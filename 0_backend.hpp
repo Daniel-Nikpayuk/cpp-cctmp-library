@@ -1746,14 +1746,6 @@ namespace cctmp {
 		constexpr auto s2	= U_pack_Vs<U_null_Vs, U_restore_T<Heaps>...>;
 
 		return NIK_MACHINE(d, MT::internal, c, i, Vs)(s1, s2);
-
-	//	constexpr auto val	= NIK_MACHINE(d, MT::internal, c, i, Vs)(s1, s2);
-
-	//	if constexpr (is_machination<decltype(val)>)
-
-	//		return NIK_MACHINE(d, MT::internal, c, i, Vs)(val.s1, val.s2);
-	//	else
-	//		return val;
 	}
 
 /***********************************************************************************************************************/

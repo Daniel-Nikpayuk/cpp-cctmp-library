@@ -98,9 +98,9 @@
 			99, 0, 5, 41
 		>;
 
-		printf("%llu\n", cctmp_program::fold_v0<cctmp::U_store_T<add>, uint_type{0}, p>);
+	//	printf("%llu\n", cctmp_program::fold_v0<cctmp::U_store_T<add>, uint_type{0}, p>);
 	//	printf("%llu\n", cctmp_program::left_v0<84, p>);
-	//	printf("%llu\n", cctmp_program::merge_sort_v0<p>);
+		printf("%llu\n", cctmp_program::merge_sort_v0<p, cctmp_program::U_GreaterThan_v0>);
 
 	//	printf("%d\n", cctmp::segment<500, 10>);
 

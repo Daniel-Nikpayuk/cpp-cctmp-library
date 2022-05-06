@@ -2305,14 +2305,6 @@ namespace cctmp {
 		constexpr auto s2	= U_pack_Vs<U_null_Vs, U_restore_T<Heaps>...>;
 
 		return NIK_MACHINE(d, MT::internal, c, i, Vs)(s1, s2);
-
-	//	constexpr auto val	= NIK_MACHINE(d, MT::internal, c, i, Vs)(s1, s2);
-
-	//	if constexpr (is_machination<decltype(val)>)
-
-	//		return NIK_MACHINE(d, MT::internal, c, i, Vs)(val.s1, val.s2);
-	//	else
-	//		return val;
 	}
 
 } // namespace cctmp
@@ -2759,6 +2751,23 @@ namespace cctmp_program
 {
 // version 0:
 
+	struct T_LessThan_v0
+	{
+		template<auto x, auto y>
+		nik_ces auto result = (x < y);
+	};
+
+	constexpr auto U_LessThan_v0 = U_store_T<T_LessThan_v0>;
+
+	struct T_GreaterThan_v0
+	{
+		template<auto x, auto y>
+		nik_ces auto result = (x > y);
+	};
+
+	constexpr auto U_GreaterThan_v0 = U_store_T<T_GreaterThan_v0>;
+
+	template<auto LessThan>
 	struct UniteSort_v0
 	{
 		template
@@ -2819,7 +2828,7 @@ namespace cctmp_program
 			copy   < _constant , less_than  >,
 			copy   < _register , l_front    >,
 			copy   < _register , r_front    >,
-			action <                        >,
+			alias  <                        >,
 			branch < loop_r                 >,
 
 			copy   < _constant , push       >,
@@ -2877,7 +2886,7 @@ namespace cctmp_program
 			U_pack_Vs
 			<
 				Overload::is_null,
-				Overload::less_than,
+				LessThan,
 				Overload::car,
 				Overload::cdr,
 				Overload::push,
@@ -2888,8 +2897,8 @@ namespace cctmp_program
 		);
 	};
 
-	template<auto l, auto r, auto d = MachineDispatch::initial_depth>
-	constexpr auto unite_sort_v0 = UniteSort_v0::template result<d, l, r>;
+	template<auto l, auto r, auto LT = U_LessThan_v0, auto d = MachineDispatch::initial_depth>
+	constexpr auto unite_sort_v0 = UniteSort_v0<LT>::template result<d, l, r>;
 }
 
 // merge sort:
@@ -2916,6 +2925,7 @@ namespace cctmp_program
 	template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
 	constexpr auto T_half_size::result<p> = sizeof...(Vs) / 2;
 
+	template<auto LessThan>
 	struct MergeSort_v0
 	{
 		template
@@ -3002,16 +3012,16 @@ namespace cctmp_program
 				U_store_T<T_half_size>,
 				U_store_T<Left_v0>,
 				U_store_T<Right_v0>,
-				U_store_T<UniteSort_v0>,
-				U_store_T<MergeSort_v0>
+				U_store_T<UniteSort_v0<LessThan>>,
+				U_store_T<MergeSort_v0<LessThan>>
 			>,
 
 			U_null_Vs, p
 		);
 	};
 
-	template<auto p, auto d = MachineDispatch::initial_depth>
-	constexpr auto merge_sort_v0 = MergeSort_v0::template result<d, p>;
+	template<auto p, auto LT = U_LessThan_v0, auto d = MachineDispatch::initial_depth>
+	constexpr auto merge_sort_v0 = MergeSort_v0<LT>::template result<d, p>;
 }
 
 // undef macros:
