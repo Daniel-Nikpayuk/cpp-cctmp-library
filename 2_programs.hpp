@@ -29,7 +29,7 @@ namespace cctmp_program { using namespace cctmp; }
 namespace cctmp_program
 {
 	template<key_type dec = _two>
-	constexpr contr_type block_program = controller
+	constexpr contr_type compel_program = controller
 	<
 		compel < dec >,
 		value  <     >
@@ -57,16 +57,18 @@ namespace cctmp_program
 
 	struct Segment_v0
 	{
-		nik_ces auto U_Segment_v0 = U_store_T<T_Segment_v0>;
+		nik_ces auto m			= MT::id;
+		nik_ces auto c			= compel_program<>;
+		nik_ces auto i			= MachineDispatch::initial_index;
+		nik_ces auto U_Segment_v0	= U_store_T<T_Segment_v0>;
 
 		template<auto d, auto n>
-		nik_ces auto result = NIK_BEGIN_MACHINE(d, MT::id, block_program<>, MachineDispatch::initial_index)
-
-		NIK_END_MACHINE(U_pack_Vs<U_Segment_v0, n>);
+		nik_ces auto result		= NIK_BEGIN_MACHINE(d, m, c, i)
+							NIK_END_MACHINE(U_pack_Vs<U_Segment_v0, n>);
 	};
 
-	template<auto n>
-	constexpr auto segment_v0 = Segment_v0::template result<MachineDispatch::initial_depth, n>;
+	template<auto n, auto d = MachineDispatch::initial_depth>
+	constexpr auto segment_v0 = Segment_v0::template result<d, n>;
 
 // at:
 
@@ -81,16 +83,18 @@ namespace cctmp_program
 
 	struct At_v0
 	{
-		nik_ces auto U_At_v0 = U_store_T<T_At_v0>;
+		nik_ces auto m		= MT::id;
+		nik_ces auto c		= compel_program<>;
+		nik_ces auto i		= MachineDispatch::initial_index;
+		nik_ces auto U_At_v0	= U_store_T<T_At_v0>;
 
 		template<auto d, auto n, auto p>
-		nik_ces auto result = NIK_BEGIN_MACHINE(d, MT::id, block_program<>, MachineDispatch::initial_index)
-
-		NIK_END_MACHINE(U_pack_Vs<U_At_v0, n, p>);
+		nik_ces auto result	= NIK_BEGIN_MACHINE(d, m, c, i)
+						NIK_END_MACHINE(U_pack_Vs<U_At_v0, n, p>);
 	};
 
-	template<auto n, auto p>
-	constexpr auto at_v0 = At_v0::template result<MachineDispatch::initial_depth, n, p>;
+	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
+	constexpr auto at_v0 = At_v0::template result<d, n, p>;
 
 // cut:
 
@@ -107,16 +111,18 @@ namespace cctmp_program
 
 	struct Left_v0
 	{
-		nik_ces auto U_Left_v0 = U_store_T<T_Left_v0>;
+		nik_ces auto m		= MT::id;
+		nik_ces auto c		= compel_program<>;
+		nik_ces auto i		= MachineDispatch::initial_index;
+		nik_ces auto U_Left_v0	= U_store_T<T_Left_v0>;
 
 		template<auto d, auto n, auto p>
-		nik_ces auto result = NIK_BEGIN_MACHINE(d, MT::id, block_program<>, MachineDispatch::initial_index)
-
-		NIK_END_MACHINE(U_pack_Vs<U_Left_v0, n, p>);
+		nik_ces auto result	= NIK_BEGIN_MACHINE(d, m, c, i)
+						NIK_END_MACHINE(U_pack_Vs<U_Left_v0, n, p>);
 	};
 
-	template<auto n, auto p>
-	constexpr auto left_v0 = Left_v0::template result<MachineDispatch::initial_depth, n, p>;
+	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
+	constexpr auto left_v0 = Left_v0::template result<d, n, p>;
 
 // right:
 
@@ -131,19 +137,55 @@ namespace cctmp_program
 
 	struct Right_v0
 	{
-		nik_ces auto U_Right_v0 = U_store_T<T_Right_v0>;
+		nik_ces auto m		= MT::id;
+		nik_ces auto c		= compel_program<>;
+		nik_ces auto i		= MachineDispatch::initial_index;
+		nik_ces auto U_Right_v0	= U_store_T<T_Right_v0>;
 
 		template<auto d, auto n, auto p>
-		nik_ces auto result = NIK_BEGIN_MACHINE(d, MT::id, block_program<>, MachineDispatch::initial_index)
-
-		NIK_END_MACHINE(U_pack_Vs<U_Right_v0, n, p>);
+		nik_ces auto result	= NIK_BEGIN_MACHINE(d, m, c, i)
+						NIK_END_MACHINE(U_pack_Vs<U_Right_v0, n, p>);
 	};
 
-	template<auto n, auto p>
-	constexpr auto right_v0 = Right_v0::template result<MachineDispatch::initial_depth, n, p>;
+	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
+	constexpr auto right_v0 = Right_v0::template result<d, n, p>;
 
 // fold:
 
+	struct T_Fold_v0
+	{
+		template<auto d, auto Op, auto V, auto p>
+		nik_ces auto result = V;
+	};
+
+	template<auto d, auto Op, auto V, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
+	constexpr auto T_Fold_v0::result<d, Op, V, p> = block
+	<
+		BN::fold,
+		BlockDispatch::next_note(d, sizeof...(Vs)),
+		BlockDispatch::next_length_9(d, sizeof...(Vs))
+
+	>::template result
+	<
+		BlockDispatch::next_depth(d),
+		BlockDispatch::next_index_9(d, sizeof...(Vs)),
+		Op, V, Vs...
+	>;
+
+	struct Fold_v0
+	{
+		nik_ces auto m		= MT::id;
+		nik_ces auto c		= compel_program<>;
+		nik_ces auto i		= MachineDispatch::initial_index;
+		nik_ces auto U_Fold_v0	= U_store_T<T_Fold_v0>;
+
+		template<auto d, auto Op, auto V, auto p>
+		nik_ces auto result	= NIK_BEGIN_MACHINE(d, m, c, i)
+						NIK_END_MACHINE(U_pack_Vs<U_Fold_v0, Op, V, p>);
+	};
+
+	template<auto Op, auto V, auto p, auto d = MachineDispatch::initial_depth>
+	constexpr auto fold_v0 = Fold_v0::template result<d, Op, V, p>;
 }
 
 /***********************************************************************************************************************/
@@ -180,7 +222,7 @@ namespace cctmp_program
 		<
 			copy   < _constant , is_zero   >,
 			copy   < _register , n         >,
-			apply  <                       >,
+			action <                       >,
 			branch < exit_case             >,
 
 			copy   < _constant , multiply  >,
@@ -192,7 +234,7 @@ namespace cctmp_program
 
 			copy   < _constant , decrement >,
 			copy   < _register , n         >,
-			apply  <                       >,
+			action <                       >,
 			cut    < _register , n         >,
 			paste  < _register             >,
 
@@ -204,24 +246,20 @@ namespace cctmp_program
 			value  <                       >
 		>;
 
-		template<typename T> nik_ces bool is_zero(T n) { return (n == 0); }
-		template<typename T> nik_ces T multiply(T m, T n) { return m*n; }
-		template<typename T> nik_ces T decrement(T n) { return n-1; }
-
 		template<auto d, auto n>
 		nik_ces auto result = start<d, program<>, n, decltype(n){_one}>
 		(
 			U_pack_Vs
 			<
-				is_zero<decltype(n)>,
+				Overload::is_zero,
 				Overload::multiply,
-				decrement<decltype(n)>
+				Overload::decrement
 			>
 		);
 	};
 
-	template<auto n>
-	constexpr auto factorial_v0 = Factorial_v0::template result<MachineDispatch::initial_depth, n>;
+	template<auto n, auto d = MachineDispatch::initial_depth>
+	constexpr auto factorial_v0 = Factorial_v0::template result<d, n>;
 
 // version 1:
 
@@ -285,8 +323,8 @@ namespace cctmp_program
 		);
 	};
 
-	template<auto n>
-	constexpr auto factorial_v1 = Factorial_v1::template result<MachineDispatch::initial_depth, n>;
+	template<auto n, auto d = MachineDispatch::initial_depth>
+	constexpr auto factorial_v1 = Factorial_v1::template result<d, n>;
 
 // version 2:
 
@@ -338,8 +376,8 @@ namespace cctmp_program
 	//	);
 	};
 
-//	template<auto n>
-//	constexpr auto factorial_v2 = Factorial_v2::template result<MachineDispatch::initial_depth, n>;
+//	template<auto n, auto d = MachineDispatch::initial_depth>
+//	constexpr auto factorial_v2 = Factorial_v2::template result<d, n>;
 }
 
 /***********************************************************************************************************************/
@@ -420,8 +458,8 @@ namespace cctmp_program
 		);
 	};
 
-	template<auto n>
-	constexpr auto fibonacci_v0 = Fibonacci_v0::template result<MachineDispatch::initial_depth, n>;
+	template<auto n, auto d = MachineDispatch::initial_depth>
+	constexpr auto fibonacci_v0 = Fibonacci_v0::template result<d, n>;
 }
 
 /***********************************************************************************************************************/
@@ -564,8 +602,8 @@ namespace cctmp_program
 		);
 	};
 
-	template<auto l, auto r>
-	constexpr auto unite_sort_v0 = UniteSort_v0::template result<MachineDispatch::initial_depth, l, r>;
+	template<auto l, auto r, auto d = MachineDispatch::initial_depth>
+	constexpr auto unite_sort_v0 = UniteSort_v0::template result<d, l, r>;
 }
 
 /***********************************************************************************************************************/
@@ -691,8 +729,8 @@ namespace cctmp_program
 		);
 	};
 
-	template<auto p>
-	constexpr auto merge_sort_v0 = MergeSort_v0::template result<MachineDispatch::initial_depth, p>;
+	template<auto p, auto d = MachineDispatch::initial_depth>
+	constexpr auto merge_sort_v0 = MergeSort_v0::template result<d, p>;
 }
 
 /***********************************************************************************************************************/

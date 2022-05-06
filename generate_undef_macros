@@ -1,0 +1,46 @@
+#!/bin/bash
+
+mawk_prog_first='BEGIN { line = 0; }
+{
+	if (line < 18)
+	{
+		print $0;
+		++line;
+	}
+
+} END {
+	sep1 = "/***********************************************************";
+	sep2 = "************************************************************/";
+
+	print "";
+	print "// undef macros:";
+	print "";
+	print sep1 sep2;
+	print sep1 sep2;
+	print "";
+}'
+
+mawk_prog_rest='BEGIN { line = 0; skip = 0; re_str = "#define [a-zA-Z0-9_]+"; }
+{
+	if (line < 18) ++line;
+	else if (match($0, re_str))
+	{
+		begin = RSTART + 8;
+		end = RLENGTH - 8;
+
+		print "#undef " substr($0, begin, end);
+		print "";
+	}
+
+} END {
+	sep1 = "/***********************************************************";
+	sep2 = "************************************************************/";
+
+	print sep1 sep2;
+	print sep1 sep2;
+	print "";
+}'
+
+mawk "$mawk_prog_first" "define_macros.hpp" >  "undef_macros.hpp" &&
+mawk "$mawk_prog_rest"  "define_macros.hpp" >> "undef_macros.hpp"
+

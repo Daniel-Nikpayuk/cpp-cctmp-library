@@ -22,6 +22,182 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+#undef nik_vp
+
+#undef nik_avp
+
+#undef nik_ces
+
+#undef NIK_0_COMMA
+
+#undef NIK_1_COMMA
+
+#undef NIK_EMPTY
+
+#undef NIK_L_PAR
+
+#undef NIK_R_PAR
+
+#undef NIK_L_ANG
+
+#undef NIK_R_ANG
+
+#undef NIK_L_BRAK
+
+#undef NIK_R_BRAK
+
+#undef NIK_AUTO
+
+#undef NIK_TYPENAME
+
+#undef NIK_LDOTS
+
+#undef NIK_R_PAR_LDOTS
+
+#undef NIK_PLUS
+
+#undef NIK_TWO_STAR
+
+#undef NIK_L_STORE
+
+#undef NIK_R_STORE
+
+#undef NIK_UPPER_1_REPS
+
+#undef NIK_UPPER_2_REPS
+
+#undef NIK_UPPER_4_REPS
+
+#undef NIK_UPPER_8_REPS
+
+#undef NIK_UPPER_16_REPS
+
+#undef NIK_UPPER_32_REPS
+
+#undef NIK_UPPER_64_REPS
+
+#undef NIK_UPPER_128_REPS
+
+#undef NIK_UPPER_256_REPS
+
+#undef NIK_UPPER_512_REPS
+
+#undef NIK_2_0_REPS
+
+#undef NIK_2_1_REPS
+
+#undef NIK_2_2_REPS
+
+#undef NIK_2_3_REPS
+
+#undef NIK_2_4_REPS
+
+#undef NIK_2_5_REPS
+
+#undef NIK_2_6_REPS
+
+#undef NIK_2_7_REPS
+
+#undef NIK_2_8_REPS
+
+#undef NIK_2_9_REPS
+
+#undef NIK_UPPER_1_IDS
+
+#undef NIK_UPPER_2_IDS
+
+#undef NIK_UPPER_4_IDS
+
+#undef NIK_UPPER_8_IDS
+
+#undef NIK_UPPER_16_IDS
+
+#undef NIK_UPPER_32_IDS
+
+#undef NIK_UPPER_64_IDS
+
+#undef NIK_UPPER_128_IDS
+
+#undef NIK_UPPER_256_IDS
+
+#undef NIK_UPPER_512_IDS
+
+#undef NIK_2_0_IDS
+
+#undef NIK_2_1_IDS
+
+#undef NIK_2_2_IDS
+
+#undef NIK_2_3_IDS
+
+#undef NIK_2_4_IDS
+
+#undef NIK_2_5_IDS
+
+#undef NIK_2_6_IDS
+
+#undef NIK_2_7_IDS
+
+#undef NIK_2_8_IDS
+
+#undef NIK_2_9_IDS
+
+#undef NIK_2_N_AUTO_VARS
+
+#undef NIK_2_N_VARS
+
+#undef NIK_2_N_TYPENAME_VARS
+
+#undef NIK_2_N_RESTORE_VARS
+
+#undef NIK_2_N_VARIADIC_VARS
+
+#undef NIK_2_N_STORE_VARS
+
+#undef NIK_2_N_PACK_VARS
+
+#undef NIK_2_N_OP_MAP_VARS
+
+#undef NIK_2_N_AL_MAP_VARS
+
+#undef NIK_2_N_INDEX_SEGMENT
+
+#undef NIK_2_N_MONOID_CALLS
+
+#undef NIK_2_N_MONOID_VARS
+
+#undef NIK_2_N_MONOID_FOLDS
+
+#undef NIK_2_N_APPLY_FOLDS
+
+#undef NIK_2_N_ALIAS_FOLDS
+
+#undef NIK_BLOCK_DISPATCH_NEXT_LENGTH
+
+#undef NIK_BLOCK_DISPATCH_NEXT_INDEX
+
+#undef NIK_BLOCK
+
+#undef NIK_DEFINE_BLOCK_SEGMENT_PASS
+
+#undef NIK_DEFINE_BLOCK_SIFTER_PASS
+
+#undef NIK_DEFINE_BLOCK_FILTER_PASS
+
+#undef NIK_DEFINE_BLOCK_LEFT_PASS
+
+#undef NIK_DEFINE_BLOCK_RIGHT_PASS
+
+#undef NIK_DEFINE_BLOCK_FOLD_PASS
+
+#undef NIK_CONTR_PARAMS
+
+#undef NIK_BEGIN_MACHINE
+
+#undef NIK_END_MACHINE
+
+#undef NIK_MACHINE
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 

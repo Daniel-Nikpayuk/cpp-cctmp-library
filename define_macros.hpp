@@ -101,11 +101,11 @@
 															\
 		2*
 
-	#define NIK_L_CACHE()												\
+	#define NIK_L_STORE()												\
 															\
 		nik_avp(auto_pack<
 
-	#define NIK_R_CACHE()												\
+	#define NIK_R_STORE()												\
 															\
 		...>*)
 
@@ -520,9 +520,9 @@
 
 // argument:
 
-	#define NIK_2_N_PRETYPE_VARS(_n_, _v_)										\
+	#define NIK_2_N_RESTORE_VARS(_n_, _v_)										\
 															\
-		NIK_2_ ## _n_ ## _IDS(U_pretype_T NIK_L_ANG, _v_, NIK_R_ANG)
+		NIK_2_ ## _n_ ## _IDS(U_restore_T NIK_L_ANG, _v_, NIK_R_ANG)
 
 // variadic:
 
@@ -530,11 +530,11 @@
 															\
 		NIK_2_ ## _n_ ## _IDS(auto NIK_LDOTS, _v_, NIK_EMPTY)
 
-// cache:
+// store:
 
-	#define NIK_2_N_CACHE_VARS(_n_, _v_)										\
+	#define NIK_2_N_STORE_VARS(_n_, _v_)										\
 															\
-		NIK_2_ ## _n_ ## _IDS(NIK_L_CACHE, _v_, NIK_R_CACHE)
+		NIK_2_ ## _n_ ## _IDS(NIK_L_STORE, _v_, NIK_R_STORE)
 
 // pack:
 
@@ -542,13 +542,13 @@
 															\
 		NIK_2_ ## _n_ ## _IDS(NIK_EMPTY, _v_, NIK_LDOTS)
 
-// op map:
+// apply map:
 
 	#define NIK_2_N_OP_MAP_VARS(_n_, _m_, _v_)									\
 															\
 		NIK_2_ ## _n_ ## _IDS(_m_ NIK_L_PAR, _v_, NIK_R_PAR_LDOTS)
 
-// al map:
+// alias map:
 
 	#define NIK_2_N_AL_MAP_VARS(_n_, _m_, _v_)									\
 															\
@@ -583,125 +583,17 @@
 
 /***********************************************************************************************************************/
 
-// operation folds:
+// apply folds:
 
-	#define NIK_2_N_OP_FOLDS(_n_, _m_, _v_)										\
+	#define NIK_2_N_APPLY_FOLDS(_n_, _m_, _v_)									\
 															\
 		NIK_2_N_MONOID_FOLDS(_n_, _m_ NIK_L_PAR, _v_, NIK_R_PAR)
 
 // alias folds:
 
-	#define NIK_2_N_AL_FOLDS(_n_, _m_, _v_)										\
+	#define NIK_2_N_ALIAS_FOLDS(_n_, _m_, _v_)									\
 															\
 		NIK_2_N_MONOID_FOLDS(_n_, _m_::template result NIK_L_ANG, _v_, NIK_R_ANG)
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// fast variables:
-
-/***********************************************************************************************************************/
-
-// identifiers:
-
-	#define NIK_0_FAST_IDS(_l_, _m_, _r_)
-
-		// blank space.
-
-	#define NIK_1_FAST_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_ ## 0 _r_()
-
-	#define NIK_2_FAST_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_ ## 0 _r_(),	_l_() _m_ ## 1 _r_()
-
-	#define NIK_3_FAST_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_ ## 0 _r_(),	_l_() _m_ ## 1 _r_(),	_l_() _m_ ## 2 _r_()
-
-	#define NIK_4_FAST_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_ ## 0 _r_(),	_l_() _m_ ## 1 _r_(),	_l_() _m_ ## 2 _r_(),	_l_() _m_ ## 3 _r_()
-
-	#define NIK_5_FAST_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_ ## 0 _r_(),	_l_() _m_ ## 1 _r_(),	_l_() _m_ ## 2 _r_(),	_l_() _m_ ## 3 _r_(),		\
-		_l_() _m_ ## 4 _r_()
-
-	#define NIK_6_FAST_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_ ## 0 _r_(),	_l_() _m_ ## 1 _r_(),	_l_() _m_ ## 2 _r_(),	_l_() _m_ ## 3 _r_(),		\
-		_l_() _m_ ## 4 _r_(),	_l_() _m_ ## 5 _r_()
-
-	#define NIK_7_FAST_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_ ## 0 _r_(),	_l_() _m_ ## 1 _r_(),	_l_() _m_ ## 2 _r_(),	_l_() _m_ ## 3 _r_(),		\
-		_l_() _m_ ## 4 _r_(),	_l_() _m_ ## 5 _r_(),	_l_() _m_ ## 6 _r_()
-
-	#define NIK_8_FAST_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_ ## 0 _r_(),	_l_() _m_ ## 1 _r_(),	_l_() _m_ ## 2 _r_(),	_l_() _m_ ## 3 _r_(),		\
-		_l_() _m_ ## 4 _r_(),	_l_() _m_ ## 5 _r_(),	_l_() _m_ ## 6 _r_(),	_l_() _m_ ## 7 _r_()
-
-/***********************************************************************************************************************/
-
-// auto:
-
-	#define NIK_N_FAST_AUTO_VARS(_n_, _v_)										\
-															\
-		NIK_ ## _n_ ## _FAST_IDS(NIK_AUTO, _v_, NIK_EMPTY)
-
-// index segment:
-
-	#define NIK_N_FAST_INDEX_SEGMENT(_n_)										\
-															\
-		NIK_ ## _n_ ## _FAST_IDS(NIK_EMPTY,, NIK_EMPTY)
-
-// struct:
-
-	#define NIK_DEFINE__FAST_STRUCT(_s_, _n_)									\
-															\
-		template<index_type... filler>										\
-		struct Fast<_n_, filler...>										\
-		{													\
-			nik_ces auto U_index_segment	= U_opt_pack_Vs							\
-								<							\
-									NIK_N_FAST_INDEX_SEGMENT(_n_)			\
-								>;							\
-															\
-			template<NIK_N_FAST_AUTO_VARS(_s_, V), auto... Vs>						\
-			nik_ces auto at = V ## _n_;									\
-		}
-
-/***********************************************************************************************************************/
-
-// heap:
-
-	#define NIK_HEAP_TYPENAMES											\
-															\
-		NIK_6_FAST_IDS(NIK_TYPENAME, Heap, NIK_EMPTY)
-
-	#define NIK_HEAP_TYPES												\
-															\
-		NIK_6_FAST_IDS(NIK_EMPTY, Heap, NIK_EMPTY)
-
-	#define NIK_HEAP_VARS												\
-															\
-		Heap0 H0, Heap1 H1, Heap2 H2,										\
-		Heap3 H3, Heap4 H4, Heap5 H5
-
-	#define NIK_HEAP_ARGS												\
-															\
-		NIK_6_FAST_IDS(NIK_EMPTY, H, NIK_EMPTY)
-
-	#define NIK_HEAP_AUTO_CARGS											\
-															\
-		NIK_6_FAST_IDS(NIK_AUTO, cH, NIK_EMPTY)
-
-	#define NIK_HEAP_CARGS												\
-															\
-		NIK_6_FAST_IDS(NIK_EMPTY, cH, NIK_EMPTY)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -709,6 +601,32 @@
 // block:
 
 /***********************************************************************************************************************/
+
+// next length:
+
+	#define NIK_BLOCK_DISPATCH_NEXT_LENGTH(_n_)									\
+															\
+		nik_ces key_type next_length_ ## _n_(cdepth_type d, cindex_type n)					\
+		{													\
+			if (d == 0) return _zero;									\
+			else        return max_length_ ## _n_(n);							\
+		}
+
+/***********************************************************************************************************************/
+
+// next index:
+
+	#define NIK_BLOCK_DISPATCH_NEXT_INDEX(_n_)									\
+															\
+		nik_ces index_type next_index_ ## _n_(cdepth_type d, cindex_type n)					\
+		{													\
+			if (d == 0) return n;										\
+			else        return n - max_index_ ## _n_(n);							\
+		}
+
+/***********************************************************************************************************************/
+
+// (block):
 
 	#define NIK_BLOCK(_r_, _d_, _p_, _n_, _v_)									\
 															\
@@ -789,6 +707,26 @@
 		{													\
 			template<auto d, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>					\
 			nik_ces auto result = NIK_BLOCK(BN::right, d, _p_, n, Vs);					\
+		};
+
+	#define NIK_DEFINE_BLOCK_FOLD_PASS(_p_)										\
+															\
+		template<key_type... filler>										\
+		struct block<BN::fold, BT::pass, _p_, filler...>							\
+		{													\
+			template<auto d, auto n, auto Op, auto V, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>		\
+			nik_ces auto result = block									\
+			<												\
+				BN::fold,										\
+				BlockDispatch::next_note(d, n),								\
+				BlockDispatch::next_length_ ## _p_(d, n)						\
+															\
+			>::template result										\
+			<												\
+				BlockDispatch::next_depth(d),								\
+				BlockDispatch::next_index_ ## _p_(d, n),						\
+				Op, NIK_2_N_ALIAS_FOLDS(_p_, T_store_U<Op>, V), Vs...					\
+			>;												\
 		};
 
 /***********************************************************************************************************************/
