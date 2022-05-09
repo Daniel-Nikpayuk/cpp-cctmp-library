@@ -47,8 +47,8 @@ number of types or mixed objects this implementation might then be preferred.
 
 With that said, sorting a list even of length 200 becomes time consuming:
 
-gcc 11 - 20.12s
-clang 13 - 2m4.21s
+gcc v11 - 20.12s
+clang v13 - 2m4.21s
 
 In any case, that's it for now. I'll update this library on occassion in terms of bug fixes and the frontend,
 but you can otherwise consider it to be complete. Thanks.

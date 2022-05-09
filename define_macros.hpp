@@ -41,17 +41,13 @@
 
 // punctuation:
 
-	#define NIK_0_COMMA
-
-		// blank space.
-
-	#define NIK_1_COMMA												\
-															\
-		,
-
 	#define NIK_EMPTY()
 
 		// blank space.
+
+	#define NIK_COMMA()												\
+															\
+		,
 
 	#define NIK_L_PAR()												\
 															\
@@ -96,10 +92,6 @@
 	#define NIK_PLUS()												\
 															\
 		+
-
-	#define NIK_TWO_STAR()												\
-															\
-		2*
 
 	#define NIK_L_STORE()												\
 															\
@@ -571,29 +563,17 @@
 
 // monoid values:
 
-	#define NIK_2_N_MONOID_VARS(_n_, _m_, _r_)									\
+	#define NIK_2_N_MONOID_VARS(_n_, _v_, _r_)									\
 															\
-		NIK_2_ ## _n_ ## _IDS(NIK_EMPTY, _m_, _r_)
+		NIK_2_ ## _n_ ## _IDS(NIK_EMPTY, _v_, _r_)
 
-// monoid folds:
+// action folds:
 
-	#define NIK_2_N_MONOID_FOLDS(_n_, _m_, _v_, _r_)								\
+	#define NIK_2_N_ACTION_FOLDS(_n_, _o_, _f_, _v_)								\
 															\
-		NIK_2_N_MONOID_CALLS(_n_, NIK_EMPTY, _m_) _v_, NIK_2_N_MONOID_VARS(_n_, _v_, _r_)
-
-/***********************************************************************************************************************/
-
-// apply folds:
-
-	#define NIK_2_N_APPLY_FOLDS(_n_, _m_, _v_)									\
+		NIK_2_N_MONOID_CALLS(_n_, Overload::template result<_o_ NIK_COMMA, _f_... NIK_COMMA)			\
 															\
-		NIK_2_N_MONOID_FOLDS(_n_, _m_ NIK_L_PAR, _v_, NIK_R_PAR)
-
-// alias folds:
-
-	#define NIK_2_N_ALIAS_FOLDS(_n_, _m_, _v_)									\
-															\
-		NIK_2_N_MONOID_FOLDS(_n_, _m_::template result NIK_L_ANG, _v_, NIK_R_ANG)
+		_v_, NIK_2_N_MONOID_VARS(_n_, _v_, NIK_R_ANG)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -628,24 +608,55 @@
 
 // (block):
 
-	#define NIK_BLOCK(_r_, _d_, _p_, _n_, _v_)									\
+	#define NIK_BLOCK(_b_, _p_, _d_, _h_, _n_, _v_)									\
 															\
 		block													\
 		<													\
-			_r_,												\
+			BN::_b_,											\
 			BlockDispatch::next_note(_d_, _n_),								\
 			BlockDispatch::next_length_ ## _p_(_d_, _n_)							\
 															\
 		>::template result											\
 		<													\
 			BlockDispatch::next_depth(_d_),									\
+			_h_,												\
 			BlockDispatch::next_index_ ## _p_(_d_, _n_),							\
 			_v_...												\
 		>
 
+	#define NIK_VARIABLE_BLOCK(_p_, _d_, _h_, _n_, _v_)								\
+															\
+		NIK_BLOCK(variable, _p_, _d_, _h_, _n_, _v_)
+
+	#define NIK_FUNCTION_BLOCK(_p_, _d_, _h_, _n_, _v_)								\
+															\
+		NIK_BLOCK(function, _p_, _d_, _h_, _n_, _v_)
+
 /***********************************************************************************************************************/
 
 // pass:
+
+	#define NIK_DEFINE_BLOCK_VARIABLE_PASS(_p_)									\
+															\
+		template<key_type... filler>										\
+		struct block<BN::variable, BT::pass, _p_, filler...>							\
+		{													\
+			template<auto d, auto Halt, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>			\
+			nik_ces auto result = NIK_VARIABLE_BLOCK(_p_, d, Halt, n, Vs);					\
+		};
+
+	#define NIK_DEFINE_BLOCK_FUNCTION_PASS(_p_)									\
+															\
+		template<key_type... filler>										\
+		struct block<BN::function, BT::pass, _p_, filler...>							\
+		{													\
+			template<auto d, auto Halt, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto... Ws>		\
+			nik_ces auto result(nik_avp(auto_pack<Ws...>*))				 			\
+			{												\
+				return NIK_FUNCTION_BLOCK(_p_, d, Halt, n, Vs)						\
+						(U_pack_Vs<Ws..., NIK_2_N_VARS(_p_, V)>);				\
+			}												\
+		};
 
 	#define NIK_DEFINE_BLOCK_SEGMENT_PASS(_p_)									\
 															\
@@ -667,66 +678,27 @@
 			>;												\
 		};
 
-	#define NIK_DEFINE_BLOCK_SIFTER_PASS(_p_)									\
-															\
-		template<key_type... filler>										\
-		struct block<BN::sifter, BT::pass, _p_, filler...>							\
-		{													\
-			template<auto d, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>					\
-			nik_ces auto result = NIK_BLOCK(BN::sifter, d, _p_, n, Vs);					\
-		};
-
-	#define NIK_DEFINE_BLOCK_FILTER_PASS(_p_)									\
-															\
-		template<key_type... filler>										\
-		struct block<BN::filter, BT::pass, _p_, filler...>							\
-		{													\
-			template<auto d, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto... Ws>			\
-			nik_ces auto result(nik_avp(auto_pack<Ws...>*))				 			\
-			{												\
-				return NIK_BLOCK(BN::filter, d, _p_, n, Vs)(U_pack_Vs<Ws..., NIK_2_N_VARS(_p_, V)>);	\
-			}												\
-		};
-
-	#define NIK_DEFINE_BLOCK_LEFT_PASS(_p_)										\
-															\
-		template<key_type... filler>										\
-		struct block<BN::left, BT::pass, _p_, filler...>							\
-		{													\
-			template<auto d, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto... Ws>			\
-			nik_ces auto result(nik_avp(auto_pack<Ws...>*))				 			\
-			{												\
-				return NIK_BLOCK(BN::left, d, _p_, n, Vs)(U_pack_Vs<Ws..., NIK_2_N_VARS(_p_, V)>);	\
-			}												\
-		};
-
-	#define NIK_DEFINE_BLOCK_RIGHT_PASS(_p_)									\
-															\
-		template<key_type... filler>										\
-		struct block<BN::right, BT::pass, _p_, filler...>							\
-		{													\
-			template<auto d, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>					\
-			nik_ces auto result = NIK_BLOCK(BN::right, d, _p_, n, Vs);					\
-		};
-
 	#define NIK_DEFINE_BLOCK_FOLD_PASS(_p_)										\
 															\
 		template<key_type... filler>										\
 		struct block<BN::fold, BT::pass, _p_, filler...>							\
 		{													\
-			template<auto d, auto n, auto Op, auto V, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>		\
-			nik_ces auto result = block									\
-			<												\
-				BN::fold,										\
-				BlockDispatch::next_note(d, n),								\
-				BlockDispatch::next_length_ ## _p_(d, n)						\
+			template<auto d, auto n, auto V, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto Op, auto... F>	\
+			nik_ces auto result(nik_vp(m)(auto_pack<Op, F...>*))						\
+			{												\
+				return block										\
+				<											\
+					BN::fold,									\
+					BlockDispatch::next_note(d, n),							\
+					BlockDispatch::next_length_ ## _p_(d, n)					\
 															\
-			>::template result										\
-			<												\
-				BlockDispatch::next_depth(d),								\
-				BlockDispatch::next_index_ ## _p_(d, n),						\
-				Op, NIK_2_N_ALIAS_FOLDS(_p_, T_store_U<Op>, V), Vs...					\
-			>;												\
+				>::template result									\
+				<											\
+					BlockDispatch::next_depth(d),							\
+					BlockDispatch::next_index_ ## _p_(d, n),					\
+					NIK_2_N_ACTION_FOLDS(_p_, Op, F, V), Vs...					\
+				>(m);											\
+			}												\
 		};
 
 /***********************************************************************************************************************/

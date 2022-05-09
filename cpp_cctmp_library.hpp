@@ -35,17 +35,13 @@
 
 // punctuation:
 
-	#define NIK_0_COMMA
-
-		// blank space.
-
-	#define NIK_1_COMMA												\
-															\
-		,
-
 	#define NIK_EMPTY()
 
 		// blank space.
+
+	#define NIK_COMMA()												\
+															\
+		,
 
 	#define NIK_L_PAR()												\
 															\
@@ -90,10 +86,6 @@
 	#define NIK_PLUS()												\
 															\
 		+
-
-	#define NIK_TWO_STAR()												\
-															\
-		2*
 
 	#define NIK_L_STORE()												\
 															\
@@ -549,27 +541,17 @@
 
 // monoid values:
 
-	#define NIK_2_N_MONOID_VARS(_n_, _m_, _r_)									\
+	#define NIK_2_N_MONOID_VARS(_n_, _v_, _r_)									\
 															\
-		NIK_2_ ## _n_ ## _IDS(NIK_EMPTY, _m_, _r_)
+		NIK_2_ ## _n_ ## _IDS(NIK_EMPTY, _v_, _r_)
 
-// monoid folds:
+// action folds:
 
-	#define NIK_2_N_MONOID_FOLDS(_n_, _m_, _v_, _r_)								\
+	#define NIK_2_N_ACTION_FOLDS(_n_, _o_, _f_, _v_)								\
 															\
-		NIK_2_N_MONOID_CALLS(_n_, NIK_EMPTY, _m_) _v_, NIK_2_N_MONOID_VARS(_n_, _v_, _r_)
-
-// apply folds:
-
-	#define NIK_2_N_APPLY_FOLDS(_n_, _m_, _v_)									\
+		NIK_2_N_MONOID_CALLS(_n_, Overload::template result<_o_ NIK_COMMA, _f_... NIK_COMMA)			\
 															\
-		NIK_2_N_MONOID_FOLDS(_n_, _m_ NIK_L_PAR, _v_, NIK_R_PAR)
-
-// alias folds:
-
-	#define NIK_2_N_ALIAS_FOLDS(_n_, _m_, _v_)									\
-															\
-		NIK_2_N_MONOID_FOLDS(_n_, _m_::template result NIK_L_ANG, _v_, NIK_R_ANG)
+		_v_, NIK_2_N_MONOID_VARS(_n_, _v_, NIK_R_ANG)
 
 // block:
 
@@ -595,22 +577,53 @@
 
 // (block):
 
-	#define NIK_BLOCK(_r_, _d_, _p_, _n_, _v_)									\
+	#define NIK_BLOCK(_b_, _p_, _d_, _h_, _n_, _v_)									\
 															\
 		block													\
 		<													\
-			_r_,												\
+			BN::_b_,											\
 			BlockDispatch::next_note(_d_, _n_),								\
 			BlockDispatch::next_length_ ## _p_(_d_, _n_)							\
 															\
 		>::template result											\
 		<													\
 			BlockDispatch::next_depth(_d_),									\
+			_h_,												\
 			BlockDispatch::next_index_ ## _p_(_d_, _n_),							\
 			_v_...												\
 		>
 
+	#define NIK_VARIABLE_BLOCK(_p_, _d_, _h_, _n_, _v_)								\
+															\
+		NIK_BLOCK(variable, _p_, _d_, _h_, _n_, _v_)
+
+	#define NIK_FUNCTION_BLOCK(_p_, _d_, _h_, _n_, _v_)								\
+															\
+		NIK_BLOCK(function, _p_, _d_, _h_, _n_, _v_)
+
 // pass:
+
+	#define NIK_DEFINE_BLOCK_VARIABLE_PASS(_p_)									\
+															\
+		template<key_type... filler>										\
+		struct block<BN::variable, BT::pass, _p_, filler...>							\
+		{													\
+			template<auto d, auto Halt, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>			\
+			nik_ces auto result = NIK_VARIABLE_BLOCK(_p_, d, Halt, n, Vs);					\
+		};
+
+	#define NIK_DEFINE_BLOCK_FUNCTION_PASS(_p_)									\
+															\
+		template<key_type... filler>										\
+		struct block<BN::function, BT::pass, _p_, filler...>							\
+		{													\
+			template<auto d, auto Halt, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto... Ws>		\
+			nik_ces auto result(nik_avp(auto_pack<Ws...>*))				 			\
+			{												\
+				return NIK_FUNCTION_BLOCK(_p_, d, Halt, n, Vs)						\
+						(U_pack_Vs<Ws..., NIK_2_N_VARS(_p_, V)>);				\
+			}												\
+		};
 
 	#define NIK_DEFINE_BLOCK_SEGMENT_PASS(_p_)									\
 															\
@@ -632,66 +645,27 @@
 			>;												\
 		};
 
-	#define NIK_DEFINE_BLOCK_SIFTER_PASS(_p_)									\
-															\
-		template<key_type... filler>										\
-		struct block<BN::sifter, BT::pass, _p_, filler...>							\
-		{													\
-			template<auto d, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>					\
-			nik_ces auto result = NIK_BLOCK(BN::sifter, d, _p_, n, Vs);					\
-		};
-
-	#define NIK_DEFINE_BLOCK_FILTER_PASS(_p_)									\
-															\
-		template<key_type... filler>										\
-		struct block<BN::filter, BT::pass, _p_, filler...>							\
-		{													\
-			template<auto d, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto... Ws>			\
-			nik_ces auto result(nik_avp(auto_pack<Ws...>*))				 			\
-			{												\
-				return NIK_BLOCK(BN::filter, d, _p_, n, Vs)(U_pack_Vs<Ws..., NIK_2_N_VARS(_p_, V)>);	\
-			}												\
-		};
-
-	#define NIK_DEFINE_BLOCK_LEFT_PASS(_p_)										\
-															\
-		template<key_type... filler>										\
-		struct block<BN::left, BT::pass, _p_, filler...>							\
-		{													\
-			template<auto d, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto... Ws>			\
-			nik_ces auto result(nik_avp(auto_pack<Ws...>*))				 			\
-			{												\
-				return NIK_BLOCK(BN::left, d, _p_, n, Vs)(U_pack_Vs<Ws..., NIK_2_N_VARS(_p_, V)>);	\
-			}												\
-		};
-
-	#define NIK_DEFINE_BLOCK_RIGHT_PASS(_p_)									\
-															\
-		template<key_type... filler>										\
-		struct block<BN::right, BT::pass, _p_, filler...>							\
-		{													\
-			template<auto d, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>					\
-			nik_ces auto result = NIK_BLOCK(BN::right, d, _p_, n, Vs);					\
-		};
-
 	#define NIK_DEFINE_BLOCK_FOLD_PASS(_p_)										\
 															\
 		template<key_type... filler>										\
 		struct block<BN::fold, BT::pass, _p_, filler...>							\
 		{													\
-			template<auto d, auto n, auto Op, auto V, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>		\
-			nik_ces auto result = block									\
-			<												\
-				BN::fold,										\
-				BlockDispatch::next_note(d, n),								\
-				BlockDispatch::next_length_ ## _p_(d, n)						\
+			template<auto d, auto n, auto V, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto Op, auto... F>	\
+			nik_ces auto result(nik_vp(m)(auto_pack<Op, F...>*))						\
+			{												\
+				return block										\
+				<											\
+					BN::fold,									\
+					BlockDispatch::next_note(d, n),							\
+					BlockDispatch::next_length_ ## _p_(d, n)					\
 															\
-			>::template result										\
-			<												\
-				BlockDispatch::next_depth(d),								\
-				BlockDispatch::next_index_ ## _p_(d, n),						\
-				Op, NIK_2_N_ALIAS_FOLDS(_p_, T_store_U<Op>, V), Vs...					\
-			>;												\
+				>::template result									\
+				<											\
+					BlockDispatch::next_depth(d),							\
+					BlockDispatch::next_index_ ## _p_(d, n),					\
+					NIK_2_N_ACTION_FOLDS(_p_, Op, F, V), Vs...					\
+				>(m);											\
+			}												\
 		};
 
 // machine:
@@ -1194,71 +1168,101 @@ namespace cctmp {
 		nik_ces key_type increment			= 18;
 		nik_ces key_type decrement			= 19;
 
+		// computational:
+
+		nik_ces key_type apply				= 20;
+		nik_ces key_type alias				= 21;
+
 		// functional:
 
-		nik_ces key_type is_null			= 20;
-		nik_ces key_type cons				= 21;
-		nik_ces key_type push				= 22;
-		nik_ces key_type car				= 23;
-		nik_ces key_type cdr				= 24;
-		nik_ces key_type cat				= 25;
+		nik_ces key_type length				= 22;
+		nik_ces key_type applywise			= 23;
+		nik_ces key_type aliaswise			= 24;
 
-		template<auto Op, auto... Vs>
-		nik_ces auto apply = U_pack_Vs<Op, Vs...>;
+		nik_ces key_type is_null			= 25;
+		nik_ces key_type cons				= 26;
+		nik_ces key_type push				= 27;
+		nik_ces key_type car				= 28;
+		nik_ces key_type cdr				= 29;
+		nik_ces key_type cat				= 30;
+		nik_ces key_type unite				= 31;
+
+		template<key_type Op, auto... Vs>
+		nik_ces auto result = U_pack_Vs<Op, Vs...>;
 	};
 
 	// comparison:
 
-	template<auto... Vs> constexpr auto Overload::apply < Overload::equal                 , Vs...> = (... == Vs);
-	template<auto... Vs> constexpr auto Overload::apply < Overload::not_equal             , Vs...> = (... != Vs);
-	template<auto... Vs> constexpr auto Overload::apply < Overload::less_than             , Vs...> = (... <  Vs);
-	template<auto... Vs> constexpr auto Overload::apply < Overload::less_than_or_equal    , Vs...> = (... <= Vs);
-	template<auto... Vs> constexpr auto Overload::apply < Overload::greater_than          , Vs...> = (... >  Vs);
-	template<auto... Vs> constexpr auto Overload::apply < Overload::greater_than_or_equal , Vs...> = (... >= Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::equal                 , Vs...> = (... == Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::not_equal             , Vs...> = (... != Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::less_than             , Vs...> = (... <  Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::less_than_or_equal    , Vs...> = (... <= Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::greater_than          , Vs...> = (... >  Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::greater_than_or_equal , Vs...> = (... >= Vs);
 
-	template<auto... Vs> constexpr auto Overload::apply < Overload::is_zero               , Vs...> = (... && (Vs == 0));
-	template<auto V, auto... Vs> constexpr auto Overload::apply < Overload::is_value , V  , Vs...> = (... && (Vs == V));
+	template<auto... Vs> constexpr auto Overload::result < Overload::is_zero               , Vs...> = (... && (Vs == 0));
+	template<auto V, auto... Vs> constexpr auto Overload::result < Overload::is_value , V  , Vs...> = (... && (Vs == V));
 
 	// logical:
 
-	template<auto... Vs> constexpr auto Overload::apply < Overload::and_                  , Vs...> = (... && Vs);
-	template<auto... Vs> constexpr auto Overload::apply < Overload::or_                   , Vs...> = (... || Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::and_                  , Vs...> = (... && Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::or_                   , Vs...> = (... || Vs);
 
 	// bitwise:
 
-	template<auto... Vs> constexpr auto Overload::apply < Overload::upshift               , Vs...> = (... << Vs);
-	template<auto... Vs> constexpr auto Overload::apply < Overload::downshift             , Vs...> = (... >> Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::upshift               , Vs...> = (... << Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::downshift             , Vs...> = (... >> Vs);
 
 	// arithmetic:
 
-	template<auto... Vs> constexpr auto Overload::apply < Overload::add                   , Vs...> = (... +  Vs);
-	template<auto... Vs> constexpr auto Overload::apply < Overload::subtract              , Vs...> = (... -  Vs);
-	template<auto... Vs> constexpr auto Overload::apply < Overload::multiply              , Vs...> = (... *  Vs);
-	template<auto... Vs> constexpr auto Overload::apply < Overload::divide                , Vs...> = (... /  Vs);
-	template<auto... Vs> constexpr auto Overload::apply < Overload::modulo                , Vs...> = (... %  Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::add                   , Vs...> = (... +  Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::subtract              , Vs...> = (... -  Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::multiply              , Vs...> = (... *  Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::divide                , Vs...> = (... /  Vs);
+	template<auto... Vs> constexpr auto Overload::result < Overload::modulo                , Vs...> = (... %  Vs);
 
-	template<auto V>     constexpr auto Overload::apply < Overload::increment             , V    > = V+1;
-	template<auto V>     constexpr auto Overload::apply < Overload::decrement             , V    > = V-1;
+	template<auto V>     constexpr auto Overload::result < Overload::increment             , V    > = V+1;
+	template<auto V>     constexpr auto Overload::result < Overload::decrement             , V    > = V-1;
+
+	// computational:
+
+	template<auto F, auto... Vs>
+	constexpr auto Overload::result < Overload::apply , F , Vs... > = F(Vs...);
+
+	template<auto F, auto... Vs>
+	constexpr auto Overload::result < Overload::alias , F , Vs... > = T_store_U<F>::template result<Vs...>;
 
 	// functional:
 
 	template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto Overload::apply < Overload::is_null , p > = (sizeof...(Vs) == 0);
+	constexpr auto Overload::result < Overload::length , p > = sizeof...(Vs);
+
+	template<auto F, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
+	constexpr auto Overload::result < Overload::applywise , F , p > = U_pack_Vs<F(Vs)...>;
+
+	template<auto F, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
+	constexpr auto Overload::result < Overload::aliaswise , F , p > = U_pack_Vs<T_store_U<F>::template result<Vs>...>;
+
+	template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
+	constexpr auto Overload::result < Overload::is_null , p > = (sizeof...(Vs) == 0);
 
 	template<auto V0, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto Overload::apply < Overload::cons , V0, p > = U_pack_Vs<V0, Vs...>;
+	constexpr auto Overload::result < Overload::cons , V0, p > = U_pack_Vs<V0, Vs...>;
 
 	template<auto V0, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto Overload::apply < Overload::push , V0, p > = U_pack_Vs<Vs..., V0>;
+	constexpr auto Overload::result < Overload::push , V0, p > = U_pack_Vs<Vs..., V0>;
 
 	template<auto V0, auto... Vs, nik_vp(p)(auto_pack<V0, Vs...>*)>
-	constexpr auto Overload::apply < Overload::car , p > = V0;
+	constexpr auto Overload::result < Overload::car , p > = V0;
 
 	template<auto V0, auto... Vs, nik_vp(p)(auto_pack<V0, Vs...>*)>
-	constexpr auto Overload::apply < Overload::cdr , p > = U_pack_Vs<Vs...>;
+	constexpr auto Overload::result < Overload::cdr , p > = U_pack_Vs<Vs...>;
 
 	template<auto... Vs, nik_vp(p0)(auto_pack<Vs...>*), auto... Ws, nik_vp(p1)(auto_pack<Ws...>*)>
-	constexpr auto Overload::apply < Overload::cat , p0, p1 > = U_pack_Vs<Vs..., Ws...>;
+	constexpr auto Overload::result < Overload::cat , p0, p1 > = U_pack_Vs<Vs..., Ws...>;
+
+	template<auto... Vs, nik_vp(p0)(auto_pack<Vs...>*), auto W, auto... Xs, nik_vp(p1)(auto_pack<Xs...>*)>
+	constexpr auto Overload::result < Overload::unite , p0, W, p1 > = U_pack_Vs<Vs..., W, Xs...>;
 
 // machination:
 
@@ -1288,25 +1292,25 @@ namespace cctmp {
 
 	struct MachineName
 	{
-			nik_ces key_type id				=  0;
-			nik_ces key_type identity			= id; // convenience for
-									      // default params.
+		nik_ces key_type id				=  0;
+		nik_ces key_type identity			= id; // convenience for
+								      // default params.
 
-			nik_ces key_type recall				=  1;
-			nik_ces key_type call				=  2;
-			nik_ces key_type halt				=  3;
+		nik_ces key_type recall				=  1;
+		nik_ces key_type call				=  2;
+		nik_ces key_type halt				=  3;
 
-			nik_ces key_type copy_r_pos			=  4;
-			nik_ces key_type copy_c_pos			=  5;
-			nik_ces key_type copy_a_pos			=  6;
+		nik_ces key_type copy_r_pos			=  4;
+		nik_ces key_type copy_c_pos			=  5;
+		nik_ces key_type copy_a_pos			=  6;
 
-			nik_ces key_type cut_r_pos			=  7;
-			nik_ces key_type cut_a_pos			=  8;
+		nik_ces key_type cut_r_pos			=  7;
+		nik_ces key_type cut_a_pos			=  8;
 
-			nik_ces key_type paste_r_all			=  9;
-			nik_ces key_type paste_a_all			= 10;
+		nik_ces key_type paste_r_all			=  9;
+		nik_ces key_type paste_a_all			= 10;
 
-			nik_ces key_type go_to				= 11;
+		nik_ces key_type go_to				= 11;
 	};
 
 	using MN = MachineName;
@@ -1315,28 +1319,26 @@ namespace cctmp {
 
 	struct MachineNote
 	{
-			nik_ces key_type id				=  0;
-			nik_ces key_type identity			= id;	// convenience for
-										// default params.
+		nik_ces key_type id				=  0;
+		nik_ces key_type identity			= id;	// convenience for
+									// default params.
 
-			nik_ces key_type internal			=  1;
+		nik_ces key_type internal			=  1;
 
-			nik_ces key_type apply				=  2;
-			nik_ces key_type alias				=  3;
-			nik_ces key_type action				=  4;
+		nik_ces key_type action				=  2;
+		nik_ces key_type block1				=  3;
+		nik_ces key_type block2				=  4;
+		nik_ces key_type compel				=  5;
+		nik_ces key_type propel				=  6;
+		nik_ces key_type fold				=  7;
 
-			nik_ces key_type block1				=  5;
-			nik_ces key_type block2				=  6;
-			nik_ces key_type compel				=  7;
-			nik_ces key_type propel				=  8;
+		nik_ces key_type pause				=  8;
+		nik_ces key_type value				=  9;
 
-			nik_ces key_type pause				=  9;
-			nik_ces key_type value				= 10;
+		nik_ces key_type insert_at_h0_back		= 10;
+		nik_ces key_type insert_at_hs_front		= 11;
 
-			nik_ces key_type insert_at_h0_back		= 11;
-			nik_ces key_type insert_at_hs_front		= 12;
-
-			nik_ces key_type conditional			= 13;
+		nik_ces key_type conditional			= 12;
 	};
 
 	using MT = MachineNote;
@@ -1353,6 +1355,8 @@ namespace cctmp {
 
 		nik_ces key_type pos					= 3;
 		nik_ces key_type dec					= 3;
+
+		nik_ces key_type act					= 4;
 
 		nik_ces index_type length     (type i)			{ return i[size]; }
 		nik_ces bool       is_optimal (cindex_type n)		{ return (n < _eight); }
@@ -1418,12 +1422,51 @@ namespace cctmp {
 				{ return i + bool{d != 0 && m == MT::id}; }
 	};
 
-	using T_program			= MachineDispatch;
-	constexpr auto U_program	= U_store_T<T_program>;
-
 // block:
 
 	template<key_type...> struct block;
+
+// halters:
+
+	// sifter:
+
+		struct BlockSifter
+		{
+			template<auto V0, auto... Vs>
+			nik_ces auto result = V0;
+		};
+
+	// right:
+
+		struct BlockRight
+		{
+			template<auto... Vs>
+			nik_ces auto result = U_pack_Vs<Vs...>;
+		};
+
+	// filter:
+
+		struct BlockFilter
+		{
+			template<auto V0, auto... Vs, typename Pack>
+			nik_ces auto result(Pack p) { return pair(p, U_pack_Vs<Vs...>); }
+		};
+
+	// left:
+
+		struct BlockLeft
+		{
+			template<auto... Vs, typename Pack>
+			nik_ces auto result(Pack p) { return p; }
+		};
+
+	// split:
+
+		struct BlockSplit
+		{
+			template<auto... Vs, typename Pack>
+			nik_ces auto result(Pack p) { return pair(p, U_pack_Vs<Vs...>); }
+		};
 
 // names:
 
@@ -1431,16 +1474,19 @@ namespace cctmp {
 	{
 		nik_ces key_type id		=  0;
 
-		nik_ces key_type segment	=  1;
-		nik_ces key_type sifter		=  2;
-		nik_ces key_type filter		=  3;
+		nik_ces key_type variable	=  1;
+		nik_ces key_type function	=  2;
 
-		nik_ces key_type at		=  4;
-		nik_ces key_type cut		=  5;
-		nik_ces key_type left		=  6;
-		nik_ces key_type right		=  7;
+		nik_ces key_type segment	=  3;
+		nik_ces key_type fold		=  4;
+		nik_ces key_type cascade	=  5;
 
-		nik_ces key_type fold		=  8;
+		nik_ces auto sifter		= U_store_T<BlockSifter>;
+		nik_ces auto right		= U_store_T<BlockRight>;
+
+		nik_ces auto filter		= U_store_T<BlockFilter>;
+		nik_ces auto left		= U_store_T<BlockLeft>;
+		nik_ces auto split		= U_store_T<BlockSplit>;
 	};
 
 	using BN = BlockName;
@@ -1529,6 +1575,60 @@ namespace cctmp {
 			NIK_BLOCK_DISPATCH_NEXT_INDEX(9)
 	};
 
+// variable:
+
+	template<key_type... filler>
+	struct block<BN::variable, BT::pause, _zero, filler...>
+	{
+		template<auto d, auto Halt, auto n, auto... Vs>
+		nik_ces auto result = machination(U_pack_Vs<Halt>, U_pack_Vs<n, Vs...>);
+	};
+
+	template<key_type... filler>
+	struct block<BN::variable, BT::halt, _zero, filler...>
+	{
+		template<auto d, auto Halt, auto n, auto... Vs>
+		nik_ces auto result = T_store_U<Halt>::template result<Vs...>;
+	};
+
+	NIK_DEFINE_BLOCK_VARIABLE_PASS(0)
+	NIK_DEFINE_BLOCK_VARIABLE_PASS(1)
+	NIK_DEFINE_BLOCK_VARIABLE_PASS(2)
+	NIK_DEFINE_BLOCK_VARIABLE_PASS(3)
+	NIK_DEFINE_BLOCK_VARIABLE_PASS(4)
+	NIK_DEFINE_BLOCK_VARIABLE_PASS(5)
+	NIK_DEFINE_BLOCK_VARIABLE_PASS(6)
+	NIK_DEFINE_BLOCK_VARIABLE_PASS(7)
+	NIK_DEFINE_BLOCK_VARIABLE_PASS(8)
+	NIK_DEFINE_BLOCK_VARIABLE_PASS(9)
+
+// function:
+
+	template<key_type... filler>
+	struct block<BN::function, BT::pause, _zero, filler...>
+	{
+		template<auto d, auto Halt, auto n, auto... Vs, typename Pack>
+		nik_ces auto result(Pack p) { return machination(U_pack_Vs<Halt>, U_pack_Vs<U_restore_T<Pack>, n, Vs...>); }
+	};
+
+	template<key_type... filler>
+	struct block<BN::function, BT::halt, _zero, filler...>
+	{
+		template<auto d, auto Halt, auto n, auto... Vs, typename Pack>
+		nik_ces auto result(Pack p) { return T_store_U<Halt>::template result<Vs...>(p); }
+	};
+
+	NIK_DEFINE_BLOCK_FUNCTION_PASS(0)
+	NIK_DEFINE_BLOCK_FUNCTION_PASS(1)
+	NIK_DEFINE_BLOCK_FUNCTION_PASS(2)
+	NIK_DEFINE_BLOCK_FUNCTION_PASS(3)
+	NIK_DEFINE_BLOCK_FUNCTION_PASS(4)
+	NIK_DEFINE_BLOCK_FUNCTION_PASS(5)
+	NIK_DEFINE_BLOCK_FUNCTION_PASS(6)
+	NIK_DEFINE_BLOCK_FUNCTION_PASS(7)
+	NIK_DEFINE_BLOCK_FUNCTION_PASS(8)
+	NIK_DEFINE_BLOCK_FUNCTION_PASS(9)
+
 // segment:
 
 	template<key_type... filler>
@@ -1558,148 +1658,20 @@ namespace cctmp {
 	NIK_DEFINE_BLOCK_SEGMENT_PASS(8)
 	NIK_DEFINE_BLOCK_SEGMENT_PASS(9)
 
-// sifter:
-
-	template<key_type... filler>
-	struct block<BN::sifter, BT::pause, _zero, filler...>
-	{
-		nik_ces auto s1 = U_pack_Vs<BN::sifter>;
-
-		template<auto d, auto n, auto... Vs>
-		nik_ces auto result = machination(s1, U_pack_Vs<n, Vs...>);
-	};
-
-	template<key_type... filler>
-	struct block<BN::sifter, BT::halt, _zero, filler...>
-	{
-		template<auto d, auto n, auto V0, auto...>
-		nik_ces auto result = V0;
-	};
-
-	NIK_DEFINE_BLOCK_SIFTER_PASS(0)
-	NIK_DEFINE_BLOCK_SIFTER_PASS(1)
-	NIK_DEFINE_BLOCK_SIFTER_PASS(2)
-	NIK_DEFINE_BLOCK_SIFTER_PASS(3)
-	NIK_DEFINE_BLOCK_SIFTER_PASS(4)
-	NIK_DEFINE_BLOCK_SIFTER_PASS(5)
-	NIK_DEFINE_BLOCK_SIFTER_PASS(6)
-	NIK_DEFINE_BLOCK_SIFTER_PASS(7)
-	NIK_DEFINE_BLOCK_SIFTER_PASS(8)
-	NIK_DEFINE_BLOCK_SIFTER_PASS(9)
-
-// filter:
-
-	template<key_type... filler>
-	struct block<BN::filter, BT::pause, _zero, filler...>
-	{
-		template<auto d, auto n, auto... Vs, typename Pack>
-		nik_ces auto result(Pack p)
-		{
-			constexpr auto s1 = U_pack_Vs<BN::filter, U_restore_T<Pack>>; // it's probably this!
-
-			return machination(s1, U_pack_Vs<n, Vs...>);
-		}
-	};
-
-	template<key_type... filler>
-	struct block<BN::filter, BT::halt, _zero, filler...>
-	{
-		template<auto d, auto n, auto V0, auto... Vs, typename Pack>
-		nik_ces auto result(Pack p) { return pair(p, U_pack_Vs<Vs...>); }
-	};
-
-	NIK_DEFINE_BLOCK_FILTER_PASS(0)
-	NIK_DEFINE_BLOCK_FILTER_PASS(1)
-	NIK_DEFINE_BLOCK_FILTER_PASS(2)
-	NIK_DEFINE_BLOCK_FILTER_PASS(3)
-	NIK_DEFINE_BLOCK_FILTER_PASS(4)
-	NIK_DEFINE_BLOCK_FILTER_PASS(5)
-	NIK_DEFINE_BLOCK_FILTER_PASS(6)
-	NIK_DEFINE_BLOCK_FILTER_PASS(7)
-	NIK_DEFINE_BLOCK_FILTER_PASS(8)
-	NIK_DEFINE_BLOCK_FILTER_PASS(9)
-
-// at:
-
-// cut:
-
-// left:
-
-	template<key_type... filler>
-	struct block<BN::left, BT::pause, _zero, filler...>
-	{
-		template<auto d, auto n, auto... Vs, typename Pack>
-		nik_ces auto result(Pack p)
-		{
-			constexpr auto s1 = U_pack_Vs<BN::left, U_restore_T<Pack>>;
-
-			return machination(s1, U_pack_Vs<n, Vs...>);
-		}
-	};
-
-	template<key_type... filler>
-	struct block<BN::left, BT::halt, _zero, filler...>
-	{
-		template<auto d, auto n, auto... Vs, typename Pack>
-		nik_ces auto result(Pack p) { return p; }
-	};
-
-	NIK_DEFINE_BLOCK_LEFT_PASS(0)
-	NIK_DEFINE_BLOCK_LEFT_PASS(1)
-	NIK_DEFINE_BLOCK_LEFT_PASS(2)
-	NIK_DEFINE_BLOCK_LEFT_PASS(3)
-	NIK_DEFINE_BLOCK_LEFT_PASS(4)
-	NIK_DEFINE_BLOCK_LEFT_PASS(5)
-	NIK_DEFINE_BLOCK_LEFT_PASS(6)
-	NIK_DEFINE_BLOCK_LEFT_PASS(7)
-	NIK_DEFINE_BLOCK_LEFT_PASS(8)
-	NIK_DEFINE_BLOCK_LEFT_PASS(9)
-
-// right:
-
-	template<key_type... filler>
-	struct block<BN::right, BT::pause, _zero, filler...>
-	{
-		nik_ces auto s1 = U_pack_Vs<BN::right>;
-
-		template<auto d, auto n, auto... Vs>
-		nik_ces auto result = machination(s1, U_pack_Vs<n, Vs...>);
-	};
-
-	template<key_type... filler>
-	struct block<BN::right, BT::halt, _zero, filler...>
-	{
-		template<auto d, auto n, auto... Vs>
-		nik_ces auto result = U_pack_Vs<Vs...>;
-	};
-
-	NIK_DEFINE_BLOCK_RIGHT_PASS(0)
-	NIK_DEFINE_BLOCK_RIGHT_PASS(1)
-	NIK_DEFINE_BLOCK_RIGHT_PASS(2)
-	NIK_DEFINE_BLOCK_RIGHT_PASS(3)
-	NIK_DEFINE_BLOCK_RIGHT_PASS(4)
-	NIK_DEFINE_BLOCK_RIGHT_PASS(5)
-	NIK_DEFINE_BLOCK_RIGHT_PASS(6)
-	NIK_DEFINE_BLOCK_RIGHT_PASS(7)
-	NIK_DEFINE_BLOCK_RIGHT_PASS(8)
-	NIK_DEFINE_BLOCK_RIGHT_PASS(9)
-
-// fold:
+// (action) fold:
 
 	template<key_type... filler>
 	struct block<BN::fold, BT::pause, _zero, filler...>
 	{
-		nik_ces auto s1 = U_pack_Vs<BN::fold>;
-
-		template<auto d, auto n, auto Op, auto V, auto... Vs>
-		nik_ces auto result = machination(s1, U_pack_Vs<n, Op, V, Vs...>);
+		template<auto d, auto n, auto V, auto... Vs, auto Op, auto... F>
+		nik_ces auto result(nik_vp(m)(auto_pack<Op, F...>*)) { return machination(m, U_pack_Vs<n, V, Vs...>); }
 	};
 
 	template<key_type... filler>
 	struct block<BN::fold, BT::halt, _zero, filler...>
 	{
-		template<auto d, auto n, auto Op, auto V, auto... Vs>
-		nik_ces auto result = V;
+		template<auto d, auto n, auto V, auto... Vs, auto Op, auto... F>
+		nik_ces auto result(nik_vp(m)(auto_pack<Op, F...>*)) { return V; }
 	};
 
 	NIK_DEFINE_BLOCK_FOLD_PASS(0)
@@ -1712,6 +1684,8 @@ namespace cctmp {
 	NIK_DEFINE_BLOCK_FOLD_PASS(7)
 	NIK_DEFINE_BLOCK_FOLD_PASS(8)
 	NIK_DEFINE_BLOCK_FOLD_PASS(9)
+
+// cascade (compel fold):
 
 // recall:
 
@@ -1742,59 +1716,13 @@ namespace cctmp {
 		}
 	};
 
-// apply:
-
-	template<key_type... filler>
-	struct machine<MN::recall, MT::apply, filler...>
-	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto Op, auto... Ws, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(auto_pack<Op, Ws...>*), Heaps... Hs)
-		{
-			constexpr auto ins	= MachineDispatch::instr(c, i);
-			constexpr auto n	= ins[MI::dec];
-
-			if constexpr (n >= d) // analogous to returning a machination.
-
-				return NIK_MACHINE(0, MT::apply, c, i, Vs)(H0, Hs...);
-			else
-			{
-				constexpr auto val = Op(Ws...);
-
-				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
-			}
-		}
-	};
-
-// alias:
-
-	template<key_type... filler>
-	struct machine<MN::recall, MT::alias, filler...>
-	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto Op, auto... Ws, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(auto_pack<Op, Ws...>*), Heaps... Hs)
-		{
-			constexpr auto ins	= MachineDispatch::instr(c, i);
-			constexpr auto n	= ins[MI::dec];
-
-			if constexpr (n >= d) // analogous to returning a machination.
-
-				return NIK_MACHINE(0, MT::alias, c, i, Vs)(H0, Hs...);
-			else
-			{
-				constexpr auto val = T_store_U<Op>::template result<Ws...>;
-
-				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
-			}
-		}
-	};
-
 // action:
 
 	template<key_type... filler>
 	struct machine<MN::recall, MT::action, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto Op, auto... Ws, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(auto_pack<Op, Ws...>*), Heaps... Hs)
+		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename... Heaps>
+		nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), Heaps... Hs)
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::dec];
@@ -1804,7 +1732,8 @@ namespace cctmp {
 				return NIK_MACHINE(0, MT::action, c, i, Vs)(H0, Hs...);
 			else
 			{
-				constexpr auto val = Overload::template apply<Op, Ws...>;
+				constexpr auto act = ins[MI::act];
+				constexpr auto val = Overload::template result<act, Ws...>;
 
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
 			}
@@ -1819,18 +1748,18 @@ namespace cctmp {
 		template
 		<
 			NIK_CONTR_PARAMS, auto... Vs,
-			auto name, auto n, auto... _Vs,
+			auto Halt, auto n, auto... _Vs,
 			auto... Ws, typename... Heaps
 		>
 		nik_ces auto result
 		(
-			nik_avp(auto_pack<name>*),
+			nik_avp(auto_pack<Halt>*),
 			nik_avp(auto_pack<n, _Vs...>*),
 			nik_vp(H0)(auto_pack<Ws...>*),
 			Heaps... Hs
 		)
 		{
-			constexpr auto val = NIK_BLOCK(name, d, 3, n, _Vs);
+			constexpr auto val = NIK_VARIABLE_BLOCK(3, d, Halt, n, _Vs);
 
 			if constexpr (is_machination<decltype(val)>)
 
@@ -1848,17 +1777,17 @@ namespace cctmp {
 		template
 		<
 			NIK_CONTR_PARAMS, auto... Vs,
-			auto name, auto p, auto n, auto... _Vs,
+			auto Halt, auto p, auto n, auto... _Vs,
 			typename... Heaps
 		>
 		nik_ces auto result
 		(
-			nik_avp(auto_pack<name, p>*),
-			nik_avp(auto_pack<n, _Vs...>*),
+			nik_avp(auto_pack<Halt>*),
+			nik_avp(auto_pack<p, n, _Vs...>*),
 			Heaps... Hs
 		)
 		{
-			constexpr auto val = NIK_BLOCK(name, d, 3, n, _Vs)(p);
+			constexpr auto val = NIK_FUNCTION_BLOCK(3, d, Halt, n, _Vs)(p);
 
 			if constexpr (is_machination<decltype(val)>)
 
@@ -1926,59 +1855,13 @@ namespace cctmp {
 
 // call:
 
-// apply:
-
-	template<key_type... filler>
-	struct machine<MN::call, MT::apply, filler...>
-	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto Op, auto... Ws, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(auto_pack<Op, Ws...>*), Heaps... Hs)
-		{
-			constexpr auto ins	= MachineDispatch::instr(c, i);
-			constexpr auto n	= ins[MI::dec];
-
-			if constexpr (n >= d) // analogous to returning a machination.
-
-				return NIK_MACHINE(0, MT::apply, c, i, Vs)(H0, Hs...);
-			else
-			{
-				constexpr auto val = Op(Ws...);
-
-				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
-			}
-		}
-	};
-
-// alias:
-
-	template<key_type... filler>
-	struct machine<MN::call, MT::alias, filler...>
-	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto Op, auto... Ws, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(auto_pack<Op, Ws...>*), Heaps... Hs)
-		{
-			constexpr auto ins	= MachineDispatch::instr(c, i);
-			constexpr auto n	= ins[MI::dec];
-
-			if constexpr (n >= d) // analogous to returning a machination.
-
-				return NIK_MACHINE(0, MT::alias, c, i, Vs)(H0, Hs...);
-			else
-			{
-				constexpr auto val = T_store_U<Op>::template result<Ws...>;
-
-				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
-			}
-		}
-	};
-
 // action:
 
 	template<key_type... filler>
 	struct machine<MN::call, MT::action, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto Op, auto... Ws, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(auto_pack<Op, Ws...>*), Heaps... Hs)
+		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename... Heaps>
+		nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), Heaps... Hs)
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::dec];
@@ -1988,7 +1871,8 @@ namespace cctmp {
 				return NIK_MACHINE(0, MT::action, c, i, Vs)(H0, Hs...);
 			else
 			{
-				constexpr auto val = Overload::template apply<Op, Ws...>;
+				constexpr auto act = ins[MI::act];
+				constexpr auto val = Overload::template result<act, Ws...>;
 
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
 			}
@@ -2064,7 +1948,7 @@ namespace cctmp {
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::pos];
-			constexpr auto val	= NIK_BLOCK(BN::sifter, d, 3, n, Vs);
+			constexpr auto val	= NIK_VARIABLE_BLOCK(3, d, BN::sifter, n, Vs);
 
 			if constexpr (is_machination<decltype(val)>)
 
@@ -2084,7 +1968,7 @@ namespace cctmp {
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::pos];
-			constexpr auto val	= NIK_BLOCK(BN::sifter, d, 3, n, Xs);
+			constexpr auto val	= NIK_VARIABLE_BLOCK(3, d, BN::sifter, n, Xs);
 
 			if constexpr (is_machination<decltype(val)>)
 
@@ -2104,7 +1988,7 @@ namespace cctmp {
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::pos];
-			constexpr auto val	= NIK_BLOCK(BN::sifter, d, 3, n, U_restore_T<Args>);
+			constexpr auto val	= NIK_VARIABLE_BLOCK(3, d, BN::sifter, n, U_restore_T<Args>);
 
 			if constexpr (is_machination<decltype(val)>)
 
@@ -2126,7 +2010,7 @@ namespace cctmp {
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::pos];
-			constexpr auto val	= NIK_BLOCK(BN::filter, d, 3, n, Vs)(U_null_Vs);
+			constexpr auto val	= NIK_FUNCTION_BLOCK(3, d, BN::filter, n, Vs)(U_null_Vs);
 
 			if constexpr (is_machination<decltype(val)>)
 
@@ -2146,7 +2030,7 @@ namespace cctmp {
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::pos];
-			constexpr auto val	= NIK_BLOCK(BN::filter, d, 3, n, U_restore_T<Args>)(U_null_Vs);
+			constexpr auto val	= NIK_FUNCTION_BLOCK(3, d, BN::filter, n, U_restore_T<Args>)(U_null_Vs);
 
 			if constexpr (is_machination<decltype(val)>)
 
@@ -2266,10 +2150,10 @@ namespace cctmp {
 	template<key_type...>
 	constexpr instr_type value = instruction<MN::halt, MT::value>;
 
-	template<key_type loc, index_type pos>
+	template<index_type pos, key_type loc> // reverse order for user friendliness.
 	constexpr instr_type copy = instruction<copy_name(loc), MT::insert_at_h0_back, pos>;
 
-	template<key_type loc, index_type pos>
+	template<index_type pos, key_type loc> // reverse order for user friendliness.
 	constexpr instr_type cut = instruction<cut_name(loc), MT::insert_at_hs_front, pos>;
 
 	template<key_type loc>
@@ -2278,17 +2162,63 @@ namespace cctmp {
 	template<key_type...>
 	constexpr instr_type cycle = instruction<MN::go_to, MT::id, _zero>;
 
-	template<key_type label>
-	constexpr instr_type branch = instruction<MN::go_to, MT::conditional, label>;
+	template<key_type pos>
+	constexpr instr_type branch = instruction<MN::go_to, MT::conditional, pos>;
 
-	template<depth_type dec = _one>
-	constexpr instr_type apply = instruction<MN::call, MT::apply, dec>;
+	template<key_type act, depth_type dec = _two> // reverse order for user friendliness.
+	constexpr instr_type action = instruction<MN::call, MT::action, dec, act>;
 
-	template<depth_type dec = _two>
-	constexpr instr_type alias = instruction<MN::call, MT::alias, dec>;
+		// comparision:
 
-	template<depth_type dec = _one>
-	constexpr instr_type action = instruction<MN::call, MT::action, dec>;
+		template<depth_type dec = _two> constexpr auto equal			= action<Overload::equal, dec>;
+		template<depth_type dec = _two> constexpr auto not_equal		= action<Overload::not_equal, dec>;
+		template<depth_type dec = _two> constexpr auto less_than		= action<Overload::less_than, dec>;
+		template<depth_type dec = _two> constexpr auto less_than_or_equal	= action<Overload::less_than_or_equal, dec>;
+		template<depth_type dec = _two> constexpr auto greater_than		= action<Overload::greater_than, dec>;
+		template<depth_type dec = _two> constexpr auto greater_than_or_equal	= action<Overload::greater_than_or_equal, dec>;
+
+		template<depth_type dec = _two> constexpr auto is_zero			= action<Overload::is_zero, dec>;
+		template<depth_type dec = _two> constexpr auto is_value			= action<Overload::is_value, dec>;
+
+		// logical:
+
+		template<depth_type dec = _two> constexpr auto and_			= action<Overload::and_, dec>;
+		template<depth_type dec = _two> constexpr auto or_			= action<Overload::or_, dec>;
+
+		// bitwise:
+
+		template<depth_type dec = _two> constexpr auto upshift			= action<Overload::upshift, dec>;
+		template<depth_type dec = _two> constexpr auto downshift		= action<Overload::downshift, dec>;
+
+		// arithmetic:
+
+		template<depth_type dec = _two> constexpr auto add			= action<Overload::add, dec>;
+		template<depth_type dec = _two> constexpr auto subtract			= action<Overload::subtract, dec>;
+		template<depth_type dec = _two> constexpr auto multiply			= action<Overload::multiply, dec>;
+		template<depth_type dec = _two> constexpr auto divide			= action<Overload::divide, dec>;
+		template<depth_type dec = _two> constexpr auto modulo			= action<Overload::modulo, dec>;
+
+		template<depth_type dec = _two> constexpr auto increment		= action<Overload::increment, dec>;
+		template<depth_type dec = _two> constexpr auto decrement		= action<Overload::decrement, dec>;
+
+		// computational:
+
+		template<depth_type dec = _two> constexpr auto apply			= action<Overload::apply, dec>;
+		template<depth_type dec = _three> constexpr auto alias			= action<Overload::alias, dec>;
+
+		// functional:
+
+		template<depth_type dec = _two> constexpr auto length			= action<Overload::length, dec>;
+		template<depth_type dec = _two> constexpr auto applywise		= action<Overload::applywise, dec>;
+		template<depth_type dec = _two> constexpr auto aliaswise		= action<Overload::aliaswise, dec>;
+
+		template<depth_type dec = _two> constexpr auto is_null			= action<Overload::is_null, dec>;
+		template<depth_type dec = _two> constexpr auto cons			= action<Overload::cons, dec>;
+		template<depth_type dec = _two> constexpr auto push			= action<Overload::push, dec>;
+		template<depth_type dec = _two> constexpr auto car			= action<Overload::car, dec>;
+		template<depth_type dec = _two> constexpr auto cdr			= action<Overload::cdr, dec>;
+		template<depth_type dec = _two> constexpr auto cat			= action<Overload::cat, dec>;
+		template<depth_type dec = _two> constexpr auto unite			= action<Overload::unite, dec>;
 
 	template<depth_type dec = _two>
 	constexpr instr_type compel = instruction<MN::call, MT::compel, dec>;
@@ -2372,7 +2302,7 @@ namespace cctmp_program
 	};
 
 	template<auto d, auto n, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_At_v0::result<d, n, p> = NIK_BLOCK(BN::sifter, d, 9, n, Vs);
+	constexpr auto T_At_v0::result<d, n, p> = NIK_VARIABLE_BLOCK(9, d, BN::sifter, n, Vs);
 
 	struct At_v0
 	{
@@ -2400,7 +2330,7 @@ namespace cctmp_program
 	};
 
 	template<auto d, auto n, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_Left_v0::result<d, n, p> = NIK_BLOCK(BN::left, d, 9, n, Vs)(U_null_Vs);
+	constexpr auto T_Left_v0::result<d, n, p> = NIK_FUNCTION_BLOCK(9, d, BN::left, n, Vs)(U_null_Vs);
 
 	struct Left_v0
 	{
@@ -2426,7 +2356,7 @@ namespace cctmp_program
 	};
 
 	template<auto d, auto n, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_Right_v0::result<d, n, p> = NIK_BLOCK(BN::right, d, 9, n, Vs);
+	constexpr auto T_Right_v0::result<d, n, p> = NIK_VARIABLE_BLOCK(9, d, BN::right, n, Vs);
 
 	struct Right_v0
 	{
@@ -2443,16 +2373,42 @@ namespace cctmp_program
 	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
 	constexpr auto right_v0 = Right_v0::template result<d, n, p>;
 
+// split:
+
+	struct T_Split_v0
+	{
+		template<auto d, auto n, auto p>
+		nik_ces auto result = p;
+	};
+
+	template<auto d, auto n, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
+	constexpr auto T_Split_v0::result<d, n, p> = NIK_FUNCTION_BLOCK(9, d, BN::split, n, Vs)(U_null_Vs);
+
+	struct Split_v0
+	{
+		nik_ces auto m		= MT::id;
+		nik_ces auto c		= compel_program<>;
+		nik_ces auto i		= MachineDispatch::initial_index;
+		nik_ces auto U_Split_v0	= U_store_T<T_Split_v0>;
+
+		template<auto d, auto n, auto p>
+		nik_ces auto result	= NIK_BEGIN_MACHINE(d, m, c, i)
+						NIK_END_MACHINE(U_pack_Vs<U_Split_v0, n, p>);
+	};
+
+	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
+	constexpr auto split_v0 = Split_v0::template result<d, n, p>;
+
 // fold:
 
 	struct T_Fold_v0
 	{
-		template<auto d, auto Op, auto V, auto p>
+		template<auto d, auto op, auto V, auto l>
 		nik_ces auto result = V;
 	};
 
-	template<auto d, auto Op, auto V, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_Fold_v0::result<d, Op, V, p> = block
+	template<auto d, auto op, auto V, auto... Vs, nik_vp(l)(auto_pack<Vs...>*)>
+	constexpr auto T_Fold_v0::result<d, op, V, l> = block
 	<
 		BN::fold,
 		BlockDispatch::next_note(d, sizeof...(Vs)),
@@ -2462,8 +2418,8 @@ namespace cctmp_program
 	<
 		BlockDispatch::next_depth(d),
 		BlockDispatch::next_index_9(d, sizeof...(Vs)),
-		Op, V, Vs...
-	>;
+		V, Vs...
+	>(op);
 
 	struct Fold_v0
 	{
@@ -2472,13 +2428,13 @@ namespace cctmp_program
 		nik_ces auto i		= MachineDispatch::initial_index;
 		nik_ces auto U_Fold_v0	= U_store_T<T_Fold_v0>;
 
-		template<auto d, auto Op, auto V, auto p>
+		template<auto d, auto op, auto V, auto l>
 		nik_ces auto result	= NIK_BEGIN_MACHINE(d, m, c, i)
-						NIK_END_MACHINE(U_pack_Vs<U_Fold_v0, Op, V, p>);
+						NIK_END_MACHINE(U_pack_Vs<U_Fold_v0, op, V, l>);
 	};
 
-	template<auto Op, auto V, auto p, auto d = MachineDispatch::initial_depth>
-	constexpr auto fold_v0 = Fold_v0::template result<d, Op, V, p>;
+	template<auto op, auto V, auto l, auto d = MachineDispatch::initial_depth>
+	constexpr auto fold_v0 = Fold_v0::template result<d, op, V, l>;
 }
 
 // factorial:
@@ -2493,57 +2449,40 @@ namespace cctmp_program
 		<
 			// registers:
 
-			key_type n			=  0,
-			key_type p			=  1,
-
-			// constants:
-
-			key_type is_zero		=  0,
-			key_type multiply		=  1,
-			key_type decrement		=  2,
+			key_type n		=  0,
+			key_type p		=  1,
 
 			// labels:
 
-			key_type exit_case		= 16
+			key_type exit_case	= 13
 		>
 		nik_ces contr_type program = controller
 		<
-			copy   < _constant , is_zero   >,
-			copy   < _register , n         >,
-			action <                       >,
-			branch < exit_case             >,
+			copy      < n , _register >,
+			is_zero   <               >,
+			branch    <     exit_case >,
 
-			copy   < _constant , multiply  >,
-			copy   < _register , n         >,
-			copy   < _register , p         >,
-			action <                       >,
-			cut    < _register , p         >,
-			paste  < _register             >,
+			copy      < n , _register >,
+			copy      < p , _register >,
+			multiply  <               >,
+			cut       < p , _register >,
+			paste     <     _register >,
 
-			copy   < _constant , decrement >,
-			copy   < _register , n         >,
-			action <                       >,
-			cut    < _register , n         >,
-			paste  < _register             >,
+			copy      < n , _register >,
+			decrement <               >,
+			cut       < n , _register >,
+			paste     <     _register >,
 
-			cycle  <                       >,
+			cycle     <               >,
 
 			// exit_case:
 
-			copy   < _register , p         >,
-			value  <                       >
+			copy      < p , _register >,
+			value     <               >
 		>;
 
 		template<auto d, auto n>
-		nik_ces auto result = start<d, program<>, n, decltype(n){_one}>
-		(
-			U_pack_Vs
-			<
-				Overload::is_zero,
-				Overload::multiply,
-				Overload::decrement
-			>
-		);
+		nik_ces auto result = start<d, program<>, n, decltype(n){_one}>();
 	};
 
 	template<auto n, auto d = MachineDispatch::initial_depth>
@@ -2564,39 +2503,33 @@ namespace cctmp_program
 
 			key_type one			=  0,
 			key_type factorial		=  1,
-			key_type is_zero		=  2,
-			key_type multiply		=  3,
 
 			// labels:
 
-			key_type exit_case		= 14
+			key_type exit_case		= 12
 		>
 		nik_ces contr_type program = controller
 		<
-			copy   < _constant , is_zero   >,
-			copy   < _register , n         >,
-			apply  <                       >,
-			branch < exit_case             >,
+			copy     < n         , _register >,
+			is_zero  <                       >,
+			branch   <             exit_case >,
 
-			copy   < _constant , factorial >,
-			copy   < _register , m         >,
-			compel <                       >,
-			cut    < _register , m         >,
-			paste  < _register             >,
+			copy     < factorial , _constant >,
+			copy     < m         , _register >,
+			compel   <                       >,
+			cut      < m         , _register >,
+			paste    <             _register >,
 
-			copy   < _constant , multiply  >,
-			copy   < _register , n         >,
-			copy   < _register , m         >,
-			action <                       >,
-			value  <                       >,
+			copy     < n         , _register >,
+			copy     < m         , _register >,
+			multiply <                       >,
+			value    <                       >,
 
 			// exit_case:
 
-			copy   < _constant , one       >,
-			value  <                       >
+			copy     < one       , _constant >,
+			value    <                       >
 		>;
-
-		template<typename T> nik_ces bool is_zero(T n) { return (n == 0); }
 
 		template<auto d, auto n>
 		nik_ces auto result = start<d, program<>, n, n-1>
@@ -2604,9 +2537,7 @@ namespace cctmp_program
 			U_pack_Vs
 			<
 				decltype(n){_one},
-				U_store_T<Factorial_v1>,
-				is_zero<decltype(n)>,
-				Overload::multiply
+				U_store_T<Factorial_v1>
 			>
 		);
 	};
@@ -2689,40 +2620,38 @@ namespace cctmp_program
 			key_type one			=  0,
 			key_type fibonacci		=  1,
 			key_type is_0_or_1		=  2,
-			key_type add			=  3,
 
 			// labels:
 
-			key_type exit_case		= 19
+			key_type exit_case		= 18
 		>
 		nik_ces contr_type program = controller
 		<
-			copy   < _constant , is_0_or_1 >,
-			copy   < _register , n         >,
+			copy   < is_0_or_1 , _constant >,
+			copy   < n         , _register >,
 			apply  <                       >,
-			branch < exit_case             >,
+			branch <             exit_case >,
 
-			copy   < _constant , fibonacci >,
-			copy   < _register , m1        >,
+			copy   < fibonacci , _constant >,
+			copy   < m1        , _register >,
 			compel <                       >,
-			cut    < _register , m1        >,
-			paste  < _register             >,
+			cut    < m1        , _register >,
+			paste  <             _register >,
 
-			copy   < _constant , fibonacci >,
-			copy   < _register , m2        >,
+			copy   < fibonacci , _constant >,
+			copy   < m2        , _register >,
 			compel <                       >,
-			cut    < _register , m2        >,
-			paste  < _register             >,
+			cut    < m2        , _register >,
+			paste  <             _register >,
 
-			copy   < _constant , add       >,
-			copy   < _register , m1        >,
-			copy   < _register , m2        >,
-			action <                       >,
+			copy   < m1        , _register >,
+			copy   < m2        , _register >,
+			add    <                       >,
 			value  <                       >,
 
 			// exit_case:
 
-			copy   < _constant , one       >,
+			copy   < one       , _constant >,
 			value  <                       >
 		>;
 
@@ -2735,8 +2664,7 @@ namespace cctmp_program
 			<
 				decltype(n){_one},
 				U_store_T<Fibonacci_v0>,
-				is_0_or_1<decltype(n)>,
-				Overload::add
+				is_0_or_1<decltype(n)>
 			>
 		);
 	};
@@ -2745,283 +2673,71 @@ namespace cctmp_program
 	constexpr auto fibonacci_v0 = Fibonacci_v0::template result<d, n>;
 }
 
-// unite sort:
+// insert sort:
 
 namespace cctmp_program
 {
 // version 0:
 
-	struct T_LessThan_v0
+	constexpr index_type first(const bool *k, const bool *e)
 	{
-		template<auto x, auto y>
-		nik_ces auto result = (x < y);
+		const bool *b = k;
+
+		while (k != e && !*k) ++k;
+
+		return k - b;
+	}
+
+	template<auto insert, auto... Vs, key_type Op, auto... F>
+	constexpr auto sort(nik_avp(auto_pack<Vs...>*), nik_avp(auto_pack<Op, F...>*))
+	{
+		constexpr auto arr		= array<bool, Overload::template result<Op, F..., insert, Vs>...>;
+		constexpr index_type size	= sizeof...(Vs);
+
+		constexpr auto d		= MachineDispatch::initial_depth;
+		constexpr auto n		= first(arr, arr + size);
+
+						// bad design: does not compose well with trampolining.
+		constexpr auto sp		= NIK_FUNCTION_BLOCK(9, d, BN::split, n, Vs)(U_null_Vs);
+
+		return Overload::template result<Overload::unite, sp.v1, insert, sp.v2>;
+	}
+
+	template<auto LT = U_pack_Vs<Overload::less_than>>
+	struct T_InsertSort_v0
+	{
+		template<auto list, auto insert>
+		nik_ces auto result = sort<insert>(list, LT);
 	};
 
-	constexpr auto U_LessThan_v0 = U_store_T<T_LessThan_v0>;
+	template<auto LT = U_pack_Vs<Overload::less_than>>
+	constexpr auto U_InsertSort_v0 = U_store_T<T_InsertSort_v0<LT>>;
 
-	struct T_GreaterThan_v0
-	{
-		template<auto x, auto y>
-		nik_ces auto result = (x > y);
-	};
-
-	constexpr auto U_GreaterThan_v0 = U_store_T<T_GreaterThan_v0>;
-
-	template<auto LessThan>
-	struct UniteSort_v0
-	{
-		template
-		<
-			// registers:
-
-			index_type l_front	=  0,
-			index_type r_front	=  1,
-
-			// constants:
-
-			index_type is_null	=  0,
-			index_type less_than	=  1,
-			index_type car		=  2,
-			index_type cdr		=  3,
-			index_type push		=  4,
-			index_type cat		=  5,
-
-			// arguments:
-
-			index_type out_list	=  0,
-			index_type left_list	=  1,
-			index_type right_list	=  2,
-
-			// labels:
-
-			index_type loop_l	=  0,
-			index_type loop_r	= 35,
-			index_type done_l	= 47,
-			index_type done_r	= 52
-		>
-		nik_ces contr_type program = controller
-		<
-			// loop_l:
-
-			copy   < _constant , is_null    >,
-			copy   < _argument , left_list  >,
-			action <                        >,
-			branch < done_l                 >,
-
-			copy   < _constant , is_null    >,
-			copy   < _argument , right_list >,
-			action <                        >,
-			branch < done_r                 >,
-
-			copy   < _constant , car        >,
-			copy   < _argument , left_list  >,
-			action <                        >,
-			cut    < _register , l_front    >,
-			paste  < _register              >,
-
-			copy   < _constant , car        >,
-			copy   < _argument , right_list >,
-			action <                        >,
-			cut    < _register , r_front    >,
-			paste  < _register              >,
-
-			copy   < _constant , less_than  >,
-			copy   < _register , l_front    >,
-			copy   < _register , r_front    >,
-			alias  <                        >,
-			branch < loop_r                 >,
-
-			copy   < _constant , push       >,
-			copy   < _register , r_front    >,
-			copy   < _argument , out_list   >,
-			action <                        >,
-			cut    < _argument , out_list   >,
-			paste  < _argument              >,
-
-			copy   < _constant , cdr        >,
-			copy   < _argument , right_list >,
-			action <                        >,
-			cut    < _argument , right_list >,
-			paste  < _argument              >,
-
-			cycle  <                        >,
-
-			// loop_r:
-
-			copy   < _constant , push       >,
-			copy   < _register , l_front    >,
-			copy   < _argument , out_list   >,
-			action <                        >,
-			cut    < _argument , out_list   >,
-			paste  < _argument              >,
-
-			copy   < _constant , cdr        >,
-			copy   < _argument , left_list  >,
-			action <                        >,
-			cut    < _argument , left_list  >,
-			paste  < _argument              >,
-
-			cycle  <                        >,
-
-			// done_l:
-
-			copy   < _constant , cat        >,
-			copy   < _argument , out_list   >,
-			copy   < _argument , right_list >,
-			action <                        >,
-			value  <                        >,
-
-			// done_r:
-
-			copy   < _constant , cat        >,
-			copy   < _argument , out_list   >,
-			copy   < _argument , left_list  >,
-			action <                        >,
-			value  <                        >
-		>;
-
-		template<auto d, auto l, auto r>
-		nik_ces auto result = start<d, program<>, _zero, _zero>
-		(
-			U_pack_Vs
-			<
-				Overload::is_null,
-				LessThan,
-				Overload::car,
-				Overload::cdr,
-				Overload::push,
-				Overload::cat
-			>,
-
-			U_null_Vs, l, r
-		);
-	};
-
-	template<auto l, auto r, auto LT = U_LessThan_v0, auto d = MachineDispatch::initial_depth>
-	constexpr auto unite_sort_v0 = UniteSort_v0<LT>::template result<d, l, r>;
+	template<auto insert, auto list, auto LT = U_pack_Vs<Overload::less_than>>
+	constexpr auto insert_sort_v0 = T_InsertSort_v0<LT>::template result<insert, list>;
 }
 
-// merge sort:
+// sort:
 
 namespace cctmp_program
 {
 // version 0:
 
-	struct T_at_most_one
-	{
-		template<auto p>
-		nik_ces auto result = true;
-	};
+	// less rigorous (l has a max length), but is fast!
 
-	template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_at_most_one::result<p> = (sizeof...(Vs) <= 1);
-
-	struct T_half_size
-	{
-		template<auto p>
-		nik_ces auto result = 0;
-	};
-
-	template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_half_size::result<p> = sizeof...(Vs) / 2;
-
-	template<auto LessThan>
-	struct MergeSort_v0
-	{
-		template
-		<
-			// registers:
-
-			index_type position	=  0,
-
-			// constants:
-
-			index_type at_most_one	=  0,
-			index_type half_size	=  1,
-			index_type left		=  2,
-			index_type right	=  3,
-			index_type unite_sort	=  4,
-			index_type merge_sort	=  5,
-
-			// arguments:
-
-			index_type left_list	=  0,
-			index_type right_list	=  1,
-
-			// labels:
-
-			index_type exit_case	= 36
-		>
-		nik_ces contr_type program = controller
-		<
-			copy   < _constant , at_most_one >,
-			copy   < _argument , right_list  >,
-			alias  <                         >,
-			branch < exit_case               >,
-
-			copy   < _constant , half_size   >,
-			copy   < _argument , right_list  >,
-			alias  <                         >,
-			cut    < _register , position    >,
-			paste  < _register               >,
-
-			copy   < _constant , left        >,
-			copy   < _register , position    >,
-			copy   < _argument , right_list  >,
-			compel <                         >,
-			cut    < _argument , left_list   >,
-			paste  < _argument               >,
-
-			copy   < _constant , right       >,
-			copy   < _register , position    >,
-			copy   < _argument , right_list  >,
-			compel <                         >,
-			cut    < _argument , right_list  >,
-			paste  < _argument               >,
-
-			copy   < _constant , merge_sort  >,
-			copy   < _argument , left_list   >,
-			compel <                         >,
-			cut    < _argument , left_list   >,
-			paste  < _argument               >,
-
-			copy   < _constant , merge_sort  >,
-			copy   < _argument , right_list  >,
-			compel <                         >,
-			cut    < _argument , right_list  >,
-			paste  < _argument               >,
-
-			copy   < _constant , unite_sort  >,
-			copy   < _argument , left_list   >,
-			copy   < _argument , right_list  >,
-			compel <                         >,
-			value  <                         >,
-
-			// exit_case:
-
-			copy   < _argument , right_list  >,
-			value  <                         >
-		>;
-
-		template<auto d, auto p>
-		nik_ces auto result = start<d, program<>, _zero>
-		(
-			U_pack_Vs
-			<
-				U_store_T<T_at_most_one>,
-				U_store_T<T_half_size>,
-				U_store_T<Left_v0>,
-				U_store_T<Right_v0>,
-				U_store_T<UniteSort_v0<LessThan>>,
-				U_store_T<MergeSort_v0<LessThan>>
-			>,
-
-			U_null_Vs, p
-		);
-	};
-
-	template<auto p, auto LT = U_LessThan_v0, auto d = MachineDispatch::initial_depth>
-	constexpr auto merge_sort_v0 = MergeSort_v0<LT>::template result<d, p>;
+	template
+	<
+		auto l,
+		auto comp	= U_pack_Vs<Overload::less_than>,
+		auto d		= MachineDispatch::initial_depth
+	>
+	constexpr auto sort_v0 = Fold_v0::template result
+	<
+		d,
+		U_pack_Vs<Overload::alias, U_InsertSort_v0<comp>>,
+		U_null_Vs,
+		l
+	>;
 }
 
 // undef macros:
@@ -3032,11 +2748,9 @@ namespace cctmp_program
 
 #undef nik_ces
 
-#undef NIK_0_COMMA
-
-#undef NIK_1_COMMA
-
 #undef NIK_EMPTY
+
+#undef NIK_COMMA
 
 #undef NIK_L_PAR
 
@@ -3059,8 +2773,6 @@ namespace cctmp_program
 #undef NIK_R_PAR_LDOTS
 
 #undef NIK_PLUS
-
-#undef NIK_TWO_STAR
 
 #undef NIK_L_STORE
 
@@ -3170,11 +2882,7 @@ namespace cctmp_program
 
 #undef NIK_2_N_MONOID_VARS
 
-#undef NIK_2_N_MONOID_FOLDS
-
-#undef NIK_2_N_APPLY_FOLDS
-
-#undef NIK_2_N_ALIAS_FOLDS
+#undef NIK_2_N_ACTION_FOLDS
 
 #undef NIK_BLOCK_DISPATCH_NEXT_LENGTH
 
@@ -3182,15 +2890,15 @@ namespace cctmp_program
 
 #undef NIK_BLOCK
 
+#undef NIK_VARIABLE_BLOCK
+
+#undef NIK_FUNCTION_BLOCK
+
+#undef NIK_DEFINE_BLOCK_VARIABLE_PASS
+
+#undef NIK_DEFINE_BLOCK_FUNCTION_PASS
+
 #undef NIK_DEFINE_BLOCK_SEGMENT_PASS
-
-#undef NIK_DEFINE_BLOCK_SIFTER_PASS
-
-#undef NIK_DEFINE_BLOCK_FILTER_PASS
-
-#undef NIK_DEFINE_BLOCK_LEFT_PASS
-
-#undef NIK_DEFINE_BLOCK_RIGHT_PASS
 
 #undef NIK_DEFINE_BLOCK_FOLD_PASS
 

@@ -79,7 +79,7 @@ namespace cctmp_program
 	};
 
 	template<auto d, auto n, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_At_v0::result<d, n, p> = NIK_BLOCK(BN::sifter, d, 9, n, Vs);
+	constexpr auto T_At_v0::result<d, n, p> = NIK_VARIABLE_BLOCK(9, d, BN::sifter, n, Vs);
 
 	struct At_v0
 	{
@@ -107,7 +107,7 @@ namespace cctmp_program
 	};
 
 	template<auto d, auto n, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_Left_v0::result<d, n, p> = NIK_BLOCK(BN::left, d, 9, n, Vs)(U_null_Vs);
+	constexpr auto T_Left_v0::result<d, n, p> = NIK_FUNCTION_BLOCK(9, d, BN::left, n, Vs)(U_null_Vs);
 
 	struct Left_v0
 	{
@@ -133,7 +133,7 @@ namespace cctmp_program
 	};
 
 	template<auto d, auto n, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_Right_v0::result<d, n, p> = NIK_BLOCK(BN::right, d, 9, n, Vs);
+	constexpr auto T_Right_v0::result<d, n, p> = NIK_VARIABLE_BLOCK(9, d, BN::right, n, Vs);
 
 	struct Right_v0
 	{
@@ -150,16 +150,42 @@ namespace cctmp_program
 	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
 	constexpr auto right_v0 = Right_v0::template result<d, n, p>;
 
+// split:
+
+	struct T_Split_v0
+	{
+		template<auto d, auto n, auto p>
+		nik_ces auto result = p;
+	};
+
+	template<auto d, auto n, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
+	constexpr auto T_Split_v0::result<d, n, p> = NIK_FUNCTION_BLOCK(9, d, BN::split, n, Vs)(U_null_Vs);
+
+	struct Split_v0
+	{
+		nik_ces auto m		= MT::id;
+		nik_ces auto c		= compel_program<>;
+		nik_ces auto i		= MachineDispatch::initial_index;
+		nik_ces auto U_Split_v0	= U_store_T<T_Split_v0>;
+
+		template<auto d, auto n, auto p>
+		nik_ces auto result	= NIK_BEGIN_MACHINE(d, m, c, i)
+						NIK_END_MACHINE(U_pack_Vs<U_Split_v0, n, p>);
+	};
+
+	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
+	constexpr auto split_v0 = Split_v0::template result<d, n, p>;
+
 // fold:
 
 	struct T_Fold_v0
 	{
-		template<auto d, auto Op, auto V, auto p>
+		template<auto d, auto op, auto V, auto l>
 		nik_ces auto result = V;
 	};
 
-	template<auto d, auto Op, auto V, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_Fold_v0::result<d, Op, V, p> = block
+	template<auto d, auto op, auto V, auto... Vs, nik_vp(l)(auto_pack<Vs...>*)>
+	constexpr auto T_Fold_v0::result<d, op, V, l> = block
 	<
 		BN::fold,
 		BlockDispatch::next_note(d, sizeof...(Vs)),
@@ -169,8 +195,8 @@ namespace cctmp_program
 	<
 		BlockDispatch::next_depth(d),
 		BlockDispatch::next_index_9(d, sizeof...(Vs)),
-		Op, V, Vs...
-	>;
+		V, Vs...
+	>(op);
 
 	struct Fold_v0
 	{
@@ -179,13 +205,13 @@ namespace cctmp_program
 		nik_ces auto i		= MachineDispatch::initial_index;
 		nik_ces auto U_Fold_v0	= U_store_T<T_Fold_v0>;
 
-		template<auto d, auto Op, auto V, auto p>
+		template<auto d, auto op, auto V, auto l>
 		nik_ces auto result	= NIK_BEGIN_MACHINE(d, m, c, i)
-						NIK_END_MACHINE(U_pack_Vs<U_Fold_v0, Op, V, p>);
+						NIK_END_MACHINE(U_pack_Vs<U_Fold_v0, op, V, l>);
 	};
 
-	template<auto Op, auto V, auto p, auto d = MachineDispatch::initial_depth>
-	constexpr auto fold_v0 = Fold_v0::template result<d, Op, V, p>;
+	template<auto op, auto V, auto l, auto d = MachineDispatch::initial_depth>
+	constexpr auto fold_v0 = Fold_v0::template result<d, op, V, l>;
 }
 
 /***********************************************************************************************************************/
@@ -205,57 +231,40 @@ namespace cctmp_program
 		<
 			// registers:
 
-			key_type n			=  0,
-			key_type p			=  1,
-
-			// constants:
-
-			key_type is_zero		=  0,
-			key_type multiply		=  1,
-			key_type decrement		=  2,
+			key_type n		=  0,
+			key_type p		=  1,
 
 			// labels:
 
-			key_type exit_case		= 16
+			key_type exit_case	= 13
 		>
 		nik_ces contr_type program = controller
 		<
-			copy   < _constant , is_zero   >,
-			copy   < _register , n         >,
-			action <                       >,
-			branch < exit_case             >,
+			copy      < n , _register >,
+			is_zero   <               >,
+			branch    <     exit_case >,
 
-			copy   < _constant , multiply  >,
-			copy   < _register , n         >,
-			copy   < _register , p         >,
-			action <                       >,
-			cut    < _register , p         >,
-			paste  < _register             >,
+			copy      < n , _register >,
+			copy      < p , _register >,
+			multiply  <               >,
+			cut       < p , _register >,
+			paste     <     _register >,
 
-			copy   < _constant , decrement >,
-			copy   < _register , n         >,
-			action <                       >,
-			cut    < _register , n         >,
-			paste  < _register             >,
+			copy      < n , _register >,
+			decrement <               >,
+			cut       < n , _register >,
+			paste     <     _register >,
 
-			cycle  <                       >,
+			cycle     <               >,
 
 			// exit_case:
 
-			copy   < _register , p         >,
-			value  <                       >
+			copy      < p , _register >,
+			value     <               >
 		>;
 
 		template<auto d, auto n>
-		nik_ces auto result = start<d, program<>, n, decltype(n){_one}>
-		(
-			U_pack_Vs
-			<
-				Overload::is_zero,
-				Overload::multiply,
-				Overload::decrement
-			>
-		);
+		nik_ces auto result = start<d, program<>, n, decltype(n){_one}>();
 	};
 
 	template<auto n, auto d = MachineDispatch::initial_depth>
@@ -276,39 +285,33 @@ namespace cctmp_program
 
 			key_type one			=  0,
 			key_type factorial		=  1,
-			key_type is_zero		=  2,
-			key_type multiply		=  3,
 
 			// labels:
 
-			key_type exit_case		= 14
+			key_type exit_case		= 12
 		>
 		nik_ces contr_type program = controller
 		<
-			copy   < _constant , is_zero   >,
-			copy   < _register , n         >,
-			apply  <                       >,
-			branch < exit_case             >,
+			copy     < n         , _register >,
+			is_zero  <                       >,
+			branch   <             exit_case >,
 
-			copy   < _constant , factorial >,
-			copy   < _register , m         >,
-			compel <                       >,
-			cut    < _register , m         >,
-			paste  < _register             >,
+			copy     < factorial , _constant >,
+			copy     < m         , _register >,
+			compel   <                       >,
+			cut      < m         , _register >,
+			paste    <             _register >,
 
-			copy   < _constant , multiply  >,
-			copy   < _register , n         >,
-			copy   < _register , m         >,
-			action <                       >,
-			value  <                       >,
+			copy     < n         , _register >,
+			copy     < m         , _register >,
+			multiply <                       >,
+			value    <                       >,
 
 			// exit_case:
 
-			copy   < _constant , one       >,
-			value  <                       >
+			copy     < one       , _constant >,
+			value    <                       >
 		>;
-
-		template<typename T> nik_ces bool is_zero(T n) { return (n == 0); }
 
 		template<auto d, auto n>
 		nik_ces auto result = start<d, program<>, n, n-1>
@@ -316,9 +319,7 @@ namespace cctmp_program
 			U_pack_Vs
 			<
 				decltype(n){_one},
-				U_store_T<Factorial_v1>,
-				is_zero<decltype(n)>,
-				Overload::multiply
+				U_store_T<Factorial_v1>
 			>
 		);
 	};
@@ -406,40 +407,38 @@ namespace cctmp_program
 			key_type one			=  0,
 			key_type fibonacci		=  1,
 			key_type is_0_or_1		=  2,
-			key_type add			=  3,
 
 			// labels:
 
-			key_type exit_case		= 19
+			key_type exit_case		= 18
 		>
 		nik_ces contr_type program = controller
 		<
-			copy   < _constant , is_0_or_1 >,
-			copy   < _register , n         >,
+			copy   < is_0_or_1 , _constant >,
+			copy   < n         , _register >,
 			apply  <                       >,
-			branch < exit_case             >,
+			branch <             exit_case >,
 
-			copy   < _constant , fibonacci >,
-			copy   < _register , m1        >,
+			copy   < fibonacci , _constant >,
+			copy   < m1        , _register >,
 			compel <                       >,
-			cut    < _register , m1        >,
-			paste  < _register             >,
+			cut    < m1        , _register >,
+			paste  <             _register >,
 
-			copy   < _constant , fibonacci >,
-			copy   < _register , m2        >,
+			copy   < fibonacci , _constant >,
+			copy   < m2        , _register >,
 			compel <                       >,
-			cut    < _register , m2        >,
-			paste  < _register             >,
+			cut    < m2        , _register >,
+			paste  <             _register >,
 
-			copy   < _constant , add       >,
-			copy   < _register , m1        >,
-			copy   < _register , m2        >,
-			action <                       >,
+			copy   < m1        , _register >,
+			copy   < m2        , _register >,
+			add    <                       >,
 			value  <                       >,
 
 			// exit_case:
 
-			copy   < _constant , one       >,
+			copy   < one       , _constant >,
 			value  <                       >
 		>;
 
@@ -452,8 +451,7 @@ namespace cctmp_program
 			<
 				decltype(n){_one},
 				U_store_T<Fibonacci_v0>,
-				is_0_or_1<decltype(n)>,
-				Overload::add
+				is_0_or_1<decltype(n)>
 			>
 		);
 	};
@@ -465,7 +463,7 @@ namespace cctmp_program
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// unite sort:
+// insert sort:
 
 /***********************************************************************************************************************/
 
@@ -473,160 +471,48 @@ namespace cctmp_program
 {
 // version 0:
 
-	struct T_LessThan_v0
+	constexpr index_type first(const bool *k, const bool *e)
 	{
-		template<auto x, auto y>
-		nik_ces auto result = (x < y);
+		const bool *b = k;
+
+		while (k != e && !*k) ++k;
+
+		return k - b;
+	}
+
+	template<auto insert, auto... Vs, key_type Op, auto... F>
+	constexpr auto sort(nik_avp(auto_pack<Vs...>*), nik_avp(auto_pack<Op, F...>*))
+	{
+		constexpr auto arr		= array<bool, Overload::template result<Op, F..., insert, Vs>...>;
+		constexpr index_type size	= sizeof...(Vs);
+
+		constexpr auto d		= MachineDispatch::initial_depth;
+		constexpr auto n		= first(arr, arr + size);
+
+						// bad design: does not compose well with trampolining.
+		constexpr auto sp		= NIK_FUNCTION_BLOCK(9, d, BN::split, n, Vs)(U_null_Vs);
+
+		return Overload::template result<Overload::unite, sp.v1, insert, sp.v2>;
+	}
+
+	template<auto LT = U_pack_Vs<Overload::less_than>>
+	struct T_InsertSort_v0
+	{
+		template<auto list, auto insert>
+		nik_ces auto result = sort<insert>(list, LT);
 	};
 
-	constexpr auto U_LessThan_v0 = U_store_T<T_LessThan_v0>;
+	template<auto LT = U_pack_Vs<Overload::less_than>>
+	constexpr auto U_InsertSort_v0 = U_store_T<T_InsertSort_v0<LT>>;
 
-	struct T_GreaterThan_v0
-	{
-		template<auto x, auto y>
-		nik_ces auto result = (x > y);
-	};
-
-	constexpr auto U_GreaterThan_v0 = U_store_T<T_GreaterThan_v0>;
-
-	template<auto LessThan>
-	struct UniteSort_v0
-	{
-		template
-		<
-			// registers:
-
-			index_type l_front	=  0,
-			index_type r_front	=  1,
-
-			// constants:
-
-			index_type is_null	=  0,
-			index_type less_than	=  1,
-			index_type car		=  2,
-			index_type cdr		=  3,
-			index_type push		=  4,
-			index_type cat		=  5,
-
-			// arguments:
-
-			index_type out_list	=  0,
-			index_type left_list	=  1,
-			index_type right_list	=  2,
-
-			// labels:
-
-			index_type loop_l	=  0,
-			index_type loop_r	= 35,
-			index_type done_l	= 47,
-			index_type done_r	= 52
-		>
-		nik_ces contr_type program = controller
-		<
-			// loop_l:
-
-			copy   < _constant , is_null    >,
-			copy   < _argument , left_list  >,
-			action <                        >,
-			branch < done_l                 >,
-
-			copy   < _constant , is_null    >,
-			copy   < _argument , right_list >,
-			action <                        >,
-			branch < done_r                 >,
-
-			copy   < _constant , car        >,
-			copy   < _argument , left_list  >,
-			action <                        >,
-			cut    < _register , l_front    >,
-			paste  < _register              >,
-
-			copy   < _constant , car        >,
-			copy   < _argument , right_list >,
-			action <                        >,
-			cut    < _register , r_front    >,
-			paste  < _register              >,
-
-			copy   < _constant , less_than  >,
-			copy   < _register , l_front    >,
-			copy   < _register , r_front    >,
-			alias  <                        >,
-			branch < loop_r                 >,
-
-			copy   < _constant , push       >,
-			copy   < _register , r_front    >,
-			copy   < _argument , out_list   >,
-			action <                        >,
-			cut    < _argument , out_list   >,
-			paste  < _argument              >,
-
-			copy   < _constant , cdr        >,
-			copy   < _argument , right_list >,
-			action <                        >,
-			cut    < _argument , right_list >,
-			paste  < _argument              >,
-
-			cycle  <                        >,
-
-			// loop_r:
-
-			copy   < _constant , push       >,
-			copy   < _register , l_front    >,
-			copy   < _argument , out_list   >,
-			action <                        >,
-			cut    < _argument , out_list   >,
-			paste  < _argument              >,
-
-			copy   < _constant , cdr        >,
-			copy   < _argument , left_list  >,
-			action <                        >,
-			cut    < _argument , left_list  >,
-			paste  < _argument              >,
-
-			cycle  <                        >,
-
-			// done_l:
-
-			copy   < _constant , cat        >,
-			copy   < _argument , out_list   >,
-			copy   < _argument , right_list >,
-			action <                        >,
-			value  <                        >,
-
-			// done_r:
-
-			copy   < _constant , cat        >,
-			copy   < _argument , out_list   >,
-			copy   < _argument , left_list  >,
-			action <                        >,
-			value  <                        >
-		>;
-
-		template<auto d, auto l, auto r>
-		nik_ces auto result = start<d, program<>, _zero, _zero>
-		(
-			U_pack_Vs
-			<
-				Overload::is_null,
-				LessThan,
-				Overload::car,
-				Overload::cdr,
-				Overload::push,
-				Overload::cat
-			>,
-
-			U_null_Vs, l, r
-		);
-	};
-
-	template<auto l, auto r, auto LT = U_LessThan_v0, auto d = MachineDispatch::initial_depth>
-	constexpr auto unite_sort_v0 = UniteSort_v0<LT>::template result<d, l, r>;
+	template<auto insert, auto list, auto LT = U_pack_Vs<Overload::less_than>>
+	constexpr auto insert_sort_v0 = T_InsertSort_v0<LT>::template result<insert, list>;
 }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// merge sort:
+// sort:
 
 /***********************************************************************************************************************/
 
@@ -634,121 +520,21 @@ namespace cctmp_program
 {
 // version 0:
 
-	struct T_at_most_one
-	{
-		template<auto p>
-		nik_ces auto result = true;
-	};
+	// less rigorous (l has a max length), but is fast!
 
-	template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_at_most_one::result<p> = (sizeof...(Vs) <= 1);
-
-	struct T_half_size
-	{
-		template<auto p>
-		nik_ces auto result = 0;
-	};
-
-	template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto T_half_size::result<p> = sizeof...(Vs) / 2;
-
-	template<auto LessThan>
-	struct MergeSort_v0
-	{
-		template
-		<
-			// registers:
-
-			index_type position	=  0,
-
-			// constants:
-
-			index_type at_most_one	=  0,
-			index_type half_size	=  1,
-			index_type left		=  2,
-			index_type right	=  3,
-			index_type unite_sort	=  4,
-			index_type merge_sort	=  5,
-
-			// arguments:
-
-			index_type left_list	=  0,
-			index_type right_list	=  1,
-
-			// labels:
-
-			index_type exit_case	= 36
-		>
-		nik_ces contr_type program = controller
-		<
-			copy   < _constant , at_most_one >,
-			copy   < _argument , right_list  >,
-			alias  <                         >,
-			branch < exit_case               >,
-
-			copy   < _constant , half_size   >,
-			copy   < _argument , right_list  >,
-			alias  <                         >,
-			cut    < _register , position    >,
-			paste  < _register               >,
-
-			copy   < _constant , left        >,
-			copy   < _register , position    >,
-			copy   < _argument , right_list  >,
-			compel <                         >,
-			cut    < _argument , left_list   >,
-			paste  < _argument               >,
-
-			copy   < _constant , right       >,
-			copy   < _register , position    >,
-			copy   < _argument , right_list  >,
-			compel <                         >,
-			cut    < _argument , right_list  >,
-			paste  < _argument               >,
-
-			copy   < _constant , merge_sort  >,
-			copy   < _argument , left_list   >,
-			compel <                         >,
-			cut    < _argument , left_list   >,
-			paste  < _argument               >,
-
-			copy   < _constant , merge_sort  >,
-			copy   < _argument , right_list  >,
-			compel <                         >,
-			cut    < _argument , right_list  >,
-			paste  < _argument               >,
-
-			copy   < _constant , unite_sort  >,
-			copy   < _argument , left_list   >,
-			copy   < _argument , right_list  >,
-			compel <                         >,
-			value  <                         >,
-
-			// exit_case:
-
-			copy   < _argument , right_list  >,
-			value  <                         >
-		>;
-
-		template<auto d, auto p>
-		nik_ces auto result = start<d, program<>, _zero>
-		(
-			U_pack_Vs
-			<
-				U_store_T<T_at_most_one>,
-				U_store_T<T_half_size>,
-				U_store_T<Left_v0>,
-				U_store_T<Right_v0>,
-				U_store_T<UniteSort_v0<LessThan>>,
-				U_store_T<MergeSort_v0<LessThan>>
-			>,
-
-			U_null_Vs, p
-		);
-	};
-
-	template<auto p, auto LT = U_LessThan_v0, auto d = MachineDispatch::initial_depth>
-	constexpr auto merge_sort_v0 = MergeSort_v0<LT>::template result<d, p>;
+	template
+	<
+		auto l,
+		auto comp	= U_pack_Vs<Overload::less_than>,
+		auto d		= MachineDispatch::initial_depth
+	>
+	constexpr auto sort_v0 = Fold_v0::template result
+	<
+		d,
+		U_pack_Vs<Overload::alias, U_InsertSort_v0<comp>>,
+		U_null_Vs,
+		l
+	>;
 }
 
 /***********************************************************************************************************************/
