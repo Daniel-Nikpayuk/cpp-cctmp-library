@@ -33,53 +33,69 @@
 
 /***********************************************************************************************************************/
 
+	using Overload = cctmp::Overload;
+
+	template<auto... Vs>
+	constexpr auto call = Overload::template result<Vs...>;
+
 	constexpr auto p = cctmp::U_pack_Vs
 	<
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
 
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
 
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
 
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
 
 		99, 0, 5, 41
 	>;
 
-	// constexpr auto add = cctmp::U_pack_Vs<cctmp::Overload::add>;
+	constexpr auto U_int	= cctmp::U_store_T<int>;
+	constexpr auto U_char	= cctmp::U_store_T<char>;
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
+	//	printf("%s\n", call<Overload::same, U_char, U_char> ? "true" : "false");
+	//	printf("%llu\n", call<Overload::map, cctmp::template increment_op<>, p>);
+	//	printf("%hu\n", call<Overload::find, cctmp::template is_zero_op<>, p>);
+
+	//	printf("%d\n", cctmp_program::at_v0<0, p>);
+	//	printf("%llu\n", cctmp_program::left_v0<2, p>);
+	//	printf("%llu\n", cctmp_program::split_v0<2, p>);
+	//	printf("%llu\n", cctmp_program::segment_v0<uint_type{10}>);
+
+	//	printf("%llu\n", cctmp_program::erase_v0<0, p>);
+	//	printf("%llu\n", cctmp_program::insert_v0<7, 4, p>);
+	//	printf("%llu\n", cctmp_program::replace_v0<7, 1, p>);
+
 	//	printf("%llu\n", cctmp_program::factorial_v0<uint_type{20}>);
 	//	printf("%llu\n", cctmp_program::factorial_v1<uint_type{20}>);
 
 	//	printf("%llu\n", cctmp_program::fibonacci_v0<uint_type{13}>);
-	//	printf("%llu\n", cctmp_program::segment_v0<uint_type{10}>);
 
-	//	printf("%llu\n", cctmp_program::fold_v0<p, add, uint_type{0}>);
+	//	printf("%llu\n", cctmp_program::fold_v0<cctmp::template add_op<>, uint_type{0}, p>);
 
 	//	printf("%llu\n", cctmp_program::insert_sort_v0<p, 3>);
-		printf("%llu\n", cctmp_program::sort_v0<p>);
-
-	//	printf("%llu\n", cctmp_program::left_v0<84, p>);
+	//	printf("%llu\n", cctmp_program::sort_v0<p>);
 
 		return 0;
 	}

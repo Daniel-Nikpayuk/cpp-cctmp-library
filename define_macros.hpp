@@ -641,8 +641,8 @@
 		template<key_type... filler>										\
 		struct block<BN::variable, BT::pass, _p_, filler...>							\
 		{													\
-			template<auto d, auto Halt, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>			\
-			nik_ces auto result = NIK_VARIABLE_BLOCK(_p_, d, Halt, n, Vs);					\
+			template<auto d, auto rtn, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>			\
+			nik_ces auto result = NIK_VARIABLE_BLOCK(_p_, d, rtn, n, Vs);					\
 		};
 
 	#define NIK_DEFINE_BLOCK_FUNCTION_PASS(_p_)									\
@@ -650,10 +650,10 @@
 		template<key_type... filler>										\
 		struct block<BN::function, BT::pass, _p_, filler...>							\
 		{													\
-			template<auto d, auto Halt, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto... Ws>		\
+			template<auto d, auto rtn, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto... Ws>		\
 			nik_ces auto result(nik_avp(auto_pack<Ws...>*))				 			\
 			{												\
-				return NIK_FUNCTION_BLOCK(_p_, d, Halt, n, Vs)						\
+				return NIK_FUNCTION_BLOCK(_p_, d, rtn, n, Vs)						\
 						(U_pack_Vs<Ws..., NIK_2_N_VARS(_p_, V)>);				\
 			}												\
 		};

@@ -504,61 +504,78 @@ namespace cctmp {
 
 		// comparision:
 
-		nik_ces key_type equal				=  1;
-		nik_ces key_type not_equal			=  2;
-		nik_ces key_type less_than			=  3;
-		nik_ces key_type less_than_or_equal		=  4;
-		nik_ces key_type greater_than			=  5;
-		nik_ces key_type greater_than_or_equal		=  6;
+		nik_ces key_type same				=  1;
 
-		nik_ces key_type is_zero			=  7;
-		nik_ces key_type is_value			=  8;
+		nik_ces key_type equal				=  2;
+		nik_ces key_type not_equal			=  3;
+		nik_ces key_type less_than			=  4;
+		nik_ces key_type less_than_or_equal		=  5;
+		nik_ces key_type greater_than			=  6;
+		nik_ces key_type greater_than_or_equal		=  7;
+
+		nik_ces key_type is_zero			=  8;
+		nik_ces key_type is_value			=  9;
 
 		// logical:
 
-		nik_ces key_type and_				=  9;
-		nik_ces key_type or_				= 10;
+		nik_ces key_type not_				= 10;
+		nik_ces key_type and_				= 11;
+		nik_ces key_type or_				= 12;
 
 		// bitwise:
 
-		nik_ces key_type upshift			= 11;
-		nik_ces key_type downshift			= 12;
+		nik_ces key_type upshift			= 13;
+		nik_ces key_type downshift			= 14;
 
 		// arithmetic:
 
-		nik_ces key_type add				= 13;
-		nik_ces key_type subtract			= 14;
-		nik_ces key_type multiply			= 15;
-		nik_ces key_type divide				= 16;
-		nik_ces key_type modulo				= 17;
+		nik_ces key_type add				= 15;
+		nik_ces key_type subtract			= 16;
+		nik_ces key_type multiply			= 17;
+		nik_ces key_type divide				= 18;
+		nik_ces key_type modulo				= 19;
 
-		nik_ces key_type increment			= 18;
-		nik_ces key_type decrement			= 19;
+		nik_ces key_type increment			= 20;
+		nik_ces key_type decrement			= 21;
 
 		// computational:
 
-		nik_ces key_type apply				= 20;
-		nik_ces key_type alias				= 21;
+		nik_ces key_type apply				= 22;
+		nik_ces key_type alias				= 23;
 
 		// functional:
 
-		nik_ces key_type length				= 22;
-		nik_ces key_type applywise			= 23;
-		nik_ces key_type aliaswise			= 24;
+		nik_ces key_type length				= 24;
+		nik_ces key_type map				= 25;
+		nik_ces key_type zip				= 26;
 
-		nik_ces key_type is_null			= 25;
-		nik_ces key_type cons				= 26;
-		nik_ces key_type push				= 27;
-		nik_ces key_type car				= 28;
-		nik_ces key_type cdr				= 29;
-		nik_ces key_type cat				= 30;
-		nik_ces key_type unite				= 31;
+		nik_ces key_type is_null			= 27;
+		nik_ces key_type cons				= 28;
+		nik_ces key_type push				= 29;
+		nik_ces key_type car				= 30;
+		nik_ces key_type cdr				= 31;
+		nik_ces key_type cat				= 32;
+		nik_ces key_type unite				= 33;
+		nik_ces key_type find				= 34;
+
+		nik_ces index_type match(const bool *k, cindex_type size)
+		{
+			const bool *b = k;
+			const bool *e = k + size;
+
+			while (k != e && !*k) ++k;
+
+			return k - b;
+		}
 
 		template<key_type Op, auto... Vs>
 		nik_ces auto result = U_pack_Vs<Op, Vs...>;
 	};
 
 	// comparison:
+
+	template<auto V0, auto V1> constexpr auto Overload::result < Overload::same , V0, V1 > = false;
+	template<auto V>           constexpr auto Overload::result < Overload::same , V, V   > = true;
 
 	template<auto... Vs> constexpr auto Overload::result < Overload::equal                 , Vs...> = (... == Vs);
 	template<auto... Vs> constexpr auto Overload::result < Overload::not_equal             , Vs...> = (... != Vs);
@@ -572,6 +589,7 @@ namespace cctmp {
 
 	// logical:
 
+	template<auto V> constexpr auto Overload::result < Overload::not_                      , V    > = !V;
 	template<auto... Vs> constexpr auto Overload::result < Overload::and_                  , Vs...> = (... && Vs);
 	template<auto... Vs> constexpr auto Overload::result < Overload::or_                   , Vs...> = (... || Vs);
 
@@ -604,11 +622,26 @@ namespace cctmp {
 	template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
 	constexpr auto Overload::result < Overload::length , p > = sizeof...(Vs);
 
-	template<auto F, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto Overload::result < Overload::applywise , F , p > = U_pack_Vs<F(Vs)...>;
+	template
+	<
+		auto Op, auto... F, nik_vp(op)(auto_pack<Op, F...>*),
+		auto... Vs, nik_vp(p)(auto_pack<Vs...>*)
+	>
+	constexpr auto Overload::result < Overload::map , op , p > = U_pack_Vs
+	<
+		Overload::template result<Op, F..., Vs>...
+	>;
 
-	template<auto F, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-	constexpr auto Overload::result < Overload::aliaswise , F , p > = U_pack_Vs<T_store_U<F>::template result<Vs>...>;
+	template
+	<
+		auto Op, auto... F, nik_vp(op)(auto_pack<Op, F...>*),
+		auto... Vs, nik_vp(p0)(auto_pack<Vs...>*),
+		auto... Ws, nik_vp(p1)(auto_pack<Ws...>*)
+	>
+	constexpr auto Overload::result < Overload::zip , op , p0 , p1 > = U_pack_Vs
+	<
+		Overload::template result<Op, F..., Vs, Ws>...
+	>;
 
 	template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
 	constexpr auto Overload::result < Overload::is_null , p > = (sizeof...(Vs) == 0);
@@ -628,8 +661,77 @@ namespace cctmp {
 	template<auto... Vs, nik_vp(p0)(auto_pack<Vs...>*), auto... Ws, nik_vp(p1)(auto_pack<Ws...>*)>
 	constexpr auto Overload::result < Overload::cat , p0, p1 > = U_pack_Vs<Vs..., Ws...>;
 
-	template<auto... Vs, nik_vp(p0)(auto_pack<Vs...>*), auto W, auto... Xs, nik_vp(p1)(auto_pack<Xs...>*)>
-	constexpr auto Overload::result < Overload::unite , p0, W, p1 > = U_pack_Vs<Vs..., W, Xs...>;
+	template<auto... Vs, nik_vp(p0)(auto_pack<Vs...>*), auto... Ws, nik_vp(p1)(auto_pack<Ws...>*), auto X>
+	constexpr auto Overload::result < Overload::unite , p0, p1, X > = U_pack_Vs<Vs..., X, Ws...>;
+
+	template
+	<
+		auto Op, auto... F, nik_vp(op)(auto_pack<Op, F...>*),
+		auto... Vs, nik_vp(p)(auto_pack<Vs...>*),
+		auto... Ws
+	>
+	constexpr auto Overload::result < Overload::find , op , p , Ws... > = Overload::match
+	(
+		array<bool, Overload::template result<Op, F..., Ws..., Vs>...>, sizeof...(Vs)
+	);
+
+/***********************************************************************************************************************/
+
+	// comparision:
+
+	template<auto... Vs> constexpr auto same_op			= U_pack_Vs<Overload::same, Vs...>;
+
+	template<auto... Vs> constexpr auto equal_op			= U_pack_Vs<Overload::equal, Vs...>;
+	template<auto... Vs> constexpr auto not_equal_op		= U_pack_Vs<Overload::not_equal, Vs...>;
+	template<auto... Vs> constexpr auto less_than_op		= U_pack_Vs<Overload::less_than, Vs...>;
+	template<auto... Vs> constexpr auto less_than_or_equal_op	= U_pack_Vs<Overload::less_than_or_equal, Vs...>;
+	template<auto... Vs> constexpr auto greater_than_op		= U_pack_Vs<Overload::greater_than, Vs...>;
+	template<auto... Vs> constexpr auto greater_than_or_equal_op	= U_pack_Vs<Overload::greater_than_or_equal, Vs...>;
+
+	template<auto... Vs> constexpr auto is_zero_op			= U_pack_Vs<Overload::is_zero, Vs...>;
+	template<auto... Vs> constexpr auto is_value_op			= U_pack_Vs<Overload::is_value, Vs...>;
+
+	// logical:
+
+	template<auto... Vs> constexpr auto not__op			= U_pack_Vs<Overload::not_, Vs...>;
+	template<auto... Vs> constexpr auto and__op			= U_pack_Vs<Overload::and_, Vs...>;
+	template<auto... Vs> constexpr auto or__op			= U_pack_Vs<Overload::or_, Vs...>;
+
+	// bitwise:
+
+	template<auto... Vs> constexpr auto upshift_op			= U_pack_Vs<Overload::upshift, Vs...>;
+	template<auto... Vs> constexpr auto downshift_op		= U_pack_Vs<Overload::downshift, Vs...>;
+
+	// arithmetic:
+
+	template<auto... Vs> constexpr auto add_op			= U_pack_Vs<Overload::add, Vs...>;
+	template<auto... Vs> constexpr auto subtract_op			= U_pack_Vs<Overload::subtract, Vs...>;
+	template<auto... Vs> constexpr auto multiply_op			= U_pack_Vs<Overload::multiply, Vs...>;
+	template<auto... Vs> constexpr auto divide_op			= U_pack_Vs<Overload::divide, Vs...>;
+	template<auto... Vs> constexpr auto modulo_op			= U_pack_Vs<Overload::modulo, Vs...>;
+
+	template<auto... Vs> constexpr auto increment_op		= U_pack_Vs<Overload::increment, Vs...>;
+	template<auto... Vs> constexpr auto decrement_op		= U_pack_Vs<Overload::decrement, Vs...>;
+
+	// computational:
+
+	template<auto... Vs> constexpr auto apply_op			= U_pack_Vs<Overload::apply, Vs...>;
+	template<auto... Vs> constexpr auto alias_op			= U_pack_Vs<Overload::alias, Vs...>;
+
+	// functional:
+
+	template<auto... Vs> constexpr auto length_op			= U_pack_Vs<Overload::length, Vs...>;
+	template<auto... Vs> constexpr auto map_op			= U_pack_Vs<Overload::map, Vs...>;
+	template<auto... Vs> constexpr auto zip_op			= U_pack_Vs<Overload::zip, Vs...>;
+
+	template<auto... Vs> constexpr auto is_null_op			= U_pack_Vs<Overload::is_null, Vs...>;
+	template<auto... Vs> constexpr auto cons_op			= U_pack_Vs<Overload::cons, Vs...>;
+	template<auto... Vs> constexpr auto push_op			= U_pack_Vs<Overload::push, Vs...>;
+	template<auto... Vs> constexpr auto car_op			= U_pack_Vs<Overload::car, Vs...>;
+	template<auto... Vs> constexpr auto cdr_op			= U_pack_Vs<Overload::cdr, Vs...>;
+	template<auto... Vs> constexpr auto cat_op			= U_pack_Vs<Overload::cat, Vs...>;
+	template<auto... Vs> constexpr auto unite_op			= U_pack_Vs<Overload::unite, Vs...>;
+	template<auto... Vs> constexpr auto find_op			= U_pack_Vs<Overload::find, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -708,19 +810,20 @@ namespace cctmp {
 		nik_ces key_type internal			=  1;
 
 		nik_ces key_type action				=  2;
-		nik_ces key_type block1				=  3;
-		nik_ces key_type block2				=  4;
-		nik_ces key_type compel				=  5;
-		nik_ces key_type propel				=  6;
-		nik_ces key_type fold				=  7;
+		nik_ces key_type variable			=  3;
+		nik_ces key_type function			=  4;
+		nik_ces key_type copy				=  5;
+		nik_ces key_type cut				=  6;
+		nik_ces key_type compel				=  7;
+		nik_ces key_type propel				=  8;
+		nik_ces key_type fold				=  9;
 
-		nik_ces key_type pause				=  8;
-		nik_ces key_type value				=  9;
+		nik_ces key_type pause				= 10;
 
-		nik_ces key_type insert_at_h0_back		= 10;
-		nik_ces key_type insert_at_hs_front		= 11;
+		nik_ces key_type insert_at_h0_back		= 11;
+		nik_ces key_type insert_at_hs_front		= 12;
 
-		nik_ces key_type conditional			= 12;
+		nik_ces key_type conditional			= 13;
 	};
 
 	using MT = MachineNote;
@@ -743,7 +846,15 @@ namespace cctmp {
 		nik_ces key_type pos					= 3;
 		nik_ces key_type dec					= 3;
 
-		nik_ces key_type act					= 4;
+		nik_ces key_type ctn					= 4;
+
+		nik_ces key_type act					= 5;
+		nik_ces key_type rtn					= 5;
+
+		// policies:
+
+		nik_ces key_type h0					= 0;
+		nik_ces key_type value					= 1;
 
 		nik_ces index_type length     (type i)			{ return i[size]; }
 		nik_ces bool       is_optimal (cindex_type n)		{ return (n < _eight); }
@@ -826,50 +937,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// halters:
-
-	// sifter:
-
-		struct BlockSifter
-		{
-			template<auto V0, auto... Vs>
-			nik_ces auto result = V0;
-		};
-
-	// right:
-
-		struct BlockRight
-		{
-			template<auto... Vs>
-			nik_ces auto result = U_pack_Vs<Vs...>;
-		};
-
-	// filter:
-
-		struct BlockFilter
-		{
-			template<auto V0, auto... Vs, typename Pack>
-			nik_ces auto result(Pack p) { return pair(p, U_pack_Vs<Vs...>); }
-		};
-
-	// left:
-
-		struct BlockLeft
-		{
-			template<auto... Vs, typename Pack>
-			nik_ces auto result(Pack p) { return p; }
-		};
-
-	// split:
-
-		struct BlockSplit
-		{
-			template<auto... Vs, typename Pack>
-			nik_ces auto result(Pack p) { return pair(p, U_pack_Vs<Vs...>); }
-		};
-
-/***********************************************************************************************************************/
-
 // names:
 
 	struct BlockName
@@ -883,13 +950,22 @@ namespace cctmp {
 		nik_ces key_type fold		=  4;
 		nik_ces key_type cascade	=  5;
 
-		nik_ces auto sifter		= U_store_T<BlockSifter>;
-		nik_ces auto right		= U_store_T<BlockRight>;
+		nik_ces key_type sifter		=  6;
+		nik_ces key_type right		=  7;
 
-		nik_ces auto filter		= U_store_T<BlockFilter>;
-		nik_ces auto left		= U_store_T<BlockLeft>;
-		nik_ces auto split		= U_store_T<BlockSplit>;
+		nik_ces key_type filter		=  8;
+		nik_ces key_type left		=  9;
+		nik_ces key_type split		= 10;
 	};
+
+/*
+	constexpr auto sifter		= U_store_T<BlockSifter>;
+	constexpr auto right		= U_store_T<BlockRight>;
+
+	constexpr auto filter		= U_store_T<BlockFilter>;
+	constexpr auto left		= U_store_T<BlockLeft>;
+	constexpr auto split		= U_store_T<BlockSplit>;
+*/
 
 	using BN = BlockName;
 
@@ -983,20 +1059,69 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// halters:
+
+	// sifter:
+
+		template<key_type... filler>
+		struct block<BN::sifter, filler...>
+		{
+			template<auto V0, auto... Vs>
+			nik_ces auto result = V0;
+		};
+
+	// right:
+
+		template<key_type... filler>
+		struct block<BN::right, filler...>
+		{
+			template<auto... Vs>
+			nik_ces auto result = U_pack_Vs<Vs...>;
+		};
+
+	// filter:
+
+		template<key_type... filler>
+		struct block<BN::filter, filler...>
+		{
+			template<auto V0, auto... Vs, typename Pack>
+			nik_ces auto result(Pack p) { return pair(p, U_pack_Vs<Vs...>); }
+		};
+
+	// left:
+
+		template<key_type... filler>
+		struct block<BN::left, filler...>
+		{
+			template<auto... Vs, typename Pack>
+			nik_ces auto result(Pack p) { return p; }
+		};
+
+	// split:
+
+		template<key_type... filler>
+		struct block<BN::split, filler...>
+		{
+			template<auto... Vs, typename Pack>
+			nik_ces auto result(Pack p) { return pair(p, U_pack_Vs<Vs...>); }
+		};
+
+/***********************************************************************************************************************/
+
 // variable:
 
 	template<key_type... filler>
 	struct block<BN::variable, BT::pause, _zero, filler...>
 	{
-		template<auto d, auto Halt, auto n, auto... Vs>
-		nik_ces auto result = machination(U_pack_Vs<Halt>, U_pack_Vs<n, Vs...>);
+		template<auto d, auto rtn, auto n, auto... Vs>
+		nik_ces auto result = machination(U_pack_Vs<rtn>, U_pack_Vs<n, Vs...>);
 	};
 
 	template<key_type... filler>
 	struct block<BN::variable, BT::halt, _zero, filler...>
 	{
-		template<auto d, auto Halt, auto n, auto... Vs>
-		nik_ces auto result = T_store_U<Halt>::template result<Vs...>;
+		template<auto d, auto rtn, auto n, auto... Vs>
+		nik_ces auto result = block<rtn>::template result<Vs...>;
 	};
 
 	NIK_DEFINE_BLOCK_VARIABLE_PASS(0)
@@ -1017,15 +1142,15 @@ namespace cctmp {
 	template<key_type... filler>
 	struct block<BN::function, BT::pause, _zero, filler...>
 	{
-		template<auto d, auto Halt, auto n, auto... Vs, typename Pack>
-		nik_ces auto result(Pack p) { return machination(U_pack_Vs<Halt>, U_pack_Vs<U_restore_T<Pack>, n, Vs...>); }
+		template<auto d, auto rtn, auto n, auto... Vs, typename Pack>
+		nik_ces auto result(Pack p) { return machination(U_pack_Vs<rtn>, U_pack_Vs<U_restore_T<Pack>, n, Vs...>); }
 	};
 
 	template<key_type... filler>
 	struct block<BN::function, BT::halt, _zero, filler...>
 	{
-		template<auto d, auto Halt, auto n, auto... Vs, typename Pack>
-		nik_ces auto result(Pack p) { return T_store_U<Halt>::template result<Vs...>(p); }
+		template<auto d, auto rtn, auto n, auto... Vs, typename Pack>
+		nik_ces auto result(Pack p) { return block<rtn>::template result<Vs...>(p); }
 	};
 
 	NIK_DEFINE_BLOCK_FUNCTION_PASS(0)
@@ -1099,6 +1224,52 @@ namespace cctmp {
 
 // cascade (compel fold):
 
+/*
+	template<key_type... filler>
+	struct block<BN::cascade, BT::pause, _zero, filler...>
+	{
+		nik_ces auto s1 = U_pack_Vs<BN::segment>;
+
+		template<auto d, auto n, auto... Vs>
+		nik_ces auto result()
+		{
+			return machination(s1, U_pack_Vs<n, Vs...>);
+		}
+	};
+
+	template<key_type... filler>
+	struct block<BN::cascade, BT::halt, _zero, filler...>
+	{
+		template<auto d, auto n, auto... Vs>
+		nik_ces auto result()
+		{
+			return U_pack_Vs<Vs...>;
+		}
+	};
+
+	template<key_type... filler>
+	struct block<BN::cascade, BT::pass, _zero, filler...>
+	{
+		template<auto d, auto n, auto V, auto V0, auto... Vs, auto Op, auto... F>
+		nik_ces auto result(nik_vp(auto_pack<Op, F...>*))
+		{
+			constexpr auto val = Overload::template result<Op, F..., V, V0>;
+
+			if constexpr (is_machination<val>)
+
+				return machination( , );
+			else
+				return block
+				<
+					BN::cascade,
+
+				>::template result
+				<
+				>;
+		}
+	};
+*/
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -1151,72 +1322,133 @@ namespace cctmp {
 				return NIK_MACHINE(0, MT::action, c, i, Vs)(H0, Hs...);
 			else
 			{
-				constexpr auto act = ins[MI::act];
-				constexpr auto val = Overload::template result<act, Ws...>;
+				constexpr auto ctn	= ins[MI::ctn];
+				constexpr auto act	= ins[MI::act];
+				constexpr auto val	= Overload::template result<act, Ws...>;
 
-				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
+				if constexpr (ctn == MI::h0)
+
+					return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
+				else
+					return val;
 			}
 		}
 	};
 
 /***********************************************************************************************************************/
 
-// block1:
+// variable:
 
 	template<key_type... filler>
-	struct machine<MN::recall, MT::block1, filler...>
+	struct machine<MN::recall, MT::variable, filler...>
 	{
-		template
-		<
-			NIK_CONTR_PARAMS, auto... Vs,
-			auto Halt, auto n, auto... _Vs,
-			auto... Ws, typename... Heaps
-		>
-		nik_ces auto result
-		(
-			nik_avp(auto_pack<Halt>*),
-			nik_avp(auto_pack<n, _Vs...>*),
-			nik_vp(H0)(auto_pack<Ws...>*),
-			Heaps... Hs
-		)
+		template<NIK_CONTR_PARAMS, auto... Vs, auto rtn, auto n, auto... _Vs, typename... Heaps>
+		nik_ces auto result(nik_avp(auto_pack<rtn>*), nik_avp(auto_pack<n, _Vs...>*), Heaps... Hs)
 		{
-			constexpr auto val = NIK_VARIABLE_BLOCK(3, d, Halt, n, _Vs);
+			constexpr auto ins = MachineDispatch::instr(c, i);
+			constexpr auto ctn = ins[MI::ctn];
+			constexpr auto val = NIK_VARIABLE_BLOCK(9, d, rtn, n, _Vs);
 
 			if constexpr (is_machination<decltype(val)>)
 
-				return NIK_MACHINE(d, MT::block1, c, i, Vs)(val.s1, val.s2, H0, Hs...);
+				return NIK_MACHINE(d, MT::variable, c, i, Vs)(val.s1, val.s2, Hs...);
+
+			else if constexpr (ctn == MI::h0)
+
+				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
 			else
-				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<Ws..., val>, Hs...);
+				return val;
 		}
 	};
 
 /***********************************************************************************************************************/
 
-// block2:
+// copy:
 
 	template<key_type... filler>
-	struct machine<MN::recall, MT::block2, filler...>
+	struct machine<MN::recall, MT::copy, filler...>
 	{
 		template
 		<
 			NIK_CONTR_PARAMS, auto... Vs,
-			auto Halt, auto p, auto n, auto... _Vs,
-			typename... Heaps
+			auto rtn, auto n, auto... _Vs,
+			auto... Ws, typename... Heaps
 		>
 		nik_ces auto result
 		(
-			nik_avp(auto_pack<Halt>*),
-			nik_avp(auto_pack<p, n, _Vs...>*),
+			nik_avp(auto_pack<rtn>*),
+			nik_avp(auto_pack<n, _Vs...>*),
+			nik_vp(H0)(auto_pack<Ws...>*),
 			Heaps... Hs
 		)
 		{
-			constexpr auto val = NIK_FUNCTION_BLOCK(3, d, Halt, n, _Vs)(p);
+			constexpr auto ins = MachineDispatch::instr(c, i);
+			constexpr auto ctn = ins[MI::ctn];
+			constexpr auto val = NIK_VARIABLE_BLOCK(3, d, rtn, n, _Vs);
 
 			if constexpr (is_machination<decltype(val)>)
 
-				return NIK_MACHINE(d, MT::block2, c, i, Vs)(val.s1, val.s2, Hs...);
+				return NIK_MACHINE(d, MT::copy, c, i, Vs)(val.s1, val.s2, H0, Hs...);
+
+			else if constexpr (ctn == MI::h0)
+
+				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<Ws..., val>, Hs...);
 			else
-				return NIK_MACHINE(d, MT::id, c, i, Vs)(val.v1, val.v2, Hs...);
+				return val;
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// function:
+
+	template<key_type... filler>
+	struct machine<MN::recall, MT::function, filler...>
+	{
+		template<NIK_CONTR_PARAMS, auto... Vs, auto rtn, auto pack, auto n, auto... _Vs, typename... Heaps>
+		nik_ces auto result(nik_avp(auto_pack<rtn>*), nik_avp(auto_pack<pack, n, _Vs...>*), Heaps... Hs)
+		{
+			constexpr auto p = NIK_FUNCTION_BLOCK(9, d, rtn, n, _Vs)(pack);
+
+			if constexpr (is_machination<decltype(p)>)
+
+				return NIK_MACHINE(d, MT::function, c, i, Vs)(p.s1, p.s2, Hs...);
+			else
+				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<p.v1, p.v2>, Hs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// cut:
+
+	template<key_type... filler>
+	struct machine<MN::recall, MT::cut, filler...>
+	{
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs,
+			auto rtn, auto pack, auto n, auto... _Vs,
+			auto val, typename... Heaps
+		>
+		nik_ces auto result
+		(
+			nik_avp(auto_pack<rtn>*),
+			nik_avp(auto_pack<pack, n, _Vs...>*),
+			nik_vp(H0)(auto_pack<val>*), Heaps... Hs
+		)
+		{
+			constexpr auto p = NIK_FUNCTION_BLOCK(3, d, rtn, n, _Vs)(pack);
+
+			if constexpr (is_machination<decltype(p)>)
+
+				return NIK_MACHINE(d, MT::cut, c, i, Vs)(p.s1, p.s2, H0, Hs...);
+			else
+			{
+				constexpr auto h0 = Overload::template result<Overload::unite, p.v1, val, p.v2>;
+
+				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, Hs...);
+			}
 		}
 	};
 
@@ -1238,14 +1470,19 @@ namespace cctmp {
 				return NIK_MACHINE(0, MT::compel, c, i, Vs)(H0, Hs...);
 			else
 			{
-				constexpr auto nd  = d+1-n;
-				constexpr auto val = T_store_U<Op>::template result<nd, Ws...>;
+				constexpr auto ctn	= ins[MI::ctn];
+				constexpr auto nd	= d+1-n;
+				constexpr auto val	= T_store_U<Op>::template result<nd, Ws...>;
 
 				if constexpr (is_machination<decltype(val)>)
 
 					return NIK_MACHINE(d, MT::propel, c, i, Vs)(val.s1, val.s2, Hs...);
-				else
+
+				else if constexpr (ctn == MI::h0)
+
 					return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
+				else
+					return val;
 			}
 		}
 	};
@@ -1270,13 +1507,19 @@ namespace cctmp {
 			Heaps... Hs
 		)
 		{
+			constexpr auto ins = MachineDispatch::instr(c, i);
+			constexpr auto ctn = ins[MI::ctn];
 			constexpr auto val = NIK_MACHINE(d, _m, _c, _i, _Vs)(_Hs...);
 
 			if constexpr (is_machination<decltype(val)>)
 
 				return NIK_MACHINE(d, MT::propel, c, i, Vs)(val.s1, val.s2, Hs...);
-			else
+
+			else if constexpr (ctn == MI::h0)
+
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
+			else
+				return val;
 		}
 	};
 
@@ -1303,11 +1546,72 @@ namespace cctmp {
 				return NIK_MACHINE(0, MT::action, c, i, Vs)(H0, Hs...);
 			else
 			{
+				constexpr auto ctn = ins[MI::ctn];
 				constexpr auto act = ins[MI::act];
 				constexpr auto val = Overload::template result<act, Ws...>;
 
-				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
+				if constexpr (ctn == MI::h0)
+
+					return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
+				else
+					return val;
 			}
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// variable:
+
+	template<key_type... filler>
+	struct machine<MN::call, MT::variable, filler...>
+	{
+		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename... Heaps> 
+		nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), Heaps... Hs)
+		{
+			constexpr auto ins	= MachineDispatch::instr(c, i);
+			constexpr auto n	= ins[MI::pos];
+			constexpr auto rtn	= ins[MI::rtn];
+			constexpr auto ctn	= ins[MI::ctn];
+			constexpr auto val	= NIK_VARIABLE_BLOCK(9, d, rtn, n, Ws);
+
+			if constexpr (is_machination<decltype(val)>)
+
+				return NIK_MACHINE(d, MT::variable, c, i, Vs)(val.s1, val.s2, Hs...);
+
+			else if constexpr (ctn == MI::h0)
+
+				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
+			else
+				return val;
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// function:
+
+	template<key_type... filler>
+	struct machine<MN::call, MT::function, filler...>
+	{
+		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename... Heaps>
+		nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), Heaps... Hs)
+		{
+			constexpr auto ins	= MachineDispatch::instr(c, i);
+			constexpr auto n	= ins[MI::pos];
+			constexpr auto rtn	= ins[MI::rtn];
+			constexpr auto ctn	= ins[MI::ctn];
+			constexpr auto p	= NIK_FUNCTION_BLOCK(9, d, rtn, n, Ws)(U_null_Vs);
+
+			if constexpr (is_machination<decltype(p)>)
+
+				return NIK_MACHINE(d, MT::function, c, i, Vs)(p.s1, p.s2, Hs...);
+
+			else if constexpr (ctn == MI::h0)
+
+				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<p.v1, p.v2>, Hs...);
+			else
+				return p;
 		}
 	};
 
@@ -1329,14 +1633,19 @@ namespace cctmp {
 				return NIK_MACHINE(0, MT::compel, c, i, Vs)(H0, Hs...);
 			else
 			{
-				constexpr auto nd  = d+1-n;
-				constexpr auto val = T_store_U<Op>::template result<nd, Ws...>;
+				constexpr auto ctn	= ins[MI::ctn];
+				constexpr auto nd	= d+1-n;
+				constexpr auto val	= T_store_U<Op>::template result<nd, Ws...>;
 
 				if constexpr (is_machination<decltype(val)>)
 
 					return NIK_MACHINE(d, MT::propel, c, i, Vs)(val.s1, val.s2, Hs...);
-				else
+
+				else if constexpr (ctn == MI::h0)
+
 					return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<val>, Hs...);
+				else
+					return val;
 			}
 		}
 	};
@@ -1363,18 +1672,6 @@ namespace cctmp {
 		}
 	};
 
-// value:
-
-	template<key_type... filler>
-	struct machine<MN::halt, MT::value, filler...>
-	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto val, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(auto_pack<val>*), Heaps...)
-		{
-			return val;
-		}
-	};
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -1392,13 +1689,18 @@ namespace cctmp {
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::pos];
+			constexpr auto ctn	= ins[MI::ctn];
 			constexpr auto val	= NIK_VARIABLE_BLOCK(3, d, BN::sifter, n, Vs);
 
 			if constexpr (is_machination<decltype(val)>)
 
-				return NIK_MACHINE(d, MT::block1, c, i, Vs)(val.s1, val.s2, H0, Hs...);
-			else
+				return NIK_MACHINE(d, MT::copy, c, i, Vs)(val.s1, val.s2, H0, Hs...);
+
+			else if constexpr (ctn == MI::h0)
+
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<Ws..., val>, Hs...);
+			else
+				return val;
 		}
 	};
 
@@ -1412,13 +1714,18 @@ namespace cctmp {
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::pos];
+			constexpr auto ctn	= ins[MI::ctn];
 			constexpr auto val	= NIK_VARIABLE_BLOCK(3, d, BN::sifter, n, Xs);
 
 			if constexpr (is_machination<decltype(val)>)
 
-				return NIK_MACHINE(d, MT::block1, c, i, Vs)(val.s1, val.s2, H0, H1, As...);
-			else
+				return NIK_MACHINE(d, MT::copy, c, i, Vs)(val.s1, val.s2, H0, H1, As...);
+
+			else if constexpr (ctn == MI::h0)
+
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<Ws..., val>, H1, As...);
+			else
+				return val;
 		}
 	};
 
@@ -1432,13 +1739,18 @@ namespace cctmp {
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::pos];
+			constexpr auto ctn	= ins[MI::ctn];
 			constexpr auto val	= NIK_VARIABLE_BLOCK(3, d, BN::sifter, n, U_restore_T<Args>);
 
 			if constexpr (is_machination<decltype(val)>)
 
-				return NIK_MACHINE(d, MT::block1, c, i, Vs)(val.s1, val.s2, H0, H1, As...);
-			else
+				return NIK_MACHINE(d, MT::copy, c, i, Vs)(val.s1, val.s2, H0, H1, As...);
+
+			else if constexpr (ctn == MI::h0)
+
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<Ws..., val>, H1, As...);
+			else
+				return val;
 		}
 	};
 
@@ -1454,18 +1766,22 @@ namespace cctmp {
 	template<key_type... filler>
 	struct machine<MN::cut_r_pos, MT::insert_at_hs_front, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, typename... Heaps>
-		nik_ces auto result(Heaps... Hs)
+		template<NIK_CONTR_PARAMS, auto... Vs, auto val, typename... Heaps>
+		nik_ces auto result(nik_vp(H0)(auto_pack<val>*), Heaps... Hs)
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::pos];
-			constexpr auto val	= NIK_FUNCTION_BLOCK(3, d, BN::filter, n, Vs)(U_null_Vs);
+			constexpr auto p	= NIK_FUNCTION_BLOCK(3, d, BN::filter, n, Vs)(U_null_Vs);
 
-			if constexpr (is_machination<decltype(val)>)
+			if constexpr (is_machination<decltype(p)>)
 
-				return NIK_MACHINE(d, MT::block2, c, i, Vs)(val.s1, val.s2, Hs...);
+				return NIK_MACHINE(d, MT::cut, c, i, Vs)(p.s1, p.s2, H0, Hs...);
 			else
-				return NIK_MACHINE(d, MT::id, c, i, Vs)(val.v1, val.v2, Hs...);
+			{
+				constexpr auto h0 = Overload::template result<Overload::unite, p.v1, val, p.v2>;
+
+				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, Hs...);
+			}
 		}
 	};
 
@@ -1474,18 +1790,22 @@ namespace cctmp {
 	template<key_type... filler>
 	struct machine<MN::cut_a_pos, MT::insert_at_hs_front, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, typename Heap0, typename Heap1, typename... Args>
-		nik_ces auto result(Heap0 H0, Heap1 H1, Args... As)
+		template<NIK_CONTR_PARAMS, auto... Vs, auto val, typename Heap1, typename... Args>
+		nik_ces auto result(nik_vp(H0)(auto_pack<val>*), Heap1 H1, Args... As)
 		{
 			constexpr auto ins	= MachineDispatch::instr(c, i);
 			constexpr auto n	= ins[MI::pos];
-			constexpr auto val	= NIK_FUNCTION_BLOCK(3, d, BN::filter, n, U_restore_T<Args>)(U_null_Vs);
+			constexpr auto p	= NIK_FUNCTION_BLOCK(3, d, BN::filter, n, U_restore_T<Args>)(U_null_Vs);
 
-			if constexpr (is_machination<decltype(val)>)
+			if constexpr (is_machination<decltype(p)>)
 
-				return NIK_MACHINE(d, MT::block2, c, i, Vs)(val.s1, val.s2, H0, H1, As...);
+				return NIK_MACHINE(d, MT::cut, c, i, Vs)(p.s1, p.s2, H0, H1, As...);
 			else
-				return NIK_MACHINE(d, MT::id, c, i, Vs)(val.v1, val.v2, H0, H1, As...);
+			{
+				constexpr auto h0 = Overload::template result<Overload::unite, p.v1, val, p.v2>;
+
+				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, H1, As...);
+			}
 		}
 	};
 
@@ -1501,25 +1821,10 @@ namespace cctmp {
 	template<key_type... filler>
 	struct machine<MN::paste_r_all, MT::id, filler...>
 	{
-		template
-		<
-			NIK_CONTR_PARAMS, auto... Vs,
-			auto... Ls, auto... Rs, auto val,
-			typename... Heaps
-		>
-		nik_ces auto result
-		(
-			nik_avp(auto_pack<Ls...>*),
-			nik_avp(auto_pack<Rs...>*),
-			nik_vp(H0)(auto_pack<val>*),
-			Heaps... Hs
-		)
+		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename... Heaps>
+		nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), Heaps... Hs)
 		{
-			return NIK_BEGIN_MACHINE(d, MT::id, c, i),
-
-				Ls..., val, Rs...
-
-			NIK_END_MACHINE(U_null_Vs, Hs...);
+			return NIK_MACHINE(d, MT::id, c, i, Ws)(U_null_Vs, Hs...);
 		}
 	};
 
@@ -1528,21 +1833,10 @@ namespace cctmp {
 	template<key_type... filler>
 	struct machine<MN::paste_a_all, MT::id, filler...>
 	{
-		template
-		<
-			NIK_CONTR_PARAMS, auto... Vs,
-			auto... Ls, auto... Rs, auto val,
-			typename Heap1, typename... Args
-		>
-		nik_ces auto result
-		(
-			nik_avp(auto_pack<Ls...>*),
-			nik_avp(auto_pack<Rs...>*),
-			nik_vp(H0)(auto_pack<val>*),
-			Heap1 H1, Args... As
-		)
+		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename Heap1, typename... Args>
+		nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), Heap1 H1, Args... As)
 		{
-			return NIK_MACHINE(d, MT::id, c, i, Vs)(U_null_Vs, H1, Ls..., val, Rs...);
+			return NIK_MACHINE(d, MT::id, c, i, Vs)(U_null_Vs, H1, Ws...);
 		}
 	};
 
@@ -1590,6 +1884,9 @@ namespace cctmp {
 	constexpr key_type _constant	= 1;
 	constexpr key_type _argument	= 2;
 
+	constexpr key_type _h0		= MI::h0;
+	constexpr key_type _value	= MI::value;
+
 	constexpr auto copy_name(ckey_type l)
 	{
 		if      (l == _register) return MN::copy_r_pos;
@@ -1609,11 +1906,8 @@ namespace cctmp {
 		else                  return MN::paste_a_all;
 	}
 
-	template<key_type...>
-	constexpr instr_type value = instruction<MN::halt, MT::value>;
-
-	template<index_type pos, key_type loc> // reverse order for user friendliness.
-	constexpr instr_type copy = instruction<copy_name(loc), MT::insert_at_h0_back, pos>;
+	template<index_type pos, key_type loc, key_type ctn = _h0> // reverse order for user friendliness.
+	constexpr instr_type copy = instruction<copy_name(loc), MT::insert_at_h0_back, pos, ctn>;
 
 	template<index_type pos, key_type loc> // reverse order for user friendliness.
 	constexpr instr_type cut = instruction<cut_name(loc), MT::insert_at_hs_front, pos>;
@@ -1627,63 +1921,137 @@ namespace cctmp {
 	template<key_type pos>
 	constexpr instr_type branch = instruction<MN::go_to, MT::conditional, pos>;
 
-	template<key_type act, depth_type dec = _two> // reverse order for user friendliness.
-	constexpr instr_type action = instruction<MN::call, MT::action, dec, act>;
+	template<key_type act, key_type ctn = _h0, depth_type dec = _two> // reverse order for user friendliness:
+	constexpr instr_type action = instruction<MN::call, MT::action, dec, ctn, act>;
 
 		// comparision:
 
-		template<depth_type dec = _two> constexpr auto equal			= action<Overload::equal, dec>;
-		template<depth_type dec = _two> constexpr auto not_equal		= action<Overload::not_equal, dec>;
-		template<depth_type dec = _two> constexpr auto less_than		= action<Overload::less_than, dec>;
-		template<depth_type dec = _two> constexpr auto less_than_or_equal	= action<Overload::less_than_or_equal, dec>;
-		template<depth_type dec = _two> constexpr auto greater_than		= action<Overload::greater_than, dec>;
-		template<depth_type dec = _two> constexpr auto greater_than_or_equal	= action<Overload::greater_than_or_equal, dec>;
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto same = action<Overload::same, ctn, dec>;
 
-		template<depth_type dec = _two> constexpr auto is_zero			= action<Overload::is_zero, dec>;
-		template<depth_type dec = _two> constexpr auto is_value			= action<Overload::is_value, dec>;
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto equal = action<Overload::equal, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto not_equal = action<Overload::not_equal, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto less_than = action<Overload::less_than, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto less_than_or_equal = action<Overload::less_than_or_equal, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto greater_than = action<Overload::greater_than, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto greater_than_or_equal = action<Overload::greater_than_or_equal, ctn, dec>;
+
+		//
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto is_zero = action<Overload::is_zero, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto is_value = action<Overload::is_value, ctn, dec>;
 
 		// logical:
 
-		template<depth_type dec = _two> constexpr auto and_			= action<Overload::and_, dec>;
-		template<depth_type dec = _two> constexpr auto or_			= action<Overload::or_, dec>;
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto not_ = action<Overload::not_, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto and_ = action<Overload::and_, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto or_ = action<Overload::or_, ctn, dec>;
 
 		// bitwise:
 
-		template<depth_type dec = _two> constexpr auto upshift			= action<Overload::upshift, dec>;
-		template<depth_type dec = _two> constexpr auto downshift		= action<Overload::downshift, dec>;
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto upshift = action<Overload::upshift, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto downshift = action<Overload::downshift, ctn, dec>;
 
 		// arithmetic:
 
-		template<depth_type dec = _two> constexpr auto add			= action<Overload::add, dec>;
-		template<depth_type dec = _two> constexpr auto subtract			= action<Overload::subtract, dec>;
-		template<depth_type dec = _two> constexpr auto multiply			= action<Overload::multiply, dec>;
-		template<depth_type dec = _two> constexpr auto divide			= action<Overload::divide, dec>;
-		template<depth_type dec = _two> constexpr auto modulo			= action<Overload::modulo, dec>;
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto add = action<Overload::add, ctn, dec>;
 
-		template<depth_type dec = _two> constexpr auto increment		= action<Overload::increment, dec>;
-		template<depth_type dec = _two> constexpr auto decrement		= action<Overload::decrement, dec>;
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto subtract = action<Overload::subtract, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto multiply = action<Overload::multiply, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto divide = action<Overload::divide, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto modulo = action<Overload::modulo, ctn, dec>;
+
+		//
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto increment = action<Overload::increment, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto decrement = action<Overload::decrement, ctn, dec>;
 
 		// computational:
 
-		template<depth_type dec = _two> constexpr auto apply			= action<Overload::apply, dec>;
-		template<depth_type dec = _three> constexpr auto alias			= action<Overload::alias, dec>;
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto apply = action<Overload::apply, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _three>
+		constexpr auto alias = action<Overload::alias, ctn, dec>;
 
 		// functional:
 
-		template<depth_type dec = _two> constexpr auto length			= action<Overload::length, dec>;
-		template<depth_type dec = _two> constexpr auto applywise		= action<Overload::applywise, dec>;
-		template<depth_type dec = _two> constexpr auto aliaswise		= action<Overload::aliaswise, dec>;
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto length = action<Overload::length, ctn, dec>;
 
-		template<depth_type dec = _two> constexpr auto is_null			= action<Overload::is_null, dec>;
-		template<depth_type dec = _two> constexpr auto cons			= action<Overload::cons, dec>;
-		template<depth_type dec = _two> constexpr auto push			= action<Overload::push, dec>;
-		template<depth_type dec = _two> constexpr auto car			= action<Overload::car, dec>;
-		template<depth_type dec = _two> constexpr auto cdr			= action<Overload::cdr, dec>;
-		template<depth_type dec = _two> constexpr auto cat			= action<Overload::cat, dec>;
-		template<depth_type dec = _two> constexpr auto unite			= action<Overload::unite, dec>;
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto map = action<Overload::map, ctn, dec>;
 
-	template<depth_type dec = _two>
-	constexpr instr_type compel = instruction<MN::call, MT::compel, dec>;
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto zip = action<Overload::zip, ctn, dec>;
+
+		//
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto is_null = action<Overload::is_null, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto cons = action<Overload::cons, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto push = action<Overload::push, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto car = action<Overload::car, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto cdr = action<Overload::cdr, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto cat = action<Overload::cat, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto unite = action<Overload::unite, ctn, dec>;
+
+		template<key_type ctn = _h0, depth_type dec = _two>
+		constexpr auto find = action<Overload::find, ctn, dec>;
+
+	template<index_type pos, key_type rtn, key_type ctn = _h0>
+	constexpr instr_type variable = instruction<MN::call, MT::variable, pos, ctn, rtn>;
+
+	template<index_type pos, key_type rtn, key_type ctn = _h0>
+	constexpr instr_type function = instruction<MN::call, MT::function, pos, ctn, rtn>;
+
+	template<key_type ctn = _h0, depth_type dec = _two>
+	constexpr instr_type compel = instruction<MN::call, MT::compel, dec, ctn>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
