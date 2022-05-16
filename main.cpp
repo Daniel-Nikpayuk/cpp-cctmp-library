@@ -87,15 +87,15 @@
 	//	printf("%llu\n", cctmp_program::insert_v0<7, 4, p>);
 	//	printf("%llu\n", cctmp_program::replace_v0<7, 1, p>);
 
-	//	printf("%llu\n", cctmp_program::factorial_v0<uint_type{20}>);
-	//	printf("%llu\n", cctmp_program::factorial_v1<uint_type{20}>);
-
-	//	printf("%llu\n", cctmp_program::fibonacci_v0<uint_type{13}>);
-
 	//	printf("%llu\n", cctmp_program::fold_v0<cctmp::template add_op<>, uint_type{0}, p>);
 
 	//	printf("%llu\n", cctmp_program::insert_sort_v0<p, 3>);
 	//	printf("%llu\n", cctmp_program::sort_v0<p>);
+
+	//	printf("%llu\n", cctmp_program::factorial_v0<uint_type{20}>);
+	//	printf("%llu\n", cctmp_program::factorial_v1<uint_type{20}>);
+
+	//	printf("%llu\n", cctmp_program::fibonacci_v0<uint_type{13}>);
 
 		return 0;
 	}
