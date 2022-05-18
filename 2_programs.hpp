@@ -128,17 +128,7 @@ namespace cctmp_program
 	struct T_Segment_v0
 	{
 		template<auto d, auto n>
-		nik_ces auto result = block
-		<
-			BN::segment,
-			BlockDispatch::next_note(d, n),
-			BlockDispatch::next_length_9(d, n)
-
-		>::template result
-		<
-			BlockDispatch::next_depth(d),
-			BlockDispatch::next_index_9(d, n)
-		>;
+		nik_ces auto result = NIK_BEGIN_BLOCK(9, segment, d, n) NIK_END_BLOCK;
 	};
 
 	constexpr auto U_Segment_v0 = U_store_T<T_Segment_v0>;
@@ -161,18 +151,7 @@ namespace cctmp_program
 	};
 
 	template<auto d, auto op, auto V, auto... Vs, nik_vp(l)(auto_pack<Vs...>*)>
-	constexpr auto T_Fold_v0::result<d, op, V, l> = block
-	<
-		BN::fold,
-		BlockDispatch::next_note(d, sizeof...(Vs)),
-		BlockDispatch::next_length_9(d, sizeof...(Vs))
-
-	>::template result
-	<
-		BlockDispatch::next_depth(d),
-		BlockDispatch::next_index_9(d, sizeof...(Vs)),
-		V, Vs...
-	>(op);
+	constexpr auto T_Fold_v0::result<d, op, V, l> = NIK_CASCADE_BLOCK(d, sizeof...(Vs), op, V, Vs)();
 
 	constexpr auto U_Fold_v0 = U_store_T<T_Fold_v0>;
 
@@ -184,6 +163,28 @@ namespace cctmp_program
 
 	template<auto op, auto V, auto l, auto d = MachineDispatch::initial_depth>
 	constexpr auto fold_v0 = Fold_v0::template result<d, op, V, l>;
+
+// cascade:
+
+	struct T_Cascade_v0
+	{
+		template<auto d, auto op, auto V, auto l>
+		nik_ces auto result = V;
+	};
+
+	template<auto d, auto op, auto V, auto... Vs, nik_vp(l)(auto_pack<Vs...>*)>
+	constexpr auto T_Cascade_v0::result<d, op, V, l> = NIK_CASCADE_BLOCK(d, sizeof...(Vs), op, V, Vs)();
+
+	constexpr auto U_Cascade_v0 = U_store_T<T_Cascade_v0>;
+
+	struct Cascade_v0
+	{
+		template<auto d, auto op, auto V, auto l>
+		nik_ces auto result = Compel::template result<d, U_pack_Vs<U_Cascade_v0, op, V, l>>;
+	};
+
+	template<auto op, auto V, auto l, auto d = MachineDispatch::initial_depth>
+	constexpr auto cascade_v0 = Cascade_v0::template result<d, op, V, l>;
 }
 
 /***********************************************************************************************************************/
@@ -287,7 +288,7 @@ namespace cctmp_program
 		constexpr auto n		= Overload::template result<Overload::find, cmp, list, insert>;
 
 						// bad design: does not compose well with trampolining.
-		constexpr auto sp		= NIK_FUNCTION_BLOCK(9, d, BN::split, n, Vs)(U_null_Vs);
+		constexpr auto sp		= NIK_FUNCTION_BLOCK(9, d, n, BN::split, Vs)(U_null_Vs);
 
 		return Overload::template result<Overload::unite, sp.v1, sp.v2, insert>;
 	}
@@ -383,6 +384,62 @@ namespace cctmp_program
 		U_null_Vs,
 		l
 	>;
+
+// version 2:
+
+	template
+	<
+		auto l,
+		auto cmp	= less_than_op<>,
+		auto d		= MachineDispatch::initial_depth
+	>
+	constexpr auto sort_v2 = Cascade_v0::template result
+	<
+		d,
+		U_InsertSort_v1<cmp>,
+		U_null_Vs,
+		l
+	>;
+}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// lookup:
+
+/***********************************************************************************************************************/
+
+namespace cctmp_program
+{
+// version 0:
+
+	struct T_LookupMatch
+	{
+		template<auto v, auto p>
+		nik_ces auto match()
+		{
+			constexpr auto pos	= Overload::template result<Overload::find, is_value_op<>, p, v>;
+			constexpr auto size	= Overload::template result<Overload::length, p>;
+
+			return pair(bool{pos < size}, pos);
+		}
+
+		template<auto v, auto p>
+		nik_ces auto result = match<v, p>();
+	};
+
+	constexpr auto U_LookupMatch = U_store_T<T_LookupMatch>;
+
+	struct T_Lookup_v0
+	{
+		template<auto d, auto p, auto v>
+		nik_ces auto result = Compel::template result<d, U_pack_Vs<U_LookupMatch, v, p>>;
+	};
+
+	constexpr auto U_Lookup_v0 = U_store_T<T_Lookup_v0>;
+
+	template<auto list, auto val, auto d = MachineDispatch::initial_depth>
+	constexpr auto lookup_v0 = T_Lookup_v0::template result<d, list, val>;
 }
 
 /***********************************************************************************************************************/

@@ -91,6 +91,8 @@
 
 	//	printf("%llu\n", cctmp_program::insert_sort_v0<p, 3>);
 	//	printf("%llu\n", cctmp_program::sort_v0<p>);
+	//	printf("%llu\n", cctmp_program::sort_v1<p>);
+		printf("%llu\n", cctmp_program::sort_v2<p>);
 
 	//	printf("%llu\n", cctmp_program::factorial_v0<uint_type{20}>);
 	//	printf("%llu\n", cctmp_program::factorial_v1<uint_type{20}>);

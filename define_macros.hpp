@@ -608,7 +608,7 @@
 
 // (block):
 
-	#define NIK_BLOCK(_b_, _p_, _d_, _h_, _n_, _v_)									\
+	#define NIK_BEGIN_BLOCK(_p_, _b_, _d_, _n_)									\
 															\
 		block													\
 		<													\
@@ -619,18 +619,23 @@
 		>::template result											\
 		<													\
 			BlockDispatch::next_depth(_d_),									\
-			_h_,												\
-			BlockDispatch::next_index_ ## _p_(_d_, _n_),							\
-			_v_...												\
+			BlockDispatch::next_index_ ## _p_(_d_, _n_)
+
+	#define NIK_END_BLOCK												\
+															\
 		>
 
-	#define NIK_VARIABLE_BLOCK(_p_, _d_, _h_, _n_, _v_)								\
+	#define NIK_VARIABLE_BLOCK(_p_, _d_, _n_, _h_, _v_)								\
 															\
-		NIK_BLOCK(variable, _p_, _d_, _h_, _n_, _v_)
+		NIK_BEGIN_BLOCK(_p_, variable, _d_, _n_), _h_, _v_... NIK_END_BLOCK
 
-	#define NIK_FUNCTION_BLOCK(_p_, _d_, _h_, _n_, _v_)								\
+	#define NIK_FUNCTION_BLOCK(_p_, _d_, _n_, _h_, _v_)								\
 															\
-		NIK_BLOCK(function, _p_, _d_, _h_, _n_, _v_)
+		NIK_BEGIN_BLOCK(_p_, function, _d_, _n_), _h_, _v_... NIK_END_BLOCK
+
+	#define NIK_CASCADE_BLOCK(_d_, _n_, _o_, _s_, _v_)								\
+															\
+		NIK_BEGIN_BLOCK(0, cascade, _d_, _n_), _o_, _s_, _v_... NIK_END_BLOCK
 
 /***********************************************************************************************************************/
 
@@ -641,8 +646,8 @@
 		template<key_type... filler>										\
 		struct block<BN::variable, BT::pass, _p_, filler...>							\
 		{													\
-			template<auto d, auto rtn, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>			\
-			nik_ces auto result = NIK_VARIABLE_BLOCK(_p_, d, rtn, n, Vs);					\
+			template<auto d, auto n, auto rtn, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs>			\
+			nik_ces auto result = NIK_VARIABLE_BLOCK(_p_, d, n, rtn, Vs);					\
 		};
 
 	#define NIK_DEFINE_BLOCK_FUNCTION_PASS(_p_)									\
@@ -650,10 +655,10 @@
 		template<key_type... filler>										\
 		struct block<BN::function, BT::pass, _p_, filler...>							\
 		{													\
-			template<auto d, auto rtn, auto n, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto... Ws>		\
+			template<auto d, auto n, auto rtn, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto... Ws>		\
 			nik_ces auto result(nik_avp(auto_pack<Ws...>*))				 			\
 			{												\
-				return NIK_FUNCTION_BLOCK(_p_, d, rtn, n, Vs)						\
+				return NIK_FUNCTION_BLOCK(_p_, d, n, rtn, Vs)						\
 						(U_pack_Vs<Ws..., NIK_2_N_VARS(_p_, V)>);				\
 			}												\
 		};
@@ -664,18 +669,11 @@
 		struct block<BN::segment, BT::pass, _p_, filler...>							\
 		{													\
 			template<auto d, auto n, auto... Vs>								\
-			nik_ces auto result = block									\
-			<												\
-				BN::segment,										\
-				BlockDispatch::next_note(d, n),								\
-				BlockDispatch::next_length_ ## _p_(d, n)						\
+			nik_ces auto result = NIK_BEGIN_BLOCK(_p_, segment, d, n),					\
 															\
-			>::template result										\
-			<												\
-				BlockDispatch::next_depth(d),								\
-				BlockDispatch::next_index_ ## _p_(d, n),						\
 				Vs..., NIK_2_N_INDEX_SEGMENT(_p_, decltype(n){sizeof...(Vs)})				\
-			>;												\
+															\
+			NIK_END_BLOCK;											\
 		};
 
 	#define NIK_DEFINE_BLOCK_FOLD_PASS(_p_)										\
@@ -686,18 +684,11 @@
 			template<auto d, auto n, auto V, NIK_2_N_AUTO_VARS(_p_, V), auto... Vs, auto Op, auto... F>	\
 			nik_ces auto result(nik_vp(m)(auto_pack<Op, F...>*))						\
 			{												\
-				return block										\
-				<											\
-					BN::fold,									\
-					BlockDispatch::next_note(d, n),							\
-					BlockDispatch::next_length_ ## _p_(d, n)					\
+				return NIK_BEGIN_BLOCK(_p_, fold, d, n),						\
 															\
-				>::template result									\
-				<											\
-					BlockDispatch::next_depth(d),							\
-					BlockDispatch::next_index_ ## _p_(d, n),					\
 					NIK_2_N_ACTION_FOLDS(_p_, Op, F, V), Vs...					\
-				>(m);											\
+															\
+				NIK_END_BLOCK(m);									\
 			}												\
 		};
 
