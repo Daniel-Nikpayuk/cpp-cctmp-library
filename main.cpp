@@ -99,7 +99,7 @@
 	//	printf("%llu\n", cctmp_program::factorial_v1<uint_type{20}>);
 
 	//	printf("%llu\n", cctmp_program::fibonacci_v0<uint_type{43}>);	// gcc 1.767s / clang 5.641s
-	//	printf("%d\n", cctmp_program::fibonacci_v1<uint_type{43}>);	// gcc 0.578s / clang 1.227s
+	//	printf("%llu\n", cctmp_program::fibonacci_v1<uint_type{43}>);	// gcc 0.578s / clang 1.227s
 
 		return 0;
 	}

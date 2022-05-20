@@ -3633,13 +3633,15 @@ namespace cctmp_program
 		nik_ces auto c = program<>;
 		nik_ces auto i = MachineDispatch::initial_index;
 		nik_ces auto f = U_store_T<MemFib_v0>;
+
+		template<typename IntType>
 		nik_ces auto t = U_pack_Vs
 		<
-			U_pack_Vs<1, 1>,
-			U_pack_Vs<0, 1>
+			U_pack_Vs<IntType{1}, IntType{1}>,
+			U_pack_Vs<IntType{0}, IntType{1}>
 		>;
 
-		template<auto d, auto n, auto mem_table = t>
+		template<auto d, auto n, auto mem_table = t<decltype(n)>>
 		nik_ces auto result = NIK_BEGIN_MACHINE(d, m, c, i),
 
 			n, n-1, n-2
