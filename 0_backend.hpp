@@ -2172,7 +2172,11 @@ namespace cctmp {
 	struct machine<MN::memoize, MT::lookup, filler...>
 	{
 		template<auto W, auto Z>
-		nik_ces bool match = (W == Overload::template result<Overload::car, Z>);
+		nik_ces bool match = Overload::template result
+		<
+			Overload::same, W,
+			Overload::template result<Overload::car, Z>
+		>;
 
 		template
 		<
@@ -2222,11 +2226,10 @@ namespace cctmp {
 			nik_vp(A0)(auto_pack<Zs...>*), Args... As
 		)
 		{
-		//	constexpr auto h1 = U_pack_Vs<Xs...>;
 			constexpr auto Z0 = U_pack_Vs<W0, X0>;
 			constexpr auto a0 = U_pack_Vs<Z0, Zs...>;
 
-			return pair(a0, X0);//NIK_MACHINE(d, MT::id, c, i, Vs)(U_null_Vs, h1, H2, a0, As...);
+			return pair(a0, X0);
 		}
 	};
 
