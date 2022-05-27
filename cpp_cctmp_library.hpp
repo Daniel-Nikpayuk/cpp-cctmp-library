@@ -1250,8 +1250,8 @@ namespace cctmp {
 	template<auto F, auto... Vs>
 	constexpr auto Overload::result < Overload::apply , F , Vs... > = F(Vs...);
 
-	template<auto F, auto... Vs>
-	constexpr auto Overload::result < Overload::alias , F , Vs... > = T_store_U<F>::template result<Vs...>;
+	template<typename F, nik_vp(p)(F*), auto... Vs>
+	constexpr auto Overload::result < Overload::alias , p , Vs... > = F::template result<Vs...>;
 
 	// functional:
 
