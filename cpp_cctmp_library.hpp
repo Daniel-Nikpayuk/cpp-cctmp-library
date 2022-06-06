@@ -1130,7 +1130,7 @@ namespace cctmp {
 	{
 		nik_ces key_type id				=  0;
 
-		// comparision:
+		// comparison:
 
 		nik_ces key_type same				=  1;
 
@@ -1311,7 +1311,7 @@ namespace cctmp {
 		array<bool, Overload::template result<Op, F..., Ws..., Vs>...>, sizeof...(Vs)
 	);
 
-	// comparision:
+	// comparison:
 
 	template<auto... Vs> constexpr auto same_op			= U_pack_Vs<Overload::same, Vs...>;
 
@@ -2771,7 +2771,7 @@ namespace cctmp {
 	template<key_type act, key_type ctn = _h1, depth_type dec = _two> // reverse order for user friendliness:
 	constexpr instr_type action = instruction<MN::call, MT::action, dec, ctn, act>;
 
-		// comparision:
+		// comparison:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
 		constexpr auto same = action<Overload::same, ctn, dec>;
