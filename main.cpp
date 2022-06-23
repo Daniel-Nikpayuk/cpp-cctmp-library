@@ -22,17 +22,27 @@
 /***********************************************************************************************************************/
 
 #include"define_macros.hpp"
-#include"0_backend.hpp"
-#include"1_frontend.hpp"
-#include"2_programs.hpp"
-#include"undef_macros.hpp"
+#include"0_cctmp_backend_0.hpp"
+#include"0_cctmp_backend_1.hpp"
+//#include"1_cctmp_functional.hpp"
+//#include"2_cctmp_frontend.hpp"
+//#include"3_generic_assembly.hpp"
+//#include"4_one_cycle_generics_0.hpp"
+//#include"4_one_cycle_generics_1.hpp"
+//#include"5_domain_specific_grammars.hpp"
+//#include"6_big_numbers_0.hpp"
+//#include"6_big_numbers_1.hpp"
+//#include"7_numerical_analysis_0.hpp"
+//#include"7_numerical_analysis_1.hpp"
+//#include"undef_macros.hpp"
 
 /***********************************************************************************************************************/
 
-	using uint_type = unsigned long long;
+	using namespace cctmp;
 
 /***********************************************************************************************************************/
 
+/*
 	using Overload = cctmp::Overload;
 
 	template<auto... Vs>
@@ -69,6 +79,41 @@
 
 	constexpr auto U_int	= cctmp::U_store_T<int>;
 	constexpr auto U_char	= cctmp::U_store_T<char>;
+*/
+
+/***********************************************************************************************************************/
+
+/*
+	template<key_type ctn = _h1, depth_type dec = _two>
+	nik_ce instr_type compel = instruction<MN::call, MT::compel, dec, ctn>;
+
+	struct Compel
+	{
+		nik_ces auto m		= MT::id;
+		nik_ces auto i		= MachineDispatch::initial_index;
+		nik_ces auto ctn	= MI::value;
+
+		template<auto d, auto h0, auto dec = _three, auto c = controller<compel<ctn, dec>>>
+		nik_ces auto result = NIK_BEGIN_MACHINE(d, m, c, i) NIK_END_MACHINE(h0, U_null_Vs, U_null_Vs);
+	};
+
+	struct T_Segment_v0
+	{
+		template<auto d, auto n, auto m>
+		nik_ces auto result = NIK_BEGIN_BLOCK(9, segment, d, n), m NIK_END_BLOCK;
+	};
+
+	constexpr auto U_Segment_v0 = U_store_T<T_Segment_v0>;
+
+	struct Segment_v0
+	{
+		template<auto d, auto n, auto m>
+		nik_ces auto result = Compel::template result<d, U_pack_Vs<U_Segment_v0, n, m>>;
+	};
+
+	template<auto n, auto m = index_type{0}, auto d = MachineDispatch::initial_depth>
+	constexpr auto segment_v0 = Segment_v0::template result<d, n, m>;
+*/
 
 /***********************************************************************************************************************/
 

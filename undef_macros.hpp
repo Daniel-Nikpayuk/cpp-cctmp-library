@@ -26,77 +26,35 @@
 
 #undef nik_avp
 
+#undef nik_ce
+
 #undef nik_ces
 
 #undef NIK_EMPTY
 
 #undef NIK_COMMA
 
-#undef NIK_L_PAR
-
-#undef NIK_R_PAR
-
-#undef NIK_L_ANG
-
 #undef NIK_R_ANG
-
-#undef NIK_L_BRAK
-
-#undef NIK_R_BRAK
 
 #undef NIK_AUTO
 
 #undef NIK_TYPENAME
 
-#undef NIK_LDOTS
-
-#undef NIK_R_PAR_LDOTS
-
 #undef NIK_PLUS
 
-#undef NIK_L_STORE
+#undef NIK_V
 
-#undef NIK_R_STORE
+#undef NIK_K_O_C
 
-#undef NIK_UPPER_1_REPS
+#undef NIK_EMPTY_1
 
-#undef NIK_UPPER_2_REPS
+#undef NIK_ID_1
 
-#undef NIK_UPPER_4_REPS
+#undef NIK_T_1
 
-#undef NIK_UPPER_8_REPS
+#undef NIK_V_1
 
-#undef NIK_UPPER_16_REPS
-
-#undef NIK_UPPER_32_REPS
-
-#undef NIK_UPPER_64_REPS
-
-#undef NIK_UPPER_128_REPS
-
-#undef NIK_UPPER_256_REPS
-
-#undef NIK_UPPER_512_REPS
-
-#undef NIK_2_0_REPS
-
-#undef NIK_2_1_REPS
-
-#undef NIK_2_2_REPS
-
-#undef NIK_2_3_REPS
-
-#undef NIK_2_4_REPS
-
-#undef NIK_2_5_REPS
-
-#undef NIK_2_6_REPS
-
-#undef NIK_2_7_REPS
-
-#undef NIK_2_8_REPS
-
-#undef NIK_2_9_REPS
+#undef NIK_T_V_1
 
 #undef NIK_UPPER_1_IDS
 
@@ -144,17 +102,7 @@
 
 #undef NIK_2_N_TYPENAME_VARS
 
-#undef NIK_2_N_RESTORE_VARS
-
-#undef NIK_2_N_VARIADIC_VARS
-
-#undef NIK_2_N_STORE_VARS
-
-#undef NIK_2_N_PACK_VARS
-
-#undef NIK_2_N_OP_MAP_VARS
-
-#undef NIK_2_N_AL_MAP_VARS
+#undef NIK_2_N_ARG_VARS
 
 #undef NIK_2_N_INDEX_SEGMENT
 
@@ -176,6 +124,8 @@
 
 #undef NIK_FUNCTION_BLOCK
 
+#undef NIK_ARGUMENT_BLOCK
+
 #undef NIK_FOLD_BLOCK
 
 #undef NIK_CASCADE_BLOCK
@@ -186,6 +136,8 @@
 
 #undef NIK_DEFINE_BLOCK_SEGMENT_PASS
 
+#undef NIK_DEFINE_BLOCK_ARGUMENT_PASS
+
 #undef NIK_DEFINE_BLOCK_FOLD_PASS
 
 #undef NIK_CONTR_PARAMS
@@ -195,6 +147,46 @@
 #undef NIK_END_MACHINE
 
 #undef NIK_MACHINE
+
+#undef NIK_LABELS_0_TO_0
+
+#undef NIK_LABELS_0_TO_1
+
+#undef NIK_LABELS_0_TO_2
+
+#undef NIK_LABELS_0_TO_3
+
+#undef NIK_LABELS_0_TO_4
+
+#undef NIK_LABELS_0_TO_5
+
+#undef NIK_LABELS_0_TO_6
+
+#undef NIK_LABELS_0_TO_7
+
+#undef NIK_LABELS_0_TO_N
+
+#undef NIK_DEFINE_LABEL
+
+#undef NIK_DEFINE_LABELS_0_TO_0
+
+#undef NIK_DEFINE_LABELS_0_TO_1
+
+#undef NIK_DEFINE_LABELS_0_TO_2
+
+#undef NIK_DEFINE_LABELS_0_TO_3
+
+#undef NIK_DEFINE_LABELS_0_TO_4
+
+#undef NIK_DEFINE_LABELS_0_TO_5
+
+#undef NIK_DEFINE_LABELS_0_TO_6
+
+#undef NIK_DEFINE_LABELS_0_TO_7
+
+#undef NIK_DEFINE_LABELS_0_TO_N
+
+#undef NIK_DEFINE_LABEL_STRUCT
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

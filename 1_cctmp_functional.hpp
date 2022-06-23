@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// programs:
+// case studies:
 
 namespace cctmp_program
 {
@@ -127,20 +127,20 @@ namespace cctmp_program
 
 	struct T_Segment_v0
 	{
-		template<auto d, auto n>
-		nik_ces auto result = NIK_BEGIN_BLOCK(9, segment, d, n) NIK_END_BLOCK;
+		template<auto d, auto n, auto m>
+		nik_ces auto result = NIK_BEGIN_BLOCK(9, segment, d, n), m NIK_END_BLOCK;
 	};
 
 	constexpr auto U_Segment_v0 = U_store_T<T_Segment_v0>;
 
 	struct Segment_v0
 	{
-		template<auto d, auto n>
-		nik_ces auto result = Compel::template result<d, U_pack_Vs<U_Segment_v0, n>>;
+		template<auto d, auto n, auto m>
+		nik_ces auto result = Compel::template result<d, U_pack_Vs<U_Segment_v0, n, m>>;
 	};
 
-	template<auto n, auto d = MachineDispatch::initial_depth>
-	constexpr auto segment_v0 = Segment_v0::template result<d, n>;
+	template<auto n, auto m = index_type{0}, auto d = MachineDispatch::initial_depth>
+	constexpr auto segment_v0 = Segment_v0::template result<d, n, m>;
 
 // fold:
 
@@ -750,4 +750,266 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// case studies:
+
+namespace cpp_cctmp_library_case_studies {
+
+	using namespace cpp_cctmp_library;
+
+	using u_type = unsigned long long;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// non-recursive:
+
+/***********************************************************************************************************************/
+
+	template
+	<
+		index_type x = 0,
+		index_type y = 1,
+		index_type z = 2
+	>
+	nik_ce auto non_recursive_algo = endodrop
+	<
+		signature<int, int, int>,
+
+		lift < z    , _constant_<2>            >,
+		lift < y    , _multiply_    , z    , y >,
+		lift < _cp_ , _multiply_    , x    , x >,
+		lift < _cp_ , _add_         , _ps_ , y >,
+
+		_return_
+	>;
+
+	nik_ce int x_squared_plus_two_y(int x, int y) { return non_recursive_algo<>(x, y, 0); }
+
+/***********************************************************************************************************************/
+
+// tacit:
+
+	// square:
+
+		struct T_square
+		{
+			template<typename T>
+			nik_ces auto result(T v) { return v * v; }
+
+		}; nik_ce auto _square_ = U_store_T<T_square>;
+
+	// twice:
+
+		struct T_twice
+		{
+			template<typename T>
+			nik_ces auto result(T v) { return 2 * v; }
+
+		}; nik_ce auto _twice_ = U_store_T<T_twice>;
+
+	// f(x) = 2x^2+1 :
+
+		nik_ce auto tacit_algo = endodrop
+		<
+			signature<float>,
+
+			tacit < _square_      >,
+			tacit < _twice_       >,
+			tacit < _increment_<> >,
+
+			_return_
+		>;
+
+		nik_ce float two_x_squared_plus_one(float x) { return tacit_algo(x); }
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// (pair) factorial:
+
+/***********************************************************************************************************************/
+
+// version 0 (baseline):
+
+	nik_ce u_type pair_factorial_v0(u_type n, u_type p)
+	{
+		if (n == 0) return p;
+		else        return pair_factorial_v0(n-1, p*n);
+	}
+
+	nik_ce u_type factorial_v0(u_type n) { return pair_factorial_v0(n, 1); }
+
+	// gcc -O3 / clang -O2:
+	// bytes: 15768 / 15856
+	// lines: 39 / 39
+
+//	printf("%llu\n", cpp_cctmp_library_case_studies::factorial_v0(argc));
+
+/***********************************************************************************************************************/
+
+// version 1:
+
+	struct T_factorial
+	{
+		nik_ces auto start	= 0;
+		nik_ces auto done	= 1;
+
+		nik_ces auto n		= 0;
+		nik_ces auto p		= 1;
+
+		nik_ces auto object = parse
+		<
+			label<start>,
+
+				test   < _is_zero_ , n             >,
+				branch < done                      >,
+
+				lift   < p , _multiply_    , n , p >,
+				lift   < n , _decrement_<> , n     >,
+
+				go_to  < start                     >,
+
+			label<done>,
+
+				_value_<p>
+		>;
+
+		template<typename IntType>
+		nik_ces auto result(IntType n)
+		{
+			return call<object, IntType>(n, IntType{1});
+		}
+
+	}; nik_ce auto _factorial_ = U_store_T<T_factorial>;
+
+	nik_ce u_type factorial_v1(const u_type n) { return T_factorial::template result(n); }
+
+	// gcc -O3 / clang -O2:
+	// bytes: 16928 / 16048
+	// lines: 103 / 99
+
+//	printf("%llu\n", cpp_cctmp_library_case_studies::factorial_v1(argc));
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// weird factorial:
+
+/***********************************************************************************************************************/
+
+/*
+	struct T_greater_than_24
+	{
+		template<typename T>
+		nik_ces bool result(T v) { return (v > 24); }
+
+	}; nik_ce auto _greater_than_24_ = U_store_T<T_greater_than_24>;
+
+	struct WeirdFactorial
+	{
+		nik_ces u_type start (u_type n, u_type p) { return link<start, object>(n, p); }
+		nik_ces u_type after (u_type n, u_type p) { return link<after, object>(n, p); }
+		nik_ces u_type done  (u_type n, u_type p) { return link<done, object>(n, p); }
+
+		nik_ces auto n = 0;
+		nik_ces auto p = 1;
+
+		nik_ces auto object = compile
+		<
+			label<start>,
+
+				test   < _is_zero_ , n             >,
+				branch < after                     >,
+
+				lift   < p , _multiply_    , n , p >,
+				lift   < n , _decrement_<> , n     >,
+
+				go_to  < start                     >,
+
+			label<after>,
+
+				test   < _greater_than_24_     , p >,
+				branch < done                      >,
+
+				lift   < p , _multiply_    , p , p >,
+				lift   < p , _decrement_<> , p     >,
+
+				go_to  < start                     >,
+
+			label<done>,
+
+				_value_<p>
+		>;
+	};
+
+	nik_ce u_type weird_factorial(u_type n) { return WeirdFactorial::start(n, 1); }
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// debugging:
+
+/***********************************************************************************************************************/
+
+/*
+	template<auto word, auto... words>
+	nik_ce auto explore_words()
+	{
+		printf("%d, ", word);
+
+		if nik_ce (sizeof...(words) > 0) explore_words<words...>();
+	}
+
+	template<auto... words>
+	nik_ce auto explore_line(nik_avp(auto_pack<words...>*))
+	{
+		printf("%d: ", int{sizeof...(words)});
+
+		printf("\n");
+	//	explore_words<words...>();
+	}
+
+	template<auto line, auto... lines>
+	nik_ce auto explore_lines()
+	{
+		explore_line(line);
+
+		if nik_ce (sizeof...(lines) > 0) explore_lines<lines...>();
+	}
+
+	template<auto deps, auto... lines>
+	nik_ce auto explore(nik_avp(auto_pack<deps, lines...>*))
+	{
+		// deps:
+
+			nik_ce auto dsize = deps[0][0] + 1;
+
+			for (auto k = deps + 1; k != deps + dsize; ++k)
+			{
+				auto vertex = *k;
+				auto vsize  = vertex[0] + 1;
+
+				printf("%d: ", *vertex);
+
+				for (auto j = vertex + 1; j != vertex + vsize; ++j) printf("%d, ", *j);
+
+				printf("\n");
+			}
+
+		// lines:
+
+			printf("\n");
+
+			explore_lines<lines...>();
+	}
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+} // cpp_cctmp_library_case_studies
 
