@@ -593,7 +593,6 @@ namespace cctmp {
 
 	// call:
 
-/*
 		template<key_type... filler>
 		struct machine<MN::call, MT::compel, filler...>
 		{
@@ -638,11 +637,9 @@ namespace cctmp {
 				}
 			}
 		};
-*/
 
 	// recall:
 
-/*
 		template<key_type... filler>
 		struct machine<MN::recall, MT::compel, filler...>
 		{
@@ -687,7 +684,6 @@ namespace cctmp {
 				}
 			}
 		};
-*/
 
 /***********************************************************************************************************************/
 
@@ -697,7 +693,6 @@ namespace cctmp {
 
 	// recall:
 
-/*
 		template<key_type... filler>
 		struct machine<MN::recall, MT::propel, filler...>
 		{
@@ -733,7 +728,6 @@ namespace cctmp {
 					return val;
 			}
 		};
-*/
 
 /***********************************************************************************************************************/
 

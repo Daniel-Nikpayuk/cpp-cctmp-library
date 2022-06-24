@@ -24,7 +24,7 @@
 #include"define_macros.hpp"
 #include"0_cctmp_backend_0.hpp"
 #include"0_cctmp_backend_1.hpp"
-//#include"1_cctmp_functional.hpp"
+#include"1_cctmp_functional.hpp"
 //#include"2_cctmp_frontend.hpp"
 //#include"3_generic_assembly.hpp"
 //#include"4_one_cycle_generics_0.hpp"
@@ -34,7 +34,7 @@
 //#include"6_big_numbers_1.hpp"
 //#include"7_numerical_analysis_0.hpp"
 //#include"7_numerical_analysis_1.hpp"
-//#include"undef_macros.hpp"
+#include"undef_macros.hpp"
 
 /***********************************************************************************************************************/
 

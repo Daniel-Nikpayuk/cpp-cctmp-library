@@ -21,6 +21,19 @@
 
 namespace cctmp {
 
+	/*
+	 * (LOC, param) (VAR, [n, _register, 0]) (VAR, [p, _register, 1]) (;)
+	 * (LOC, const) (VAR, [is_zero, _constant, 0]) (VAR, [multiply, _constant, 1]) (VAR, [decrement, _constant, 2]) (;)
+	 * (LOC, arg) (;)
+	 * (LABEL, start) (;)
+	 * (IF) (LP) (VAR, is_zero) (VAR, n) (RP) (INSTR, goto) (LABEL, exit_case) (;)
+	 * (VAR, p) (=) (VAR, multiply) (VAR, n) (VAR, p) (;)
+	 * (VAR, n) (=) (VAR, decrement) (VAR, n) (;)
+	 * (INSTR, goto) (LABEL, start) (;)
+	 * (LABEL, exit_case) (;)
+	 * (INSTR, return) (VAR, p) (;)
+	*/
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
