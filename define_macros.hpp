@@ -449,9 +449,9 @@
 															\
 		NIK_BEGIN_BLOCK(_p_, argument, _d_, _n_), _t_... NIK_END_BLOCK
 
-	#define NIK_FOLD_BLOCK(_d_, _n_, _o_, _s_, _v_)									\
+	#define NIK_FOLD_BLOCK(_d_, _n_, _k_, _o_, _c_, _s_, _v_)							\
 															\
-		NIK_BEGIN_BLOCK(9, fold, _d_, _n_), _s_, _v_... NIK_END_BLOCK(_o_)
+		NIK_BEGIN_BLOCK(9, fold, _d_, _n_), _k_, _o_, _s_, _v_... NIK_END_BLOCK(_c_)
 
 	#define NIK_CASCADE_BLOCK(_d_, _n_, _o_, _s_, _v_)								\
 															\

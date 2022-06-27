@@ -42,13 +42,10 @@
 
 /***********************************************************************************************************************/
 
-/*
-	using Overload = cctmp::Overload;
-
 	template<auto... Vs>
-	constexpr auto call = Overload::template result<Vs...>;
+	constexpr auto alias_call = Overload::template result<Overload::alias, Vs...>;
 
-	constexpr auto p = cctmp::U_pack_Vs
+	constexpr auto p = U_pack_Vs
 	<
 		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
 		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
@@ -77,43 +74,8 @@
 		99, 0, 5, 41
 	>;
 
-	constexpr auto U_int	= cctmp::U_store_T<int>;
-	constexpr auto U_char	= cctmp::U_store_T<char>;
-*/
-
-/***********************************************************************************************************************/
-
-/*
-	template<key_type ctn = _h1, depth_type dec = _two>
-	nik_ce instr_type compel = instruction<MN::call, MT::compel, dec, ctn>;
-
-	struct Compel
-	{
-		nik_ces auto m		= MT::id;
-		nik_ces auto i		= MachineDispatch::initial_index;
-		nik_ces auto ctn	= MI::value;
-
-		template<auto d, auto h0, auto dec = _three, auto c = controller<compel<ctn, dec>>>
-		nik_ces auto result = NIK_BEGIN_MACHINE(d, m, c, i) NIK_END_MACHINE(h0, U_null_Vs, U_null_Vs);
-	};
-
-	struct T_Segment_v0
-	{
-		template<auto d, auto n, auto m>
-		nik_ces auto result = NIK_BEGIN_BLOCK(9, segment, d, n), m NIK_END_BLOCK;
-	};
-
-	constexpr auto U_Segment_v0 = U_store_T<T_Segment_v0>;
-
-	struct Segment_v0
-	{
-		template<auto d, auto n, auto m>
-		nik_ces auto result = Compel::template result<d, U_pack_Vs<U_Segment_v0, n, m>>;
-	};
-
-	template<auto n, auto m = index_type{0}, auto d = MachineDispatch::initial_depth>
-	constexpr auto segment_v0 = Segment_v0::template result<d, n, m>;
-*/
+	constexpr auto U_int	= U_store_T<int>;
+	constexpr auto U_char	= U_store_T<char>;
 
 /***********************************************************************************************************************/
 
@@ -123,31 +85,20 @@
 	//	printf("%llu\n", call<Overload::map, cctmp::template increment_op<>, p>);
 	//	printf("%hu\n", call<Overload::find, cctmp::template is_zero_op<>, p>);
 
-	//	printf("%d\n", cctmp_program::at_v0<0, p>);
-	//	printf("%llu\n", cctmp_program::left_v0<2, p>);
-	//	printf("%llu\n", cctmp_program::split_v0<2, p>);
-	//	printf("%llu\n", cctmp_program::segment_v0<uint_type{10}>);
+	//	printf("%d\n",   cctmp_functional::at<0, p>);
+	//	printf("%llu\n", cctmp_functional::left<2, p>);
+	//	printf("%llu\n", cctmp_functional::split<2, p>);
+	//	printf("%llu\n", cctmp_functional::segment<unsigned{10}>);
 
-	//	printf("%llu\n", cctmp_program::erase_v0<0, p>);
-	//	printf("%llu\n", cctmp_program::insert_v0<7, 4, p>);
-	//	printf("%llu\n", cctmp_program::replace_v0<7, 1, p>);
+	//	printf("%llu\n", cctmp_functional::erase<0, p>);
+	//	printf("%llu\n", cctmp_functional::insert<7, 4, p>);
+	//	printf("%llu\n", cctmp_functional::replace<7, 1, p>);
 
-	//	printf("%llu\n", cctmp_program::fold_v0<cctmp::template add_op<>, uint_type{0}, p>);
+	//	printf("%llu\n", cctmp_functional::fold<cctmp::template add_op<>, uint_type{0}, p>);
 
-	//	printf("%llu\n", cctmp_program::insert_sort_v0<p, 3>);
-	//	printf("%llu\n", cctmp_program::sort_v0<p>);
-	//	printf("%llu\n", cctmp_program::sort_v1<p>);
-	//	printf("%llu\n", cctmp_program::sort_v2<p>);	// gcc 1.717s / clang 4.199s
+	//	printf("%llu\n", cctmp_functional::insert_sort<p, 3>);
+	//	printf("%llu\n", cctmp_functional::sort<p>);	// gcc 1.717s / clang 4.199s
 								// gcc 1.344s / clang 3.568s
-
-	//	printf("%llu\n", cctmp_program::factorial_v0<uint_type{20}>);
-	//	printf("%llu\n", cctmp_program::factorial_v1<uint_type{20}>);
-
-	//	printf("%llu\n", cctmp_program::fibonacci_v0<uint_type{43}>);	// gcc 1.767s / clang 5.641s
-	//	printf("%llu\n", cctmp_program::fibonacci_v1<uint_type{43}>);	// gcc 0.599s / clang 1.300s
-
-	//	printf("%llu\n", cctmp_program::fibonacci_v0<uint_type{70}>);	// gcc > 10m / clang ~ who knows (4x 10m)
-	//	printf("%llu\n", cctmp_program::fibonacci_v1<uint_type{92}>);	// gcc 1.462s / clang 3.492s
 
 		return 0;
 	}
