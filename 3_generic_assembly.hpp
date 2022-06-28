@@ -25,47 +25,27 @@ namespace cctmp_generics {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// identity:
-
-/***********************************************************************************************************************/
-
-// int type:
-
-	template<typename...>
-	nik_ce bool is_int_type = false;
-
-	template < typename... filler > nik_ce bool is_int_type < unsigned char      , filler... > = true;
-	template < typename... filler > nik_ce bool is_int_type <   signed char      , filler... > = true;
-
-	template < typename... filler > nik_ce bool is_int_type < unsigned short     , filler... > = true;
-	template < typename... filler > nik_ce bool is_int_type <   signed short     , filler... > = true;
-
-	template < typename... filler > nik_ce bool is_int_type < unsigned int       , filler... > = true;
-	template < typename... filler > nik_ce bool is_int_type <   signed int       , filler... > = true;
-
-	template < typename... filler > nik_ce bool is_int_type < unsigned long      , filler... > = true;
-	template < typename... filler > nik_ce bool is_int_type <   signed long      , filler... > = true;
-
-	template < typename... filler > nik_ce bool is_int_type < unsigned long long , filler... > = true;
-	template < typename... filler > nik_ce bool is_int_type <   signed long long , filler... > = true;
-
 /***********************************************************************************************************************/
 
 // not int type:
 
+/*
 	struct NotIntType
 	{
 		template<auto V>
 		nik_ces bool result = ! is_int_type<decltype(V)>;
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // type sifter:
 
+/*
 	template<index_type n, typename... Ts>
 	using type_sifter = T_store_U<_value_sifter<n, U_store_T<Ts>...>()>;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -76,6 +56,7 @@ namespace cctmp_generics {
 
 // arguments:
 
+/*
 	template<index_type n, typename T, typename... Ts>
 	nik_ce auto arg(T v, Ts... vs)
 	{
@@ -115,6 +96,7 @@ namespace cctmp_generics {
 		// return:
 
 			nik_ce auto _return_ = _value_<_zero>;
+*/
 
 /***********************************************************************************************************************/
 
@@ -127,6 +109,7 @@ namespace cctmp_generics {
 
 	// subcompose:
 
+/*
 		template<auto f, auto f_ns_p, auto ns_p> struct T_subcompose;
 
 		template
@@ -180,6 +163,7 @@ namespace cctmp_generics {
 
 		}; template<auto l, auto r, auto f>
 			nik_ce auto _allot_ = U_store_T<T_allot<l, r, f>>;
+*/
 
 /***********************************************************************************************************************/
 
@@ -187,6 +171,7 @@ namespace cctmp_generics {
 
 	// assign:
 
+/*
 		struct T_assign
 		{
 			template<typename T1, typename T2>
@@ -212,6 +197,7 @@ namespace cctmp_generics {
 				U_pack_Vs < _dereference_ , _id_ >,
 				U_pack_Vs <  0            ,  1   >
 			>;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -226,6 +212,7 @@ namespace cctmp_generics {
 
 /***********************************************************************************************************************/
 
+/*
 	template<auto lbl>
 	nik_ce auto _go_to_ = _apply_<lbl>;
 
@@ -241,6 +228,7 @@ namespace cctmp_generics {
 
 		template<auto lbl, nik_vp(p)(_go_to<lbl>*)>
 		nik_ce bool is_go_to<p> = true;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -249,6 +237,7 @@ namespace cctmp_generics {
 
 /***********************************************************************************************************************/
 
+/*
 	template<auto lbl>
 	struct T_branch
 	{
@@ -274,6 +263,7 @@ namespace cctmp_generics {
 
 		template<auto lbl, nik_vp(p)(_branch<lbl>*)>
 		nik_ce bool is_branch<p> = true;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -282,6 +272,7 @@ namespace cctmp_generics {
 
 /***********************************************************************************************************************/
 
+/*
 	template<auto lbl> struct _label { };
 
 	template<auto lbl>
@@ -308,6 +299,7 @@ namespace cctmp_generics {
 
 		template<auto lbl, nik_vp(p)(_label<lbl>*)>
 		nik_ce auto label_value<p> = lbl;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -318,6 +310,7 @@ namespace cctmp_generics {
 	// Total (register) assignment in this context is equivalent to replacing the continuation's given argument.
 	// Partial assignment is then achieved through the side effect of the given instruction.
 
+/*
 	template<auto...> struct T_lift { };
 
 	// id:
@@ -331,9 +324,11 @@ namespace cctmp_generics {
 
 		template<auto... Vs, nik_vp(p)(T_lift<Vs...>*)>
 		nik_ce bool is_lift<p> = true;
+*/
 
 /***********************************************************************************************************************/
 
+/*
 	nik_ce void _cp_ () { } // copy
 	nik_ce void _ps_ () { } // paste
 
@@ -351,6 +346,7 @@ namespace cctmp_generics {
 		template<auto V>
 		nik_ces key_type location	= same<V, _cp_> ? insert : replace;
 	};
+*/
 
 /***********************************************************************************************************************/
 
@@ -358,6 +354,7 @@ namespace cctmp_generics {
 
 	// direct:
 
+/*
 		template<auto f>
 		struct T_lift<Lift::deny, f, true>
 		{
@@ -383,6 +380,7 @@ namespace cctmp_generics {
 				return T_store_U<pass>::template result<Ts...>(vs...);
 			}
 		};
+*/
 
 /***********************************************************************************************************************/
 
@@ -390,6 +388,7 @@ namespace cctmp_generics {
 
 	// direct:
 
+/*
 		template<auto f>
 		struct T_lift<Lift::insert, f, true>
 		{
@@ -415,6 +414,7 @@ namespace cctmp_generics {
 				return T_store_U<pass>::template result<decltype(val), Ts...>(val, vs...);
 			}
 		};
+*/
 
 /***********************************************************************************************************************/
 
@@ -422,6 +422,7 @@ namespace cctmp_generics {
 
 	// direct:
 
+/*
 		template<auto m, auto f>
 		struct T_lift<Lift::replace, m, f, true>
 		{
@@ -457,6 +458,7 @@ namespace cctmp_generics {
 				return T_allot<l, r, pass>::template result<decltype(val), Ts...>(val, vs...);
 			}
 		};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -465,6 +467,7 @@ namespace cctmp_generics {
 
 	// helpers:
 
+/*
 		template<auto... ns>
 		nik_ce auto find_non_int = ArrayPointer::template find<NotIntType, ns...>;
 
@@ -484,11 +487,13 @@ namespace cctmp_generics {
 			if nik_ce (all_ints) return U_pack_Vs<index_type{ns}...>;
 			else                 return U_pack_Vs<map_indices<ns>()...>;
 		}
+*/
 
 /***********************************************************************************************************************/
 
 // specializations:
 
+/*
 	template<key_type, key_type, key_type...> struct LiftDispatch;
 
 	using T_ToId = T_ToValue<_id_>;
@@ -591,6 +596,7 @@ namespace cctmp_generics {
 
 		template<auto f>
 		nik_ce auto tacit = LiftDispatch<Lift::allow, Lift::insert>::template result<_cp_, f, _ps_>;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -601,6 +607,7 @@ namespace cctmp_generics {
 
 // endopose:
 
+/*
 	template<typename F, typename G>
 	struct _endopose
 	{
@@ -658,17 +665,21 @@ namespace cctmp_generics {
 
 	template<auto s, auto f, auto f0, auto f1, auto... fs>
 	nik_ce auto endodrop<s, f, f0, f1, fs...> = endodrop<s, endopose<f, f0>, f1, fs...>;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // parse:
 
+/*
 	using cdep_type  = cindex_type* const;
 	using cdeps_type = cdep_type* const;
+*/
 
 /***********************************************************************************************************************/
 
+/*
 	template<bool EmptyInstrs, bool... filler>
 	struct Parse
 	{
@@ -977,12 +988,14 @@ namespace cctmp_generics {
 	(
 		U_null_Vs, U_null_Vs, U_null_Vs, U_null_Vs, U_null_Vs, U_null_Vs
 	);
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // make:
 
+/*
 	template<bool, bool...> struct Make;
 
 	nik_ce auto dispatch_make(cindex_type k, cdep_type deps, cindex_type rest_size)
@@ -992,9 +1005,11 @@ namespace cctmp_generics {
 
 		return no_deps_left || is_last_word;
 	}
+*/
 
 /***********************************************************************************************************************/
 
+/*
 	template<bool... filler>
 	struct Make<true, filler...>
 	{
@@ -1059,6 +1074,7 @@ namespace cctmp_generics {
 		dispatch_make(0, deps, sizeof...(words))
 
 	>::template result<0, _lifted_id_, words...>(c);
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -1067,6 +1083,7 @@ namespace cctmp_generics {
 
 /***********************************************************************************************************************/
 
+/*
 	template<auto lbl, auto... lbls, auto deps, auto... lines>
 	nik_ce auto _link(nik_avp(auto_pack<deps, lines...>*))
 	{
@@ -1080,18 +1097,22 @@ namespace cctmp_generics {
 
 	template<auto parsed, auto lbl, auto... lbls>
 	nik_ce auto link = _link<lbl, lbls...>(parsed);
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // labels:
 
+/*
 	template<index_type, index_type...> struct Label { };
+*/
 
 /***********************************************************************************************************************/
 
 // [0-7]:
 
+/*
 	NIK_DEFINE_LABEL_STRUCT(0, 1);
 	NIK_DEFINE_LABEL_STRUCT(1, 2);
 	NIK_DEFINE_LABEL_STRUCT(2, 3);
@@ -1100,22 +1121,27 @@ namespace cctmp_generics {
 	NIK_DEFINE_LABEL_STRUCT(5, 6);
 	NIK_DEFINE_LABEL_STRUCT(6, 7);
 	NIK_DEFINE_LABEL_STRUCT(7, 8);
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // call:
 
+/*
 	template<auto deps, auto... lines>
 	nik_ce auto label_size(nik_avp(auto_pack<deps, lines...>*)) { return sizeof...(lines); }
+*/
 
 /***********************************************************************************************************************/
 
+/*
 	template<auto object, typename T, typename... Ts>
 	nik_ce auto call(Ts... vs)
 	{
 		return Label<label_size(object)>::template l0<object, T, Ts...>(vs...);
 	}
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

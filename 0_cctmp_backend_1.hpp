@@ -267,10 +267,7 @@ namespace cctmp {
 		struct block<BN::lookup, filler...>
 		{
 			template<auto V0, auto... Vs>
-			nik_ces auto result = Overload::template result
-			<
-				Overload::alias, Operator::cadr, V0
-			>;
+			nik_ces auto result = alias<Operator::cadr, V0>;
 		};
 
 	// filter:
@@ -434,18 +431,18 @@ namespace cctmp {
 	template<key_type... filler>
 	struct block<BN::fold, BT::pause, _zero, filler...>
 	{
-		template<auto d, auto n, auto Key, auto Op, auto V, auto... Vs, auto... cs>
-		nik_ces auto result(nik_vp(c)(auto_pack<cs...>*))
+		template<auto d, auto n, auto op, auto V, auto... Vs>
+		nik_ces auto result()
 		{
-			return machination(c, U_pack_Vs<n, Key, Op, V, Vs...>);
+			return machination(U_pack_Vs<op>, U_pack_Vs<n, V, Vs...>);
 		}
 	};
 
 	template<key_type... filler>
 	struct block<BN::fold, BT::halt, _zero, filler...>
 	{
-		template<auto d, auto n, auto Key, auto Op, auto V, auto... Vs, auto... cs>
-		nik_ces auto result(nik_vp(c)(auto_pack<cs...>*)) { return V; }
+		template<auto d, auto n, auto op, auto V, auto... Vs>
+		nik_ces auto result() { return V; }
 	};
 
 	NIK_DEFINE_BLOCK_FOLD_PASS(0)
@@ -466,33 +463,33 @@ namespace cctmp {
 	template<key_type... filler>
 	struct block<BN::cascade, BT::pause, _zero, filler...>
 	{
-		template<auto d, auto n, auto Op, auto V, auto... Vs>
+		template<auto d, auto n, auto op, auto V, auto... Vs>
 		nik_ces auto result()
 		{
-			return machination(U_pack_Vs<Op>, U_pack_Vs<BT::pause, n, V, Vs...>);
+			return machination(U_pack_Vs<op>, U_pack_Vs<BT::pause, n, V, Vs...>);
 		}
 	};
 
 	template<key_type... filler>
 	struct block<BN::cascade, BT::halt, _zero, filler...>
 	{
-		template<auto d, auto n, auto Op, auto V, auto... Vs>
+		template<auto d, auto n, auto op, auto V, auto... Vs>
 		nik_ces auto result() { return V; }
 	};
 
 	template<key_type... filler>
 	struct block<BN::cascade, BT::pass, _zero, filler...>
 	{
-		template<auto d, auto n, auto Op, auto V, auto V0, auto... Vs>
+		template<auto d, auto n, auto op, auto V, auto V0, auto... Vs>
 		nik_ces auto result()
 		{
-			nik_ce auto val = T_store_U<Op>::template result<d, V, V0>;
+			nik_ce auto val = T_store_U<op>::template result<d, V, V0>;
 
 			if nik_ce (is_machination<decltype(val)>)
 
-				return machination(U_pack_Vs<Op>, U_pack_Vs<BT::id, n, val.s1, val.s2, Vs...>);
+				return machination(U_pack_Vs<op>, U_pack_Vs<BT::id, n, val.s1, val.s2, Vs...>);
 			else
-				return NIK_CASCADE_BLOCK(d, n, Op, val, Vs);
+				return NIK_CASCADE_BLOCK(d, n, op, val, Vs);
 		}
 	};
 
@@ -524,7 +521,7 @@ namespace cctmp {
 					nik_ce auto ctn = ins[MI::ctn];
 					nik_ce auto key = ins[MI::key];
 					nik_ce auto act = ins[MI::act];
-					nik_ce auto val = Overload::template result<key, act, Ws...>;
+					nik_ce auto val = overload<U_overload<key, act>, Ws...>;
 
 					if nik_ce (ctn == MI::h1)
 
@@ -560,7 +557,7 @@ namespace cctmp {
 					nik_ce auto ctn	= ins[MI::ctn];
 					nik_ce auto key	= ins[MI::key];
 					nik_ce auto act	= ins[MI::act];
-					nik_ce auto val	= Overload::template result<key, act, Ws...>;
+					nik_ce auto val = overload<U_overload<key, act>, Ws...>;
 
 					if nik_ce (ctn == MI::h1)
 
@@ -767,10 +764,7 @@ namespace cctmp {
 					return NIK_MACHINE(d, MT::cut, c, i, Vs)(val.s1, val.s2, H1, Hs...);
 				else
 				{
-					nik_ce auto h0 = Overload::template result
-					<
-						Overload::alias, Operator::unite, val.v1, val.v2, X0
-					>;
+					nik_ce auto h0 = alias<Operator::unite, val.v1, val.v2, X0>;
 
 					return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, Hs...);
 				}
@@ -798,10 +792,7 @@ namespace cctmp {
 					return NIK_MACHINE(d, MT::cut, c, i, Vs)(val.s1, val.s2, H1, H2, As...);
 				else
 				{
-					nik_ce auto h0 = Overload::template result
-					<
-						Overload::alias, Operator::unite, val.v1, val.v2, X0
-					>;
+					nik_ce auto h0 = alias<Operator::unite, val.v1, val.v2, X0>;
 
 					return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, H2, As...);
 				}
@@ -832,10 +823,7 @@ namespace cctmp {
 					return NIK_MACHINE(d, MT::cut, c, i, Vs)(val.s1, val.s2, H1, Hs...);
 				else
 				{
-					nik_ce auto h0 = Overload::template result
-					<
-						Overload::alias, Operator::unite, val.v1, val.v2, X0
-					>;
+					nik_ce auto h0 = alias<Operator::unite, val.v1, val.v2, X0>;
 
 					return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, Hs...);
 				}
@@ -1364,14 +1352,16 @@ namespace cctmp {
 	template<key_type... filler>
 	struct machine<MN::memoize, MT::lookup, filler...>
 	{
-		using T_find = T_overload<Overload::alias, Operator::find>;
+		struct T_same_car
+		{
+			template<auto W, auto Z>
+			nik_ces auto result = alias
+			<
+				Operator::same, W,
+				alias<Operator::car, Z>
+			>;
 
-		template<auto W, auto Z>
-		nik_ces bool match = Overload::template result
-		<
-			Overload::alias, Operator::same, W,
-			Overload::template result<Overload::alias, Operator::car, Z>
-		>;
+		}; nik_ces auto U_same_car = U_store_T<T_same_car>;
 
 		template
 		<
@@ -1386,8 +1376,7 @@ namespace cctmp {
 		)
 		{
 			nik_ce auto size = sizeof...(Zs);
-			nik_ce auto arr	 = array<bool, match<W0, Zs>...>;
-			nik_ce auto pos	 = T_higher_order<Operator::match, _to_bool_>::result(arr, size);
+			nik_ce auto pos	 = alias<Operator::find, U_custom<U_same_car, W0>, U_restore_T<decltype(A0)>>;
 
 			if nik_ce (pos == size)
 

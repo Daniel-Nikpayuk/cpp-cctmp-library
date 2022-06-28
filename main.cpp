@@ -26,7 +26,7 @@
 #include"0_cctmp_backend_1.hpp"
 #include"1_cctmp_functional.hpp"
 //#include"2_cctmp_frontend.hpp"
-//#include"3_generic_assembly.hpp"
+#include"3_generic_assembly.hpp"
 //#include"4_one_cycle_generics_0.hpp"
 //#include"4_one_cycle_generics_1.hpp"
 //#include"5_domain_specific_grammars.hpp"
@@ -41,9 +41,6 @@
 	using namespace cctmp;
 
 /***********************************************************************************************************************/
-
-	template<auto... Vs>
-	constexpr auto alias_call = Overload::template result<Overload::alias, Vs...>;
 
 	constexpr auto p = U_pack_Vs
 	<

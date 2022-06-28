@@ -73,9 +73,9 @@
 															\
 		V
 
-	#define NIK_K_O_C()												\
+	#define NIK_OP()												\
 															\
-		Overload::template result<Key, Op, cs...,
+		overload<op,
 
 /***********************************************************************************************************************/
 
@@ -515,16 +515,16 @@
 		{													\
 			template											\
 			<												\
-				auto d, auto n, auto Key, auto Op,							\
-				auto V, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs, auto... cs				\
+				auto d, auto n, auto op,								\
+				auto V, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs					\
 			>												\
-			nik_ces auto result(nik_vp(c)(auto_pack<cs...>*))						\
+			nik_ces auto result()										\
 			{												\
 				return NIK_BEGIN_BLOCK(_p_, fold, d, n),						\
 															\
-					NIK_2_N_ACTION_FOLDS(_p_, NIK_K_O_C, NIK_V, NIK_V_1, NIK_R_ANG), Vs...		\
+					NIK_2_N_ACTION_FOLDS(_p_, NIK_OP, NIK_V, NIK_V_1, NIK_R_ANG), Vs...		\
 															\
-				NIK_END_BLOCK(c);									\
+				NIK_END_BLOCK();									\
 			}												\
 		};
 

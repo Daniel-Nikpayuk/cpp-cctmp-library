@@ -246,7 +246,7 @@ namespace cctmp_functional
 		>;
 
 		template<auto v, auto p>
-		nik_ces auto h0 = U_pack_Vs<Overload::higher_order, Operator::curry, U_pack_Vs<cmp, v>, p>;
+		nik_ces auto h0 = U_pack_Vs<_curry_<cmp, v>, p>;
 
 		template<auto d, auto p, auto v>
 		nik_ces auto result = general_start<d, c, v>(h0<v, p>, U_null_Vs, U_null_Vs, p);
@@ -282,14 +282,13 @@ namespace cctmp_functional
 
 // match:
 
-/*
 	struct T_lookup_match
 	{
 		template<auto v, auto p>
 		nik_ces auto match()
 		{
-			nik_ce auto pos = T_find::template result<Overload::higher_order, Operator::curry, _is_equal_<v>, p>;
-			nik_ce auto size = T_length::template result<p>;
+			nik_ce auto pos  = alias<Operator::find, U_same<v>, p>;
+			nik_ce auto size = alias<Operator::length, p>;
 
 			return pair(bool{pos < size}, pos);
 		}
@@ -298,45 +297,20 @@ namespace cctmp_functional
 		nik_ces auto result = match<v, p>();
 
 	}; nik_ce auto U_lookup_match = U_store_T<T_lookup_match>;
-*/
-
-/*
-	struct T_lookup_match
-	{
-		template<auto v, auto p>
-		nik_ces auto match()
-		{
-			nik_ce auto pos	= Overload::template result<Overload::find, is_value_op<>, p, v>;
-			nik_ce auto size	= Overload::template result<Overload::length, p>;
-
-			return pair(bool{pos < size}, pos);
-		}
-
-		template<auto v, auto p>
-		nik_ces auto result = match<v, p>();
-
-	}; nik_ce auto U_ = U_store_T<T_>;
-
-	nik_ce auto U_lookup_match = U_store_T<T_lookup_match>;
-*/
 
 /***********************************************************************************************************************/
 
 // (lookup):
 
-/*
 	struct T_lookup
 	{
 		template<auto d, auto p, auto v, auto dec = 3>
-		nik_ces auto result = compel_start<d, dec>(U_pack_Vs<U_LookupMatch, v, p>);
+		nik_ces auto result = compel_start<d, dec>(U_pack_Vs<U_lookup_match, v, p>);
 
-	}; nik_ce auto U_ = U_store_T<T_>;
-
-	nik_ce auto U_lookup = U_store_T<T_lookup>;
+	}; nik_ce auto U_lookup = U_store_T<T_lookup>;
 
 	template<auto list, auto val, auto dec = 3, auto d = MachineDispatch::initial_depth>
 	nik_ce auto lookup = T_lookup::template result<d, list, val, dec>;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
