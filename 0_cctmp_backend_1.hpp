@@ -391,58 +391,20 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// argument:
-
-	template<key_type... filler>
-	struct block<BN::argument, BT::pause, _zero, filler...>
-	{
-		template<bool V>
-		nik_ces auto result_assert() { return V; }
-
-		template<auto d, auto n, typename... Ts>
-		nik_ces auto result(Ts... vs)
-		{
-			static_assert(result_assert<bool{d != 0}>(), "argument nesting depth exceeded!");
-		}
-	};
-
-	template<key_type... filler>
-	struct block<BN::argument, BT::halt, _zero, filler...>
-	{
-		template<auto d, auto n, typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) { return v; }
-	};
-
-	NIK_DEFINE_BLOCK_ARGUMENT_PASS(0)
-	NIK_DEFINE_BLOCK_ARGUMENT_PASS(1)
-	NIK_DEFINE_BLOCK_ARGUMENT_PASS(2)
-	NIK_DEFINE_BLOCK_ARGUMENT_PASS(3)
-	NIK_DEFINE_BLOCK_ARGUMENT_PASS(4)
-	NIK_DEFINE_BLOCK_ARGUMENT_PASS(5)
-	NIK_DEFINE_BLOCK_ARGUMENT_PASS(6)
-	NIK_DEFINE_BLOCK_ARGUMENT_PASS(7)
-	NIK_DEFINE_BLOCK_ARGUMENT_PASS(8)
-	NIK_DEFINE_BLOCK_ARGUMENT_PASS(9)
-
-/***********************************************************************************************************************/
-
 // (action) fold:
 
 	template<key_type... filler>
 	struct block<BN::fold, BT::pause, _zero, filler...>
 	{
 		template<auto d, auto n, auto op, auto V, auto... Vs>
-		nik_ces auto result()
-		{
-			return machination(U_pack_Vs<op>, U_pack_Vs<n, V, Vs...>);
-		}
+		nik_ces auto result = machination(U_pack_Vs<op>, U_pack_Vs<n, V, Vs...>);
 	};
 
 	template<key_type... filler>
 	struct block<BN::fold, BT::halt, _zero, filler...>
 	{
 		template<auto d, auto n, auto op, auto V, auto... Vs>
-		nik_ces auto result() { return V; }
+		nik_ces auto result = V;
 	};
 
 	NIK_DEFINE_BLOCK_FOLD_PASS(0)
@@ -492,6 +454,41 @@ namespace cctmp {
 				return NIK_CASCADE_BLOCK(d, n, op, val, Vs);
 		}
 	};
+
+/***********************************************************************************************************************/
+
+// argument:
+
+	template<key_type... filler>
+	struct block<BN::argument, BT::pause, _zero, filler...>
+	{
+		template<bool V>
+		nik_ces auto result_assert() { return V; }
+
+		template<auto d, auto n, typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			static_assert(result_assert<bool{d != 0}>(), "argument nesting depth exceeded!");
+		}
+	};
+
+	template<key_type... filler>
+	struct block<BN::argument, BT::halt, _zero, filler...>
+	{
+		template<auto d, auto n, typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs) { return v; }
+	};
+
+	NIK_DEFINE_BLOCK_ARGUMENT_PASS(0)
+	NIK_DEFINE_BLOCK_ARGUMENT_PASS(1)
+	NIK_DEFINE_BLOCK_ARGUMENT_PASS(2)
+	NIK_DEFINE_BLOCK_ARGUMENT_PASS(3)
+	NIK_DEFINE_BLOCK_ARGUMENT_PASS(4)
+	NIK_DEFINE_BLOCK_ARGUMENT_PASS(5)
+	NIK_DEFINE_BLOCK_ARGUMENT_PASS(6)
+	NIK_DEFINE_BLOCK_ARGUMENT_PASS(7)
+	NIK_DEFINE_BLOCK_ARGUMENT_PASS(8)
+	NIK_DEFINE_BLOCK_ARGUMENT_PASS(9)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

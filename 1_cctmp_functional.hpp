@@ -117,23 +117,23 @@ namespace cctmp_functional
 
 	struct T_block_fold
 	{
-		template<auto d, auto key, auto op, auto cs, auto V, auto l>
+		template<auto d, auto op, auto V, auto l>
 		nik_ces auto result = V;
 
 	}; nik_ce auto U_block_fold = U_store_T<T_block_fold>;
 
-	template<auto d, auto key, auto op, auto cs, auto V, auto... Vs, nik_vp(l)(auto_pack<Vs...>*)>
-	nik_ce auto T_block_fold::result<d, key, op, cs, V, l> = NIK_FOLD_BLOCK(d, sizeof...(Vs), key, op, cs, V, Vs);
+	template<auto d, auto op, auto V, auto... Vs, nik_vp(l)(auto_pack<Vs...>*)>
+	nik_ce auto T_block_fold::result<d, op, V, l> = NIK_FOLD_BLOCK(d, sizeof...(Vs), op, V, Vs);
 
 	struct T_fold
 	{
-		template<auto d, auto key, auto op, auto cs, auto V, auto l, auto dec = 3>
-		nik_ces auto result = compel_start<d, dec>(U_pack_Vs<U_block_fold, key, op, cs, V, l>);
+		template<auto d, auto op, auto V, auto l, auto dec = 3>
+		nik_ces auto result = compel_start<d, dec>(U_pack_Vs<U_block_fold, op, V, l>);
 
 	}; nik_ce auto U_fold = U_store_T<T_fold>;
 
-	template<auto key, auto op, auto V, auto l, auto cs = U_null_Vs, auto dec = 3, auto d = MachineDispatch::initial_depth>
-	nik_ce auto fold = T_fold::template result<d, key, op, cs, V, l, dec>;
+	template<auto op, auto V, auto l, auto dec = 3, auto d = MachineDispatch::initial_depth>
+	nik_ce auto fold = T_fold::template result<d, op, V, l, dec>;
 
 // cascade:
 

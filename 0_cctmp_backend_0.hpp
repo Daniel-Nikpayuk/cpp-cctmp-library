@@ -301,6 +301,11 @@ namespace cctmp {
 
 			nik_ces key_type product			= 19;
 
+			// mutation:
+
+			nik_ces key_type assign				= 20;
+			nik_ces key_type dereference			= 21;
+
 		// higher order:
 
 			// basis:
@@ -332,14 +337,14 @@ namespace cctmp {
 
 			// basis:
 
-			nik_ces key_type first				=  0;
-			nik_ces key_type to_const			=  1;
+			nik_ces key_type to_const			=  0;
 
 			// comparison:
 
-			nik_ces key_type same				=  2;
-			nik_ces key_type csame				=  3;
-			nik_ces key_type is_int_type			=  4;
+			nik_ces key_type same				=  1;
+			nik_ces key_type csame				=  2;
+			nik_ces key_type is_int_type			=  3;
+			nik_ces key_type not_int_type			=  4;
 
 			// functional:
 
@@ -577,6 +582,28 @@ namespace cctmp {
 
 			}; nik_ce auto _product_ = U_function_T<Operator::product>;
 
+	// mutation:
+
+		// assign:
+
+			template<auto... filler>
+			struct T_overload<Overload::function, Operator::assign, filler...>
+			{
+				template<typename T1, typename T2>
+				nik_ces auto result(T1 v1, T2 v2) { return v1 = v2; }
+
+			}; nik_ce auto _assign_ = U_function_T<Operator::assign>;
+
+		// dereference:
+
+			template<auto... filler>
+			struct T_overload<Overload::function, Operator::dereference, filler...>
+			{
+				template<typename T>
+				nik_ces auto & result(T v) { return *v; }
+
+			}; nik_ce auto _dereference_ = U_function_T<Operator::dereference>;
+
 /***********************************************************************************************************************/
 
 // higher order:
@@ -707,9 +734,6 @@ namespace cctmp {
 
 	// basis:
 
-		template<auto V, auto... Vs>
-		nik_ce auto alias<Operator::first, V, Vs...> = V;
-
 		template<typename T, nik_vp(V)(T*)>
 		nik_ce auto alias<Operator::to_const, V> = U_store_T<T const>;
 
@@ -744,6 +768,11 @@ namespace cctmp {
 		template<nik_vp(V)(  signed long     *)> nik_ce auto alias<Operator::is_int_type, V> = true;
 		template<nik_vp(V)(unsigned long long*)> nik_ce auto alias<Operator::is_int_type, V> = true;
 		template<nik_vp(V)(  signed long long*)> nik_ce auto alias<Operator::is_int_type, V> = true;
+
+		template<auto V> nik_ce auto alias<Operator::not_int_type, V> = !alias<Operator::is_int_type, V>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 	// functional:
 
@@ -788,10 +817,8 @@ namespace cctmp {
 		nik_ce auto alias<Operator::unite, p0, p1, Xs...> = U_pack_Vs<Vs..., Xs..., Ws...>;
 
 		template<auto op, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-		nik_ce auto alias<Operator::find, op, p> = T_higher_order<Operator::match, _to_bool_>::result
-		(
-			array<bool, overload<op, Vs>...>, sizeof...(Vs)
-		);
+		nik_ce auto alias<Operator::find, op, p> = T_higher_order<Operator::match, _to_bool_>::template
+			result<bool const*, index_type>(array<bool, overload<op, Vs>...>, sizeof...(Vs));
 
 		template<auto Op, auto... Vs>
 		nik_ce auto alias<Operator::custom, Op, Vs...> = T_store_U<Op>::template result<Vs...>;
@@ -809,53 +836,53 @@ namespace cctmp {
 
 	// basis:
 
-	template<auto... Vs> using T_first		= T_alias   < Operator::first       , Vs... >;
-	template<auto... Vs> using T_to_const		= T_alias   < Operator::to_const    , Vs... >;
+	template<auto... Vs> using T_to_const		= T_alias   < Operator::to_const     , Vs... >;
 
-	template<auto... Vs> nik_ce auto U_first	= U_store_T < T_first               < Vs... > >;
-	template<auto... Vs> nik_ce auto U_to_const	= U_store_T < T_to_const            < Vs... > >;
+	template<auto... Vs> nik_ce auto U_to_const	= U_store_T < T_to_const             < Vs... > >;
 
 	// comparison:
 
-	template<auto... Vs> using T_same		= T_alias   < Operator::same        , Vs... >;
-	template<auto... Vs> using T_csame		= T_alias   < Operator::csame       , Vs... >;
-	template<auto... Vs> using T_is_int_type	= T_alias   < Operator::is_int_type , Vs... >;
+	template<auto... Vs> using T_same		= T_alias   < Operator::same         , Vs... >;
+	template<auto... Vs> using T_csame		= T_alias   < Operator::csame        , Vs... >;
+	template<auto... Vs> using T_is_int_type	= T_alias   < Operator::is_int_type  , Vs... >;
+	template<auto... Vs> using T_not_int_type	= T_alias   < Operator::not_int_type , Vs... >;
 
-	template<auto... Vs> nik_ce auto U_same		= U_store_T < T_same                < Vs... > >;
-	template<auto... Vs> nik_ce auto U_csame	= U_store_T < T_csame               < Vs... > >;
-	template<auto... Vs> nik_ce auto U_is_int_type	= U_store_T < T_is_int_type         < Vs... > >;
+	template<auto... Vs> nik_ce auto U_same		= U_store_T < T_same                 < Vs... > >;
+	template<auto... Vs> nik_ce auto U_csame	= U_store_T < T_csame                < Vs... > >;
+	template<auto... Vs> nik_ce auto U_is_int_type	= U_store_T < T_is_int_type          < Vs... > >;
+	template<auto... Vs> nik_ce auto U_not_int_type	= U_store_T < T_not_int_type         < Vs... > >;
 
 	// functional:
 
-	template<auto... Vs> using T_length		= T_alias   < Operator::length      , Vs... >;
-	template<auto... Vs> using T_map		= T_alias   < Operator::map         , Vs... >;
-	template<auto... Vs> using T_zip		= T_alias   < Operator::zip         , Vs... >;
-	template<auto... Vs> using T_is_null		= T_alias   < Operator::is_null     , Vs... >;
-	template<auto... Vs> using T_cons		= T_alias   < Operator::cons        , Vs... >;
-	template<auto... Vs> using T_push		= T_alias   < Operator::push        , Vs... >;
-	template<auto... Vs> using T_car		= T_alias   < Operator::car         , Vs... >;
-	template<auto... Vs> using T_cdr		= T_alias   < Operator::cdr         , Vs... >;
-	template<auto... Vs> using T_cadr		= T_alias   < Operator::cadr        , Vs... >;
-	template<auto... Vs> using T_unite		= T_alias   < Operator::unite       , Vs... >;
-	template<auto... Vs> using T_find		= T_alias   < Operator::find        , Vs... >;
+	template<auto... Vs> using T_length		= T_alias   < Operator::length       , Vs... >;
+	template<auto... Vs> using T_map		= T_alias   < Operator::map          , Vs... >;
+	template<auto... Vs> using T_zip		= T_alias   < Operator::zip          , Vs... >;
+	template<auto... Vs> using T_is_null		= T_alias   < Operator::is_null      , Vs... >;
+	template<auto... Vs> using T_cons		= T_alias   < Operator::cons         , Vs... >;
+	template<auto... Vs> using T_push		= T_alias   < Operator::push         , Vs... >;
+	template<auto... Vs> using T_car		= T_alias   < Operator::car          , Vs... >;
+	template<auto... Vs> using T_cdr		= T_alias   < Operator::cdr          , Vs... >;
+	template<auto... Vs> using T_cadr		= T_alias   < Operator::cadr         , Vs... >;
+	template<auto... Vs> using T_unite		= T_alias   < Operator::unite        , Vs... >;
+	template<auto... Vs> using T_find		= T_alias   < Operator::find         , Vs... >;
 
-	template<auto... Vs> nik_ce auto U_length	= U_store_T < T_length              < Vs... > >;
-	template<auto... Vs> nik_ce auto U_map		= U_store_T < T_map                 < Vs... > >;
-	template<auto... Vs> nik_ce auto U_zip		= U_store_T < T_zip                 < Vs... > >;
-	template<auto... Vs> nik_ce auto U_is_null	= U_store_T < T_is_null             < Vs... > >;
-	template<auto... Vs> nik_ce auto U_cons		= U_store_T < T_cons                < Vs... > >;
-	template<auto... Vs> nik_ce auto U_push		= U_store_T < T_push                < Vs... > >;
-	template<auto... Vs> nik_ce auto U_car		= U_store_T < T_car                 < Vs... > >;
-	template<auto... Vs> nik_ce auto U_cdr		= U_store_T < T_cdr                 < Vs... > >;
-	template<auto... Vs> nik_ce auto U_cadr		= U_store_T < T_cadr                < Vs... > >;
-	template<auto... Vs> nik_ce auto U_unite	= U_store_T < T_unite               < Vs... > >;
-	template<auto... Vs> nik_ce auto U_find		= U_store_T < T_find                < Vs... > >;
+	template<auto... Vs> nik_ce auto U_length	= U_store_T < T_length               < Vs... > >;
+	template<auto... Vs> nik_ce auto U_map		= U_store_T < T_map                  < Vs... > >;
+	template<auto... Vs> nik_ce auto U_zip		= U_store_T < T_zip                  < Vs... > >;
+	template<auto... Vs> nik_ce auto U_is_null	= U_store_T < T_is_null              < Vs... > >;
+	template<auto... Vs> nik_ce auto U_cons		= U_store_T < T_cons                 < Vs... > >;
+	template<auto... Vs> nik_ce auto U_push		= U_store_T < T_push                 < Vs... > >;
+	template<auto... Vs> nik_ce auto U_car		= U_store_T < T_car                  < Vs... > >;
+	template<auto... Vs> nik_ce auto U_cdr		= U_store_T < T_cdr                  < Vs... > >;
+	template<auto... Vs> nik_ce auto U_cadr		= U_store_T < T_cadr                 < Vs... > >;
+	template<auto... Vs> nik_ce auto U_unite	= U_store_T < T_unite                < Vs... > >;
+	template<auto... Vs> nik_ce auto U_find		= U_store_T < T_find                 < Vs... > >;
 
 	// modular:
 
-	template<auto... Vs> using T_custom		= T_alias   < Operator::custom      , Vs... >;
+	template<auto... Vs> using T_custom		= T_alias   < Operator::custom       , Vs... >;
 
-	template<auto... Vs> nik_ce auto U_custom	= U_store_T < T_custom              < Vs... > >;
+	template<auto... Vs> nik_ce auto U_custom	= U_store_T < T_custom               < Vs... > >;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

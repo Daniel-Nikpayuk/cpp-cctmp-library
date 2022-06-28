@@ -73,9 +73,13 @@
 															\
 		V
 
+	#define NIK_OVER()												\
+															\
+		overload<
+
 	#define NIK_OP()												\
 															\
-		overload<op,
+		op
 
 /***********************************************************************************************************************/
 
@@ -383,9 +387,9 @@
 
 // action folds:
 
-	#define NIK_2_N_ACTION_FOLDS(_n_, _l_, _m_, _v_, _r_)								\
+	#define NIK_2_N_ACTION_FOLDS(_n_, _l_, _m_, _s_, _v_, _r_)							\
 															\
-		NIK_2_N_MONOID_CALLS(_n_, _l_, _m_), NIK_2_N_MONOID_VARS(_n_, _v_, _r_)
+		NIK_2_N_MONOID_CALLS(_n_, _l_, _m_), _s_, NIK_2_N_MONOID_VARS(_n_, _v_, _r_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -445,17 +449,17 @@
 															\
 		NIK_BEGIN_BLOCK(_p_, function, _d_, _n_), _h_, _v_... NIK_END_BLOCK
 
-	#define NIK_ARGUMENT_BLOCK(_p_, _d_, _n_, _t_)									\
+	#define NIK_FOLD_BLOCK(_d_, _n_, _o_, _s_, _v_)									\
 															\
-		NIK_BEGIN_BLOCK(_p_, argument, _d_, _n_), _t_... NIK_END_BLOCK
-
-	#define NIK_FOLD_BLOCK(_d_, _n_, _k_, _o_, _c_, _s_, _v_)							\
-															\
-		NIK_BEGIN_BLOCK(9, fold, _d_, _n_), _k_, _o_, _s_, _v_... NIK_END_BLOCK(_c_)
+		NIK_BEGIN_BLOCK(9, fold, _d_, _n_), _o_, _s_, _v_... NIK_END_BLOCK
 
 	#define NIK_CASCADE_BLOCK(_d_, _n_, _o_, _s_, _v_)								\
 															\
 		NIK_BEGIN_BLOCK(0, cascade, _d_, _n_), _o_, _s_, _v_... NIK_END_BLOCK()
+
+	#define NIK_ARGUMENT_BLOCK(_p_, _d_, _n_, _t_)									\
+															\
+		NIK_BEGIN_BLOCK(_p_, argument, _d_, _n_), _t_... NIK_END_BLOCK
 
 /***********************************************************************************************************************/
 
@@ -496,6 +500,19 @@
 			NIK_END_BLOCK;											\
 		};
 
+	#define NIK_DEFINE_BLOCK_FOLD_PASS(_p_)										\
+															\
+		template<key_type... filler>										\
+		struct block<BN::fold, BT::pass, _p_, filler...>							\
+		{													\
+			template<auto d, auto n, auto op, auto V, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs>		\
+			nik_ces auto result = NIK_BEGIN_BLOCK(_p_, fold, d, n),	op,					\
+															\
+				NIK_2_N_ACTION_FOLDS(_p_, NIK_OVER, NIK_OP, V, NIK_V_1, NIK_R_ANG), Vs...		\
+															\
+			NIK_END_BLOCK;											\
+		};
+
 	#define NIK_DEFINE_BLOCK_ARGUMENT_PASS(_p_)									\
 															\
 		template<key_type... filler>										\
@@ -505,26 +522,6 @@
 			nik_ces auto result(NIK_2_N_ARG_VARS(_p_, NIK_T_V_1), Ts... vs)					\
 			{												\
 				return NIK_ARGUMENT_BLOCK(_p_, d, n, Ts)(vs...);					\
-			}												\
-		};
-
-	#define NIK_DEFINE_BLOCK_FOLD_PASS(_p_)										\
-															\
-		template<key_type... filler>										\
-		struct block<BN::fold, BT::pass, _p_, filler...>							\
-		{													\
-			template											\
-			<												\
-				auto d, auto n, auto op,								\
-				auto V, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs					\
-			>												\
-			nik_ces auto result()										\
-			{												\
-				return NIK_BEGIN_BLOCK(_p_, fold, d, n),						\
-															\
-					NIK_2_N_ACTION_FOLDS(_p_, NIK_OP, NIK_V, NIK_V_1, NIK_R_ANG), Vs...		\
-															\
-				NIK_END_BLOCK();									\
 			}												\
 		};
 

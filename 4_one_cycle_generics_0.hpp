@@ -19,7 +19,7 @@
 
 namespace cpp_one_cycle_generics {
 
-	using namespace cpp_cctmp_library;
+	using namespace cctmp_generics;
 
 /*
 	template<auto V>		nik_ce auto _constant_	= cpp_cctmp_library::template _constant_<V>;
