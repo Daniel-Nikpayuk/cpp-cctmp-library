@@ -21,10 +21,52 @@
 
 namespace cctmp_generics {
 
-	using namespace cctmp;
+	using key_type						= typename cctmp::key_type;
+	using index_type					= typename cctmp::index_type;
+	using cindex_type					= typename cctmp::cindex_type;
+	using BN						= typename cctmp::BN;
+	using BD						= typename cctmp::BD;
+	using Operator						= typename cctmp::Operator;
 
-	template<auto n, auto m = index_type{0}>
-	nik_ce auto segment = cctmp_functional::template segment<n, m>;
+	template<auto... Vs> using auto_pack			= typename cctmp::template auto_pack<Vs...>;
+	template<auto... Vs> using block			= typename cctmp::template block<Vs...>;
+
+	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
+
+	template<auto V> using T_out_type			= typename cctmp::template T_out_type<V>;
+
+	nik_ce auto _zero					= cctmp::_zero;
+	nik_ce auto _one					= cctmp::_one;
+
+	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
+
+	nik_ce auto _id_					= cctmp::_id_;
+	nik_ce auto _assign_					= cctmp::_assign_;
+	nik_ce auto _dereference_				= cctmp::_dereference_;
+
+	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
+	template<typename T> nik_ce auto U_restore_T		= cctmp::template U_restore_T<T>;
+	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
+	template<typename... Ts> nik_ce auto U_pack_Ts		= cctmp::template U_pack_Ts<Ts...>;
+
+	template<typename T, auto... Vs> nik_ce auto array	= cctmp::template array<T, Vs...>;
+
+	template<auto V> nik_ce auto in_types			= cctmp::template in_types<V>;
+
+	template<auto... Vs> nik_ce auto overload		= cctmp::template overload<Vs...>;
+
+	template<auto V> nik_ce auto _constant_			= cctmp::template _constant_<V>;
+	template<auto f> nik_ce auto _apply_			= cctmp::template _apply_<f>;
+	template<auto... Vs> nik_ce auto _bind_			= cctmp::template _bind_<Vs...>;
+
+	template<auto... Vs> nik_ce auto alias			= cctmp::template alias<Vs...>;
+
+	template<auto... Vs> nik_ce auto U_same			= cctmp::template U_same<Vs...>;
+	template<auto...> nik_ce auto U_not_int_type		= cctmp::template U_not_int_type<>;
+
+	template<auto...Vs> nik_ce auto U_custom		= cctmp::template U_custom<Vs...>;
+
+	template<auto... Vs> nik_ce auto segment		= cctmp_functional::template segment<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -555,20 +597,20 @@ namespace cctmp_generics {
 
 	// implemented this way as gcc complains about ambiguous matches.
 
-	template<typename... Ts, auto... fs>
-	nik_ce auto _endodrop(nik_avp(typename_pack<Ts...>*), nik_vp(p)(auto_pack<fs...>*))
+	template<auto... UTs, auto... fs>
+	nik_ce auto _endodrop(nik_avp(auto_pack<UTs...>*), nik_vp(p)(auto_pack<fs...>*))
 	{
 		nik_ce auto size = sizeof...(fs);
 
-		if nik_ce (size == _zero) return T_store_U<_id_>::template result<Ts...>;
+		if nik_ce (size == _zero) return T_store_U<_id_>::template result<T_store_U<UTs>...>;
 		else
 		{
 			nik_ce auto s    = cctmp_functional::split<size - _one, U_restore_T<decltype(p)>>;
 			nik_ce auto f    = cctmp_functional::fold<U_custom<U_endopose>, _lifted_id_, s.v1>;
 			nik_ce auto halt = cctmp_functional::at<_zero, s.v2>;
 
-			if nik_ce (same<f, _lifted_id_>) return T_store_U<halt>::template result<Ts...>;
-			else                             return T_store_U<f>::template result<halt, Ts...>;
+			if nik_ce (same<f, _lifted_id_>) return T_store_U<halt>::template result<T_store_U<UTs>...>;
+			else                             return T_store_U<f>::template result<halt, T_store_U<UTs>...>;
 		}
 	}
 
@@ -818,7 +860,7 @@ namespace cctmp_generics {
 
 			else if nik_ce (is_lift<instr0>)
 			{
-				nik_ce auto instr1 = go_to<label_value<car<instrs...>>>;
+				nik_ce auto instr1 = go_to<label_value<alias<Operator::car, instrs...>>>;
 				nik_ce auto nchars = U_pack_Vs<ws..., instr0>;
 
 				return dispatch_go_to<instr1, instrs...>(labels, lines, words, nchars, graph, verts);
@@ -880,7 +922,7 @@ namespace cctmp_generics {
 
 				return rest_is_empty<instr0>(labels, lines, words, chars, graph, verts);
 
-			else if nik_ce (is_label<car<instrs...>>)
+			else if nik_ce (is_label<alias<Operator::car, instrs...>>)
 
 				return is_before_label<instr0, instrs...>(labels, lines, words, chars, graph, verts);
 			else

@@ -19,33 +19,14 @@
 
 namespace cpp_one_cycle_specs {
 
-	using index_type					= typename cpp_cctmp_library::index_type;
+	template<auto U> using T_store_U			= cctmp::template T_store_U<U>;
 
-	template<typename T>		nik_ce auto U_store_T	= cpp_cctmp_library::template U_store_T<T>;
-	template<auto U>		using T_store_U		= cpp_cctmp_library::template T_store_U<U>;
-	template<auto... Vs>		nik_ce auto U_pack_Vs	= cpp_cctmp_library::template U_pack_Vs<Vs...>;
-	template<auto... Vs>		using auto_pack		= typename cpp_cctmp_library::template auto_pack<Vs...>;
+	nik_ce auto _id_					= cctmp::_id_;
+	nik_ce auto _equal_					= cctmp::_equal_;
 
-//	template<auto lbl>		nik_ce auto label	= cpp_cctmp_library::template label<lbl>;
-//	template<auto... Vs>		nik_ce auto lift	= cpp_cctmp_library::template lift<Vs...>;
-//	template<auto... Vs>		nik_ce auto test	= cpp_cctmp_library::template test<Vs...>;
-//	template<auto V>		nik_ce auto branch	= cpp_cctmp_library::template branch<V>;
-//	template<auto V>		nik_ce auto go_to	= cpp_cctmp_library::template go_to<V>;
-//	template<auto obj, auto lbl>	nik_ce auto link	= cpp_cctmp_library::template link<obj, lbl>;
-//	template<auto Lbl, auto... Is>	nik_ce auto compile	= cpp_cctmp_library::template compile<Lbl, Is...>;
+	nik_ce auto _deref_assign_				= cctmp_generics::_deref_assign_;
 
-//	nik_ce auto _return_					= cpp_cctmp_library::_return_;
-
-	nik_ce auto _id_					= cpp_cctmp_library::_id_;
-
-	template<auto f, auto f_ns_p, auto ns_p>
-	nik_ce auto _subcompose_				= cpp_cctmp_library::_subcompose_<f, f_ns_p, ns_p>;
-
-	nik_ce auto _equal_					= cpp_cctmp_library::_equal_;
-	template<auto V = 1> nik_ce auto _increment_		= cpp_cctmp_library::_increment_<V>;
-	nik_ce auto _assign_					= cpp_cctmp_library::_assign_;
-	nik_ce auto _dereference_				= cpp_cctmp_library::_dereference_;
-	nik_ce auto _deref_assign_				= cpp_cctmp_library::_deref_assign_;
+	template<auto... Vs> nik_ce auto _increment_		= cctmp::template _increment_<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

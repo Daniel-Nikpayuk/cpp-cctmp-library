@@ -23,9 +23,46 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-namespace cctmp_functional
-{
-	using namespace cctmp;
+namespace cctmp_functional {
+
+	using index_type					= typename cctmp::index_type;
+	using BN						= typename cctmp::BN;
+	using BD						= typename cctmp::BD;
+	using MD						= typename cctmp::MD;
+	using Operator						= typename cctmp::Operator;
+
+	template<auto... Vs> using auto_pack			= typename cctmp::template auto_pack<Vs...>;
+	template<auto... Vs> using block			= typename cctmp::template block<Vs...>;
+
+	nik_ce auto _zero					= cctmp::_zero;
+
+	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
+
+	nik_ce auto _h1						= cctmp::_h1;
+	nik_ce auto _register					= cctmp::_register;
+	nik_ce auto _argument					= cctmp::_argument;
+	nik_ce auto _value					= cctmp::_value;
+
+	nik_ce auto _less_than_					= cctmp::_less_than_;
+
+	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
+	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
+
+	template<auto... Vs> nik_ce auto _curry_		= cctmp::template _curry_<Vs...>;
+
+	template<auto... Vs> nik_ce auto U_same			= cctmp::template U_same<Vs...>;
+
+	template<auto... Vs> nik_ce auto unite			= cctmp::template unite<Vs...>;
+	template<auto... Vs> nik_ce auto find			= cctmp::template find<Vs...>;
+
+	template<auto... Vs> nik_ce auto alias			= cctmp::template alias<Vs...>;
+
+	template<auto... Vs> nik_ce auto function		= cctmp::template function<Vs...>;
+	template<auto... Vs> nik_ce auto copy			= cctmp::template copy<Vs...>;
+	template<auto... Vs> nik_ce auto write			= cctmp::template write<Vs...>;
+	template<auto...> nik_ce auto stage			= cctmp::template stage<>;
+
+	template<auto... Vs> nik_ce auto controller		= cctmp::template controller<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -39,11 +76,11 @@ namespace cctmp_functional
 	struct T_at
 	{
 		template<auto d, auto n, auto p>
-		nik_ces auto result = variable_start<d, n, BN::sifter>(p);
+		nik_ces auto result = cctmp::variable_start<d, n, BN::sifter>(p);
 
 	}; nik_ce auto U_at = U_store_T<T_at>;
 
-	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
+	template<auto n, auto p, auto d = MD::initial_depth>
 	nik_ce auto at = T_at::template result<d, n, p>;
 
 // left:
@@ -51,11 +88,11 @@ namespace cctmp_functional
 	struct T_left
 	{
 		template<auto d, auto n, auto p>
-		nik_ces auto result = function_start<d, n, BN::left>(p);
+		nik_ces auto result = cctmp::function_start<d, n, BN::left>(p);
 
 	}; nik_ce auto U_left = U_store_T<T_left>;
 
-	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
+	template<auto n, auto p, auto d = MD::initial_depth>
 	nik_ce auto left = T_left::template result<d, n, p>;
 
 // right:
@@ -63,11 +100,11 @@ namespace cctmp_functional
 	struct T_right
 	{
 		template<auto d, auto n, auto p>
-		nik_ces auto result = variable_start<d, n, BN::right>(p);
+		nik_ces auto result = cctmp::variable_start<d, n, BN::right>(p);
 
 	}; nik_ce auto U_right = U_store_T<T_right>;
 
-	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
+	template<auto n, auto p, auto d = MD::initial_depth>
 	nik_ce auto right = T_right::template result<d, n, p>;
 
 // cut:
@@ -75,11 +112,11 @@ namespace cctmp_functional
 	struct T_cut
 	{
 		template<auto d, auto n, auto p>
-		nik_ces auto result = function_start<d, n, BN::filter>(p);
+		nik_ces auto result = cctmp::function_start<d, n, BN::filter>(p);
 
 	}; nik_ce auto U_cut = U_store_T<T_cut>;
 
-	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
+	template<auto n, auto p, auto d = MD::initial_depth>
 	nik_ce auto cut = T_cut::template result<d, n, p>;
 
 // split:
@@ -87,11 +124,11 @@ namespace cctmp_functional
 	struct T_split
 	{
 		template<auto d, auto n, auto p>
-		nik_ces auto result = function_start<d, n, BN::split>(p);
+		nik_ces auto result = cctmp::function_start<d, n, BN::split>(p);
 
 	}; nik_ce auto U_split = U_store_T<T_split>;
 
-	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
+	template<auto n, auto p, auto d = MD::initial_depth>
 	nik_ce auto split = T_split::template result<d, n, p>;
 
 // segment:
@@ -106,11 +143,11 @@ namespace cctmp_functional
 	struct T_segment
 	{
 		template<auto d, auto n, auto m, auto dec = 3>
-		nik_ces auto result = compel_start<d, dec>(U_pack_Vs<U_block_segment, n, m>);
+		nik_ces auto result = cctmp::compel_start<d, dec>(U_pack_Vs<U_block_segment, n, m>);
 
 	}; nik_ce auto U_segment = U_store_T<T_segment>;
 
-	template<auto n, auto m = index_type{0}, auto dec = 3, auto d = MachineDispatch::initial_depth>
+	template<auto n, auto m = index_type{0}, auto dec = 3, auto d = MD::initial_depth>
 	nik_ce auto segment = T_segment::template result<d, n, m, dec>;
 
 // fold:
@@ -128,11 +165,11 @@ namespace cctmp_functional
 	struct T_fold
 	{
 		template<auto d, auto op, auto V, auto l, auto dec = 3>
-		nik_ces auto result = compel_start<d, dec>(U_pack_Vs<U_block_fold, op, V, l>);
+		nik_ces auto result = cctmp::compel_start<d, dec>(U_pack_Vs<U_block_fold, op, V, l>);
 
 	}; nik_ce auto U_fold = U_store_T<T_fold>;
 
-	template<auto op, auto V, auto l, auto dec = 3, auto d = MachineDispatch::initial_depth>
+	template<auto op, auto V, auto l, auto dec = 3, auto d = MD::initial_depth>
 	nik_ce auto fold = T_fold::template result<d, op, V, l, dec>;
 
 // cascade:
@@ -150,11 +187,11 @@ namespace cctmp_functional
 	struct T_cascade
 	{
 		template<auto d, auto op, auto V, auto l, auto dec = 3>
-		nik_ces auto result = compel_start<d, dec>(U_pack_Vs<U_block_cascade, op, V, l>);
+		nik_ces auto result = cctmp::compel_start<d, dec>(U_pack_Vs<U_block_cascade, op, V, l>);
 
 	}; nik_ce auto U_cascade = U_store_T<T_cascade>;
 
-	template<auto op, auto V, auto l, auto dec = 3, auto d = MachineDispatch::initial_depth>
+	template<auto op, auto V, auto l, auto dec = 3, auto d = MD::initial_depth>
 	nik_ce auto cascade = T_cascade::template result<d, op, V, l, dec>;
 
 /***********************************************************************************************************************/
@@ -176,11 +213,11 @@ namespace cctmp_functional
 		>;
 
 		template<auto d, auto n, auto p>
-		nik_ces auto result = general_start<d, c>(p, U_pack_Vs<n>, U_null_Vs);
+		nik_ces auto result = cctmp::general_start<d, c>(p, U_pack_Vs<n>, U_null_Vs);
 
 	}; nik_ce auto U_erase = U_store_T<T_erase>;
 
-	template<auto n, auto p, auto d = MachineDispatch::initial_depth>
+	template<auto n, auto p, auto d = MD::initial_depth>
 	nik_ce auto erase = T_erase::template result<d, n, p>;
 
 // insert:
@@ -196,11 +233,11 @@ namespace cctmp_functional
 		>;
 
 		template<auto d, auto v, auto n, auto p>
-		nik_ces auto result = general_start<d, c, v>(p, U_pack_Vs<n>, U_null_Vs);
+		nik_ces auto result = cctmp::general_start<d, c, v>(p, U_pack_Vs<n>, U_null_Vs);
 
 	}; nik_ce auto U_insert = U_store_T<T_insert>;
 
-	template<auto v, auto n, auto p, auto d = MachineDispatch::initial_depth>
+	template<auto v, auto n, auto p, auto d = MD::initial_depth>
 	nik_ce auto insert = T_insert::template result<d, v, n, p>;
 
 // replace:
@@ -216,11 +253,11 @@ namespace cctmp_functional
 		>;
 
 		template<auto d, auto v, auto n, auto p>
-		nik_ces auto result = general_start<d, c, v>(p, U_pack_Vs<n>, U_null_Vs);
+		nik_ces auto result = cctmp::general_start<d, c, v>(p, U_pack_Vs<n>, U_null_Vs);
 
 	}; nik_ce auto U_replace = U_store_T<T_replace>;
 
-	template<auto v, auto n, auto p, auto d = MachineDispatch::initial_depth>
+	template<auto v, auto n, auto p, auto d = MD::initial_depth>
 	nik_ce auto replace = T_replace::template result<d, v, n, p>;
 
 /***********************************************************************************************************************/
@@ -249,12 +286,12 @@ namespace cctmp_functional
 		nik_ces auto h0 = U_pack_Vs<_curry_<cmp, v>, p>;
 
 		template<auto d, auto p, auto v>
-		nik_ces auto result = general_start<d, c, v>(h0<v, p>, U_null_Vs, U_null_Vs, p);
+		nik_ces auto result = cctmp::general_start<d, c, v>(h0<v, p>, U_null_Vs, U_null_Vs, p);
 
 	}; template<auto cmp = _less_than_>
 		nik_ce auto U_insert_sort = U_store_T<T_insert_sort<cmp>>;
 
-	template<auto list, auto insert, auto cmp = _less_than_, auto d = MachineDispatch::initial_depth>
+	template<auto list, auto insert, auto cmp = _less_than_, auto d = MD::initial_depth>
 	nik_ce auto insert_sort = T_insert_sort<cmp>::template result<d, list, insert>;
 
 // (sort):
@@ -263,7 +300,7 @@ namespace cctmp_functional
 	<
 		auto l,
 		auto cmp	= _less_than_,
-		auto d		= MachineDispatch::initial_depth
+		auto d		= MD::initial_depth
 	>
 	nik_ce auto sort = T_cascade::template result
 	<
@@ -305,11 +342,11 @@ namespace cctmp_functional
 	struct T_lookup
 	{
 		template<auto d, auto p, auto v, auto dec = 3>
-		nik_ces auto result = compel_start<d, dec>(U_pack_Vs<U_lookup_match, v, p>);
+		nik_ces auto result = cctmp::compel_start<d, dec>(U_pack_Vs<U_lookup_match, v, p>);
 
 	}; nik_ce auto U_lookup = U_store_T<T_lookup>;
 
-	template<auto list, auto val, auto dec = 3, auto d = MachineDispatch::initial_depth>
+	template<auto list, auto val, auto dec = 3, auto d = MD::initial_depth>
 	nik_ce auto lookup = T_lookup::template result<d, list, val, dec>;
 
 /***********************************************************************************************************************/

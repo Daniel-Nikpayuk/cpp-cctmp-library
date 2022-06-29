@@ -27,8 +27,8 @@
 #include"1_cctmp_functional.hpp"
 //#include"2_cctmp_frontend.hpp"
 #include"3_generic_assembly.hpp"
-//#include"4_one_cycle_generics_0.hpp"
-//#include"4_one_cycle_generics_1.hpp"
+#include"4_one_cycle_generics_0.hpp"
+#include"4_one_cycle_generics_1.hpp"
 //#include"5_domain_specific_grammars.hpp"
 //#include"6_big_numbers_0.hpp"
 //#include"6_big_numbers_1.hpp"
@@ -38,10 +38,11 @@
 
 /***********************************************************************************************************************/
 
-	using namespace cctmp_generics;
+//	using namespace cctmp_generics;
 
 /***********************************************************************************************************************/
 
+/*
 	constexpr auto p = U_pack_Vs
 	<
 	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
@@ -73,6 +74,7 @@
 
 	constexpr auto U_int	= U_store_T<int>;
 	constexpr auto U_char	= U_store_T<char>;
+*/
 
 /***********************************************************************************************************************/
 
@@ -81,6 +83,26 @@
 //	constexpr auto f   = overload<U_custom<U_endopose>, sq, inc>;
 //	constexpr auto f   = endofold<sq, inc>;
 //	constexpr auto f   = endodrop<signature<int, int>, sq, inc, sq, _return_>;
+
+/***********************************************************************************************************************/
+
+	constexpr void print_array(int *b, const int *e)
+	{
+		while (b != e)
+		{
+			printf("%d, ", *b);
+			++b;
+		}
+
+		printf("end\n");
+	}
+
+	constexpr void repeat_array(int *b, const int *e, int v)
+	{
+		while (b != e) *(b++) = v;
+	}
+
+	using direct_spec = typename cpp_one_cycle_specs::template spec<cpp_one_cycle_specs::template direct_repeat>;
 
 /***********************************************************************************************************************/
 
@@ -107,6 +129,12 @@
 	//	printf("%llu\n", cctmp_functional::insert_sort<p, 3>);
 	//	printf("%llu\n", cctmp_functional::sort<p>);	// gcc 1.717s / clang 4.199s
 								// gcc 1.344s / clang 3.568s
+
+		int size = 10;
+		int arr[size];
+		cpp_one_cycle_generics::T_repeat<direct_spec>::result(arr, arr+size, argc);
+	//	repeat_array(arr, arr+size, argc);
+	//	print_array(arr, arr+size);
 
 		return 0;
 	}

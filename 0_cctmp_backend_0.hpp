@@ -117,12 +117,10 @@ namespace cctmp {
 
 // typename:
 
-	template<typename...> struct typename_pack { };
-
 	template<typename... Ts>
-	nik_ce auto U_pack_Ts = store<typename_pack<Ts...>*>;
+	nik_ce auto U_pack_Ts = U_pack_Vs<U_store_T<Ts>...>;
 
-	nik_ce auto U_null_Ts = U_pack_Ts<>;
+	nik_ce auto U_null_Ts = U_null_Vs;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

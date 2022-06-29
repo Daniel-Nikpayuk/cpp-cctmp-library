@@ -19,22 +19,19 @@
 
 namespace cpp_one_cycle_generics {
 
-	using namespace cctmp_generics;
+	nik_ce auto _return_					= cctmp_generics::_return_;
 
-/*
-	template<auto V>		nik_ce auto _constant_	= cpp_cctmp_library::template _constant_<V>;
-	template<auto V>		nik_ce auto _is_value_	= cpp_cctmp_library::template _is_value_<V>;
+	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
 
-	template<auto lbl>		nik_ce auto label	= cpp_cctmp_library::template label<lbl>;
-	template<auto... Vs>		nik_ce auto lift	= cpp_cctmp_library::template lift<Vs...>;
-	template<auto... Vs>		nik_ce auto test	= cpp_cctmp_library::template test<Vs...>;
-	template<auto V>		nik_ce auto branch	= cpp_cctmp_library::template branch<V>;
-	template<auto V>		nik_ce auto go_to	= cpp_cctmp_library::template go_to<V>;
-	template<auto obj, auto lbl>	nik_ce auto link	= cpp_cctmp_library::template link<obj, lbl>;
-	template<auto Lbl, auto... Is>	nik_ce auto compile	= cpp_cctmp_library::template compile<Lbl, Is...>;
+	template<auto V> nik_ce auto _constant_			= cctmp::template _constant_<V>;
+	template<auto V> nik_ce auto _is_equal_			= cctmp::template _is_equal_<V>;
 
-	nik_ce auto _return_					= cpp_cctmp_library::_return_;
-*/
+	template<auto V> nik_ce auto label			= cctmp_generics::template label<V>;
+	template<auto... Vs> nik_ce auto lift			= cctmp_generics::template lift<Vs...>;
+	template<auto... Vs> nik_ce auto test			= cctmp_generics::template test<Vs...>;
+	template<auto V> nik_ce auto branch			= cctmp_generics::template branch<V>;
+	template<auto V> nik_ce auto go_to			= cctmp_generics::template go_to<V>;
+	template<auto... Vs> nik_ce auto parse			= cctmp_generics::template parse<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -193,7 +190,7 @@ namespace cpp_one_cycle_generics {
 		template<typename OutType, typename EndType, typename InType>
 		nik_ces auto result(OutType b, EndType e, InType c)
 		{
-			return call<object, OutType>(b, e, c);
+			return cctmp_generics::template call<object, OutType>(b, e, c);
 		}
 
 	}; template<typename S>
@@ -243,7 +240,7 @@ namespace cpp_one_cycle_generics {
 		template<typename OutType, typename InType, typename EndType>
 		nik_ces auto result(OutType o, InType i, EndType e)
 		{
-			return call<object, OutType>(o, i, e);
+			return cctmp_generics::template call<object, OutType>(o, i, e);
 		}
 
 	}; template<typename S>
@@ -280,7 +277,7 @@ namespace cpp_one_cycle_generics {
 		template<typename OutType, typename InType, typename EndType>
 		nik_ces auto result(OutType o, InType i, EndType e)
 		{
-			return call<object, OutType>(o, i, e);
+			return cctmp_generics::template call<object, OutType>(o, i, e);
 		}
 
 	}; template<typename S>
@@ -322,23 +319,23 @@ namespace cpp_one_cycle_generics {
 
 		// value:
 
-			nik_ce auto _is_pre_value_				= _is_value_<Break::pre_value>;
-			nik_ce auto _is_post_value_				= _is_value_<Break::post_value>;
+			nik_ce auto _is_pre_value_				= _is_equal_<Break::pre_value>;
+			nik_ce auto _is_post_value_				= _is_equal_<Break::post_value>;
 
 		// act:
 
-			nik_ce auto _is_pre_act_				= _is_value_<Break::pre_act>;
-			nik_ce auto _is_post_act_				= _is_value_<Break::post_act>;
+			nik_ce auto _is_pre_act_				= _is_equal_<Break::pre_act>;
+			nik_ce auto _is_post_act_				= _is_equal_<Break::post_act>;
 
 		// combine:
 
-			nik_ce auto _is_pre_combine_				= _is_value_<Break::pre_combine>;
-			nik_ce auto _is_post_combine_				= _is_value_<Break::post_combine>;
+			nik_ce auto _is_pre_combine_				= _is_equal_<Break::pre_combine>;
+			nik_ce auto _is_post_combine_				= _is_equal_<Break::post_combine>;
 
 		// next:
 
-			nik_ce auto _is_pre_next_				= _is_value_<Break::pre_next>;
-			nik_ce auto _is_post_next_				= _is_value_<Break::post_next>;
+			nik_ce auto _is_pre_next_				= _is_equal_<Break::pre_next>;
+			nik_ce auto _is_post_next_				= _is_equal_<Break::post_next>;
 
 	// constants:
 
@@ -404,7 +401,7 @@ namespace cpp_one_cycle_generics {
 		template<typename InType, typename EndType>
 		nik_ces auto result(InType i, EndType e)
 		{
-			return call<object, InType>(e, i, e);
+			return cctmp_generics::template call<object, InType>(e, i, e);
 		}
 
 	}; template<typename S>
@@ -466,7 +463,7 @@ namespace cpp_one_cycle_generics {
 		template<typename OutType, typename InType, typename EndType>
 		nik_ces auto result(OutType o, InType i, EndType e)
 		{
-			return call<object, OutType>(o, i, e, false);
+			return cctmp_generics::template call<object, OutType>(o, i, e, false);
 		}
 
 	}; template<typename S>
@@ -514,7 +511,7 @@ namespace cpp_one_cycle_generics {
 		template<typename OutType, typename CarInType, typename CdrInType, typename EndType>
 		nik_ces auto result(OutType o, CarInType i1, CdrInType i2, EndType e2)
 		{
-			return call<object, OutType>(o, i1, i2, e2);
+			return cctmp_generics::template call<object, OutType>(o, i1, i2, e2);
 		}
 
 	}; template<typename S>
@@ -562,7 +559,7 @@ namespace cpp_one_cycle_generics {
 		template<typename OutType, typename CarInType, typename CdrInType, typename EndType>
 		nik_ces auto result(OutType o, CarInType i1, CdrInType i2, EndType e2)
 		{
-			return call<object, OutType>(o, i1, i2, e2);
+			return cctmp_generics::template call<object, OutType>(o, i1, i2, e2);
 		}
 
 	}; template<typename S>
@@ -607,7 +604,7 @@ namespace cpp_one_cycle_generics {
 		template<typename OutType, typename CarInType, typename CdrInType, typename EndType>
 		nik_ces auto result(OutType o, CarInType i1, CdrInType i2, EndType e2)
 		{
-			return call<object, OutType>(o, i1, i2, e2);
+			return cctmp_generics::template call<object, OutType>(o, i1, i2, e2);
 		}
 
 	}; template<typename S>

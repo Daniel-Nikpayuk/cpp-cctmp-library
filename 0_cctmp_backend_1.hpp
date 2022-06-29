@@ -81,7 +81,7 @@ namespace cctmp {
 
 // dispatch:
 
-	struct MachineDispatch
+	struct MachineDisp
 	{
 		// defaults:
 
@@ -115,6 +115,8 @@ namespace cctmp {
 			nik_ces index_type next_index(cdepth_type d, ckey_type m, contr_type, cindex_type i)
 				{ return i + bool{d != 0 && m == MT::id}; }
 	};
+
+	using MD = MachineDisp;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -170,7 +172,7 @@ namespace cctmp {
 
 // dispatch:
 
-	struct BlockDispatch
+	struct BlockDisp
 	{
 		// length:
 
@@ -238,6 +240,8 @@ namespace cctmp {
 			NIK_BLOCK_DISPATCH_NEXT_INDEX(8)
 			NIK_BLOCK_DISPATCH_NEXT_INDEX(9)
 	};
+
+	using BD = BlockDisp;
 
 /***********************************************************************************************************************/
 
@@ -507,7 +511,7 @@ namespace cctmp {
 			template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
 			nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), nik_vp(H1)(auto_pack<Xs...>*), Heaps... Hs)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto n	= ins[MI::dec];
 
 				if nik_ce (n >= d) // analogous to returning a machination.
@@ -543,7 +547,7 @@ namespace cctmp {
 			template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
 			nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), nik_vp(H1)(auto_pack<Xs...>*), Heaps... Hs)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto n	= ins[MI::dec];
 
 				if nik_ce (n >= d) // analogous to returning a machination.
@@ -583,7 +587,7 @@ namespace cctmp {
 			template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename... Heaps>
 			nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), Heaps... Hs)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto n	= ins[MI::pos];
 				nik_ce auto ctn	= ins[MI::ctn];
 				nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, BN::sifter, Vs);
@@ -612,7 +616,7 @@ namespace cctmp {
 			template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
 			nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), nik_vp(H1)(auto_pack<Xs...>*), Heaps... Hs)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto n	= ins[MI::pos];
 				nik_ce auto ctn	= ins[MI::ctn];
 				nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, BN::sifter, Xs);
@@ -649,7 +653,7 @@ namespace cctmp {
 				nik_vp(H2)(auto_pack<Ys...>*), Args... As
 			)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto n	= ins[MI::pos];
 				nik_ce auto ctn	= ins[MI::ctn];
 				nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, BN::sifter, Ys);
@@ -682,7 +686,7 @@ namespace cctmp {
 			>
 			nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), Heap1 H1, Heap2 H2, Args... As)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto n	= ins[MI::pos];
 				nik_ce auto ctn	= ins[MI::ctn];
 				nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, BN::sifter, U_restore_T<Args>);
@@ -720,7 +724,7 @@ namespace cctmp {
 				nik_vp(H0)(auto_pack<Ws...>*), Heaps... Hs
 			)
 			{
-				nik_ce auto ins = MachineDispatch::instr(c, i);
+				nik_ce auto ins = MD::instr(c, i);
 				nik_ce auto ctn = ins[MI::ctn];
 				nik_ce auto val = NIK_VARIABLE_BLOCK(3, d, n, rtn, _Vs);
 
@@ -752,7 +756,7 @@ namespace cctmp {
 			template<NIK_CONTR_PARAMS, auto... Vs, typename Heap0, auto X0, auto... Xs, typename... Heaps>
 			nik_ces auto result(Heap0 H0, nik_vp(H1)(auto_pack<X0, Xs...>*), Heaps... Hs)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto n	= ins[MI::pos];
 				nik_ce auto val	= NIK_FUNCTION_BLOCK(3, d, n, BN::filter, Vs)(U_null_Vs);
 
@@ -780,7 +784,7 @@ namespace cctmp {
 			>
 			nik_ces auto result(Heap0 H0, nik_vp(H1)(auto_pack<X0, Xs...>*), Heap2 H2, Args... As)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto n	= ins[MI::pos];
 				nik_ce auto val	= NIK_FUNCTION_BLOCK(3, d, n, BN::filter, U_restore_T<Args>)(U_null_Vs);
 
@@ -839,7 +843,7 @@ namespace cctmp {
 			template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto n, auto... Xs, typename... Heaps> 
 			nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), nik_vp(H1)(auto_pack<n, Xs...>*), Heaps... Hs)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto rtn	= ins[MI::rtn];
 				nik_ce auto ctn	= ins[MI::ctn];
 				nik_ce auto val	= NIK_VARIABLE_BLOCK(9, d, n, rtn, Ws);
@@ -879,7 +883,7 @@ namespace cctmp {
 				nik_vp(H1)(auto_pack<Xs...>*), Heaps... Hs
 			)
 			{
-				nik_ce auto ins = MachineDispatch::instr(c, i);
+				nik_ce auto ins = MD::instr(c, i);
 				nik_ce auto ctn = ins[MI::ctn];
 				nik_ce auto val = NIK_VARIABLE_BLOCK(9, d, n, rtn, _Vs);
 
@@ -912,7 +916,7 @@ namespace cctmp {
 			template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto n, auto... Xs, typename... Heaps>
 			nik_ces auto result(nik_vp(H0)(auto_pack<Ws...>*), nik_vp(H1)(auto_pack<n, Xs...>*), Heaps... Hs)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto rtn	= ins[MI::rtn];
 				nik_ce auto ctn	= ins[MI::ctn];
 				nik_ce auto val	= NIK_FUNCTION_BLOCK(9, d, n, rtn, Ws)(U_null_Vs);
@@ -970,7 +974,7 @@ namespace cctmp {
 			template<NIK_CONTR_PARAMS, auto... Vs, auto Op, auto W0, auto... Ws, auto n, auto... Xs, typename... Heaps>
 			nik_ces auto result(nik_vp(H0)(auto_pack<Op, W0, Ws...>*), nik_vp(H1)(auto_pack<n, Xs...>*), Heaps... Hs)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto rtn	= ins[MI::rtn];
 				nik_ce auto ctn	= ins[MI::ctn];
 				nik_ce auto val	= NIK_CASCADE_BLOCK(d, n, Op, W0, Ws);
@@ -1007,7 +1011,7 @@ namespace cctmp {
 			)
 			{
 				nik_ce auto _c	= controller<instruction<MN::call, MT::internal>>;
-				nik_ce auto _i	= MachineDispatch::initial_index;
+				nik_ce auto _i	= MD::initial_index;
 				nik_ce auto val	= NIK_BEGIN_MACHINE(d, MT::internal, _c, _i)
 								NIK_END_MACHINE(_s1, _s2);
 
@@ -1066,7 +1070,7 @@ namespace cctmp {
 				nik_vp(H1)(auto_pack<Xs...>*), Heaps... Hs
 			)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto n	= ins[MI::dec];
 
 				if nik_ce (n >= d) // analogous to returning a machination.
@@ -1113,7 +1117,7 @@ namespace cctmp {
 				nik_vp(H1)(auto_pack<Xs...>*), Heaps... Hs
 			)
 			{
-				nik_ce auto ins	= MachineDispatch::instr(c, i);
+				nik_ce auto ins	= MD::instr(c, i);
 				nik_ce auto n	= ins[MI::dec];
 
 				if nik_ce (n >= d) // analogous to returning a machination.
@@ -1167,7 +1171,7 @@ namespace cctmp {
 				nik_vp(H1)(auto_pack<Xs...>*), Heaps... Hs
 			)
 			{
-				nik_ce auto ins = MachineDispatch::instr(c, i);
+				nik_ce auto ins = MD::instr(c, i);
 				nik_ce auto ctn = ins[MI::ctn];
 				nik_ce auto val = NIK_MACHINE(d, _m, _c, _i, _Vs)(_Hs...);
 
@@ -1315,7 +1319,7 @@ namespace cctmp {
 		template<NIK_CONTR_PARAMS, auto... Vs, typename... Heaps>
 		nik_ces auto result(Heaps... Hs)
 		{
-			nik_ce auto ins	= MachineDispatch::instr(c, i);
+			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto ni	= ins[MI::pos];
 
 			return NIK_MACHINE(d, MT::id, c, ni, Vs)(Hs...);
@@ -1330,7 +1334,7 @@ namespace cctmp {
 		template<NIK_CONTR_PARAMS, auto... Vs, typename Heap0, bool X0, auto... Xs, typename... Heaps>
 		nik_ces auto result(Heap0 H0, nik_vp(H1)(auto_pack<X0, Xs...>*), Heaps... Hs)
 		{
-			nik_ce auto ins	= MachineDispatch::instr(c, i);
+			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto ni	= X0 ? ins[MI::pos] : i;
 
 			return NIK_MACHINE(d, MT::id, c, ni, Vs)(H0, U_pack_Vs<Xs...>, Hs...);
@@ -1380,7 +1384,7 @@ namespace cctmp {
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_null_Vs, H1, H2, A0, As...);
 			else
 			{
-				nik_ce auto ins = MachineDispatch::instr(c, i);
+				nik_ce auto ins = MD::instr(c, i);
 				nik_ce auto ni  = ins[MI::pos];
 
 				return NIK_MACHINE(d, MT::id, c, ni, Vs)(A0, U_pack_Vs<pos, Xs...>, H2, A0, As...);
@@ -1432,7 +1436,7 @@ namespace cctmp {
 		nik_ce auto ctn = MI::value;
 		nik_ce auto m   = MT::id;
 		nik_ce auto c   = controller<variable<rtn, ctn>>;
-		nik_ce auto i   = MachineDispatch::initial_index;
+		nik_ce auto i   = MD::initial_index;
 		nik_ce auto H1  = U_pack_Vs<n>;
 
 		return NIK_BEGIN_MACHINE(d, m, c, i) NIK_END_MACHINE(H0, H1, U_null_Vs);
@@ -1446,7 +1450,7 @@ namespace cctmp {
 		nik_ce auto ctn = MI::value;
 		nik_ce auto m   = MT::id;
 		nik_ce auto c   = controller<function<rtn, ctn>>;
-		nik_ce auto i   = MachineDispatch::initial_index;
+		nik_ce auto i   = MD::initial_index;
 		nik_ce auto H1  = U_pack_Vs<n>;
 
 		return NIK_BEGIN_MACHINE(d, m, c, i) NIK_END_MACHINE(H0, H1, U_null_Vs);
@@ -1462,7 +1466,7 @@ namespace cctmp {
 		nik_ce auto ctn = MI::value;
 		nik_ce auto m   = MT::id;
 		nik_ce auto c   = controller<compel<ctn, dec>>;
-		nik_ce auto i   = MachineDispatch::initial_index;
+		nik_ce auto i   = MD::initial_index;
 
 		return NIK_BEGIN_MACHINE(d, m, c, i) NIK_END_MACHINE(H0, U_null_Vs, U_null_Vs);
 	}
@@ -1474,7 +1478,7 @@ namespace cctmp {
 	{
 		nik_ce auto m = MT::id;
 		nik_ce auto c = controller<internal<>>;
-		nik_ce auto i = MachineDispatch::initial_index;
+		nik_ce auto i = MD::initial_index;
 
 		return NIK_BEGIN_MACHINE(d, m, c, i), m, prog, i, Vs... NIK_END_MACHINE(H0, H1, ch, As...);
 	}

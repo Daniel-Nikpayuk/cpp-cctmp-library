@@ -429,13 +429,13 @@
 		block													\
 		<													\
 			BN::_b_,											\
-			BlockDispatch::next_note(_d_, _n_),								\
-			BlockDispatch::next_length_ ## _p_(_d_, _n_)							\
+			BD::next_note(_d_, _n_),									\
+			BD::next_length_ ## _p_(_d_, _n_)								\
 															\
 		>::template result											\
 		<													\
-			BlockDispatch::next_depth(_d_),									\
-			BlockDispatch::next_index_ ## _p_(_d_, _n_)
+			BD::next_depth(_d_),										\
+			BD::next_index_ ## _p_(_d_, _n_)
 
 	#define NIK_END_BLOCK												\
 															\
@@ -542,14 +542,14 @@
 															\
 		machine													\
 		<													\
-			MachineDispatch::next_name(_d_, _m_, _c_, _i_),							\
-			MachineDispatch::next_note(_d_, _m_, _c_, _i_)							\
+			MD::next_name(_d_, _m_, _c_, _i_),								\
+			MD::next_note(_d_, _m_, _c_, _i_)								\
 															\
 		>::template result											\
 		<													\
-			MachineDispatch::next_depth(_d_),								\
+			MD::next_depth(_d_),										\
 			_m_, _c_,											\
-			MachineDispatch::next_index(_d_, _m_, _c_, _i_)
+			MD::next_index(_d_, _m_, _c_, _i_)
 
 	#define NIK_END_MACHINE 											\
 															\
