@@ -134,7 +134,7 @@
 		int arr[size];
 		cpp_one_cycle_generics::T_repeat<direct_spec>::result(arr, arr+size, argc);
 	//	repeat_array(arr, arr+size, argc);
-	//	print_array(arr, arr+size);
+		print_array(arr, arr+size);
 
 		return 0;
 	}

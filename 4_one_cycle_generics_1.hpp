@@ -19,7 +19,7 @@
 
 namespace cpp_one_cycle_specs {
 
-	template<auto U> using T_store_U			= cctmp::template T_store_U<U>;
+	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
 
 	nik_ce auto _id_					= cctmp::_id_;
 	nik_ce auto _equal_					= cctmp::_equal_;

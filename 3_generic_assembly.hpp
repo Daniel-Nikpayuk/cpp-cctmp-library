@@ -91,6 +91,16 @@ namespace cctmp_generics {
 	template<auto V>
 	nik_ce auto has_int_type = alias<Operator::is_int_type, U_store_T<decltype(V)>>;
 
+// car:
+
+	template<auto... Vs>
+	nik_ce auto car = alias<Operator::car, U_pack_Vs<Vs...>>;
+
+// find:
+
+	template<auto Op, auto... Vs>
+	nik_ce auto find = alias<Operator::find, Op, U_pack_Vs<Vs...>>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -465,7 +475,7 @@ namespace cctmp_generics {
 		nik_ce auto _constant_id_ = _constant_<_id_>;
 
 		template<auto... ns>
-		nik_ce auto find_non_int = alias<Operator::find, U_not_int_type<>, U_pack_Vs<U_store_T<decltype(ns)>...>>;
+		nik_ce auto find_non_int = find<U_not_int_type<>, U_store_T<decltype(ns)>...>;
 
 		template<auto p, auto... ns>
 		nik_ce auto is_all_ints = (p == sizeof...(ns));
@@ -636,7 +646,7 @@ namespace cctmp_generics {
 			return array
 			<
 				cindex_type, sizeof...(ds),
-				alias<Operator::find, U_same<ds>, lbls...>...
+				find<U_same<ds>, lbls...>...
 			>;
 		}
 
@@ -860,7 +870,7 @@ namespace cctmp_generics {
 
 			else if nik_ce (is_lift<instr0>)
 			{
-				nik_ce auto instr1 = go_to<label_value<alias<Operator::car, instrs...>>>;
+				nik_ce auto instr1 = go_to<label_value<car<instrs...>>>;
 				nik_ce auto nchars = U_pack_Vs<ws..., instr0>;
 
 				return dispatch_go_to<instr1, instrs...>(labels, lines, words, nchars, graph, verts);
@@ -922,7 +932,7 @@ namespace cctmp_generics {
 
 				return rest_is_empty<instr0>(labels, lines, words, chars, graph, verts);
 
-			else if nik_ce (is_label<alias<Operator::car, instrs...>>)
+			else if nik_ce (is_label<car<instrs...>>)
 
 				return is_before_label<instr0, instrs...>(labels, lines, words, chars, graph, verts);
 			else
@@ -975,7 +985,7 @@ namespace cctmp_generics {
 			else if nik_ce (sizeof...(words) != 0)
 			{
 				nik_ce auto ncont = T_endopose::template result<cont, word>;
-				nik_ce auto halt  = alias<Operator::car, words...>;
+				nik_ce auto halt  = car<words...>;
 
 				return endodrop<sign, ncont, halt>;
 			}
@@ -1028,7 +1038,7 @@ namespace cctmp_generics {
 	template<auto lbl, auto... lbls, auto deps, auto... lines>
 	nik_ce auto _link(nik_vp(parsed)(auto_pack<deps, lines...>*))
 	{
-		nik_ce auto n = alias<Operator::find, U_same<lbl>, lbls...>;
+		nik_ce auto n = find<U_same<lbl>, lbls...>;
 		nik_ce auto l = cctmp_functional::at<n+1, U_restore_T<decltype(parsed)>>;
 		nik_ce auto s = in_types<lbl>;
 		nik_ce auto c = U_pack_Vs<s, deps[n+1], lbls...>;
