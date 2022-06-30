@@ -102,9 +102,9 @@
 		while (b != e) *(b++) = v;
 	}
 
-	using direct_spec = typename cpp_one_cycle_specs::template spec<cpp_one_cycle_specs::template direct_repeat>;
-
 /***********************************************************************************************************************/
+
+	constexpr auto direct_spec = cpp_one_cycle_specs::template direct_repeat<>;
 
 	int main(int argc, char *argv[])
 	{

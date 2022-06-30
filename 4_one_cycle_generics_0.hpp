@@ -19,6 +19,8 @@
 
 namespace cpp_one_cycle_generics {
 
+	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
+
 	nik_ce auto _return_					= cctmp_generics::_return_;
 
 	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
@@ -41,9 +43,9 @@ namespace cpp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
-	template<typename S> nik_ce auto  precycle_			= S::precycle_label;
-	template<typename S> nik_ce auto     cycle_			= S::cycle_label;
-	template<typename S> nik_ce auto postcycle_			= S::postcycle_label;
+	template<auto S> nik_ce auto  precycle_			= T_store_U<S>::precycle_label;
+	template<auto S> nik_ce auto     cycle_			= T_store_U<S>::cycle_label;
+	template<auto S> nik_ce auto postcycle_			= T_store_U<S>::postcycle_label;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -55,69 +57,69 @@ namespace cpp_one_cycle_generics {
 
 // out:
 
-	template<typename S> using out_type_				= typename S::out_type;
+	template<auto S> using out_type_			= typename T_store_U<S>::out_type;
 
-	template<typename S> nik_ce auto out_				= S::out_position;
+	template<auto S> nik_ce auto out_			= T_store_U<S>::out_position;
 
-	template<typename S> nik_ce auto pre_out_next_			= S::pre_out_next;
-	template<typename S> nik_ce auto out_next_				= S::out_next;
-	template<typename S> nik_ce auto post_out_next_			= S::post_out_next;
+	template<auto S> nik_ce auto pre_out_next_		= T_store_U<S>::pre_out_next;
+	template<auto S> nik_ce auto out_next_			= T_store_U<S>::out_next;
+	template<auto S> nik_ce auto post_out_next_		= T_store_U<S>::post_out_next;
 
 /***********************************************************************************************************************/
 
 // in:
 
-	template<typename S> using in_type_				= typename S::in_type;
+	template<auto S> using in_type_				= typename T_store_U<S>::in_type;
 
-	template<typename S> nik_ce auto in_				= S::in_position;
+	template<auto S> nik_ce auto in_			= T_store_U<S>::in_position;
 
-	template<typename S> nik_ce auto pre_in_next_			= S::pre_in_next;
-	template<typename S> nik_ce auto in_next_				= S::in_next;
-	template<typename S> nik_ce auto post_in_next_			= S::post_in_next;
+	template<auto S> nik_ce auto pre_in_next_		= T_store_U<S>::pre_in_next;
+	template<auto S> nik_ce auto in_next_			= T_store_U<S>::in_next;
+	template<auto S> nik_ce auto post_in_next_		= T_store_U<S>::post_in_next;
 
 /***********************************************************************************************************************/
 
 // car in:
 
-	template<typename S> using car_in_type_				= typename S::car_in_type;
+	template<auto S> using car_in_type_			= typename T_store_U<S>::car_in_type;
 
-	template<typename S> nik_ce auto car_in_			= S::car_in_position;
+	template<auto S> nik_ce auto car_in_			= T_store_U<S>::car_in_position;
 
-	template<typename S> nik_ce auto pre_car_in_next_		= S::pre_car_in_next;
-	template<typename S> nik_ce auto car_in_next_			= S::car_in_next;
-	template<typename S> nik_ce auto post_car_in_next_		= S::post_car_in_next;
+	template<auto S> nik_ce auto pre_car_in_next_		= T_store_U<S>::pre_car_in_next;
+	template<auto S> nik_ce auto car_in_next_		= T_store_U<S>::car_in_next;
+	template<auto S> nik_ce auto post_car_in_next_		= T_store_U<S>::post_car_in_next;
 
 /***********************************************************************************************************************/
 
 // cdr in:
 
-	template<typename S> using cdr_in_type_				= typename S::cdr_in_type;
+	template<auto S> using cdr_in_type_			= typename T_store_U<S>::cdr_in_type;
 
-	template<typename S> nik_ce auto cdr_in_			= S::cdr_in_position;
+	template<auto S> nik_ce auto cdr_in_			= T_store_U<S>::cdr_in_position;
 
-	template<typename S> nik_ce auto pre_cdr_in_next_		= S::pre_cdr_in_next;
-	template<typename S> nik_ce auto cdr_in_next_			= S::cdr_in_next;
-	template<typename S> nik_ce auto post_cdr_in_next_		= S::post_cdr_in_next;
+	template<auto S> nik_ce auto pre_cdr_in_next_		= T_store_U<S>::pre_cdr_in_next;
+	template<auto S> nik_ce auto cdr_in_next_		= T_store_U<S>::cdr_in_next;
+	template<auto S> nik_ce auto post_cdr_in_next_		= T_store_U<S>::post_cdr_in_next;
 
 /***********************************************************************************************************************/
 
 // end:
 
-	template<typename S> using end_type_				= typename S::end_type;
+	template<auto S> using end_type_			= typename T_store_U<S>::end_type;
 
-	template<typename S> nik_ce auto end_				= S::end_position;
+	template<auto S> nik_ce auto end_			= T_store_U<S>::end_position;
 
-	template<typename S> nik_ce auto pre_end_prev_			= S::pre_end_prev;
-	template<typename S> nik_ce auto end_prev_			= S::end_prev;
+	template<auto S> nik_ce auto pre_end_prev_		= T_store_U<S>::pre_end_prev;
+	template<auto S> nik_ce auto end_prev_			= T_store_U<S>::end_prev;
 
-	template<typename S> nik_ce auto end_next_			= S::end_next;
-	template<typename S> nik_ce auto post_end_next_			= S::post_end_next;
+	template<auto S> nik_ce auto end_next_			= T_store_U<S>::end_next;
+	template<auto S> nik_ce auto post_end_next_		= T_store_U<S>::post_end_next;
 
 /***********************************************************************************************************************/
 
 // return:
 
-	template<typename S> using return_type_				= typename S::return_type;
+	template<auto S> using return_type_			= typename T_store_U<S>::return_type;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -129,29 +131,29 @@ namespace cpp_one_cycle_generics {
 
 // loop:
 
-	template<typename S> nik_ce auto loop_pred_			= S::loop_predicate;
+	template<auto S> nik_ce auto loop_pred_			= T_store_U<S>::loop_predicate;
 
 /***********************************************************************************************************************/
 
 // value:
 
-	template<typename S> nik_ce auto value_pred_			= S::value_predicate;
+	template<auto S> nik_ce auto value_pred_		= T_store_U<S>::value_predicate;
 
 /***********************************************************************************************************************/
 
 // act:
 
-	template<typename S> nik_ce auto act_pred_			= S::act_predicate;
+	template<auto S> nik_ce auto act_pred_			= T_store_U<S>::act_predicate;
 
-	template<typename S> nik_ce auto act_func_			= S::act_function;
-	template<typename S> nik_ce auto post_act_func_			= S::post_act_function;
+	template<auto S> nik_ce auto act_func_			= T_store_U<S>::act_function;
+	template<auto S> nik_ce auto post_act_func_		= T_store_U<S>::post_act_function;
 
 /***********************************************************************************************************************/
 
 // combine:
 
-	template<typename S> nik_ce auto combine_func_			= S::combine_function;
-	template<typename S> nik_ce auto post_combine_func_		= S::post_combine_function;
+	template<auto S> nik_ce auto combine_func_		= T_store_U<S>::combine_function;
+	template<auto S> nik_ce auto post_combine_func_		= T_store_U<S>::post_combine_function;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -163,7 +165,7 @@ namespace cpp_one_cycle_generics {
 
 // repeat:
 
-	template<typename S>
+	template<auto S>
 	struct T_repeat
 	{
 		nik_ces auto object = parse
@@ -193,7 +195,7 @@ namespace cpp_one_cycle_generics {
 			return cctmp_generics::template call<object, OutType>(b, e, c);
 		}
 
-	}; template<typename S>
+	}; template<auto S>
 		nik_ce auto _repeat_ = U_store_T<T_repeat<S>>;
 
 /***********************************************************************************************************************/
@@ -207,7 +209,7 @@ namespace cpp_one_cycle_generics {
 		//	4. If (3), then for each right endpoint, when open, iterate.
 		//	5. If bidirectional and last, iterate end to reset.
 
-	template<typename S>
+	template<auto S>
 	struct T_map
 	{
 		nik_ces auto object = parse
@@ -243,14 +245,14 @@ namespace cpp_one_cycle_generics {
 			return cctmp_generics::template call<object, OutType>(o, i, e);
 		}
 
-	}; template<typename S>
+	}; template<auto S>
 		nik_ce auto _map_ = U_store_T<T_map<S>>;
 
 /***********************************************************************************************************************/
 
 // fold:
 
-	template<typename S>
+	template<auto S>
 	struct T_fold
 	{
 		nik_ces auto object = parse
@@ -280,7 +282,7 @@ namespace cpp_one_cycle_generics {
 			return cctmp_generics::template call<object, OutType>(o, i, e);
 		}
 
-	}; template<typename S>
+	}; template<auto S>
 		nik_ce auto _fold_ = U_store_T<T_fold<S>>;
 
 /***********************************************************************************************************************/
@@ -364,7 +366,7 @@ namespace cpp_one_cycle_generics {
 // (find) first:
 
 /*
-	template<typename S>
+	template<auto S>
 	struct T_find_first
 	{
 		nik_ces auto object = parse
@@ -404,7 +406,7 @@ namespace cpp_one_cycle_generics {
 			return cctmp_generics::template call<object, InType>(e, i, e);
 		}
 
-	}; template<typename S>
+	}; template<auto S>
 		nik_ce auto _find_first_ = U_store_T<T_find_first<S>>;
 */
 
@@ -413,7 +415,7 @@ namespace cpp_one_cycle_generics {
 // (find) all:
 
 /*
-	template<typename S>
+	template<auto S>
 	struct T_find_all
 	{
 		nik_ces auto object = parse
@@ -466,7 +468,7 @@ namespace cpp_one_cycle_generics {
 			return cctmp_generics::template call<object, OutType>(o, i, e, false);
 		}
 
-	}; template<typename S>
+	}; template<auto S>
 		nik_ce auto _find_all_ = U_store_T<T_find_all<S>>;
 */
 
@@ -475,7 +477,7 @@ namespace cpp_one_cycle_generics {
 
 // zip (bimap):
 
-	template<typename S>
+	template<auto S>
 	struct T_zip
 	{
 		nik_ces auto object = parse
@@ -514,14 +516,14 @@ namespace cpp_one_cycle_generics {
 			return cctmp_generics::template call<object, OutType>(o, i1, i2, e2);
 		}
 
-	}; template<typename S>
+	}; template<auto S>
 		nik_ce auto _zip_ = U_store_T<T_zip<S>>;
 
 /***********************************************************************************************************************/
 
 // fasten:
 
-	template<typename S>
+	template<auto S>
 	struct T_fasten
 	{
 		nik_ces auto object = parse
@@ -562,14 +564,14 @@ namespace cpp_one_cycle_generics {
 			return cctmp_generics::template call<object, OutType>(o, i1, i2, e2);
 		}
 
-	}; template<typename S>
+	}; template<auto S>
 		nik_ce auto _fasten_ = U_store_T<T_fasten<S>>;
 
 /***********************************************************************************************************************/
 
 // glide (bifold):
 
-	template<typename S>
+	template<auto S>
 	struct T_glide
 	{
 		nik_ces auto object = parse
@@ -607,7 +609,7 @@ namespace cpp_one_cycle_generics {
 			return cctmp_generics::template call<object, OutType>(o, i1, i2, e2);
 		}
 
-	}; template<typename S>
+	}; template<auto S>
 		nik_ce auto _glide_ = U_store_T<T_glide<S>>;
 
 /***********************************************************************************************************************/

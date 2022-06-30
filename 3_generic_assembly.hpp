@@ -94,12 +94,12 @@ namespace cctmp_generics {
 // car:
 
 	template<auto... Vs>
-	nik_ce auto car = alias<Operator::car, U_pack_Vs<Vs...>>;
+	nik_ce auto car = alias<Operator::car, Vs...>;
 
 // find:
 
 	template<auto Op, auto... Vs>
-	nik_ce auto find = alias<Operator::find, Op, U_pack_Vs<Vs...>>;
+	nik_ce auto find = alias<Operator::find, Op, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -205,6 +205,14 @@ namespace cctmp_generics {
 
 		}; template<auto l, auto r, auto f>
 			nik_ce auto _allot_ = U_store_T<T_allot<l, r, f>>;
+
+	// tuple apply:
+
+	//	template<auto f, typename T, typename... Ts, index_type... tuple_indices>
+	//	constexpr auto tuple_apply(const tuple<T, Ts...> & t, nik_vp(pack)(auto_pack<tuple_indices...>*))
+	//	{
+	//		return f(tuple_value<tuple_indices>(t)...);
+	//	}
 
 /***********************************************************************************************************************/
 
@@ -616,8 +624,10 @@ namespace cctmp_generics {
 		else
 		{
 			nik_ce auto s    = cctmp_functional::split<size - _one, U_restore_T<decltype(p)>>;
-			nik_ce auto f    = cctmp_functional::fold<U_custom<U_endopose>, _lifted_id_, s.v1>;
-			nik_ce auto halt = cctmp_functional::at<_zero, s.v2>;
+			nik_ce auto l    = cctmp::tuple_value<0>(s);
+			nik_ce auto r    = cctmp::tuple_value<1>(s);
+			nik_ce auto f    = cctmp_functional::fold<U_custom<U_endopose>, _lifted_id_, l>;
+			nik_ce auto halt = cctmp_functional::at<_zero, r>;
 
 			if nik_ce (same<f, _lifted_id_>) return T_store_U<halt>::template result<T_store_U<UTs>...>;
 			else                             return T_store_U<f>::template result<halt, T_store_U<UTs>...>;

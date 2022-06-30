@@ -26,6 +26,8 @@ namespace cpp_one_cycle_specs {
 
 	nik_ce auto _deref_assign_				= cctmp_generics::_deref_assign_;
 
+	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
+
 	template<auto... Vs> nik_ce auto _increment_		= cctmp::template _increment_<Vs...>;
 
 /***********************************************************************************************************************/
@@ -33,9 +35,6 @@ namespace cpp_one_cycle_specs {
 /***********************************************************************************************************************/
 
 // specifications:
-
-	template<template<auto...> class interpretation, auto... Vs>
-	using spec = interpretation<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -136,7 +135,7 @@ namespace cpp_one_cycle_specs {
 		auto ActFunction, auto PostActFunction,
 		auto PreOutNext, auto OutNext
 	>
-	struct RepeatSpecification
+	struct T_repeat_specification
 	{
 		nik_ces auto  precycle_label		=  PrecycleLabel;
 		nik_ces auto     cycle_label		=     CycleLabel;
@@ -154,6 +153,26 @@ namespace cpp_one_cycle_specs {
 		nik_ces auto pre_out_next		= PreOutNext;
 		nik_ces auto     out_next		=    OutNext;
 	};
+	
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
+		auto OutPosition, auto EndPosition, auto InPosition,
+		auto LoopPredicate,
+		auto ActFunction, auto PostActFunction,
+		auto PreOutNext, auto OutNext
+	>
+	nik_ce auto U_repeat_specification = U_store_T
+	<
+		T_repeat_specification
+		<
+			PrecycleLabel, CycleLabel, PostcycleLabel,
+			OutPosition, EndPosition, InPosition,
+			LoopPredicate,
+			ActFunction, PostActFunction,
+			PreOutNext, OutNext
+		>
+	>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -182,7 +201,7 @@ namespace cpp_one_cycle_specs {
 		auto     cycle_label		= 1,
 		auto postcycle_label		= 2
 	>
-	using direct_repeat = RepeatSpecification
+	nik_ce auto direct_repeat = U_repeat_specification
 	<
 		 precycle_label,
 		    cycle_label,

@@ -137,18 +137,20 @@ namespace cctmp {
 		nik_ces key_type function	=  2;
 
 		nik_ces key_type segment	=  3;
-		nik_ces key_type argument	=  4;
 
-		nik_ces key_type fold		=  5;
-		nik_ces key_type cascade	=  6;
+		nik_ces key_type fold		=  4;
+		nik_ces key_type cascade	=  5;
 
-		nik_ces key_type sifter		=  7;
-		nik_ces key_type right		=  8;
-		nik_ces key_type lookup		=  9;
+		nik_ces key_type argument	=  6;
+		nik_ces key_type tuple		=  7;
 
-		nik_ces key_type filter		= 10;
-		nik_ces key_type left		= 11;
-		nik_ces key_type split		= 12;
+		nik_ces key_type sifter		=  8;
+		nik_ces key_type right		=  9;
+		nik_ces key_type lookup		= 10;
+
+		nik_ces key_type filter		= 11;
+		nik_ces key_type left		= 12;
+		nik_ces key_type split		= 13;
 	};
 
 	using BN = BlockName;
@@ -271,7 +273,7 @@ namespace cctmp {
 		struct block<BN::lookup, filler...>
 		{
 			template<auto V0, auto... Vs>
-			nik_ces auto result = alias<Operator::cadr, V0>;
+			nik_ces auto result = unpack_alias<V0, Operator::cadr>;
 		};
 
 	// filter:
@@ -280,7 +282,12 @@ namespace cctmp {
 		struct block<BN::filter, filler...>
 		{
 			template<auto V0, auto... Vs, typename Pack>
-			nik_ces auto result(Pack p) { return pair(p, U_pack_Vs<Vs...>); }
+			nik_ces auto result(Pack p)
+			{
+				nik_ce auto r = U_pack_Vs<Vs...>;
+
+				return tuple<Pack, decltype(r)>(p, r);
+			}
 		};
 
 	// left:
@@ -298,7 +305,12 @@ namespace cctmp {
 		struct block<BN::split, filler...>
 		{
 			template<auto... Vs, typename Pack>
-			nik_ces auto result(Pack p) { return pair(p, U_pack_Vs<Vs...>); }
+			nik_ces auto result(Pack p)
+			{
+				nik_ce auto r = U_pack_Vs<Vs...>;
+
+				return tuple<Pack, decltype(r)>(p, r);
+			}
 		};
 
 /***********************************************************************************************************************/
@@ -495,6 +507,54 @@ namespace cctmp {
 	NIK_DEFINE_BLOCK_ARGUMENT_PASS(9)
 
 /***********************************************************************************************************************/
+
+// tuple:
+
+	template<key_type... filler>
+	struct block<BN::tuple, BT::pause, _zero, filler...>
+	{
+		template<bool V>
+		nik_ces auto result_assert() { return V; }
+
+		template<auto d, auto n, typename... Ts>
+		nik_ces auto & result(tuple<Ts...> & t)
+			{ static_assert(result_assert<bool{d != 0}>(), "tuple nesting depth exceeded!"); }
+
+		template<auto d, auto n, typename... Ts>
+		nik_ces const auto & result(const tuple<Ts...> & t)
+			{ static_assert(result_assert<bool{d != 0}>(), "tuple nesting depth exceeded!"); }
+	};
+
+	template<key_type... filler>
+	struct block<BN::tuple, BT::halt, _zero, filler...>
+	{
+		template<auto d, auto n, typename... Ts>
+		nik_ces auto & result(tuple<Ts...> & t) { return t.value; }
+
+		template<auto d, auto n, typename... Ts>
+		nik_ces const auto & result(const tuple<Ts...> & t) { return t.value; }
+	};
+
+	NIK_DEFINE_BLOCK_TUPLE_PASS(0)
+	NIK_DEFINE_BLOCK_TUPLE_PASS(1)
+	NIK_DEFINE_BLOCK_TUPLE_PASS(2)
+	NIK_DEFINE_BLOCK_TUPLE_PASS(3)
+	NIK_DEFINE_BLOCK_TUPLE_PASS(4)
+	NIK_DEFINE_BLOCK_TUPLE_PASS(5)
+	NIK_DEFINE_BLOCK_TUPLE_PASS(6)
+	NIK_DEFINE_BLOCK_TUPLE_PASS(7)
+	NIK_DEFINE_BLOCK_TUPLE_PASS(8)
+	NIK_DEFINE_BLOCK_TUPLE_PASS(9)
+
+	// value:
+
+		template<index_type n, typename... Ts>
+		constexpr auto & tuple_value(tuple<Ts...> & t) { return NIK_TUPLE_BLOCK(3, 500, n, Ts)(t); }
+
+		template<index_type n, typename... Ts>
+		constexpr const auto & tuple_value(const tuple<Ts...> & t) { return NIK_TUPLE_BLOCK(3, 500, n, Ts)(t); }
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // call/recall:
@@ -531,8 +591,18 @@ namespace cctmp {
 
 					else if nik_ce (ctn == MI::h1_pair)
 
+					//	return NIK_MACHINE(d, MT::id, c, i, Vs)
+					//		(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+
 						return NIK_MACHINE(d, MT::id, c, i, Vs)
-							(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+						(
+							U_null_Vs, U_pack_Vs
+							<
+								tuple_value<0>(val),
+								tuple_value<1>(val), Xs...
+
+							>, Hs...
+						);
 					else
 						return val;
 				}
@@ -567,8 +637,18 @@ namespace cctmp {
 
 					else if nik_ce (ctn == MI::h1_pair)
 
+					//	return NIK_MACHINE(d, MT::id, c, i, Vs)
+					//		(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+
 						return NIK_MACHINE(d, MT::id, c, i, Vs)
-							(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+						(
+							U_null_Vs, U_pack_Vs
+							<
+								tuple_value<0>(val),
+								tuple_value<1>(val), Xs...
+
+							>, Hs...
+						);
 					else
 						return val;
 				}
@@ -859,8 +939,18 @@ namespace cctmp {
 
 				else if nik_ce (ctn == MI::h1_pair)
 
+				//	return NIK_MACHINE(d, MT::id, c, i, Vs)
+				//		(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+
 					return NIK_MACHINE(d, MT::id, c, i, Vs)
-						(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+					(
+						U_null_Vs, U_pack_Vs
+						<
+							tuple_value<0>(val),
+							tuple_value<1>(val), Xs...
+
+						>, Hs...
+					);
 				else
 					return val;
 			}
@@ -897,8 +987,18 @@ namespace cctmp {
 
 				else if nik_ce (ctn == MI::h1_pair)
 
+				//	return NIK_MACHINE(d, MT::id, c, i, Vs)
+				//		(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+
 					return NIK_MACHINE(d, MT::id, c, i, Vs)
-						(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+					(
+						U_null_Vs, U_pack_Vs
+						<
+							tuple_value<0>(val),
+							tuple_value<1>(val), Xs...
+
+						>, Hs...
+					);
 				else
 					return val;
 			}
@@ -927,8 +1027,18 @@ namespace cctmp {
 
 				else if nik_ce (ctn == MI::h1 || ctn == MI::h1_pair)
 
+				//	return NIK_MACHINE(d, MT::id, c, i, Vs)
+				//		(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+
 					return NIK_MACHINE(d, MT::id, c, i, Vs)
-						(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+					(
+						U_null_Vs, U_pack_Vs
+						<
+							tuple_value<0>(val),
+							tuple_value<1>(val), Xs...
+
+						>, Hs...
+					);
 				else
 					return val;
 			}
@@ -1093,8 +1203,18 @@ namespace cctmp {
 
 					else if nik_ce (ctn == MI::h1_pair)
 
+					//	return NIK_MACHINE(d, MT::id, c, i, Vs)
+					//		(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+
 						return NIK_MACHINE(d, MT::id, c, i, Vs)
-							(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+						(
+							U_null_Vs, U_pack_Vs
+							<
+								tuple_value<0>(val),
+								tuple_value<1>(val), Xs...
+
+							>, Hs...
+						);
 					else
 						return val;
 				}
@@ -1140,8 +1260,18 @@ namespace cctmp {
 
 					else if nik_ce (ctn == MI::h1_pair)
 
+					//	return NIK_MACHINE(d, MT::id, c, i, Vs)
+					//		(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+
 						return NIK_MACHINE(d, MT::id, c, i, Vs)
-							(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+						(
+							U_null_Vs, U_pack_Vs
+							<
+								tuple_value<0>(val),
+								tuple_value<1>(val), Xs...
+
+							>, Hs...
+						);
 					else
 						return val;
 				}
@@ -1185,8 +1315,18 @@ namespace cctmp {
 
 				else if nik_ce (ctn == MI::h1_pair)
 
+				//	return NIK_MACHINE(d, MT::id, c, i, Vs)
+				//		(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+
 					return NIK_MACHINE(d, MT::id, c, i, Vs)
-						(U_null_Vs, U_pack_Vs<val.v1, val.v2, Xs...>, Hs...);
+					(
+						U_null_Vs, U_pack_Vs
+						<
+							tuple_value<0>(val),
+							tuple_value<1>(val), Xs...
+
+						>, Hs...
+					);
 				else
 					return val;
 			}
@@ -1359,7 +1499,7 @@ namespace cctmp {
 			nik_ces auto result = alias
 			<
 				Operator::same, W,
-				alias<Operator::car, Z>
+				unpack_alias<Z, Operator::car>
 			>;
 
 		}; nik_ces auto U_same_car = U_store_T<T_same_car>;
@@ -1377,7 +1517,7 @@ namespace cctmp {
 		)
 		{
 			nik_ce auto size = sizeof...(Zs);
-			nik_ce auto pos	 = alias<Operator::find, U_custom<U_same_car, W0>, U_restore_T<decltype(A0)>>;
+			nik_ce auto pos	 = alias<Operator::find, U_custom<U_same_car, W0>, Zs...>;
 
 			if nik_ce (pos == size)
 
@@ -1414,7 +1554,7 @@ namespace cctmp {
 			nik_ce auto Z0 = U_pack_Vs<W0, X0>;
 			nik_ce auto a0 = U_pack_Vs<Z0, Zs...>;
 
-			return pair(a0, X0);
+			return tuple<decltype(a0), decltype(X0)>(a0, X0);
 		}
 	};
 

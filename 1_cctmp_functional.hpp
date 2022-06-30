@@ -32,6 +32,7 @@ namespace cctmp_functional {
 	using Operator						= typename cctmp::Operator;
 
 	template<auto... Vs> using auto_pack			= typename cctmp::template auto_pack<Vs...>;
+	template<typename... Ts> using tuple			= typename cctmp::template tuple<Ts...>;
 	template<auto... Vs> using block			= typename cctmp::template block<Vs...>;
 
 	nik_ce auto _zero					= cctmp::_zero;
@@ -53,10 +54,10 @@ namespace cctmp_functional {
 	template<auto... Vs> nik_ce auto U_same			= cctmp::template U_same<Vs...>;
 
 	template<auto... Vs> nik_ce auto unite			= cctmp::template unite<Vs...>;
-	template<auto... Vs> nik_ce auto find			= cctmp::template find<Vs...>;
 
-	template<auto... Vs> nik_ce auto alias			= cctmp::template alias<Vs...>;
+	template<auto... Vs> nik_ce auto unpack_alias		= cctmp::template unpack_alias<Vs...>;
 
+	template<auto... Vs> nik_ce auto unpack			= cctmp::template unpack<Vs...>;
 	template<auto... Vs> nik_ce auto function		= cctmp::template function<Vs...>;
 	template<auto... Vs> nik_ce auto copy			= cctmp::template copy<Vs...>;
 	template<auto... Vs> nik_ce auto write			= cctmp::template write<Vs...>;
@@ -274,7 +275,7 @@ namespace cctmp_functional {
 	{
 		nik_ces auto c = controller
 		<
-			find     <                   >,
+			unpack   <                   >,
 			write    < _zero , _argument >,
 			function <         BN::split >,
 			stage    <                   >,
@@ -283,7 +284,7 @@ namespace cctmp_functional {
 		>;
 
 		template<auto v, auto p>
-		nik_ces auto h0 = U_pack_Vs<_curry_<cmp, v>, p>;
+		nik_ces auto h0 = U_pack_Vs<p, Operator::find, _curry_<cmp, v>>;
 
 		template<auto d, auto p, auto v>
 		nik_ces auto result = cctmp::general_start<d, c, v>(h0<v, p>, U_null_Vs, U_null_Vs, p);
@@ -324,10 +325,10 @@ namespace cctmp_functional {
 		template<auto v, auto p>
 		nik_ces auto match()
 		{
-			nik_ce auto pos  = alias<Operator::find, U_same<v>, p>;
-			nik_ce auto size = alias<Operator::length, p>;
+			nik_ce auto pos  = unpack_alias<p, Operator::find, U_same<v>>;
+			nik_ce auto size = unpack_alias<p, Operator::length>;
 
-			return pair(bool{pos < size}, pos);
+			return tuple<bool, decltype(pos)>(bool{pos < size}, pos);
 		}
 
 		template<auto v, auto p>

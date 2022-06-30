@@ -125,15 +125,19 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// pair:
+// tuple:
 
-	template<typename T1, typename T2>
-	struct pair
+/***********************************************************************************************************************/
+
+	template<typename... Ts> struct tuple { };
+
+	template<typename T, typename... Ts>
+	struct tuple<T, Ts...>
 	{
-		T1 v1;
-		T2 v2;
+		T value;
+		tuple<Ts...> rest;
 
-		nik_ce pair(const T1 & _v1, const T2 & _v2) : v1{_v1}, v2{_v2} { }
+		nik_ce tuple(const T & v, const Ts &... vs) : value{v}, rest{vs...} { }
 	};
 
 /***********************************************************************************************************************/
@@ -143,20 +147,6 @@ namespace cctmp {
 
 	template<typename Type, Type... Vs>
 	nik_ce Type array[] = { Vs... };
-
-/***********************************************************************************************************************/
-
-// U -> V:
-
-	template<typename Type, auto... Vs>
-	nik_ce auto V_array_U(nik_avp(auto_pack<Vs...>*))
-		{ return array<Type, Vs...>; }
-
-// V -> U:
-
-	template<auto Arr, auto... Is>
-	nik_ce auto U_array_V(nik_avp(auto_pack<Is...>*))
-		{ return U_pack_Vs<Arr[Is]...>; }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -297,7 +287,7 @@ namespace cctmp {
 
 			// algebraic:
 
-			nik_ces key_type product			= 19;
+			nik_ces key_type tuple				= 19;
 
 			// mutation:
 
@@ -337,22 +327,23 @@ namespace cctmp {
 
 			nik_ces key_type to_const			=  0;
 
+			nik_ces key_type to_array			=  1;
+			nik_ces key_type from_array			=  2;
+
 			// comparison:
 
-			nik_ces key_type same				=  1;
-			nik_ces key_type csame				=  2;
-			nik_ces key_type is_int_type			=  3;
-			nik_ces key_type not_int_type			=  4;
+			nik_ces key_type same				=  3;
+			nik_ces key_type csame				=  4;
+			nik_ces key_type is_int_type			=  5;
+			nik_ces key_type not_int_type			=  6;
 
 			// functional:
 
-			nik_ces key_type length				=  5;
-			nik_ces key_type map				=  6;
-			nik_ces key_type zip				=  7;
+			nik_ces key_type length				=  7;
+			nik_ces key_type map				=  8;
+			nik_ces key_type zip				=  9;
 
-			nik_ces key_type is_null			=  8;
-			nik_ces key_type cons				=  9;
-			nik_ces key_type push				= 10;
+			nik_ces key_type is_null			= 10;
 			nik_ces key_type car				= 11;
 			nik_ces key_type cdr				= 12;
 			nik_ces key_type cadr				= 13;
@@ -362,6 +353,12 @@ namespace cctmp {
 			// modular:
 
 			nik_ces key_type custom				= 16;
+
+			// pack:
+
+			nik_ces key_type unpack				= 17;
+			nik_ces key_type cons				= 18;
+			nik_ces key_type push				= 19;
 	};
 
 /***********************************************************************************************************************/
@@ -570,15 +567,15 @@ namespace cctmp {
 
 	// algebraic:
 
-		// pair:
+		// tuple:
 
 			template<auto... filler>
-			struct T_overload<Overload::function, Operator::product, filler...>
+			struct T_overload<Overload::function, Operator::tuple, filler...>
 			{
 				template<typename... Ts>
-				nik_ces auto result(Ts... vs) { return pair<Ts...>(vs...); }
+				nik_ces auto result(Ts... vs) { return tuple<Ts...>(vs...); }
 
-			}; nik_ce auto _product_ = U_function_T<Operator::product>;
+			}; nik_ce auto _tuple_ = U_function_T<Operator::tuple>;
 
 	// mutation:
 
@@ -727,6 +724,8 @@ namespace cctmp {
 
 // alias (variable template):
 
+	// Assumes variadic input, for pack input see "Operator::unpack".
+
 	template<key_type Op, auto... Vs>
 	nik_ce auto alias = U_pack_Vs<Op, Vs...>;
 
@@ -737,6 +736,14 @@ namespace cctmp {
 
 		template<typename T, nik_vp(V)(T&)>
 		nik_ce auto alias<Operator::to_const, V> = U_store_T<T const &>;
+
+		template<typename T, nik_vp(t)(T*), auto... Vs>
+		nik_ce auto alias<Operator::to_array, t, Vs...> = array<T, Vs...>;
+
+			// to array T& doesn't make sense as an option.
+
+		template<auto a, auto... Is>
+		nik_ce auto alias<Operator::from_array, a, Is...> = U_pack_Vs<a[Is]...>;
 
 	// comparison:
 
@@ -774,52 +781,59 @@ namespace cctmp {
 
 	// functional:
 
-		template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-		nik_ce auto alias<Operator::length, p> = sizeof...(Vs);
+		template<auto... Vs>
+		nik_ce auto alias<Operator::length, Vs...> = sizeof...(Vs);
 
-		template<auto op, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-		nik_ce auto alias<Operator::map, op, p> = U_pack_Vs<overload<op, Vs>...>;
+		template<auto op, auto... Vs>
+		nik_ce auto alias<Operator::map, op, Vs...> = U_pack_Vs<overload<op, Vs>...>;
 
-		template
-		<
-			auto op,
-			auto... Vs, nik_vp(p0)(auto_pack<Vs...>*),
-			auto... Ws, nik_vp(p1)(auto_pack<Ws...>*)
-		>
-		nik_ce auto alias<Operator::zip, op, p0, p1> = U_pack_Vs<overload<op, Vs, Ws>...>;
+		template<auto op, auto... Ws, nik_vp(p)(auto_pack<Ws...>*), auto... Vs>
+		nik_ce auto alias<Operator::zip, op, p, Vs...> = U_pack_Vs<overload<op, Ws, Vs>...>;
 
-		template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-		nik_ce auto alias<Operator::is_null, p> = (sizeof...(Vs) == 0);
+		template<auto... Vs>
+		nik_ce auto alias<Operator::is_null, Vs...> = (sizeof...(Vs) == 0);
 
-		template<auto V0, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-		nik_ce auto alias<Operator::cons, V0, p> = U_pack_Vs<V0, Vs...>;
+		template<auto V0, auto... Vs>
+		nik_ce auto alias<Operator::car, V0, Vs...> = V0;
 
-		template<auto V0, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-		nik_ce auto alias<Operator::push, V0, p> = U_pack_Vs<Vs..., V0>;
+		template<auto V0, auto... Vs>
+		nik_ce auto alias<Operator::cdr, V0, Vs...> = U_pack_Vs<Vs...>;
 
-		template<auto V0, auto... Vs, nik_vp(p)(auto_pack<V0, Vs...>*)>
-		nik_ce auto alias<Operator::car, p> = V0;
-
-		template<auto V0, auto... Vs, nik_vp(p)(auto_pack<V0, Vs...>*)>
-		nik_ce auto alias<Operator::cdr, p> = U_pack_Vs<Vs...>;
-
-		template<auto V0, auto V1, auto... Vs, nik_vp(p)(auto_pack<V0, V1, Vs...>*)>
-		nik_ce auto alias<Operator::cadr, p> = V1;
+		template<auto V0, auto V1, auto... Vs>
+		nik_ce auto alias<Operator::cadr, V0, V1, Vs...> = V1;
 
 		template
 		<
-			auto... Vs, nik_vp(p0)(auto_pack<Vs...>*),
+			auto... Xs, nik_vp(p0)(auto_pack<Xs...>*),
 			auto... Ws, nik_vp(p1)(auto_pack<Ws...>*),
-			auto... Xs
+			auto... Vs
 		>
-		nik_ce auto alias<Operator::unite, p0, p1, Xs...> = U_pack_Vs<Vs..., Xs..., Ws...>;
+		nik_ce auto alias<Operator::unite, p0, p1, Vs...> = U_pack_Vs<Xs..., Vs..., Ws...>;
 
-		template<auto op, auto... Vs, nik_vp(p)(auto_pack<Vs...>*)>
-		nik_ce auto alias<Operator::find, op, p> = T_higher_order<Operator::match, _to_bool_>::template
+		template<auto op, auto... Vs>
+		nik_ce auto alias<Operator::find, op, Vs...> = T_higher_order<Operator::match, _to_bool_>::template
 			result<bool const*, index_type>(array<bool, overload<op, Vs>...>, sizeof...(Vs));
+
+	// modular:
 
 		template<auto Op, auto... Vs>
 		nik_ce auto alias<Operator::custom, Op, Vs...> = T_store_U<Op>::template result<Vs...>;
+
+	// unpack:
+
+		template<auto... Ws, nik_vp(p)(auto_pack<Ws...>*), key_type Op, auto... Vs>
+		nik_ce auto alias<Operator::unpack, p, Op, Vs...> = alias<Op, Vs..., Ws...>;
+
+		template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*), auto V0>
+		nik_ce auto alias<Operator::unpack, p, Operator::cons, V0> = U_pack_Vs<V0, Vs...>;
+
+		template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*), auto V0>
+		nik_ce auto alias<Operator::unpack, p, Operator::push, V0> = U_pack_Vs<Vs..., V0>;
+
+		// syntactic sugar:
+
+			template<auto p, auto Op, auto... Vs>
+			nik_ce auto unpack_alias = alias<Operator::unpack, p, Op, Vs...>;
 
 /***********************************************************************************************************************/
 
@@ -835,8 +849,12 @@ namespace cctmp {
 	// basis:
 
 	template<auto... Vs> using T_to_const		= T_alias   < Operator::to_const     , Vs... >;
+	template<auto... Vs> using T_to_array		= T_alias   < Operator::to_array     , Vs... >;
+	template<auto... Vs> using T_from_array		= T_alias   < Operator::from_array   , Vs... >;
 
 	template<auto... Vs> nik_ce auto U_to_const	= U_store_T < T_to_const             < Vs... > >;
+	template<auto... Vs> nik_ce auto U_to_array	= U_store_T < T_to_array             < Vs... > >;
+	template<auto... Vs> nik_ce auto U_from_array	= U_store_T < T_from_array           < Vs... > >;
 
 	// comparison:
 
@@ -856,8 +874,6 @@ namespace cctmp {
 	template<auto... Vs> using T_map		= T_alias   < Operator::map          , Vs... >;
 	template<auto... Vs> using T_zip		= T_alias   < Operator::zip          , Vs... >;
 	template<auto... Vs> using T_is_null		= T_alias   < Operator::is_null      , Vs... >;
-	template<auto... Vs> using T_cons		= T_alias   < Operator::cons         , Vs... >;
-	template<auto... Vs> using T_push		= T_alias   < Operator::push         , Vs... >;
 	template<auto... Vs> using T_car		= T_alias   < Operator::car          , Vs... >;
 	template<auto... Vs> using T_cdr		= T_alias   < Operator::cdr          , Vs... >;
 	template<auto... Vs> using T_cadr		= T_alias   < Operator::cadr         , Vs... >;
@@ -868,8 +884,6 @@ namespace cctmp {
 	template<auto... Vs> nik_ce auto U_map		= U_store_T < T_map                  < Vs... > >;
 	template<auto... Vs> nik_ce auto U_zip		= U_store_T < T_zip                  < Vs... > >;
 	template<auto... Vs> nik_ce auto U_is_null	= U_store_T < T_is_null              < Vs... > >;
-	template<auto... Vs> nik_ce auto U_cons		= U_store_T < T_cons                 < Vs... > >;
-	template<auto... Vs> nik_ce auto U_push		= U_store_T < T_push                 < Vs... > >;
 	template<auto... Vs> nik_ce auto U_car		= U_store_T < T_car                  < Vs... > >;
 	template<auto... Vs> nik_ce auto U_cdr		= U_store_T < T_cdr                  < Vs... > >;
 	template<auto... Vs> nik_ce auto U_cadr		= U_store_T < T_cadr                 < Vs... > >;
@@ -881,6 +895,16 @@ namespace cctmp {
 	template<auto... Vs> using T_custom		= T_alias   < Operator::custom       , Vs... >;
 
 	template<auto... Vs> nik_ce auto U_custom	= U_store_T < T_custom               < Vs... > >;
+
+	// unpack:
+
+	template<auto... Vs> using T_unpack		= T_alias   < Operator::unpack       , Vs... >;
+	template<auto... Vs> using T_cons		= T_alias   < Operator::cons         , Vs... >;
+	template<auto... Vs> using T_push		= T_alias   < Operator::push         , Vs... >;
+
+	template<auto... Vs> nik_ce auto U_unpack	= U_store_T < T_unpack               < Vs... > >;
+	template<auto... Vs> nik_ce auto U_cons		= U_store_T < T_cons                 < Vs... > >;
+	template<auto... Vs> nik_ce auto U_push		= U_store_T < T_push                 < Vs... > >;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -1119,7 +1143,7 @@ namespace cctmp {
 		// algebraic:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto product = f_action<Operator::product, ctn, dec>;
+		nik_ce auto product = f_action<Operator::tuple, ctn, dec>;
 
 	// higher order:
 
@@ -1170,16 +1194,8 @@ namespace cctmp {
 		template<key_type ctn = _h1, depth_type dec = _two>
 		nik_ce auto zip = a_action<Operator::zip, ctn, dec>;
 
-		//
-
 		template<key_type ctn = _h1, depth_type dec = _two>
 		nik_ce auto is_null = a_action<Operator::is_null, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto cons = a_action<Operator::cons, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto push = a_action<Operator::push, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
 		nik_ce auto car = a_action<Operator::car, ctn, dec>;
@@ -1200,6 +1216,11 @@ namespace cctmp {
 
 		template<key_type ctn = _h1, depth_type dec = _two>
 		nik_ce auto custom = a_action<Operator::custom, ctn, dec>;
+
+		// unpack:
+
+		template<key_type ctn = _h1, depth_type dec = _three>
+		nik_ce auto unpack = a_action<Operator::unpack, ctn, dec>;
 
 /***********************************************************************************************************************/
 

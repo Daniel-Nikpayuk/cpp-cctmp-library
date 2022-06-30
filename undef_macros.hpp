@@ -34,6 +34,8 @@
 
 #undef NIK_COMMA
 
+#undef NIK_PERIOD
+
 #undef NIK_R_ANG
 
 #undef NIK_AUTO
@@ -46,7 +48,7 @@
 
 #undef NIK_OVER
 
-#undef NIK_OP
+#undef NIK_REST
 
 #undef NIK_EMPTY_1
 
@@ -57,6 +59,8 @@
 #undef NIK_V_1
 
 #undef NIK_T_V_1
+
+#undef NIK_OP_1
 
 #undef NIK_UPPER_1_IDS
 
@@ -106,6 +110,8 @@
 
 #undef NIK_2_N_ARG_VARS
 
+#undef NIK_2_N_TUPLE_VARS
+
 #undef NIK_2_N_INDEX_SEGMENT
 
 #undef NIK_2_N_MONOID_CALLS
@@ -132,6 +138,8 @@
 
 #undef NIK_ARGUMENT_BLOCK
 
+#undef NIK_TUPLE_BLOCK
+
 #undef NIK_DEFINE_BLOCK_VARIABLE_PASS
 
 #undef NIK_DEFINE_BLOCK_FUNCTION_PASS
@@ -141,6 +149,8 @@
 #undef NIK_DEFINE_BLOCK_FOLD_PASS
 
 #undef NIK_DEFINE_BLOCK_ARGUMENT_PASS
+
+#undef NIK_DEFINE_BLOCK_TUPLE_PASS
 
 #undef NIK_CONTR_PARAMS
 
