@@ -467,6 +467,10 @@
 															\
 		NIK_BEGIN_BLOCK(9, fold, _d_, _n_), _o_, _s_, _v_... NIK_END_BLOCK
 
+	#define NIK_PARSE_BLOCK(_d_, _n_, _o_, _s_, _v_)								\
+															\
+		NIK_BEGIN_BLOCK(0, parse, _d_, _n_), _o_, _s_, _v_... NIK_END_BLOCK
+
 	#define NIK_CASCADE_BLOCK(_d_, _n_, _o_, _s_, _v_)								\
 															\
 		NIK_BEGIN_BLOCK(0, cascade, _d_, _n_), _o_, _s_, _v_... NIK_END_BLOCK()

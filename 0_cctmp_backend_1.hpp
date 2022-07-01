@@ -139,18 +139,19 @@ namespace cctmp {
 		nik_ces key_type segment	=  3;
 
 		nik_ces key_type fold		=  4;
-		nik_ces key_type cascade	=  5;
+		nik_ces key_type parse		=  5;
+		nik_ces key_type cascade	=  6;
 
-		nik_ces key_type argument	=  6;
-		nik_ces key_type tuple		=  7;
+		nik_ces key_type argument	=  7;
+		nik_ces key_type tuple		=  8;
 
-		nik_ces key_type sifter		=  8;
-		nik_ces key_type right		=  9;
-		nik_ces key_type lookup		= 10;
+		nik_ces key_type sifter		=  9;
+		nik_ces key_type right		= 10;
+		nik_ces key_type lookup		= 11;
 
-		nik_ces key_type filter		= 11;
-		nik_ces key_type left		= 12;
-		nik_ces key_type split		= 13;
+		nik_ces key_type filter		= 12;
+		nik_ces key_type left		= 13;
+		nik_ces key_type split		= 14;
 	};
 
 	using BN = BlockName;
@@ -436,6 +437,35 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// parse (fold with one lookahead):
+
+	template<key_type... filler>
+	struct block<BN::parse, BT::pause, _zero, filler...>
+	{
+		template<auto d, auto n, auto op, auto V, auto... Vs>
+		nik_ces auto result = machination(U_pack_Vs<op>, U_pack_Vs<n, V, Vs...>);
+	};
+
+	template<key_type... filler>
+	struct block<BN::parse, BT::halt, _zero, filler...>
+	{
+		template<auto d, auto n, auto op, auto V, auto... Vs>
+		nik_ces auto result = V;
+	};
+
+	template<key_type... filler>
+	struct block<BN::parse, BT::pass, _zero, filler...>
+	{
+		template<auto d, auto n, auto op, auto V, auto V0, auto V1, auto... Vs>
+		nik_ces auto result = NIK_BEGIN_BLOCK(0, parse, d, n),
+
+			op, overload<op, V, V0, V1>, V1, Vs...
+
+		NIK_END_BLOCK;
+	};
+
+/***********************************************************************************************************************/
+
 // cascade (compel fold):
 
 	template<key_type... filler>
@@ -455,8 +485,8 @@ namespace cctmp {
 		nik_ces auto result() { return V; }
 	};
 
-	template<key_type... filler>
-	struct block<BN::cascade, BT::pass, _zero, filler...>
+	template<key_type... filler> // function compel and alias compel, then only call compels?
+	struct block<BN::cascade, BT::pass, _zero, filler...> // can dispatch the ::pause ::id here.
 	{
 		template<auto d, auto n, auto op, auto V, auto V0, auto... Vs>
 		nik_ces auto result()

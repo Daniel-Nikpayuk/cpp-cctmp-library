@@ -173,6 +173,28 @@ namespace cctmp_functional {
 	template<auto op, auto V, auto l, auto dec = 3, auto d = MD::initial_depth>
 	nik_ce auto fold = T_fold::template result<d, op, V, l, dec>;
 
+// parse (fold with one lookahead):
+
+	struct T_block_parse
+	{
+		template<auto d, auto op, auto V, auto l>
+		nik_ces auto result = V;
+
+	}; nik_ce auto U_block_parse = U_store_T<T_block_parse>;
+
+	template<auto d, auto op, auto V, auto... Vs, nik_vp(l)(auto_pack<Vs...>*)>
+	nik_ce auto T_block_parse::result<d, op, V, l> = NIK_PARSE_BLOCK(d, sizeof...(Vs)-1, op, V, Vs);
+
+	struct T_parse
+	{
+		template<auto d, auto op, auto V, auto l, auto dec = 3>
+		nik_ces auto result = cctmp::compel_start<d, dec>(U_pack_Vs<U_block_parse, op, V, l>);
+
+	}; nik_ce auto U_parse = U_store_T<T_parse>;
+
+	template<auto op, auto V, auto l, auto dec = 3, auto d = MD::initial_depth>
+	nik_ce auto parse = T_parse::template result<d, op, V, l, dec>;
+
 // cascade:
 
 	struct T_block_cascade

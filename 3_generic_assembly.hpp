@@ -26,6 +26,7 @@ namespace cctmp_generics {
 	using cindex_type					= typename cctmp::cindex_type;
 	using BN						= typename cctmp::BN;
 	using BD						= typename cctmp::BD;
+	using MD						= typename cctmp::MD;
 	using Operator						= typename cctmp::Operator;
 
 	template<auto... Vs> using auto_pack			= typename cctmp::template auto_pack<Vs...>;
@@ -60,6 +61,7 @@ namespace cctmp_generics {
 	template<auto... Vs> nik_ce auto _bind_			= cctmp::template _bind_<Vs...>;
 
 	template<auto... Vs> nik_ce auto alias			= cctmp::template alias<Vs...>;
+	template<auto... Vs> nik_ce auto unpack_alias		= cctmp::template unpack_alias<Vs...>;
 
 	template<auto... Vs> nik_ce auto U_same			= cctmp::template U_same<Vs...>;
 	template<auto...> nik_ce auto U_not_int_type		= cctmp::template U_not_int_type<>;
@@ -605,8 +607,12 @@ namespace cctmp_generics {
 
 // endofold:
 
-	template<auto... Vs>
-	nik_ce auto endofold = NIK_FOLD_BLOCK(500, sizeof...(Vs), U_custom<U_endopose>, _lifted_id_, Vs);
+	struct T_endofold
+	{
+		template<auto... Vs>
+		nik_ces auto result = NIK_FOLD_BLOCK(500, sizeof...(Vs), U_custom<U_endopose>, _lifted_id_, Vs);
+
+	}; nik_ce auto U_endofold = U_store_T<T_endofold>;
 
 // endodrop:
 
@@ -647,314 +653,304 @@ namespace cctmp_generics {
 
 /***********************************************************************************************************************/
 
-	template<bool EmptyInstrs, bool... filler>
-	struct Parse
+// state:
+
+	struct ParseState
 	{
-		template<auto... lbls, auto... ds>
-		nik_ces auto map(nik_avp(auto_pack<ds...>*))
+		nik_ces key_type labels				= 0;
+		nik_ces key_type lines				= 1;
+		nik_ces key_type words				= 2;
+		nik_ces key_type chars				= 3;
+		nik_ces key_type graph				= 4;
+		nik_ces key_type verts				= 5;
+	};
+
+	using PS = ParseState;
+
+/***********************************************************************************************************************/
+
+// dispatch:
+
+	struct ParseDispatch
+	{
+		nik_ces key_type name				= 0;
+		nik_ces key_type note				= 1;
+
+		nik_ces key_type rest_is_empty			= 0;
+		nik_ces key_type is_before_label		= 1;
+		nik_ces key_type not_before_label		= 2;
+
+		nik_ces key_type label				= 0;
+		nik_ces key_type branch				= 1;
+		nik_ces key_type go_to				= 2;
+		nik_ces key_type lift				= 3;
+		nik_ces key_type drop				= 4;
+	};
+
+	using PD = ParseDispatch;
+
+/***********************************************************************************************************************/
+
+// mutators:
+
+	template<key_type, key_type...> struct Parse;
+
+	template<key_type... filler>
+	struct Parse<PD::label, filler...>
+	{
+		template<auto instr0, typename State>
+		nik_ces auto result(State)
 		{
-			return array
-			<
-				cindex_type, sizeof...(ds),
-				find<U_same<ds>, lbls...>...
-			>;
+			nik_ce auto state   = U_restore_T<State>;
+			nik_ce auto labels  = cctmp_functional::at<PS::labels, state>;
+
+			nik_ce auto lbl     = label_value<instr0>;
+			nik_ce auto nlabels = unpack_alias<labels, Operator::push, lbl>; // error if already exists.
+			nik_ce auto nstate  = cctmp_functional::replace<nlabels, PS::labels, state>;
+
+			return nstate;
+		}
+	};
+
+	template<key_type... filler>
+	struct Parse<PD::branch, filler...>
+	{
+		template<auto instr0, auto labels, auto lines, auto words, auto chars, auto graph, auto verts>
+		nik_ces auto result(nik_vp(state)(auto_pack<labels, lines, words, chars, graph, verts>*))
+		{
+			nik_ce auto lbl    = label_value<instr0>;
+			nik_ce auto nverts = unpack_alias<verts, Operator::push, lbl>;
+
+			nik_ce auto nword  = unpack_alias<chars, Operator::custom, U_endofold>;
+			nik_ce auto nwords = unpack_alias<words, Operator::push, nword>;
+
+			nik_ce auto nstate = U_pack_Vs<labels, lines, nwords, U_null_Vs, graph, nverts>;
+
+			return nstate;
+		}
+	};
+
+	template<key_type... filler>
+	struct Parse<PD::go_to, filler...>
+	{
+		template<auto instr0, auto labels, auto lines, auto words, auto chars, auto graph, auto verts>
+		nik_ces auto result(nik_vp(state)(auto_pack<labels, lines, words, chars, graph, verts>*))
+		{
+			nik_ce auto lbl    = label_value<instr0>;
+			nik_ce auto nverts = unpack_alias<verts, Operator::push, lbl>;
+			nik_ce auto ngraph = unpack_alias<graph, Operator::push, nverts>;
+
+			nik_ce auto nword  = unpack_alias<chars, Operator::custom, U_endofold>;
+			nik_ce auto nwords = unpack_alias<words, Operator::push, nword>;
+			nik_ce auto nlines = unpack_alias<lines, Operator::push, nwords>;
+
+			nik_ce auto nstate = U_pack_Vs<labels, nlines, U_null_Vs, U_null_Vs, ngraph, U_null_Vs>;
+
+			return nstate;
+		}
+	};
+
+	template<key_type... filler>
+	struct Parse<PD::lift, filler...>
+	{
+		template<auto instr0, typename State>
+		nik_ces auto result(State)
+		{
+			nik_ce auto state  = U_restore_T<State>;
+			nik_ce auto chars  = cctmp_functional::at<PS::chars, state>;
+
+			nik_ce auto nchars = unpack_alias<chars, Operator::push, instr0>;
+			nik_ce auto nstate = cctmp_functional::replace<nchars, PS::chars, state>;
+
+			return nstate;
+		}
+	};
+
+	template<key_type... filler>
+	struct Parse<PD::drop, filler...>
+	{
+		template<auto instr0, auto labels, auto lines, auto words, auto chars, auto graph, auto verts>
+		nik_ces auto result(nik_vp(state)(auto_pack<labels, lines, words, chars, graph, verts>*))
+		{
+			nik_ce auto ngraph = unpack_alias<graph, Operator::push, verts>;
+
+			nik_ce auto nword  = unpack_alias<chars, Operator::custom, U_endofold>;
+			nik_ce auto nwords = unpack_alias<words, Operator::push, nword, instr0>;
+			nik_ce auto nlines = unpack_alias<lines, Operator::push, nwords>;
+
+			nik_ce auto nstate = U_pack_Vs<labels, nlines, U_null_Vs, U_null_Vs, ngraph, U_null_Vs>;
+
+			return nstate;
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// parse instruction (monoid):
+
+	nik_ce void _parse_end_ () { }
+
+	struct T_parse_instr
+	{
+		template<auto instr1>
+		nik_ces auto _name()
+		{
+			if nik_ce (same<instr1, _parse_end_>) return PD::rest_is_empty;
+			else if nik_ce (is_label<instr1>)     return PD::is_before_label;
+			else                                  return PD::not_before_label;
 		}
 
-		template
-		<
-			auto... lbls, auto... Ls,
-			typename Words, typename Word,
-			auto... Ds, typename Verts
-		>
-		nik_ces auto result
-		(
-			nik_vp(labels)(auto_pack<lbls...>*), nik_vp(lines)(auto_pack<Ls...>*),
-			Words, Word, nik_vp(graph)(auto_pack<Ds...>*), Verts
-		)
+		template<auto instr0>
+		nik_ces auto _note()
 		{
-			nik_ce auto asize  = array<cindex_type, sizeof...(Ds)>;
-			nik_ce auto deps   = array<cdep_type, asize, map<lbls...>(Ds)...>;
-			nik_ce auto parsed = U_pack_Vs<deps, Ls...>;
+			if      nik_ce (is_label<instr0> ) return PD::label;
+			else if nik_ce (is_branch<instr0>) return PD::branch;
+			else if nik_ce (is_go_to<instr0> ) return PD::go_to;
+			else if nik_ce (is_lift<instr0>  ) return PD::lift;
+			else                               return PD::drop;
+		}
+
+		template<auto name, auto note>
+		nik_ces auto _dispatch()
+		{
+			nik_ce auto names = array
+			<
+				bool const,
+
+				(name == PD::rest_is_empty),
+				(name == PD::is_before_label),
+				(name == PD::not_before_label)
+			>;
+
+			nik_ce auto notes = array
+			<
+				bool const,
+
+				(note == PD::label),
+				(note == PD::branch),
+				(note == PD::go_to),
+				(note == PD::lift),
+				(note == PD::drop)
+			>;
+
+			return array<bool const*, names, notes>;
+		}
+
+		template<auto d>
+		nik_ces auto _static_assert()
+		{
+			nik_ce bool rest_is_empty_label    = !(d[PD::name][PD::rest_is_empty] && d[PD::note][PD::label]);
+			nik_ce bool rest_is_empty_branch   = !(d[PD::name][PD::rest_is_empty] && d[PD::note][PD::branch]);
+			nik_ce bool rest_is_empty_lift     = !(d[PD::name][PD::rest_is_empty] && d[PD::note][PD::lift]);
+
+			nik_ce bool is_before_label_label  = !(d[PD::name][PD::is_before_label] && d[PD::note][PD::label]);
+			nik_ce bool is_before_label_branch = !(d[PD::name][PD::is_before_label] && d[PD::note][PD::branch]);
+
+			nik_ce bool not_before_label_go_to = !(d[PD::name][PD::not_before_label] && d[PD::note][PD::go_to]);
+			nik_ce bool not_before_label_drop  = !(d[PD::name][PD::not_before_label] && d[PD::note][PD::drop]);
+
+			static_assert(rest_is_empty_label    , "A label as a final instruction is not allowed.");
+			static_assert(rest_is_empty_branch   , "A branch as a final instruction is not allowed.");
+			static_assert(rest_is_empty_lift     , "A lift as a final instruction is not allowed.");
+
+			static_assert(is_before_label_label  , "A label before a label is not allowed.");
+			static_assert(is_before_label_branch , "A branch before a label is not allowed.");
+
+			static_assert(not_before_label_go_to , "A go_to followed by a nonlabel is not allowed.");
+			static_assert(not_before_label_drop  , "A drop followed by a nonlabel is not allowed.");
+		}
+
+		template<auto state, auto instr0, auto instr1>
+		nik_ces auto _result()
+		{
+			if nik_ce (same<instr0, _parse_end_>) return state;
+			else
+			{
+				nik_ce auto name = _name<instr1>();
+				nik_ce auto note = _note<instr0>();
+				nik_ce auto disp = _dispatch<name, note>();
+
+				_static_assert<disp>();
+
+				nik_ce bool is_before_label_lift = disp[PD::name][PD::is_before_label]
+								&& disp[PD::note][PD::lift];
+
+				if nik_ce (is_before_label_lift)
+				{
+					nik_ce auto chars   = cctmp_functional::at<PS::chars, state>;
+
+					nik_ce auto ninstr0 = go_to<label_value<instr1>>;
+					nik_ce auto nchars  = unpack_alias<chars, Operator::push, instr0>;
+					nik_ce auto nstate  = cctmp_functional::replace<nchars, PS::chars, state>;
+
+					return Parse<PD::go_to>::template result<ninstr0>(nstate);
+				}
+				else return Parse<note>::template result<instr0>(state);
+			}
+		}
+
+		template<auto state, auto instr0, auto instr1>
+		nik_ces auto result = _result<state, instr0, instr1>();
+
+	}; nik_ce auto U_parse_instr = U_store_T<T_parse_instr>;
+
+/***********************************************************************************************************************/
+
+// (parser) helpers:
+
+	struct T_vertices_to_indices
+	{
+		template<auto labels, auto... vertexes>
+		nik_ces auto result = array
+		<
+			cindex_type, sizeof...(vertexes),
+			unpack_alias<labels, Operator::find, U_same<vertexes>>...
+		>;
+
+	}; nik_ce auto U_vertices_to_indices = U_store_T<T_vertices_to_indices>;
+
+	struct T_graph_to_indices
+	{
+		template<auto labels, auto dep_size, auto... vertices>
+		nik_ces auto result = array
+		<
+			cdep_type, dep_size,
+			unpack_alias<vertices, Operator::custom, U_vertices_to_indices, labels>...
+		>;
+
+	}; nik_ce auto U_graph_to_indices = U_store_T<T_graph_to_indices>;
+
+/***********************************************************************************************************************/
+
+// parser:
+
+	struct T_parse
+	{
+		nik_ces auto initial_state = unpack_alias<segment<6>, Operator::map, _constant_<U_null_Vs>>;
+
+		template<auto labels, auto lines, auto words, auto chars, auto graph, auto verts>
+		nik_ces auto _result(nik_vp(state)(auto_pack<labels, lines, words, chars, graph, verts>*))
+		{
+			nik_ce auto asize  = array<cindex_type, unpack_alias<graph, Operator::length>>;
+			nik_ce auto deps   = unpack_alias<graph, Operator::custom, U_graph_to_indices, labels, asize>;
+			nik_ce auto parsed = unpack_alias<lines, Operator::cons, deps>;
 
 			return parsed;
 		}
-	};
 
-	template<bool... filler>
-	struct Parse<false, filler...>
-	{
-		template<auto V>
-		nik_ces auto parse_assert() { return false; }
-
-		template
-		<
-			auto instr0, auto... instrs,
-
-			auto... lbls, auto... Ls,
-			auto... Ws, auto... ws,
-			auto... Ds, auto... ds
-		>
-		nik_ces auto dispatch_label
+		template<auto... instrs>
+		nik_ces auto result = _result
 		(
-			nik_vp(labels)(auto_pack<lbls...>*), nik_vp(lines)(auto_pack<Ls...>*),
-			nik_vp(words)(auto_pack<Ws...>*), nik_vp(chars)(auto_pack<ws...>*),
-			nik_vp(graph)(auto_pack<Ds...>*), nik_vp(verts)(auto_pack<ds...>*)
-		)
-		{
-			nik_ce auto lbl     = label_value<instr0>;
-			nik_ce auto nlabels = U_pack_Vs<lbls..., lbl>; // error if already exists.
-
-			return Parse<bool{sizeof...(instrs) == 0}>::template result<instrs...>
-			(
-				nlabels, lines, words, chars, graph, verts
-			);
-		}
-
-		template
-		<
-			auto instr0, auto... instrs,
-
-			auto... lbls, auto... Ls,
-			auto... Ws, auto... ws,
-			auto... Ds, auto... ds
-		>
-		nik_ces auto dispatch_branch
-		(
-			nik_vp(labels)(auto_pack<lbls...>*), nik_vp(lines)(auto_pack<Ls...>*),
-			nik_vp(words)(auto_pack<Ws...>*), nik_vp(chars)(auto_pack<ws...>*),
-			nik_vp(graph)(auto_pack<Ds...>*), nik_vp(verts)(auto_pack<ds...>*)
-		)
-		{
-			nik_ce auto lbl    = label_value<instr0>;
-			nik_ce auto nverts = U_pack_Vs<ds..., lbl>;
-
-			nik_ce auto nword  = endofold<ws...>;
-			nik_ce auto nwords = U_pack_Vs<Ws..., nword>;
-
-			return Parse<bool{sizeof...(instrs) == 0}>::template result<instrs...>
-			(
-				labels, lines, nwords, U_null_Vs, graph, nverts
-			);
-		}
-
-		template
-		<
-			auto instr0, auto... instrs,
-
-			auto... lbls, auto... Ls,
-			auto... Ws, auto... ws,
-			auto... Ds, auto... ds
-		>
-		nik_ces auto dispatch_go_to
-		(
-			nik_vp(labels)(auto_pack<lbls...>*), nik_vp(lines)(auto_pack<Ls...>*),
-			nik_vp(words)(auto_pack<Ws...>*), nik_vp(chars)(auto_pack<ws...>*),
-			nik_vp(graph)(auto_pack<Ds...>*), nik_vp(verts)(auto_pack<ds...>*)
-		)
-		{
-			nik_ce auto lbl    = label_value<instr0>;
-			nik_ce auto nverts = U_pack_Vs<ds..., lbl>;
-			nik_ce auto ngraph = U_pack_Vs<Ds..., nverts>;
-
-			nik_ce auto nword  = endofold<ws...>;
-			nik_ce auto nwords = U_pack_Vs<Ws..., nword>;
-			nik_ce auto nlines = U_pack_Vs<Ls..., nwords>;
-
-			return Parse<bool{sizeof...(instrs) == 0}>::template result<instrs...>
-			(
-				labels, nlines, U_null_Vs, U_null_Vs, ngraph, U_null_Vs
-			);
-		}
-
-		template
-		<
-			auto instr0, auto... instrs,
-
-			auto... lbls, auto... Ls,
-			auto... Ws, auto... ws,
-			auto... Ds, auto... ds
-		>
-		nik_ces auto dispatch_lift
-		(
-			nik_vp(labels)(auto_pack<lbls...>*), nik_vp(lines)(auto_pack<Ls...>*),
-			nik_vp(words)(auto_pack<Ws...>*), nik_vp(chars)(auto_pack<ws...>*),
-			nik_vp(graph)(auto_pack<Ds...>*), nik_vp(verts)(auto_pack<ds...>*)
-		)
-		{
-			nik_ce auto nchars = U_pack_Vs<ws..., instr0>;
-
-			return Parse<bool{sizeof...(instrs) == 0}>::template result<instrs...>
-			(
-				labels, lines, words, nchars, graph, verts
-			);
-		}
-
-		template
-		<
-			auto instr0, auto... instrs,
-
-			auto... lbls, auto... Ls,
-			auto... Ws, auto... ws,
-			auto... Ds, auto... ds
-		>
-		nik_ces auto dispatch_drop
-		(
-			nik_vp(labels)(auto_pack<lbls...>*), nik_vp(lines)(auto_pack<Ls...>*),
-			nik_vp(words)(auto_pack<Ws...>*), nik_vp(chars)(auto_pack<ws...>*),
-			nik_vp(graph)(auto_pack<Ds...>*), nik_vp(verts)(auto_pack<ds...>*)
-		)
-		{
-			nik_ce auto nverts = U_restore_T<decltype(verts)>;
-			nik_ce auto ngraph = U_pack_Vs<Ds..., nverts>;
-
-			nik_ce auto nword  = endofold<ws...>;
-			nik_ce auto nwords = U_pack_Vs<Ws..., nword, instr0>;
-			nik_ce auto nlines = U_pack_Vs<Ls..., nwords>;
-
-			return Parse<bool{sizeof...(instrs) == 0}>::template result<instrs...>
-			(
-				labels, nlines, U_null_Vs, U_null_Vs, ngraph, U_null_Vs
-			);
-		}
-
-		template
-		<
-			auto instr0,
-
-			auto... lbls, auto... Ls,
-			auto... Ws, auto... ws,
-			auto... Ds, auto... ds
-		>
-		nik_ces auto rest_is_empty
-		(
-			nik_vp(labels)(auto_pack<lbls...>*), nik_vp(lines)(auto_pack<Ls...>*),
-			nik_vp(words)(auto_pack<Ws...>*), nik_vp(chars)(auto_pack<ws...>*),
-			nik_vp(graph)(auto_pack<Ds...>*), nik_vp(verts)(auto_pack<ds...>*)
-		)
-		{
-			if nik_ce (is_label<instr0>)
-
-				static_assert(parse_assert<instr0>(), "A label as a final instruction is not allowed.");
-
-			else if nik_ce (is_branch<instr0>)
-
-				static_assert(parse_assert<instr0>(), "A branch as a final instruction is not allowed.");
-
-			else if nik_ce (is_go_to<instr0>)
-
-				return dispatch_go_to<instr0>(labels, lines, words, chars, graph, verts);
-
-			else if nik_ce (is_lift<instr0>)
-
-				static_assert(parse_assert<instr0>(), "A lift as a final instruction is not allowed.");
-			else
-				return dispatch_drop<instr0>(labels, lines, words, chars, graph, verts);
-		}
-
-		template
-		<
-			auto instr0, auto... instrs,
-
-			auto... lbls, auto... Ls,
-			auto... Ws, auto... ws,
-			auto... Ds, auto... ds
-		>
-		nik_ces auto is_before_label
-		(
-			nik_vp(labels)(auto_pack<lbls...>*), nik_vp(lines)(auto_pack<Ls...>*),
-			nik_vp(words)(auto_pack<Ws...>*), nik_vp(chars)(auto_pack<ws...>*),
-			nik_vp(graph)(auto_pack<Ds...>*), nik_vp(verts)(auto_pack<ds...>*)
-		)
-		{
-			if nik_ce (is_label<instr0>)
-
-				static_assert(parse_assert<instr0>(), "A label before a label is not allowed.");
-
-			else if nik_ce (is_branch<instr0>)
-
-				static_assert(parse_assert<instr0>(), "A branch before a label is not allowed.");
-
-			else if nik_ce (is_go_to<instr0>)
-
-				return dispatch_go_to<instr0, instrs...>(labels, lines, words, chars, graph, verts);
-
-			else if nik_ce (is_lift<instr0>)
-			{
-				nik_ce auto instr1 = go_to<label_value<car<instrs...>>>;
-				nik_ce auto nchars = U_pack_Vs<ws..., instr0>;
-
-				return dispatch_go_to<instr1, instrs...>(labels, lines, words, nchars, graph, verts);
-			}
-			else
-				return dispatch_drop<instr0, instrs...>(labels, lines, words, chars, graph, verts);
-		}
-
-		template
-		<
-			auto instr0, auto... instrs,
-
-			auto... lbls, auto... Ls,
-			auto... Ws, auto... ws,
-			auto... Ds, auto... ds
-		>
-		nik_ces auto not_before_label
-		(
-			nik_vp(labels)(auto_pack<lbls...>*), nik_vp(lines)(auto_pack<Ls...>*),
-			nik_vp(words)(auto_pack<Ws...>*), nik_vp(chars)(auto_pack<ws...>*),
-			nik_vp(graph)(auto_pack<Ds...>*), nik_vp(verts)(auto_pack<ds...>*)
-		)
-		{
-			if nik_ce (is_label<instr0>)
-
-				return dispatch_label<instr0, instrs...>(labels, lines, words, chars, graph, verts);
-
-			else if nik_ce (is_branch<instr0>)
-
-				return dispatch_branch<instr0, instrs...>(labels, lines, words, chars, graph, verts);
-
-			else if nik_ce (is_go_to<instr0>)
-
-				static_assert(parse_assert<instr0>(), "A go_to followed by a nonlabel is not allowed.");
-
-			else if nik_ce (is_lift<instr0>)
-
-				return dispatch_lift<instr0, instrs...>(labels, lines, words, chars, graph, verts);
-			else 
-				static_assert(parse_assert<instr0>(), "A drop followed by a nonlabel is not allowed.");
-		}
-
-		template
-		<
-			auto instr0, auto... instrs,
-
-			auto... lbls, auto... Ls,
-			auto... Ws, auto... ws,
-			auto... Ds, auto... ds
-		>
-		nik_ces auto result
-		(
-			nik_vp(labels)(auto_pack<lbls...>*), nik_vp(lines)(auto_pack<Ls...>*),
-			nik_vp(words)(auto_pack<Ws...>*), nik_vp(chars)(auto_pack<ws...>*),
-			nik_vp(graph)(auto_pack<Ds...>*), nik_vp(verts)(auto_pack<ds...>*)
-		)
-		{
-			if nik_ce (sizeof...(instrs) == 0)
-
-				return rest_is_empty<instr0>(labels, lines, words, chars, graph, verts);
-
-			else if nik_ce (is_label<car<instrs...>>)
-
-				return is_before_label<instr0, instrs...>(labels, lines, words, chars, graph, verts);
-			else
-				return not_before_label<instr0, instrs...>(labels, lines, words, chars, graph, verts);
-		}
+			cctmp_functional::parse
+			<
+				U_custom<U_parse_instr>, initial_state,
+				U_pack_Vs<instrs..., _parse_end_>
+			>
+		);
 	};
 
 	template<auto... instrs>
-	nik_ce auto parse = Parse<bool{sizeof...(instrs) == 0}>::template result<instrs...>
-	(
-		U_null_Vs, U_null_Vs, U_null_Vs, U_null_Vs, U_null_Vs, U_null_Vs
-	);
+	nik_ce auto parse = T_parse::template result<instrs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

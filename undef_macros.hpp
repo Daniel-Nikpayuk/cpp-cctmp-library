@@ -134,6 +134,8 @@
 
 #undef NIK_FOLD_BLOCK
 
+#undef NIK_PARSE_BLOCK
+
 #undef NIK_CASCADE_BLOCK
 
 #undef NIK_ARGUMENT_BLOCK

@@ -824,16 +824,16 @@ namespace cctmp {
 		template<auto... Ws, nik_vp(p)(auto_pack<Ws...>*), key_type Op, auto... Vs>
 		nik_ce auto alias<Operator::unpack, p, Op, Vs...> = alias<Op, Vs..., Ws...>;
 
-		template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*), auto V0>
-		nik_ce auto alias<Operator::unpack, p, Operator::cons, V0> = U_pack_Vs<V0, Vs...>;
-
-		template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*), auto V0>
-		nik_ce auto alias<Operator::unpack, p, Operator::push, V0> = U_pack_Vs<Vs..., V0>;
-
 		// syntactic sugar:
 
 			template<auto p, auto Op, auto... Vs>
 			nik_ce auto unpack_alias = alias<Operator::unpack, p, Op, Vs...>;
+
+			template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*), auto... Ws>
+			nik_ce auto unpack_alias<p, Operator::cons, Ws...> = U_pack_Vs<Ws..., Vs...>;
+
+			template<auto... Vs, nik_vp(p)(auto_pack<Vs...>*), auto... Ws>
+			nik_ce auto unpack_alias<p, Operator::push, Ws...> = U_pack_Vs<Vs..., Ws...>;
 
 /***********************************************************************************************************************/
 
