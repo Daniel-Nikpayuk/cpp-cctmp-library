@@ -38,6 +38,7 @@
 
 /***********************************************************************************************************************/
 
+//	using namespace cctmp;
 //	using namespace cctmp_generics;
 
 /***********************************************************************************************************************/
@@ -71,18 +72,7 @@
 
 		99, 0, 5, 41
 	>;
-
-	constexpr auto U_int	= U_store_T<int>;
-	constexpr auto U_char	= U_store_T<char>;
 */
-
-/***********************************************************************************************************************/
-
-//	constexpr auto sq  = lift<0, _multiply_, 1, 1>;
-//	constexpr auto inc = lift<0, _add_     , 0, 1>;
-//	constexpr auto f   = overload<U_custom<U_endopose>, sq, inc>;
-//	constexpr auto f   = endofold<sq, inc>;
-//	constexpr auto f   = endodrop<signature<int, int>, sq, inc, sq, _return_>;
 
 /***********************************************************************************************************************/
 

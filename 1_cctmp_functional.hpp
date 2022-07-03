@@ -29,7 +29,6 @@ namespace cctmp_functional {
 	using BN						= typename cctmp::BN;
 	using BD						= typename cctmp::BD;
 	using MD						= typename cctmp::MD;
-	using Operator						= typename cctmp::Operator;
 
 	template<auto... Vs> using auto_pack			= typename cctmp::template auto_pack<Vs...>;
 	template<typename... Ts> using tuple			= typename cctmp::template tuple<Ts...>;
@@ -46,17 +45,19 @@ namespace cctmp_functional {
 
 	nik_ce auto _less_than_					= cctmp::_less_than_;
 
+	nik_ce auto U_same					= cctmp::U_same;
+	nik_ce auto U_length					= cctmp::U_length;
+	nik_ce auto U_find					= cctmp::U_find;
+
 	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
 	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
 
 	template<auto... Vs> nik_ce auto _curry_		= cctmp::template _curry_<Vs...>;
+	template<auto... Vs> nik_ce auto U_custom		= cctmp::template U_custom<Vs...>;
 
-	template<auto... Vs> nik_ce auto U_same			= cctmp::template U_same<Vs...>;
+	template<auto... Vs> nik_ce auto unpack_		= cctmp::template unpack_<Vs...>;
 
 	template<auto... Vs> nik_ce auto unite			= cctmp::template unite<Vs...>;
-
-	template<auto... Vs> nik_ce auto unpack_alias		= cctmp::template unpack_alias<Vs...>;
-
 	template<auto... Vs> nik_ce auto unpack			= cctmp::template unpack<Vs...>;
 	template<auto... Vs> nik_ce auto function		= cctmp::template function<Vs...>;
 	template<auto... Vs> nik_ce auto copy			= cctmp::template copy<Vs...>;
@@ -306,7 +307,7 @@ namespace cctmp_functional {
 		>;
 
 		template<auto v, auto p>
-		nik_ces auto h0 = U_pack_Vs<p, Operator::find, _curry_<cmp, v>>;
+		nik_ces auto h0 = U_pack_Vs<p, U_find, _curry_<cmp, v>>;
 
 		template<auto d, auto p, auto v>
 		nik_ces auto result = cctmp::general_start<d, c, v>(h0<v, p>, U_null_Vs, U_null_Vs, p);
@@ -347,8 +348,8 @@ namespace cctmp_functional {
 		template<auto v, auto p>
 		nik_ces auto match()
 		{
-			nik_ce auto pos  = unpack_alias<p, Operator::find, U_same<v>>;
-			nik_ce auto size = unpack_alias<p, Operator::length>;
+			nik_ce auto pos  = unpack_<p, U_find, U_custom<U_same, v>>;
+			nik_ce auto size = unpack_<p, U_length>;
 
 			return tuple<bool, decltype(pos)>(bool{pos < size}, pos);
 		}

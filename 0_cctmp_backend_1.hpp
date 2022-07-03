@@ -274,7 +274,7 @@ namespace cctmp {
 		struct block<BN::lookup, filler...>
 		{
 			template<auto V0, auto... Vs>
-			nik_ces auto result = unpack_alias<V0, Operator::cadr>;
+			nik_ces auto result = unpack_<V0, U_cadr>;
 		};
 
 	// filter:
@@ -1526,11 +1526,7 @@ namespace cctmp {
 		struct T_same_car
 		{
 			template<auto W, auto Z>
-			nik_ces auto result = alias
-			<
-				Operator::same, W,
-				unpack_alias<Z, Operator::car>
-			>;
+			nik_ces auto result = overload<U_same, W, unpack_<Z, U_car>>;
 
 		}; nik_ces auto U_same_car = U_store_T<T_same_car>;
 
@@ -1547,7 +1543,7 @@ namespace cctmp {
 		)
 		{
 			nik_ce auto size = sizeof...(Zs);
-			nik_ce auto pos	 = alias<Operator::find, U_custom<U_same_car, W0>, Zs...>;
+			nik_ce auto pos	 = find_<U_custom<U_same_car, W0>, Zs...>;
 
 			if nik_ce (pos == size)
 
