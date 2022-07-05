@@ -132,6 +132,8 @@
 
 #undef NIK_FUNCTION_BLOCK
 
+#undef NIK_SEGMENT_BLOCK
+
 #undef NIK_FOLD_BLOCK
 
 #undef NIK_PARSE_BLOCK

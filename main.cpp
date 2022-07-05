@@ -22,28 +22,46 @@
 /***********************************************************************************************************************/
 
 #include"define_macros.hpp"
-#include"0_cctmp_backend_0.hpp"
-#include"0_cctmp_backend_1.hpp"
-#include"1_cctmp_functional.hpp"
-//#include"2_cctmp_frontend.hpp"
-#include"3_generic_assembly.hpp"
-#include"4_one_cycle_generics_0.hpp"
-#include"4_one_cycle_generics_1.hpp"
-//#include"5_domain_specific_grammars.hpp"
-//#include"6_big_numbers_0.hpp"
-//#include"6_big_numbers_1.hpp"
-//#include"7_numerical_analysis_0.hpp"
-//#include"7_numerical_analysis_1.hpp"
+#include"00_cctmp_grammar.hpp"
+#include"01_cctmp_block.hpp"
+#include"02_cctmp_machine.hpp"
+#include"03_cctmp_functional.hpp"
+//#include"04_cctmp_front.hpp"
+//#include"05_generic_assembly.hpp"
+//#include"06_one_cycle_generics.hpp"
+//#include"07_one_cycle_specifics.hpp"
+//#include"08_domain_specifics.hpp"
+//#include"09_big_numbers.hpp"
+//#include"10_cryptography.hpp"
+//#include"11_numerical.hpp"
+//#include"12_signal_processing.hpp"
 #include"undef_macros.hpp"
 
 /***********************************************************************************************************************/
 
-//	using namespace cctmp;
+	using namespace cctmp;
 //	using namespace cctmp_generics;
 
 /***********************************************************************************************************************/
 
-/*
+	constexpr void print_array(int *b, const int *e)
+	{
+		while (b != e)
+		{
+			printf("%d, ", *b);
+			++b;
+		}
+
+		printf("end\n");
+	}
+
+	constexpr void repeat_array(int *b, const int *e, int v)
+	{
+		while (b != e) *(b++) = v;
+	}
+
+/***********************************************************************************************************************/
+
 	constexpr auto p = U_pack_Vs
 	<
 	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
@@ -72,41 +90,19 @@
 
 		99, 0, 5, 41
 	>;
-*/
 
 /***********************************************************************************************************************/
 
-	constexpr void print_array(int *b, const int *e)
-	{
-		while (b != e)
-		{
-			printf("%d, ", *b);
-			++b;
-		}
-
-		printf("end\n");
-	}
-
-	constexpr void repeat_array(int *b, const int *e, int v)
-	{
-		while (b != e) *(b++) = v;
-	}
-
-/***********************************************************************************************************************/
-
-	constexpr auto direct_spec = cpp_one_cycle_specs::template direct_repeat<>;
+//	constexpr auto direct_spec = cpp_one_cycle_specs::template direct_repeat<>;
 
 	int main(int argc, char *argv[])
 	{
-	//	printf("%d\n", f(0, 5));
-	//	printf("%d\n", T_store_U<f>::template result<_return_>(0, 5));
-
 	//	printf("%s\n", call<Overload::same, U_char, U_char> ? "true" : "false");
 	//	printf("%llu\n", call<Overload::map, cctmp::template increment_op<>, p>);
 	//	printf("%hu\n", call<Overload::find, cctmp::template is_zero_op<>, p>);
 
 	//	printf("%d\n",   cctmp_functional::at<0, p>);
-	//	printf("%llu\n", cctmp_functional::left<2, p>);
+	//	printf("%llu\n", cctmp_functional::left<0, p>);
 	//	printf("%llu\n", cctmp_functional::split<2, p>);
 	//	printf("%llu\n", cctmp_functional::segment<unsigned{10}>);
 
@@ -120,11 +116,11 @@
 	//	printf("%llu\n", cctmp_functional::sort<p>);	// gcc 1.717s / clang 4.199s
 								// gcc 1.344s / clang 3.568s
 
-		int size = 10;
-		int arr[size];
-		cpp_one_cycle_generics::T_repeat<direct_spec>::result(arr, arr+size, argc);
+	//	int size = 10;
+	//	int arr[size];
+	//	cpp_one_cycle_generics::T_repeat<direct_spec>::result(arr, arr+size, argc);
 	//	repeat_array(arr, arr+size, argc);
-		print_array(arr, arr+size);
+	//	print_array(arr, arr+size);
 
 		return 0;
 	}
