@@ -24,9 +24,14 @@ mawk_prog_rest='BEGIN { line = 0; skip = 0; re_str = "^\/\*+\/$"; }
 	}
 }'
 
-mawk "$mawk_prog_first" "define_macros.hpp" >  "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "0_backend.hpp"     >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "1_frontend.hpp"    >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "2_programs.hpp"    >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "undef_macros.hpp"  >> "cpp_cctmp_library.hpp"
+mawk "$mawk_prog_first" "define_macros.hpp"          >  "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "00_cctmp_grammar.hpp"       >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "01_cctmp_block.hpp"         >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "02_cctmp_machine.hpp"       >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "03_cctmp_functional.hpp"    >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "05_generic_assembly.hpp"    >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "undef_macros.hpp"           >> "cpp_cctmp_library.hpp"
+
+#mawk "$mawk_prog_rest"  "06_one_cycle_generics.hpp"  >> "cpp_cctmp_library.hpp" &&
+#mawk "$mawk_prog_rest"  "07_one_cycle_specifics.hpp" >> "cpp_cctmp_library.hpp" &&
 

@@ -201,7 +201,7 @@ namespace cctmp_functional {
 	struct T_parse
 	{
 		template<auto d, auto op, auto V, auto... Vs>
-		nik_ces auto result = T_block_parse::template result<d, sizeof...(Vs), op, V, Vs...>;
+		nik_ces auto result = T_block_parse::template result<d, sizeof...(Vs)-1, op, V, Vs...>;
 
 	}; nik_ce auto U_parse = U_store_T<T_parse>;
 

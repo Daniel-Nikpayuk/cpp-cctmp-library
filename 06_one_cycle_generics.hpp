@@ -29,10 +29,11 @@ namespace cpp_one_cycle_generics {
 	template<auto V> nik_ce auto _is_equal_			= cctmp::template _is_equal_<V>;
 
 	template<auto V> nik_ce auto label			= cctmp_generics::template label<V>;
-	template<auto... Vs> nik_ce auto lift			= cctmp_generics::template lift<Vs...>;
-	template<auto... Vs> nik_ce auto test			= cctmp_generics::template test<Vs...>;
 	template<auto V> nik_ce auto branch			= cctmp_generics::template branch<V>;
 	template<auto V> nik_ce auto go_to			= cctmp_generics::template go_to<V>;
+
+	template<auto... Vs> nik_ce auto lift			= cctmp_generics::template lift<Vs...>;
+	template<auto... Vs> nik_ce auto test			= cctmp_generics::template test<Vs...>;
 	template<auto... Vs> nik_ce auto parse			= cctmp_generics::template parse<Vs...>;
 
 /***********************************************************************************************************************/

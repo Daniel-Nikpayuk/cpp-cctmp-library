@@ -27,9 +27,9 @@
 #include"02_cctmp_machine.hpp"
 #include"03_cctmp_functional.hpp"
 //#include"04_cctmp_front.hpp"
-//#include"05_generic_assembly.hpp"
-//#include"06_one_cycle_generics.hpp"
-//#include"07_one_cycle_specifics.hpp"
+#include"05_generic_assembly.hpp"
+#include"06_one_cycle_generics.hpp"
+#include"07_one_cycle_specifics.hpp"
 //#include"08_domain_specifics.hpp"
 //#include"09_big_numbers.hpp"
 //#include"10_cryptography.hpp"
@@ -39,7 +39,7 @@
 
 /***********************************************************************************************************************/
 
-	using namespace cctmp;
+//	using namespace cctmp;
 //	using namespace cctmp_generics;
 
 /***********************************************************************************************************************/
@@ -62,6 +62,7 @@
 
 /***********************************************************************************************************************/
 
+/*
 	constexpr auto p = U_pack_Vs
 	<
 	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
@@ -90,10 +91,14 @@
 
 		99, 0, 5, 41
 	>;
+*/
 
 /***********************************************************************************************************************/
 
-//	constexpr auto direct_spec = cpp_one_cycle_specs::template direct_repeat<>;
+	constexpr auto direct_spec	= cpp_one_cycle_specs::template direct_repeat<>;
+	using T_repeat			= typename cpp_one_cycle_generics::template T_repeat<direct_spec>;
+
+/***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
@@ -136,11 +141,23 @@
 	//	printf("%llu\n", cctmp_functional::pack_sort<_less_than_, 9, 5, 3, 4>);
 	//	printf("%llu\n", cctmp_functional::list_sort<p>);		// gcc 2.489s / clang 7.010s
 
-	//	int size = 10;
-	//	int arr[size];
-	//	cpp_one_cycle_generics::T_repeat<direct_spec>::result(arr, arr+size, argc);
+	//	constexpr auto reqs  = unpack_<T_repeat::object, U_car>;
+	//	constexpr auto lines = unpack_<T_repeat::object, U_cdr>;
+
+	//	printf("%lu\n", unpack_<reqs, U_length>);
+	//	printf("%lu\n", cctmp_functional::list_at<reqs, 0>);
+	//	printf("%lu\n", cctmp_functional::list_at<reqs, 1>);
+	//	printf("%lu\n", cctmp_functional::list_at<reqs, 2>);
+
+	//	printf("%lu\n", cctmp_functional::list_at<lines, 0>);
+	//	printf("%lu\n", cctmp_functional::list_at<lines, 1>);
+	//	printf("%lu\n", cctmp_functional::list_at<lines, 2>);
+
+		int size = 10;
+		int arr[size];
+		T_repeat::result(arr, arr+size, argc);
 	//	repeat_array(arr, arr+size, argc);
-	//	print_array(arr, arr+size);
+		print_array(arr, arr+size);
 
 		return 0;
 	}
