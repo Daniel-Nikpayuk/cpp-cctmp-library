@@ -28,7 +28,7 @@ namespace cctmp_generics {
 	using BD						= typename cctmp::BD;
 	using MD						= typename cctmp::MD;
 
-	template<auto... Vs> using auto_pack			= typename cctmp::template auto_pack<Vs...>;
+	template<auto... Vs> using T_store_Vs			= typename cctmp::template T_store_Vs<Vs...>;
 	template<auto... Vs> using block			= typename cctmp::template block<Vs...>;
 
 	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
@@ -163,8 +163,8 @@ namespace cctmp_generics {
 		template
 		<
 			auto f,
-			auto... f_ns, nik_vp(f_ns_p)(auto_pack<f_ns...>*),
-			auto... ns, nik_vp(ns_p)(auto_pack<ns...>*)
+			auto... f_ns, nik_vp(f_ns_p)(T_store_Vs<f_ns...>*),
+			auto... ns, nik_vp(ns_p)(T_store_Vs<ns...>*)
 		>
 		struct T_subcompose<f, f_ns_p, ns_p>
 		{
@@ -187,8 +187,8 @@ namespace cctmp_generics {
 
 		template
 		<
-			auto... l_ns, nik_vp(l)(auto_pack<l_ns...>*),
-			auto... r_ns, nik_vp(r)(auto_pack<r_ns...>*),
+			auto... l_ns, nik_vp(l)(T_store_Vs<l_ns...>*),
+			auto... r_ns, nik_vp(r)(T_store_Vs<r_ns...>*),
 			auto f
 		>
 		struct T_allot<l, r, f>
@@ -215,7 +215,7 @@ namespace cctmp_generics {
 	// tuple apply:
 
 	//	template<auto f, typename T, typename... Ts, index_type... tuple_indices>
-	//	constexpr auto tuple_apply(const tuple<T, Ts...> & t, nik_vp(pack)(auto_pack<tuple_indices...>*))
+	//	constexpr auto tuple_apply(const tuple<T, Ts...> & t, nik_vp(pack)(T_store_Vs<tuple_indices...>*))
 	//	{
 	//		return f(tuple_value<tuple_indices>(t)...);
 	//	}
@@ -509,7 +509,7 @@ namespace cctmp_generics {
 		}
 
 		template<auto f, auto... ns, auto policy, auto... ms>
-		nik_ce auto lift_dispatch(nik_avp(auto_pack<policy, ms...>*))
+		nik_ce auto lift_dispatch(nik_avp(T_store_Vs<policy, ms...>*))
 		{
 			if nik_ce (same<f, _id_>) return _lifted_id_;
 			else
@@ -628,7 +628,7 @@ namespace cctmp_generics {
 	struct T_endodrop
 	{
 		template<auto p, auto... UTs>
-		nik_ces auto _result(nik_avp(auto_pack<UTs...>*))
+		nik_ces auto _result(nik_avp(T_store_Vs<UTs...>*))
 		{
 			nik_ce auto size = unpack_<p, U_length>;
 
@@ -726,7 +726,7 @@ namespace cctmp_generics {
 	struct Parse<PD::branch, filler...>
 	{
 		template<auto instr0, auto labels, auto lines, auto words, auto chars, auto graph, auto verts>
-		nik_ces auto result(nik_vp(state)(auto_pack<labels, lines, words, chars, graph, verts>*))
+		nik_ces auto result(nik_vp(state)(T_store_Vs<labels, lines, words, chars, graph, verts>*))
 		{
 			nik_ce auto lbl    = label_value<instr0>;
 			nik_ce auto nverts = overload<U_push, verts, lbl>;
@@ -744,7 +744,7 @@ namespace cctmp_generics {
 	struct Parse<PD::go_to, filler...>
 	{
 		template<auto instr0, auto labels, auto lines, auto words, auto chars, auto graph, auto verts>
-		nik_ces auto result(nik_vp(state)(auto_pack<labels, lines, words, chars, graph, verts>*))
+		nik_ces auto result(nik_vp(state)(T_store_Vs<labels, lines, words, chars, graph, verts>*))
 		{
 			nik_ce auto lbl    = label_value<instr0>;
 			nik_ce auto nverts = overload<U_push, verts, lbl>;
@@ -780,7 +780,7 @@ namespace cctmp_generics {
 	struct Parse<PD::drop, filler...>
 	{
 		template<auto instr0, auto labels, auto lines, auto words, auto chars, auto graph, auto verts>
-		nik_ces auto result(nik_vp(state)(auto_pack<labels, lines, words, chars, graph, verts>*))
+		nik_ces auto result(nik_vp(state)(T_store_Vs<labels, lines, words, chars, graph, verts>*))
 		{
 			nik_ce auto ngraph = overload<U_push, graph, verts>;
 
@@ -937,7 +937,7 @@ namespace cctmp_generics {
 		nik_ces auto initial_state = unpack_<segment<6>, U_map, _constant_<U_null_Vs>>;
 
 		template<auto labels, auto lines, auto words, auto chars, auto graph, auto verts>
-		nik_ces auto _result(nik_vp(state)(auto_pack<labels, lines, words, chars, graph, verts>*))
+		nik_ces auto _result(nik_vp(state)(T_store_Vs<labels, lines, words, chars, graph, verts>*))
 		{
 			nik_ce auto reqs   = unpack_<graph, U_custom<U_graph_to_requirements>, labels>;
 			nik_ce auto parsed = overload<U_cons, lines, reqs>;
@@ -1060,7 +1060,7 @@ namespace cctmp_generics {
 /***********************************************************************************************************************/
 
 	template<auto lbl, auto... lbls, auto reqs, auto... lines>
-	nik_ce auto _link(nik_vp(parsed)(auto_pack<reqs, lines...>*))
+	nik_ce auto _link(nik_vp(parsed)(T_store_Vs<reqs, lines...>*))
 	{
 		nik_ce auto sign	= in_types<lbl>;
 		nik_ce auto labels	= U_pack_Vs<lbls...>;

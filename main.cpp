@@ -101,20 +101,40 @@
 	//	printf("%llu\n", call<Overload::map, cctmp::template increment_op<>, p>);
 	//	printf("%hu\n", call<Overload::find, cctmp::template is_zero_op<>, p>);
 
-	//	printf("%d\n",   cctmp_functional::at<0, p>);
-	//	printf("%llu\n", cctmp_functional::left<0, p>);
-	//	printf("%llu\n", cctmp_functional::split<2, p>);
+	//	printf("%d\n",   cctmp_functional::pack_at<0, 9, 5, 3, 4>);
+	//	printf("%d\n",   cctmp_functional::list_at<p, 0>);
+	//	printf("%llu\n", cctmp_functional::pack_left<0, 9, 5, 3, 4>);
+	//	printf("%llu\n", cctmp_functional::list_left<p, 0>);
+	//	printf("%llu\n", cctmp_functional::pack_right<0, 9, 5, 3, 4>);
+	//	printf("%llu\n", cctmp_functional::list_right<p, 0>);
+
+	//	constexpr auto p_cut = cctmp_functional::pack_cut<0, 9, 5, 3, 4>;
+	//	printf("%llu, %llu\n", tuple_value<0>(p_cut), tuple_value<1>(p_cut));
+	//	constexpr auto l_cut = cctmp_functional::list_cut<p, 3>;
+	//	printf("%llu, %llu\n", tuple_value<0>(l_cut), tuple_value<1>(l_cut));
+
+	//	constexpr auto p_split = cctmp_functional::pack_split<0, 9, 5, 3, 4>;
+	//	printf("%llu, %llu\n", tuple_value<0>(p_split), tuple_value<1>(p_split));
+	//	constexpr auto l_split = cctmp_functional::list_split<p, 4>;
+	//	printf("%llu, %llu\n", tuple_value<0>(l_split), tuple_value<1>(l_split));
+
 	//	printf("%llu\n", cctmp_functional::segment<unsigned{10}>);
 
-	//	printf("%llu\n", cctmp_functional::erase<0, p>);
-	//	printf("%llu\n", cctmp_functional::insert<7, 4, p>);
-	//	printf("%llu\n", cctmp_functional::replace<7, 1, p>);
+	//	printf("%d\n", cctmp_functional::pack_fold<_add_, 0, 9, 5, 3, 4>);
+	//	printf("%d\n", cctmp_functional::list_fold<p, _add_, 0>);
 
-	//	printf("%llu\n", cctmp_functional::fold<cctmp::template add_op<>, uint_type{0}, p>);
+	//	printf("%llu\n", cctmp_functional::pack_erase<0, 9, 5, 3, 4>);
+	//	printf("%llu\n", cctmp_functional::list_erase<p, 0>);
+	//	printf("%llu\n", cctmp_functional::pack_insert<0, 7,    9, 5, 3, 4>);
+	//	printf("%llu\n", cctmp_functional::list_insert<p, 0, 7>);
+	//	printf("%llu\n", cctmp_functional::pack_replace<1, 7,    9, 5, 3, 4>);
+	//	printf("%llu\n", cctmp_functional::list_replace<p, 1, 7>);
 
-	//	printf("%llu\n", cctmp_functional::insert_sort<p, 3>);
-	//	printf("%llu\n", cctmp_functional::sort<p>);	// gcc 1.717s / clang 4.199s
-								// gcc 1.344s / clang 3.568s
+	//	printf("%llu\n", cctmp_functional::pack_insert_sort<_less_than_, 0,    9, 5, 3, 4>);
+	//	printf("%llu\n", cctmp_functional::list_insert_sort<p, 0>);
+
+	//	printf("%llu\n", cctmp_functional::pack_sort<_less_than_, 9, 5, 3, 4>);
+	//	printf("%llu\n", cctmp_functional::list_sort<p>);		// gcc 2.489s / clang 7.010s
 
 	//	int size = 10;
 	//	int arr[size];

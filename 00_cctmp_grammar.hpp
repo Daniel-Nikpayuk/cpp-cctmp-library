@@ -108,10 +108,10 @@ namespace cctmp {
 
 // auto:
 
-	template<auto...> struct auto_pack { };
+	template<auto...> struct T_store_Vs { };
 
 	template<auto... Vs>
-	nik_ce auto U_pack_Vs = store<auto_pack<Vs...>*>;
+	nik_ce auto U_pack_Vs = store<T_store_Vs<Vs...>*>;
 
 	nik_ce auto U_null_Vs = U_pack_Vs<>;
 
@@ -121,6 +121,24 @@ namespace cctmp {
 	nik_ce auto U_pack_Ts = U_pack_Vs<U_store_T<Ts>...>;
 
 	nik_ce auto U_null_Ts = U_null_Vs;
+
+// auto template:
+
+	template<template<auto...> class...> struct T_store_Bs { };
+
+	template<template<auto...> class... Bs>
+	nik_ce auto U_pack_Bs = U_pack_Ts<T_store_Bs<Bs>...>;
+
+	nik_ce auto U_null_Bs = U_null_Vs;
+
+// typename template:
+
+	template<template<typename...> class...> struct T_store_As { };
+
+	template<template<typename...> class... As>
+	nik_ce auto U_pack_As = U_pack_Ts<T_store_As<As>...>;
+
+	nik_ce auto U_null_As = U_null_Vs;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -330,45 +348,49 @@ namespace cctmp {
 
 			// basis:
 
-			nik_ces key_type to_const			=  0;
+			nik_ces key_type type_to_const			=  0;
 
-			nik_ces key_type to_array			=  1;
-			nik_ces key_type from_array			=  2;
+			nik_ces key_type list_to_array			=  1;
+			nik_ces key_type array_to_list			=  2;
+
+			nik_ces key_type template_to_list		=  3;
+			nik_ces key_type list_to_template		=  4;
 
 			// comparison:
 
-			nik_ces key_type same				=  3;
-			nik_ces key_type csame				=  4;
-			nik_ces key_type is_int_type			=  5;
-			nik_ces key_type not_int_type			=  6;
+			nik_ces key_type same				=  5;
+			nik_ces key_type csame				=  6;
+			nik_ces key_type is_int_type			=  7;
+			nik_ces key_type not_int_type			=  8;
 
 			// functional:
 
-			nik_ces key_type length				=  7;
-			nik_ces key_type map				=  8;
+			nik_ces key_type to_list			=  9;
+			nik_ces key_type length				= 10;
+			nik_ces key_type map				= 11;
 
-			nik_ces key_type is_null			=  9;
-			nik_ces key_type car				= 10;
-			nik_ces key_type cdr				= 11;
-			nik_ces key_type cadr				= 12;
-			nik_ces key_type find				= 13;
+			nik_ces key_type is_null			= 12;
+			nik_ces key_type car				= 13;
+			nik_ces key_type cdr				= 14;
+			nik_ces key_type cadr				= 15;
+			nik_ces key_type find				= 16;
 
 			// variadic:
 
-			nik_ces key_type zip				= 14;
-			nik_ces key_type unite				= 15;
-			nik_ces key_type cons				= 16;
-			nik_ces key_type push				= 17;
-			nik_ces key_type unpack				= 18;
+			nik_ces key_type zip				= 17;
+			nik_ces key_type unite				= 18;
+			nik_ces key_type cons				= 19;
+			nik_ces key_type push				= 20;
+			nik_ces key_type unpack				= 21;
 
 			// grammatical:
 
-			nik_ces key_type custom				= 19;
-			nik_ces key_type procedure			= 20;
-			nik_ces key_type method				= 21;
-			nik_ces key_type tailor				= 22;
+			nik_ces key_type custom				= 22;
+			nik_ces key_type procedure			= 23;
+			nik_ces key_type method				= 24;
+			nik_ces key_type tailor				= 25;
 
-			nik_ces key_type partial			= 23;
+			nik_ces key_type partial			= 26;
 	};
 
 /***********************************************************************************************************************/
@@ -779,59 +801,89 @@ namespace cctmp {
 	template<nik_vp(V)(unsigned long long*)> nik_ce auto alias<Operator::is_int_type, V> = true;
 	template<nik_vp(V)(  signed long long*)> nik_ce auto alias<Operator::is_int_type, V> = true;
 
-	template<auto Op, auto... Ws, nik_vp(p)(auto_pack<Ws...>*), auto... Vs>
+	template<template<auto...> typename AutoTemplate, auto... Vs, nik_vp(p)(AutoTemplate<Vs...>*)>
+	nik_ce auto alias<Operator::template_to_list, p> = U_pack_Vs<Vs...>;
+
+	template
+	<
+		auto... Vs, nik_vp(p)(T_store_Vs<Vs...>*),
+		template<auto...> typename AutoTemplate, nik_vp(b)(T_store_Bs<AutoTemplate>*)
+	>
+	nik_ce auto alias<Operator::list_to_template, p, b> = U_store_T<AutoTemplate<Vs...>>;
+
+	template<auto Op, auto... Ws, nik_vp(p)(T_store_Vs<Ws...>*), auto... Vs>
 	nik_ce auto alias<Operator::zip, Op, p, Vs...> = U_pack_Vs<overload<Op, Ws, Vs>...>;
 
 	template
 	<
-		auto... Xs, nik_vp(p0)(auto_pack<Xs...>*),
-		auto... Ws, nik_vp(p1)(auto_pack<Ws...>*),
+		auto... Xs, nik_vp(p0)(T_store_Vs<Xs...>*),
+		auto... Ws, nik_vp(p1)(T_store_Vs<Ws...>*),
 		auto... Vs
 	>
 	nik_ce auto alias<Operator::unite, p0, p1, Vs...> = U_pack_Vs<Xs..., Vs..., Ws...>;
 
-	template<auto... Ws, nik_vp(p)(auto_pack<Ws...>*), auto Op, auto... Vs>
+	template<auto... Ws, nik_vp(p)(T_store_Vs<Ws...>*), auto Op, auto... Vs>
 	nik_ce auto alias<Operator::unpack, p, Op, Vs...> = overload<Op, Vs..., Ws...>;
 
-	template<auto Op, auto... Ws, nik_vp(p)(auto_pack<Ws...>*), auto... Vs>
+	template<auto Op, auto... Ws, nik_vp(p)(T_store_Vs<Ws...>*), auto... Vs>
 	nik_ce auto alias<Operator::method, Op, p, Vs...> = T_store_U<Op>::template result<Ws...>(Vs...);
 
-	template<auto Op, auto... Ws, nik_vp(p)(auto_pack<Ws...>*), auto... Vs>
+	template<auto Op, auto... Ws, nik_vp(p)(T_store_Vs<Ws...>*), auto... Vs>
 	nik_ce auto alias<Operator::tailor, Op, p, Vs...> = T_store_U<Op>::template result<Vs...>(Ws...);
 
 /***********************************************************************************************************************/
 
 // basis:
 
-	// to_const:
+	// type to const:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::to_const, filler...>
+		struct T_overload<Overload::alias, Operator::type_to_const, filler...>
 		{
 			template<auto U>
 			nik_ces auto result = U_store_T<T_store_U<U> const>;
 
-		}; nik_ce auto U_to_const = U_store_T<T_alias<Operator::to_const>>;
+		}; nik_ce auto U_type_to_const = U_store_T<T_alias<Operator::type_to_const>>;
 
-	// to_array:
+	// list to array:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::to_array, filler...>
+		struct T_overload<Overload::alias, Operator::list_to_array, filler...>
 		{
 			template<auto U, auto... Vs>
 			nik_ces auto result = array<T_store_U<U>, Vs...>;
 
-		}; nik_ce auto U_to_array = U_store_T<T_alias<Operator::to_array>>;
+		}; nik_ce auto U_list_to_array = U_store_T<T_alias<Operator::list_to_array>>;
 
-	// from_array:
+	// from array:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::from_array, filler...>
+		struct T_overload<Overload::alias, Operator::array_to_list, filler...>
 		{
 			template<auto A, auto... Is>
 			nik_ces auto result = U_pack_Vs<A[Is]...>;
 
-		}; nik_ce auto U_from_array = U_store_T<T_alias<Operator::from_array>>;
+		}; nik_ce auto U_array_to_list = U_store_T<T_alias<Operator::array_to_list>>;
+
+	// template to list:
+
+		template<auto... filler>
+		struct T_overload<Overload::alias, Operator::template_to_list, filler...>
+		{
+			template<auto p>
+			nik_ces auto result = alias<Operator::template_to_list, p>;
+
+		}; nik_ce auto U_template_to_list = U_store_T<T_alias<Operator::template_to_list>>;
+
+	// list to template:
+
+		template<auto... filler>
+		struct T_overload<Overload::alias, Operator::list_to_template, filler...>
+		{
+			template<auto p, auto b>
+			nik_ces auto result = alias<Operator::list_to_template, p, b>;
+
+		}; nik_ce auto U_list_to_template = U_store_T<T_alias<Operator::list_to_template>>;
 
 	// same:
 
@@ -848,14 +900,14 @@ namespace cctmp {
 		template<auto... filler>
 		struct T_overload<Overload::alias, Operator::csame, filler...>
 		{
-			using T_to_const = T_alias<Operator::to_const>;
+			using T_type_to_const = T_alias<Operator::type_to_const>;
 
 			template<auto V0, auto V1>
 			nik_ces auto result = alias
 			<
 				Operator::same,
-				T_to_const::template result<V0>,
-				T_to_const::template result<V1>
+				T_type_to_const::template result<V0>,
+				T_type_to_const::template result<V1>
 			>;
 
 		}; nik_ce auto U_csame = U_store_T<T_alias<Operator::csame>>;
@@ -883,6 +935,16 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // functional:
+
+	// to list:
+
+		template<auto... filler>
+		struct T_overload<Overload::alias, Operator::to_list, filler...>
+		{
+			template<auto... Vs>
+			nik_ces auto result = U_pack_Vs<Vs...>;
+
+		}; nik_ce auto U_to_list = U_store_T<T_alias<Operator::to_list>>;
 
 	// length:
 

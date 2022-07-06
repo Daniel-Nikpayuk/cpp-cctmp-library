@@ -506,7 +506,7 @@
 		struct T_block<BN::function, BT::pass, _p_, filler...>							\
 		{													\
 			template<auto d, auto n, auto rtn, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs, auto... Ws>	\
-			nik_ces auto result(nik_avp(auto_pack<Ws...>*))				 			\
+			nik_ces auto result(nik_avp(T_store_Vs<Ws...>*))			 			\
 			{												\
 				return NIK_FUNCTION_BLOCK(_p_, d, n, rtn, Vs)						\
 						(U_pack_Vs<Ws..., NIK_2_N_VARS(_p_, NIK_V_1)>);				\

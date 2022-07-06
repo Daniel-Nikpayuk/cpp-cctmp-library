@@ -183,7 +183,7 @@ namespace cctmp {
 		// sift:
 
 			template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-			nik_ces auto sift(nik_vp(indices)(auto_pack<Is...>*))
+			nik_ces auto sift(nik_vp(indices)(T_store_Vs<Is...>*))
 			{
 				nik_ce auto Size	= Leng + 1;
 				nik_ce auto arr	= apply<Type, Size, PointerModule::Sift, Leng, p>(Arr);
@@ -202,7 +202,7 @@ namespace cctmp {
 	// -> V:
 
 		template<typename Type, typename F, auto... As, auto... Ps, auto... Is>
-		nik_ce auto V_apply(nik_avp(auto_pack<Ps...>*), nik_avp(auto_pack<Is...>*))
+		nik_ce auto V_apply(nik_avp(T_store_Vs<Ps...>*), nik_avp(T_store_Vs<Is...>*))
 		{
 			nik_ce auto Size	= sizeof...(Is);
 			nik_ce auto arr		= ArrayModule::template apply<Type, Size, F, Ps...>(As...);
@@ -213,7 +213,7 @@ namespace cctmp {
 	// -> U:
 
 		template<typename Type, typename F, auto... As, auto... Ps, auto... Is>
-		nik_ce auto U_apply(nik_avp(auto_pack<Ps...>*), nik_avp(auto_pack<Is...>*))
+		nik_ce auto U_apply(nik_avp(T_store_Vs<Ps...>*), nik_avp(T_store_Vs<Is...>*))
 		{
 			nik_ce auto Size	= sizeof...(Is);
 			nik_ce auto arr		= ArrayModule::apply<Type, Size, F, Ps...>(As...);
@@ -292,7 +292,7 @@ namespace cctmp {
 	// -> V:
 
 		template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-		nik_ce auto V_sift(nik_vp(indices)(auto_pack<Is...>*))
+		nik_ce auto V_sift(nik_vp(indices)(T_store_Vs<Is...>*))
 		{
 			nik_ce auto Size	= Leng + 1;
 			nik_ce auto arr		= ArrayModule::template apply<Type, Size, PointerModule::Sift, Leng, p>(Arr);
@@ -304,7 +304,7 @@ namespace cctmp {
 
 /*
 		template<typename Type, auto p, auto Arr, auto Leng, auto I0, auto... Is>
-		nik_ce auto V_sift(nik_vp(indices)(auto_pack<I0, Is...>*))
+		nik_ce auto V_sift(nik_vp(indices)(T_store_Vs<I0, Is...>*))
 		{
 			nik_ce auto Size	= sizeof...(Is) + 1;
 			nik_ce auto arr		= apply<Type, Size, PointerModule::Sift, Leng, p>(Arr);
@@ -317,7 +317,7 @@ namespace cctmp {
 
 /*
 		template<typename Type, auto p, auto Arr, auto Leng, auto I0, auto... Is>
-		nik_ce auto U_sift(nik_vp(indices)(auto_pack<I0, Is...>*))
+		nik_ce auto U_sift(nik_vp(indices)(T_store_Vs<I0, Is...>*))
 		{
 			nik_ce auto Size	= sizeof...(Is) + 1;
 			nik_ce auto arr		= apply<Type, Size, PointerModule::Sift, Leng, p>(Arr);
@@ -334,13 +334,13 @@ namespace cctmp {
 	// -> V:
 
 		template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-		nik_ce auto V_subsequence(nik_vp(indices)(auto_pack<Is...>*))
+		nik_ce auto V_subsequence(nik_vp(indices)(T_store_Vs<Is...>*))
 			{ return V_apply<Type, PointerModule::Sift, Arr>(U_pack_Vs<Leng, sizeof...(Is), p>, indices); }
 
 	// -> U:
 
 		template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-		nik_ce auto U_subsequence(nik_vp(indices)(auto_pack<Is...>*))
+		nik_ce auto U_subsequence(nik_vp(indices)(T_store_Vs<Is...>*))
 			{ return U_apply<Type, PointerModule::Sift, Arr>(U_pack_Vs<Leng, sizeof...(Is), p>, indices); }
 */
 

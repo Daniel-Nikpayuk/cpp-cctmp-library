@@ -68,30 +68,31 @@ namespace cctmp {
 	{
 		nik_ces key_type id		=  0;
 
-		nik_ces key_type filter		=  1;
+		nik_ces key_type part		=  1;
 		nik_ces key_type left		=  2;
-		nik_ces key_type split		=  3;
-		nik_ces key_type lookup		=  4;
+		nik_ces key_type lookup		=  3;
 	};
 
 	using BL = BlockOverload;
 
 /***********************************************************************************************************************/
 
-// filter:
+// part:
 
-	template<auto... filler>
-	struct T_block_overload<BL::filter, filler...>
+	template<auto Op>
+	struct T_block_overload<BL::part, Op>
 	{
-		template<auto V0, auto... Vs, typename Pack>
+		template<auto... Vs, typename Pack>
 		nik_ces auto result(Pack l)
 		{
-			nik_ce auto r = U_pack_Vs<Vs...>;
+			nik_ce auto r = T_store_U<Op>::template result<Vs...>;
 
 			return tuple<Pack, decltype(r)>(l, r);
 		}
+	};
 
-	}; nik_ce auto U_block_filter = U_store_T<T_block_overload<BL::filter>>;
+	nik_ce auto U_block_filter = U_store_T<T_block_overload<BL::part, U_cdr>>;
+	nik_ce auto U_block_split  = U_store_T<T_block_overload<BL::part, U_to_list>>;
 
 /***********************************************************************************************************************/
 
@@ -104,25 +105,6 @@ namespace cctmp {
 		nik_ces auto result(Pack p) { return p; }
 
 	}; nik_ce auto U_block_left = U_store_T<T_block_overload<BL::left>>;
-
-/***********************************************************************************************************************/
-
-/*
-// split:
-
-	template<auto... filler>
-	struct T_block_overload<BL::split, filler...>
-	{
-		template<auto... Vs, typename Pack>
-		nik_ces auto result(Pack p)
-		{
-			nik_ce auto r = U_pack_Vs<Vs...>;
-
-			return tuple<Pack, decltype(r)>(p, r);
-		}
-
-	}; nik_ce auto U_block_split = U_store_T<T_block_overload<BL::split>>;
-*/
 
 /***********************************************************************************************************************/
 
@@ -269,7 +251,6 @@ namespace cctmp {
 	{
 		template<auto d, auto n, auto rtn, auto... Vs>
 		nik_ces auto result = NIK_VARIABLE_BLOCK(9, d, n, rtn, Vs);
-
 	};
 
 	using T_block_variable		= T_block<BN::variable, BT::start, _zero>;
@@ -309,7 +290,6 @@ namespace cctmp {
 	{
 		template<auto d, auto p, auto n, auto rtn, auto... Vs>
 		nik_ces auto result = NIK_FUNCTION_BLOCK(9, d, n, rtn, Vs)(p);
-
 	};
 
 	using T_block_function		= T_block<BN::function, BT::start, _zero>;
@@ -354,7 +334,6 @@ namespace cctmp {
 	{
 		template<auto d, auto n, auto s, auto... Vs>
 		nik_ces auto result = NIK_SEGMENT_BLOCK(9, d, n, s, Vs);
-
 	};
 
 	using T_block_segment		= T_block<BN::segment, BT::start, _zero>;
@@ -394,7 +373,6 @@ namespace cctmp {
 	{
 		template<auto d, auto n, auto op, auto V, auto... Vs>
 		nik_ces auto result = NIK_FOLD_BLOCK(9, d, n, op, V, Vs);
-
 	};
 
 	using T_block_fold		= T_block<BN::fold, BT::start, _zero>;
@@ -434,7 +412,6 @@ namespace cctmp {
 	{
 		template<auto d, auto n, auto op, auto V, auto... Vs>
 		nik_ces auto result = NIK_PARSE_BLOCK(0, d, n, op, V, Vs);
-
 	};
 
 	using T_block_parse		= T_block<BN::parse, BT::start, _zero>;
@@ -486,7 +463,7 @@ namespace cctmp {
 	struct T_block<BN::cascade, BT::start, _one, filler...>
 	{
 		template<auto d, auto u, auto n, auto op, auto... Vs, auto... _Vs>
-		nik_ces auto _result(nik_avp(auto_pack<_Vs...>*))
+		nik_ces auto _result(nik_avp(T_store_Vs<_Vs...>*))
 		{
 			nik_ce auto val = T_store_U<u>::template result<d, _Vs...>;
 
@@ -540,7 +517,6 @@ namespace cctmp {
 	{
 		template<auto d, auto n, typename... Ts>
 		nik_ces auto result(Ts... vs) { return NIK_ARGUMENT_BLOCK(9, d, n, Ts)(vs...); }
-
 	};
 
 	using T_block_argument		= T_block<BN::argument, BT::start, _zero>;
@@ -589,7 +565,6 @@ namespace cctmp {
 
 		template<auto d, auto n, typename... Ts>
 		nik_ces const auto & result(const tuple<Ts...> & t) { return NIK_TUPLE_BLOCK(9, d, n, Ts)(t); }
-
 	};
 
 	using T_block_tuple		= T_block<BN::tuple, BT::start, _zero>;
