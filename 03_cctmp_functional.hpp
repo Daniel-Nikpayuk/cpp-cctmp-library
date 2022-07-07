@@ -25,6 +25,7 @@
 
 namespace cctmp_functional {
 
+	using key_type						= typename cctmp::key_type;
 	using index_type					= typename cctmp::index_type;
 	using BN						= typename cctmp::BN;
 	using BD						= typename cctmp::BD;
@@ -39,6 +40,8 @@ namespace cctmp_functional {
 	using T_start						= typename cctmp::T_start;
 
 	template<auto... Vs> using T_store_Vs			= typename cctmp::template T_store_Vs<Vs...>;
+	template<template<auto...> class... Bs>
+	using T_store_B						= typename cctmp::template T_store_B<Bs...>;
 	template<typename... Ts> using tuple			= typename cctmp::template tuple<Ts...>;
 
 	nik_ce auto _zero					= cctmp::_zero;
@@ -55,9 +58,9 @@ namespace cctmp_functional {
 	nik_ce auto _custom					= cctmp::_custom;
 	nik_ce auto _method					= cctmp::_method;
 
-	nik_ce auto _less_than_					= cctmp::_less_than_;
+	nik_ce auto H_curry_equal				= cctmp::template H_curry<cctmp::_equal_>;
+	nik_ce auto H_curry_less_than				= cctmp::template H_curry<cctmp::_less_than_>;
 
-	nik_ce auto U_same					= cctmp::U_same;
 	nik_ce auto U_to_list					= cctmp::U_to_list;
 	nik_ce auto U_length					= cctmp::U_length;
 	nik_ce auto U_car					= cctmp::U_car;
@@ -69,12 +72,12 @@ namespace cctmp_functional {
 	nik_ce auto U_block_split				= cctmp::U_block_split;
 	nik_ce auto U_block_left				= cctmp::U_block_left;
 
+	nik_ce auto H_partial_same				= cctmp::template H_partial<cctmp::U_same>;
+
 	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
 	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
 
 	template<auto... Vs> nik_ce auto overload		= cctmp::template overload<Vs...>;
-
-	template<auto... Vs> nik_ce auto _curry_		= cctmp::template _curry_<Vs...>;
 
 	template<auto... Vs> nik_ce auto U_partial		= cctmp::template U_partial<Vs...>;
 
@@ -83,10 +86,13 @@ namespace cctmp_functional {
 
 	template<auto... Vs> nik_ce auto find			= cctmp::template find<Vs...>;
 	template<auto... Vs> nik_ce auto compel			= cctmp::template compel<Vs...>;
+	template<auto... Vs> nik_ce auto custom			= cctmp::template custom<Vs...>;
 	template<auto... Vs> nik_ce auto unite			= cctmp::template unite<Vs...>;
 	template<auto... Vs> nik_ce auto unpack			= cctmp::template unpack<Vs...>;
 	template<auto... Vs> nik_ce auto copy			= cctmp::template copy<Vs...>;
 	template<auto... Vs> nik_ce auto write			= cctmp::template write<Vs...>;
+	template<auto... Vs> nik_ce auto branch			= cctmp::template branch<Vs...>;
+	template<auto... Vs> nik_ce auto value			= cctmp::template value<Vs...>;
 	template<auto...> nik_ce auto stage			= cctmp::template stage<>;
 
 	template<auto... Vs> nik_ce auto controller		= cctmp::template controller<Vs...>;
@@ -323,34 +329,40 @@ namespace cctmp_functional {
 			unite  <           _value    >
 		>;
 
-		template<auto d, auto cmp, auto V, auto... Vs>
-		nik_ces auto result = T_start::template result<d, c, V>
-		(
-			U_pack_Vs < _curry_<cmp, V>, Vs... >,
-			U_pack_Vs < Vs...                  >,
-			U_pack_Vs < U_split                >
-		);
+		template<auto d, auto V, auto... Vs, template<auto...> class B>
+		nik_ces auto _result(nik_avp(T_store_B<B>*))
+		{
+			nik_ce auto Pred = U_store_T<B<V>>;
+			nik_ce auto H0   = U_pack_Vs<Pred, Vs...>;
+			nik_ce auto H1   = U_pack_Vs<Vs...>;
+			nik_ce auto H2   = U_pack_Vs<U_split>;
+
+			return T_start::template result<d, c, V>(H0, H1, H2);
+		}
+
+		template<auto d, auto H, auto V, auto... Vs>
+		nik_ces auto result = _result<d, V, Vs...>(H);
 
 	}; nik_ce auto U_insert_sort = U_store_T<T_insert_sort>;
 
-	template<auto cmp, auto V, auto... Vs>
-	nik_ce auto pack_insert_sort = T_insert_sort::template result<MD::initial_depth, cmp, V, Vs...>;
+	template<auto H, auto V, auto... Vs>
+	nik_ce auto pack_insert_sort = T_insert_sort::template result<MD::initial_depth, H, V, Vs...>;
 
-	template<auto p, auto V, auto cmp = _less_than_, auto d = MD::initial_depth>
-	nik_ce auto list_insert_sort = unpack_<p, U_custom, U_insert_sort, d, cmp, V>;
+	template<auto p, auto V, auto H = H_curry_less_than, auto d = MD::initial_depth>
+	nik_ce auto list_insert_sort = unpack_<p, U_custom, U_insert_sort, d, H, V>;
 
 /***********************************************************************************************************************/
 
 // monoid:
 
-	template<auto cmp = _less_than_>
-	struct T_monoid_sort
+	template<auto H = H_curry_less_than>
+	struct T_sort_monoid
 	{
 		template<auto d, auto p, auto V>
-		nik_ces auto result = unpack_<p, U_custom, U_insert_sort, d, cmp, V>;
+		nik_ces auto result = unpack_<p, U_custom, U_insert_sort, d, H, V>;
 
-	}; template<auto cmp = _less_than_>
-		nik_ce auto U_monoid_sort = U_store_T<T_monoid_sort<cmp>>;
+	}; template<auto H = H_curry_less_than>
+		nik_ce auto U_sort_monoid = U_store_T<T_sort_monoid<H>>;
 
 /***********************************************************************************************************************/
 
@@ -358,16 +370,48 @@ namespace cctmp_functional {
 
 	struct T_sort
 	{
-		template<auto d, auto cmp, auto... Vs>
-		nik_ces auto result = T_cascade::template result<d, U_monoid_sort<cmp>, U_null_Vs, Vs...>;
+		template<auto d, auto H, auto V, auto... Vs>
+		nik_ces auto result = T_cascade::template result<d, U_sort_monoid<H>, V, Vs...>;
 
 	}; nik_ce auto U_sort = U_store_T<T_sort>;
 
-	template<auto cmp, auto... Vs>
-	nik_ce auto pack_sort = T_sort::template result<MD::initial_depth, cmp, Vs...>;
+	template<auto H, auto V, auto... Vs>
+	nik_ce auto pack_sort = T_sort::template result<MD::initial_depth, H, V, Vs...>;
 
-	template<auto p, auto cmp = _less_than_, auto d = MD::initial_depth>
-	nik_ce auto list_sort = unpack_<p, U_custom, U_sort, d, cmp>;
+	template<auto p, auto H = H_curry_less_than, auto V = U_null_Vs, auto d = MD::initial_depth>
+	nik_ce auto list_sort = unpack_<p, U_custom, U_sort, d, H, V>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// match:
+
+	// This operator is intended for use within machine tests, with the _h1_pair option.
+
+/***********************************************************************************************************************/
+
+	struct T_match
+	{
+		template<auto V, auto... Vs, template<auto...> class B>
+		nik_ces auto _result(nik_avp(T_store_B<B>*))
+		{
+			nik_ce auto Pred = U_store_T<B<V>>;
+			nik_ce auto pos  = find_<Pred, Vs...>;
+			nik_ce auto size = sizeof...(Vs);
+
+			return tuple<bool, decltype(pos)>(bool{pos < size}, pos);
+		}
+
+		template<auto H, auto V, auto... Vs>
+		nik_ces auto result = _result<V, Vs...>(H);
+
+	}; nik_ce auto U_match = U_store_T<T_match>;
+
+	template<auto H, auto V, auto... Vs>
+	nik_ce auto pack_match = T_match::template result<H, V, Vs...>;
+
+	template<auto p, auto H = H_partial_same>
+	nik_ce auto list_match = unpack_<p, U_custom, U_match, H>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -376,23 +420,115 @@ namespace cctmp_functional {
 
 /***********************************************************************************************************************/
 
-// match:
-
+/*
 	struct T_lookup
 	{
-		template<auto V, auto... Vs>
-		nik_ces auto match()
-		{
-			nik_ce auto pos  = find_<U_partial<U_same, V>, Vs...>;
-			nik_ce auto size = sizeof...(Vs);
-
-			return tuple<bool, decltype(pos)>(bool{pos < size}, pos);
-		}
-
-		template<auto V, auto... Vs>
-		nik_ces auto result = match<V, Vs...>();
 
 	}; nik_ce auto U_lookup = U_store_T<T_lookup>;
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// union:
+
+/***********************************************************************************************************************/
+
+// insert:
+
+	struct T_insert_union
+	{
+		nik_ces key_type exit_case = 4;
+
+		nik_ces auto c = controller
+		<
+			custom < _h1_pair            >,
+			branch <           exit_case >,
+			write  < _zero   , _argument >,
+			compel < _custom , _value    >,
+
+			// exit_case:
+
+			value  < _zero   , _register >
+		>;
+
+		template<auto d, auto HEq, auto HCmp, auto V, auto... Vs>
+		nik_ces auto _result()
+		{
+			nik_ce auto R0 = U_pack_Vs<Vs... >;
+			nik_ce auto H0 = U_pack_Vs<U_match, HEq, V, Vs...>;
+			nik_ce auto H1 = U_null_Vs;
+			nik_ce auto H2 = U_null_Vs;
+			nik_ce auto A0 = U_pack_Vs<U_insert_sort, HCmp, V, Vs...>;
+
+			return T_start::template result<d, c, R0>(H0, H1, H2, A0);
+		}
+
+		template<auto d, auto HEq, auto HCmp, auto V, auto... Vs>
+		nik_ces auto result = _result<d, HEq, HCmp, V, Vs...>();
+
+	}; nik_ce auto U_insert_union = U_store_T<T_insert_union>;
+
+	template<auto HEq, auto HCmp, auto V, auto... Vs>
+	nik_ce auto pack_insert_union = T_insert_union::template result<MD::initial_depth, HEq, HCmp, V, Vs...>;
+
+	template<auto p, auto V, auto HEq = H_curry_equal, auto HCmp = H_curry_less_than, auto d = MD::initial_depth>
+	nik_ce auto list_insert_union = unpack_<p, U_custom, U_insert_union, d, HEq, HCmp, V>;
+
+/***********************************************************************************************************************/
+
+// monoid:
+
+	template<auto HEq = H_curry_equal, auto HCmp = H_curry_less_than>
+	struct T_union_monoid
+	{
+		template<auto d, auto p, auto V>
+		nik_ces auto result = unpack_<p, U_custom, U_insert_union, d, HEq, HCmp, V>;
+
+	}; template<auto HEq = H_curry_equal, auto HCmp = H_curry_less_than>
+		nik_ce auto U_union_monoid = U_store_T<T_union_monoid<HEq, HCmp>>;
+
+/***********************************************************************************************************************/
+
+// (fold) union:
+
+	struct T_union
+	{
+		template<auto d, auto HEq, auto HCmp, auto V, auto... Vs>
+		nik_ces auto result = T_cascade::template result<d, U_union_monoid<HEq, HCmp>, V, Vs...>;
+
+	}; nik_ce auto U_union = U_store_T<T_union>;
+
+	template<auto HEq, auto HCmp, auto V, auto... Vs>
+	nik_ce auto pack_union = T_union::template result<MD::initial_depth, HEq, HCmp, V, Vs...>;
+
+	template
+	<
+		auto p,
+		auto HEq = H_curry_equal, auto HCmp = H_curry_less_than,
+		auto V = U_null_Vs, auto d = MD::initial_depth
+	>
+	nik_ce auto list_union = unpack_<p, U_custom, U_union, d, HEq, HCmp, V>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// fill:
+
+/***********************************************************************************************************************/
+
+	struct T_fill
+	{
+		template<auto d, auto HEq, auto HCmp, auto V, auto... Vs>
+		nik_ces auto result = T_union::template result<d, HEq, HCmp, list_sort<V, HCmp>, Vs...>;
+
+	}; nik_ce auto U_fill = U_store_T<T_fill>;
+
+	template<auto HEq, auto HCmp, auto V, auto... Vs>
+	nik_ce auto pack_fill = T_fill::template result<MD::initial_depth, HEq, HCmp, V, Vs...>;
+
+	template<auto p, auto V, auto HEq = H_curry_equal, auto HCmp = H_curry_less_than, auto d = MD::initial_depth>
+	nik_ce auto list_fill = unpack_<p, U_custom, U_fill, d, HEq, HCmp, V>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
