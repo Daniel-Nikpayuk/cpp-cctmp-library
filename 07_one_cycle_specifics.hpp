@@ -17,24 +17,360 @@
 **
 ************************************************************************************************************************/
 
-namespace cpp_one_cycle_specs {
+namespace cctmp_one_cycle_specs {
 
-	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
+	using AOP							= typename cctmp::AOP;
+	using MD							= typename cctmp::MD;
 
-	nik_ce auto _id_					= cctmp::_id_;
-	nik_ce auto _equal_					= cctmp::_equal_;
+	template<auto U> using T_store_U				= typename cctmp::template T_store_U<U>;
 
-	nik_ce auto _deref_assign_				= cctmp_generics::_deref_assign_;
+	nik_ce auto _zero						= cctmp::_zero;
+	nik_ce auto _one						= cctmp::_one;
+	nik_ce auto _two						= cctmp::_two;
 
-	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
+	nik_ce auto _id_						= cctmp::_id_;
+	nik_ce auto _equal_						= cctmp::_equal_;
+	nik_ce auto _less_than_						= cctmp::_less_than_;
 
-	template<auto... Vs> nik_ce auto _increment_		= cctmp::template _increment_<Vs...>;
+	nik_ce auto U_same						= cctmp::U_same;
+	nik_ce auto U_custom						= cctmp::U_custom;
+	nik_ce auto U_map						= cctmp::U_map;
+
+	nik_ce auto _deref_assign_					= cctmp_generics::_deref_assign_;
+
+	template<typename T> nik_ce auto U_store_T			= cctmp::template U_store_T<T>;
+	template<template<auto...> class B> nik_ce auto U_store_B	= cctmp::template U_store_B<B>;
+
+	template<auto... Vs> nik_ce auto U_pack_Vs			= cctmp::template U_pack_Vs<Vs...>;
+
+	template<auto... Vs> nik_ce auto _increment_			= cctmp::template _increment_<Vs...>;
+
+	template<auto... Vs> nik_ce auto alias				= cctmp::template alias<Vs...>;
+	template<auto... Vs> nik_ce auto unpack_			= cctmp::template unpack_<Vs...>;
+
+	template<auto... Vs> nik_ce auto U_partial			= cctmp::template U_partial<Vs...>;
+	template<auto... Vs> nik_ce auto H_partial			= cctmp::template H_partial<Vs...>;
+	nik_ce auto H_partial_same					= H_partial<U_same>;
+
+	template<auto... Vs> nik_ce auto list_fill			= cctmp_functional::template list_fill<Vs...>;
+	template<auto... Vs> nik_ce auto list_compare			= cctmp_functional::template list_compare<Vs...>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// tags:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// direct:
+
+/***********************************************************************************************************************/
+
+// label:
+
+	template<auto f> struct _precycle_label			{ nik_ces auto value = f; };
+	template<auto f> struct _cycle_label			{ nik_ces auto value = f; };
+	template<auto f> struct _postcycle_label		{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _precycle_label_		= U_store_T<_precycle_label<f>>;
+	template<auto f> nik_ce auto _cycle_label_		= U_store_T<_cycle_label<f>>;
+	template<auto f> nik_ce auto _postcycle_label_		= U_store_T<_postcycle_label<f>>;
+
+/***********************************************************************************************************************/
+
+// position:
+
+	template<auto f> struct _out_position			{ nik_ces auto value = f; };
+	template<auto f> struct _in_position			{ nik_ces auto value = f; };
+	template<auto f> struct _car_in_position		{ nik_ces auto value = f; };
+	template<auto f> struct _cdr_in_position		{ nik_ces auto value = f; };
+	template<auto f> struct _end_position			{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _out_position_		= U_store_T<_out_position<f>>;
+	template<auto f> nik_ce auto _in_position_		= U_store_T<_in_position<f>>;
+	template<auto f> nik_ce auto _car_in_position_		= U_store_T<_car_in_position<f>>;
+	template<auto f> nik_ce auto _cdr_in_position_		= U_store_T<_cdr_in_position<f>>;
+	template<auto f> nik_ce auto _end_position_		= U_store_T<_end_position<f>>;
+
+/***********************************************************************************************************************/
+
+// out:
+
+	template<auto f> struct _pre_out_next			{ nik_ces auto value = f; };
+	template<auto f> struct _out_next			{ nik_ces auto value = f; };
+	template<auto f> struct _post_out_next			{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _pre_out_next_		= U_store_T<_pre_out_next<f>>;
+	template<auto f> nik_ce auto _out_next_			= U_store_T<_out_next<f>>;
+	template<auto f> nik_ce auto _post_out_next_		= U_store_T<_post_out_next<f>>;
+
+/***********************************************************************************************************************/
+
+// in:
+
+	template<auto f> struct _pre_in_next			{ nik_ces auto value = f; };
+	template<auto f> struct _in_next			{ nik_ces auto value = f; };
+	template<auto f> struct _post_in_next			{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _pre_in_next_		= U_store_T<_pre_in_next<f>>;
+	template<auto f> nik_ce auto _in_next_			= U_store_T<_in_next<f>>;
+	template<auto f> nik_ce auto _post_in_next_		= U_store_T<_post_in_next<f>>;
+
+/***********************************************************************************************************************/
+
+// car in:
+
+	template<auto f> struct _pre_car_in_next		{ nik_ces auto value = f; };
+	template<auto f> struct _car_in_next			{ nik_ces auto value = f; };
+	template<auto f> struct _post_car_in_next		{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _pre_car_in_next_		= U_store_T<_pre_car_in_next<f>>;
+	template<auto f> nik_ce auto _car_in_next_		= U_store_T<_car_in_next<f>>;
+	template<auto f> nik_ce auto _post_car_in_next_		= U_store_T<_post_car_in_next<f>>;
+
+/***********************************************************************************************************************/
+
+// cdr in:
+
+	template<auto f> struct _pre_cdr_in_next		{ nik_ces auto value = f; };
+	template<auto f> struct _cdr_in_next			{ nik_ces auto value = f; };
+	template<auto f> struct _post_cdr_in_next		{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _pre_cdr_in_next_		= U_store_T<_pre_cdr_in_next<f>>;
+	template<auto f> nik_ce auto _cdr_in_next_		= U_store_T<_cdr_in_next<f>>;
+	template<auto f> nik_ce auto _post_cdr_in_next_		= U_store_T<_post_cdr_in_next<f>>;
+
+/***********************************************************************************************************************/
+
+// end:
+
+	template<auto f> struct _pre_end_prev			{ nik_ces auto value = f; };
+	template<auto f> struct _end_prev			{ nik_ces auto value = f; };
+
+	template<auto f> struct _end_next			{ nik_ces auto value = f; };
+	template<auto f> struct _post_end_next			{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _pre_end_prev_		= U_store_T<_pre_end_prev<f>>;
+	template<auto f> nik_ce auto _end_prev_			= U_store_T<_end_prev<f>>;
+
+	template<auto f> nik_ce auto _end_next_			= U_store_T<_end_next<f>>;
+	template<auto f> nik_ce auto _post_end_next_		= U_store_T<_post_end_next<f>>;
+
+/***********************************************************************************************************************/
+
+// loop:
+
+	template<auto f> struct _loop_predicate			{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _loop_predicate_		= U_store_T<_loop_predicate<f>>;
+
+/***********************************************************************************************************************/
+
+// value:
+
+	template<auto f> struct _value_predicate		{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _value_predicate_		= U_store_T<_value_predicate<f>>;
+
+/***********************************************************************************************************************/
+
+// act:
+
+	template<auto f> struct _act_predicate			{ nik_ces auto value = f; };
+	template<auto f> struct _act_function			{ nik_ces auto value = f; };
+	template<auto f> struct _post_act_function		{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _act_predicate_		= U_store_T<_act_predicate<f>>;
+	template<auto f> nik_ce auto _act_function_		= U_store_T<_act_function<f>>;
+	template<auto f> nik_ce auto _post_act_function_	= U_store_T<_post_act_function<f>>;
+
+/***********************************************************************************************************************/
+
+// combine:
+
+	template<auto f> struct _combine_function		{ nik_ces auto value = f; };
+	template<auto f> struct _post_combine_function		{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _combine_function_		= U_store_T<_combine_function<f>>;
+	template<auto f> nik_ce auto _post_combine_function_	= U_store_T<_post_combine_function<f>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// tag operators:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// comparison:
+
+/***********************************************************************************************************************/
+
+// order:
+
+	nik_ce auto tag_order = U_pack_Vs
+	<
+		// label:
+
+			U_store_B < _precycle_label        >,
+			U_store_B < _cycle_label           >,
+			U_store_B < _postcycle_label       >,
+
+		// position:
+
+			U_store_B < _out_position          >,
+			U_store_B < _in_position           >,
+			U_store_B < _car_in_position       >,
+			U_store_B < _cdr_in_position       >,
+			U_store_B < _end_position          >,
+
+		// out:
+
+			U_store_B < _pre_out_next          >,
+			U_store_B < _out_next              >,
+			U_store_B < _post_out_next         >,
+
+		// in:
+
+			U_store_B < _pre_in_next           >,
+			U_store_B < _in_next               >,
+			U_store_B < _post_in_next          >,
+
+		// car in:
+
+			U_store_B < _pre_car_in_next       >,
+			U_store_B < _car_in_next           >,
+			U_store_B < _post_car_in_next      >,
+
+		// cdr in:
+
+			U_store_B < _pre_cdr_in_next       >,
+			U_store_B < _cdr_in_next           >,
+			U_store_B < _post_cdr_in_next      >,
+
+		// end:
+
+			U_store_B < _pre_end_prev          >,
+			U_store_B < _end_prev              >,
+
+			U_store_B < _end_next              >,
+			U_store_B < _post_end_next         >,
+
+		// loop:
+
+			U_store_B < _loop_predicate        >,
+
+		// value:
+
+			U_store_B < _value_predicate       >,
+
+		// act:
+
+			U_store_B < _act_predicate         >,
+			U_store_B < _act_function          >,
+			U_store_B < _post_act_function     >,
+
+		// combine:
+
+			U_store_B < _combine_function      >,
+			U_store_B < _post_combine_function >
+	>;
+
+/***********************************************************************************************************************/
+
+// compare:
+
+	struct T_tag_compare
+	{
+		template<auto d, auto Op, auto V0, auto V1>
+		nik_ces auto result = list_compare
+		<
+			tag_order, Op,
+			alias<AOP::template_id, V0>,
+			alias<AOP::template_id, V1>,
+			H_partial_same, d
+		>;
+
+	}; nik_ce auto U_tag_compare = U_store_T<T_tag_compare>;
+
+	template<auto Op, auto V0, auto V1, auto d = MD::initial_depth>
+	nik_ce auto tag_compare = T_tag_compare::template result<d, Op, V0, V1>;
+
+/***********************************************************************************************************************/
+
+// equal:
+
+	constexpr auto H_tag_equal = H_partial<U_custom, U_tag_compare, MD::initial_depth, _equal_>;
+
+// less than:
+
+	constexpr auto H_tag_less_than = H_partial<U_custom, U_tag_compare, MD::initial_depth, _less_than_>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// value:
+
+	struct T_tag_value
+	{
+		template<auto UTag>
+		nik_ces auto result = T_store_U<UTag>::value;
+
+	}; nik_ce auto U_tag_value = U_store_T<T_tag_value>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // specifications:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// direct:
+
+/***********************************************************************************************************************/
+
+// to values:
+
+	template<auto p>
+	nik_ce auto direct_to_values = unpack_
+	<
+		p,
+		U_partial
+		<
+			U_map,
+			U_partial<U_custom, U_tag_value>
+		>
+	>;
+
+/***********************************************************************************************************************/
+
+// to spec:
+
+	template<auto spec, auto H_spec>
+	nik_ce auto direct_to_spec = alias
+	<
+		AOP::list_to_template,
+		direct_to_values<spec>,
+		H_spec
+	>;
+
+/***********************************************************************************************************************/
+
+// fill:
+
+	template<auto defs, auto... Vs>
+	nik_ce auto direct_fill = list_fill
+	<
+		defs,
+		U_pack_Vs<Vs...>,
+		H_tag_equal,
+		H_tag_less_than
+	>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -120,6 +456,7 @@ namespace cpp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // repeat:
 
@@ -130,10 +467,9 @@ namespace cpp_one_cycle_specs {
 	template
 	<
 		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
-		auto OutPosition, auto EndPosition, auto InPosition,
-		auto LoopPredicate,
-		auto ActFunction, auto PostActFunction,
-		auto PreOutNext, auto OutNext
+		auto OutPosition, auto InPosition, auto EndPosition,
+		auto PreOutNext, auto OutNext, auto LoopPredicate,
+		auto ActFunction, auto PostActFunction
 	>
 	struct T_repeat_specification
 	{
@@ -142,37 +478,19 @@ namespace cpp_one_cycle_specs {
 		nik_ces auto postcycle_label		= PostcycleLabel;
 
 		nik_ces auto out_position		= OutPosition;
-		nik_ces auto end_position		= EndPosition;
 		nik_ces auto  in_position		=  InPosition;
+		nik_ces auto end_position		= EndPosition;
+
+		nik_ces auto pre_out_next		= PreOutNext;
+		nik_ces auto     out_next		=    OutNext;
 
 		nik_ces auto loop_predicate		= LoopPredicate;
 
 		nik_ces auto      act_function		=     ActFunction;
 		nik_ces auto post_act_function		= PostActFunction;
-
-		nik_ces auto pre_out_next		= PreOutNext;
-		nik_ces auto     out_next		=    OutNext;
 	};
-	
-	template
-	<
-		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
-		auto OutPosition, auto EndPosition, auto InPosition,
-		auto LoopPredicate,
-		auto ActFunction, auto PostActFunction,
-		auto PreOutNext, auto OutNext
-	>
-	nik_ce auto U_repeat_specification = U_store_T
-	<
-		T_repeat_specification
-		<
-			PrecycleLabel, CycleLabel, PostcycleLabel,
-			OutPosition, EndPosition, InPosition,
-			LoopPredicate,
-			ActFunction, PostActFunction,
-			PreOutNext, OutNext
-		>
-	>;
+
+	nik_ce auto H_repeat_specification = U_store_B<T_repeat_specification>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -183,103 +501,35 @@ namespace cpp_one_cycle_specs {
 
 // direct:
 
-	template
-	<
-		auto loop_predicate		= _equal_,
+	// defaults:
 
-		auto      act_function		= _deref_assign_,
-		auto post_act_function		= _id_,
+		// manually sorted for compile time performance.
 
-		auto pre_out_next		= _id_,
-		auto     out_next		= _increment_<>,
+		nik_ce auto direct_repeat_defaults = U_pack_Vs
+		<
+			_precycle_label_    < _zero          >,
+			_cycle_label_       < _one           >,
+			_postcycle_label_   < _two           >,
 
-		auto out_position		= 0,
-		auto end_position		= 1,
-		auto  in_position		= 2,
+			_out_position_      < _zero          >,
+			_in_position_       < _two           >,
+			_end_position_      < _one           >,
 
-		auto  precycle_label		= 0,
-		auto     cycle_label		= 1,
-		auto postcycle_label		= 2
-	>
-	nik_ce auto direct_repeat = U_repeat_specification
-	<
-		 precycle_label,
-		    cycle_label,
-		postcycle_label,
+			_pre_out_next_      < _id_           >,
+			_out_next_          < _increment_<>  >,
 
-		out_position,
-		end_position,
-		 in_position,
+			_loop_predicate_    < _equal_        >,
 
-		loop_predicate,
-
-		     act_function,
-		post_act_function,
-
-		pre_out_next,
-		    out_next
-	>;
-
-// default:
-
-	struct RepeatDefaultSpecification
-	{
-/*
-	template
-	<
-		auto LoopSpec		= _loop_predicate
-					<
-					    _op   , _equal_
-					>,
-		auto ActSpec		= _act_function
-					<
-					    _op   , _assign_           ,
-					    _arg  , Argument::deref    ,
-					    _arg  , Argument::direct
-					>,
-		auto OutSpec		= _out_next
-					<
-					    _dir  , Direction::forward ,
-					    _inc  , _one               ,
-					    _ival , Interval::closing
-					>
-
-		auto out_position	= 0,
-		auto end_position	= 1,
-		auto  in_position	= 2,
-
-		auto  precycle_label	= 0,
-		auto     cycle_label	= 1,
-		auto postcycle_label	= 2
-	>
-	using conceptual_repeat = RepeatSpecification
-	<
-		 precycle_label,
-		    cycle_label,
-		postcycle_label,
-
-		out_position,
-		end_position,
-		 in_position,
-
-		repeat_default_loop<LoopSpec, OutSpec>,
-
-		repeat_default_function<ActSpec>,
-		repeat_default_post_function<ActSpec>,
-
-		repeat_default_pre_next<OutSpec>,
-		repeat_default_next<OutSpec>
-	>;
-*/
+			_act_function_      < _deref_assign_ >,
+			_post_act_function_ < _id_           >
+		>;
 
 		template<auto... Vs>
-		nik_ces auto result()
-		{
-		}
-	};
-
-	template<auto... Vs>
-	using repeat_default = T_store_U<RepeatDefaultSpecification::template result<Vs...>()>;
+		nik_ce auto direct_repeat = direct_to_spec
+		<
+			direct_fill<direct_repeat_defaults, Vs...>,
+			H_repeat_specification
+		>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -343,5 +593,26 @@ namespace cpp_one_cycle_specs {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // cpp_one_cycle_specs
+} // cctmp_one_cycle_specs
+
+/*
+	template
+	<
+		auto LoopSpec		= _loop_predicate
+					<
+					    _op   , _equal_
+					>,
+		auto ActSpec		= _act_function
+					<
+					    _op   , _assign_           ,
+					    _arg  , Argument::deref    ,
+					    _arg  , Argument::direct
+					>,
+		auto OutSpec		= _out_next
+					<
+					    _dir  , Direction::forward ,
+					    _inc  , _one               ,
+					    _ival , Interval::closing
+					>
+*/
 

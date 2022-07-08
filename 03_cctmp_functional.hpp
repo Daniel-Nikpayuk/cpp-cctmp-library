@@ -40,8 +40,8 @@ namespace cctmp_functional {
 	using T_start						= typename cctmp::T_start;
 
 	template<auto... Vs> using T_pack_Vs			= typename cctmp::template T_pack_Vs<Vs...>;
-	template<template<auto...> class... Bs>
-	using T_store_B						= typename cctmp::template T_store_B<Bs...>;
+	template<template<auto...> class... Bs> using T_store_B	= typename cctmp::template T_store_B<Bs...>;
+	template<auto... Vs> using T_overload			= typename cctmp::template T_overload<Vs...>;
 	template<typename... Ts> using tuple			= typename cctmp::template tuple<Ts...>;
 
 	nik_ce auto _zero					= cctmp::_zero;
@@ -88,7 +88,7 @@ namespace cctmp_functional {
 	template<auto... Vs> nik_ce auto compel			= cctmp::template compel<Vs...>;
 	template<auto... Vs> nik_ce auto custom			= cctmp::template custom<Vs...>;
 	template<auto... Vs> nik_ce auto unite			= cctmp::template unite<Vs...>;
-//	template<auto... Vs> nik_ce auto unpack			= cctmp::template unpack<Vs...>;
+	template<auto... Vs> nik_ce auto action			= cctmp::template action<Vs...>;
 	template<auto... Vs> nik_ce auto copy			= cctmp::template copy<Vs...>;
 	template<auto... Vs> nik_ce auto write			= cctmp::template write<Vs...>;
 	template<auto... Vs> nik_ce auto branch			= cctmp::template branch<Vs...>;
@@ -548,6 +548,50 @@ namespace cctmp_functional {
 
 	template<auto p, auto V, auto HEq = H_curry_equal, auto HCmp = H_curry_less_than, auto d = MD::initial_depth>
 	nik_ce auto list_fill = unpack_<p, U_custom, U_fill, d, HEq, HCmp, V>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// compare:
+
+/***********************************************************************************************************************/
+
+	struct T_compare
+	{
+		template<auto key, auto act>
+		nik_ces auto c = controller
+		<
+			find   <                         >,
+			write  < _zero ,       _argument >,
+			find   <                         >,
+			stage  <                         >,
+			action < key   , act , _value    >
+		>;
+
+		template<auto d, auto V0, auto V1, auto... Vs, auto key, auto act, template<auto...> class B>
+		nik_ces auto _result(nik_avp(T_overload<key, act>*), nik_avp(T_store_B<B>*))
+		{
+			nik_ce auto Pred0 = U_store_T<B<V0>>;
+			nik_ce auto Pred1 = U_store_T<B<V1>>;
+
+			nik_ce auto H0    = U_pack_Vs<Pred1, Vs...>;
+			nik_ce auto H1    = U_null_Vs;
+			nik_ce auto H2    = U_null_Vs;
+			nik_ce auto A0    = U_pack_Vs<Pred0, Vs...>;
+
+			return T_start::template result<d, c<key, act>>(H0, H1, H2, A0);
+		}
+
+		template<auto d, auto Op, auto H, auto V0, auto V1, auto... Vs>
+		nik_ces auto result = _result<d, V0, V1, Vs...>(Op, H);
+
+	}; nik_ce auto U_compare = U_store_T<T_compare>;
+
+	template<auto Op, auto H, auto V0, auto V1, auto... Vs>
+	nik_ce auto pack_compare = T_compare::template result<MD::initial_depth, Op, H, V0, V1, Vs...>;
+
+	template<auto p, auto Op, auto V0, auto V1, auto H = H_partial_same, auto d = MD::initial_depth>
+	nik_ce auto list_compare = unpack_<p, U_custom, U_compare, d, Op, H, V0, V1>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

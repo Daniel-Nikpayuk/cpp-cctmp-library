@@ -227,10 +227,12 @@ namespace cctmp {
 		nik_ces key_type alias				=  2;
 	};
 
+	using OL = Overload;
+
 	// function:
 
 		template<key_type Op>
-		using T_function = T_overload<Overload::function, Op>;
+		using T_function = T_overload<OL::function, Op>;
 
 		template<key_type Op>
 		nik_ce auto U_function_T = U_store_T<T_function<Op>>;
@@ -238,7 +240,7 @@ namespace cctmp {
 	// higher order:
 
 		template<key_type Op, auto... Ws>
-		using T_higher_order = T_overload<Overload::higher_order, Op, Ws...>;
+		using T_higher_order = T_overload<OL::higher_order, Op, Ws...>;
 
 		template<key_type Op, auto... Ws>
 		nik_ce auto U_higher_order_T = U_store_T<T_higher_order<Op, Ws...>>;
@@ -246,7 +248,7 @@ namespace cctmp {
 	// alias:
 
 		template<key_type Op, auto... Ws>
-		using T_alias = T_overload<Overload::alias, Op, Ws...>;
+		using T_alias = T_overload<OL::alias, Op, Ws...>;
 
 		template<key_type Op, auto... Ws>
 		nik_ce auto U_alias_T = U_store_T<T_alias<Op, Ws...>>;
@@ -258,28 +260,31 @@ namespace cctmp {
 	template<auto... Vs>
 	nik_ce auto overload = U_pack_Vs<Vs...>;
 
-	template<key_type Op, nik_vp(op)(T_overload<Overload::function, Op>*), auto... Vs>
+	template<key_type Op, nik_vp(op)(T_overload<OL::function, Op>*), auto... Vs>
 	nik_ce auto overload<op, Vs...> = T_function<Op>::template result<decltype(Vs)...>(Vs...);
 
-	template<key_type Op, auto... Ws, nik_vp(op)(T_overload<Overload::higher_order, Op, Ws...>*), auto... Vs>
+	template<key_type Op, auto... Ws, nik_vp(op)(T_overload<OL::higher_order, Op, Ws...>*), auto... Vs>
 	nik_ce auto overload<op, Vs...> = T_higher_order<Op, Ws...>::template result<decltype(Vs)...>(Vs...);
 
-	template<key_type Op, auto... Ws, nik_vp(op)(T_overload<Overload::alias, Op, Ws...>*), auto... Vs>
+	template<key_type Op, auto... Ws, nik_vp(op)(T_overload<OL::alias, Op, Ws...>*), auto... Vs>
 	nik_ce auto overload<op, Vs...> = T_alias<Op, Ws...>::template result<Vs...>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// function:
 
 /***********************************************************************************************************************/
 
 // operator:
 
-	struct Operator
+	struct FunctionOperator
 	{
-		// function:
-
-			// basis:
+		// basis:
 
 			nik_ces key_type id				=  0;
 
-			// comparison:
+		// comparison:
 
 			nik_ces key_type equal				=  1;
 			nik_ces key_type not_equal			=  2;
@@ -289,7 +294,7 @@ namespace cctmp {
 			nik_ces key_type greater_than			=  5;
 			nik_ces key_type greater_than_or_equal		=  6;
 
-			// logical:
+		// logical:
 
 			nik_ces key_type not_				=  7;
 			nik_ces key_type and_				=  8;
@@ -297,7 +302,7 @@ namespace cctmp {
 			nik_ces key_type implies			= 10;
 			nik_ces key_type equivalent			= 11;
 
-			// arithmetic:
+		// arithmetic:
 
 			nik_ces key_type add				= 12;
 			nik_ces key_type subtract			= 13;
@@ -305,104 +310,26 @@ namespace cctmp {
 			nik_ces key_type divide				= 15;
 			nik_ces key_type modulo				= 16;
 
-			// bitwise:
+		// bitwise:
 
 			nik_ces key_type upshift			= 17;
 			nik_ces key_type downshift			= 18;
 
-			// algebraic:
+		// algebraic:
 
 			nik_ces key_type tuple				= 19;
 
-			// mutation:
+		// mutation:
 
 			nik_ces key_type assign				= 20;
 			nik_ces key_type dereference			= 21;
 
-			// block:
+		// block:
 
 			nik_ces key_type filter				= 22;
-
-		// higher order:
-
-			// basis:
-
-			nik_ces key_type cast				=  0;
-			nik_ces key_type constant			=  1;
-
-			nik_ces key_type apply				=  2;
-			nik_ces key_type bind				=  3;
-			nik_ces key_type curry				=  4;
-
-			// comparison:
-
-			nik_ces key_type match				=  5;
-
-			// curried:
-
-				// comparison:
-
-				nik_ces key_type is_equal		=  6;
-				nik_ces key_type is_zero		=  7;
-
-				// arithmetic:
-
-				nik_ces key_type increment		=  8;
-				nik_ces key_type decrement		=  9;
-
-		// alias:
-
-			// basis:
-
-			nik_ces key_type type_to_const			=  0;
-
-			nik_ces key_type list_to_array			=  1;
-			nik_ces key_type array_to_list			=  2;
-
-			nik_ces key_type template_to_list		=  3;
-			nik_ces key_type list_to_template		=  4;
-
-			// comparison:
-
-			nik_ces key_type same				=  5;
-			nik_ces key_type csame				=  6;
-			nik_ces key_type is_int_type			=  7;
-			nik_ces key_type not_int_type			=  8;
-
-			// functional:
-
-			nik_ces key_type to_list			=  9;
-			nik_ces key_type length				= 10;
-			nik_ces key_type map				= 11;
-
-			nik_ces key_type is_null			= 12;
-			nik_ces key_type car				= 13;
-			nik_ces key_type cdr				= 14;
-			nik_ces key_type cadr				= 15;
-			nik_ces key_type find				= 16;
-
-			// variadic:
-
-			nik_ces key_type zip				= 17;
-			nik_ces key_type unite				= 18;
-			nik_ces key_type cons				= 19;
-			nik_ces key_type push				= 20;
-			nik_ces key_type unpack				= 21;
-
-			// grammatical:
-
-			nik_ces key_type custom				= 22;
-			nik_ces key_type procedure			= 23;
-			nik_ces key_type method				= 24;
-			nik_ces key_type tailor				= 25;
-
-			nik_ces key_type partial			= 26;
 	};
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// function:
+	using FOP = FunctionOperator;
 
 /***********************************************************************************************************************/
 
@@ -411,12 +338,12 @@ namespace cctmp {
 	// id:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::id, filler...>
+		struct T_overload<OL::function, FOP::id, filler...>
 		{
 			template<typename T>
 			nik_ces auto result(T v) { return v; }
 
-		}; nik_ce auto _id_ = U_function_T<Operator::id>;
+		}; nik_ce auto _id_ = U_function_T<FOP::id>;
 
 /***********************************************************************************************************************/
 
@@ -425,62 +352,62 @@ namespace cctmp {
 	// equal:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::equal, filler...>
+		struct T_overload<OL::function, FOP::equal, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... == vs); }
 
-		}; nik_ce auto _equal_ = U_function_T<Operator::equal>;
+		}; nik_ce auto _equal_ = U_function_T<FOP::equal>;
 
 	// not_equal:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::not_equal, filler...>
+		struct T_overload<OL::function, FOP::not_equal, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... != vs); }
 
-		}; nik_ce auto _not_equal_ = U_function_T<Operator::not_equal>;
+		}; nik_ce auto _not_equal_ = U_function_T<FOP::not_equal>;
 
 	// less_than:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::less_than, filler...>
+		struct T_overload<OL::function, FOP::less_than, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... < vs); }
 
-		}; nik_ce auto _less_than_ = U_function_T<Operator::less_than>;
+		}; nik_ce auto _less_than_ = U_function_T<FOP::less_than>;
 
 	// less_than_or_equal:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::less_than_or_equal, filler...>
+		struct T_overload<OL::function, FOP::less_than_or_equal, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... <= vs); }
 
-		}; nik_ce auto _less_than_or_equal_ = U_function_T<Operator::less_than_or_equal>;
+		}; nik_ce auto _less_than_or_equal_ = U_function_T<FOP::less_than_or_equal>;
 
 	// greater_than:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::greater_than, filler...>
+		struct T_overload<OL::function, FOP::greater_than, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... > vs); }
 
-		}; nik_ce auto _greater_than_ = U_function_T<Operator::greater_than>;
+		}; nik_ce auto _greater_than_ = U_function_T<FOP::greater_than>;
 
 	// greater_than_or_equal:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::greater_than_or_equal, filler...>
+		struct T_overload<OL::function, FOP::greater_than_or_equal, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... >= vs); }
 
-		}; nik_ce auto _greater_than_or_equal_ = U_function_T<Operator::greater_than_or_equal>;
+		}; nik_ce auto _greater_than_or_equal_ = U_function_T<FOP::greater_than_or_equal>;
 
 /***********************************************************************************************************************/
 
@@ -489,52 +416,52 @@ namespace cctmp {
 	// not_:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::not_, filler...>
+		struct T_overload<OL::function, FOP::not_, filler...>
 		{
 			template<typename T>
 			nik_ces auto result(T v) { return !v; }
 
-		}; nik_ce auto _not_ = U_function_T<Operator::not_>;
+		}; nik_ce auto _not_ = U_function_T<FOP::not_>;
 
 	// and_:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::and_, filler...>
+		struct T_overload<OL::function, FOP::and_, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... && vs); }
 
-		}; nik_ce auto _and_ = U_function_T<Operator::and_>;
+		}; nik_ce auto _and_ = U_function_T<FOP::and_>;
 
 	// or_:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::or_, filler...>
+		struct T_overload<OL::function, FOP::or_, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... || vs); }
 
-		}; nik_ce auto _or_ = U_function_T<Operator::or_>;
+		}; nik_ce auto _or_ = U_function_T<FOP::or_>;
 
 	// implies:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::implies, filler...>
+		struct T_overload<OL::function, FOP::implies, filler...>
 		{
 			template<typename T1, typename T2>
 			nik_ces auto result(T1 v1, T2 v2) { return (!v1 || v2); }
 
-		}; nik_ce auto _implies_ = U_function_T<Operator::implies>;
+		}; nik_ce auto _implies_ = U_function_T<FOP::implies>;
 
 	// equivalent:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::equivalent, filler...>
+		struct T_overload<OL::function, FOP::equivalent, filler...>
 		{
 			template<typename T1, typename T2>
 			nik_ces auto result(T1 v1, T2 v2) { return ((!v1 || v2) && (v1 || !v2)); }
 
-		}; nik_ce auto _equivalent_ = U_function_T<Operator::equivalent>;
+		}; nik_ce auto _equivalent_ = U_function_T<FOP::equivalent>;
 
 /***********************************************************************************************************************/
 
@@ -543,52 +470,52 @@ namespace cctmp {
 	// add:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::add, filler...>
+		struct T_overload<OL::function, FOP::add, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... + vs); }
 
-		}; nik_ce auto _add_ = U_function_T<Operator::add>;
+		}; nik_ce auto _add_ = U_function_T<FOP::add>;
 
 	// subtract:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::subtract, filler...>
+		struct T_overload<OL::function, FOP::subtract, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... - vs); }
 
-		}; nik_ce auto _subtract_ = U_function_T<Operator::subtract>;
+		}; nik_ce auto _subtract_ = U_function_T<FOP::subtract>;
 
 	// multiply:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::multiply, filler...>
+		struct T_overload<OL::function, FOP::multiply, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... * vs); }
 
-		}; nik_ce auto _multiply_ = U_function_T<Operator::multiply>;
+		}; nik_ce auto _multiply_ = U_function_T<FOP::multiply>;
 
 	// divide:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::divide, filler...>
+		struct T_overload<OL::function, FOP::divide, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... / vs); }
 
-		}; nik_ce auto _divide_ = U_function_T<Operator::divide>;
+		}; nik_ce auto _divide_ = U_function_T<FOP::divide>;
 
 	// modulo:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::modulo, filler...>
+		struct T_overload<OL::function, FOP::modulo, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return (... % vs); }
 
-		}; nik_ce auto _modulo_ = U_function_T<Operator::modulo>;
+		}; nik_ce auto _modulo_ = U_function_T<FOP::modulo>;
 
 /***********************************************************************************************************************/
 
@@ -597,22 +524,22 @@ namespace cctmp {
 	// upshift:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::upshift, filler...>
+		struct T_overload<OL::function, FOP::upshift, filler...>
 		{
 			template<typename T1, typename T2>
 			nik_ces auto result(T1 v1, T2 v2) { return (v1 << v2); }
 
-		}; nik_ce auto _upshift_ = U_function_T<Operator::upshift>;
+		}; nik_ce auto _upshift_ = U_function_T<FOP::upshift>;
 
 	// downshift:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::downshift, filler...>
+		struct T_overload<OL::function, FOP::downshift, filler...>
 		{
 			template<typename T1, typename T2>
 			nik_ces auto result(T1 v1, T2 v2) { return (v1 >> v2); }
 
-		}; nik_ce auto _downshift_ = U_function_T<Operator::downshift>;
+		}; nik_ce auto _downshift_ = U_function_T<FOP::downshift>;
 
 /***********************************************************************************************************************/
 
@@ -621,34 +548,34 @@ namespace cctmp {
 	// tuple:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::tuple, filler...>
+		struct T_overload<OL::function, FOP::tuple, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return tuple<Ts...>(vs...); }
 
-		}; nik_ce auto _tuple_ = U_function_T<Operator::tuple>;
+		}; nik_ce auto _tuple_ = U_function_T<FOP::tuple>;
 
 // mutation:
 
 	// assign:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::assign, filler...>
+		struct T_overload<OL::function, FOP::assign, filler...>
 		{
 			template<typename T1, typename T2>
 			nik_ces auto result(T1 v1, T2 v2) { return v1 = v2; }
 
-		}; nik_ce auto _assign_ = U_function_T<Operator::assign>;
+		}; nik_ce auto _assign_ = U_function_T<FOP::assign>;
 
 	// dereference:
 
 		template<auto... filler>
-		struct T_overload<Overload::function, Operator::dereference, filler...>
+		struct T_overload<OL::function, FOP::dereference, filler...>
 		{
 			template<typename T>
 			nik_ces auto & result(T v) { return *v; }
 
-		}; nik_ce auto _dereference_ = U_function_T<Operator::dereference>;
+		}; nik_ce auto _dereference_ = U_function_T<FOP::dereference>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -657,18 +584,50 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+	struct HigherOrderOperator
+	{
+		// basis:
+
+			nik_ces key_type cast				=  0;
+			nik_ces key_type constant			=  1;
+
+			nik_ces key_type apply				=  2;
+			nik_ces key_type bind				=  3;
+			nik_ces key_type curry				=  4;
+
+		// comparison:
+
+			nik_ces key_type match				=  5;
+
+		// curried:
+
+			// comparison:
+
+				nik_ces key_type is_equal		=  6;
+				nik_ces key_type is_zero		=  7;
+
+			// arithmetic:
+
+				nik_ces key_type increment		=  8;
+				nik_ces key_type decrement		=  9;
+	};
+
+	using HOP = HigherOrderOperator;
+
+/***********************************************************************************************************************/
+
 // basis:
 
 	// cast:
 
 		template<typename Type, nik_vp(V)(Type*)>
-		struct T_overload<Overload::higher_order, Operator::cast, V>
+		struct T_overload<OL::higher_order, HOP::cast, V>
 		{
 			template<typename T>
 			nik_ces auto result(T v) { return Type(v); }
 
 		}; template<auto V>
-			nik_ce auto _cast_ = U_higher_order_T<Operator::cast, V>;
+			nik_ce auto _cast_ = U_higher_order_T<HOP::cast, V>;
 
 	// to_bool:
 
@@ -677,29 +636,29 @@ namespace cctmp {
 	// constant:
 
 		template<auto V>
-		struct T_overload<Overload::higher_order, Operator::constant, V>
+		struct T_overload<OL::higher_order, HOP::constant, V>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts...) { return V; }
 
 		}; template<auto V>
-			nik_ce auto _constant_ = U_higher_order_T<Operator::constant, V>;
+			nik_ce auto _constant_ = U_higher_order_T<HOP::constant, V>;
 
 	// apply:
 
 		template<auto f>
-		struct T_overload<Overload::higher_order, Operator::apply, f>
+		struct T_overload<OL::higher_order, HOP::apply, f>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return f(vs...); }
 
 		}; template<auto f>
-			nik_ce auto _apply_ = U_higher_order_T<Operator::apply, f>;
+			nik_ce auto _apply_ = U_higher_order_T<HOP::apply, f>;
 
 	// bind:
 
 		template<auto f, auto... ps>
-		struct T_overload<Overload::higher_order, Operator::bind, f, ps...>
+		struct T_overload<OL::higher_order, HOP::bind, f, ps...>
 		{
 			using F = T_store_U<f>;
 
@@ -708,12 +667,12 @@ namespace cctmp {
 				{ return F::template result<ps..., Ts...>(vs...); }
 
 		}; template<auto f, auto... ps>
-			nik_ce auto _bind_ = U_higher_order_T<Operator::bind, f, ps...>;
+			nik_ce auto _bind_ = U_higher_order_T<HOP::bind, f, ps...>;
 
 	// curry:
 
 		template<auto f, auto... Vs>
-		struct T_overload<Overload::higher_order, Operator::curry, f, Vs...>
+		struct T_overload<OL::higher_order, HOP::curry, f, Vs...>
 		{
 			using F = T_store_U<f>;
 
@@ -724,7 +683,7 @@ namespace cctmp {
 			}
 
 		}; template<auto f, auto... Vs>
-			nik_ce auto _curry_ = U_higher_order_T<Operator::curry, f, Vs...>;
+			nik_ce auto _curry_ = U_higher_order_T<HOP::curry, f, Vs...>;
 
 		// auto template:
 
@@ -732,7 +691,7 @@ namespace cctmp {
 			struct B_curry
 			{
 				template<auto... Vs>
-				using result = T_higher_order<Operator::curry, Ws..., Vs...>;
+				using result = T_higher_order<HOP::curry, Ws..., Vs...>;
 
 			}; template<auto... Ws>
 				nik_ce auto H_curry = U_store_B<B_curry<Ws...>::template result>;
@@ -744,7 +703,7 @@ namespace cctmp {
 	// match:
 
 		template<auto p>
-		struct T_overload<Overload::higher_order, Operator::match, p>
+		struct T_overload<OL::higher_order, HOP::match, p>
 		{
 			using P = T_store_U<p>;
 
@@ -760,7 +719,7 @@ namespace cctmp {
 			}
 
 		}; template<auto p = _to_bool_>
-			nik_ce auto _match_ = U_higher_order_T<Operator::match, p>;
+			nik_ce auto _match_ = U_higher_order_T<HOP::match, p>;
 
 /***********************************************************************************************************************/
 
@@ -794,7 +753,61 @@ namespace cctmp {
 
 // alias (variable template):
 
-	// Assumes variadic input, for pack input see "Operator::unpack".
+	// Assumes variadic input, for pack input see "AOP::unpack".
+
+/***********************************************************************************************************************/
+
+	struct AliasOperator
+	{
+		// basis:
+
+			nik_ces key_type type_to_const			=  0;
+
+			nik_ces key_type list_to_array			=  1;
+			nik_ces key_type array_to_list			=  2;
+
+			nik_ces key_type template_id			=  3;
+			nik_ces key_type template_to_list		=  4;
+			nik_ces key_type list_to_template		=  5;
+
+		// comparison:
+
+			nik_ces key_type same				=  6;
+			nik_ces key_type csame				=  7;
+			nik_ces key_type is_int_type			=  8;
+			nik_ces key_type not_int_type			=  9;
+
+		// functional:
+
+			nik_ces key_type to_list			= 10;
+			nik_ces key_type length				= 11;
+			nik_ces key_type map				= 12;
+
+			nik_ces key_type is_null			= 13;
+			nik_ces key_type car				= 14;
+			nik_ces key_type cdr				= 15;
+			nik_ces key_type cadr				= 16;
+			nik_ces key_type find				= 17;
+
+		// variadic:
+
+			nik_ces key_type zip				= 18;
+			nik_ces key_type unite				= 19;
+			nik_ces key_type cons				= 20;
+			nik_ces key_type push				= 21;
+			nik_ces key_type unpack				= 22;
+
+		// grammatical:
+
+			nik_ces key_type custom				= 23;
+			nik_ces key_type procedure			= 24;
+			nik_ces key_type method				= 25;
+			nik_ces key_type tailor				= 26;
+
+			nik_ces key_type partial			= 27;
+	};
+
+	using AOP = AliasOperator;
 
 /***********************************************************************************************************************/
 
@@ -803,33 +816,36 @@ namespace cctmp {
 	template<key_type Op, auto... Vs>
 	nik_ce auto alias = U_pack_Vs<Op, Vs...>;
 
-	template<auto V0, auto V1> nik_ce auto alias<Operator::same, V0, V1> = false;
-	template<auto V>           nik_ce auto alias<Operator::same, V , V > = true;
+	template<auto V0, auto V1> nik_ce auto alias<AOP::same, V0, V1> = false;
+	template<auto V>           nik_ce auto alias<AOP::same, V , V > = true;
 
-	template<auto V>                         nik_ce auto alias<Operator::is_int_type, V> = false;
-	template<nik_vp(V)(unsigned char     *)> nik_ce auto alias<Operator::is_int_type, V> = true;
-	template<nik_vp(V)(  signed char     *)> nik_ce auto alias<Operator::is_int_type, V> = true;
-	template<nik_vp(V)(unsigned short    *)> nik_ce auto alias<Operator::is_int_type, V> = true;
-	template<nik_vp(V)(  signed short    *)> nik_ce auto alias<Operator::is_int_type, V> = true;
-	template<nik_vp(V)(unsigned int      *)> nik_ce auto alias<Operator::is_int_type, V> = true;
-	template<nik_vp(V)(  signed int      *)> nik_ce auto alias<Operator::is_int_type, V> = true;
-	template<nik_vp(V)(unsigned long     *)> nik_ce auto alias<Operator::is_int_type, V> = true;
-	template<nik_vp(V)(  signed long     *)> nik_ce auto alias<Operator::is_int_type, V> = true;
-	template<nik_vp(V)(unsigned long long*)> nik_ce auto alias<Operator::is_int_type, V> = true;
-	template<nik_vp(V)(  signed long long*)> nik_ce auto alias<Operator::is_int_type, V> = true;
+	template<auto V>                         nik_ce auto alias<AOP::is_int_type, V> = false;
+	template<nik_vp(V)(unsigned char     *)> nik_ce auto alias<AOP::is_int_type, V> = true;
+	template<nik_vp(V)(  signed char     *)> nik_ce auto alias<AOP::is_int_type, V> = true;
+	template<nik_vp(V)(unsigned short    *)> nik_ce auto alias<AOP::is_int_type, V> = true;
+	template<nik_vp(V)(  signed short    *)> nik_ce auto alias<AOP::is_int_type, V> = true;
+	template<nik_vp(V)(unsigned int      *)> nik_ce auto alias<AOP::is_int_type, V> = true;
+	template<nik_vp(V)(  signed int      *)> nik_ce auto alias<AOP::is_int_type, V> = true;
+	template<nik_vp(V)(unsigned long     *)> nik_ce auto alias<AOP::is_int_type, V> = true;
+	template<nik_vp(V)(  signed long     *)> nik_ce auto alias<AOP::is_int_type, V> = true;
+	template<nik_vp(V)(unsigned long long*)> nik_ce auto alias<AOP::is_int_type, V> = true;
+	template<nik_vp(V)(  signed long long*)> nik_ce auto alias<AOP::is_int_type, V> = true;
 
 	template<template<auto...> typename B, auto... Vs, nik_vp(p)(B<Vs...>*)>
-	nik_ce auto alias<Operator::template_to_list, p> = U_pack_Vs<Vs...>;
+	nik_ce auto alias<AOP::template_id, p> = U_store_B<B>;
+
+	template<template<auto...> typename B, auto... Vs, nik_vp(p)(B<Vs...>*)>
+	nik_ce auto alias<AOP::template_to_list, p> = U_pack_Vs<Vs...>;
 
 	template
 	<
 		auto... Vs, nik_vp(p)(T_pack_Vs<Vs...>*),
 		template<auto...> typename B, nik_vp(b)(T_store_B<B>*)
 	>
-	nik_ce auto alias<Operator::list_to_template, p, b> = U_store_T<B<Vs...>>;
+	nik_ce auto alias<AOP::list_to_template, p, b> = U_store_T<B<Vs...>>;
 
 	template<auto Op, auto... Ws, nik_vp(p)(T_pack_Vs<Ws...>*), auto... Vs>
-	nik_ce auto alias<Operator::zip, Op, p, Vs...> = U_pack_Vs<overload<Op, Ws, Vs>...>;
+	nik_ce auto alias<AOP::zip, Op, p, Vs...> = U_pack_Vs<overload<Op, Ws, Vs>...>;
 
 	template
 	<
@@ -837,16 +853,16 @@ namespace cctmp {
 		auto... Ws, nik_vp(p1)(T_pack_Vs<Ws...>*),
 		auto... Vs
 	>
-	nik_ce auto alias<Operator::unite, p0, p1, Vs...> = U_pack_Vs<Xs..., Vs..., Ws...>;
+	nik_ce auto alias<AOP::unite, p0, p1, Vs...> = U_pack_Vs<Xs..., Vs..., Ws...>;
 
 	template<auto... Ws, nik_vp(p)(T_pack_Vs<Ws...>*), auto Op, auto... Vs>
-	nik_ce auto alias<Operator::unpack, p, Op, Vs...> = overload<Op, Vs..., Ws...>;
+	nik_ce auto alias<AOP::unpack, p, Op, Vs...> = overload<Op, Vs..., Ws...>;
 
 	template<auto Op, auto... Ws, nik_vp(p)(T_pack_Vs<Ws...>*), auto... Vs>
-	nik_ce auto alias<Operator::method, Op, p, Vs...> = T_store_U<Op>::template result<Ws...>(Vs...);
+	nik_ce auto alias<AOP::method, Op, p, Vs...> = T_store_U<Op>::template result<Ws...>(Vs...);
 
 	template<auto Op, auto... Ws, nik_vp(p)(T_pack_Vs<Ws...>*), auto... Vs>
-	nik_ce auto alias<Operator::tailor, Op, p, Vs...> = T_store_U<Op>::template result<Vs...>(Ws...);
+	nik_ce auto alias<AOP::tailor, Op, p, Vs...> = T_store_U<Op>::template result<Vs...>(Ws...);
 
 /***********************************************************************************************************************/
 
@@ -855,99 +871,109 @@ namespace cctmp {
 	// type to const:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::type_to_const, filler...>
+		struct T_overload<OL::alias, AOP::type_to_const, filler...>
 		{
 			template<auto U>
 			nik_ces auto result = U_store_T<T_store_U<U> const>;
 
-		}; nik_ce auto U_type_to_const = U_alias_T<Operator::type_to_const>;
+		}; nik_ce auto U_type_to_const = U_alias_T<AOP::type_to_const>;
 
 	// list to array:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::list_to_array, filler...>
+		struct T_overload<OL::alias, AOP::list_to_array, filler...>
 		{
 			template<auto U, auto... Vs>
 			nik_ces auto result = array<T_store_U<U>, Vs...>;
 
-		}; nik_ce auto U_list_to_array = U_alias_T<Operator::list_to_array>;
+		}; nik_ce auto U_list_to_array = U_alias_T<AOP::list_to_array>;
 
 	// from array:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::array_to_list, filler...>
+		struct T_overload<OL::alias, AOP::array_to_list, filler...>
 		{
 			template<auto A, auto... Is>
 			nik_ces auto result = U_pack_Vs<A[Is]...>;
 
-		}; nik_ce auto U_array_to_list = U_alias_T<Operator::array_to_list>;
+		}; nik_ce auto U_array_to_list = U_alias_T<AOP::array_to_list>;
+
+	// template id:
+
+		template<auto... filler>
+		struct T_overload<OL::alias, AOP::template_id, filler...>
+		{
+			template<auto p>
+			nik_ces auto result = alias<AOP::template_id, p>;
+
+		}; nik_ce auto U_template_id = U_alias_T<AOP::template_id>;
 
 	// template to list:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::template_to_list, filler...>
+		struct T_overload<OL::alias, AOP::template_to_list, filler...>
 		{
 			template<auto p>
-			nik_ces auto result = alias<Operator::template_to_list, p>;
+			nik_ces auto result = alias<AOP::template_to_list, p>;
 
-		}; nik_ce auto U_template_to_list = U_alias_T<Operator::template_to_list>;
+		}; nik_ce auto U_template_to_list = U_alias_T<AOP::template_to_list>;
 
 	// list to template:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::list_to_template, filler...>
+		struct T_overload<OL::alias, AOP::list_to_template, filler...>
 		{
 			template<auto p, auto b>
-			nik_ces auto result = alias<Operator::list_to_template, p, b>;
+			nik_ces auto result = alias<AOP::list_to_template, p, b>;
 
-		}; nik_ce auto U_list_to_template = U_alias_T<Operator::list_to_template>;
+		}; nik_ce auto U_list_to_template = U_alias_T<AOP::list_to_template>;
 
 	// same:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::same, filler...>
+		struct T_overload<OL::alias, AOP::same, filler...>
 		{
 			template<auto V0, auto V1>
-			nik_ces auto result = alias<Operator::same, V0, V1>;
+			nik_ces auto result = alias<AOP::same, V0, V1>;
 
-		}; nik_ce auto U_same = U_alias_T<Operator::same>;
+		}; nik_ce auto U_same = U_alias_T<AOP::same>;
 
 	// csame:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::csame, filler...>
+		struct T_overload<OL::alias, AOP::csame, filler...>
 		{
-			using T_type_to_const = T_alias<Operator::type_to_const>;
+			using T_type_to_const = T_alias<AOP::type_to_const>;
 
 			template<auto V0, auto V1>
 			nik_ces auto result = alias
 			<
-				Operator::same,
+				AOP::same,
 				T_type_to_const::template result<V0>,
 				T_type_to_const::template result<V1>
 			>;
 
-		}; nik_ce auto U_csame = U_alias_T<Operator::csame>;
+		}; nik_ce auto U_csame = U_alias_T<AOP::csame>;
 
 	// is_int_type:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::is_int_type, filler...>
+		struct T_overload<OL::alias, AOP::is_int_type, filler...>
 		{
 			template<auto V>
-			nik_ces auto result = alias<Operator::is_int_type, V>;
+			nik_ces auto result = alias<AOP::is_int_type, V>;
 
-		}; nik_ce auto U_is_int_type = U_alias_T<Operator::is_int_type>;
+		}; nik_ce auto U_is_int_type = U_alias_T<AOP::is_int_type>;
 
 	// not_int_type:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::not_int_type, filler...>
+		struct T_overload<OL::alias, AOP::not_int_type, filler...>
 		{
 			template<auto V>
-			nik_ces auto result = ! alias<Operator::is_int_type, V>;
+			nik_ces auto result = ! alias<AOP::is_int_type, V>;
 
-		}; nik_ce auto U_not_int_type = U_alias_T<Operator::not_int_type>;
+		}; nik_ce auto U_not_int_type = U_alias_T<AOP::not_int_type>;
 
 /***********************************************************************************************************************/
 
@@ -956,79 +982,79 @@ namespace cctmp {
 	// to list:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::to_list, filler...>
+		struct T_overload<OL::alias, AOP::to_list, filler...>
 		{
 			template<auto... Vs>
 			nik_ces auto result = U_pack_Vs<Vs...>;
 
-		}; nik_ce auto U_to_list = U_alias_T<Operator::to_list>;
+		}; nik_ce auto U_to_list = U_alias_T<AOP::to_list>;
 
 	// length:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::length, filler...>
+		struct T_overload<OL::alias, AOP::length, filler...>
 		{
 			template<auto... Vs>
 			nik_ces auto result = sizeof...(Vs);
 
-		}; nik_ce auto U_length = U_alias_T<Operator::length>;
+		}; nik_ce auto U_length = U_alias_T<AOP::length>;
 
 	// map:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::map, filler...>
+		struct T_overload<OL::alias, AOP::map, filler...>
 		{
 			template<auto Op, auto... Vs>
 			nik_ces auto result = U_pack_Vs<overload<Op, Vs>...>;
 
-		}; nik_ce auto U_map = U_alias_T<Operator::map>;
+		}; nik_ce auto U_map = U_alias_T<AOP::map>;
 
 	// is_null:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::is_null, filler...>
+		struct T_overload<OL::alias, AOP::is_null, filler...>
 		{
 			template<auto... Vs>
 			nik_ces auto result = (sizeof...(Vs) == 0);
 
-		}; nik_ce auto U_is_null = U_alias_T<Operator::is_null>;
+		}; nik_ce auto U_is_null = U_alias_T<AOP::is_null>;
 
 	// car:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::car, filler...>
+		struct T_overload<OL::alias, AOP::car, filler...>
 		{
 			template<auto V0, auto... Vs>
 			nik_ces auto result = V0;
 
-		}; nik_ce auto U_car = U_alias_T<Operator::car>;
+		}; nik_ce auto U_car = U_alias_T<AOP::car>;
 
 	// cdr:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::cdr, filler...>
+		struct T_overload<OL::alias, AOP::cdr, filler...>
 		{
 			template<auto V0, auto... Vs>
 			nik_ces auto result = U_pack_Vs<Vs...>;
 
-		}; nik_ce auto U_cdr = U_alias_T<Operator::cdr>;
+		}; nik_ce auto U_cdr = U_alias_T<AOP::cdr>;
 
 	// cadr:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::cadr, filler...>
+		struct T_overload<OL::alias, AOP::cadr, filler...>
 		{
 			template<auto V0, auto V1, auto... Vs>
 			nik_ces auto result = V1;
 
-		}; nik_ce auto U_cadr = U_alias_T<Operator::cadr>;
+		}; nik_ce auto U_cadr = U_alias_T<AOP::cadr>;
 
 	// find:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::find, filler...>
+		struct T_overload<OL::alias, AOP::find, filler...>
 		{
-			nik_ces auto match = T_higher_order<Operator::match, _to_bool_>::template result
+			nik_ces auto match = T_higher_order<HOP::match, _to_bool_>::template result
 			<
 				bool const*, index_type
 			>;
@@ -1036,7 +1062,7 @@ namespace cctmp {
 			template<auto Op, auto... Vs>
 			nik_ces auto result = match(array<bool const, overload<Op, Vs>...>, sizeof...(Vs));
 
-		}; nik_ce auto U_find = U_alias_T<Operator::find>;
+		}; nik_ce auto U_find = U_alias_T<AOP::find>;
 
 /***********************************************************************************************************************/
 
@@ -1045,52 +1071,52 @@ namespace cctmp {
 	// zip:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::zip, filler...>
+		struct T_overload<OL::alias, AOP::zip, filler...>
 		{
 			template<auto Op, auto p, auto... Vs>
-			nik_ces auto result = alias<Operator::zip, Op, p, Vs...>;
+			nik_ces auto result = alias<AOP::zip, Op, p, Vs...>;
 
-		}; nik_ce auto U_zip = U_alias_T<Operator::zip>;
+		}; nik_ce auto U_zip = U_alias_T<AOP::zip>;
 
 	// unite:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::unite, filler...>
+		struct T_overload<OL::alias, AOP::unite, filler...>
 		{
 			template<auto p0, auto p1, auto... Vs>
-			nik_ces auto result = alias<Operator::unite, p0, p1, Vs...>;
+			nik_ces auto result = alias<AOP::unite, p0, p1, Vs...>;
 
-		}; nik_ce auto U_unite = U_alias_T<Operator::unite>;
+		}; nik_ce auto U_unite = U_alias_T<AOP::unite>;
 
 	// cons:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::cons, filler...>
+		struct T_overload<OL::alias, AOP::cons, filler...>
 		{
 			template<auto p, auto... Vs>
-			nik_ces auto result = alias<Operator::unite, U_null_Vs, p, Vs...>;
+			nik_ces auto result = alias<AOP::unite, U_null_Vs, p, Vs...>;
 
-		}; nik_ce auto U_cons = U_alias_T<Operator::cons>;
+		}; nik_ce auto U_cons = U_alias_T<AOP::cons>;
 
 	// push:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::push, filler...>
+		struct T_overload<OL::alias, AOP::push, filler...>
 		{
 			template<auto p, auto... Vs>
-			nik_ces auto result = alias<Operator::unite, p, U_null_Vs, Vs...>;
+			nik_ces auto result = alias<AOP::unite, p, U_null_Vs, Vs...>;
 
-		}; nik_ce auto U_push = U_alias_T<Operator::push>;
+		}; nik_ce auto U_push = U_alias_T<AOP::push>;
 
 	// unpack:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::unpack, filler...>
+		struct T_overload<OL::alias, AOP::unpack, filler...>
 		{
 			template<auto p, auto Op, auto... Vs>
-			nik_ces auto result = alias<Operator::unpack, p, Op, Vs...>;
+			nik_ces auto result = alias<AOP::unpack, p, Op, Vs...>;
 
-		}; nik_ce auto U_unpack = U_alias_T<Operator::unpack>;
+		}; nik_ce auto U_unpack = U_alias_T<AOP::unpack>;
 
 /***********************************************************************************************************************/
 
@@ -1099,53 +1125,53 @@ namespace cctmp {
 	// custom:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::custom, filler...>
+		struct T_overload<OL::alias, AOP::custom, filler...>
 		{
 			template<auto Op, auto... Vs>
 			nik_ces auto result = T_store_U<Op>::template result<Vs...>;
 
-		}; nik_ce auto U_custom = U_alias_T<Operator::custom>;
+		}; nik_ce auto U_custom = U_alias_T<AOP::custom>;
 
 	// procedure:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::procedure, filler...>
+		struct T_overload<OL::alias, AOP::procedure, filler...>
 		{
 			template<auto Op, auto... Vs>
 			nik_ces auto result = T_store_U<Op>::result(Vs...);
 
-		}; nik_ce auto U_procedure = U_alias_T<Operator::procedure>;
+		}; nik_ce auto U_procedure = U_alias_T<AOP::procedure>;
 
 	// method:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::method, filler...>
+		struct T_overload<OL::alias, AOP::method, filler...>
 		{
 			template<auto... Vs>
-			nik_ces auto result = alias<Operator::method, Vs...>;
+			nik_ces auto result = alias<AOP::method, Vs...>;
 
-		}; nik_ce auto U_method = U_alias_T<Operator::method>;
+		}; nik_ce auto U_method = U_alias_T<AOP::method>;
 
 	// tailor:
 
 		template<auto... filler>
-		struct T_overload<Overload::alias, Operator::tailor, filler...>
+		struct T_overload<OL::alias, AOP::tailor, filler...>
 		{
 			template<auto... Vs>
-			nik_ces auto result = alias<Operator::tailor, Vs...>;
+			nik_ces auto result = alias<AOP::tailor, Vs...>;
 
-		}; nik_ce auto U_tailor = U_alias_T<Operator::tailor>;
+		}; nik_ce auto U_tailor = U_alias_T<AOP::tailor>;
 
 	// partial:
 
 		template<auto... Ws>
-		struct T_overload<Overload::alias, Operator::partial, Ws...>
+		struct T_overload<OL::alias, AOP::partial, Ws...>
 		{
 			template<auto... Vs>
 			nik_ces auto result = overload<Ws..., Vs...>;
 
 		}; template<auto... Ws>
-			nik_ce auto U_partial = U_alias_T<Operator::partial, Ws...>;
+			nik_ce auto U_partial = U_alias_T<AOP::partial, Ws...>;
 
 		// auto template:
 
@@ -1153,7 +1179,7 @@ namespace cctmp {
 			struct B_partial
 			{
 				template<auto... Vs>
-				using result = T_alias<Operator::partial, Ws..., Vs...>;
+				using result = T_alias<AOP::partial, Ws..., Vs...>;
 
 			}; template<auto... Ws>
 				nik_ce auto H_partial = U_store_B<B_partial<Ws...>::template result>;
@@ -1163,16 +1189,16 @@ namespace cctmp {
 // syntactic sugar:
 
 	template<auto Op, auto... Vs>
-	nik_ce auto map_ = T_alias<Operator::map>::template result<Op, Vs...>;
+	nik_ce auto map_ = T_alias<AOP::map>::template result<Op, Vs...>;
 
 	template<auto Op, auto... Vs>
-	nik_ce auto find_ = T_alias<Operator::find>::template result<Op, Vs...>;
+	nik_ce auto find_ = T_alias<AOP::find>::template result<Op, Vs...>;
 
 	template<auto Op, auto p, auto... Vs>
-	nik_ce auto zip_ = T_alias<Operator::zip>::template result<Op, p, Vs...>;
+	nik_ce auto zip_ = T_alias<AOP::zip>::template result<Op, p, Vs...>;
 
 	template<auto p, auto Op, auto... Vs>
-	nik_ce auto unpack_ = T_alias<Operator::unpack>::template result<p, Op, Vs...>;
+	nik_ce auto unpack_ = T_alias<AOP::unpack>::template result<p, Op, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

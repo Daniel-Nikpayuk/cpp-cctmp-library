@@ -38,12 +38,12 @@ namespace cctmp_program
 	{
 		constexpr auto d		= MachineDispatch::initial_depth;
 		constexpr auto list		= U_restore_T<decltype(l)>;
-		constexpr auto n		= Overload::template result<Overload::find, cmp, list, insert>;
+		constexpr auto n		= OL::template result<OL::find, cmp, list, insert>;
 
 						// bad design: does not compose well with trampolining.
 		constexpr auto sp		= NIK_FUNCTION_BLOCK(9, d, n, BN::split, Vs)(U_null_Vs);
 
-		return Overload::template result<Overload::unite, sp.v1, sp.v2, insert>;
+		return OL::template result<OL::unite, sp.v1, sp.v2, insert>;
 	}
 
 	template<auto cmp = less_than_op<>>

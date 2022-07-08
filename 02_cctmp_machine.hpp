@@ -463,7 +463,7 @@ namespace cctmp {
 			{
 				nik_ce auto v0 = tuple_value<0>(val);
 				nik_ce auto v1 = tuple_value<1>(val);
-				nik_ce auto h0 = alias<Operator::unite, v0, v1, X0>;
+				nik_ce auto h0 = alias<AOP::unite, v0, v1, X0>;
 
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, Hs...);
 			}
@@ -491,7 +491,7 @@ namespace cctmp {
 			{
 				nik_ce auto v0 = tuple_value<0>(val);
 				nik_ce auto v1 = tuple_value<1>(val);
-				nik_ce auto h0 = alias<Operator::unite, v0, v1, X0>;
+				nik_ce auto h0 = alias<AOP::unite, v0, v1, X0>;
 
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, As...);
 			}
@@ -526,7 +526,7 @@ namespace cctmp {
 			{
 				nik_ce auto v0 = tuple_value<0>(val);
 				nik_ce auto v1 = tuple_value<1>(val);
-				nik_ce auto h0 = alias<Operator::unite, v0, v1, X0>;
+				nik_ce auto h0 = alias<AOP::unite, v0, v1, X0>;
 
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, Hs...);
 			}
@@ -971,108 +971,108 @@ namespace cctmp {
 	nik_ce instr_type action = instruction<MN::call, MT::action, dec, ctn, key, act>;
 
 		template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-		nik_ce instr_type f_action = action<Overload::function, act, ctn, dec>;
+		nik_ce instr_type f_action = action<OL::function, act, ctn, dec>;
 
 		template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-		nik_ce instr_type h_action = action<Overload::higher_order, act, ctn, dec>;
+		nik_ce instr_type h_action = action<OL::higher_order, act, ctn, dec>;
 
 		template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-		nik_ce instr_type a_action = action<Overload::alias, act, ctn, dec>;
+		nik_ce instr_type a_action = action<OL::alias, act, ctn, dec>;
 
 	// function:
 
 		// comparison:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto equal = f_action<Operator::equal, ctn, dec>;
+		nik_ce auto equal = f_action<FOP::equal, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto not_equal = f_action<Operator::not_equal, ctn, dec>;
+		nik_ce auto not_equal = f_action<FOP::not_equal, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto less_than = f_action<Operator::less_than, ctn, dec>;
+		nik_ce auto less_than = f_action<FOP::less_than, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto less_than_or_equal = f_action<Operator::less_than_or_equal, ctn, dec>;
+		nik_ce auto less_than_or_equal = f_action<FOP::less_than_or_equal, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto greater_than = f_action<Operator::greater_than, ctn, dec>;
+		nik_ce auto greater_than = f_action<FOP::greater_than, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto greater_than_or_equal = f_action<Operator::greater_than_or_equal, ctn, dec>;
+		nik_ce auto greater_than_or_equal = f_action<FOP::greater_than_or_equal, ctn, dec>;
 
 		// logical:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto not_ = f_action<Operator::not_, ctn, dec>;
+		nik_ce auto not_ = f_action<FOP::not_, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto and_ = f_action<Operator::and_, ctn, dec>;
+		nik_ce auto and_ = f_action<FOP::and_, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto or_ = f_action<Operator::or_, ctn, dec>;
+		nik_ce auto or_ = f_action<FOP::or_, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto implies = f_action<Operator::implies, ctn, dec>;
+		nik_ce auto implies = f_action<FOP::implies, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto equivalent = f_action<Operator::equivalent, ctn, dec>;
+		nik_ce auto equivalent = f_action<FOP::equivalent, ctn, dec>;
 
 		// arithmetic:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto add = f_action<Operator::add, ctn, dec>;
+		nik_ce auto add = f_action<FOP::add, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto subtract = f_action<Operator::subtract, ctn, dec>;
+		nik_ce auto subtract = f_action<FOP::subtract, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto multiply = f_action<Operator::multiply, ctn, dec>;
+		nik_ce auto multiply = f_action<FOP::multiply, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto divide = f_action<Operator::divide, ctn, dec>;
+		nik_ce auto divide = f_action<FOP::divide, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto modulo = f_action<Operator::modulo, ctn, dec>;
+		nik_ce auto modulo = f_action<FOP::modulo, ctn, dec>;
 
 		// bitwise:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto upshift = f_action<Operator::upshift, ctn, dec>;
+		nik_ce auto upshift = f_action<FOP::upshift, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto downshift = f_action<Operator::downshift, ctn, dec>;
+		nik_ce auto downshift = f_action<FOP::downshift, ctn, dec>;
 
 		// algebraic:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto product = f_action<Operator::tuple, ctn, dec>;
+		nik_ce auto product = f_action<FOP::tuple, ctn, dec>;
 
 	// higher order:
 
 		// computational:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto apply = h_action<Operator::apply, ctn, dec>;
+		nik_ce auto apply = h_action<HOP::apply, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _three>
-		nik_ce auto bind = h_action<Operator::bind, ctn, dec>;
+		nik_ce auto bind = h_action<HOP::bind, ctn, dec>;
 
 			// comparison:
 
 			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto is_equal = h_action<Operator::is_equal, ctn, dec>;
+			nik_ce auto is_equal = h_action<HOP::is_equal, ctn, dec>;
 
 			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto is_zero = h_action<Operator::is_zero, ctn, dec>;
+			nik_ce auto is_zero = h_action<HOP::is_zero, ctn, dec>;
 
 			// arithmetic:
 
 			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto increment = h_action<Operator::increment, ctn, dec>;
+			nik_ce auto increment = h_action<HOP::increment, ctn, dec>;
 
 			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto decrement = h_action<Operator::decrement, ctn, dec>;
+			nik_ce auto decrement = h_action<HOP::decrement, ctn, dec>;
 
 	// alias:
 
@@ -1081,68 +1081,68 @@ namespace cctmp {
 		// comparison:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto same = a_action<Operator::same, ctn, dec>;
+		nik_ce auto same = a_action<AOP::same, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto csame = a_action<Operator::csame, ctn, dec>;
+		nik_ce auto csame = a_action<AOP::csame, ctn, dec>;
 
 		// functional:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto to_list = a_action<Operator::to_list, ctn, dec>;
+		nik_ce auto to_list = a_action<AOP::to_list, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto length = a_action<Operator::length, ctn, dec>;
+		nik_ce auto length = a_action<AOP::length, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto map = a_action<Operator::map, ctn, dec>;
+		nik_ce auto map = a_action<AOP::map, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto zip = a_action<Operator::zip, ctn, dec>;
+		nik_ce auto zip = a_action<AOP::zip, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto is_null = a_action<Operator::is_null, ctn, dec>;
+		nik_ce auto is_null = a_action<AOP::is_null, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto car = a_action<Operator::car, ctn, dec>;
+		nik_ce auto car = a_action<AOP::car, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto cdr = a_action<Operator::cdr, ctn, dec>;
+		nik_ce auto cdr = a_action<AOP::cdr, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto cadr = a_action<Operator::cadr, ctn, dec>;
+		nik_ce auto cadr = a_action<AOP::cadr, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto unite = a_action<Operator::unite, ctn, dec>;
+		nik_ce auto unite = a_action<AOP::unite, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto find = a_action<Operator::find, ctn, dec>;
+		nik_ce auto find = a_action<AOP::find, ctn, dec>;
 
 		// grammatical:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto custom = a_action<Operator::custom, ctn, dec>;
+		nik_ce auto custom = a_action<AOP::custom, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto procedure = a_action<Operator::procedure, ctn, dec>;
+		nik_ce auto procedure = a_action<AOP::procedure, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto method = a_action<Operator::method, ctn, dec>;
+		nik_ce auto method = a_action<AOP::method, ctn, dec>;
 
 		// unpack:
 
 		template<key_type ctn = _h1, depth_type dec = _three>
-		nik_ce auto unpack = a_action<Operator::unpack, ctn, dec>;
+		nik_ce auto unpack = a_action<AOP::unpack, ctn, dec>;
 
 /***********************************************************************************************************************/
 
 // compel:
 
 	template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-	nik_ce instr_type compel = instruction<MN::call, MT::compel, dec, ctn, Overload::alias, act>;
+	nik_ce instr_type compel = instruction<MN::call, MT::compel, dec, ctn, OL::alias, act>;
 
-		nik_ce auto _custom = Operator::custom;
-		nik_ce auto _method = Operator::method;
+		nik_ce auto _custom = AOP::custom;
+		nik_ce auto _method = AOP::method;
 
 /***********************************************************************************************************************/
 
