@@ -261,9 +261,10 @@ namespace cctmp_functional {
 	template<auto p, auto n, auto d = MD::initial_depth>
 	nik_ce auto list_erase = unpack_<p, U_custom, U_erase, d, n>;
 
-// insert:
+// mutate (generic):
 
-	struct T_insert
+	template<auto Part>
+	struct T_mutate
 	{
 		nik_ces auto c = controller
 		<
@@ -274,9 +275,13 @@ namespace cctmp_functional {
 		>;
 
 		template<auto d, auto n, auto V, auto... Vs>
-		nik_ces auto result = T_start::template result<d, c, V>(U_pack_Vs<U_split, n, Vs...>, U_null_Vs, U_null_Vs);
+		nik_ces auto result = T_start::template result<d, c, V>(U_pack_Vs<Part, n, Vs...>, U_null_Vs, U_null_Vs);
+	};
 
-	}; nik_ce auto U_insert = U_store_T<T_insert>;
+// insert:
+
+	using T_insert		= T_mutate<U_split>;
+	nik_ce auto U_insert	= U_store_T<T_insert>;
 
 	template<auto n, auto V, auto... Vs>
 	nik_ce auto pack_insert = T_insert::template result<MD::initial_depth, n, V, Vs...>;
@@ -286,20 +291,8 @@ namespace cctmp_functional {
 
 // replace:
 
-	struct T_replace
-	{
-		nik_ces auto c = controller
-		<
-			compel < _custom , _h1_pair  >,
-			stage  <                     >,
-			copy   < _zero   , _register >,
-			unite  <             _value  >
-		>;
-
-		template<auto d, auto n, auto V, auto... Vs>
-		nik_ces auto result = T_start::template result<d, c, V>(U_pack_Vs<U_cut, n, Vs...>, U_null_Vs, U_null_Vs);
-
-	}; nik_ce auto U_replace = U_store_T<T_replace>;
+	using T_replace		= T_mutate<U_cut>;
+	nik_ce auto U_replace	= U_store_T<T_replace>;
 
 	template<auto n, auto V, auto... Vs>
 	nik_ce auto pack_replace = T_replace::template result<MD::initial_depth, n, V, Vs...>;
@@ -314,9 +307,10 @@ namespace cctmp_functional {
 
 /***********************************************************************************************************************/
 
-// insert:
+// mutate (generic):
 
-	struct T_insert_sort
+	template<auto Part>
+	struct T_mutate_sort
 	{
 		nik_ces auto c = controller
 		<
@@ -335,7 +329,7 @@ namespace cctmp_functional {
 			nik_ce auto Pred = U_store_T<B<V>>;
 			nik_ce auto H0   = U_pack_Vs<Pred, Vs...>;
 			nik_ce auto H1   = U_pack_Vs<Vs...>;
-			nik_ce auto H2   = U_pack_Vs<U_split>;
+			nik_ce auto H2   = U_pack_Vs<Part>;
 
 			return T_start::template result<d, c, V>(H0, H1, H2);
 		}
@@ -343,7 +337,15 @@ namespace cctmp_functional {
 		template<auto d, auto H, auto V, auto... Vs>
 		nik_ces auto result = _result<d, V, Vs...>(H);
 
-	}; nik_ce auto U_insert_sort = U_store_T<T_insert_sort>;
+	}; template<auto Part>
+		nik_ce auto U_mutate_sort = U_store_T<T_mutate_sort<Part>>;
+
+/***********************************************************************************************************************/
+
+// insert:
+
+	using T_insert_sort		= T_mutate_sort<U_split>;
+	nik_ce auto U_insert_sort	= U_store_T<T_insert_sort>;
 
 	template<auto H, auto V, auto... Vs>
 	nik_ce auto pack_insert_sort = T_insert_sort::template result<MD::initial_depth, H, V, Vs...>;
@@ -353,16 +355,29 @@ namespace cctmp_functional {
 
 /***********************************************************************************************************************/
 
+// replace:
+
+	using T_replace_sort		= T_mutate_sort<U_cut>;
+	nik_ce auto U_replace_sort	= U_store_T<T_replace_sort>;
+
+	template<auto H, auto V, auto... Vs>
+	nik_ce auto pack_replace_sort = T_replace_sort::template result<MD::initial_depth, H, V, Vs...>;
+
+	template<auto p, auto V, auto H = H_curry_less_than, auto d = MD::initial_depth>
+	nik_ce auto list_replace_sort = unpack_<p, U_custom, U_replace_sort, d, H, V>;
+
+/***********************************************************************************************************************/
+
 // monoid:
 
-	template<auto H = H_curry_less_than>
+	template<auto H = H_curry_less_than, auto P = U_split> // implies U_insert_sort
 	struct T_sort_monoid
 	{
 		template<auto d, auto p, auto V>
-		nik_ces auto result = unpack_<p, U_custom, U_insert_sort, d, H, V>;
+		nik_ces auto result = unpack_<p, U_custom, U_mutate_sort<P>, d, H, V>;
 
-	}; template<auto H = H_curry_less_than>
-		nik_ce auto U_sort_monoid = U_store_T<T_sort_monoid<H>>;
+	}; template<auto H = H_curry_less_than, auto P = U_split>
+		nik_ce auto U_sort_monoid = U_store_T<T_sort_monoid<H, P>>;
 
 /***********************************************************************************************************************/
 
@@ -370,16 +385,16 @@ namespace cctmp_functional {
 
 	struct T_sort
 	{
-		template<auto d, auto H, auto V, auto... Vs>
-		nik_ces auto result = T_cascade::template result<d, U_sort_monoid<H>, V, Vs...>;
+		template<auto d, auto H, auto P, auto V, auto... Vs>
+		nik_ces auto result = T_cascade::template result<d, U_sort_monoid<H, P>, V, Vs...>;
 
 	}; nik_ce auto U_sort = U_store_T<T_sort>;
 
 	template<auto H, auto V, auto... Vs>
-	nik_ce auto pack_sort = T_sort::template result<MD::initial_depth, H, V, Vs...>;
+	nik_ce auto pack_sort = T_sort::template result<MD::initial_depth, H, U_split, V, Vs...>;
 
-	template<auto p, auto H = H_curry_less_than, auto V = U_null_Vs, auto d = MD::initial_depth>
-	nik_ce auto list_sort = unpack_<p, U_custom, U_sort, d, H, V>;
+	template<auto p, auto H = H_curry_less_than, auto V = U_null_Vs, auto P = U_split, auto d = MD::initial_depth>
+	nik_ce auto list_sort = unpack_<p, U_custom, U_sort, d, H, P, V>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -530,7 +545,7 @@ namespace cctmp_functional {
 		template<auto d, auto HEq, auto HCmp, auto... Vs, auto... Ws>
 		nik_ces auto _result(nik_avp(T_pack_Vs<Ws...>*))
 		{
-			nik_ce auto H0 = U_pack_Vs<U_sort, HCmp, U_null_Vs, Ws...>;
+			nik_ce auto H0 = U_pack_Vs<U_sort, HCmp, U_split, U_null_Vs, Ws...>;
 			nik_ce auto H1 = U_pack_Vs<Vs...>;
 			nik_ce auto H2 = U_null_Vs;
 			nik_ce auto A0 = U_pack_Vs<U_union, HEq, HCmp>;

@@ -96,12 +96,7 @@
 
 /***********************************************************************************************************************/
 
-//	constexpr auto direct_spec	= cctmp_one_cycle_specs::template direct_repeat<>;
-	constexpr auto direct_spec	= cctmp_one_cycle_specs::template direct_to_spec
-					<
-						cctmp_one_cycle_specs::direct_repeat_defaults,
-						cctmp_one_cycle_specs::H_repeat_specification
-					>;
+	constexpr auto direct_spec	= cctmp_one_cycle_specs::template direct_repeat<>;
 	using T_repeat			= typename cctmp_one_cycle_generics::template T_repeat<direct_spec>;
 
 /***********************************************************************************************************************/

@@ -52,6 +52,10 @@ namespace cctmp_one_cycle_specs {
 	template<auto... Vs> nik_ce auto H_partial			= cctmp::template H_partial<Vs...>;
 	nik_ce auto H_partial_same					= H_partial<U_same>;
 
+	using T_sort							= typename cctmp_functional::T_sort;
+
+	nik_ce auto U_cut						= cctmp_functional::U_cut;
+
 	template<auto... Vs> nik_ce auto list_fill			= cctmp_functional::template list_fill<Vs...>;
 	template<auto... Vs> nik_ce auto list_compare			= cctmp_functional::template list_compare<Vs...>;
 
@@ -361,6 +365,16 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
+// write:
+
+	template<auto defs, auto... Vs>
+	nik_ce auto direct_write = T_sort::template result
+	<
+		MD::initial_depth, H_tag_equal, U_cut, defs, Vs...
+	>;
+
+/***********************************************************************************************************************/
+
 // fill:
 
 	template<auto defs, auto... Vs>
@@ -524,10 +538,12 @@ namespace cctmp_one_cycle_specs {
 			_post_act_function_ < _id_           >
 		>;
 
+	// repeat:
+
 		template<auto... Vs>
 		nik_ce auto direct_repeat = direct_to_spec
 		<
-			direct_fill<direct_repeat_defaults, Vs...>,
+			direct_write<direct_repeat_defaults, Vs...>,
 			H_repeat_specification
 		>;
 
