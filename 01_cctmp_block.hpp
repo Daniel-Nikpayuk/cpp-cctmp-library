@@ -463,7 +463,7 @@ namespace cctmp {
 	struct T_block<BN::cascade, BT::start, _one, filler...>
 	{
 		template<auto d, auto u, auto n, auto op, auto... Vs, auto... _Vs>
-		nik_ces auto _result(nik_avp(T_store_Vs<_Vs...>*))
+		nik_ces auto _result(nik_avp(T_pack_Vs<_Vs...>*))
 		{
 			nik_ce auto val = T_store_U<u>::template result<d, _Vs...>;
 

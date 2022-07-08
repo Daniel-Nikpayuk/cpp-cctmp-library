@@ -39,7 +39,7 @@
 
 /***********************************************************************************************************************/
 
-	using namespace cctmp;
+//	using namespace cctmp;
 //	using namespace cctmp_generics;
 
 /***********************************************************************************************************************/
@@ -135,8 +135,8 @@
 	//	printf("%llu\n", cctmp_functional::pack_replace<1, 7,    3, 4, 5, 9>);
 	//	printf("%llu\n", cctmp_functional::list_replace<p, 1, 7>);
 
-		constexpr auto H_curry_equal		= H_curry<_equal_>;
-		constexpr auto H_curry_less_than	= H_curry<_less_than_>;
+	//	constexpr auto H_curry_equal		= H_curry<_equal_>;
+	//	constexpr auto H_curry_less_than	= H_curry<_less_than_>;
 
 	//	printf("%llu\n", cctmp_functional::pack_insert_sort<H_curry_less_than, 0,    3, 4, 5, 9>);
 	//	printf("%llu\n", cctmp_functional::list_insert_sort<p, 0>);
@@ -145,6 +145,10 @@
 	//	printf("%llu\n", cctmp_functional::list_sort<p>);		// gcc 2.489s / clang 7.010s
 
 	//	printf("%llu\n", cctmp_functional::pack_union<H_curry_equal, H_curry_less_than, U_null_Vs, 9,    3, 4, 5, 9>);
+
+	//	constexpr auto def_specs	= U_pack_Vs<0, 1, 2, 3, 4, 5>;
+	//	constexpr auto specs0		= U_pack_Vs<3, 5, 0>;
+	//	printf("%llu\n", cctmp_functional::list_fill<def_specs, specs0>);
 
 	//	constexpr auto reqs  = unpack_<T_repeat::object, U_car>;
 	//	constexpr auto lines = unpack_<T_repeat::object, U_cdr>;
@@ -158,8 +162,8 @@
 	//	printf("%lu\n", cctmp_functional::list_at<lines, 1>);
 	//	printf("%lu\n", cctmp_functional::list_at<lines, 2>);
 
-		int size = 10;
-		int arr[size];
+	//	int size = 10;
+	//	int arr[size];
 	//	T_repeat::result(arr, arr+size, argc);
 	//	repeat_array(arr, arr+size, argc);
 	//	print_array(arr, arr+size);

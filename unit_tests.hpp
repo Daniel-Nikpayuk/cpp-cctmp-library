@@ -34,7 +34,7 @@ namespace cctmp_program
 // version 0:
 
 	template<auto insert, auto cmp, auto... Vs>
-	constexpr auto sort(nik_vp(l)(T_store_Vs<Vs...>*))
+	constexpr auto sort(nik_vp(l)(T_pack_Vs<Vs...>*))
 	{
 		constexpr auto d		= MachineDispatch::initial_depth;
 		constexpr auto list		= U_restore_T<decltype(l)>;
@@ -623,7 +623,7 @@ namespace cctmp_program
 	}
 
 	template<auto... words>
-	nik_ce auto explore_line(nik_avp(T_store_Vs<words...>*))
+	nik_ce auto explore_line(nik_avp(T_pack_Vs<words...>*))
 	{
 		printf("%d: ", int{sizeof...(words)});
 
@@ -640,7 +640,7 @@ namespace cctmp_program
 	}
 
 	template<auto deps, auto... lines>
-	nik_ce auto explore(nik_avp(T_store_Vs<deps, lines...>*))
+	nik_ce auto explore(nik_avp(T_pack_Vs<deps, lines...>*))
 	{
 		// deps:
 

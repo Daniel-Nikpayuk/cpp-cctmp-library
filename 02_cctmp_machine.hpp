@@ -248,7 +248,7 @@ namespace cctmp {
 	template<auto... Vs>
 	nik_ce auto start = U_pack_Vs<Vs...>;
 
-	template<auto d, auto... Hs, nik_vp(p)(T_store_Vs<Hs...>*), auto m, auto c, auto i, auto...Vs>
+	template<auto d, auto... Hs, nik_vp(p)(T_pack_Vs<Hs...>*), auto m, auto c, auto i, auto...Vs>
 	nik_ce auto start<d, p, m, c, i, Vs...> = NIK_MACHINE(d, m, c, i, Vs)(Hs...);
 
 	struct T_start
@@ -286,7 +286,7 @@ namespace cctmp {
 	struct T_machine<MN::call, MT::copy_r_pos, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_store_Vs<Ws...>*), Heaps... Hs)
+		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
@@ -317,7 +317,7 @@ namespace cctmp {
 	struct T_machine<MN::call, MT::copy_j_pos, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_store_Vs<Ws...>*), nik_vp(H1)(T_store_Vs<Xs...>*), Heaps... Hs)
+		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
@@ -348,7 +348,7 @@ namespace cctmp {
 	struct T_machine<MN::call, MT::copy_c_pos, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename Heap1, auto... Ys, typename... Args>
-		nik_ces auto result(nik_vp(H0)(T_store_Vs<Ws...>*), Heap1 H1, nik_vp(H2)(T_store_Vs<Ys...>*), Args... As)
+		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), Heap1 H1, nik_vp(H2)(T_pack_Vs<Ys...>*), Args... As)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
@@ -379,7 +379,7 @@ namespace cctmp {
 	struct T_machine<MN::call, MT::copy_a_pos, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename Heap1, typename Heap2, typename... Args>
-		nik_ces auto result(nik_vp(H0)(T_store_Vs<Ws...>*), Heap1 H1, Heap2 H2, Args... As)
+		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), Heap1 H1, Heap2 H2, Args... As)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
@@ -415,7 +415,7 @@ namespace cctmp {
 			auto n, auto rtn, auto... _Vs,
 			auto... Ws, auto... Xs, typename... Heaps
 		>
-		nik_ces auto result(nik_avp(T_store_Vs<n, rtn, _Vs...>*), nik_vp(H0)(T_store_Vs<Ws...>*), Heaps... Hs)
+		nik_ces auto result(nik_avp(T_pack_Vs<n, rtn, _Vs...>*), nik_vp(H0)(T_pack_Vs<Ws...>*), Heaps... Hs)
 		{
 			nik_ce auto ins = MD::instr(c, i);
 			nik_ce auto ctn = ins[MI::ctn];
@@ -450,7 +450,7 @@ namespace cctmp {
 	struct T_machine<MN::call, MT::cut_r_pos, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, typename Heap0, auto X0, auto... Xs, typename... Heaps>
-		nik_ces auto result(Heap0 H0, nik_vp(H1)(T_store_Vs<X0, Xs...>*), Heaps... Hs)
+		nik_ces auto result(Heap0 H0, nik_vp(H1)(T_pack_Vs<X0, Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
@@ -478,7 +478,7 @@ namespace cctmp {
 	struct T_machine<MN::call, MT::cut_a_pos, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, typename Heap0, auto X0, auto... Xs, typename Heap2, typename... Args>
-		nik_ces auto result(Heap0 H0, nik_vp(H1)(T_store_Vs<X0, Xs...>*), Heap2 H2, Args... As)
+		nik_ces auto result(Heap0 H0, nik_vp(H1)(T_pack_Vs<X0, Xs...>*), Heap2 H2, Args... As)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
@@ -513,8 +513,8 @@ namespace cctmp {
 		>
 		nik_ces auto result
 		(
-			nik_avp(T_store_Vs<p, n, rtn, _Vs...>*),
-			Heap0 H0, nik_vp(H1)(T_store_Vs<X0, Xs...>*), Heaps... Hs
+			nik_avp(T_pack_Vs<p, n, rtn, _Vs...>*),
+			Heap0 H0, nik_vp(H1)(T_pack_Vs<X0, Xs...>*), Heaps... Hs
 		)
 		{
 			nik_ce auto val = T_block_function::template result<d, p, n, rtn, _Vs...>;
@@ -546,7 +546,7 @@ namespace cctmp {
 	struct T_machine<MN::call, MT::action, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_store_Vs<Ws...>*), nik_vp(H1)(T_store_Vs<Xs...>*), Heaps... Hs)
+		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::dec];
@@ -590,7 +590,7 @@ namespace cctmp {
 	struct T_machine<MN::recall, MT::action, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_store_Vs<Ws...>*), nik_vp(H1)(T_store_Vs<Xs...>*), Heaps... Hs)
+		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::dec];
@@ -639,7 +639,7 @@ namespace cctmp {
 	struct T_machine<MN::call, MT::compel, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, auto Op, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_store_Vs<Op, Ws...>*), nik_vp(H1)(T_store_Vs<Xs...>*), Heaps... Hs)
+		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Op, Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::dec];
@@ -688,7 +688,7 @@ namespace cctmp {
 	struct T_machine<MN::recall, MT::compel, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, auto Op, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_store_Vs<Op, Ws...>*), nik_vp(H1)(T_store_Vs<Xs...>*), Heaps... Hs)
+		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Op, Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::dec];
@@ -744,7 +744,7 @@ namespace cctmp {
 	struct T_machine<MN::recall, MT::propel, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, typename _U, auto... _Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(_U, nik_avp(T_store_Vs<_Ws...>*), nik_vp(H1)(T_store_Vs<Xs...>*), Heaps... Hs)
+		nik_ces auto result(_U, nik_avp(T_pack_Vs<_Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins = MD::instr(c, i);
 			nik_ce auto ctn = ins[MI::ctn];
@@ -787,7 +787,7 @@ namespace cctmp {
 	struct T_machine<MN::move_j_all, MT::id, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_store_Vs<Ws...>*), nik_vp(H1)(T_store_Vs<Xs...>*), Heaps... Hs)
+		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
 		{
 			return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<Ws..., Xs...>, U_null_Vs, Hs...);
 		}
@@ -806,7 +806,7 @@ namespace cctmp {
 	struct T_machine<MN::paste_r_all, MT::id, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_store_Vs<Ws...>*), Heaps... Hs)
+		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), Heaps... Hs)
 		{
 			return NIK_MACHINE(d, MT::id, c, i, Ws)(U_null_Vs, Hs...);
 		}
@@ -818,7 +818,7 @@ namespace cctmp {
 	struct T_machine<MN::paste_a_all, MT::id, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename Heap1, typename Heap2, typename... Args>
-		nik_ces auto result(nik_vp(H0)(T_store_Vs<Ws...>*), Heap1 H1, Heap2 H2, Args... As)
+		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), Heap1 H1, Heap2 H2, Args... As)
 		{
 			return NIK_MACHINE(d, MT::id, c, i, Vs)(U_null_Vs, H1, H2, Ws...);
 		}
@@ -852,7 +852,7 @@ namespace cctmp {
 	struct T_machine<MN::go_to, MT::conditional, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, typename Heap0, bool X0, auto... Xs, typename... Heaps>
-		nik_ces auto result(Heap0 H0, nik_vp(H1)(T_store_Vs<X0, Xs...>*), Heaps... Hs)
+		nik_ces auto result(Heap0 H0, nik_vp(H1)(T_pack_Vs<X0, Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto ni	= X0 ? ins[MI::pos] : i;
@@ -887,9 +887,9 @@ namespace cctmp {
 		>
 		nik_ces auto result
 		(
-			nik_vp(H0)(T_store_Vs<W0>*),
-			nik_vp(H1)(T_store_Vs<Xs...>*), Heap2 H2,
-			nik_vp(A0)(T_store_Vs<Zs...>*), Args... As
+			nik_vp(H0)(T_pack_Vs<W0>*),
+			nik_vp(H1)(T_pack_Vs<Xs...>*), Heap2 H2,
+			nik_vp(A0)(T_pack_Vs<Zs...>*), Args... As
 		)
 		{
 			nik_ce auto size = sizeof...(Zs);
@@ -922,9 +922,9 @@ namespace cctmp {
 		>
 		nik_ces auto result
 		(
-			nik_vp(H0)(T_store_Vs<W0>*),
-			nik_vp(H1)(T_store_Vs<X0, Xs...>*), Heap2 H2,
-			nik_vp(A0)(T_store_Vs<Zs...>*), Args... As
+			nik_vp(H0)(T_pack_Vs<W0>*),
+			nik_vp(H1)(T_pack_Vs<X0, Xs...>*), Heap2 H2,
+			nik_vp(A0)(T_pack_Vs<Zs...>*), Args... As
 		)
 		{
 			nik_ce auto Z0 = U_pack_Vs<W0, X0>;

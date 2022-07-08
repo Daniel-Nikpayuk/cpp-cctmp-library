@@ -39,7 +39,7 @@ namespace cctmp_functional {
 	using T_block_cascade					= typename cctmp::T_block_cascade;
 	using T_start						= typename cctmp::T_start;
 
-	template<auto... Vs> using T_store_Vs			= typename cctmp::template T_store_Vs<Vs...>;
+	template<auto... Vs> using T_pack_Vs			= typename cctmp::template T_pack_Vs<Vs...>;
 	template<template<auto...> class... Bs>
 	using T_store_B						= typename cctmp::template T_store_B<Bs...>;
 	template<typename... Ts> using tuple			= typename cctmp::template tuple<Ts...>;
@@ -88,7 +88,7 @@ namespace cctmp_functional {
 	template<auto... Vs> nik_ce auto compel			= cctmp::template compel<Vs...>;
 	template<auto... Vs> nik_ce auto custom			= cctmp::template custom<Vs...>;
 	template<auto... Vs> nik_ce auto unite			= cctmp::template unite<Vs...>;
-	template<auto... Vs> nik_ce auto unpack			= cctmp::template unpack<Vs...>;
+//	template<auto... Vs> nik_ce auto unpack			= cctmp::template unpack<Vs...>;
 	template<auto... Vs> nik_ce auto copy			= cctmp::template copy<Vs...>;
 	template<auto... Vs> nik_ce auto write			= cctmp::template write<Vs...>;
 	template<auto... Vs> nik_ce auto branch			= cctmp::template branch<Vs...>;
@@ -455,7 +455,7 @@ namespace cctmp_functional {
 		template<auto d, auto HEq, auto HCmp, auto V, auto... Vs>
 		nik_ces auto _result()
 		{
-			nik_ce auto R0 = U_pack_Vs<Vs... >;
+			nik_ce auto R0 = U_pack_Vs<Vs...>;
 			nik_ce auto H0 = U_pack_Vs<U_match, HEq, V, Vs...>;
 			nik_ce auto H1 = U_null_Vs;
 			nik_ce auto H2 = U_null_Vs;
@@ -519,8 +519,27 @@ namespace cctmp_functional {
 
 	struct T_fill
 	{
+		nik_ces auto c = controller
+		<
+			compel < _custom             >,
+			write  < _zero   , _argument >,
+			stage  <                     >,
+			compel < _custom , _value    >
+		>;
+
+		template<auto d, auto HEq, auto HCmp, auto... Vs, auto... Ws>
+		nik_ces auto _result(nik_avp(T_pack_Vs<Ws...>*))
+		{
+			nik_ce auto H0 = U_pack_Vs<U_sort, HCmp, U_null_Vs, Ws...>;
+			nik_ce auto H1 = U_pack_Vs<Vs...>;
+			nik_ce auto H2 = U_null_Vs;
+			nik_ce auto A0 = U_pack_Vs<U_union, HEq, HCmp>;
+
+			return T_start::template result<d, c>(H0, H1, H2, A0);
+		}
+
 		template<auto d, auto HEq, auto HCmp, auto V, auto... Vs>
-		nik_ces auto result = T_union::template result<d, HEq, HCmp, list_sort<V, HCmp>, Vs...>;
+		nik_ces auto result = _result<d, HEq, HCmp, Vs...>(V);
 
 	}; nik_ce auto U_fill = U_store_T<T_fill>;
 

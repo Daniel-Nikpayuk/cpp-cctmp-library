@@ -108,10 +108,10 @@ namespace cctmp {
 
 // auto:
 
-	template<auto...> struct T_store_Vs { };
+	template<auto...> struct T_pack_Vs { };
 
 	template<auto... Vs>
-	nik_ce auto U_pack_Vs = store<T_store_Vs<Vs...>*>;
+	nik_ce auto U_pack_Vs = store<T_pack_Vs<Vs...>*>;
 
 	nik_ce auto U_null_Vs = U_pack_Vs<>;
 
@@ -823,29 +823,29 @@ namespace cctmp {
 
 	template
 	<
-		auto... Vs, nik_vp(p)(T_store_Vs<Vs...>*),
+		auto... Vs, nik_vp(p)(T_pack_Vs<Vs...>*),
 		template<auto...> typename B, nik_vp(b)(T_store_B<B>*)
 	>
 	nik_ce auto alias<Operator::list_to_template, p, b> = U_store_T<B<Vs...>>;
 
-	template<auto Op, auto... Ws, nik_vp(p)(T_store_Vs<Ws...>*), auto... Vs>
+	template<auto Op, auto... Ws, nik_vp(p)(T_pack_Vs<Ws...>*), auto... Vs>
 	nik_ce auto alias<Operator::zip, Op, p, Vs...> = U_pack_Vs<overload<Op, Ws, Vs>...>;
 
 	template
 	<
-		auto... Xs, nik_vp(p0)(T_store_Vs<Xs...>*),
-		auto... Ws, nik_vp(p1)(T_store_Vs<Ws...>*),
+		auto... Xs, nik_vp(p0)(T_pack_Vs<Xs...>*),
+		auto... Ws, nik_vp(p1)(T_pack_Vs<Ws...>*),
 		auto... Vs
 	>
 	nik_ce auto alias<Operator::unite, p0, p1, Vs...> = U_pack_Vs<Xs..., Vs..., Ws...>;
 
-	template<auto... Ws, nik_vp(p)(T_store_Vs<Ws...>*), auto Op, auto... Vs>
+	template<auto... Ws, nik_vp(p)(T_pack_Vs<Ws...>*), auto Op, auto... Vs>
 	nik_ce auto alias<Operator::unpack, p, Op, Vs...> = overload<Op, Vs..., Ws...>;
 
-	template<auto Op, auto... Ws, nik_vp(p)(T_store_Vs<Ws...>*), auto... Vs>
+	template<auto Op, auto... Ws, nik_vp(p)(T_pack_Vs<Ws...>*), auto... Vs>
 	nik_ce auto alias<Operator::method, Op, p, Vs...> = T_store_U<Op>::template result<Ws...>(Vs...);
 
-	template<auto Op, auto... Ws, nik_vp(p)(T_store_Vs<Ws...>*), auto... Vs>
+	template<auto Op, auto... Ws, nik_vp(p)(T_pack_Vs<Ws...>*), auto... Vs>
 	nik_ce auto alias<Operator::tailor, Op, p, Vs...> = T_store_U<Op>::template result<Vs...>(Ws...);
 
 /***********************************************************************************************************************/
