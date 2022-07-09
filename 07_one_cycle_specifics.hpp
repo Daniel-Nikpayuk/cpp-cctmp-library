@@ -30,6 +30,7 @@ namespace cctmp_one_cycle_specs {
 
 	nik_ce auto _id_						= cctmp::_id_;
 	nik_ce auto _equal_						= cctmp::_equal_;
+	nik_ce auto _dereference_					= cctmp::_dereference_;
 
 	nik_ce auto U_similar						= cctmp::U_similar;
 	nik_ce auto U_map						= cctmp::U_map;
@@ -51,8 +52,10 @@ namespace cctmp_one_cycle_specs {
 
 	template<auto... Vs> nik_ce auto pack_write			= cctmp_functional::template pack_write<Vs...>;
 
-	template<auto... Vs> nik_ce auto _side_deref_assign_		= cctmp_generics::template
-										_side_deref_assign_<Vs...>;
+	nik_ce auto _side_assign_d_i_					= cctmp_generics::template _side_assign_
+									<
+										_dereference_, _id_
+									>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -391,21 +394,21 @@ namespace cctmp_one_cycle_specs {
 
 		nik_ce auto direct_repeat_defaults = U_pack_Vs
 		<
-			_precycle_label_    < _zero                 >,
-			_cycle_label_       < _one                  >,
-			_postcycle_label_   < _two                  >,
+			_precycle_label_    < _zero             >,
+			_cycle_label_       < _one              >,
+			_postcycle_label_   < _two              >,
 
-			_out_position_      < _zero                 >,
-			_end_position_      < _one                  >,
-			_in_position_       < _two                  >,
+			_out_position_      < _zero             >,
+			_end_position_      < _one              >,
+			_in_position_       < _two              >,
 
-			_pre_out_next_      < _id_                  >,
+			_pre_out_next_      < _id_              >,
 
-			_loop_predicate_    < _equal_               >,
-			_act_function_      < _side_deref_assign_<> >,
-			_out_next_          < _increment_<>         >,
+			_loop_predicate_    < _equal_           >,
+			_act_function_      < _side_assign_d_i_ >,
+			_out_next_          < _increment_<>     >,
 
-			_post_act_function_ < _id_                  >
+			_post_act_function_ < _id_              >
 		>;
 
 	// spec:
@@ -425,23 +428,6 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 
 // specification:
-
-		//	0. If bidirectional and last, reverse iterate end.
-		//	1. For each left endpoint, if open, then iterate.
-		//	2. Evaluate the common (closing) loop.
-		//	3. If there exists any right endpoint, which is closed, then act/combine.
-		//	4. If (3), then for each right endpoint, when open, iterate.
-		//	5. If bidirectional and last, iterate end to reset.
-
-	//	lift < end , end_prev_<Spec> , end >,	// boolean_before_loop < is_end_prev_before_<Spec>
-	//	lift < out , out_next_<Spec> , out >,	// boolean_before_loop < is_out_next_before_<Spec>
-	//	lift < in  , in_next_<Spec>  , in  >,	// boolean_before_loop < is_in_next_before_<Spec>
-
-
-	//	lift < out , act_func_<Spec>   , in  >,	// boolean_after_loop < is_act_func_after_<Spec>
-	//	lift < out , out_next_<Spec>   , out >,	// boolean_after_loop < is_out_next_after_<Spec>
-	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
-	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
 
 	template
 	<
@@ -491,30 +477,30 @@ namespace cctmp_one_cycle_specs {
 
 		nik_ce auto direct_map_defaults = U_pack_Vs
 		<
-			_precycle_label_    < _zero                 >,
-			_cycle_label_       < _one                  >,
-			_postcycle_label_   < _two                  >,
+			_precycle_label_    < _zero             >,
+			_cycle_label_       < _one              >,
+			_postcycle_label_   < _two              >,
 
-			_out_position_      < _zero                 >,
-			_in_position_       < _one                  >,
-			_end_position_      < _two                  >,
+			_out_position_      < _zero             >,
+			_in_position_       < _one              >,
+			_end_position_      < _two              >,
 
-			_pre_end_prev_      < _id_                  >,
-			_pre_out_next_      < _id_                  >,
-			_pre_in_next_       < _id_                  >,
+			_pre_end_prev_      < _id_              >,
+			_pre_out_next_      < _id_              >,
+			_pre_in_next_       < _id_              >,
 
-			_loop_predicate_    < _equal_               >,
-			_act_function_      < _side_deref_assign_<> >,
-			_out_next_          < _increment_<>         >,
-			_in_next_           < _increment_<>         >,
+			_loop_predicate_    < _equal_           >,
+			_act_function_      < _side_assign_d_i_ >,
+			_out_next_          < _increment_<>     >,
+			_in_next_           < _increment_<>     >,
 
-			_post_act_function_ < _id_                  >,
-			_post_out_next_     < _id_                  >,
-			_post_in_next_      < _id_                  >,
-			_post_end_next_     < _id_                  >
+			_post_act_function_ < _id_              >,
+			_post_out_next_     < _id_              >,
+			_post_in_next_      < _id_              >,
+			_post_end_next_     < _id_              >
 		>;
 
-	// direct:
+	// spec:
 
 		template<auto... Vs>
 		nik_ce auto direct_map = direct_to_spec
@@ -522,6 +508,27 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_map_defaults, Vs...>,
 			H_map_specification
 		>;
+
+/***********************************************************************************************************************/
+
+// conceptual:
+
+		//	0. If bidirectional and last, reverse iterate end.
+		//	1. For each left endpoint, if open, then iterate.
+		//	2. Evaluate the common (closing) loop.
+		//	3. If there exists any right endpoint, which is closed, then act/combine.
+		//	4. If (3), then for each right endpoint, when open, iterate.
+		//	5. If bidirectional and last, iterate end to reset.
+
+	//	lift < end , end_prev_<Spec> , end >,	// boolean_before_loop < is_end_prev_before_<Spec>
+	//	lift < out , out_next_<Spec> , out >,	// boolean_before_loop < is_out_next_before_<Spec>
+	//	lift < in  , in_next_<Spec>  , in  >,	// boolean_before_loop < is_in_next_before_<Spec>
+
+
+	//	lift < out , act_func_<Spec>   , in  >,	// boolean_after_loop < is_act_func_after_<Spec>
+	//	lift < out , out_next_<Spec>   , out >,	// boolean_after_loop < is_out_next_after_<Spec>
+	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
+	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -535,7 +542,6 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
-/*
 	template
 	<
 		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
@@ -564,7 +570,6 @@ namespace cctmp_one_cycle_specs {
 	};
 
 	nik_ce auto H_fold_specification = U_store_B<T_fold_specification>;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -577,27 +582,26 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
-/*
 		nik_ce auto direct_fold_defaults = U_pack_Vs
 		<
-			_precycle_label_        < _zero                 >,
-			_cycle_label_           < _one                  >,
-			_postcycle_label_       < _two                  >,
+			_precycle_label_        < _zero         >,
+			_cycle_label_           < _one          >,
+			_postcycle_label_       < _two          >,
 
-			_out_position_          < _zero                 >,
-			_in_position_           < _one                  >,
-			_end_position_          < _two                  >,
+			_out_position_          < _zero         >,
+			_in_position_           < _one          >,
+			_end_position_          < _two          >,
 
-			_pre_in_next_           < _id_                  >,
+			_pre_in_next_           < _id_          >,
 
-			_loop_predicate_        < _equal_               >,
-			_combine_function_      < _side_deref_assign_<> >,
-			_in_next_               < _increment_<>         >,
+			_loop_predicate_        < _equal_       >,
+			_combine_function_      < _id_          >,
+			_in_next_               < _increment_<> >,
 
-			_post_combine_function_ < _id_                  >
+			_post_combine_function_ < _id_          >
 		>;
 
-	// direct:
+	// spec:
 
 		template<auto... Vs>
 		nik_ce auto direct_fold = direct_to_spec
@@ -605,7 +609,6 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_fold_defaults, Vs...>,
 			H_fold_specification
 		>;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -630,24 +633,6 @@ namespace cctmp_one_cycle_specs {
 
 // specification:
 
-		//	0. If bidirectional and last, reverse iterate end.
-		//	1. For each left endpoint, if open, then iterate.
-		//	2. Evaluate the common (closing) loop.
-		//	3. If there exists any right endpoint, which is closed, then act/combine.
-		//	4. If (3), then for each right endpoint, when open, iterate.
-		//	5. If bidirectional and last, iterate end to reset.
-
-	//	lift < end , end_prev_<Spec> , end >,	// boolean_before_loop < is_end_prev_before_<Spec>
-	//	lift < out , out_next_<Spec> , out >,	// boolean_before_loop < is_out_next_before_<Spec>
-	//	lift < in  , in_next_<Spec>  , in  >,	// boolean_before_loop < is_in_next_before_<Spec>
-
-
-	//	lift < out , act_func_<Spec>   , in  >,	// boolean_after_loop < is_act_func_after_<Spec>
-	//	lift < out , out_next_<Spec>   , out >,	// boolean_after_loop < is_out_next_after_<Spec>
-	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
-	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
-
-/*
 	template
 	<
 		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
@@ -686,7 +671,27 @@ namespace cctmp_one_cycle_specs {
 	};
 
 	nik_ce auto H_zip_specification = U_store_B<T_zip_specification>;
-*/
+
+/***********************************************************************************************************************/
+
+// conceptual:
+
+		//	0. If bidirectional and last, reverse iterate end.
+		//	1. For each left endpoint, if open, then iterate.
+		//	2. Evaluate the common (closing) loop.
+		//	3. If there exists any right endpoint, which is closed, then act/combine.
+		//	4. If (3), then for each right endpoint, when open, iterate.
+		//	5. If bidirectional and last, iterate end to reset.
+
+	//	lift < end , end_prev_<Spec> , end >,	// boolean_before_loop < is_end_prev_before_<Spec>
+	//	lift < out , out_next_<Spec> , out >,	// boolean_before_loop < is_out_next_before_<Spec>
+	//	lift < in  , in_next_<Spec>  , in  >,	// boolean_before_loop < is_in_next_before_<Spec>
+
+
+	//	lift < out , act_func_<Spec>   , in  >,	// boolean_after_loop < is_act_func_after_<Spec>
+	//	lift < out , out_next_<Spec>   , out >,	// boolean_after_loop < is_out_next_after_<Spec>
+	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
+	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -699,34 +704,33 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
-/*
 		nik_ce auto direct_zip_defaults = U_pack_Vs
 		<
-			_precycle_label_    < _zero                 >,
-			_cycle_label_       < _one                  >,
-			_postcycle_label_   < _two                  >,
+			_precycle_label_    < _zero         >,
+			_cycle_label_       < _one          >,
+			_postcycle_label_   < _two          >,
 
-			_out_position_      < _zero                 >,
-			_car_in_position_   < _one                  >,
-			_cdr_in_position_   < _two                  >,
-			_end_position_      < _three                >,
+			_out_position_      < _zero         >,
+			_car_in_position_   < _one          >,
+			_cdr_in_position_   < _two          >,
+			_end_position_      < _three        >,
 
-			_pre_end_prev_      < _id_                  >,
-			_pre_out_next_      < _id_                  >,
-			_pre_car_in_next_   < _id_                  >,
-			_pre_cdr_in_next_   < _id_                  >,
+			_pre_end_prev_      < _id_          >,
+			_pre_out_next_      < _id_          >,
+			_pre_car_in_next_   < _id_          >,
+			_pre_cdr_in_next_   < _id_          >,
 
-			_loop_predicate_    < _equal_               >,
-			_act_function_      < _side_deref_assign_<> >,
-			_out_next_          < _increment_<>         >,
-			_car_in_next_       < _increment_<>         >,
-			_cdr_in_next_       < _increment_<>         >,
+			_loop_predicate_    < _equal_       >,
+			_act_function_      < _id_          >,
+			_out_next_          < _increment_<> >,
+			_car_in_next_       < _increment_<> >,
+			_cdr_in_next_       < _increment_<> >,
 
-			_post_act_function_ < _id_                  >,
-			_post_out_next_     < _id_                  >,
-			_post_car_in_next_  < _id_                  >,
-			_post_cdr_in_next_  < _id_                  >,
-			_post_end_next_     < _id_                  >
+			_post_act_function_ < _id_          >,
+			_post_out_next_     < _id_          >,
+			_post_car_in_next_  < _id_          >,
+			_post_cdr_in_next_  < _id_          >,
+			_post_end_next_     < _id_          >
 		>;
 
 	// spec:
@@ -737,7 +741,6 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_zip_defaults, Vs...>,
 			H_zip_specification
 		>;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -756,11 +759,10 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
-/*
 	template
 	<
 		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
-		auto OutPosition, auto InPosition, auto EndPosition,
+		auto OutPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
 		auto PreEndPrev, auto PreCarInNext, auto PreCdrInNext,
 		auto LoopPredicate, auto ActFunction, auto CombineFunction, auto CarInNext, auto CdrInNext,
 		auto PostActFunction, auto PostCombineFunction, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
@@ -794,7 +796,6 @@ namespace cctmp_one_cycle_specs {
 	};
 
 	nik_ce auto H_glide_specification = U_store_B<T_glide_specification>;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -807,36 +808,35 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
-/*
 		nik_ce auto direct_glide_defaults = U_pack_Vs
 		<
-			_precycle_label_        < _zero                 >,
-			_cycle_label_           < _one                  >,
-			_postcycle_label_       < _two                  >,
+			_precycle_label_        < _zero         >,
+			_cycle_label_           < _one          >,
+			_postcycle_label_       < _two          >,
 
-			_out_position_          < _zero                 >,
-			_car_in_position_       < _one                  >,
-			_cdr_in_position_       < _two                  >,
-			_end_position_          < _three                >,
+			_out_position_          < _zero         >,
+			_car_in_position_       < _one          >,
+			_cdr_in_position_       < _two          >,
+			_end_position_          < _three        >,
 
-			_pre_end_prev           < _id_                  >,
-			_pre_car_in_next_       < _id_                  >,
-			_pre_cdr_in_next_       < _id_                  >,
+			_pre_end_prev_          < _id_          >,
+			_pre_car_in_next_       < _id_          >,
+			_pre_cdr_in_next_       < _id_          >,
 
-			_loop_predicate_        < _equal_               >,
-			_act_function_          < _side_deref_assign_<> >,
-			_combine_function_      < _side_deref_assign_<> >,
-			_car_in_next_           < _increment_<>         >,
-			_cdr_in_next_           < _increment_<>         >,
+			_loop_predicate_        < _equal_       >,
+			_act_function_          < _id_          >,
+			_combine_function_      < _id_          >,
+			_car_in_next_           < _increment_<> >,
+			_cdr_in_next_           < _increment_<> >,
 
-			_post_act_function_     < _id_                  >,
-			_post_combine_function_ < _id_                  >,
-			_post_car_in_next       < _id_                  >,
-			_post_cdr_in_next       < _id_                  >,
-			_post_end_next          < _id_                  >
+			_post_act_function_     < _id_          >,
+			_post_combine_function_ < _id_          >,
+			_post_car_in_next_      < _id_          >,
+			_post_cdr_in_next_      < _id_          >,
+			_post_end_next_         < _id_          >
 		>;
 
-	// direct:
+	// spec:
 
 		template<auto... Vs>
 		nik_ce auto direct_glide = direct_to_spec
@@ -844,7 +844,6 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_glide_defaults, Vs...>,
 			H_glide_specification
 		>;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

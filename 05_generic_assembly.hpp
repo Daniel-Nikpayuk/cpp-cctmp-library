@@ -140,125 +140,156 @@ namespace cctmp_generics {
 
 /***********************************************************************************************************************/
 
-// arguments:
-
-	template<auto f, auto n, typename... Ts>
-	nik_ce auto f_arg = T_store_U<f>::template result<type_at<n, Ts...>>;
-
-	template<auto f, auto n, typename... Ts>
-	using f_arg_type = T_out_type<f_arg<f, n, Ts...>>;
-
-	// value:
-
-			// The trailing return type is necessary to preserve references and qualifiers.
-
-		template<auto f, auto n, auto d = 500>
-		struct T_value
-		{
-			template<typename... Ts>
-			nik_ces auto result(Ts... vs) -> f_arg_type<f, n, Ts...>
-				{ return f_arg<f, n, Ts...>(T_block_argument::template result<d, n, Ts...>(vs...)); }
-		};
-
-		template<auto n, auto d>
-		struct T_value<_id_, n, d>
-		{
-			template<typename... Ts>
-			nik_ces auto result(Ts... vs) { return T_block_argument::template result<d, n, Ts...>(vs...); }
-
-		}; template<auto n, auto f = _id_, auto d = 500>
-			nik_ce auto _value_ = U_store_T<T_value<f, n, d>>;
-
-		// return:
-
-			nik_ce auto _return_ = _value_<_zero>;
+// compose:
 
 /***********************************************************************************************************************/
 
-// call:
+// arguments:
+
+	// f_args:
+
+		template<auto f, auto n, typename... Ts>
+		nik_ce auto f_args = T_store_U<f>::template result<type_at<n, Ts...>>;
+
+		template<auto f, auto... ns, nik_vp(p)(T_pack_Vs<ns...>*), typename... Ts>
+		nik_ce auto f_args<f, p, Ts...> = T_store_U<f>::template result<type_at<ns, Ts...>...>;
+
+	// out_type:
+
+		template<auto f, auto on, typename... Ts>
+		using f_args_out_type = T_out_type<f_args<f, on, Ts...>>;
+
+	// block_arg:
+
+		template<auto d, auto n, typename... Ts>
+		nik_ce auto block_arg = T_block_argument::template result<d, n, Ts...>;
+
+/***********************************************************************************************************************/
+
+// subapply:
+
+		// The trailing return type is necessary to preserve references and qualifiers.
+
+	template<auto f, auto n, auto d = 500>
+	struct T_subapply
+	{
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) -> f_args_out_type<f, n, Ts...>
+			{ return f_args<f, n, Ts...>(block_arg<d, n, Ts...>(vs...)); }
+	};
+
+	template<auto n, auto d>
+	struct T_subapply<_id_, n, d>
+	{
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) { return block_arg<d, n, Ts...>(vs...); }
+	};
+
+	template<auto f, auto... ns, nik_vp(p)(T_pack_Vs<ns...>*), auto d>
+	struct T_subapply<f, p, d>
+	{
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) -> f_args_out_type<f, p, Ts...>
+			{ return f_args<f, p, Ts...>(block_arg<d, ns, Ts...>(vs...)...); }
+	};
+
+	// value:
+
+		template<auto n, auto f = _id_, auto d = 500>
+		nik_ce auto _value_ = U_store_T<T_subapply<f, n, d>>;
+
+	// return:
+
+		nik_ce auto _return_ = _value_<_zero>;
+
+/***********************************************************************************************************************/
+
+// allot:
+
+	template<auto l, auto r, auto f> struct T_allot;
+
+	template
+	<
+		auto... l_ns, nik_vp(l)(T_pack_Vs<l_ns...>*),
+		auto... r_ns, nik_vp(r)(T_pack_Vs<r_ns...>*),
+		auto f
+	>
+	struct T_allot<l, r, f>
+	{
+		template<typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs)
+		{
+			return T_store_U<f>::template result
+			<
+				type_at<l_ns, Ts...>...,
+				T,
+				type_at<r_ns, Ts...>...
+			>
+			(
+				T_subapply<_id_, l_ns>::template result<Ts...>(vs...)...,
+				v,
+				T_subapply<_id_, r_ns>::template result<Ts...>(vs...)...
+			);
+		}
+
+	}; template<auto l, auto r, auto f>
+		nik_ce auto _allot_ = U_store_T<T_allot<l, r, f>>;
 
 	// Normalizes the grammatical form for various kinds of function calls.
 	// All function calls following are assumed to have the normal form
 	// unless stated otherwise. With that said, labels are assumed
 	// to be fully declared.
 
-	// subcompose:
+/***********************************************************************************************************************/
 
-		template<auto f, auto f_ns_p, auto ns_p> struct T_subcompose;
+// subcompose:
 
-		template
-		<
-			auto f,
-			auto... f_ns, nik_vp(f_ns_p)(T_pack_Vs<f_ns...>*),
-			auto... ns, nik_vp(ns_p)(T_pack_Vs<ns...>*)
-		>
-		struct T_subcompose<f, f_ns_p, ns_p>
+	template<auto f, auto f_ns_p, auto ons_p> struct T_subcompose;
+
+	template
+	<
+		auto f,
+		auto... f_ns, nik_vp(f_ns_p)(T_pack_Vs<f_ns...>*),
+		auto... ons, nik_vp(ons_p)(T_pack_Vs<ons...>*)
+	>
+	struct T_subcompose<f, f_ns_p, ons_p>
+	{
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs)
 		{
-			template<typename... Ts>
-			nik_ces auto result(Ts... vs)
-			{
-				return T_store_U<f>::template result
-				<
-					f_arg_type<f_ns, ns, Ts...>...
+			return T_store_U<f>::template result
+			<
+				f_args_out_type<f_ns, ons, Ts...>...
 
-				>(T_value<f_ns, ns>::template result<Ts...>(vs...)...);
-			}
+			>(T_subapply<f_ns, ons>::template result<Ts...>(vs...)...);
+		}
 
-		}; template<auto f, auto f_ns_p, auto ns_p>
-			nik_ce auto _subcompose_ = U_store_T<T_subcompose<f, f_ns_p, ns_p>>;
+	}; template<auto f, auto f_ns_p, auto ons_p>
+		nik_ce auto _subcompose_ = U_store_T<T_subcompose<f, f_ns_p, ons_p>>;
 
-	// allot:
+/***********************************************************************************************************************/
 
-		template<auto l, auto r, auto f> struct T_allot;
+// tuple apply:
 
-		template
-		<
-			auto... l_ns, nik_vp(l)(T_pack_Vs<l_ns...>*),
-			auto... r_ns, nik_vp(r)(T_pack_Vs<r_ns...>*),
-			auto f
-		>
-		struct T_allot<l, r, f>
-		{
-			template<typename T, typename... Ts>
-			nik_ces auto result(T v, Ts... vs)
-			{
-				return T_store_U<f>::template result
-				<
-					type_at<l_ns, Ts...>...,
-					T,
-					type_at<r_ns, Ts...>...
-				>
-				(
-					T_value<_id_, l_ns>::template result<Ts...>(vs...)...,
-					v,
-					T_value<_id_, r_ns>::template result<Ts...>(vs...)...
-				);
-			}
-
-		}; template<auto l, auto r, auto f>
-			nik_ce auto _allot_ = U_store_T<T_allot<l, r, f>>;
-
-	// tuple apply:
-
-	//	template<auto f, typename T, typename... Ts, index_type... tuple_indices>
-	//	constexpr auto tuple_apply(const tuple<T, Ts...> & t, nik_vp(pack)(T_pack_Vs<tuple_indices...>*))
-	//	{
-	//		return f(tuple_value<tuple_indices>(t)...);
-	//	}
+//	template<auto f, typename T, typename... Ts, index_type... tuple_indices>
+//	constexpr auto tuple_apply(const tuple<T, Ts...> & t, nik_vp(pack)(T_pack_Vs<tuple_indices...>*))
+//	{
+//		return f(tuple_value<tuple_indices>(t)...);
+//	}
 
 /***********************************************************************************************************************/
 
 // mutation:
 
-	// deref assign:
+	// void assign:
 
-		template<auto f = _id_>
-		nik_ce auto _deref_assign_ = _subcompose_
+		template<auto l, auto r0, auto... rs>
+		nik_ce auto _void_assign_ = _subcompose_
 		<
 			_assign_,
 
-			U_pack_Vs < _dereference_ , f >,
-			U_pack_Vs <  0            , 1 >
+			U_pack_Vs<l, r0, rs...>,
+			segment<sizeof...(rs) + 2>
 		>;
 
 /***********************************************************************************************************************/
@@ -387,8 +418,8 @@ namespace cctmp_generics {
 
 	// conveniences:
 
-		template<auto f = _id_>
-		nik_ce auto _side_deref_assign_ = _side_<_deref_assign_<f>>;
+		template<auto... fs>
+		nik_ce auto _side_assign_ = _side_<_void_assign_<fs...>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

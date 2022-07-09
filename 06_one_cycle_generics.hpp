@@ -28,6 +28,9 @@ namespace cctmp_one_cycle_generics {
 	template<auto V> nik_ce auto _constant_			= cctmp::template _constant_<V>;
 	template<auto V> nik_ce auto _is_equal_			= cctmp::template _is_equal_<V>;
 
+	nik_ce auto _cp_					= cctmp_generics::_cp_;
+	nik_ce auto _ps_					= cctmp_generics::_ps_;
+
 	template<auto V> nik_ce auto label			= cctmp_generics::template label<V>;
 	template<auto V> nik_ce auto branch			= cctmp_generics::template branch<V>;
 	template<auto V> nik_ce auto go_to			= cctmp_generics::template go_to<V>;
@@ -266,7 +269,7 @@ namespace cctmp_one_cycle_generics {
 
 				test   <                   loop_pred_<S> ,  in_<S> , end_<S> >,
 				branch <                   postcycle_<S>                     >,
-				lift   <                combine_func_<S> , out_<S> ,  in_<S> >,
+				lift   < out_<S> ,      combine_func_<S> , out_<S> ,  in_<S> >,
 				lift   <  in_<S> ,           in_next_<S> ,  in_<S>           >,
 				go_to  <                       cycle_<S>                     >,
 
@@ -492,7 +495,7 @@ namespace cctmp_one_cycle_generics {
 
 			label<cycle_<S>>,
 
-				test   <                     loop_pred_<S> , car_in_<S> ,    end_<S> >,
+				test   <                     loop_pred_<S> , cdr_in_<S> ,    end_<S> >,
 				branch <                     postcycle_<S>                           >,
 				lift   <    out_<S> ,         act_func_<S> , car_in_<S> , cdr_in_<S> >,
 				lift   <    out_<S> ,         out_next_<S> ,    out_<S>              >,
@@ -587,16 +590,16 @@ namespace cctmp_one_cycle_generics {
 
 				test   <                      loop_pred_<S> , cdr_in_<S> ,    end_<S> >,
 				branch <                      postcycle_<S>                           >,
-				lift   <    out_<S> ,          act_func_<S> ,     in_<S>              >,
-				lift   <    out_<S> ,      combine_func_<S> ,    out_<S>              >,
+				lift   <    _cp_    ,          act_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    out_<S> ,      combine_func_<S> ,    out_<S> ,    _ps_    >,
 				lift   < car_in_<S> ,       car_in_next_<S> , car_in_<S>              >,
 				lift   < cdr_in_<S> ,       cdr_in_next_<S> , cdr_in_<S>              >,
 				go_to  <                          cycle_<S>                           >,
 
 			label<postcycle_<S>>,
 
-				lift   <    out_<S> ,     post_act_func_<S> , car_in_<S> , cdr_in_<S> >,
-				lift   <    out_<S> , post_combine_func_<S> ,    out_<S>              >,
+				lift   <    _cp_    ,     post_act_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    out_<S> , post_combine_func_<S> ,    out_<S> ,    _ps_    >,
 				lift   < car_in_<S> ,  post_car_in_next_<S> , car_in_<S>              >,
 				lift   < cdr_in_<S> ,  post_cdr_in_next_<S> , cdr_in_<S>              >,
 				lift   <    end_<S> ,     post_end_next_<S> ,    end_<S>              >,

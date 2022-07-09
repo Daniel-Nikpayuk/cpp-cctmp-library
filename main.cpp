@@ -43,6 +43,8 @@
 //	using namespace cctmp_generics;
 //	using namespace cctmp_one_cycle_specs;
 
+	template<auto... Vs> constexpr auto U_pack_Vs = cctmp::template U_pack_Vs<Vs...>;
+
 /***********************************************************************************************************************/
 
 	constexpr void print_array(int *b, const int *e)
@@ -96,17 +98,67 @@
 
 /***********************************************************************************************************************/
 
+// repeat:
+
 //	constexpr auto repeat_d_spec		= cctmp_one_cycle_specs::template direct_repeat<>;
 //	using T_repeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_d_spec>;
 
-	constexpr int sq(int x) { return x*x; }
+// map:
 
+	constexpr int sq(int x)			{ return x*x; }
 	constexpr auto _sq_			= cctmp::template _apply_<sq>;
-	constexpr auto _side_deref_assign_	= cctmp_generics::template _side_deref_assign_<_sq_>;
-	constexpr auto _act_function_		= cctmp_one_cycle_specs::template _act_function_<_side_deref_assign_>;
 
-	constexpr auto map_d_spec		= cctmp_one_cycle_specs::template direct_map<_act_function_>;
-	using T_map				= typename cctmp_one_cycle_generics::template T_map<map_d_spec>;
+	constexpr auto _id_			= cctmp::_id_;
+	constexpr auto _add_			= cctmp::_add_;
+	constexpr auto _assign_			= cctmp::_assign_;
+	constexpr auto _deref_			= cctmp::_dereference_;
+
+	constexpr auto _side_assign_d_i_	= cctmp_generics::template _side_assign_<_deref_, _id_>;
+	constexpr auto _map_function_id_	= cctmp_one_cycle_specs::template _act_function_<_side_assign_d_i_>;
+	constexpr auto map_d_spec_id_		= cctmp_one_cycle_specs::template direct_map<_map_function_id_>;
+	using T_map_id				= typename cctmp_one_cycle_generics::template T_map<map_d_spec_id_>;
+
+	constexpr auto _side_assign_d_sq_	= cctmp_generics::template _side_assign_<_deref_, _sq_>;
+	constexpr auto _map_function_sq_	= cctmp_one_cycle_specs::template _act_function_<_side_assign_d_sq_>;
+	constexpr auto map_d_spec_sq_		= cctmp_one_cycle_specs::template direct_map<_map_function_sq_>;
+	using T_map_sq				= typename cctmp_one_cycle_generics::template T_map<map_d_spec_sq_>;
+
+// fold:
+
+	constexpr auto _fold_function_add_	= cctmp_one_cycle_specs::template _combine_function_<_add_>;
+
+	constexpr auto fold_d_spec_add_		= cctmp_one_cycle_specs::template direct_fold<_fold_function_add_>;
+	using T_fold_add			= typename cctmp_one_cycle_generics::template T_fold<fold_d_spec_add_>;
+
+// zip:
+
+	constexpr auto _add_dd_			= cctmp_generics::template _subcompose_
+						<
+							_add_,
+
+							U_pack_Vs < _deref_ , _deref_ >,
+							U_pack_Vs < 0       , 1       >
+						>;
+	constexpr auto _assign_d_add_dd_	= cctmp_generics::template _subcompose_
+						<
+							_assign_,
+
+							U_pack_Vs < _deref_ , _add_dd_         >,
+							U_pack_Vs < 0       , U_pack_Vs<1, 2>  >
+						>;
+	constexpr auto _side_assign_d_add_dd_	= cctmp_generics::template _side_<_assign_d_add_dd_>;
+	constexpr auto _zip_function_add_	= cctmp_one_cycle_specs::template _act_function_<_side_assign_d_add_dd_>;
+	constexpr auto zip_d_spec_add_		= cctmp_one_cycle_specs::template direct_zip<_zip_function_add_>;
+	using T_zip_add				= typename cctmp_one_cycle_generics::template T_zip<zip_d_spec_add_>;
+
+// glide:
+
+	constexpr auto _glide_function_add_	= cctmp_one_cycle_specs::template _act_function_<_add_dd_>;
+	constexpr auto glide_d_spec_add_	= cctmp_one_cycle_specs::template direct_glide
+						<
+							_glide_function_add_, _fold_function_add_
+						>;
+	using T_glide_add			= typename cctmp_one_cycle_generics::template T_glide<glide_d_spec_add_>;
 
 /***********************************************************************************************************************/
 
@@ -170,14 +222,45 @@
 	//	printf("%s\n", tag_compare<cctmp::_less_than_, tag1, tag0> ? "true" : "false");
 
 		int size = argc;
+
 		int arr[size];
+		int arr_id[size];
+		int arr_sq[size];
+
+// repeat:
 
 	//	repeat_array(arr, arr+size, argc);
 	//	T_repeat::result(arr, arr+size, argc);
 	//	print_array(arr, arr+size);
 
-		T_map::template result(arr, 0, size);
-		print_array(arr, arr+size);
+// map:
+
+	//	T_map_id::template result(arr_id, 0, size);
+	//	print_array(arr_id, arr_id+size);
+
+	//	T_map_sq::template result(arr_sq, 0, size);
+	//	print_array(arr_sq, arr_sq+size);
+
+// fold:
+
+	//	auto val = T_fold_add::template result(0, 0, size);
+	//	printf("%d\n", val);
+
+// zip:
+
+	//	T_map_id::template result(arr_id, 0, size);
+	//	T_map_sq::template result(arr_sq, 0, size);
+
+	//	T_zip_add::template result(arr, arr_id, arr_sq, arr_sq+size);
+	//	print_array(arr, arr+size);
+
+// glide:
+
+		T_map_id::template result(arr_id, 0, size);
+		T_map_sq::template result(arr_sq, 0, size);
+
+		auto val = T_glide_add::template result(0, arr_id, arr_sq, arr_sq+size);
+		printf("%d\n", val);
 
 		return 0;
 	}
