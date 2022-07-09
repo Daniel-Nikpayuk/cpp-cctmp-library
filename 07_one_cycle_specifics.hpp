@@ -20,7 +20,6 @@
 namespace cctmp_one_cycle_specs {
 
 	using AOP							= typename cctmp::AOP;
-	using MD							= typename cctmp::MD;
 
 	template<auto U> using T_store_U				= typename cctmp::template T_store_U<U>;
 
@@ -30,13 +29,10 @@ namespace cctmp_one_cycle_specs {
 
 	nik_ce auto _id_						= cctmp::_id_;
 	nik_ce auto _equal_						= cctmp::_equal_;
-	nik_ce auto _less_than_						= cctmp::_less_than_;
 
-	nik_ce auto U_same						= cctmp::U_same;
-	nik_ce auto U_custom						= cctmp::U_custom;
+	nik_ce auto U_similar						= cctmp::U_similar;
 	nik_ce auto U_map						= cctmp::U_map;
-
-	nik_ce auto _deref_assign_					= cctmp_generics::_deref_assign_;
+	nik_ce auto U_custom						= cctmp::U_custom;
 
 	template<typename T> nik_ce auto U_store_T			= cctmp::template U_store_T<T>;
 	template<template<auto...> class B> nik_ce auto U_store_B	= cctmp::template U_store_B<B>;
@@ -50,14 +46,11 @@ namespace cctmp_one_cycle_specs {
 
 	template<auto... Vs> nik_ce auto U_partial			= cctmp::template U_partial<Vs...>;
 	template<auto... Vs> nik_ce auto H_partial			= cctmp::template H_partial<Vs...>;
-	nik_ce auto H_partial_same					= H_partial<U_same>;
+	nik_ce auto H_partial_similar					= H_partial<U_similar>;
 
-	using T_sort							= typename cctmp_functional::T_sort;
+	template<auto... Vs> nik_ce auto pack_write			= cctmp_functional::template pack_write<Vs...>;
 
-	nik_ce auto U_cut						= cctmp_functional::U_cut;
-
-	template<auto... Vs> nik_ce auto list_fill			= cctmp_functional::template list_fill<Vs...>;
-	template<auto... Vs> nik_ce auto list_compare			= cctmp_functional::template list_compare<Vs...>;
+	template<auto... Vs> nik_ce auto _deref_assign_			= cctmp_generics::template _deref_assign_<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -207,114 +200,6 @@ namespace cctmp_one_cycle_specs {
 // tag operators:
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// comparison:
-
-/***********************************************************************************************************************/
-
-// order:
-
-	nik_ce auto tag_order = U_pack_Vs
-	<
-		// label:
-
-			U_store_B < _precycle_label        >,
-			U_store_B < _cycle_label           >,
-			U_store_B < _postcycle_label       >,
-
-		// position:
-
-			U_store_B < _out_position          >,
-			U_store_B < _in_position           >,
-			U_store_B < _car_in_position       >,
-			U_store_B < _cdr_in_position       >,
-			U_store_B < _end_position          >,
-
-		// out:
-
-			U_store_B < _pre_out_next          >,
-			U_store_B < _out_next              >,
-			U_store_B < _post_out_next         >,
-
-		// in:
-
-			U_store_B < _pre_in_next           >,
-			U_store_B < _in_next               >,
-			U_store_B < _post_in_next          >,
-
-		// car in:
-
-			U_store_B < _pre_car_in_next       >,
-			U_store_B < _car_in_next           >,
-			U_store_B < _post_car_in_next      >,
-
-		// cdr in:
-
-			U_store_B < _pre_cdr_in_next       >,
-			U_store_B < _cdr_in_next           >,
-			U_store_B < _post_cdr_in_next      >,
-
-		// end:
-
-			U_store_B < _pre_end_prev          >,
-			U_store_B < _end_prev              >,
-
-			U_store_B < _end_next              >,
-			U_store_B < _post_end_next         >,
-
-		// loop:
-
-			U_store_B < _loop_predicate        >,
-
-		// value:
-
-			U_store_B < _value_predicate       >,
-
-		// act:
-
-			U_store_B < _act_predicate         >,
-			U_store_B < _act_function          >,
-			U_store_B < _post_act_function     >,
-
-		// combine:
-
-			U_store_B < _combine_function      >,
-			U_store_B < _post_combine_function >
-	>;
-
-/***********************************************************************************************************************/
-
-// compare:
-
-	struct T_tag_compare
-	{
-		template<auto d, auto Op, auto V0, auto V1>
-		nik_ces auto result = list_compare
-		<
-			tag_order, Op,
-			alias<AOP::template_id, V0>,
-			alias<AOP::template_id, V1>,
-			H_partial_same, d
-		>;
-
-	}; nik_ce auto U_tag_compare = U_store_T<T_tag_compare>;
-
-	template<auto Op, auto V0, auto V1, auto d = MD::initial_depth>
-	nik_ce auto tag_compare = T_tag_compare::template result<d, Op, V0, V1>;
-
-/***********************************************************************************************************************/
-
-// equal:
-
-	constexpr auto H_tag_equal = H_partial<U_custom, U_tag_compare, MD::initial_depth, _equal_>;
-
-// less than:
-
-	constexpr auto H_tag_less_than = H_partial<U_custom, U_tag_compare, MD::initial_depth, _less_than_>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
 // value:
 
@@ -355,11 +240,11 @@ namespace cctmp_one_cycle_specs {
 
 // to spec:
 
-	template<auto spec, auto H_spec>
+	template<auto direct, auto H_spec>
 	nik_ce auto direct_to_spec = alias
 	<
 		AOP::list_to_template,
-		direct_to_values<spec>,
+		direct_to_values<direct>,
 		H_spec
 	>;
 
@@ -368,23 +253,7 @@ namespace cctmp_one_cycle_specs {
 // write:
 
 	template<auto defs, auto... Vs>
-	nik_ce auto direct_write = T_sort::template result
-	<
-		MD::initial_depth, H_tag_equal, U_cut, defs, Vs...
-	>;
-
-/***********************************************************************************************************************/
-
-// fill:
-
-	template<auto defs, auto... Vs>
-	nik_ce auto direct_fill = list_fill
-	<
-		defs,
-		U_pack_Vs<Vs...>,
-		H_tag_equal,
-		H_tag_less_than
-	>;
+	nik_ce auto direct_write = pack_write<H_partial_similar, defs, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -481,9 +350,10 @@ namespace cctmp_one_cycle_specs {
 	template
 	<
 		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
-		auto OutPosition, auto InPosition, auto EndPosition,
-		auto PreOutNext, auto OutNext, auto LoopPredicate,
-		auto ActFunction, auto PostActFunction
+		auto OutPosition, auto EndPosition, auto InPosition,
+		auto PreOutNext,
+		auto LoopPredicate, auto ActFunction, auto OutNext,
+		auto PostActFunction
 	>
 	struct T_repeat_specification
 	{
@@ -492,15 +362,15 @@ namespace cctmp_one_cycle_specs {
 		nik_ces auto postcycle_label		= PostcycleLabel;
 
 		nik_ces auto out_position		= OutPosition;
-		nik_ces auto  in_position		=  InPosition;
 		nik_ces auto end_position		= EndPosition;
+		nik_ces auto  in_position		=  InPosition;
 
 		nik_ces auto pre_out_next		= PreOutNext;
-		nik_ces auto     out_next		=    OutNext;
 
 		nik_ces auto loop_predicate		= LoopPredicate;
+		nik_ces auto  act_function		=  ActFunction;
+		nik_ces auto  out_next			=  OutNext;
 
-		nik_ces auto      act_function		=     ActFunction;
 		nik_ces auto post_act_function		= PostActFunction;
 	};
 
@@ -517,25 +387,23 @@ namespace cctmp_one_cycle_specs {
 
 	// defaults:
 
-		// manually sorted for compile time performance.
-
 		nik_ce auto direct_repeat_defaults = U_pack_Vs
 		<
-			_precycle_label_    < _zero          >,
-			_cycle_label_       < _one           >,
-			_postcycle_label_   < _two           >,
+			_precycle_label_    < _zero            >,
+			_cycle_label_       < _one             >,
+			_postcycle_label_   < _two             >,
 
-			_out_position_      < _zero          >,
-			_in_position_       < _two           >,
-			_end_position_      < _one           >,
+			_out_position_      < _zero            >,
+			_end_position_      < _one             >,
+			_in_position_       < _two             >,
 
-			_pre_out_next_      < _id_           >,
-			_out_next_          < _increment_<>  >,
+			_pre_out_next_      < _id_             >,
 
-			_loop_predicate_    < _equal_        >,
+			_loop_predicate_    < _equal_          >,
+			_act_function_      < _deref_assign_<> >,
+			_out_next_          < _increment_<>    >,
 
-			_act_function_      < _deref_assign_ >,
-			_post_act_function_ < _id_           >
+			_post_act_function_ < _id_             >
 		>;
 
 	// repeat:
@@ -559,8 +427,6 @@ namespace cctmp_one_cycle_specs {
 		//	4. If (3), then for each right endpoint, when open, iterate.
 		//	5. If bidirectional and last, iterate end to reset.
 
-	struct MapSpecification
-	{
 	//	lift < end , end_prev_<Spec> , end >,	// boolean_before_loop < is_end_prev_before_<Spec>
 	//	lift < out , out_next_<Spec> , out >,	// boolean_before_loop < is_out_next_before_<Spec>
 	//	lift < in  , in_next_<Spec>  , in  >,	// boolean_before_loop < is_in_next_before_<Spec>
@@ -570,7 +436,86 @@ namespace cctmp_one_cycle_specs {
 	//	lift < out , out_next_<Spec>   , out >,	// boolean_after_loop < is_out_next_after_<Spec>
 	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
 	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
+
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
+		auto OutPosition, auto InPosition, auto EndPosition,
+		auto PreEndPrev, auto PreOutNext, auto PreInNext,
+		auto LoopPredicate, auto ActFunction, auto OutNext, auto InNext,
+		auto PostActFunction, auto PostOutNext, auto PostInNext, auto PostEndNext
+	>
+	struct T_map_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+
+		nik_ces auto out_position		= OutPosition;
+		nik_ces auto  in_position		=  InPosition;
+		nik_ces auto end_position		= EndPosition;
+
+		nik_ces auto pre_end_prev		= PreEndPrev;
+		nik_ces auto pre_out_next		= PreOutNext;
+		nik_ces auto  pre_in_next		= PreInNext;
+
+		nik_ces auto loop_predicate		= LoopPredicate;
+		nik_ces auto  act_function		=  ActFunction;
+		nik_ces auto  out_next			=  OutNext;
+		nik_ces auto   in_next			=   InNext;
+
+		nik_ces auto post_act_function		= PostActFunction;
+		nik_ces auto post_out_next		= PostOutNext;
+		nik_ces auto  post_in_next		=  PostInNext;
+		nik_ces auto post_end_next		= PostEndNext;
 	};
+
+	nik_ce auto H_map_specification = U_store_B<T_map_specification>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// interpretations:
+
+/***********************************************************************************************************************/
+
+// direct:
+
+	// defaults:
+
+		nik_ce auto direct_map_defaults = U_pack_Vs
+		<
+			_precycle_label_    < _zero            >,
+			_cycle_label_       < _one             >,
+			_postcycle_label_   < _two             >,
+
+			_out_position_      < _zero            >,
+			_in_position_       < _one             >,
+			_end_position_      < _two             >,
+
+			_pre_end_prev_      < _id_             >,
+			_pre_out_next_      < _id_             >,
+			_pre_in_next_       < _id_             >,
+
+			_loop_predicate_    < _equal_          >,
+			_act_function_      < _deref_assign_<> >,
+			_out_next_          < _increment_<>    >,
+			_in_next_           < _increment_<>    >,
+
+			_post_act_function_ < _id_             >,
+			_post_out_next_     < _id_             >,
+			_post_in_next_      < _id_             >,
+			_post_end_next_     < _id_             >
+		>;
+
+	// map:
+
+		template<auto... Vs>
+		nik_ce auto direct_map = direct_to_spec
+		<
+			direct_write<direct_map_defaults, Vs...>,
+			H_map_specification
+		>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

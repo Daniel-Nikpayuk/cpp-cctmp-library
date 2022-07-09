@@ -668,6 +668,103 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// comparison:
+
+/***********************************************************************************************************************/
+
+// order:
+
+	nik_ce auto tag_order = U_pack_Vs
+	<
+		// label:
+
+			U_store_B < _precycle_label        >,
+			U_store_B < _cycle_label           >,
+			U_store_B < _postcycle_label       >,
+
+		// position:
+
+			U_store_B < _out_position          >,
+			U_store_B < _in_position           >,
+			U_store_B < _car_in_position       >,
+			U_store_B < _cdr_in_position       >,
+			U_store_B < _end_position          >,
+
+		// out:
+
+			U_store_B < _pre_out_next          >,
+			U_store_B < _out_next              >,
+			U_store_B < _post_out_next         >,
+
+		// in:
+
+			U_store_B < _pre_in_next           >,
+			U_store_B < _in_next               >,
+			U_store_B < _post_in_next          >,
+
+		// car in:
+
+			U_store_B < _pre_car_in_next       >,
+			U_store_B < _car_in_next           >,
+			U_store_B < _post_car_in_next      >,
+
+		// cdr in:
+
+			U_store_B < _pre_cdr_in_next       >,
+			U_store_B < _cdr_in_next           >,
+			U_store_B < _post_cdr_in_next      >,
+
+		// end:
+
+			U_store_B < _pre_end_prev          >,
+			U_store_B < _end_prev              >,
+
+			U_store_B < _end_next              >,
+			U_store_B < _post_end_next         >,
+
+		// loop:
+
+			U_store_B < _loop_predicate        >,
+
+		// value:
+
+			U_store_B < _value_predicate       >,
+
+		// act:
+
+			U_store_B < _act_predicate         >,
+			U_store_B < _act_function          >,
+			U_store_B < _post_act_function     >,
+
+		// combine:
+
+			U_store_B < _combine_function      >,
+			U_store_B < _post_combine_function >
+	>;
+
+/***********************************************************************************************************************/
+
+// compare:
+
+	struct T_tag_compare
+	{
+		template<auto d, auto Op, auto V0, auto V1>
+		nik_ces auto result = list_compare
+		<
+			tag_order, Op,
+			alias<AOP::template_id, V0>,
+			alias<AOP::template_id, V1>,
+			H_partial_same, d
+		>;
+
+	}; nik_ce auto U_tag_compare = U_store_T<T_tag_compare>;
+
+	template<auto Op, auto V0, auto V1, auto d = MD::initial_depth>
+	nik_ce auto tag_compare = T_tag_compare::template result<d, Op, V0, V1>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 } // case studies

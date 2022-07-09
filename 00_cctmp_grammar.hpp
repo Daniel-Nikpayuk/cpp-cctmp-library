@@ -774,37 +774,38 @@ namespace cctmp {
 
 			nik_ces key_type same				=  6;
 			nik_ces key_type csame				=  7;
-			nik_ces key_type is_int_type			=  8;
-			nik_ces key_type not_int_type			=  9;
+			nik_ces key_type similar			=  8;
+			nik_ces key_type is_int_type			=  9;
+			nik_ces key_type not_int_type			= 10;
 
 		// functional:
 
-			nik_ces key_type to_list			= 10;
-			nik_ces key_type length				= 11;
-			nik_ces key_type map				= 12;
+			nik_ces key_type to_list			= 11;
+			nik_ces key_type length				= 12;
+			nik_ces key_type map				= 13;
 
-			nik_ces key_type is_null			= 13;
-			nik_ces key_type car				= 14;
-			nik_ces key_type cdr				= 15;
-			nik_ces key_type cadr				= 16;
-			nik_ces key_type find				= 17;
+			nik_ces key_type is_null			= 14;
+			nik_ces key_type car				= 15;
+			nik_ces key_type cdr				= 16;
+			nik_ces key_type cadr				= 17;
+			nik_ces key_type find				= 18;
 
 		// variadic:
 
-			nik_ces key_type zip				= 18;
-			nik_ces key_type unite				= 19;
-			nik_ces key_type cons				= 20;
-			nik_ces key_type push				= 21;
-			nik_ces key_type unpack				= 22;
+			nik_ces key_type zip				= 19;
+			nik_ces key_type unite				= 20;
+			nik_ces key_type cons				= 21;
+			nik_ces key_type push				= 22;
+			nik_ces key_type unpack				= 23;
 
 		// grammatical:
 
-			nik_ces key_type custom				= 23;
-			nik_ces key_type procedure			= 24;
-			nik_ces key_type method				= 25;
-			nik_ces key_type tailor				= 26;
+			nik_ces key_type custom				= 24;
+			nik_ces key_type procedure			= 25;
+			nik_ces key_type method				= 26;
+			nik_ces key_type tailor				= 27;
 
-			nik_ces key_type partial			= 27;
+			nik_ces key_type partial			= 28;
 	};
 
 	using AOP = AliasOperator;
@@ -928,6 +929,10 @@ namespace cctmp {
 
 		}; nik_ce auto U_list_to_template = U_alias_T<AOP::list_to_template>;
 
+/***********************************************************************************************************************/
+
+// comparison:
+
 	// same:
 
 		template<auto... filler>
@@ -954,6 +959,21 @@ namespace cctmp {
 			>;
 
 		}; nik_ce auto U_csame = U_alias_T<AOP::csame>;
+
+	// similar:
+
+		template<auto... filler>
+		struct T_overload<OL::alias, AOP::similar, filler...>
+		{
+			template<auto V0, auto V1>
+			nik_ces auto result = alias
+			<
+				AOP::same,
+				alias<AOP::template_id, V0>,
+				alias<AOP::template_id, V1>
+			>;
+
+		}; nik_ce auto U_similar = U_alias_T<AOP::similar>;
 
 	// is_int_type:
 

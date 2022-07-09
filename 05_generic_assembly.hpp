@@ -252,12 +252,13 @@ namespace cctmp_generics {
 
 	// deref assign:
 
+		template<auto f = _id_>
 		nik_ce auto _deref_assign_ = _subcompose_
 		<
 			_assign_,
 
-			U_pack_Vs < _dereference_ , _id_ >,
-			U_pack_Vs <  0            ,  1   >
+			U_pack_Vs < _dereference_ , f >,
+			U_pack_Vs <  0            , 1 >
 		>;
 
 /***********************************************************************************************************************/

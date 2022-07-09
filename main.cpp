@@ -96,8 +96,17 @@
 
 /***********************************************************************************************************************/
 
-	constexpr auto direct_spec	= cctmp_one_cycle_specs::template direct_repeat<>;
-	using T_repeat			= typename cctmp_one_cycle_generics::template T_repeat<direct_spec>;
+//	constexpr auto repeat_d_spec	= cctmp_one_cycle_specs::template direct_repeat<>;
+//	using T_repeat			= typename cctmp_one_cycle_generics::template T_repeat<repeat_d_spec>;
+
+	constexpr int sq(int x) { return x*x; }
+
+	constexpr auto _sq_		= cctmp::template _apply_<sq>;
+	constexpr auto _deref_assign_	= cctmp_generics::template _deref_assign_<_sq_>;
+	constexpr auto _act_function_	= cctmp_one_cycle_specs::template _act_function_<_deref_assign_>;
+
+	constexpr auto map_d_spec	= cctmp_one_cycle_specs::template direct_map<_act_function_>;
+	using T_map			= typename cctmp_one_cycle_generics::template T_map<map_d_spec>;
 
 /***********************************************************************************************************************/
 
@@ -160,10 +169,14 @@
 	//	constexpr auto tag1 = _post_out_next_<_id_>;
 	//	printf("%s\n", tag_compare<cctmp::_less_than_, tag1, tag0> ? "true" : "false");
 
-		int size = 10;
+		int size = argc;
 		int arr[size];
-		T_repeat::result(arr, arr+size, argc);
+
 	//	repeat_array(arr, arr+size, argc);
+	//	T_repeat::result(arr, arr+size, argc);
+	//	print_array(arr, arr+size);
+
+		T_map::template result(arr, 0, size);
 		print_array(arr, arr+size);
 
 		return 0;
