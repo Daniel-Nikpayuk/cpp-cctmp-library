@@ -179,7 +179,7 @@ namespace cctmp_one_cycle_generics {
 
 				test   <               loop_pred_<S> , out_<S> , end_<S> >,
 				branch <               postcycle_<S>                     >,
-				lift   <                act_func_<S> , out_<S> ,  in_<S> >,
+				lift   < out_<S> ,      act_func_<S> ,  in_<S>           >,
 				lift   < out_<S> ,      out_next_<S> , out_<S>           >,
 				go_to  <                   cycle_<S>                     >,
 
@@ -225,14 +225,14 @@ namespace cctmp_one_cycle_generics {
 
 				test   <               loop_pred_<S> ,  in_<S> , end_<S> >,
 				branch <               postcycle_<S>                     >,
-				lift   <                act_func_<S> , out_<S> ,  in_<S> >,
+				lift   < out_<S> ,      act_func_<S> ,  in_<S>           >,
 				lift   < out_<S> ,      out_next_<S> , out_<S>           >,
 				lift   <  in_<S> ,       in_next_<S> ,  in_<S>           >,
 				go_to  <                   cycle_<S>                     >,
 
 			label<postcycle_<S>>,
 
-				lift   <           post_act_func_<S> , out_<S> ,  in_<S> >,
+				lift   < out_<S> , post_act_func_<S> ,  in_<S>           >,
 				lift   < out_<S> , post_out_next_<S> , out_<S>           >,
 				lift   <  in_<S> ,  post_in_next_<S> ,  in_<S>           >,
 				lift   < end_<S> , post_end_next_<S> , end_<S>           >,
@@ -260,19 +260,19 @@ namespace cctmp_one_cycle_generics {
 		<
 			label<precycle_<S>>,
 
-				lift   <  in_<S> ,       pre_in_next_<S> , in_<S>           >,
+				lift   <  in_<S> ,       pre_in_next_<S> ,  in_<S>           >,
 
 			label<cycle_<S>>,
 
-				test   <                   loop_pred_<S> , in_<S> , end_<S> >,
-				branch <                   postcycle_<S>                    >,
-				lift   < out_<S> ,      combine_func_<S> , in_<S>           >,
-				lift   <  in_<S> ,           in_next_<S> , in_<S>           >,
-				go_to  <                       cycle_<S>                    >,
+				test   <                   loop_pred_<S> ,  in_<S> , end_<S> >,
+				branch <                   postcycle_<S>                     >,
+				lift   <                combine_func_<S> , out_<S> ,  in_<S> >,
+				lift   <  in_<S> ,           in_next_<S> ,  in_<S>           >,
+				go_to  <                       cycle_<S>                     >,
 
 			label<postcycle_<S>>,
 
-				lift   < out_<S> , post_combine_func_<S> , in_<S>           >,
+				lift   < out_<S> , post_combine_func_<S> , out_<S> ,  in_<S> >,
 
 				_return_
 		>;
@@ -587,7 +587,7 @@ namespace cctmp_one_cycle_generics {
 
 				test   <                      loop_pred_<S> , cdr_in_<S> ,    end_<S> >,
 				branch <                      postcycle_<S>                           >,
-			//	lift   <    out_<S> ,          act_func_<S> ,     in_<S>              >,
+				lift   <    out_<S> ,          act_func_<S> ,     in_<S>              >,
 				lift   <    out_<S> ,      combine_func_<S> ,    out_<S>              >,
 				lift   < car_in_<S> ,       car_in_next_<S> , car_in_<S>              >,
 				lift   < cdr_in_<S> ,       cdr_in_next_<S> , cdr_in_<S>              >,

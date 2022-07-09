@@ -26,6 +26,7 @@ namespace cctmp_one_cycle_specs {
 	nik_ce auto _zero						= cctmp::_zero;
 	nik_ce auto _one						= cctmp::_one;
 	nik_ce auto _two						= cctmp::_two;
+	nik_ce auto _three						= cctmp::_three;
 
 	nik_ce auto _id_						= cctmp::_id_;
 	nik_ce auto _equal_						= cctmp::_equal_;
@@ -50,7 +51,8 @@ namespace cctmp_one_cycle_specs {
 
 	template<auto... Vs> nik_ce auto pack_write			= cctmp_functional::template pack_write<Vs...>;
 
-	template<auto... Vs> nik_ce auto _deref_assign_			= cctmp_generics::template _deref_assign_<Vs...>;
+	template<auto... Vs> nik_ce auto _side_deref_assign_		= cctmp_generics::template
+										_side_deref_assign_<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -379,34 +381,34 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// interpretations:
+// interpretation:
 
 /***********************************************************************************************************************/
 
 // direct:
 
-	// defaults:
+	// default:
 
 		nik_ce auto direct_repeat_defaults = U_pack_Vs
 		<
-			_precycle_label_    < _zero            >,
-			_cycle_label_       < _one             >,
-			_postcycle_label_   < _two             >,
+			_precycle_label_    < _zero                 >,
+			_cycle_label_       < _one                  >,
+			_postcycle_label_   < _two                  >,
 
-			_out_position_      < _zero            >,
-			_end_position_      < _one             >,
-			_in_position_       < _two             >,
+			_out_position_      < _zero                 >,
+			_end_position_      < _one                  >,
+			_in_position_       < _two                  >,
 
-			_pre_out_next_      < _id_             >,
+			_pre_out_next_      < _id_                  >,
 
-			_loop_predicate_    < _equal_          >,
-			_act_function_      < _deref_assign_<> >,
-			_out_next_          < _increment_<>    >,
+			_loop_predicate_    < _equal_               >,
+			_act_function_      < _side_deref_assign_<> >,
+			_out_next_          < _increment_<>         >,
 
-			_post_act_function_ < _id_             >
+			_post_act_function_ < _id_                  >
 		>;
 
-	// repeat:
+	// spec:
 
 		template<auto... Vs>
 		nik_ce auto direct_repeat = direct_to_spec
@@ -419,6 +421,10 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 
 // map:
+
+/***********************************************************************************************************************/
+
+// specification:
 
 		//	0. If bidirectional and last, reverse iterate end.
 		//	1. For each left endpoint, if open, then iterate.
@@ -475,40 +481,40 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// interpretations:
+// interpretation:
 
 /***********************************************************************************************************************/
 
 // direct:
 
-	// defaults:
+	// default:
 
 		nik_ce auto direct_map_defaults = U_pack_Vs
 		<
-			_precycle_label_    < _zero            >,
-			_cycle_label_       < _one             >,
-			_postcycle_label_   < _two             >,
+			_precycle_label_    < _zero                 >,
+			_cycle_label_       < _one                  >,
+			_postcycle_label_   < _two                  >,
 
-			_out_position_      < _zero            >,
-			_in_position_       < _one             >,
-			_end_position_      < _two             >,
+			_out_position_      < _zero                 >,
+			_in_position_       < _one                  >,
+			_end_position_      < _two                  >,
 
-			_pre_end_prev_      < _id_             >,
-			_pre_out_next_      < _id_             >,
-			_pre_in_next_       < _id_             >,
+			_pre_end_prev_      < _id_                  >,
+			_pre_out_next_      < _id_                  >,
+			_pre_in_next_       < _id_                  >,
 
-			_loop_predicate_    < _equal_          >,
-			_act_function_      < _deref_assign_<> >,
-			_out_next_          < _increment_<>    >,
-			_in_next_           < _increment_<>    >,
+			_loop_predicate_    < _equal_               >,
+			_act_function_      < _side_deref_assign_<> >,
+			_out_next_          < _increment_<>         >,
+			_in_next_           < _increment_<>         >,
 
-			_post_act_function_ < _id_             >,
-			_post_out_next_     < _id_             >,
-			_post_in_next_      < _id_             >,
-			_post_end_next_     < _id_             >
+			_post_act_function_ < _id_                  >,
+			_post_out_next_     < _id_                  >,
+			_post_in_next_      < _id_                  >,
+			_post_end_next_     < _id_                  >
 		>;
 
-	// map:
+	// direct:
 
 		template<auto... Vs>
 		nik_ce auto direct_map = direct_to_spec
@@ -521,6 +527,85 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 
 // fold:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// specification:
+
+/***********************************************************************************************************************/
+
+/*
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
+		auto OutPosition, auto InPosition, auto EndPosition,
+		auto PreInNext,
+		auto LoopPredicate, auto CombineFunction, auto InNext,
+		auto PostCombineFunction
+	>
+	struct T_fold_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+
+		nik_ces auto out_position		= OutPosition;
+		nik_ces auto  in_position		=  InPosition;
+		nik_ces auto end_position		= EndPosition;
+
+		nik_ces auto  pre_in_next		= PreInNext;
+
+		nik_ces auto    loop_predicate		=    LoopPredicate;
+		nik_ces auto combine_function		= CombineFunction;
+		nik_ces auto      in_next		=      InNext;
+
+		nik_ces auto post_combine_function	= PostCombineFunction;
+	};
+
+	nik_ce auto H_fold_specification = U_store_B<T_fold_specification>;
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// interpretation:
+
+/***********************************************************************************************************************/
+
+// direct:
+
+	// default:
+
+/*
+		nik_ce auto direct_fold_defaults = U_pack_Vs
+		<
+			_precycle_label_        < _zero                 >,
+			_cycle_label_           < _one                  >,
+			_postcycle_label_       < _two                  >,
+
+			_out_position_          < _zero                 >,
+			_in_position_           < _one                  >,
+			_end_position_          < _two                  >,
+
+			_pre_in_next_           < _id_                  >,
+
+			_loop_predicate_        < _equal_               >,
+			_combine_function_      < _side_deref_assign_<> >,
+			_in_next_               < _increment_<>         >,
+
+			_post_combine_function_ < _id_                  >
+		>;
+
+	// direct:
+
+		template<auto... Vs>
+		nik_ce auto direct_fold = direct_to_spec
+		<
+			direct_write<direct_fold_defaults, Vs...>,
+			H_fold_specification
+		>;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -543,12 +628,223 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// specification:
+
+		//	0. If bidirectional and last, reverse iterate end.
+		//	1. For each left endpoint, if open, then iterate.
+		//	2. Evaluate the common (closing) loop.
+		//	3. If there exists any right endpoint, which is closed, then act/combine.
+		//	4. If (3), then for each right endpoint, when open, iterate.
+		//	5. If bidirectional and last, iterate end to reset.
+
+	//	lift < end , end_prev_<Spec> , end >,	// boolean_before_loop < is_end_prev_before_<Spec>
+	//	lift < out , out_next_<Spec> , out >,	// boolean_before_loop < is_out_next_before_<Spec>
+	//	lift < in  , in_next_<Spec>  , in  >,	// boolean_before_loop < is_in_next_before_<Spec>
+
+
+	//	lift < out , act_func_<Spec>   , in  >,	// boolean_after_loop < is_act_func_after_<Spec>
+	//	lift < out , out_next_<Spec>   , out >,	// boolean_after_loop < is_out_next_after_<Spec>
+	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
+	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
+
+/*
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
+		auto OutPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
+		auto PreEndPrev, auto PreOutNext, auto PreCarInNext, auto PreCdrInNext,
+		auto LoopPredicate, auto ActFunction, auto OutNext, auto CarInNext, auto CdrInNext,
+		auto PostActFunction, auto PostOutNext, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
+	>
+	struct T_zip_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+
+		nik_ces auto    out_position		=   OutPosition;
+		nik_ces auto car_in_position		= CarInPosition;
+		nik_ces auto cdr_in_position		= CdrInPosition;
+		nik_ces auto    end_position		=   EndPosition;
+
+		nik_ces auto    pre_end_prev		=   PreEndPrev;
+		nik_ces auto    pre_out_next		=   PreOutNext;
+		nik_ces auto pre_car_in_next		= PreCarInNext;
+		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
+
+		nik_ces auto   loop_predicate		=  LoopPredicate;
+		nik_ces auto    act_function		=   ActFunction;
+		nik_ces auto    out_next		=   OutNext;
+		nik_ces auto car_in_next		= CarInNext;
+		nik_ces auto cdr_in_next		= CdrInNext;
+
+		nik_ces auto    post_act_function	=   PostActFunction;
+		nik_ces auto    post_out_next		=   PostOutNext;
+		nik_ces auto post_car_in_next		= PostCarInNext;
+		nik_ces auto post_cdr_in_next		= PostCdrInNext;
+		nik_ces auto    post_end_next		=   PostEndNext;
+	};
+
+	nik_ce auto H_zip_specification = U_store_B<T_zip_specification>;
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// interpretation:
+
+/***********************************************************************************************************************/
+
+// direct:
+
+	// default:
+
+/*
+		nik_ce auto direct_zip_defaults = U_pack_Vs
+		<
+			_precycle_label_    < _zero                 >,
+			_cycle_label_       < _one                  >,
+			_postcycle_label_   < _two                  >,
+
+			_out_position_      < _zero                 >,
+			_car_in_position_   < _one                  >,
+			_cdr_in_position_   < _two                  >,
+			_end_position_      < _three                >,
+
+			_pre_end_prev_      < _id_                  >,
+			_pre_out_next_      < _id_                  >,
+			_pre_car_in_next_   < _id_                  >,
+			_pre_cdr_in_next_   < _id_                  >,
+
+			_loop_predicate_    < _equal_               >,
+			_act_function_      < _side_deref_assign_<> >,
+			_out_next_          < _increment_<>         >,
+			_car_in_next_       < _increment_<>         >,
+			_cdr_in_next_       < _increment_<>         >,
+
+			_post_act_function_ < _id_                  >,
+			_post_out_next_     < _id_                  >,
+			_post_car_in_next_  < _id_                  >,
+			_post_cdr_in_next_  < _id_                  >,
+			_post_end_next_     < _id_                  >
+		>;
+
+	// spec:
+
+		template<auto... Vs>
+		nik_ce auto direct_zip = direct_to_spec
+		<
+			direct_write<direct_zip_defaults, Vs...>,
+			H_zip_specification
+		>;
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // fasten:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // glide (bifold):
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// specification:
+
+/***********************************************************************************************************************/
+
+/*
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
+		auto OutPosition, auto InPosition, auto EndPosition,
+		auto PreEndPrev, auto PreCarInNext, auto PreCdrInNext,
+		auto LoopPredicate, auto ActFunction, auto CombineFunction, auto CarInNext, auto CdrInNext,
+		auto PostActFunction, auto PostCombineFunction, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
+	>
+	struct T_glide_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+
+		nik_ces auto    out_position		=   OutPosition;
+		nik_ces auto car_in_position		= CarInPosition;
+		nik_ces auto cdr_in_position		= CdrInPosition;
+		nik_ces auto    end_position		=   EndPosition;
+
+		nik_ces auto    pre_end_prev		=   PreEndPrev;
+		nik_ces auto pre_car_in_next		= PreCarInNext;
+		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
+
+		nik_ces auto    loop_predicate		=    LoopPredicate;
+		nik_ces auto     act_function		=     ActFunction;
+		nik_ces auto combine_function		= CombineFunction;
+		nik_ces auto  car_in_next		=   CarInNext;
+		nik_ces auto  cdr_in_next		=   CdrInNext;
+
+		nik_ces auto     post_act_function	=     PostActFunction;
+		nik_ces auto post_combine_function	= PostCombineFunction;
+		nik_ces auto  post_car_in_next		=   PostCarInNext;
+		nik_ces auto  post_cdr_in_next		=   PostCdrInNext;
+		nik_ces auto     post_end_next		=     PostEndNext;
+	};
+
+	nik_ce auto H_glide_specification = U_store_B<T_glide_specification>;
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// interpretation:
+
+/***********************************************************************************************************************/
+
+// direct:
+
+	// default:
+
+/*
+		nik_ce auto direct_glide_defaults = U_pack_Vs
+		<
+			_precycle_label_        < _zero                 >,
+			_cycle_label_           < _one                  >,
+			_postcycle_label_       < _two                  >,
+
+			_out_position_          < _zero                 >,
+			_car_in_position_       < _one                  >,
+			_cdr_in_position_       < _two                  >,
+			_end_position_          < _three                >,
+
+			_pre_end_prev           < _id_                  >,
+			_pre_car_in_next_       < _id_                  >,
+			_pre_cdr_in_next_       < _id_                  >,
+
+			_loop_predicate_        < _equal_               >,
+			_act_function_          < _side_deref_assign_<> >,
+			_combine_function_      < _side_deref_assign_<> >,
+			_car_in_next_           < _increment_<>         >,
+			_cdr_in_next_           < _increment_<>         >,
+
+			_post_act_function_     < _id_                  >,
+			_post_combine_function_ < _id_                  >,
+			_post_car_in_next       < _id_                  >,
+			_post_cdr_in_next       < _id_                  >,
+			_post_end_next          < _id_                  >
+		>;
+
+	// direct:
+
+		template<auto... Vs>
+		nik_ce auto direct_glide = direct_to_spec
+		<
+			direct_write<direct_glide_defaults, Vs...>,
+			H_glide_specification
+		>;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

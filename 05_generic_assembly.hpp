@@ -359,55 +359,103 @@ namespace cctmp_generics {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// side:
+
+/***********************************************************************************************************************/
+
+	template<auto f> struct _side { };
+
+	template<auto f>
+	nik_ce auto _side_ = U_store_T<_side<f>>;
+
+	// is side:
+
+		template<auto>
+		nik_ce bool is_side = false;
+
+		template<auto f, nik_vp(p)(_side<f>*)>
+		nik_ce bool is_side<p> = true;
+
+	// side value:
+
+		template<auto v>
+		nik_ce auto side_value = v;
+
+		template<auto f, nik_vp(p)(_side<f>*)>
+		nik_ce auto side_value<p> = f;
+
+	// conveniences:
+
+		template<auto f = _id_>
+		nik_ce auto _side_deref_assign_ = _side_<_deref_assign_<f>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // lift:
 
-	// Total (register) assignment in this context is equivalent to replacing the continuation's given argument.
-	// Partial assignment is then achieved through the side effect of the given instruction.
-
 	template<auto...> struct T_lift { };
 
-	// id:
+/***********************************************************************************************************************/
 
-		nik_ce auto _lifted_id_ = U_store_T<T_lift<>>;
+// name:
 
-	// is label:
+	struct LiftName
+	{
+		nik_ces key_type effect		= 0;
+		nik_ces key_type copy		= 1;
+		nik_ces key_type mutate		= 2;
+	};
 
-		template<auto>
-		nik_ce bool is_lift = false;
+	using FN		= LiftName;
 
-		template<auto... Vs, nik_vp(p)(T_lift<Vs...>*)>
-		nik_ce bool is_lift<p> = true;
+	nik_ce auto U_effect	= U_pack_Vs<FN::effect>;
+	nik_ce auto U_copy	= U_pack_Vs<FN::copy>;
+
+	template<auto m>
+	nik_ce auto U_mutate	= U_pack_Vs<FN::mutate, m>;
 
 /***********************************************************************************************************************/
+
+// is lift:
+
+	template<auto>
+	nik_ce bool is_lift = false;
+
+	template<auto... Vs, nik_vp(p)(T_lift<Vs...>*)>
+	nik_ce bool is_lift<p> = true;
+
+/***********************************************************************************************************************/
+
+// options:
 
 	nik_ce void _cp_ () { } // copy
 	nik_ce void _ps_ () { } // paste
 
-	struct Lift
-	{
-		nik_ces key_type deny		= 0;
-		nik_ces key_type allow		= 1;
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-		nik_ces key_type insert		= 2;
-		nik_ces key_type replace	= 3;
+// specializations:
 
-		template<auto V>
-		nik_ces key_type direction	= !has_int_type<V> && !same<V, _cp_> ? deny : allow;
-
-		template<auto V>
-		nik_ces key_type location	= same<V, _cp_> ? insert : replace;
-	};
+	// Total (register) assignment in this context is equivalent to replacing the continuation's given argument.
+	// Partial assignment is then achieved through the side effect of the given instruction.
 
 /***********************************************************************************************************************/
 
-// deny:
+// id:
 
-	// direct:
+	nik_ce auto _lifted_id_ = U_store_T<T_lift<>>;
+
+/***********************************************************************************************************************/
+
+// (side) effect:
+
+	// sign:
 
 		template<auto f>
-		struct T_lift<Lift::deny, f, true>
+		struct T_lift<FN::effect, f, true>
 		{
 			template<auto pass, typename... Ts>
 			nik_ces auto result(Ts... vs)
@@ -418,10 +466,10 @@ namespace cctmp_generics {
 			}
 		};
 
-	// indirect:
+	// paste:
 
 		template<auto f>
-		struct T_lift<Lift::deny, f, false>
+		struct T_lift<FN::effect, f, false>
 		{
 			template<auto pass, typename T, typename... Ts>
 			nik_ces auto result(T v, Ts... vs)
@@ -434,12 +482,12 @@ namespace cctmp_generics {
 
 /***********************************************************************************************************************/
 
-// (allow,) insert:
+// copy:
 
-	// direct:
+	// sign:
 
 		template<auto f>
-		struct T_lift<Lift::insert, f, true>
+		struct T_lift<FN::copy, f, true>
 		{
 			template<auto pass, typename... Ts>
 			nik_ces auto result(Ts... vs)
@@ -450,10 +498,10 @@ namespace cctmp_generics {
 			}
 		};
 
-	// indirect:
+	// paste:
 
 		template<auto f>
-		struct T_lift<Lift::insert, f, false>
+		struct T_lift<FN::copy, f, false>
 		{
 			template<auto pass, typename T, typename... Ts>
 			nik_ces auto result(T v, Ts... vs)
@@ -466,12 +514,12 @@ namespace cctmp_generics {
 
 /***********************************************************************************************************************/
 
-// (allow,) replace:
+// mutate:
 
-	// direct:
+	// sign:
 
 		template<auto m, auto f>
-		struct T_lift<Lift::replace, m, f, true>
+		struct T_lift<FN::mutate, m, f, true>
 		{
 			nik_ces auto l = segment<m>;
 			nik_ces auto n = m + _one;
@@ -487,10 +535,10 @@ namespace cctmp_generics {
 			}
 		};
 
-	// indirect:
+	// paste:
 
 		template<auto m, auto f>
-		struct T_lift<Lift::replace, m, f, false>
+		struct T_lift<FN::mutate, m, f, false>
 		{
 			nik_ces auto l = segment<m>;
 			nik_ces auto n = m + _one;
@@ -509,34 +557,34 @@ namespace cctmp_generics {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// lift:
+// dispatch:
 
-	// helpers:
+/***********************************************************************************************************************/
 
-		nik_ce auto _constant_id_ = _constant_<_id_>;
-
+	struct LiftDispatch
+	{
 		template<auto... ns>
-		nik_ce auto find_non_int = find_<U_not_int_type, U_store_T<decltype(ns)>...>;
+		nik_ces auto find_non_int = find_<U_not_int_type, U_store_T<decltype(ns)>...>;
 
 		template<auto p, auto... ns>
-		nik_ce auto is_all_ints = (p == sizeof...(ns));
+		nik_ces auto is_all_ints = (p == sizeof...(ns));
 
 		template<auto V>
-		nik_ce index_type map_indices()
+		nik_ces index_type map_index()
 		{
 			if nik_ce (has_int_type<V>) return V + _one;
 			else return _zero;
 		}
 
 		template<bool all_ints, auto... ns>
-		nik_ce auto lift_indices()
+		nik_ces auto index_list()
 		{
 			if nik_ce (all_ints) return U_pack_Vs<index_type{ns}...>;
-			else                 return U_pack_Vs<map_indices<ns>()...>;
+			else                 return U_pack_Vs<map_index<ns>()...>;
 		}
 
-		template<auto f, auto... ns, auto policy, auto... ms>
-		nik_ce auto lift_dispatch(nik_avp(T_pack_Vs<policy, ms...>*))
+		template<auto f, auto... ns, auto name, auto... ms>
+		nik_ces auto result(nik_avp(T_pack_Vs<name, ms...>*))
 		{
 			if nik_ce (same<f, _id_>) return _lifted_id_;
 			else
@@ -544,63 +592,48 @@ namespace cctmp_generics {
 				nik_ce auto p		= find_non_int<ns...>;
 				nik_ce auto all_ints	= is_all_ints<p, ns...>;
 
-				nik_ce auto f_ns_p	= U_pack_Vs<overload<_constant_id_, ns>...>;
-				nik_ce auto ns_p	= lift_indices<all_ints, ns...>();
+				nik_ce auto f_ns_p	= U_pack_Vs<overload<_constant_<_id_>, ns>...>;
+				nik_ce auto ns_p	= index_list<all_ints, ns...>();
 				nik_ce auto nf		= _subcompose_<f, f_ns_p, ns_p>;
 
-				using T_dispatched_lift = T_lift<policy, ms..., nf, all_ints>;
+				using T_dispatched_lift = T_lift<name, ms..., nf, all_ints>;
 
 				return U_store_T<T_dispatched_lift>;
 			}
 		}
-
-/***********************************************************************************************************************/
-
-// specializations:
-
-	template<key_type, key_type, key_type...> struct LiftDispatch;
-
-// deny, id (internal):
-
-	template<key_type... filler>
-	struct LiftDispatch<Lift::deny, Lift::replace, filler...>
-	{
-		template<auto f, auto... ns>
-		nik_ces auto result = lift_dispatch<f, ns...>(U_pack_Vs<Lift::deny>);
 	};
 
-// allow, insert (indirect):
-
-	template<key_type... filler>
-	struct LiftDispatch<Lift::allow, Lift::insert, filler...>
-	{
-		template<auto m, auto f, auto... ns>
-		nik_ces auto result = lift_dispatch<f, ns...>(U_pack_Vs<Lift::insert>);
-	};
-
-// allow, replace (direct):
-
-	template<key_type... filler>
-	struct LiftDispatch<Lift::allow, Lift::replace, filler...>
-	{
-		template<auto m, auto f, auto... ns>
-		nik_ces auto result = lift_dispatch<f, ns...>(U_pack_Vs<Lift::replace, m>);
-	};
+	using FD = LiftDispatch;
 
 	// lift:
 
+		template<auto m, auto f, auto... ns>
+		nik_ce auto _lift_maybe()
+		{
+			if nik_ce (is_side<f>) return FD::template result<side_value<f>, m, ns...>(U_effect);
+			else                   return FD::template result<f, ns...>(U_mutate<m>);
+		}
+
 		template<auto V, auto... Vs>
-		nik_ce auto lift = LiftDispatch<Lift::direction<V>, Lift::location<V>>::template result<V, Vs...>;
+		nik_ce auto _lift()
+		{
+			if      nik_ce (same<V, _cp_>)    return FD::template result<Vs...>(U_copy);
+			else if nik_ce (!has_int_type<V>) return FD::template result<V, Vs...>(U_effect);
+			else                              return _lift_maybe<V, Vs...>();
+		}
+
+		template<auto... Vs>
+		nik_ce auto lift = _lift<Vs...>();
 
 	// test:
 
 		template<auto p, auto... ns>
-		nik_ce auto test = LiftDispatch<Lift::allow, Lift::insert>::template result<_cp_, p, ns...>;
+		nik_ce auto test = FD::template result<p, ns...>(U_copy);
 
 	// tacit:
 
 		template<auto f>
-		nik_ce auto tacit = LiftDispatch<Lift::allow, Lift::insert>::template result<_cp_, f, _ps_>;
+		nik_ce auto tacit = FD::template result<f, _ps_>(U_copy);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

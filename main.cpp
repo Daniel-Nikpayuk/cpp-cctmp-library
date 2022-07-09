@@ -96,17 +96,17 @@
 
 /***********************************************************************************************************************/
 
-//	constexpr auto repeat_d_spec	= cctmp_one_cycle_specs::template direct_repeat<>;
-//	using T_repeat			= typename cctmp_one_cycle_generics::template T_repeat<repeat_d_spec>;
+//	constexpr auto repeat_d_spec		= cctmp_one_cycle_specs::template direct_repeat<>;
+//	using T_repeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_d_spec>;
 
 	constexpr int sq(int x) { return x*x; }
 
-	constexpr auto _sq_		= cctmp::template _apply_<sq>;
-	constexpr auto _deref_assign_	= cctmp_generics::template _deref_assign_<_sq_>;
-	constexpr auto _act_function_	= cctmp_one_cycle_specs::template _act_function_<_deref_assign_>;
+	constexpr auto _sq_			= cctmp::template _apply_<sq>;
+	constexpr auto _side_deref_assign_	= cctmp_generics::template _side_deref_assign_<_sq_>;
+	constexpr auto _act_function_		= cctmp_one_cycle_specs::template _act_function_<_side_deref_assign_>;
 
-	constexpr auto map_d_spec	= cctmp_one_cycle_specs::template direct_map<_act_function_>;
-	using T_map			= typename cctmp_one_cycle_generics::template T_map<map_d_spec>;
+	constexpr auto map_d_spec		= cctmp_one_cycle_specs::template direct_map<_act_function_>;
+	using T_map				= typename cctmp_one_cycle_generics::template T_map<map_d_spec>;
 
 /***********************************************************************************************************************/
 
