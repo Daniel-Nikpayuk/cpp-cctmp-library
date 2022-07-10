@@ -123,7 +123,7 @@ namespace cctmp_one_cycle_generics {
 
 // return:
 
-	template<auto S> using return_type_			= typename T_store_U<S>::return_type;
+//	template<auto S> using return_type_			= typename T_store_U<S>::return_type;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -160,14 +160,26 @@ namespace cctmp_one_cycle_generics {
 	template<auto S> nik_ce auto post_combine_func_		= T_store_U<S>::post_combine_function;
 
 /***********************************************************************************************************************/
+
+// side:
+
+	template<auto S> nik_ce auto assign_func_		= T_store_U<S>::assign_function;
+	template<auto S> nik_ce auto post_assign_func_		= T_store_U<S>::post_assign_function;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // functional algorithms:
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // repeat:
+
+/***********************************************************************************************************************/
+
+// algo:
 
 	template<auto S>
 	struct T_repeat
@@ -176,19 +188,19 @@ namespace cctmp_one_cycle_generics {
 		<
 			label<precycle_<S>>,
 
-				lift   < out_<S> ,  pre_out_next_<S> , out_<S>           >,
+				lift   < out_<S> ,     pre_out_next_<S> , out_<S>           >,
 
 			label<cycle_<S>>,
 
-				test   <               loop_pred_<S> , out_<S> , end_<S> >,
-				branch <               postcycle_<S>                     >,
-				lift   < out_<S> ,      act_func_<S> ,  in_<S>           >,
-				lift   < out_<S> ,      out_next_<S> , out_<S>           >,
-				go_to  <                   cycle_<S>                     >,
+				test   <                  loop_pred_<S> , out_<S> , end_<S> >,
+				branch <                  postcycle_<S>                     >,
+				lift   < out_<S> ,      assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,         out_next_<S> , out_<S>           >,
+				go_to  <                      cycle_<S>                     >,
 
 			label<postcycle_<S>>,
 
-				lift   < out_<S> , post_act_func_<S> ,  in_<S>           >,
+				lift   < out_<S> , post_assign_func_<S> ,  in_<S>           >,
 
 				_return_
 		>;
@@ -203,15 +215,13 @@ namespace cctmp_one_cycle_generics {
 		nik_ce auto _repeat_ = U_store_T<T_repeat<S>>;
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // map:
 
-		//	0. If bidirectional and last, reverse iterate end.
-		//	1. For each left endpoint, if open, then iterate.
-		//	2. Evaluate the common (closing) loop.
-		//	3. If there exists any right endpoint, which is closed, then act/combine.
-		//	4. If (3), then for each right endpoint, when open, iterate.
-		//	5. If bidirectional and last, iterate end to reset.
+/***********************************************************************************************************************/
+
+// algo:
 
 	template<auto S>
 	struct T_map
@@ -220,25 +230,25 @@ namespace cctmp_one_cycle_generics {
 		<
 			label<precycle_<S>>,
 
-				lift   < end_<S> ,  pre_end_prev_<S> , end_<S>           >,
-				lift   < out_<S> ,  pre_out_next_<S> , out_<S>           >,
-				lift   <  in_<S> ,   pre_in_next_<S> ,  in_<S>           >,
+				lift   < end_<S> ,     pre_end_prev_<S> , end_<S>           >,
+				lift   < out_<S> ,     pre_out_next_<S> , out_<S>           >,
+				lift   <  in_<S> ,      pre_in_next_<S> ,  in_<S>           >,
 
 			label<cycle_<S>>,
 
-				test   <               loop_pred_<S> ,  in_<S> , end_<S> >,
-				branch <               postcycle_<S>                     >,
-				lift   < out_<S> ,      act_func_<S> ,  in_<S>           >,
-				lift   < out_<S> ,      out_next_<S> , out_<S>           >,
-				lift   <  in_<S> ,       in_next_<S> ,  in_<S>           >,
-				go_to  <                   cycle_<S>                     >,
+				test   <                  loop_pred_<S> ,  in_<S> , end_<S> >,
+				branch <                  postcycle_<S>                     >,
+				lift   < out_<S> ,      assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,         out_next_<S> , out_<S>           >,
+				lift   <  in_<S> ,          in_next_<S> ,  in_<S>           >,
+				go_to  <                      cycle_<S>                     >,
 
 			label<postcycle_<S>>,
 
-				lift   < out_<S> , post_act_func_<S> ,  in_<S>           >,
-				lift   < out_<S> , post_out_next_<S> , out_<S>           >,
-				lift   <  in_<S> ,  post_in_next_<S> ,  in_<S>           >,
-				lift   < end_<S> , post_end_next_<S> , end_<S>           >,
+				lift   < out_<S> , post_assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,    post_out_next_<S> , out_<S>           >,
+				lift   <  in_<S> ,     post_in_next_<S> ,  in_<S>           >,
+				lift   < end_<S> ,    post_end_next_<S> , end_<S>           >,
 
 				_return_
 		>;
@@ -253,8 +263,13 @@ namespace cctmp_one_cycle_generics {
 		nik_ce auto _map_ = U_store_T<T_map<S>>;
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // fold:
+
+/***********************************************************************************************************************/
+
+// algo:
 
 	template<auto S>
 	struct T_fold
@@ -481,6 +496,10 @@ namespace cctmp_one_cycle_generics {
 
 // zip (bimap):
 
+/***********************************************************************************************************************/
+
+// algo:
+
 	template<auto S>
 	struct T_zip
 	{
@@ -497,7 +516,8 @@ namespace cctmp_one_cycle_generics {
 
 				test   <                     loop_pred_<S> , cdr_in_<S> ,    end_<S> >,
 				branch <                     postcycle_<S>                           >,
-				lift   <    out_<S> ,         act_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    _cp_    ,         act_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    out_<S> ,      assign_func_<S> ,    _ps_                 >,
 				lift   <    out_<S> ,         out_next_<S> ,    out_<S>              >,
 				lift   < car_in_<S> ,      car_in_next_<S> , car_in_<S>              >,
 				lift   < cdr_in_<S> ,      cdr_in_next_<S> , cdr_in_<S>              >,
@@ -505,7 +525,8 @@ namespace cctmp_one_cycle_generics {
 
 			label<postcycle_<S>>,
 
-				lift   <    out_<S> ,    post_act_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    _cp_    ,    post_act_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    out_<S> , post_assign_func_<S> ,    _ps_                 >,
 				lift   <    out_<S> ,    post_out_next_<S> ,    out_<S>              >,
 				lift   < car_in_<S> , post_car_in_next_<S> , car_in_<S>              >,
 				lift   < cdr_in_<S> , post_cdr_in_next_<S> , cdr_in_<S>              >,
@@ -524,8 +545,13 @@ namespace cctmp_one_cycle_generics {
 		nik_ce auto _zip_ = U_store_T<T_zip<S>>;
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// fasten:
+// fasten (zip with a carry):
+
+/***********************************************************************************************************************/
+
+// algo:
 
 	template<auto S>
 	struct T_fasten
@@ -534,30 +560,30 @@ namespace cctmp_one_cycle_generics {
 		<
 			label<precycle_<S>>,
 
-				lift   <    end_<S> ,      pre_end_prev_<S> ,    end_<S>              >,
-				lift   <    out_<S> ,      pre_out_next_<S> ,    out_<S>              >,
-				lift   < car_in_<S> ,   pre_car_in_next_<S> , car_in_<S>              >,
-				lift   < cdr_in_<S> ,   pre_cdr_in_next_<S> , cdr_in_<S>              >,
+				lift   <    end_<S> ,     pre_end_prev_<S> ,    end_<S>              >,
+				lift   <    out_<S> ,     pre_out_next_<S> ,    out_<S>              >,
+				lift   < car_in_<S> ,  pre_car_in_next_<S> , car_in_<S>              >,
+				lift   < cdr_in_<S> ,  pre_cdr_in_next_<S> , cdr_in_<S>              >,
 
 			label<cycle_<S>>,
 
-				test   <                      loop_pred_<S> , cdr_in_<S> ,    end_<S> >,
-				branch <                      postcycle_<S>                           >,
-				lift   <    out_<S> ,          act_func_<S> , car_in_<S> , cdr_in_<S> >,
-				lift   <    out_<S> ,      combine_func_<S> , car_in_<S> , cdr_in_<S> >,
-				lift   <    out_<S> ,          out_next_<S> ,    out_<S>              >,
-				lift   < car_in_<S> ,       car_in_next_<S> , car_in_<S>              >,
-				lift   < cdr_in_<S> ,       cdr_in_next_<S> , cdr_in_<S>              >,
-				go_to  <                          cycle_<S>                           >,
+				test   <                     loop_pred_<S> , cdr_in_<S> ,    end_<S> >,
+				branch <                     postcycle_<S>                           >,
+				lift   <    _cp_    ,         act_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    out_<S> ,      assign_func_<S> ,    out_<S> ,    _ps_    >,
+				lift   <    out_<S> ,         out_next_<S> ,    out_<S>              >,
+				lift   < car_in_<S> ,      car_in_next_<S> , car_in_<S>              >,
+				lift   < cdr_in_<S> ,      cdr_in_next_<S> , cdr_in_<S>              >,
+				go_to  <                         cycle_<S>                           >,
 
 			label<postcycle_<S>>,
 
-				lift   <    out_<S> ,     post_act_func_<S> , car_in_<S> , cdr_in_<S> >,
-				lift   <    out_<S> , post_combine_func_<S> , car_in_<S> , cdr_in_<S> >,
-				lift   <    out_<S> ,     post_out_next_<S> ,    out_<S>              >,
-				lift   < car_in_<S> ,  post_car_in_next_<S> , car_in_<S>              >,
-				lift   < cdr_in_<S> ,  post_cdr_in_next_<S> , cdr_in_<S>              >,
-				lift   <    end_<S> ,     post_end_next_<S> ,    end_<S>              >,
+				lift   <    _cp_    ,    post_act_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    out_<S> , post_assign_func_<S> ,    out_<S> ,    _ps_    >,
+				lift   <    out_<S> ,    post_out_next_<S> ,    out_<S>              >,
+				lift   < car_in_<S> , post_car_in_next_<S> , car_in_<S>              >,
+				lift   < cdr_in_<S> , post_cdr_in_next_<S> , cdr_in_<S>              >,
+				lift   <    end_<S> ,    post_end_next_<S> ,    end_<S>              >,
 
 				_return_
 		>;
@@ -572,8 +598,13 @@ namespace cctmp_one_cycle_generics {
 		nik_ce auto _fasten_ = U_store_T<T_fasten<S>>;
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // glide (bifold):
+
+/***********************************************************************************************************************/
+
+// algo:
 
 	template<auto S>
 	struct T_glide

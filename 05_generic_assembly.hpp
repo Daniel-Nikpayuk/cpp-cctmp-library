@@ -267,6 +267,11 @@ namespace cctmp_generics {
 	}; template<auto f, auto f_ns_p, auto ons_p>
 		nik_ce auto _subcompose_ = U_store_T<T_subcompose<f, f_ns_p, ons_p>>;
 
+	// arg:
+
+		template<auto op, auto l, auto r0, auto... rs>
+		nik_ce auto _argcompose_ = _subcompose_<op, U_pack_Vs<l, r0, rs...>, segment<sizeof...(rs) + 2>>;
+
 /***********************************************************************************************************************/
 
 // tuple apply:
@@ -276,21 +281,6 @@ namespace cctmp_generics {
 //	{
 //		return f(tuple_value<tuple_indices>(t)...);
 //	}
-
-/***********************************************************************************************************************/
-
-// mutation:
-
-	// void assign:
-
-		template<auto l, auto r0, auto... rs>
-		nik_ce auto _void_assign_ = _subcompose_
-		<
-			_assign_,
-
-			U_pack_Vs<l, r0, rs...>,
-			segment<sizeof...(rs) + 2>
-		>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -415,11 +405,6 @@ namespace cctmp_generics {
 
 		template<auto f, nik_vp(p)(_side<f>*)>
 		nik_ce auto side_value<p> = f;
-
-	// conveniences:
-
-		template<auto... fs>
-		nik_ce auto _side_assign_ = _side_<_void_assign_<fs...>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
