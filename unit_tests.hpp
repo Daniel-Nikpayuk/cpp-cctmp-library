@@ -764,6 +764,67 @@ namespace cctmp_program
 	nik_ce auto tag_compare = T_tag_compare::template result<d, Op, V0, V1>;
 
 /***********************************************************************************************************************/
+
+// dump:
+
+	//	printf("%s\n", call<Overload::same, U_char, U_char> ? "true" : "false");
+	//	printf("%llu\n", call<Overload::map, cctmp::template increment_op<>, p>);
+	//	printf("%hu\n", call<Overload::find, cctmp::template is_zero_op<>, p>);
+
+	//	printf("%d\n",   cctmp_functional::pack_at<0, 3, 4, 5, 9>);
+	//	printf("%d\n",   cctmp_functional::list_at<p, 0>);
+	//	printf("%llu\n", cctmp_functional::pack_left<0, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_functional::list_left<p, 0>);
+	//	printf("%llu\n", cctmp_functional::pack_right<0, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_functional::list_right<p, 0>);
+
+	//	constexpr auto p_cut = cctmp_functional::pack_cut<0, 3, 4, 5, 9>;
+	//	printf("%llu, %llu\n", tuple_value<0>(p_cut), tuple_value<1>(p_cut));
+	//	constexpr auto l_cut = cctmp_functional::list_cut<p, 3>;
+	//	printf("%llu, %llu\n", tuple_value<0>(l_cut), tuple_value<1>(l_cut));
+
+	//	constexpr auto p_split = cctmp_functional::pack_split<0, 3, 4, 5, 9>;
+	//	printf("%llu, %llu\n", tuple_value<0>(p_split), tuple_value<1>(p_split));
+	//	constexpr auto l_split = cctmp_functional::list_split<p, 4>;
+	//	printf("%llu, %llu\n", tuple_value<0>(l_split), tuple_value<1>(l_split));
+
+	//	printf("%llu\n", cctmp_functional::segment<unsigned{10}>);
+
+	//	printf("%d\n", cctmp_functional::pack_fold<_add_, 0, 3, 4, 5, 9>);
+	//	printf("%d\n", cctmp_functional::list_fold<p, _add_, 0>);
+
+	//	printf("%llu\n", cctmp_functional::pack_erase<0, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_functional::list_erase<p, 0>);
+	//	printf("%llu\n", cctmp_functional::pack_insert<0, 7,    3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_functional::list_insert<p, 0, 7>);
+	//	printf("%llu\n", cctmp_functional::pack_replace<1, 7,    3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_functional::list_replace<p, 1, 7>);
+
+	//	constexpr auto H_curry_equal		= H_curry<_equal_>;
+	//	constexpr auto H_curry_less_than	= H_curry<_less_than_>;
+
+	//	printf("%llu\n", cctmp_functional::pack_insert_sort<H_curry_less_than, 0,    3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_functional::list_insert_sort<p, 0>);
+
+	//	printf("%llu\n", cctmp_functional::pack_sort<H_curry_less_than, U_null_Vs, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_functional::list_sort<p>);		// gcc 2.489s / clang 7.010s
+
+	//	printf("%llu\n", cctmp_functional::pack_union<H_curry_equal, H_curry_less_than, U_null_Vs, 9,    3, 4, 5, 9>);
+
+	//	constexpr auto def_specs	= U_pack_Vs<0, 1, 2, 3, 4, 5>;
+	//	constexpr auto specs0		= U_pack_Vs<3, 5, 0>;
+	//	printf("%llu\n", cctmp_functional::list_fill<def_specs, specs0>);
+
+	//	constexpr auto p0  = cctmp_one_cycle_specs::direct_repeat_defaults;
+	//	constexpr auto cmp = H_partial<U_custom, cctmp_one_cycle_specs::U_tag_compare, MD::initial_depth, _less_than_>;
+	//	constexpr auto p  = cctmp_functional::list_sort<p0, cmp>;
+	//	printf("%llu\n", p);
+
+	//	constexpr auto tag0 = _pre_out_next_<_id_>;
+	//	constexpr auto tag1 = _post_out_next_<_id_>;
+	//	printf("%s\n", tag_compare<cctmp::_less_than_, tag1, tag0> ? "true" : "false");
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 

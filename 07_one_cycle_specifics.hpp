@@ -27,6 +27,8 @@ namespace cctmp_one_cycle_specs {
 	nik_ce auto _one						= cctmp::_one;
 	nik_ce auto _two						= cctmp::_two;
 	nik_ce auto _three						= cctmp::_three;
+	nik_ce auto _four						= cctmp::_four;
+	nik_ce auto _five						= cctmp::_five;
 
 	nik_ce auto _id_						= cctmp::_id_;
 	nik_ce auto _equal_						= cctmp::_equal_;
@@ -42,6 +44,7 @@ namespace cctmp_one_cycle_specs {
 
 	template<auto... Vs> nik_ce auto U_pack_Vs			= cctmp::template U_pack_Vs<Vs...>;
 
+	template<auto... Vs> nik_ce auto _constant_			= cctmp::template _constant_<Vs...>;
 	template<auto... Vs> nik_ce auto _increment_			= cctmp::template _increment_<Vs...>;
 
 	template<auto... Vs> nik_ce auto alias				= cctmp::template alias<Vs...>;
@@ -75,141 +78,161 @@ namespace cctmp_one_cycle_specs {
 
 // label:
 
-	template<auto f> struct _precycle_label			{ nik_ces auto value = f; };
-	template<auto f> struct _cycle_label			{ nik_ces auto value = f; };
-	template<auto f> struct _postcycle_label		{ nik_ces auto value = f; };
+	template<auto f> struct _precycle_label				{ nik_ces auto value = f; };
+	template<auto f> struct _cycle_label				{ nik_ces auto value = f; };
+	template<auto f> struct _postcycle_label			{ nik_ces auto value = f; };
 
-	template<auto f> nik_ce auto _precycle_label_		= U_store_T<_precycle_label<f>>;
-	template<auto f> nik_ce auto _cycle_label_		= U_store_T<_cycle_label<f>>;
-	template<auto f> nik_ce auto _postcycle_label_		= U_store_T<_postcycle_label<f>>;
+	template<auto f> struct _match_label				{ nik_ces auto value = f; };
+	template<auto f> struct _postmatch_label			{ nik_ces auto value = f; };
+
+	template<auto f> struct _done_label				{ nik_ces auto value = f; };
+
+	//
+
+	template<auto f> nik_ce auto _precycle_label_			= U_store_T<_precycle_label<f>>;
+	template<auto f> nik_ce auto _cycle_label_			= U_store_T<_cycle_label<f>>;
+	template<auto f> nik_ce auto _postcycle_label_			= U_store_T<_postcycle_label<f>>;
+
+	template<auto f> nik_ce auto _match_label_			= U_store_T<_match_label<f>>;
+	template<auto f> nik_ce auto _postmatch_label_			= U_store_T<_postmatch_label<f>>;
+
+	template<auto f> nik_ce auto _done_label_			= U_store_T<_done_label<f>>;
 
 /***********************************************************************************************************************/
 
 // position:
 
-	template<auto f> struct _out_position			{ nik_ces auto value = f; };
-	template<auto f> struct _in_position			{ nik_ces auto value = f; };
-	template<auto f> struct _car_in_position		{ nik_ces auto value = f; };
-	template<auto f> struct _cdr_in_position		{ nik_ces auto value = f; };
-	template<auto f> struct _end_position			{ nik_ces auto value = f; };
+	template<auto f> struct _out_position				{ nik_ces auto value = f; };
+	template<auto f> struct _in_position				{ nik_ces auto value = f; };
+	template<auto f> struct _car_in_position			{ nik_ces auto value = f; };
+	template<auto f> struct _cdr_in_position			{ nik_ces auto value = f; };
+	template<auto f> struct _end_position				{ nik_ces auto value = f; };
 
-	template<auto f> nik_ce auto _out_position_		= U_store_T<_out_position<f>>;
-	template<auto f> nik_ce auto _in_position_		= U_store_T<_in_position<f>>;
-	template<auto f> nik_ce auto _car_in_position_		= U_store_T<_car_in_position<f>>;
-	template<auto f> nik_ce auto _cdr_in_position_		= U_store_T<_cdr_in_position<f>>;
-	template<auto f> nik_ce auto _end_position_		= U_store_T<_end_position<f>>;
+	template<auto f> nik_ce auto _out_position_			= U_store_T<_out_position<f>>;
+	template<auto f> nik_ce auto _in_position_			= U_store_T<_in_position<f>>;
+	template<auto f> nik_ce auto _car_in_position_			= U_store_T<_car_in_position<f>>;
+	template<auto f> nik_ce auto _cdr_in_position_			= U_store_T<_cdr_in_position<f>>;
+	template<auto f> nik_ce auto _end_position_			= U_store_T<_end_position<f>>;
 
 /***********************************************************************************************************************/
 
 // out:
 
-	template<auto f> struct _pre_out_next			{ nik_ces auto value = f; };
-	template<auto f> struct _out_next			{ nik_ces auto value = f; };
-	template<auto f> struct _post_out_next			{ nik_ces auto value = f; };
+	template<auto f> struct _pre_out_next				{ nik_ces auto value = f; };
+	template<auto f> struct _out_next				{ nik_ces auto value = f; };
+	template<auto f> struct _post_out_next				{ nik_ces auto value = f; };
+	template<auto f> struct _match_out_next				{ nik_ces auto value = f; };
+	template<auto f> struct _postmatch_out_next			{ nik_ces auto value = f; };
 
-	template<auto f> nik_ce auto _pre_out_next_		= U_store_T<_pre_out_next<f>>;
-	template<auto f> nik_ce auto _out_next_			= U_store_T<_out_next<f>>;
-	template<auto f> nik_ce auto _post_out_next_		= U_store_T<_post_out_next<f>>;
+	template<auto f> nik_ce auto _pre_out_next_			= U_store_T<_pre_out_next<f>>;
+	template<auto f> nik_ce auto _out_next_				= U_store_T<_out_next<f>>;
+	template<auto f> nik_ce auto _post_out_next_			= U_store_T<_post_out_next<f>>;
+	template<auto f> nik_ce auto _match_out_next_			= U_store_T<_match_out_next<f>>;
+	template<auto f> nik_ce auto _postmatch_out_next_		= U_store_T<_postmatch_out_next<f>>;
 
 /***********************************************************************************************************************/
 
 // in:
 
-	template<auto f> struct _pre_in_next			{ nik_ces auto value = f; };
-	template<auto f> struct _in_next			{ nik_ces auto value = f; };
-	template<auto f> struct _post_in_next			{ nik_ces auto value = f; };
+	template<auto f> struct _pre_in_next				{ nik_ces auto value = f; };
+	template<auto f> struct _in_next				{ nik_ces auto value = f; };
+	template<auto f> struct _post_in_next				{ nik_ces auto value = f; };
+	template<auto f> struct _match_in_next				{ nik_ces auto value = f; };
 
-	template<auto f> nik_ce auto _pre_in_next_		= U_store_T<_pre_in_next<f>>;
-	template<auto f> nik_ce auto _in_next_			= U_store_T<_in_next<f>>;
-	template<auto f> nik_ce auto _post_in_next_		= U_store_T<_post_in_next<f>>;
+	template<auto f> nik_ce auto _pre_in_next_			= U_store_T<_pre_in_next<f>>;
+	template<auto f> nik_ce auto _in_next_				= U_store_T<_in_next<f>>;
+	template<auto f> nik_ce auto _post_in_next_			= U_store_T<_post_in_next<f>>;
+	template<auto f> nik_ce auto _match_in_next_			= U_store_T<_match_in_next<f>>;
 
 /***********************************************************************************************************************/
 
 // car in:
 
-	template<auto f> struct _pre_car_in_next		{ nik_ces auto value = f; };
-	template<auto f> struct _car_in_next			{ nik_ces auto value = f; };
-	template<auto f> struct _post_car_in_next		{ nik_ces auto value = f; };
+	template<auto f> struct _pre_car_in_next			{ nik_ces auto value = f; };
+	template<auto f> struct _car_in_next				{ nik_ces auto value = f; };
+	template<auto f> struct _post_car_in_next			{ nik_ces auto value = f; };
 
-	template<auto f> nik_ce auto _pre_car_in_next_		= U_store_T<_pre_car_in_next<f>>;
-	template<auto f> nik_ce auto _car_in_next_		= U_store_T<_car_in_next<f>>;
-	template<auto f> nik_ce auto _post_car_in_next_		= U_store_T<_post_car_in_next<f>>;
+	template<auto f> nik_ce auto _pre_car_in_next_			= U_store_T<_pre_car_in_next<f>>;
+	template<auto f> nik_ce auto _car_in_next_			= U_store_T<_car_in_next<f>>;
+	template<auto f> nik_ce auto _post_car_in_next_			= U_store_T<_post_car_in_next<f>>;
 
 /***********************************************************************************************************************/
 
 // cdr in:
 
-	template<auto f> struct _pre_cdr_in_next		{ nik_ces auto value = f; };
-	template<auto f> struct _cdr_in_next			{ nik_ces auto value = f; };
-	template<auto f> struct _post_cdr_in_next		{ nik_ces auto value = f; };
+	template<auto f> struct _pre_cdr_in_next			{ nik_ces auto value = f; };
+	template<auto f> struct _cdr_in_next				{ nik_ces auto value = f; };
+	template<auto f> struct _post_cdr_in_next			{ nik_ces auto value = f; };
 
-	template<auto f> nik_ce auto _pre_cdr_in_next_		= U_store_T<_pre_cdr_in_next<f>>;
-	template<auto f> nik_ce auto _cdr_in_next_		= U_store_T<_cdr_in_next<f>>;
-	template<auto f> nik_ce auto _post_cdr_in_next_		= U_store_T<_post_cdr_in_next<f>>;
+	template<auto f> nik_ce auto _pre_cdr_in_next_			= U_store_T<_pre_cdr_in_next<f>>;
+	template<auto f> nik_ce auto _cdr_in_next_			= U_store_T<_cdr_in_next<f>>;
+	template<auto f> nik_ce auto _post_cdr_in_next_			= U_store_T<_post_cdr_in_next<f>>;
 
 /***********************************************************************************************************************/
 
 // end:
 
-	template<auto f> struct _pre_end_prev			{ nik_ces auto value = f; };
-	template<auto f> struct _end_prev			{ nik_ces auto value = f; };
+	template<auto f> struct _pre_end_prev				{ nik_ces auto value = f; };
+	template<auto f> struct _end_prev				{ nik_ces auto value = f; };
 
-	template<auto f> struct _end_next			{ nik_ces auto value = f; };
-	template<auto f> struct _post_end_next			{ nik_ces auto value = f; };
+	template<auto f> struct _end_next				{ nik_ces auto value = f; };
+	template<auto f> struct _post_end_next				{ nik_ces auto value = f; };
 
-	template<auto f> nik_ce auto _pre_end_prev_		= U_store_T<_pre_end_prev<f>>;
-	template<auto f> nik_ce auto _end_prev_			= U_store_T<_end_prev<f>>;
+	template<auto f> nik_ce auto _pre_end_prev_			= U_store_T<_pre_end_prev<f>>;
+	template<auto f> nik_ce auto _end_prev_				= U_store_T<_end_prev<f>>;
 
-	template<auto f> nik_ce auto _end_next_			= U_store_T<_end_next<f>>;
-	template<auto f> nik_ce auto _post_end_next_		= U_store_T<_post_end_next<f>>;
+	template<auto f> nik_ce auto _end_next_				= U_store_T<_end_next<f>>;
+	template<auto f> nik_ce auto _post_end_next_			= U_store_T<_post_end_next<f>>;
 
 /***********************************************************************************************************************/
 
 // loop:
 
-	template<auto f> struct _loop_predicate			{ nik_ces auto value = f; };
+	template<auto f> struct _loop_predicate				{ nik_ces auto value = f; };
 
-	template<auto f> nik_ce auto _loop_predicate_		= U_store_T<_loop_predicate<f>>;
-
-/***********************************************************************************************************************/
-
-// value:
-
-	template<auto f> struct _value_predicate		{ nik_ces auto value = f; };
-
-	template<auto f> nik_ce auto _value_predicate_		= U_store_T<_value_predicate<f>>;
+	template<auto f> nik_ce auto _loop_predicate_			= U_store_T<_loop_predicate<f>>;
 
 /***********************************************************************************************************************/
 
 // act:
 
-	template<auto f> struct _act_predicate			{ nik_ces auto value = f; };
-	template<auto f> struct _act_function			{ nik_ces auto value = f; };
-	template<auto f> struct _post_act_function		{ nik_ces auto value = f; };
+	template<auto f> struct _act_predicate				{ nik_ces auto value = f; };
+	template<auto f> struct _post_act_predicate			{ nik_ces auto value = f; };
 
-	template<auto f> nik_ce auto _act_predicate_		= U_store_T<_act_predicate<f>>;
-	template<auto f> nik_ce auto _act_function_		= U_store_T<_act_function<f>>;
-	template<auto f> nik_ce auto _post_act_function_	= U_store_T<_post_act_function<f>>;
+	template<auto f> struct _act_function				{ nik_ces auto value = f; };
+	template<auto f> struct _post_act_function			{ nik_ces auto value = f; };
+
+	//
+
+	template<auto f> nik_ce auto _act_predicate_			= U_store_T<_act_predicate<f>>;
+	template<auto f> nik_ce auto _post_act_predicate_		= U_store_T<_post_act_predicate<f>>;
+
+	template<auto f> nik_ce auto _act_function_			= U_store_T<_act_function<f>>;
+	template<auto f> nik_ce auto _post_act_function_		= U_store_T<_post_act_function<f>>;
 
 /***********************************************************************************************************************/
 
 // combine:
 
-	template<auto f> struct _combine_function		{ nik_ces auto value = f; };
-	template<auto f> struct _post_combine_function		{ nik_ces auto value = f; };
+	template<auto f> struct _combine_function			{ nik_ces auto value = f; };
+	template<auto f> struct _post_combine_function			{ nik_ces auto value = f; };
 
-	template<auto f> nik_ce auto _combine_function_		= U_store_T<_combine_function<f>>;
-	template<auto f> nik_ce auto _post_combine_function_	= U_store_T<_post_combine_function<f>>;
+	template<auto f> nik_ce auto _combine_function_			= U_store_T<_combine_function<f>>;
+	template<auto f> nik_ce auto _post_combine_function_		= U_store_T<_post_combine_function<f>>;
 
 /***********************************************************************************************************************/
 
 // assign:
 
-	template<auto f> struct _assign_function		{ nik_ces auto value = _side_<f>; };
-	template<auto f> struct _post_assign_function		{ nik_ces auto value = _side_<f>; };
+	template<auto f> struct _assign_function			{ nik_ces auto value = _side_<f>; };
+	template<auto f> struct _post_assign_function			{ nik_ces auto value = _side_<f>; };
+	template<auto f> struct _match_assign_function			{ nik_ces auto value = _side_<f>; };
+	template<auto f> struct _postmatch_assign_function		{ nik_ces auto value = _side_<f>; };
 
-	template<auto f> nik_ce auto _assign_function_		= U_store_T<_assign_function<f>>;
-	template<auto f> nik_ce auto _post_assign_function_	= U_store_T<_post_assign_function<f>>;
+	template<auto f> nik_ce auto _assign_function_			= U_store_T<_assign_function<f>>;
+	template<auto f> nik_ce auto _post_assign_function_		= U_store_T<_post_assign_function<f>>;
+	template<auto f> nik_ce auto _match_assign_function_		= U_store_T<_match_assign_function<f>>;
+	template<auto f> nik_ce auto _postmatch_assign_function_	= U_store_T<_postmatch_assign_function<f>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -544,6 +567,27 @@ namespace cctmp_one_cycle_specs {
 	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
 	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
 
+/*
+	template
+	<
+		auto LoopSpec		= _loop_predicate
+					<
+					    _op   , _equal_
+					>,
+		auto ActSpec		= _act_function
+					<
+					    _op   , _assign_           ,
+					    _arg  , Argument::deref    ,
+					    _arg  , Argument::direct
+					>,
+		auto OutSpec		= _out_next
+					<
+					    _dir  , Direction::forward ,
+					    _inc  , _one               ,
+					    _ival , Interval::closing
+					>
+*/
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -635,12 +679,196 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
+// specification:
+
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto MatchLabel, auto PostcycleLabel, auto DoneLabel,
+		auto OutPosition, auto InPosition, auto EndPosition,
+		auto PreInNext,
+		auto LoopPredicate, auto ActPredicate, auto InNext,
+		auto MatchAssignFunction, auto MatchOutNext,
+		auto PostActPredicate
+	>
+	struct T_find_first_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto     match_label		=     MatchLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+		nik_ces auto      done_label		=      DoneLabel;
+
+		nik_ces auto out_position		= OutPosition;
+		nik_ces auto  in_position		=  InPosition;
+		nik_ces auto end_position		= EndPosition;
+
+		nik_ces auto  pre_in_next		= PreInNext;
+
+		nik_ces auto loop_predicate		= LoopPredicate;
+		nik_ces auto  act_predicate		=  ActPredicate;
+		nik_ces auto   in_next			=   InNext;
+
+		nik_ces auto match_assign_function	= MatchAssignFunction;
+		nik_ces auto    match_out_next		=    MatchOutNext;
+
+		nik_ces auto post_act_predicate		= PostActPredicate;
+	};
+
+	nik_ce auto H_find_first_specification = U_store_B<T_find_first_specification>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// interpretation:
+
+/***********************************************************************************************************************/
+
+// direct:
+
+	// default:
+
+		nik_ce auto direct_find_first_defaults = U_pack_Vs
+		<
+			_precycle_label_        < _zero             >,
+			_cycle_label_           < _one              >,
+			_match_label_           < _two              >,
+			_postcycle_label_       < _three            >,
+			_done_label_            < _four             >,
+
+			_out_position_          < _zero             >,
+			_in_position_           < _one              >,
+			_end_position_          < _two              >,
+
+			_pre_in_next_           < _id_              >,
+
+			_loop_predicate_        < _equal_           >,
+			_act_predicate_         < _constant_<false> >,
+			_in_next_               < _increment_<>     >,
+
+			_match_assign_function_ < _d_assign_i_      >,
+			_match_out_next_        < _increment_<>     >,
+
+			_post_act_predicate_    < _constant_<false> >
+		>;
+
+	// spec:
+
+		template<auto... Vs>
+		nik_ce auto direct_find_first = direct_to_spec
+		<
+			direct_write<direct_find_first_defaults, Vs...>,
+			H_find_first_specification
+		>;
+
+/***********************************************************************************************************************/
+
+// conceptual:
+
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // (find) all:
 
 /***********************************************************************************************************************/
+
+// specification:
+
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto MatchLabel, auto PostcycleLabel, auto PostmatchLabel, auto DoneLabel,
+		auto OutPosition, auto InPosition, auto EndPosition,
+		auto PreInNext,
+		auto LoopPredicate, auto ActPredicate, auto InNext,
+		auto MatchAssignFunction, auto MatchOutNext, auto MatchInNext,
+		auto PostActPredicate,
+		auto PostmatchAssignFunction, auto PostmatchOutNext
+	>
+	struct T_find_all_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto     match_label		=     MatchLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+		nik_ces auto postmatch_label		= PostmatchLabel;
+		nik_ces auto      done_label		=      DoneLabel;
+
+		nik_ces auto out_position		= OutPosition;
+		nik_ces auto  in_position		=  InPosition;
+		nik_ces auto end_position		= EndPosition;
+
+		nik_ces auto  pre_in_next		= PreInNext;
+
+		nik_ces auto loop_predicate		= LoopPredicate;
+		nik_ces auto  act_predicate		=  ActPredicate;
+		nik_ces auto   in_next			=   InNext;
+
+		nik_ces auto match_assign_function	= MatchAssignFunction;
+		nik_ces auto    match_out_next		=    MatchOutNext;
+		nik_ces auto     match_in_next		=     MatchInNext;
+
+		nik_ces auto post_act_predicate		= PostActPredicate;
+
+		nik_ces auto postmatch_assign_function	= PostmatchAssignFunction;
+		nik_ces auto    postmatch_out_next	=    PostmatchOutNext;
+	};
+
+	nik_ce auto H_find_all_specification = U_store_B<T_find_all_specification>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// interpretation:
+
+/***********************************************************************************************************************/
+
+// direct:
+
+	// default:
+
+		nik_ce auto direct_find_all_defaults = U_pack_Vs
+		<
+			_precycle_label_            < _zero             >,
+			_cycle_label_               < _one              >,
+			_match_label_               < _two              >,
+			_postcycle_label_           < _three            >,
+			_postmatch_label_           < _four             >,
+			_done_label_                < _five             >,
+
+			_out_position_              < _zero             >,
+			_in_position_               < _one              >,
+			_end_position_              < _two              >,
+
+			_pre_in_next_               < _id_              >,
+
+			_loop_predicate_            < _equal_           >,
+			_act_predicate_             < _constant_<false> >,
+			_in_next_                   < _increment_<>     >,
+
+			_match_assign_function_     < _d_assign_i_      >,
+			_match_out_next_            < _increment_<>     >,
+			 _match_in_next_            < _increment_<>     >,
+
+			_post_act_predicate_        < _constant_<false> >,
+
+			_postmatch_assign_function_ < _d_assign_i_      >,
+			_postmatch_out_next_        < _increment_<>     >
+		>;
+
+	// spec:
+
+		template<auto... Vs>
+		nik_ce auto direct_find_all = direct_to_spec
+		<
+			direct_write<direct_find_all_defaults, Vs...>,
+			H_find_all_specification
+		>;
+
+/***********************************************************************************************************************/
+
+// conceptual:
+
+
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -991,25 +1219,4 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 
 } // cctmp_one_cycle_specs
-
-/*
-	template
-	<
-		auto LoopSpec		= _loop_predicate
-					<
-					    _op   , _equal_
-					>,
-		auto ActSpec		= _act_function
-					<
-					    _op   , _assign_           ,
-					    _arg  , Argument::deref    ,
-					    _arg  , Argument::direct
-					>,
-		auto OutSpec		= _out_next
-					<
-					    _dir  , Direction::forward ,
-					    _inc  , _one               ,
-					    _ival , Interval::closing
-					>
-*/
 

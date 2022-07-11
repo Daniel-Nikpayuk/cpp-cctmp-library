@@ -105,10 +105,12 @@
 
 	constexpr auto _id_			= cctmp::_id_;
 	constexpr auto _add_			= cctmp::_add_;
+	constexpr auto _is_25_			= cctmp::template _is_equal_<25>;
 	constexpr auto _assign_			= cctmp::_assign_;
 	constexpr auto _deref_			= cctmp::_dereference_;
 
 	constexpr auto _add_dd_			= cctmp_generics::template _argcompose_<_add_, _deref_, _deref_>;
+	constexpr auto _is_25_d_		= cctmp_generics::template _argcompose_<_is_25_, _deref_>;
 
 	constexpr auto _d_assign_i_		= cctmp_generics::template _argcompose_<_assign_, _deref_, _id_>;
 	constexpr auto _d_assign_sq_		= cctmp_generics::template _argcompose_<_assign_, _deref_, _sq_>;
@@ -147,6 +149,17 @@
 	constexpr auto fold_dspec_add_		= cctmp_one_cycle_specs::template direct_fold<_fold_function_add_>;
 	using T_fold_add			= typename cctmp_one_cycle_generics::template T_fold<fold_dspec_add_>;
 
+// find first:
+
+	constexpr auto _find_first_pred_is_25_	= cctmp_one_cycle_specs::template _act_predicate_<_is_25_d_>;
+	constexpr auto find_first_dspec_is_25_	= cctmp_one_cycle_specs::template direct_find_first<_find_first_pred_is_25_>;
+	using T_find_first_is_25		= typename cctmp_one_cycle_generics::template T_find_first<find_first_dspec_is_25_>;
+
+// find all:
+
+	constexpr auto find_all_dspec_is_25_	= cctmp_one_cycle_specs::template direct_find_all<_find_first_pred_is_25_>;
+	using T_find_all_is_25			= typename cctmp_one_cycle_generics::template T_find_all<find_all_dspec_is_25_>;
+
 // zip:
 
 	constexpr auto _zip_function_add_	= cctmp_one_cycle_specs::template _act_function_<_add_dd_>;
@@ -156,6 +169,21 @@
 							_zip_function_add_, _zip_assign_
 						>;
 	using T_zip_add				= typename cctmp_one_cycle_generics::template T_zip<zip_dspec_add_>;
+
+// fasten:
+
+//	template<
+//	constexpr auto _fasten_assign_()
+//	{
+//	}
+
+//	constexpr auto _fasten_function_add_	= cctmp_one_cycle_specs::template _act_function_<_add_dd_>;
+//	constexpr auto _fasten_assign_		= cctmp_one_cycle_specs::template _assign_function_<_d_assign_i_>;
+//	constexpr auto fasten_dspec_add_	= cctmp_one_cycle_specs::template direct_fasten
+//						<
+//							_fasten_function_add_, _fasten_assign_
+//						>;
+//	using T_fasten_add				= typename cctmp_one_cycle_generics::template T_fasten<fasten_dspec_add_>;
 
 // glide:
 
@@ -171,68 +199,12 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	printf("%s\n", call<Overload::same, U_char, U_char> ? "true" : "false");
-	//	printf("%llu\n", call<Overload::map, cctmp::template increment_op<>, p>);
-	//	printf("%hu\n", call<Overload::find, cctmp::template is_zero_op<>, p>);
-
-	//	printf("%d\n",   cctmp_functional::pack_at<0, 3, 4, 5, 9>);
-	//	printf("%d\n",   cctmp_functional::list_at<p, 0>);
-	//	printf("%llu\n", cctmp_functional::pack_left<0, 3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_left<p, 0>);
-	//	printf("%llu\n", cctmp_functional::pack_right<0, 3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_right<p, 0>);
-
-	//	constexpr auto p_cut = cctmp_functional::pack_cut<0, 3, 4, 5, 9>;
-	//	printf("%llu, %llu\n", tuple_value<0>(p_cut), tuple_value<1>(p_cut));
-	//	constexpr auto l_cut = cctmp_functional::list_cut<p, 3>;
-	//	printf("%llu, %llu\n", tuple_value<0>(l_cut), tuple_value<1>(l_cut));
-
-	//	constexpr auto p_split = cctmp_functional::pack_split<0, 3, 4, 5, 9>;
-	//	printf("%llu, %llu\n", tuple_value<0>(p_split), tuple_value<1>(p_split));
-	//	constexpr auto l_split = cctmp_functional::list_split<p, 4>;
-	//	printf("%llu, %llu\n", tuple_value<0>(l_split), tuple_value<1>(l_split));
-
-	//	printf("%llu\n", cctmp_functional::segment<unsigned{10}>);
-
-	//	printf("%d\n", cctmp_functional::pack_fold<_add_, 0, 3, 4, 5, 9>);
-	//	printf("%d\n", cctmp_functional::list_fold<p, _add_, 0>);
-
-	//	printf("%llu\n", cctmp_functional::pack_erase<0, 3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_erase<p, 0>);
-	//	printf("%llu\n", cctmp_functional::pack_insert<0, 7,    3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_insert<p, 0, 7>);
-	//	printf("%llu\n", cctmp_functional::pack_replace<1, 7,    3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_replace<p, 1, 7>);
-
-	//	constexpr auto H_curry_equal		= H_curry<_equal_>;
-	//	constexpr auto H_curry_less_than	= H_curry<_less_than_>;
-
-	//	printf("%llu\n", cctmp_functional::pack_insert_sort<H_curry_less_than, 0,    3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_insert_sort<p, 0>);
-
-	//	printf("%llu\n", cctmp_functional::pack_sort<H_curry_less_than, U_null_Vs, 3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_sort<p>);		// gcc 2.489s / clang 7.010s
-
-	//	printf("%llu\n", cctmp_functional::pack_union<H_curry_equal, H_curry_less_than, U_null_Vs, 9,    3, 4, 5, 9>);
-
-	//	constexpr auto def_specs	= U_pack_Vs<0, 1, 2, 3, 4, 5>;
-	//	constexpr auto specs0		= U_pack_Vs<3, 5, 0>;
-	//	printf("%llu\n", cctmp_functional::list_fill<def_specs, specs0>);
-
-	//	constexpr auto p0  = cctmp_one_cycle_specs::direct_repeat_defaults;
-	//	constexpr auto cmp = H_partial<U_custom, cctmp_one_cycle_specs::U_tag_compare, MD::initial_depth, _less_than_>;
-	//	constexpr auto p  = cctmp_functional::list_sort<p0, cmp>;
-	//	printf("%llu\n", p);
-
-	//	constexpr auto tag0 = _pre_out_next_<_id_>;
-	//	constexpr auto tag1 = _post_out_next_<_id_>;
-	//	printf("%s\n", tag_compare<cctmp::_less_than_, tag1, tag0> ? "true" : "false");
-
 		int size = 10;//argc;
 
-		int arr[size];
-		int arr_id[size];
-		int arr_sq[size];
+		int  arr[size];
+		int  arr_id[size];
+		int  arr_sq[size];
+		int* arr_ptr[size];
 
 // repeat:
 
@@ -253,7 +225,25 @@
 	//	auto val = T_fold_add::template result(0, 0, size);
 	//	printf("%d\n", val);
 
-// find:
+// find first:
+
+	//	T_map_sq::template result(arr_sq, 0, size);
+
+	//	auto val = T_find_first_is_25::template result(arr_ptr, arr_sq, arr_sq+size);
+	//	printf("%ld\n", val - arr_ptr);
+	//	printf("%ld\n", *arr_ptr - arr_sq);
+
+// find all:
+
+	//	T_map_sq::template result(arr_sq, 0, size);
+	//	arr_sq[3] = 25;
+	//	arr_sq[8] = 25;
+
+	//	auto val = T_find_all_is_25::template result(arr_ptr, arr_sq, arr_sq+size);
+	//	printf("%ld\n", val - arr_ptr);
+	//	printf("%ld\n", arr_ptr[0] - arr_sq);
+	//	printf("%ld\n", arr_ptr[1] - arr_sq);
+	//	printf("%ld\n", arr_ptr[2] - arr_sq);
 
 // zip:
 
@@ -261,6 +251,14 @@
 	//	T_map_sq::template result(arr_sq, 0, size);
 
 	//	T_zip_add::template result(arr, arr_id, arr_sq, arr_sq+size);
+	//	print_array(arr, arr+size);
+
+// fasten:
+
+	//	T_map_id::template result(arr_id, 0, size);
+	//	T_map_sq::template result(arr_sq, 0, size);
+
+	//	T_fasten_add::template result(arr, arr_id, arr_sq, arr_sq+size);
 	//	print_array(arr, arr+size);
 
 // glide:

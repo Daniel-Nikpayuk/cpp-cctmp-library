@@ -20,6 +20,7 @@
 namespace cctmp_one_cycle_generics {
 
 	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
+	template<typename... Ts> using tuple			= typename cctmp::template tuple<Ts...>;
 
 	nik_ce auto _return_					= cctmp_generics::_return_;
 
@@ -50,6 +51,9 @@ namespace cctmp_one_cycle_generics {
 	template<auto S> nik_ce auto  precycle_			= T_store_U<S>::precycle_label;
 	template<auto S> nik_ce auto     cycle_			= T_store_U<S>::cycle_label;
 	template<auto S> nik_ce auto postcycle_			= T_store_U<S>::postcycle_label;
+	template<auto S> nik_ce auto     match_			= T_store_U<S>::match_label;
+	template<auto S> nik_ce auto postmatch_			= T_store_U<S>::postmatch_label;
+	template<auto S> nik_ce auto      done_			= T_store_U<S>::done_label;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -67,7 +71,9 @@ namespace cctmp_one_cycle_generics {
 
 	template<auto S> nik_ce auto pre_out_next_		= T_store_U<S>::pre_out_next;
 	template<auto S> nik_ce auto out_next_			= T_store_U<S>::out_next;
+	template<auto S> nik_ce auto match_out_next_		= T_store_U<S>::match_out_next;
 	template<auto S> nik_ce auto post_out_next_		= T_store_U<S>::post_out_next;
+	template<auto S> nik_ce auto postmatch_out_next_	= T_store_U<S>::postmatch_out_next;
 
 /***********************************************************************************************************************/
 
@@ -79,6 +85,7 @@ namespace cctmp_one_cycle_generics {
 
 	template<auto S> nik_ce auto pre_in_next_		= T_store_U<S>::pre_in_next;
 	template<auto S> nik_ce auto in_next_			= T_store_U<S>::in_next;
+	template<auto S> nik_ce auto match_in_next_		= T_store_U<S>::match_in_next;
 	template<auto S> nik_ce auto post_in_next_		= T_store_U<S>::post_in_next;
 
 /***********************************************************************************************************************/
@@ -120,12 +127,6 @@ namespace cctmp_one_cycle_generics {
 	template<auto S> nik_ce auto post_end_next_		= T_store_U<S>::post_end_next;
 
 /***********************************************************************************************************************/
-
-// return:
-
-//	template<auto S> using return_type_			= typename T_store_U<S>::return_type;
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -139,15 +140,10 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
-// value:
-
-	template<auto S> nik_ce auto value_pred_		= T_store_U<S>::value_predicate;
-
-/***********************************************************************************************************************/
-
 // act:
 
 	template<auto S> nik_ce auto act_pred_			= T_store_U<S>::act_predicate;
+	template<auto S> nik_ce auto post_act_pred_		= T_store_U<S>::post_act_predicate;
 
 	template<auto S> nik_ce auto act_func_			= T_store_U<S>::act_function;
 	template<auto S> nik_ce auto post_act_func_		= T_store_U<S>::post_act_function;
@@ -165,6 +161,8 @@ namespace cctmp_one_cycle_generics {
 
 	template<auto S> nik_ce auto assign_func_		= T_store_U<S>::assign_function;
 	template<auto S> nik_ce auto post_assign_func_		= T_store_U<S>::post_assign_function;
+	template<auto S> nik_ce auto match_assign_func_		= T_store_U<S>::match_assign_function;
+	template<auto S> nik_ce auto postmatch_assign_func_	= T_store_U<S>::postmatch_assign_function;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -307,84 +305,16 @@ namespace cctmp_one_cycle_generics {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// find:
-
-/***********************************************************************************************************************/
-
-// message specs:
-
-	// break:
-
-		enum struct Break
-		{
-			pre_value,
-			post_value,
-
-			pre_act1,
-			pre_act2,
-			pre_act,
-			post_act,
-
-			pre_combine1,
-			pre_combine2,
-			pre_combine,
-			post_combine,
-
-			pre_next,
-			post_next,
-
-			dimension // filler
-		};
-
-	// predicates:
-
-		// value:
-
-			nik_ce auto _is_pre_value_				= _is_equal_<Break::pre_value>;
-			nik_ce auto _is_post_value_				= _is_equal_<Break::post_value>;
-
-		// act:
-
-			nik_ce auto _is_pre_act_				= _is_equal_<Break::pre_act>;
-			nik_ce auto _is_post_act_				= _is_equal_<Break::post_act>;
-
-		// combine:
-
-			nik_ce auto _is_pre_combine_				= _is_equal_<Break::pre_combine>;
-			nik_ce auto _is_post_combine_				= _is_equal_<Break::post_combine>;
-
-		// next:
-
-			nik_ce auto _is_pre_next_				= _is_equal_<Break::pre_next>;
-			nik_ce auto _is_post_next_				= _is_equal_<Break::post_next>;
-
-	// constants:
-
-		// value:
-
-			nik_ce auto _br_pre_value_				= _constant_<Break::pre_value>;
-			nik_ce auto _br_post_value_				= _constant_<Break::post_value>;
-
-		// act:
-
-			nik_ce auto _br_pre_act_				= _constant_<Break::pre_act>;
-			nik_ce auto _br_post_act_				= _constant_<Break::post_act>;
-
-		// combine:
-
-			nik_ce auto _br_pre_combine_				= _constant_<Break::pre_combine>;
-			nik_ce auto _br_post_combine_				= _constant_<Break::post_combine>;
-
-		// next:
-
-			nik_ce auto _br_pre_next_				= _constant_<Break::pre_next>;
-			nik_ce auto _br_post_next_				= _constant_<Break::post_next>;
-
-/***********************************************************************************************************************/
-
 // (find) first:
 
-/*
+/***********************************************************************************************************************/
+
+// algo:
+
+		// If the in iterator is privileged for all interval types,
+		// then the out iterator is restricted to being an opening interval,
+		// so as to indicate whether or not a match was found.
+
 	template<auto S>
 	struct T_find_first
 	{
@@ -392,91 +322,29 @@ namespace cctmp_one_cycle_generics {
 		<
 			label<precycle_<S>>,
 
-				lift   <  in_<S> , pre_in_next_<S> ,  in_<S>           >,
+				lift   <  in_<S> ,       pre_in_next_<S> ,  in_<S>           >,
 
 			label<cycle_<S>>,
 
-				test   <             loop_pred_<S> ,  in_<S> , end_<S> >,
-				branch <             postcycle_<S>                     >,
-				test   <              act_pred_<S> ,  in_<S>           >,
-				branch <              postmatch                        >,
-				lift   <  in_<S> ,     in_next_<S> ,  in_<S>           >,
-				go_to  <                 cycle_<S>                     >,
+				test   <                   loop_pred_<S> ,  in_<S> , end_<S> >,
+				branch <                   postcycle_<S>                     >,
+				test   <                    act_pred_<S> ,  in_<S>           >,
+				branch <                       match_<S>                     >,
+				lift   <  in_<S> ,           in_next_<S> ,  in_<S>           >,
+				go_to  <                       cycle_<S>                     >,
+
+			label<match_<S>>,
+
+				lift   < out_<S> , match_assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,    match_out_next_<S> , out_<S>           >,
+				go_to  <                        done_<S>                     >,
 
 			label<postcycle_<S>>,
 
-				lift   < out_<S> ,    act_func_<S> , end_<S>           >,
-				lift   < msg_<S> ,    msg_func_<S> , end_<S>           >,
-				go_to  <                 done                          >,
+				test   <               post_act_pred_<S> ,  in_<S>           >,
+				branch <                       match_<S>                     >,
 
-			label<postmatch>,
-
-				lift   < out_<S> ,    act_func_<S> ,  in_<S>           >,
-				lift   < msg_<S> ,    msg_func_<S> ,  in_<S>           >,
-
-			label<done>,
-
-				_pair_ < out_<S> ,         msg_<S>                     >
-		>;
-
-		template<typename InType, typename EndType>
-		nik_ces auto result(InType i, EndType e)
-		{
-			return cctmp_generics::template call<object, InType>(e, i, e);
-		}
-
-	}; template<auto S>
-		nik_ce auto _find_first_ = U_store_T<T_find_first<S>>;
-*/
-
-/***********************************************************************************************************************/
-
-// (find) all:
-
-/*
-	template<auto S>
-	struct T_find_all
-	{
-		nik_ces auto object = parse
-		<
-			label<precycle_<S>>,
-
-				lift   < end_<S> ,  pre_end_prev_<S> , end_<S>           >,
-				lift   < out_<S> ,  pre_out_next_<S> , out_<S>           >,
-				lift   <  in_<S> ,   pre_in_next_<S> ,  in_<S>           >,
-
-			label<cycle_<S>>,
-
-				test   <               loop_pred_<S> ,  in_<S> , end_<S> >,
-				branch <               postcycle_<S>                     >,
-				lift   < out_<S> ,    value_pred_<S> ,  in_<S>           >,
-				test   <                act_pred_<S> ,  in_<S> , end_<S> >,
-				branch <                actcycle                         >,
-				go_to  <                nextcycle                        >,
-
-			label<actcycle>,
-
-				lift   < out_<S> ,      act_func_<S> ,  in_<S>           >,
-
-			label<contcycle>,
-
-				test   <                act_pred_<S> ,  in_<S> , end_<S> >,
-				branch <                 nextcycle                       >,
-				lift   <  in_<S> ,       in_next_<S> ,  in_<S>           >,
-				go_to  <                   cycle_<S>                     >,
-
-			label<nextcycle>,
-
-				lift   < out_<S> ,      out_next_<S> , out_<S>           >,
-				lift   <  in_<S> ,       in_next_<S> , in_<S>            >,
-				go_to  <                   cycle_<S>                     >,
-
-			label<postcycle_<S>>,
-
-				lift   < out_<S> , post_act_func_<S> ,  in_<S>           >,
-				lift   < out_<S> , post_out_next_<S> , out_<S>           >,
-				lift   <  in_<S> ,  post_in_next_<S> ,  in_<S>           >,
-				lift   < end_<S> , post_end_next_<S> , end_<S>           >,
+			label<done_<S>>,
 
 				_return_
 		>;
@@ -484,12 +352,74 @@ namespace cctmp_one_cycle_generics {
 		template<typename OutType, typename InType, typename EndType>
 		nik_ces auto result(OutType o, InType i, EndType e)
 		{
-			return cctmp_generics::template call<object, OutType>(o, i, e, false);
+			return cctmp_generics::template call<object, OutType>(o, i, e);
+		}
+
+	}; template<auto S>
+		nik_ce auto _find_first_ = U_store_T<T_find_first<S>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// (find) all:
+
+/***********************************************************************************************************************/
+
+// algo:
+
+		// If the in iterator is privileged for all interval types,
+		// then the out iterator is restricted to being an opening interval,
+		// so as to indicate whether or not a match was found.
+
+	template<auto S>
+	struct T_find_all
+	{
+		nik_ces auto object = parse
+		<
+			label<precycle_<S>>,
+
+				lift   <  in_<S> ,           pre_in_next_<S> ,  in_<S>           >,
+
+			label<cycle_<S>>,
+
+				test   <                       loop_pred_<S> ,  in_<S> , end_<S> >,
+				branch <                       postcycle_<S>                     >,
+				test   <                        act_pred_<S> ,  in_<S>           >,
+				branch <                           match_<S>                     >,
+				lift   <  in_<S> ,               in_next_<S> ,  in_<S>           >,
+				go_to  <                           cycle_<S>                     >,
+
+			label<match_<S>>,
+
+				lift   < out_<S> ,     match_assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,        match_out_next_<S> , out_<S>           >,
+				lift   <  in_<S> ,         match_in_next_<S> ,  in_<S>           >,
+				go_to  <                           cycle_<S>                     >,
+
+			label<postcycle_<S>>,
+
+				test   <                   post_act_pred_<S> ,  in_<S>           >,
+				branch <                       postmatch_<S>                     >,
+				go_to  <                            done_<S>                     >,
+
+			label<postmatch_<S>>,
+
+				lift   < out_<S> , postmatch_assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,    postmatch_out_next_<S> , out_<S>           >,
+
+			label<done_<S>>,
+
+				_return_
+		>;
+
+		template<typename OutType, typename InType, typename EndType>
+		nik_ces auto result(OutType o, InType i, EndType e)
+		{
+			return cctmp_generics::template call<object, OutType>(o, i, e);
 		}
 
 	}; template<auto S>
 		nik_ce auto _find_all_ = U_store_T<T_find_all<S>>;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

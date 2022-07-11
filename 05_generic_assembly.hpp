@@ -269,8 +269,8 @@ namespace cctmp_generics {
 
 	// arg:
 
-		template<auto op, auto l, auto r0, auto... rs>
-		nik_ce auto _argcompose_ = _subcompose_<op, U_pack_Vs<l, r0, rs...>, segment<sizeof...(rs) + 2>>;
+		template<auto op, auto f0, auto... fs>
+		nik_ce auto _argcompose_ = _subcompose_<op, U_pack_Vs<f0, fs...>, segment<sizeof...(fs) + 1>>;
 
 /***********************************************************************************************************************/
 
@@ -870,6 +870,45 @@ namespace cctmp_generics {
 
 /***********************************************************************************************************************/
 
+// go_to state:
+
+	template<key_type, key_type...> struct GoToState;
+
+	template<key_type... filler>
+	struct GoToState<PD::branch, filler...>
+	{
+		template<auto instr0, auto labels, auto lines, auto words, auto chars, auto graph, auto verts>
+		nik_ces auto result(nik_vp(state)(T_pack_Vs<labels, lines, words, chars, graph, verts>*))
+		{
+			nik_ce auto lbl     = label_value<instr0>;
+			nik_ce auto nverts  = push<verts, lbl>;
+
+			nik_ce auto nword   = unpack_<chars, U_custom, U_endofold>;
+			nik_ce auto nwords  = push<words, nword>;
+			nik_ce auto nstate  = U_pack_Vs<labels, lines, nwords, U_null_Vs, graph, nverts>;
+
+			return nstate;
+		}
+	};
+
+	template<key_type... filler>
+	struct GoToState<PD::lift, filler...>
+	{
+		template<auto instr0, typename State>
+		nik_ces auto result(State)
+		{
+			nik_ce auto state  = U_restore_T<State>;
+			nik_ce auto chars  = list_at<state, PS::chars>;
+
+			nik_ce auto nchars = push<chars, instr0>;
+			nik_ce auto nstate = list_replace<state, PS::chars, nchars>;
+
+			return nstate;
+		}
+	};
+
+/***********************************************************************************************************************/
+
 // parse instruction (monoid):
 
 	nik_ce void _parse_end_ () { }
@@ -928,7 +967,6 @@ namespace cctmp_generics {
 			nik_ce bool rest_is_empty_lift     = !(d[PD::name][PD::rest_is_empty] && d[PD::note][PD::lift]);
 
 			nik_ce bool is_before_label_label  = !(d[PD::name][PD::is_before_label] && d[PD::note][PD::label]);
-			nik_ce bool is_before_label_branch = !(d[PD::name][PD::is_before_label] && d[PD::note][PD::branch]);
 
 			nik_ce bool not_before_label_go_to = !(d[PD::name][PD::not_before_label] && d[PD::note][PD::go_to]);
 			nik_ce bool not_before_label_drop  = !(d[PD::name][PD::not_before_label] && d[PD::note][PD::drop]);
@@ -938,7 +976,6 @@ namespace cctmp_generics {
 			static_assert(rest_is_empty_lift     , "A lift as a final instruction is not allowed.");
 
 			static_assert(is_before_label_label  , "A label before a label is not allowed.");
-			static_assert(is_before_label_branch , "A branch before a label is not allowed.");
 
 			static_assert(not_before_label_go_to , "A go_to followed by a nonlabel is not allowed.");
 			static_assert(not_before_label_drop  , "A drop followed by a nonlabel is not allowed.");
@@ -956,20 +993,20 @@ namespace cctmp_generics {
 
 				_static_assert<disp>();
 
-				nik_ce bool is_before_label_lift = disp[PD::name][PD::is_before_label]
-								&& disp[PD::note][PD::lift];
+				nik_ce bool is_before_label	= disp[PD::name][PD::is_before_label];
+				nik_ce bool is_branch		= disp[PD::note][PD::branch];
+				nik_ce bool is_lift		= disp[PD::note][PD::lift];
+				nik_ce bool is_go_to_deducible	= is_before_label && (is_branch || is_lift);
 
-				if nik_ce (is_before_label_lift)
+				if nik_ce (!is_go_to_deducible) return Parse<note>::template result<instr0>(state);
+				else
 				{
-					nik_ce auto chars   = list_at<state, PS::chars>;
-
+					nik_ce auto disp    = is_branch ? PD::branch : PD::lift;
+					nik_ce auto nstate  = GoToState<disp>::template result<instr0>(state);
 					nik_ce auto ninstr0 = go_to<label_value<instr1>>;
-					nik_ce auto nchars  = push<chars, instr0>;
-					nik_ce auto nstate  = list_replace<state, PS::chars, nchars>;
 
 					return Parse<PD::go_to>::template result<ninstr0>(nstate);
 				}
-				else return Parse<note>::template result<instr0>(state);
 			}
 		}
 
