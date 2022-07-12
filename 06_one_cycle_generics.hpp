@@ -19,26 +19,27 @@
 
 namespace cctmp_one_cycle_generics {
 
-	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
-	template<typename... Ts> using tuple			= typename cctmp::template tuple<Ts...>;
+	template<auto U> using T_store_U				= typename cctmp::template T_store_U<U>;
+	template<typename... Ts> using tuple				= typename cctmp::template tuple<Ts...>;
 
-	nik_ce auto _return_					= cctmp_generics::_return_;
+	nik_ce auto _return_						= cctmp_generics::_return_;
 
-	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
+	template<typename T> nik_ce auto U_store_T			= cctmp::template U_store_T<T>;
+	template<template<auto...> class B> nik_ce auto U_store_B	= cctmp::template U_store_B<B>;
 
-	template<auto V> nik_ce auto _constant_			= cctmp::template _constant_<V>;
-	template<auto V> nik_ce auto _is_equal_			= cctmp::template _is_equal_<V>;
+	template<auto V> nik_ce auto _constant_				= cctmp::template _constant_<V>;
+	template<auto V> nik_ce auto _is_equal_				= cctmp::template _is_equal_<V>;
 
-	nik_ce auto _cp_					= cctmp_generics::_cp_;
-	nik_ce auto _ps_					= cctmp_generics::_ps_;
+	nik_ce auto _cp_						= cctmp_generics::_cp_;
+	nik_ce auto _ps_						= cctmp_generics::_ps_;
 
-	template<auto V> nik_ce auto label			= cctmp_generics::template label<V>;
-	template<auto V> nik_ce auto branch			= cctmp_generics::template branch<V>;
-	template<auto V> nik_ce auto go_to			= cctmp_generics::template go_to<V>;
+	template<auto V> nik_ce auto label				= cctmp_generics::template label<V>;
+	template<auto V> nik_ce auto branch				= cctmp_generics::template branch<V>;
+	template<auto V> nik_ce auto go_to				= cctmp_generics::template go_to<V>;
 
-	template<auto... Vs> nik_ce auto lift			= cctmp_generics::template lift<Vs...>;
-	template<auto... Vs> nik_ce auto test			= cctmp_generics::template test<Vs...>;
-	template<auto... Vs> nik_ce auto parse			= cctmp_generics::template parse<Vs...>;
+	template<auto... Vs> nik_ce auto lift				= cctmp_generics::template lift<Vs...>;
+	template<auto... Vs> nik_ce auto test				= cctmp_generics::template test<Vs...>;
+	template<auto... Vs> nik_ce auto parse				= cctmp_generics::template parse<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -211,6 +212,39 @@ namespace cctmp_one_cycle_generics {
 		nik_ce auto _repeat_ = U_store_T<T_repeat<S>>;
 
 /***********************************************************************************************************************/
+
+// spec:
+
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
+		auto OutPosition, auto EndPosition, auto InPosition,
+		auto PreOutNext,
+		auto LoopPredicate, auto AssignFunction, auto OutNext,
+		auto PostAssignFunction
+	>
+	struct T_repeat_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+
+		nik_ces auto out_position		= OutPosition;
+		nik_ces auto end_position		= EndPosition;
+		nik_ces auto  in_position		=  InPosition;
+
+		nik_ces auto pre_out_next		= PreOutNext;
+
+		nik_ces auto   loop_predicate		=   LoopPredicate;
+		nik_ces auto assign_function		= AssignFunction;
+		nik_ces auto    out_next		=    OutNext;
+
+		nik_ces auto post_assign_function	= PostAssignFunction;
+	};
+
+	nik_ce auto H_repeat_specification = U_store_B<T_repeat_specification>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // map:
@@ -259,6 +293,45 @@ namespace cctmp_one_cycle_generics {
 		nik_ce auto _map_ = U_store_T<T_map<S>>;
 
 /***********************************************************************************************************************/
+
+// spec:
+
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
+		auto OutPosition, auto InPosition, auto EndPosition,
+		auto PreEndPrev, auto PreOutNext, auto PreInNext,
+		auto LoopPredicate, auto AssignFunction, auto OutNext, auto InNext,
+		auto PostAssignFunction, auto PostOutNext, auto PostInNext, auto PostEndNext
+	>
+	struct T_map_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+
+		nik_ces auto out_position		= OutPosition;
+		nik_ces auto  in_position		=  InPosition;
+		nik_ces auto end_position		= EndPosition;
+
+		nik_ces auto pre_end_prev		= PreEndPrev;
+		nik_ces auto pre_out_next		= PreOutNext;
+		nik_ces auto  pre_in_next		= PreInNext;
+
+		nik_ces auto   loop_predicate		=   LoopPredicate;
+		nik_ces auto assign_function		= AssignFunction;
+		nik_ces auto    out_next		=    OutNext;
+		nik_ces auto     in_next		=     InNext;
+
+		nik_ces auto post_assign_function	= PostAssignFunction;
+		nik_ces auto post_out_next		=    PostOutNext;
+		nik_ces auto  post_in_next		=     PostInNext;
+		nik_ces auto post_end_next		=    PostEndNext;
+	};
+
+	nik_ce auto H_map_specification = U_store_B<T_map_specification>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // fold:
@@ -299,6 +372,39 @@ namespace cctmp_one_cycle_generics {
 
 	}; template<auto S>
 		nik_ce auto _fold_ = U_store_T<T_fold<S>>;
+
+/***********************************************************************************************************************/
+
+// spec:
+
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
+		auto OutPosition, auto InPosition, auto EndPosition,
+		auto PreInNext,
+		auto LoopPredicate, auto CombineFunction, auto InNext,
+		auto PostCombineFunction
+	>
+	struct T_fold_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+
+		nik_ces auto out_position		= OutPosition;
+		nik_ces auto  in_position		=  InPosition;
+		nik_ces auto end_position		= EndPosition;
+
+		nik_ces auto  pre_in_next		= PreInNext;
+
+		nik_ces auto    loop_predicate		=    LoopPredicate;
+		nik_ces auto combine_function		= CombineFunction;
+		nik_ces auto      in_next		=      InNext;
+
+		nik_ces auto post_combine_function	= PostCombineFunction;
+	};
+
+	nik_ce auto H_fold_specification = U_store_B<T_fold_specification>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -355,6 +461,45 @@ namespace cctmp_one_cycle_generics {
 
 	}; template<auto S>
 		nik_ce auto _find_first_ = U_store_T<T_find_first<S>>;
+
+/***********************************************************************************************************************/
+
+// spec:
+
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto MatchLabel, auto PostcycleLabel, auto DoneLabel,
+		auto OutPosition, auto InPosition, auto EndPosition,
+		auto PreInNext,
+		auto LoopPredicate, auto ActPredicate, auto InNext,
+		auto MatchAssignFunction, auto MatchOutNext,
+		auto PostActPredicate
+	>
+	struct T_find_first_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto     match_label		=     MatchLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+		nik_ces auto      done_label		=      DoneLabel;
+
+		nik_ces auto out_position		= OutPosition;
+		nik_ces auto  in_position		=  InPosition;
+		nik_ces auto end_position		= EndPosition;
+
+		nik_ces auto  pre_in_next		= PreInNext;
+
+		nik_ces auto loop_predicate		= LoopPredicate;
+		nik_ces auto  act_predicate		=  ActPredicate;
+		nik_ces auto   in_next			=   InNext;
+
+		nik_ces auto match_assign_function	= MatchAssignFunction;
+		nik_ces auto    match_out_next		=    MatchOutNext;
+
+		nik_ces auto post_act_predicate		= PostActPredicate;
+	};
+
+	nik_ce auto H_find_first_specification = U_store_B<T_find_first_specification>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -420,6 +565,51 @@ namespace cctmp_one_cycle_generics {
 		nik_ce auto _find_all_ = U_store_T<T_find_all<S>>;
 
 /***********************************************************************************************************************/
+
+// spec:
+
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto MatchLabel, auto PostcycleLabel, auto PostmatchLabel, auto DoneLabel,
+		auto OutPosition, auto InPosition, auto EndPosition,
+		auto PreInNext,
+		auto LoopPredicate, auto ActPredicate, auto InNext,
+		auto MatchAssignFunction, auto MatchOutNext, auto MatchInNext,
+		auto PostActPredicate,
+		auto PostmatchAssignFunction, auto PostmatchOutNext
+	>
+	struct T_find_all_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto     match_label		=     MatchLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+		nik_ces auto postmatch_label		= PostmatchLabel;
+		nik_ces auto      done_label		=      DoneLabel;
+
+		nik_ces auto out_position		= OutPosition;
+		nik_ces auto  in_position		=  InPosition;
+		nik_ces auto end_position		= EndPosition;
+
+		nik_ces auto  pre_in_next		= PreInNext;
+
+		nik_ces auto loop_predicate		= LoopPredicate;
+		nik_ces auto  act_predicate		=  ActPredicate;
+		nik_ces auto   in_next			=   InNext;
+
+		nik_ces auto match_assign_function	= MatchAssignFunction;
+		nik_ces auto    match_out_next		=    MatchOutNext;
+		nik_ces auto     match_in_next		=     MatchInNext;
+
+		nik_ces auto post_act_predicate		= PostActPredicate;
+
+		nik_ces auto postmatch_assign_function	= PostmatchAssignFunction;
+		nik_ces auto    postmatch_out_next	=    PostmatchOutNext;
+	};
+
+	nik_ce auto H_find_all_specification = U_store_B<T_find_all_specification>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // zip (bimap):
@@ -471,6 +661,52 @@ namespace cctmp_one_cycle_generics {
 
 	}; template<auto S>
 		nik_ce auto _zip_ = U_store_T<T_zip<S>>;
+
+/***********************************************************************************************************************/
+
+// spec:
+
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
+		auto OutPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
+		auto PreEndPrev, auto PreOutNext, auto PreCarInNext, auto PreCdrInNext,
+		auto LoopPredicate, auto ActFunction, auto AssignFunction, auto OutNext, auto CarInNext, auto CdrInNext,
+		auto PostActFunction, auto PostAssignFunction,
+			auto PostOutNext, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
+	>
+	struct T_zip_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+
+		nik_ces auto    out_position		=   OutPosition;
+		nik_ces auto car_in_position		= CarInPosition;
+		nik_ces auto cdr_in_position		= CdrInPosition;
+		nik_ces auto    end_position		=   EndPosition;
+
+		nik_ces auto    pre_end_prev		=   PreEndPrev;
+		nik_ces auto    pre_out_next		=   PreOutNext;
+		nik_ces auto pre_car_in_next		= PreCarInNext;
+		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
+
+		nik_ces auto   loop_predicate		=   LoopPredicate;
+		nik_ces auto    act_function		=    ActFunction;
+		nik_ces auto assign_function		= AssignFunction;
+		nik_ces auto    out_next		=    OutNext;
+		nik_ces auto car_in_next		=  CarInNext;
+		nik_ces auto cdr_in_next		=  CdrInNext;
+
+		nik_ces auto    post_act_function	=    PostActFunction;
+		nik_ces auto post_assign_function	= PostAssignFunction;
+		nik_ces auto    post_out_next		=    PostOutNext;
+		nik_ces auto post_car_in_next		=  PostCarInNext;
+		nik_ces auto post_cdr_in_next		=  PostCdrInNext;
+		nik_ces auto    post_end_next		=    PostEndNext;
+	};
+
+	nik_ce auto H_zip_specification = U_store_B<T_zip_specification>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -536,6 +772,59 @@ namespace cctmp_one_cycle_generics {
 		nik_ce auto _fasten_ = U_store_T<T_fasten<S>>;
 
 /***********************************************************************************************************************/
+
+// spec:
+
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
+		auto OutPosition, auto AuxPosition, auto InPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
+		auto PreEndPrev, auto PreOutNext, auto PreCarInNext, auto PreCdrInNext,
+		auto LoopPredicate, auto ActFunction, auto AssignFunction, auto AuxNext, auto CombineFunction, auto InNext,
+			auto OutNext, auto CarInNext, auto CdrInNext,
+		auto PostActFunction, auto PostAssignFunction, auto PostCombineFunction,
+			auto PostOutNext, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
+	>
+	struct T_fasten_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+
+		nik_ces auto    out_position		=   OutPosition;
+		nik_ces auto    aux_position		=   AuxPosition;
+		nik_ces auto     in_position		=    InPosition;
+		nik_ces auto car_in_position		= CarInPosition;
+		nik_ces auto cdr_in_position		= CdrInPosition;
+		nik_ces auto    end_position		=   EndPosition;
+
+		nik_ces auto    pre_end_prev		=   PreEndPrev;
+		nik_ces auto    pre_out_next		=   PreOutNext;
+		nik_ces auto pre_car_in_next		= PreCarInNext;
+		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
+
+		nik_ces auto    loop_predicate		=    LoopPredicate;
+		nik_ces auto     act_function		=     ActFunction;
+		nik_ces auto  assign_function		=  AssignFunction;
+		nik_ces auto     aux_next		=     AuxNext;
+		nik_ces auto combine_function		= CombineFunction;
+		nik_ces auto      in_next		=      InNext;
+		nik_ces auto     out_next		=     OutNext;
+		nik_ces auto  car_in_next		=   CarInNext;
+		nik_ces auto  cdr_in_next		=   CdrInNext;
+
+		nik_ces auto     post_act_function	=     PostActFunction;
+		nik_ces auto  post_assign_function	=  PostAssignFunction;
+		nik_ces auto post_combine_function	= PostCombineFunction;
+		nik_ces auto     post_out_next		=     PostOutNext;
+		nik_ces auto  post_car_in_next		=   PostCarInNext;
+		nik_ces auto  post_cdr_in_next		=   PostCdrInNext;
+		nik_ces auto     post_end_next		=     PostEndNext;
+	};
+
+	nik_ce auto H_fasten_specification = U_store_B<T_fasten_specification>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // glide (bifold):
@@ -584,6 +873,48 @@ namespace cctmp_one_cycle_generics {
 
 	}; template<auto S>
 		nik_ce auto _glide_ = U_store_T<T_glide<S>>;
+
+/***********************************************************************************************************************/
+
+// spec:
+
+	template
+	<
+		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
+		auto OutPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
+		auto PreEndPrev, auto PreCarInNext, auto PreCdrInNext,
+		auto LoopPredicate, auto ActFunction, auto CombineFunction, auto CarInNext, auto CdrInNext,
+		auto PostActFunction, auto PostCombineFunction, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
+	>
+	struct T_glide_specification
+	{
+		nik_ces auto  precycle_label		=  PrecycleLabel;
+		nik_ces auto     cycle_label		=     CycleLabel;
+		nik_ces auto postcycle_label		= PostcycleLabel;
+
+		nik_ces auto    out_position		=   OutPosition;
+		nik_ces auto car_in_position		= CarInPosition;
+		nik_ces auto cdr_in_position		= CdrInPosition;
+		nik_ces auto    end_position		=   EndPosition;
+
+		nik_ces auto    pre_end_prev		=   PreEndPrev;
+		nik_ces auto pre_car_in_next		= PreCarInNext;
+		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
+
+		nik_ces auto    loop_predicate		=    LoopPredicate;
+		nik_ces auto     act_function		=     ActFunction;
+		nik_ces auto combine_function		= CombineFunction;
+		nik_ces auto  car_in_next		=   CarInNext;
+		nik_ces auto  cdr_in_next		=   CdrInNext;
+
+		nik_ces auto     post_act_function	=     PostActFunction;
+		nik_ces auto post_combine_function	= PostCombineFunction;
+		nik_ces auto  post_car_in_next		=   PostCarInNext;
+		nik_ces auto  post_cdr_in_next		=   PostCdrInNext;
+		nik_ces auto     post_end_next		=     PostEndNext;
+	};
+
+	nik_ce auto H_glide_specification = U_store_B<T_glide_specification>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

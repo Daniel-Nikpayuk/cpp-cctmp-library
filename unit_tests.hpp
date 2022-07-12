@@ -825,6 +825,27 @@ namespace cctmp_program
 	//	printf("%s\n", tag_compare<cctmp::_less_than_, tag1, tag0> ? "true" : "false");
 
 /***********************************************************************************************************************/
+
+// brainstorming:
+
+//	auto val = repeat<"(out+, end]; out == end; *out = in">(out, end, in);
+//	auto val = map<"[out+]; (in+, end+]; in == end; *out = *in">(out, in, end);
+
+		// How to read this:
+
+		// Map over two iterators "out" and "in", both unidirectional forward,
+		// until "in" equals "end". The map action is an assignment taken by
+		// dereferencing both "out" and "in" (assigning to "out"). Furthermore,
+		// "in" is an *opening* interval "(]", meaning "in" increments once, then
+		// the map action is applied iteratively until "end" is reached. The map action
+		// is further applied to the "end" location itself. Beyond this, "out" is a *closed*
+		// interval "[]", meaning the map action is applied to the initial "out" location,
+		// applied iteratively, then applied to the last "out" location. Finally, "end" is
+		// also unidirectional forward. This is relevant for some interval combinations of
+		// "out/in" intervals where you alternatively need to either peek ahead from "in" or
+		// you can simply decrement "end" temporarily, returning it once the loop is finished.
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
