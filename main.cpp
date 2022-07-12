@@ -103,6 +103,15 @@
 	constexpr int sq(int x)			{ return x*x; }
 	constexpr auto _sq_			= cctmp::template _apply_<sq>;
 
+	constexpr int mod_add(int x, int y)	{ return (x+y) % 10; }
+	constexpr auto _mod_add_		= cctmp::template _apply_<mod_add>;
+
+	constexpr int carry0_add_ddd(int *o, int *i1, int *i2) { return (*o < *i1); }
+	constexpr int carry1_add_dii(int *o, int i, bool a) { return a || (i == 1 && *o == 0); }
+
+	constexpr auto _carry0_add_ddd_		= cctmp::template _apply_<carry0_add_ddd>;
+	constexpr auto _carry1_add_dii_		= cctmp::template _apply_<carry1_add_dii>;
+
 	constexpr auto _id_			= cctmp::_id_;
 	constexpr auto _add_			= cctmp::_add_;
 	constexpr auto _is_25_			= cctmp::template _is_equal_<25>;
@@ -111,6 +120,8 @@
 
 	constexpr auto _add_dd_			= cctmp_generics::template _argcompose_<_add_, _deref_, _deref_>;
 	constexpr auto _is_25_d_		= cctmp_generics::template _argcompose_<_is_25_, _deref_>;
+	constexpr auto _mod_add_di_		= cctmp_generics::template _argcompose_<_mod_add_, _deref_, _id_>;
+	constexpr auto _mod_add_dd_		= cctmp_generics::template _argcompose_<_mod_add_, _deref_, _deref_>;
 
 	constexpr auto _d_assign_i_		= cctmp_generics::template _argcompose_<_assign_, _deref_, _id_>;
 	constexpr auto _d_assign_sq_		= cctmp_generics::template _argcompose_<_assign_, _deref_, _sq_>;
@@ -172,18 +183,16 @@
 
 // fasten:
 
-//	template<
-//	constexpr auto _fasten_assign_()
-//	{
-//	}
-
-//	constexpr auto _fasten_function_add_	= cctmp_one_cycle_specs::template _act_function_<_add_dd_>;
-//	constexpr auto _fasten_assign_		= cctmp_one_cycle_specs::template _assign_function_<_d_assign_i_>;
-//	constexpr auto fasten_dspec_add_	= cctmp_one_cycle_specs::template direct_fasten
-//						<
-//							_fasten_function_add_, _fasten_assign_
-//						>;
-//	using T_fasten_add				= typename cctmp_one_cycle_generics::template T_fasten<fasten_dspec_add_>;
+	constexpr auto _fasten_function_add_	= cctmp_one_cycle_specs::template _act_function_<_mod_add_dd_>;
+	constexpr auto _fasten_combine_add_	= cctmp_one_cycle_specs::template _combine_function_<_mod_add_di_>;
+	constexpr auto _fasten_aux_next_	= cctmp_one_cycle_specs::template _aux_next_<_carry0_add_ddd_>;
+	constexpr auto _fasten_in_next_		= cctmp_one_cycle_specs::template _in_next_<_carry1_add_dii_>;
+	constexpr auto fasten_dspec_add_	= cctmp_one_cycle_specs::template direct_fasten
+						<
+							_fasten_function_add_, _fasten_combine_add_,
+							_fasten_aux_next_, _fasten_in_next_
+						>;
+	using T_fasten_mod_add			= typename cctmp_one_cycle_generics::template T_fasten<fasten_dspec_add_>;
 
 // glide:
 
@@ -255,11 +264,13 @@
 
 // fasten:
 
-	//	T_map_id::template result(arr_id, 0, size);
-	//	T_map_sq::template result(arr_sq, 0, size);
+	//	int mod_size = 3;
+	//	int arr_mod_add[mod_size];
+	//	int arr_134[] = { 4, 3, 1 };
+	//	int arr_379[] = { 9, 7, 3 };
 
-	//	T_fasten_add::template result(arr, arr_id, arr_sq, arr_sq+size);
-	//	print_array(arr, arr+size);
+	//	T_fasten_mod_add::template result(arr_mod_add, 0, 0, arr_134, arr_379, arr_379+mod_size);
+	//	printf("%d%d%d\n", arr_mod_add[2], arr_mod_add[1], arr_mod_add[0]);
 
 // glide:
 

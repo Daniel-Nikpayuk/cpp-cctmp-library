@@ -103,12 +103,14 @@ namespace cctmp_one_cycle_specs {
 // position:
 
 	template<auto f> struct _out_position				{ nik_ces auto value = f; };
+	template<auto f> struct _aux_position				{ nik_ces auto value = f; };
 	template<auto f> struct _in_position				{ nik_ces auto value = f; };
 	template<auto f> struct _car_in_position			{ nik_ces auto value = f; };
 	template<auto f> struct _cdr_in_position			{ nik_ces auto value = f; };
 	template<auto f> struct _end_position				{ nik_ces auto value = f; };
 
 	template<auto f> nik_ce auto _out_position_			= U_store_T<_out_position<f>>;
+	template<auto f> nik_ce auto _aux_position_			= U_store_T<_aux_position<f>>;
 	template<auto f> nik_ce auto _in_position_			= U_store_T<_in_position<f>>;
 	template<auto f> nik_ce auto _car_in_position_			= U_store_T<_car_in_position<f>>;
 	template<auto f> nik_ce auto _cdr_in_position_			= U_store_T<_cdr_in_position<f>>;
@@ -129,6 +131,14 @@ namespace cctmp_one_cycle_specs {
 	template<auto f> nik_ce auto _post_out_next_			= U_store_T<_post_out_next<f>>;
 	template<auto f> nik_ce auto _match_out_next_			= U_store_T<_match_out_next<f>>;
 	template<auto f> nik_ce auto _postmatch_out_next_		= U_store_T<_postmatch_out_next<f>>;
+
+/***********************************************************************************************************************/
+
+// aux:
+
+	template<auto f> struct _aux_next				{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _aux_next_				= U_store_T<_aux_next<f>>;
 
 /***********************************************************************************************************************/
 
@@ -1007,10 +1017,11 @@ namespace cctmp_one_cycle_specs {
 	template
 	<
 		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
-		auto OutPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
+		auto OutPosition, auto AuxPosition, auto InPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
 		auto PreEndPrev, auto PreOutNext, auto PreCarInNext, auto PreCdrInNext,
-		auto LoopPredicate, auto ActFunction, auto AssignFunction, auto OutNext, auto CarInNext, auto CdrInNext,
-		auto PostActFunction, auto PostAssignFunction,
+		auto LoopPredicate, auto ActFunction, auto AssignFunction, auto AuxNext, auto CombineFunction, auto InNext,
+			auto OutNext, auto CarInNext, auto CdrInNext,
+		auto PostActFunction, auto PostAssignFunction, auto PostCombineFunction,
 			auto PostOutNext, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
 	>
 	struct T_fasten_specification
@@ -1020,6 +1031,8 @@ namespace cctmp_one_cycle_specs {
 		nik_ces auto postcycle_label		= PostcycleLabel;
 
 		nik_ces auto    out_position		=   OutPosition;
+		nik_ces auto    aux_position		=   AuxPosition;
+		nik_ces auto     in_position		=    InPosition;
 		nik_ces auto car_in_position		= CarInPosition;
 		nik_ces auto cdr_in_position		= CdrInPosition;
 		nik_ces auto    end_position		=   EndPosition;
@@ -1029,19 +1042,23 @@ namespace cctmp_one_cycle_specs {
 		nik_ces auto pre_car_in_next		= PreCarInNext;
 		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
 
-		nik_ces auto   loop_predicate		=   LoopPredicate;
-		nik_ces auto    act_function		=    ActFunction;
-		nik_ces auto assign_function		= AssignFunction;
-		nik_ces auto    out_next		=    OutNext;
-		nik_ces auto car_in_next		=  CarInNext;
-		nik_ces auto cdr_in_next		=  CdrInNext;
+		nik_ces auto    loop_predicate		=    LoopPredicate;
+		nik_ces auto     act_function		=     ActFunction;
+		nik_ces auto  assign_function		=  AssignFunction;
+		nik_ces auto     aux_next		=     AuxNext;
+		nik_ces auto combine_function		= CombineFunction;
+		nik_ces auto      in_next		=      InNext;
+		nik_ces auto     out_next		=     OutNext;
+		nik_ces auto  car_in_next		=   CarInNext;
+		nik_ces auto  cdr_in_next		=   CdrInNext;
 
-		nik_ces auto    post_act_function	=    PostActFunction;
-		nik_ces auto post_assign_function	= PostAssignFunction;
-		nik_ces auto    post_out_next		=    PostOutNext;
-		nik_ces auto post_car_in_next		=  PostCarInNext;
-		nik_ces auto post_cdr_in_next		=  PostCdrInNext;
-		nik_ces auto    post_end_next		=    PostEndNext;
+		nik_ces auto     post_act_function	=     PostActFunction;
+		nik_ces auto  post_assign_function	=  PostAssignFunction;
+		nik_ces auto post_combine_function	= PostCombineFunction;
+		nik_ces auto     post_out_next		=     PostOutNext;
+		nik_ces auto  post_car_in_next		=   PostCarInNext;
+		nik_ces auto  post_cdr_in_next		=   PostCdrInNext;
+		nik_ces auto     post_end_next		=     PostEndNext;
 	};
 
 	nik_ce auto H_fasten_specification = U_store_B<T_fasten_specification>;
@@ -1080,33 +1097,39 @@ namespace cctmp_one_cycle_specs {
 
 		nik_ce auto direct_fasten_defaults = U_pack_Vs
 		<
-			_precycle_label_       < _zero         >,
-			_cycle_label_          < _one          >,
-			_postcycle_label_      < _two          >,
+			_precycle_label_        < _zero             >,
+			_cycle_label_           < _one              >,
+			_postcycle_label_       < _two              >,
 
-			_out_position_         < _zero         >,
-			_car_in_position_      < _one          >,
-			_cdr_in_position_      < _two          >,
-			_end_position_         < _three        >,
+			_out_position_          < _zero             >,
+			_aux_position_          < _one              >,
+			_in_position_           < _two              >,
+			_car_in_position_       < _three            >,
+			_cdr_in_position_       < _four             >,
+			_end_position_          < _five             >,
 
-			_pre_end_prev_         < _id_          >,
-			_pre_out_next_         < _id_          >,
-			_pre_car_in_next_      < _id_          >,
-			_pre_cdr_in_next_      < _id_          >,
+			_pre_end_prev_          < _id_              >,
+			_pre_out_next_          < _id_              >,
+			_pre_car_in_next_       < _id_              >,
+			_pre_cdr_in_next_       < _id_              >,
 
-			_loop_predicate_       < _equal_       >,
-			_act_function_         < _id_          >,
-			_assign_function_      < _id_          >,
-			_out_next_             < _increment_<> >,
-			_car_in_next_          < _increment_<> >,
-			_cdr_in_next_          < _increment_<> >,
+			_loop_predicate_        < _equal_           >,
+			_act_function_          < _id_              >,
+			_assign_function_       < _d_assign_i_      >,
+			_aux_next_              < _constant_<false> >,
+			_combine_function_      < _id_              >,
+			_in_next_               < _constant_<false> >,
+			_out_next_              < _increment_<>     >,
+			_car_in_next_           < _increment_<>     >,
+			_cdr_in_next_           < _increment_<>     >,
 
-			_post_act_function_    < _id_          >,
-			_post_assign_function_ < _id_          >,
-			_post_out_next_        < _id_          >,
-			_post_car_in_next_     < _id_          >,
-			_post_cdr_in_next_     < _id_          >,
-			_post_end_next_        < _id_          >
+			_post_act_function_     < _id_              >,
+			_post_assign_function_  < _id_              >,
+			_post_combine_function_ < _id_              >,
+			_post_out_next_         < _id_              >,
+			_post_car_in_next_      < _id_              >,
+			_post_cdr_in_next_      < _id_              >,
+			_post_end_next_         < _id_              >
 		>;
 
 	// spec:

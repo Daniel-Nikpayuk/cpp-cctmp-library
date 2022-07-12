@@ -65,8 +65,6 @@ namespace cctmp_one_cycle_generics {
 
 // out:
 
-	template<auto S> using out_type_			= typename T_store_U<S>::out_type;
-
 	template<auto S> nik_ce auto out_			= T_store_U<S>::out_position;
 
 	template<auto S> nik_ce auto pre_out_next_		= T_store_U<S>::pre_out_next;
@@ -77,9 +75,15 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
-// in:
+// aux:
 
-	template<auto S> using in_type_				= typename T_store_U<S>::in_type;
+	template<auto S> nik_ce auto aux_			= T_store_U<S>::aux_position;
+
+	template<auto S> nik_ce auto aux_next_			= T_store_U<S>::aux_next;
+
+/***********************************************************************************************************************/
+
+// in:
 
 	template<auto S> nik_ce auto in_			= T_store_U<S>::in_position;
 
@@ -92,8 +96,6 @@ namespace cctmp_one_cycle_generics {
 
 // car in:
 
-	template<auto S> using car_in_type_			= typename T_store_U<S>::car_in_type;
-
 	template<auto S> nik_ce auto car_in_			= T_store_U<S>::car_in_position;
 
 	template<auto S> nik_ce auto pre_car_in_next_		= T_store_U<S>::pre_car_in_next;
@@ -104,8 +106,6 @@ namespace cctmp_one_cycle_generics {
 
 // cdr in:
 
-	template<auto S> using cdr_in_type_			= typename T_store_U<S>::cdr_in_type;
-
 	template<auto S> nik_ce auto cdr_in_			= T_store_U<S>::cdr_in_position;
 
 	template<auto S> nik_ce auto pre_cdr_in_next_		= T_store_U<S>::pre_cdr_in_next;
@@ -115,8 +115,6 @@ namespace cctmp_one_cycle_generics {
 /***********************************************************************************************************************/
 
 // end:
-
-	template<auto S> using end_type_			= typename T_store_U<S>::end_type;
 
 	template<auto S> nik_ce auto end_			= T_store_U<S>::end_position;
 
@@ -157,7 +155,7 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
-// side:
+// assign:
 
 	template<auto S> nik_ce auto assign_func_		= T_store_U<S>::assign_function;
 	template<auto S> nik_ce auto post_assign_func_		= T_store_U<S>::post_assign_function;
@@ -490,38 +488,48 @@ namespace cctmp_one_cycle_generics {
 		<
 			label<precycle_<S>>,
 
-				lift   <    end_<S> ,     pre_end_prev_<S> ,    end_<S>              >,
-				lift   <    out_<S> ,     pre_out_next_<S> ,    out_<S>              >,
-				lift   < car_in_<S> ,  pre_car_in_next_<S> , car_in_<S>              >,
-				lift   < cdr_in_<S> ,  pre_cdr_in_next_<S> , cdr_in_<S>              >,
+				lift   <    end_<S> ,      pre_end_prev_<S> ,    end_<S>                           >,
+				lift   <    out_<S> ,      pre_out_next_<S> ,    out_<S>                           >,
+				lift   < car_in_<S> ,   pre_car_in_next_<S> , car_in_<S>                           >,
+				lift   < cdr_in_<S> ,   pre_cdr_in_next_<S> , cdr_in_<S>                           >,
 
 			label<cycle_<S>>,
 
-				test   <                     loop_pred_<S> , cdr_in_<S> ,    end_<S> >,
-				branch <                     postcycle_<S>                           >,
-				lift   <    _cp_    ,         act_func_<S> , car_in_<S> , cdr_in_<S> >,
-				lift   <    out_<S> ,      assign_func_<S> ,    out_<S> ,    _ps_    >,
-				lift   <    out_<S> ,         out_next_<S> ,    out_<S>              >,
-				lift   < car_in_<S> ,      car_in_next_<S> , car_in_<S>              >,
-				lift   < cdr_in_<S> ,      cdr_in_next_<S> , cdr_in_<S>              >,
-				go_to  <                         cycle_<S>                           >,
+				test   <                      loop_pred_<S> , cdr_in_<S> ,    end_<S>              >,
+				branch <                      postcycle_<S>                                        >,
+				lift   <    _cp_    ,          act_func_<S> , car_in_<S> , cdr_in_<S>              >,
+				lift   <    out_<S> ,       assign_func_<S> ,    _ps_                              >,
+				lift   <    aux_<S> ,          aux_next_<S> ,    out_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    _cp_    ,      combine_func_<S> ,    out_<S> ,     in_<S>              >,
+				lift   <    out_<S> ,       assign_func_<S> ,    _ps_                              >,
+				lift   <     in_<S> ,           in_next_<S> ,    out_<S> ,     in_<S> ,    aux_<S> >,
+				lift   <    out_<S> ,          out_next_<S> ,    out_<S>                           >,
+				lift   < car_in_<S> ,       car_in_next_<S> , car_in_<S>                           >,
+				lift   < cdr_in_<S> ,       cdr_in_next_<S> , cdr_in_<S>                           >,
+				go_to  <                          cycle_<S>                                        >,
 
 			label<postcycle_<S>>,
 
-				lift   <    _cp_    ,    post_act_func_<S> , car_in_<S> , cdr_in_<S> >,
-				lift   <    out_<S> , post_assign_func_<S> ,    out_<S> ,    _ps_    >,
-				lift   <    out_<S> ,    post_out_next_<S> ,    out_<S>              >,
-				lift   < car_in_<S> , post_car_in_next_<S> , car_in_<S>              >,
-				lift   < cdr_in_<S> , post_cdr_in_next_<S> , cdr_in_<S>              >,
-				lift   <    end_<S> ,    post_end_next_<S> ,    end_<S>              >,
+				lift   <    _cp_    ,     post_act_func_<S> , car_in_<S> , cdr_in_<S>              >,
+				lift   <    out_<S> ,  post_assign_func_<S> ,    _ps_                              >,
+				lift   <    _cp_    , post_combine_func_<S> ,    out_<S> ,  in_<S>                 >,
+				lift   <    out_<S> ,  post_assign_func_<S> ,    _ps_                              >,
+				lift   <    out_<S> ,     post_out_next_<S> ,    out_<S>                           >,
+				lift   < car_in_<S> ,  post_car_in_next_<S> , car_in_<S>                           >,
+				lift   < cdr_in_<S> ,  post_cdr_in_next_<S> , cdr_in_<S>                           >,
+				lift   <    end_<S> ,     post_end_next_<S> ,    end_<S>                           >,
 
 				_return_
 		>;
 
-		template<typename OutType, typename CarInType, typename CdrInType, typename EndType>
-		nik_ces auto result(OutType o, CarInType i1, CdrInType i2, EndType e2)
+		template
+		<
+			typename OutType, typename AuxType, typename InType,
+			typename CarInType, typename CdrInType, typename EndType
+		>
+		nik_ces auto result(OutType o, AuxType a, InType i, CarInType i1, CdrInType i2, EndType e2)
 		{
-			return cctmp_generics::template call<object, OutType>(o, i1, i2, e2);
+			return cctmp_generics::template call<object, OutType>(o, a, i, i1, i2, e2);
 		}
 
 	}; template<auto S>
