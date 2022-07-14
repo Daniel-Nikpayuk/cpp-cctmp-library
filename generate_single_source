@@ -34,4 +34,5 @@ mawk "$mawk_prog_rest"  "undef_macros.hpp"           >> "cpp_cctmp_library.hpp"
 
 #mawk "$mawk_prog_rest"  "06_one_cycle_generics.hpp"  >> "cpp_cctmp_library.hpp" &&
 #mawk "$mawk_prog_rest"  "07_one_cycle_specifics.hpp" >> "cpp_cctmp_library.hpp" &&
+#mawk "$mawk_prog_rest"  "08_one_cycle_defaults.hpp"  >> "cpp_cctmp_library.hpp" &&
 

@@ -769,43 +769,46 @@ namespace cctmp {
 			nik_ces key_type template_id			=  3;
 			nik_ces key_type template_to_list		=  4;
 			nik_ces key_type list_to_template		=  5;
+			nik_ces key_type template_to_template		=  6;
+
+			nik_ces key_type if_then_else			=  7;
 
 		// comparison:
 
-			nik_ces key_type same				=  6;
-			nik_ces key_type csame				=  7;
-			nik_ces key_type similar			=  8;
-			nik_ces key_type is_int_type			=  9;
-			nik_ces key_type not_int_type			= 10;
+			nik_ces key_type same				=  8;
+			nik_ces key_type csame				=  9;
+			nik_ces key_type similar			= 10;
+			nik_ces key_type is_int_type			= 11;
+			nik_ces key_type not_int_type			= 12;
 
 		// functional:
 
-			nik_ces key_type to_list			= 11;
-			nik_ces key_type length				= 12;
-			nik_ces key_type map				= 13;
+			nik_ces key_type to_list			= 13;
+			nik_ces key_type length				= 14;
+			nik_ces key_type map				= 15;
 
-			nik_ces key_type is_null			= 14;
-			nik_ces key_type car				= 15;
-			nik_ces key_type cdr				= 16;
-			nik_ces key_type cadr				= 17;
-			nik_ces key_type find				= 18;
+			nik_ces key_type is_null			= 16;
+			nik_ces key_type car				= 17;
+			nik_ces key_type cdr				= 18;
+			nik_ces key_type cadr				= 19;
+			nik_ces key_type find				= 20;
 
 		// variadic:
 
-			nik_ces key_type zip				= 19;
-			nik_ces key_type unite				= 20;
-			nik_ces key_type cons				= 21;
-			nik_ces key_type push				= 22;
-			nik_ces key_type unpack				= 23;
+			nik_ces key_type zip				= 21;
+			nik_ces key_type unite				= 22;
+			nik_ces key_type cons				= 23;
+			nik_ces key_type push				= 24;
+			nik_ces key_type unpack				= 25;
 
 		// grammatical:
 
-			nik_ces key_type custom				= 24;
-			nik_ces key_type procedure			= 25;
-			nik_ces key_type method				= 26;
-			nik_ces key_type tailor				= 27;
+			nik_ces key_type custom				= 26;
+			nik_ces key_type procedure			= 27;
+			nik_ces key_type method				= 28;
+			nik_ces key_type tailor				= 29;
 
-			nik_ces key_type partial			= 28;
+			nik_ces key_type partial			= 30;
 	};
 
 	using AOP = AliasOperator;
@@ -844,6 +847,16 @@ namespace cctmp {
 		template<auto...> typename B, nik_vp(b)(T_store_B<B>*)
 	>
 	nik_ce auto alias<AOP::list_to_template, p, b> = U_store_T<B<Vs...>>;
+
+	template
+	<
+		template<auto...> typename B0, auto... Vs, nik_vp(p)(B0<Vs...>*),
+		template<auto...> typename B1, nik_vp(b)(T_store_B<B1>*)
+	>
+	nik_ce auto alias<AOP::template_to_template, p, b> = U_store_T<B1<Vs...>>;
+
+	template<auto ante, auto conse> nik_ce auto alias<AOP::if_then_else,  true, ante, conse> = ante;
+	template<auto ante, auto conse> nik_ce auto alias<AOP::if_then_else, false, ante, conse> = conse;
 
 	template<auto Op, auto... Ws, nik_vp(p)(T_pack_Vs<Ws...>*), auto... Vs>
 	nik_ce auto alias<AOP::zip, Op, p, Vs...> = U_pack_Vs<overload<Op, Ws, Vs>...>;
@@ -928,6 +941,26 @@ namespace cctmp {
 			nik_ces auto result = alias<AOP::list_to_template, p, b>;
 
 		}; nik_ce auto U_list_to_template = U_alias_T<AOP::list_to_template>;
+
+	// template to template:
+
+		template<auto... filler>
+		struct T_overload<OL::alias, AOP::template_to_template, filler...>
+		{
+			template<auto p, auto b>
+			nik_ces auto result = alias<AOP::template_to_template, p, b>;
+
+		}; nik_ce auto U_template_to_template = U_alias_T<AOP::template_to_template>;
+
+	// if then else:
+
+		template<auto... filler>
+		struct T_overload<OL::alias, AOP::if_then_else, filler...>
+		{
+			template<auto cond, auto ante, auto conse>
+			nik_ces auto result = alias<AOP::if_then_else, ante, conse>;
+
+		}; nik_ce auto U_if_then_else = U_alias_T<AOP::if_then_else>;
 
 /***********************************************************************************************************************/
 

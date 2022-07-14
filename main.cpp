@@ -30,11 +30,12 @@
 #include"05_generic_assembly.hpp"
 #include"06_one_cycle_generics.hpp"
 #include"07_one_cycle_specifics.hpp"
-//#include"08_domain_specifics.hpp"
-//#include"09_big_numbers.hpp"
-//#include"10_cryptography.hpp"
-//#include"11_numerical.hpp"
-//#include"12_signal_processing.hpp"
+//#include"08_one_cycle_defaults.hpp"
+//#include"09_domain_specifics.hpp"
+//#include"10_big_numbers.hpp"
+//#include"11_cryptography.hpp"
+//#include"12_numerical.hpp"
+//#include"13_signal_processing.hpp"
 #include"undef_macros.hpp"
 
 /***********************************************************************************************************************/
@@ -100,6 +101,7 @@
 
 // functions:
 
+/*
 	constexpr int sq(int x)			{ return x*x; }
 	constexpr auto _sq_			= cctmp::template _apply_<sq>;
 
@@ -136,9 +138,11 @@
 						<
 							_d_assign_add_, _id_, _deref_, _deref_
 						>;
+*/
 
 /***********************************************************************************************************************/
 
+/*
 // repeat:
 
 	constexpr auto repeat_dspec		= cctmp_one_cycle_specs::template direct_repeat<>;
@@ -203,17 +207,18 @@
 							_glide_function_add_, _glide_combine_add_
 						>;
 	using T_glide_add			= typename cctmp_one_cycle_generics::template T_glide<glide_dspec_add_>;
+*/
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		int size = 10;//argc;
+	//	int size = 10;//argc;
 
-		int  arr[size];
-		int  arr_id[size];
-		int  arr_sq[size];
-		int* arr_ptr[size];
+	//	int  arr[size];
+	//	int  arr_id[size];
+	//	int  arr_sq[size];
+	//	int* arr_ptr[size];
 
 // repeat:
 
