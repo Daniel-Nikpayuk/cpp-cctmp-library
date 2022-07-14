@@ -86,6 +86,27 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// operators:
+
+/***********************************************************************************************************************/
+
+// value:
+
+/*
+	struct T_tag_value
+	{
+		template<auto UTag>
+		nik_ces auto result = T_store_U<UTag>::value;
+
+	}; nik_ce auto U_tag_value = U_store_T<T_tag_value>;
+
+	template<auto UTag>
+	nik_ce auto tag_value = T_tag_value::template result<UTag>;
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // direct:
 
 /***********************************************************************************************************************/
@@ -325,11 +346,6 @@ namespace cctmp_one_cycle_specs {
 		nik_ces char opening	[] = "(]";
 	};
 
-	using Ival = Interval;
-
-	template<auto ival> nik_ce auto is_left_open			= (ival[0] == '(');
-	template<auto ival> nik_ce auto is_right_closed			= (ival[1] == ']');
-
 	// out:
 
 		template<auto... Vs> struct _out_ival			{ };
@@ -398,27 +414,7 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// tag operators:
-
-/***********************************************************************************************************************/
-
-// value:
-
-	struct T_tag_value
-	{
-		template<auto UTag>
-		nik_ces auto result = T_store_U<UTag>::value;
-
-	}; nik_ce auto U_tag_value = U_store_T<T_tag_value>;
-
-	template<auto UTag>
-	nik_ce auto tag_value = T_tag_value::template result<UTag>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// tag translators:
+// translators:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -448,24 +444,173 @@ namespace cctmp_one_cycle_specs {
 
 // etc:
 
+	template<template<key_type, typename...> class T_etc, key_type Key, auto... Vs>
+	nik_ce auto tr_ = U_store_T<T_etc<Key, T_store_U<Vs>...>>;
+
+	template<auto... Vs>
+	nik_ce auto to_value = U_pack_Vs<T_store_U<Vs>::value...>;
+
 /***********************************************************************************************************************/
 
-	template<key_type, typename...> struct T_label;
-	template<key_type, typename...> struct T_position;
-	template<key_type, typename...> struct T_cycle;
-	template<key_type, typename...> struct T_precycle;
-	template<key_type, typename...> struct T_postcycle;
+// atomic:
 
-	template<key_type Key, auto... Vs> using etc_label			= T_label<Key, T_store_U<Vs>...>;
-	template<key_type Key, auto... Vs> using etc_position			= T_position<Key, T_store_U<Vs>...>;
-	template<key_type Key, auto... Vs> using etc_cycle			= T_cycle<Key, T_store_U<Vs>...>;
+	// labels:
 
-	template<key_type Key, typename... Ts> using etc_precycle		= T_precycle<Key, Ts...>;
-	template<key_type Key, typename... Ts> using etc_postcycle		= T_postcycle<Key, Ts...>;
+		template<key_type, typename...> struct T_cycle;
+		template<key_type, typename...> struct T_precycle;
+		template<key_type, typename...> struct T_postcycle;
+		template<key_type, typename...> struct T_match;
+		template<key_type, typename...> struct T_postmatch;
+		template<key_type, typename...> struct T_done;
 
+	// positions:
+
+		template<key_type, typename...> struct T_out;
+		template<key_type, typename...> struct T_aux;
+		template<key_type, typename...> struct T_in;
+		template<key_type, typename...> struct T_car_in;
+		template<key_type, typename...> struct T_cdr_in;
+		template<key_type, typename...> struct T_end;
+
+	// precycle:
+
+		template<key_type, typename...> struct T_pre_prev;
+		template<key_type, typename...> struct T_pre_next;
+
+	// cycle:
+
+		template<key_type, typename...> struct T_loop_predicate;
+		template<key_type, typename...> struct T_assign_function;
+		template<key_type, typename...> struct T_next;
+
+	// postcycle:
+
+		template<key_type, typename...> struct T_post_assign_function;
+		template<key_type, typename...> struct T_post_next;
+
+	// ival:
+
+		template<key_type, typename...> struct T_is_left_open;
+		template<key_type, typename...> struct T_is_right_closed;
+
+// composite:
+
+		template<key_type, typename...> struct T_label;
+		template<key_type, typename...> struct T_position;
+
+		// ival:
+
+		template<key_type, typename...> struct T_ival;
+		template<key_type, typename...> struct T_ivals;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// id:
+
+/***********************************************************************************************************************/
+
+// labels:
+
+	template<auto Precycle  > struct T_precycle  <TR::id,  _precycle<Precycle  >> { nik_ces auto value = Precycle; };
+	template<auto Cycle     > struct T_cycle     <TR::id,     _cycle<Cycle     >> { nik_ces auto value = Cycle; };
+	template<auto Postcycle > struct T_postcycle <TR::id, _postcycle<Postcycle >> { nik_ces auto value = Postcycle; };
+	template<auto Match     > struct T_match     <TR::id,     _match<Match     >> { nik_ces auto value = Match; };
+	template<auto Postmatch > struct T_postmatch <TR::id, _postmatch<Postmatch >> { nik_ces auto value = Postmatch; };
+	template<auto Done      > struct T_done      <TR::id,      _done<Done      >> { nik_ces auto value = Done; };
+
+/***********************************************************************************************************************/
+
+// positions:
+
+	template<auto Out   > struct T_out    <TR::id, _out    <Out   >> { nik_ces auto value = Out; };
+	template<auto Aux   > struct T_aux    <TR::id, _aux    <Aux   >> { nik_ces auto value = Aux; };
+	template<auto In    > struct T_in     <TR::id, _in     <In    >> { nik_ces auto value = In; };
+	template<auto CarIn > struct T_car_in <TR::id, _car_in <CarIn >> { nik_ces auto value = CarIn; };
+	template<auto CdrIn > struct T_cdr_in <TR::id, _cdr_in <CdrIn >> { nik_ces auto value = CdrIn; };
+	template<auto End   > struct T_end    <TR::id, _end    <End   >> { nik_ces auto value = End; };
+
+/***********************************************************************************************************************/
+
+// precycle:
+
+	// next:
+
+		template<typename Ival, typename Next>
+		struct T_pre_next<TR::id, Ival, Next>
+		{
+			nik_ces auto value = alias
+			<
+				AOP::if_then_else, Ival::is_left_open::value, Next::value, _id_
+			>;
+		};
+
+/***********************************************************************************************************************/
+
+// cycle:
+
+	// next:
+
+		template<auto Op>
+		struct T_next<TR::id, _next<Op>>
+		{
+			nik_ces auto value = Op;
+		};
+
+	// ival:
+
+		template<auto Ival>
+		struct T_is_left_open<TR::id, _type<Ival>>
+		{
+			nik_ces auto value = (Ival[0] == '(');
+		};
+
+		template<auto Ival>
+		struct T_is_right_closed<TR::id, _type<Ival>>
+		{
+			nik_ces auto value = (Ival[1] == ']');
+		};
+
+		template<typename _Type>
+		struct T_ival<TR::id, _Type>
+		{
+			nik_ces auto _Type_		= U_store_T<_Type>;
+			nik_ces auto is_left_open	= tr_< T_is_left_open   , TR::id, _Type_ >;
+			nik_ces auto is_right_closed	= tr_< T_is_right_closed, TR::id, _Type_ >;
+		};
+
+/***********************************************************************************************************************/
+
+// postcycle:
+
+	// assign function:
+
+		template<typename Ival, typename AssignFunc>
+		struct T_post_assign_function<TR::id, Ival, AssignFunc>
+		{
+			nik_ces auto value = alias
+			<
+				AOP::if_then_else, Ival::is_right_closed::value, AssignFunc::value, _id_
+			>;
+		};
+
+	// next:
+
+		template<typename Ival, typename Next>
+		struct T_post_next<TR::id, Ival, Next>
+		{
+			nik_ces auto value = alias
+			<
+				AOP::if_then_else, Ival::is_right_closed::value, Next::value, _id_
+			>;
+		};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // repeat:
+
+/***********************************************************************************************************************/
 
 	template
 	<
@@ -475,7 +620,7 @@ namespace cctmp_one_cycle_specs {
 		typename cycle,
 		typename postcycle
 	>
-	nik_ce auto etc_repeat = U_pack_Vs
+	nik_ce auto etc_repeat = to_value
 	<
 		label::precycle,
 		label::cycle,
@@ -496,7 +641,104 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
+// loop predicate:
+
+	template<auto Op, auto OutArg, auto EndArg>
+	struct T_loop_predicate<TR::repeat, _op<Op>, _out_arg<OutArg>, _end_arg<EndArg>>
+	{
+		nik_ces auto value = _argcompose_<Op, OutArg, EndArg>;
+	};
+
+/***********************************************************************************************************************/
+
+// assign function:
+
+	template<auto Op, auto OutArg, auto InArg>
+	struct T_assign_function<TR::repeat, _op<Op>, _out_arg<OutArg>, _in_arg<InArg>>
+	{
+		nik_ces auto assign_function	= _argcompose_<Op, OutArg, InArg>;
+		nik_ces auto value		= _side_<assign_function>;
+	};
+
+/***********************************************************************************************************************/
+
+// label:
+
+	template<auto _Precycle_, auto _Cycle_, auto _Postcycle_>
+	struct T_label<TR::repeat, _label<_Precycle_, _Cycle_, _Postcycle_>>
+	{
+		nik_ces auto precycle		= tr_<  T_precycle, TR::id,  _Precycle_ >;
+		nik_ces auto cycle		= tr_<     T_cycle, TR::id,     _Cycle_ >;
+		nik_ces auto postcycle		= tr_< T_postcycle, TR::id, _Postcycle_ >;
+	};
+
+/***********************************************************************************************************************/
+
+// position:
+
+	template<auto _Out_, auto _End_, auto _In_>
+	struct T_position<TR::repeat, _position<_Out_, _End_, _In_>>
+	{
+		nik_ces auto out	= tr_< T_out, TR::id, _Out_ >;
+		nik_ces auto end	= tr_< T_end, TR::id, _End_ >;
+		nik_ces auto in		= tr_<  T_in, TR::id,  _In_ >;
+	};
+
+/***********************************************************************************************************************/
+
+// cycle:
+
+	template
+	<
+		auto _Type_, auto  _Next_,
+		auto  _Op0_, auto _Arg01_, auto _Arg02_,
+		auto  _Op1_, auto _Arg11_, auto _Arg12_
+	>
+	struct T_cycle
+	<
+		TR::repeat,
+
+		_out_ival < _Type_ , _Next_            >,
+		_break    < _Op0_  , _Arg01_ , _Arg02_ >,
+		_action   < _Op1_  , _Arg11_ , _Arg12_ >
+	>
+	{
+		nik_ces auto loop_predicate		= tr_<  T_loop_predicate, TR::repeat, _Op0_, _Arg01_, _Arg02_ >;
+		nik_ces auto assign_function		= tr_< T_assign_function, TR::repeat, _Op1_, _Arg11_, _Arg12_ >;
+
+		nik_ces auto out_next			= tr_< T_next, TR::id, _Next_ >;
+		nik_ces auto out_ival			= tr_< T_ival, TR::id, _Type_ >;
+	};
+
+/***********************************************************************************************************************/
+
+// precycle:
+
+	template<typename cycle>
+	struct T_precycle<TR::repeat, cycle>
+	{
+		nik_ces auto pre_out_next = tr_<T_pre_next, TR::id, cycle::out_ival, cycle::out_next>;
+	};
+
+/***********************************************************************************************************************/
+
+// postcycle:
+
+	template<typename cycle>
+	struct T_postcycle<TR::repeat, cycle>
+	{
+		nik_ces auto post_assign_function = tr_
+		<
+			T_post_assign_function, TR::id, cycle::out_ival, cycle::assign_function
+		>;
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // map:
+
+/***********************************************************************************************************************/
 
 	template
 	<
@@ -506,7 +748,7 @@ namespace cctmp_one_cycle_specs {
 		typename cycle,
 		typename postcycle
 	>
-	nik_ce auto etc_map = U_pack_Vs
+	nik_ce auto etc_map = to_value
 	<
 		label::precycle,
 		label::cycle,
@@ -523,7 +765,7 @@ namespace cctmp_one_cycle_specs {
 		cycle::loop_predicate,
 		cycle::assign_function,
 		cycle::out_next,
-		cycle::in_next,
+		cycle::in_next::value,
 
 		postcycle::post_assign_function,
 		postcycle::post_out_next,
@@ -532,355 +774,38 @@ namespace cctmp_one_cycle_specs {
 	>;
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// label:
-
-/***********************************************************************************************************************/
-
-// id:
-
-	template<auto precycle, auto cycle, auto postcycle>
-	struct T_label<TR::id, _label<precycle, cycle, postcycle>>
-	{
-		nik_ces auto precycle_value	= tag_value<precycle>;
-		nik_ces auto cycle_value	= tag_value<cycle>;
-		nik_ces auto postcycle_value	= tag_value<postcycle>;
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
 // position:
 
-/***********************************************************************************************************************/
-
-// repeat:
-
-	template<auto out, auto end, auto in>
-	struct T_label<TR::repeat, _position<out, end, in>>
+	template<auto _Out_, auto _In_, auto _End_>
+	struct T_position<TR::map, _position<_Out_, _In_, _End_>>
 	{
-		nik_ces auto out_value		= tag_value<out>;
-		nik_ces auto end_value		= tag_value<end>;
-		nik_ces auto in_value		= tag_value<in>;
+		nik_ces auto out	= tr_< T_out, TR::id, _Out_ >;
+		nik_ces auto in		= tr_<  T_in, TR::id,  _In_ >;
+		nik_ces auto end	= tr_< T_end, TR::id, _End_ >;
 	};
 
-/***********************************************************************************************************************/
-
-// map:
-
-	template<auto out, auto in, auto end>
-	struct T_label<TR::map, _position<out, in, end>>
-	{
-		nik_ces auto out_value		= tag_value<out>;
-		nik_ces auto in_value		= tag_value<in>;
-		nik_ces auto end_value		= tag_value<end>;
-	};
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // cycle:
 
-/***********************************************************************************************************************/
-
-// repeat:
-
 	template
 	<
-		auto type, auto  next,
-		auto  op0, auto arg01, auto arg02,
-		auto  op1, auto arg11, auto arg12
+		auto _Type0_, auto _Next0_,
+		auto _Type1_, auto _Next1_,
+		auto   _Op0_, auto _Arg01_, auto _Arg02_,
+		auto   _Op1_, auto _Arg11_, auto _Arg12_
 	>
 	struct T_cycle
 	<
-		TR::repeat,
+		TR::map,
 
-		_out_ival < type , next          >,
-		_break    < op0  , arg01 , arg02 >,
-		_action   < op1  , arg11 , arg12 >
+		_out_ival < _Type0_ , _Next0_           >,
+		_in_ival  < _Type1_ , _Next1_           >,
+		_break    < _Op0_   , _Arg01_ , _Arg02_ >,
+		_action   < _Op1_   , _Arg11_ , _Arg12_ >
 	>
 	{
-		nik_ces auto break_op			= tag_value<op0>;
-		nik_ces auto break_out_arg		= tag_value<arg01>;
-		nik_ces auto break_end_arg		= tag_value<arg02>;
-		nik_ces auto loop_predicate_value	= _argcompose_<break_op, break_out_arg, break_end_arg>;
-
-		nik_ces auto action_op			= tag_value<op1>;
-		nik_ces auto action_out_arg		= tag_value<arg11>;
-		nik_ces auto action_in_arg		= tag_value<arg12>;
-		nik_ces auto action_function		= _argcompose_<action_op, action_out_arg, action_in_arg>;
-		nik_ces auto assign_function_value	= _side_<action_function>;
-
-		nik_ces auto out_next_value		= tag_value<next>;
-
-		nik_ces auto out_ival			= tag_value<type>;
-		nik_ces auto out_ival_is_left_open	= is_left_open<out_ival>;
-		nik_ces auto out_ival_is_right_closed	= is_right_closed<out_ival>;
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// precycle:
-
-/***********************************************************************************************************************/
-
-	template<typename cycle>
-	struct T_precycle<TR::repeat, cycle>
-	{
-		nik_ces auto pre_out_next = alias
-		<
-			AOP::if_then_else,
-			cycle::out_ival_is_left_open,
-			cycle::out_next_value,
-			_id_
-		>;
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// postcycle:
-
-/***********************************************************************************************************************/
-
-	template<typename cycle>
-	struct T_postcycle<TR::repeat, cycle>
-	{
-		nik_ces auto post_assign_function = alias
-		<
-			AOP::if_then_else,
-			cycle::out_ival_is_right_closed,
-			cycle::assign_function_value,
-			_id_
-		>;
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// interpretations:
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// direct:
-
-/***********************************************************************************************************************/
-
-// to values:
-
-	template<auto p, auto Op = U_tag_value>
-	nik_ce auto direct_to_values = unpack_
-	<
-		p,
-		U_partial
-		<
-			U_map,
-			U_partial<U_custom, Op>
-		>
-	>;
-
-/***********************************************************************************************************************/
-
-// to spec:
-
-	template<auto direct, auto H_spec>
-	nik_ce auto direct_to_spec = alias
-	<
-		AOP::list_to_template,
-		direct_to_values<direct>,
-		H_spec
-	>;
-
-/***********************************************************************************************************************/
-
-// write:
-
-	template<auto defs, auto... Vs>
-	nik_ce auto direct_write = pack_write<H_partial_similar, defs, Vs...>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// conceptual:
-
-/***********************************************************************************************************************/
-
-// write:
-
-	// temporary:
-
-	template<auto defs, auto... Vs>
-	nik_ce auto conceptual_write = defs;
-
-//	template<auto defs, auto... Vs>
-//	nik_ce auto conceptual_write = pack_write<H_partial_similar, defs, Vs...>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// repeat:
-
-/***********************************************************************************************************************/
-
-// direct:
-
-	// default:
-
-		nik_ce auto direct_repeat_defaults = U_pack_Vs
-		<
-			_precycle_label_       < _zero         >,
-			_cycle_label_          < _one          >,
-			_postcycle_label_      < _two          >,
-
-			_out_position_         < _zero         >,
-			_end_position_         < _one          >,
-			_in_position_          < _two          >,
-
-			_pre_out_next_         < _id_          >,
-
-			_loop_predicate_       < _equal_       >,
-			_assign_function_      < _d_assign_i_  >,
-			_out_next_             < _increment_<> >,
-
-			_post_assign_function_ < _id_          >
-		>;
-
-	// spec:
-
-		template<auto... Vs>
-		nik_ce auto direct_repeat = direct_to_spec
-		<
-			direct_write<direct_repeat_defaults, Vs...>,
-			H_repeat_specification
-		>;
-
-/***********************************************************************************************************************/
-
-// conceptual:
-
-	// default:
-
-		nik_ces auto conceptual_repeat_defaults = U_pack_Vs
-		<
-			_label_
-			<
-				_precycle_  < _zero         >,
-				_cycle_     < _one          >,
-				_postcycle_ < _two          >
-			>,
-			_position_
-			<
-				_out_       < _zero         >,
-				_end_       < _one          >,
-				_in_        < _two          >
-			>,
-			_out_ival_
-			<
-				_type_      < Ival::closing >,
-				_next_      < _increment_<> >
-			>,
-			_break_
-			<
-				_op_        < _equal_       >,
-				_out_arg_   < _id_          >,
-				_end_arg_   < _id_          >
-			>,
-			_action_
-			<
-				_op_        < _assign_      >,
-				_out_arg_   < _dereference_ >,
-				_in_arg_    < _id_          >
-			>
-		>;
-
-	// spec:
-
-		template<auto label, auto position, auto out_ival, auto break_, auto action>
-		nik_ce auto _conceptual_repeat(nik_avp(T_pack_Vs<label, position, out_ival, break_, action>*))
-		{
-			using label_etc			= etc_label<TR::id, label>;
-			using position_etc		= etc_position<TR::repeat, position>;
-			using cycle_etc			= etc_cycle<TR::repeat, out_ival, break_, action>;
-			using precycle_etc		= etc_precycle<TR::repeat, cycle_etc>;
-			using postcycle_etc		= etc_postcycle<TR::repeat, cycle_etc>;
-
-			return etc_repeat
-			<
-				label_etc,
-				position_etc,
-				precycle_etc,
-				cycle_etc,
-				postcycle_etc
-			>;
-		}
-
-		template<auto p>
-		nik_ce auto let_conceptual_repeat = alias
-		<
-			AOP::list_to_template, _conceptual_repeat(p), H_repeat_specification
-		>;
-
-		template<auto... Vs>
-		nik_ce auto conceptual_repeat = let_conceptual_repeat
-		<
-			conceptual_write<conceptual_repeat_defaults, Vs...>
-		>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// map:
-
-/***********************************************************************************************************************/
-
-// direct:
-
-	// default:
-
-		nik_ce auto direct_map_defaults = U_pack_Vs
-		<
-			_precycle_label_       < _zero         >,
-			_cycle_label_          < _one          >,
-			_postcycle_label_      < _two          >,
-
-			_out_position_         < _zero         >,
-			_in_position_          < _one          >,
-			_end_position_         < _two          >,
-
-			_pre_end_prev_         < _id_          >,
-			_pre_out_next_         < _id_          >,
-			_pre_in_next_          < _id_          >,
-
-			_loop_predicate_       < _equal_       >,
-			_assign_function_      < _d_assign_i_  >,
-			_out_next_             < _increment_<> >,
-			_in_next_              < _increment_<> >,
-
-			_post_assign_function_ < _id_          >,
-			_post_out_next_        < _id_          >,
-			_post_in_next_         < _id_          >,
-			_post_end_next_        < _id_          >
-		>;
-
-	// spec:
-
-		template<auto... Vs>
-		nik_ce auto direct_map = direct_to_spec
-		<
-			direct_write<direct_map_defaults, Vs...>,
-			H_map_specification
-		>;
-
-/***********************************************************************************************************************/
-
-// conceptual:
-
 		//	0. If bidirectional and last, reverse iterate end.
 		//	1. For each left endpoint, if open, then iterate.
 		//	2. Evaluate the common (closing) loop.
@@ -888,87 +813,47 @@ namespace cctmp_one_cycle_specs {
 		//	4. If (3), then for each right endpoint, when open, iterate.
 		//	5. If bidirectional and last, iterate end to reset.
 
-	//	lift < end , end_prev_<Spec> , end >,	// boolean_before_loop < is_end_prev_before_<Spec>
-	//	lift < out , out_next_<Spec> , out >,	// boolean_before_loop < is_out_next_before_<Spec>
-	//	lift < in  , in_next_<Spec>  , in  >,	// boolean_before_loop < is_in_next_before_<Spec>
+		nik_ces auto loop_predicate		= tr_<  T_loop_predicate, TR::map, _Op0_, _Arg01_, _Arg02_ >;
+		nik_ces auto assign_function		= tr_< T_assign_function, TR::map, _Op1_, _Arg11_, _Arg12_ >;
 
+		nik_ces auto out_next			= tr_< T_next, TR::id, _Next0_ >;
+		nik_ces auto in_next			= tr_< T_next, TR::id, _Next1_ >;
 
-	//	lift < out , act_func_<Spec>   , in  >,	// boolean_after_loop < is_act_func_after_<Spec>
-	//	lift < out , out_next_<Spec>   , out >,	// boolean_after_loop < is_out_next_after_<Spec>
-	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
-	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
+		nik_ces auto out_ival			= tr_< T_ival, TR::id, _Type0_ >;
+		nik_ces auto in_ival			= tr_< T_ival, TR::id, _Type1_ >;
 
-		nik_ces auto conceptual_map_defaults = U_pack_Vs
-		<
-			_label_
-			<
-				_precycle_  < _zero         >,
-				_cycle_     < _one          >,
-				_postcycle_ < _two          >
-			>,
-			_position_
-			<
-				_out_       < _zero         >,
-				_in_        < _one          >,
-				_end_       < _two          >
-			>,
-			_out_ival_
-			<
-				_type_      < Ival::closing >,
-				_next_      < _increment_<> >
-			>,
-			_in_ival_
-			<
-				_type_      < Ival::closing >,
-				_next_      < _increment_<> >,
-				_prev_      < _decrement_<> >
-			>,
-			_break_
-			<
-				_op_        < _equal_       >,
-				_in_arg_    < _id_          >,
-				_end_arg_   < _id_          >
-			>,
-			_action_
-			<
-				_op_        < _assign_      >,
-				_out_arg_   < _dereference_ >,
-				_in_arg_    < _dereference_ >
-			>
-		>;
-
-		template<auto label, auto position, auto out_ival, auto in_ival, auto break_, auto action>
-		nik_ce auto _conceptual_map(nik_avp(T_pack_Vs<label, position, out_ival, in_ival, break_, action>*))
-		{
-			using label_etc			= etc_label<TR::id, label>;
-			using position_etc		= etc_position<TR::map, position>;
-			using cycle_etc			= etc_cycle<TR::map, out_ival, in_ival, break_, action>;
-			using precycle_etc		= etc_precycle<TR::map, cycle_etc>;
-			using postcycle_etc		= etc_postcycle<TR::map, cycle_etc>;
-
-			return etc_map
-			<
-				label_etc,
-				position_etc,
-				precycle_etc,
-				cycle_etc,
-				postcycle_etc
-			>;
-		}
-
-		template<auto p>
-		nik_ce auto let_conceptual_map = alias
-		<
-			AOP::list_to_template, _conceptual_map(p), H_map_specification
-		>;
-
-		template<auto... Vs>
-		nik_ce auto conceptual_map = let_conceptual_map
-		<
-			conceptual_write<conceptual_map_defaults, Vs...>
-		>;
+//		nik_ces auto out_in_ival		= tr_< T_ivals, TR::id, out_ival, in_ival >;
+	};
 
 /***********************************************************************************************************************/
+
+// precycle:
+
+	template<typename cycle>
+	struct T_precycle<TR::map, cycle>
+	{
+	//	nik_ces auto pre_end_prev = tr_< T_pre_prev, TR::id, cycle::out_ival, cycle::out_next >;
+		nik_ces auto pre_out_next = tr_< T_pre_next, TR::id, cycle::out_ival, cycle::out_next >;
+		nik_ces auto pre_in_next  = tr_< T_pre_next, TR::id,  cycle::in_ival,  cycle::in_next >;
+	};
+
+/***********************************************************************************************************************/
+
+// postcycle:
+
+	template<typename cycle>
+	struct T_postcycle<TR::map, cycle>
+	{
+		nik_ces auto post_assign_function = tr_
+		<
+			T_post_assign_function, TR::id, cycle::ivals, cycle::assign_function
+		>;
+
+		nik_ces auto post_out_next = tr_< T_post_next, TR::id, cycle::out_ival, cycle::out_next >;
+		nik_ces auto post_in_next  = tr_< T_post_next, TR::id,  cycle::in_ival,  cycle::in_next >;
+	//	nik_ces auto post_end_next = tr_< T_post_next, TR::id, cycle::out_ival, cycle::out_next >;
+	};
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -976,356 +861,40 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
-// direct:
-
-	// default:
-
-		nik_ce auto direct_fold_defaults = U_pack_Vs
-		<
-			_precycle_label_        < _zero         >,
-			_cycle_label_           < _one          >,
-			_postcycle_label_       < _two          >,
-
-			_out_position_          < _zero         >,
-			_in_position_           < _one          >,
-			_end_position_          < _two          >,
-
-			_pre_in_next_           < _id_          >,
-
-			_loop_predicate_        < _equal_       >,
-			_combine_function_      < _id_          >,
-			_in_next_               < _increment_<> >,
-
-			_post_combine_function_ < _id_          >
-		>;
-
-	// spec:
-
-		template<auto... Vs>
-		nik_ce auto direct_fold = direct_to_spec
-		<
-			direct_write<direct_fold_defaults, Vs...>,
-			H_fold_specification
-		>;
-
-/***********************************************************************************************************************/
-
-// conceptual:
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// find:
+// find first:
+
+/***********************************************************************************************************************/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// (find) first:
+// find all:
 
 /***********************************************************************************************************************/
-
-// direct:
-
-	// default:
-
-		nik_ce auto direct_find_first_defaults = U_pack_Vs
-		<
-			_precycle_label_        < _zero             >,
-			_cycle_label_           < _one              >,
-			_match_label_           < _two              >,
-			_postcycle_label_       < _three            >,
-			_done_label_            < _four             >,
-
-			_out_position_          < _zero             >,
-			_in_position_           < _one              >,
-			_end_position_          < _two              >,
-
-			_pre_in_next_           < _id_              >,
-
-			_loop_predicate_        < _equal_           >,
-			_act_predicate_         < _constant_<false> >,
-			_in_next_               < _increment_<>     >,
-
-			_match_assign_function_ < _d_assign_i_      >,
-			_match_out_next_        < _increment_<>     >,
-
-			_post_act_predicate_    < _constant_<false> >
-		>;
-
-	// spec:
-
-		template<auto... Vs>
-		nik_ce auto direct_find_first = direct_to_spec
-		<
-			direct_write<direct_find_first_defaults, Vs...>,
-			H_find_first_specification
-		>;
-
-/***********************************************************************************************************************/
-
-// conceptual:
-
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// (find) all:
+// zip:
 
 /***********************************************************************************************************************/
 
-// direct:
-
-	// default:
-
-		nik_ce auto direct_find_all_defaults = U_pack_Vs
-		<
-			_precycle_label_            < _zero             >,
-			_cycle_label_               < _one              >,
-			_match_label_               < _two              >,
-			_postcycle_label_           < _three            >,
-			_postmatch_label_           < _four             >,
-			_done_label_                < _five             >,
-
-			_out_position_              < _zero             >,
-			_in_position_               < _one              >,
-			_end_position_              < _two              >,
-
-			_pre_in_next_               < _id_              >,
-
-			_loop_predicate_            < _equal_           >,
-			_act_predicate_             < _constant_<false> >,
-			_in_next_                   < _increment_<>     >,
-
-			_match_assign_function_     < _d_assign_i_      >,
-			_match_out_next_            < _increment_<>     >,
-			 _match_in_next_            < _increment_<>     >,
-
-			_post_act_predicate_        < _constant_<false> >,
-
-			_postmatch_assign_function_ < _d_assign_i_      >,
-			_postmatch_out_next_        < _increment_<>     >
-		>;
-
-	// spec:
-
-		template<auto... Vs>
-		nik_ce auto direct_find_all = direct_to_spec
-		<
-			direct_write<direct_find_all_defaults, Vs...>,
-			H_find_all_specification
-		>;
-
-/***********************************************************************************************************************/
-
-// conceptual:
-
-
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// zip (bimap):
+// fasten:
 
 /***********************************************************************************************************************/
 
-// direct:
-
-	// default:
-
-		nik_ce auto direct_zip_defaults = U_pack_Vs
-		<
-			_precycle_label_       < _zero         >,
-			_cycle_label_          < _one          >,
-			_postcycle_label_      < _two          >,
-
-			_out_position_         < _zero         >,
-			_car_in_position_      < _one          >,
-			_cdr_in_position_      < _two          >,
-			_end_position_         < _three        >,
-
-			_pre_end_prev_         < _id_          >,
-			_pre_out_next_         < _id_          >,
-			_pre_car_in_next_      < _id_          >,
-			_pre_cdr_in_next_      < _id_          >,
-
-			_loop_predicate_       < _equal_       >,
-			_act_function_         < _id_          >,
-			_assign_function_      < _d_assign_i_  >,
-			_out_next_             < _increment_<> >,
-			_car_in_next_          < _increment_<> >,
-			_cdr_in_next_          < _increment_<> >,
-
-			_post_act_function_    < _id_          >,
-			_post_assign_function_ < _id_          >,
-			_post_out_next_        < _id_          >,
-			_post_car_in_next_     < _id_          >,
-			_post_cdr_in_next_     < _id_          >,
-			_post_end_next_        < _id_          >
-		>;
-
-	// spec:
-
-		template<auto... Vs>
-		nik_ce auto direct_zip = direct_to_spec
-		<
-			direct_write<direct_zip_defaults, Vs...>,
-			H_zip_specification
-		>;
-
-/***********************************************************************************************************************/
-
-// conceptual:
-
-		//	0. If bidirectional and last, reverse iterate end.
-		//	1. For each left endpoint, if open, then iterate.
-		//	2. Evaluate the common (closing) loop.
-		//	3. If there exists any right endpoint, which is closed, then act/combine.
-		//	4. If (3), then for each right endpoint, when open, iterate.
-		//	5. If bidirectional and last, iterate end to reset.
-
-	//	lift < end , end_prev_<Spec> , end >,	// boolean_before_loop < is_end_prev_before_<Spec>
-	//	lift < out , out_next_<Spec> , out >,	// boolean_before_loop < is_out_next_before_<Spec>
-	//	lift < in  , in_next_<Spec>  , in  >,	// boolean_before_loop < is_in_next_before_<Spec>
-
-
-	//	lift < out , act_func_<Spec>   , in  >,	// boolean_after_loop < is_act_func_after_<Spec>
-	//	lift < out , out_next_<Spec>   , out >,	// boolean_after_loop < is_out_next_after_<Spec>
-	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
-	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// fasten (zip with a carry):
+// glide:
 
 /***********************************************************************************************************************/
-
-// direct:
-
-	// default:
-
-		nik_ce auto direct_fasten_defaults = U_pack_Vs
-		<
-			_precycle_label_        < _zero             >,
-			_cycle_label_           < _one              >,
-			_postcycle_label_       < _two              >,
-
-			_out_position_          < _zero             >,
-			_aux_position_          < _one              >,
-			_in_position_           < _two              >,
-			_car_in_position_       < _three            >,
-			_cdr_in_position_       < _four             >,
-			_end_position_          < _five             >,
-
-			_pre_end_prev_          < _id_              >,
-			_pre_out_next_          < _id_              >,
-			_pre_car_in_next_       < _id_              >,
-			_pre_cdr_in_next_       < _id_              >,
-
-			_loop_predicate_        < _equal_           >,
-			_act_function_          < _id_              >,
-			_assign_function_       < _d_assign_i_      >,
-			_aux_next_              < _constant_<false> >,
-			_combine_function_      < _id_              >,
-			_in_next_               < _constant_<false> >,
-			_out_next_              < _increment_<>     >,
-			_car_in_next_           < _increment_<>     >,
-			_cdr_in_next_           < _increment_<>     >,
-
-			_post_act_function_     < _id_              >,
-			_post_assign_function_  < _id_              >,
-			_post_combine_function_ < _id_              >,
-			_post_out_next_         < _id_              >,
-			_post_car_in_next_      < _id_              >,
-			_post_cdr_in_next_      < _id_              >,
-			_post_end_next_         < _id_              >
-		>;
-
-	// spec:
-
-		template<auto... Vs>
-		nik_ce auto direct_fasten = direct_to_spec
-		<
-			direct_write<direct_fasten_defaults, Vs...>,
-			H_fasten_specification
-		>;
-
-/***********************************************************************************************************************/
-
-// conceptual:
-
-		//	0. If bidirectional and last, reverse iterate end.
-		//	1. For each left endpoint, if open, then iterate.
-		//	2. Evaluate the common (closing) loop.
-		//	3. If there exists any right endpoint, which is closed, then act/combine.
-		//	4. If (3), then for each right endpoint, when open, iterate.
-		//	5. If bidirectional and last, iterate end to reset.
-
-	//	lift < end , end_prev_<Spec> , end >,	// boolean_before_loop < is_end_prev_before_<Spec>
-	//	lift < out , out_next_<Spec> , out >,	// boolean_before_loop < is_out_next_before_<Spec>
-	//	lift < in  , in_next_<Spec>  , in  >,	// boolean_before_loop < is_in_next_before_<Spec>
-
-
-	//	lift < out , act_func_<Spec>   , in  >,	// boolean_after_loop < is_act_func_after_<Spec>
-	//	lift < out , out_next_<Spec>   , out >,	// boolean_after_loop < is_out_next_after_<Spec>
-	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
-	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// glide (bifold):
-
-/***********************************************************************************************************************/
-
-// direct:
-
-	// default:
-
-		nik_ce auto direct_glide_defaults = U_pack_Vs
-		<
-			_precycle_label_        < _zero         >,
-			_cycle_label_           < _one          >,
-			_postcycle_label_       < _two          >,
-
-			_out_position_          < _zero         >,
-			_car_in_position_       < _one          >,
-			_cdr_in_position_       < _two          >,
-			_end_position_          < _three        >,
-
-			_pre_end_prev_          < _id_          >,
-			_pre_car_in_next_       < _id_          >,
-			_pre_cdr_in_next_       < _id_          >,
-
-			_loop_predicate_        < _equal_       >,
-			_act_function_          < _id_          >,
-			_combine_function_      < _id_          >,
-			_car_in_next_           < _increment_<> >,
-			_cdr_in_next_           < _increment_<> >,
-
-			_post_act_function_     < _id_          >,
-			_post_combine_function_ < _id_          >,
-			_post_car_in_next_      < _id_          >,
-			_post_cdr_in_next_      < _id_          >,
-			_post_end_next_         < _id_          >
-		>;
-
-	// spec:
-
-		template<auto... Vs>
-		nik_ce auto direct_glide = direct_to_spec
-		<
-			direct_write<direct_glide_defaults, Vs...>,
-			H_glide_specification
-		>;
-
-/***********************************************************************************************************************/
-
-// conceptual:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
