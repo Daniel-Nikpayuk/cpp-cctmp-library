@@ -226,7 +226,6 @@ namespace cctmp_one_cycle_specs {
 
 			_post_assign_function_ < _id_          >,
 			_post_out_next_        < _id_          >,
-			_post_in_next_         < _id_          >,
 			_post_end_next_        < _id_          >
 		>;
 
@@ -506,7 +505,6 @@ namespace cctmp_one_cycle_specs {
 			_post_assign_function_ < _id_          >,
 			_post_out_next_        < _id_          >,
 			_post_car_in_next_     < _id_          >,
-			_post_cdr_in_next_     < _id_          >,
 			_post_end_next_        < _id_          >
 		>;
 
@@ -585,7 +583,6 @@ namespace cctmp_one_cycle_specs {
 			_post_combine_function_ < _id_              >,
 			_post_out_next_         < _id_              >,
 			_post_car_in_next_      < _id_              >,
-			_post_cdr_in_next_      < _id_              >,
 			_post_end_next_         < _id_              >
 		>;
 
@@ -655,7 +652,6 @@ namespace cctmp_one_cycle_specs {
 			_post_act_function_     < _id_          >,
 			_post_combine_function_ < _id_          >,
 			_post_car_in_next_      < _id_          >,
-			_post_cdr_in_next_      < _id_          >,
 			_post_end_next_         < _id_          >
 		>;
 
