@@ -918,15 +918,24 @@ namespace cctmp_program
 	//	printf("%llu\n", cctmp_functional::pack_right<0, 3, 4, 5, 9>);
 	//	printf("%llu\n", cctmp_functional::list_right<p, 0>);
 
+	//	constexpr auto p_split = cctmp_functional::pack_split<0, 3, 4, 5, 9>;
+	//	printf("%llu, %llu\n", tuple_value<0>(p_split), tuple_value<1>(p_split));
+	//	constexpr auto l_split = cctmp_functional::list_split<p, 4>;
+	//	printf("%llu, %llu\n", tuple_value<0>(l_split), tuple_value<1>(l_split));
+
 	//	constexpr auto p_cut = cctmp_functional::pack_cut<0, 3, 4, 5, 9>;
 	//	printf("%llu, %llu\n", tuple_value<0>(p_cut), tuple_value<1>(p_cut));
 	//	constexpr auto l_cut = cctmp_functional::list_cut<p, 3>;
 	//	printf("%llu, %llu\n", tuple_value<0>(l_cut), tuple_value<1>(l_cut));
 
-	//	constexpr auto p_split = cctmp_functional::pack_split<0, 3, 4, 5, 9>;
-	//	printf("%llu, %llu\n", tuple_value<0>(p_split), tuple_value<1>(p_split));
-	//	constexpr auto l_split = cctmp_functional::list_split<p, 4>;
-	//	printf("%llu, %llu\n", tuple_value<0>(l_split), tuple_value<1>(l_split));
+	//	constexpr auto p_alter = cctmp_functional::pack_alter<0, 3, 4, 5, 9>;
+	//	constexpr auto l_alter = unpack_<tuple_value<0>(p_alter), _car_>;
+	//	constexpr auto r_alter = unpack_<tuple_value<0>(p_alter), _cadr_>;
+	//	printf("%llu, %llu, %llu\n", l_alter, r_alter, tuple_value<1>(p_alter));
+	//	constexpr auto p_alter = cctmp_functional::list_alter<p, 3>;
+	//	constexpr auto l_alter = unpack_<tuple_value<0>(p_alter), _car_>;
+	//	constexpr auto r_alter = unpack_<tuple_value<0>(p_alter), _cadr_>;
+	//	printf("%llu, %llu, %llu\n", l_alter, r_alter, tuple_value<1>(p_alter));
 
 	//	printf("%llu\n", cctmp_functional::segment<unsigned{10}>);
 
@@ -940,16 +949,16 @@ namespace cctmp_program
 	//	printf("%llu\n", cctmp_functional::pack_replace<1, 7,    3, 4, 5, 9>);
 	//	printf("%llu\n", cctmp_functional::list_replace<p, 1, 7>);
 
-	//	constexpr auto H_curry_equal		= H_curry<_equal_>;
-	//	constexpr auto H_curry_less_than	= H_curry<_less_than_>;
+	//	printf("%llu\n", cctmp_functional::pack_ordered_insert<_less_than_, 0,    3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_functional::list_ordered_insert<p, 0>);
 
-	//	printf("%llu\n", cctmp_functional::pack_insert_sort<H_curry_less_than, 0,    3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_insert_sort<p, 0>);
-
-	//	printf("%llu\n", cctmp_functional::pack_sort<H_curry_less_than, U_null_Vs, 3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_sort<p>);		// gcc 2.489s / clang 7.010s
+	//	printf("%llu\n", cctmp_functional::pack_ordered_replace<_less_than_, 0,    3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_functional::list_ordered_replace<p, 0>);
 
 	//	printf("%llu\n", cctmp_functional::pack_union<H_curry_equal, H_curry_less_than, U_null_Vs, 9,    3, 4, 5, 9>);
+
+	//	printf("%llu\n", cctmp_functional::pack_sort<_less_than_, U_null_Vs, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_functional::list_sort<p>);		// gcc 2.854s / clang 7.166s
 
 	//	constexpr auto def_specs	= U_pack_Vs<0, 1, 2, 3, 4, 5>;
 	//	constexpr auto specs0		= U_pack_Vs<3, 5, 0>;

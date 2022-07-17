@@ -26,53 +26,51 @@ namespace cctmp_generics {
 	using key_type						= typename cctmp::key_type;
 	using index_type					= typename cctmp::index_type;
 
-	using T_block_argument					= typename cctmp::T_block_argument;
-
-	template<auto... Vs> using T_pack_Vs			= typename cctmp::template T_pack_Vs<Vs...>;
-	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
-	template<auto V> using T_out_type			= typename cctmp::template T_out_type<V>;
-
 	nik_ce auto _zero					= cctmp::_zero;
 	nik_ce auto _one					= cctmp::_one;
 
-	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
-
-	nik_ce auto _id_					= cctmp::_id_;
-	nik_ce auto _assign_					= cctmp::_assign_;
-	nik_ce auto _dereference_				= cctmp::_dereference_;
-
-	nik_ce auto U_same					= cctmp::U_same;
-	nik_ce auto U_is_int_type				= cctmp::U_is_int_type;
-	nik_ce auto U_not_int_type				= cctmp::U_not_int_type;
-	nik_ce auto U_length					= cctmp::U_length;
-	nik_ce auto U_map					= cctmp::U_map;
-	nik_ce auto U_car					= cctmp::U_car;
-	nik_ce auto U_find					= cctmp::U_find;
-	nik_ce auto U_zip					= cctmp::U_zip;
-	nik_ce auto U_cons					= cctmp::U_cons;
-	nik_ce auto U_push					= cctmp::U_push;
-	nik_ce auto U_unite					= cctmp::U_unite;
-	nik_ce auto U_custom					= cctmp::U_custom;
+	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
+	template<auto... Vs> using T_pack_Vs			= typename cctmp::template T_pack_Vs<Vs...>;
 
 	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
 	template<typename T> nik_ce auto U_restore_T		= cctmp::template U_restore_T<T>;
-	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
 	template<typename... Ts> nik_ce auto U_pack_Ts		= cctmp::template U_pack_Ts<Ts...>;
+	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
+
+	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
 
 	template<typename T, auto... Vs> nik_ce auto array	= cctmp::template array<T, Vs...>;
 
+	template<auto V> using T_out_type			= typename cctmp::template T_out_type<V>;
 	template<auto V> nik_ce auto in_types			= cctmp::template in_types<V>;
 
+	nik_ce auto H_id					= cctmp::H_id;
+
 	template<auto... Vs> nik_ce auto overload		= cctmp::template overload<Vs...>;
+	template<auto... Vs> nik_ce auto U_alias		= cctmp::template U_alias<Vs...>;
+
+	nik_ce auto _id_					= cctmp::_id_;
 
 	template<auto V> nik_ce auto _constant_			= cctmp::template _constant_<V>;
 	template<auto f> nik_ce auto _apply_			= cctmp::template _apply_<f>;
 	template<auto... Vs> nik_ce auto _bind_			= cctmp::template _bind_<Vs...>;
 
-	template<auto... Vs> nik_ce auto find_			= cctmp::template find_<Vs...>;
-	template<auto... Vs> nik_ce auto unpack_		= cctmp::template unpack_<Vs...>;
+	nik_ce auto _same_					= cctmp::_same_;
+	nik_ce auto _is_int_type_				= cctmp::_is_int_type_;
+	nik_ce auto _not_int_type_				= cctmp::_not_int_type_;
+	nik_ce auto _length_					= cctmp::_length_;
+	nik_ce auto _car_					= cctmp::_car_;
+	nik_ce auto _map_					= cctmp::_map_;
+	nik_ce auto _find_					= cctmp::_find_;
+	nik_ce auto _zip_					= cctmp::_zip_;
+	nik_ce auto _cons_					= cctmp::_cons_;
+	nik_ce auto _push_					= cctmp::_push_;
+	nik_ce auto _unite_					= cctmp::_unite_;
 
-	template<auto... Vs> nik_ce auto U_partial		= cctmp::template U_partial<Vs...>;
+	template<auto... Vs> nik_ce auto unpack_		= cctmp::template unpack_<Vs...>;
+	template<auto... Vs> nik_ce auto find_			= cctmp::template find_<Vs...>;
+
+	using T_block_argument					= typename cctmp::T_block_argument;
 
 // functional:
 
@@ -101,37 +99,37 @@ namespace cctmp_generics {
 // same:
 
 	template<auto V0, auto V1>
-	nik_ce auto same = overload<U_same, V0, V1>;
+	nik_ce auto same = overload<_same_, V0, V1>;
 
 // has int type:
 
 	template<auto V>
-	nik_ce auto has_int_type = overload<U_is_int_type, U_store_T<decltype(V)>>;
+	nik_ce auto has_int_type = overload<_is_int_type_, U_store_T<decltype(V)>>;
 
 // length:
 
 	template<auto p>
-	nik_ce auto length = unpack_<p, U_length>;
+	nik_ce auto length = unpack_<p, _length_>;
 
 // car:
 
 	template<auto p>
-	nik_ce auto car = unpack_<p, U_car>;
+	nik_ce auto car = unpack_<p, _car_>;
 
 // cons:
 
 	template<auto p, auto... Vs>
-	nik_ce auto cons = overload<U_cons, p, Vs...>;
+	nik_ce auto cons = overload<_cons_, H_id, p, Vs...>;
 
 // push:
 
 	template<auto p, auto... Vs>
-	nik_ce auto push = overload<U_push, p, Vs...>;
+	nik_ce auto push = overload<_push_, H_id, p, Vs...>;
 
 // unite:
 
 	template<auto p0, auto p1, auto... Vs>
-	nik_ce auto unite = overload<U_unite, p0, p1, Vs...>;
+	nik_ce auto unite = overload<_unite_, H_id, p0, p1, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -580,7 +578,7 @@ namespace cctmp_generics {
 	struct LiftDispatch
 	{
 		template<auto... ns>
-		nik_ces auto find_non_int = find_<U_not_int_type, U_store_T<decltype(ns)>...>;
+		nik_ces auto find_non_int = find_<_not_int_type_, U_store_T<decltype(ns)>...>;
 
 		template<auto p, auto... ns>
 		nik_ces auto is_all_ints = (p == sizeof...(ns));
@@ -690,7 +688,7 @@ namespace cctmp_generics {
 	struct T_endofold
 	{
 		template<auto... Vs>
-		nik_ces auto result = cctmp_functional::pack_fold<U_partial<U_custom, U_endopose>, _lifted_id_, Vs...>;
+		nik_ces auto result = cctmp_functional::pack_fold<U_endopose, _lifted_id_, Vs...>;
 
 	}; nik_ce auto U_endofold = U_store_T<T_endofold>;
 
@@ -714,7 +712,7 @@ namespace cctmp_generics {
 				nik_ce auto s    = list_split<p, size-1>;
 				nik_ce auto l    = cctmp::tuple_value<0>(s);
 				nik_ce auto r    = cctmp::tuple_value<1>(s);
-				nik_ce auto f    = unpack_<l, U_custom, U_endofold>;
+				nik_ce auto f    = unpack_<l, U_endofold>;
 				nik_ce auto halt = car<r>;
 
 				if nik_ce (same<f, _lifted_id_>) return T_store_U<halt>::template result<T_store_U<UTs>...>;
@@ -805,7 +803,7 @@ namespace cctmp_generics {
 			nik_ce auto lbl    = label_value<instr0>;
 			nik_ce auto nverts = push<verts, lbl>;
 
-			nik_ce auto nword  = unpack_<chars, U_custom, U_endofold>;
+			nik_ce auto nword  = unpack_<chars, U_endofold>;
 			nik_ce auto nwords = push<words, nword>;
 
 			nik_ce auto nstate = U_pack_Vs<labels, lines, nwords, U_null_Vs, graph, nverts>;
@@ -824,7 +822,7 @@ namespace cctmp_generics {
 			nik_ce auto nverts = push<verts, lbl>;
 			nik_ce auto ngraph = push<graph, nverts>;
 
-			nik_ce auto nword  = unpack_<chars, U_custom, U_endofold>;
+			nik_ce auto nword  = unpack_<chars, U_endofold>;
 			nik_ce auto nwords = push<words, nword>;
 			nik_ce auto nlines = push<lines, nwords>;
 
@@ -858,7 +856,7 @@ namespace cctmp_generics {
 		{
 			nik_ce auto ngraph = push<graph, verts>;
 
-			nik_ce auto nword  = unpack_<chars, U_custom, U_endofold>;
+			nik_ce auto nword  = unpack_<chars, U_endofold>;
 			nik_ce auto nwords = push<words, nword, instr0>;
 			nik_ce auto nlines = push<lines, nwords>;
 
@@ -883,7 +881,7 @@ namespace cctmp_generics {
 			nik_ce auto lbl     = label_value<instr0>;
 			nik_ce auto nverts  = push<verts, lbl>;
 
-			nik_ce auto nword   = unpack_<chars, U_custom, U_endofold>;
+			nik_ce auto nword   = unpack_<chars, U_endofold>;
 			nik_ce auto nwords  = push<words, nword>;
 			nik_ce auto nstate  = U_pack_Vs<labels, lines, nwords, U_null_Vs, graph, nverts>;
 
@@ -1024,7 +1022,7 @@ namespace cctmp_generics {
 		template<auto labels, auto... vertexes>
 		nik_ces auto result = U_pack_Vs
 		<
-			unpack_<labels, U_find, U_partial<U_same, vertexes>>...
+			unpack_<labels, _find_, U_alias<_same_, vertexes>>...
 		>;
 
 	}; nik_ce auto U_vertices_to_indices = U_store_T<T_vertices_to_indices>;
@@ -1034,7 +1032,7 @@ namespace cctmp_generics {
 		template<auto labels, auto... vertices>
 		nik_ces auto result = U_pack_Vs
 		<
-			unpack_<vertices, U_custom, U_vertices_to_indices, labels>...
+			unpack_<vertices, U_vertices_to_indices, labels>...
 		>;
 
 	}; nik_ce auto U_graph_to_requirements = U_store_T<T_graph_to_requirements>;
@@ -1045,12 +1043,12 @@ namespace cctmp_generics {
 
 	struct T_parse
 	{
-		nik_ces auto initial_state = unpack_<segment<6>, U_map, _constant_<U_null_Vs>>;
+		nik_ces auto initial_state = unpack_<segment<6>, _map_, H_id, _constant_<U_null_Vs>>;
 
 		template<auto labels, auto lines, auto words, auto chars, auto graph, auto verts>
 		nik_ces auto _result(nik_vp(state)(T_pack_Vs<labels, lines, words, chars, graph, verts>*))
 		{
-			nik_ce auto reqs   = unpack_<graph, U_custom, U_graph_to_requirements, labels>;
+			nik_ce auto reqs   = unpack_<graph, U_graph_to_requirements, labels>;
 			nik_ce auto parsed = cons<lines, reqs>;
 
 			return parsed;
@@ -1061,7 +1059,7 @@ namespace cctmp_generics {
 		(
 			pack_parse
 			<
-				U_partial<U_custom, U_parse_instr>, initial_state,
+				U_parse_instr, initial_state,
 				instrs..., _parse_end_, _parse_end_
 			>
 		);
@@ -1124,14 +1122,14 @@ namespace cctmp_generics {
 			nik_ce auto deps_front	= cctmp::tuple_value<0>(split_deps);
 			nik_ce auto deps_back	= cctmp::tuple_value<1>(split_deps);
 
-			nik_ce auto conts_p0	= unpack_<deps_front, U_zip, U_partial<U_custom, U_make>, line_front>;
+			nik_ce auto conts_p0	= unpack_<deps_front, _zip_, H_id, U_make, line_front>;
 			nik_ce auto conts_p	= unite<conts_p0, line_back>;
 
 			nik_ce auto halt_lbl	= car<deps_back>;
 			nik_ce auto halt	= _go_to_<halt_lbl>;
 			nik_ce auto fs_p	= push<conts_p, halt>;
 
-			return overload<U_custom, U_endodrop, sign, fs_p>;
+			return overload<U_endodrop, sign, fs_p>;
 		}
 	};
 
@@ -1147,10 +1145,10 @@ namespace cctmp_generics {
 			nik_ce auto line_front	= cctmp::tuple_value<0>(split_line);
 			nik_ce auto line_back	= cctmp::tuple_value<1>(split_line);
 
-			nik_ce auto conts_p	= unpack_<deps, U_zip, U_partial<U_custom, U_make>, line_front>;
+			nik_ce auto conts_p	= unpack_<deps, _zip_, H_id, U_make, line_front>;
 			nik_ce auto fs_p	= unite<conts_p, line_back>;
 
-			return overload<U_custom, U_endodrop, sign, fs_p>;
+			return overload<U_endodrop, sign, fs_p>;
 		}
 	};
 
@@ -1175,13 +1173,13 @@ namespace cctmp_generics {
 	{
 		nik_ce auto sign	= in_types<lbl>;
 		nik_ce auto labels	= U_pack_Vs<lbls...>;
-		nik_ce auto lbl_pos	= find_<U_partial<U_same, lbl>, lbls...>;
+		nik_ce auto lbl_pos	= find_<U_alias<_same_, lbl>, lbls...>;
 
 		nik_ce auto line	= list_at<U_restore_T<decltype(parsed)>, lbl_pos + 1>;
 		nik_ce auto line_size	= length<line>;
 
 		nik_ce auto inds	= list_at<reqs, lbl_pos>;
-		nik_ce auto deps	= unpack_<inds, U_custom, U_indices_to_dependencies, labels>;
+		nik_ce auto deps	= unpack_<inds, U_indices_to_dependencies, labels>;
 		nik_ce auto deps_size	= length<deps>;
 
 		nik_ce auto disp	= (line_size == deps_size) ? LD::go_to : LD::drop;

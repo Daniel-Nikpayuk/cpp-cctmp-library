@@ -32,30 +32,12 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
-// to values:
-
-	template<auto p, auto Op = U_member_value>
-	nik_ce auto direct_to_values = unpack_
-	<
-		p,
-		U_partial
-		<
-			U_map,
-			U_partial<U_custom, Op>
-		>
-	>;
-
-/***********************************************************************************************************************/
-
 // to spec:
 
-	template<auto direct, auto H_spec>
-	nik_ce auto direct_to_spec = alias
-	<
-		AOP::list_to_template,
-		direct_to_values<direct>,
-		H_spec
-	>;
+/*
+	template<auto direct, auto H_spec, auto Op = U_member_value>
+	nik_ce auto direct_to_values = unpack_<direct, _map_, H_spec, Op>;
+*/
 
 /***********************************************************************************************************************/
 
@@ -63,6 +45,7 @@ namespace cctmp_one_cycle_specs {
 
 	// direct:
 
+/*
 	struct T_direct_write
 	{
 		template<auto d, auto defs, auto... Vs>
@@ -72,6 +55,7 @@ namespace cctmp_one_cycle_specs {
 
 	template<auto defs, auto... Vs>
 	nik_ce auto direct_write = T_direct_write::template result<MD::initial_depth, defs, Vs...>;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -82,6 +66,7 @@ namespace cctmp_one_cycle_specs {
 
 // write:
 
+/*
 	struct T_conceptual_write
 	{
 		template<auto d, auto defs, auto... Vs>
@@ -94,6 +79,7 @@ namespace cctmp_one_cycle_specs {
 
 	template<auto defs, auto... Vs>
 	nik_ce auto conceptual_write = T_conceptual_write::template result<MD::initial_depth, defs, Vs...>;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -107,6 +93,7 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
+/*
 		nik_ce auto direct_repeat_defaults = U_pack_Vs
 		<
 			_precycle_label_       < _zero         >,
@@ -134,6 +121,7 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_repeat_defaults, Vs...>,
 			H_repeat_specification
 		>;
+*/
 
 /***********************************************************************************************************************/
 
@@ -141,6 +129,7 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
+/*
 		nik_ces auto conceptual_repeat_defaults = U_pack_Vs
 		<
 			_label_
@@ -198,16 +187,17 @@ namespace cctmp_one_cycle_specs {
 		}
 
 		template<auto p>
-		nik_ce auto let_conceptual_repeat = _conceptual_repeat(p);/*alias
+		nik_ce auto let_conceptual_repeat = _conceptual_repeat(p);alias
 		<
 			AOP::list_to_template, _conceptual_repeat(p), H_repeat_specification
-		>;*/
+		>;
 
 		template<auto... Vs>
 		nik_ce auto conceptual_repeat = let_conceptual_repeat
 		<
 			conceptual_write<conceptual_repeat_defaults, Vs...>
 		>;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -221,6 +211,7 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
+/*
 		nik_ce auto direct_map_defaults = U_pack_Vs
 		<
 			_precycle_label_       < _zero         >,
@@ -253,11 +244,13 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_map_defaults, Vs...>,
 			H_map_specification
 		>;
+*/
 
 /***********************************************************************************************************************/
 
 // conceptual:
 
+/*
 		nik_ces auto conceptual_map_defaults = U_pack_Vs
 		<
 			_label_
@@ -327,6 +320,7 @@ namespace cctmp_one_cycle_specs {
 		<
 			conceptual_write<conceptual_map_defaults, Vs...>
 		>;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -340,6 +334,7 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
+/*
 		nik_ce auto direct_fold_defaults = U_pack_Vs
 		<
 			_precycle_label_        < _zero         >,
@@ -367,6 +362,7 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_fold_defaults, Vs...>,
 			H_fold_specification
 		>;
+*/
 
 /***********************************************************************************************************************/
 
@@ -389,6 +385,7 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
+/*
 		nik_ce auto direct_find_first_defaults = U_pack_Vs
 		<
 			_precycle_label_        < _zero             >,
@@ -421,6 +418,7 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_find_first_defaults, Vs...>,
 			H_find_first_specification
 		>;
+*/
 
 /***********************************************************************************************************************/
 
@@ -438,6 +436,7 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
+/*
 		nik_ce auto direct_find_all_defaults = U_pack_Vs
 		<
 			_precycle_label_            < _zero             >,
@@ -475,6 +474,7 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_find_all_defaults, Vs...>,
 			H_find_all_specification
 		>;
+*/
 
 /***********************************************************************************************************************/
 
@@ -494,6 +494,7 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
+/*
 		nik_ce auto direct_zip_defaults = U_pack_Vs
 		<
 			_precycle_label_       < _zero         >,
@@ -532,6 +533,7 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_zip_defaults, Vs...>,
 			H_zip_specification
 		>;
+*/
 
 /***********************************************************************************************************************/
 
@@ -566,6 +568,7 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
+/*
 		nik_ce auto direct_fasten_defaults = U_pack_Vs
 		<
 			_precycle_label_        < _zero             >,
@@ -610,6 +613,7 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_fasten_defaults, Vs...>,
 			H_fasten_specification
 		>;
+*/
 
 /***********************************************************************************************************************/
 
@@ -644,6 +648,7 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
+/*
 		nik_ce auto direct_glide_defaults = U_pack_Vs
 		<
 			_precycle_label_        < _zero         >,
@@ -679,6 +684,7 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_glide_defaults, Vs...>,
 			H_glide_specification
 		>;
+*/
 
 /***********************************************************************************************************************/
 

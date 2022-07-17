@@ -76,56 +76,73 @@ namespace cctmp {
 
 	using BL = BlockOverload;
 
+	// syntactic sugar:
+
+		// car:
+
+			using T_block_car					= T_alias<Alias::car>;
+			nik_ce auto U_block_car					= U_store_T<T_block_car>;
+
+		// right:
+
+			template<auto b = H_id> using T_block_right		= T_alias<Alias::to_list, b>;
+			template<auto b = H_id> nik_ce auto U_block_right	= U_store_T<T_block_right<b>>;
+
 /***********************************************************************************************************************/
 
 // part:
 
-	template<auto Op, auto b>
-	struct T_block_overload<BL::part, Op, b>
+	template<auto Op, auto bl, auto br>
+	struct T_block_overload<BL::part, Op, bl, br>
 	{
-		template<auto... Vs, typename Pack>
-		nik_ces auto result(Pack l)
+		template<auto... Vs, template<auto...> typename B, auto... Ws>
+		nik_ces auto result(nik_avp(B<Ws...>*))
 		{
-			nik_ce auto r = overload<Op, b, Vs...>;
+			nik_ce auto l = to_list_<bl, Ws...>;
+			nik_ce auto r = overload<Op, br, Vs...>;
 
-			return tuple<Pack, decltype(r)>(l, r);
+			return tuple<decltype(l), decltype(r)>(l, r);
 		}
 	};
 
-	template<auto b = H_id> nik_ce auto U_block_filter = U_store_T<T_block_overload<BL::part, Alias::cdr, b>>;
-	template<auto b = H_id> nik_ce auto U_block_split  = U_store_T<T_block_overload<BL::part, Alias::to_list, b>>;
+	template<auto bl = H_id, auto br = H_id>
+		nik_ce auto U_block_split = U_store_T<T_block_overload<BL::part, Alias::to_list, bl, br>>;
+
+	template<auto bl = H_id, auto br = H_id>
+		nik_ce auto U_block_cut = U_store_T<T_block_overload<BL::part, Alias::cdr, bl, br>>;
 
 /***********************************************************************************************************************/
 
 // left:
 
-	template<auto... filler>
-	struct T_block_overload<BL::left, filler...>
+	template<auto b>
+	struct T_block_overload<BL::left, b>
 	{
-		template<auto... Vs, typename Pack>
-		nik_ces auto result(Pack p) { return p; }
+		template<auto... Vs, template<auto...> typename B, auto... Ws>
+		nik_ces auto result(nik_avp(B<Ws...>*)) { return to_list_<b, Ws...>; }
 
-	}; nik_ce auto U_block_left = U_store_T<T_block_overload<BL::left>>;
+	}; template<auto b = H_id>
+		nik_ce auto U_block_left = U_store_T<T_block_overload<BL::left, b>>;
 
 /***********************************************************************************************************************/
 
 // alter:
 
-	template<auto b>
-	struct T_block_overload<BL::alter, b>
+	template<auto bl, auto br, auto bp>
+	struct T_block_overload<BL::alter, bl, br, bp>
 	{
-		template<auto V0, auto... Vs, typename Pack>
-		nik_ces auto result(Pack)
+		template<auto V0, auto... Vs, template<auto...> typename B, auto... Ws>
+		nik_ces auto result(nik_avp(B<Ws...>*))
 		{
-			nik_ce auto l = U_restore_T<Pack>;
-			nik_ce auto r = to_list_<b, Vs...>;
-			nik_ce auto p = to_list_<b, l, r>;
+			nik_ce auto l = to_list_<bl, Ws...>;
+			nik_ce auto r = to_list_<br, Vs...>;
+			nik_ce auto p = to_list_<bp, l, r>;
 
 			return tuple<decltype(p), decltype(V0)>(p, V0);
 		}
 
-	}; template<auto b = H_id>
-		nik_ce auto U_block_alter = U_store_T<T_block_overload<BL::alter, b>>;
+	}; template<auto bl = H_id, auto br = H_id, auto bp = H_id>
+		nik_ce auto U_block_alter = U_store_T<T_block_overload<BL::alter, bl, br, bp>>;
 
 /***********************************************************************************************************************/
 
@@ -140,15 +157,6 @@ namespace cctmp {
 
 	}; nik_ce auto U_block_lookup = U_store_T<T_block_overload<BL::lookup>>;
 */
-
-/***********************************************************************************************************************/
-
-// syntactic sugar:
-
-	// car:
-
-		using T_block_car		= T_alias<Alias::car>;
-		nik_ce auto U_block_car		= U_store_T<T_block_car>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -362,38 +370,38 @@ namespace cctmp {
 
 // segment:
 
-	template<auto b>
-	struct T_block<BN::segment, BT::start, _zero, b>
+	template<auto... filler>
+	struct T_block<BN::segment, BT::start, _zero, filler...>
 	{
-		template<auto d, auto n, auto s, auto... Vs>
-		nik_ces auto result = NIK_SEGMENT_BLOCK(9, b, d, n, s, Vs);
+		template<auto d, auto n, auto b, auto s, auto... Vs>
+		nik_ces auto result = NIK_SEGMENT_BLOCK(9, d, n, b, s, Vs);
 	};
 
-	template<auto b = H_id> using T_block_segment		= T_block<BN::segment, BT::start, _zero, b>;
-	template<auto b = H_id> nik_ce auto U_block_segment	= U_store_T<T_block_segment<b>>;
+	using T_block_segment		= T_block<BN::segment, BT::start, _zero>;
+	nik_ce auto U_block_segment	= U_store_T<T_block_segment>;
 
-	NIK_DEFINE_BLOCK_SEGMENT_PASS(0, b)
-	NIK_DEFINE_BLOCK_SEGMENT_PASS(1, b)
-	NIK_DEFINE_BLOCK_SEGMENT_PASS(2, b)
-	NIK_DEFINE_BLOCK_SEGMENT_PASS(3, b)
-	NIK_DEFINE_BLOCK_SEGMENT_PASS(4, b)
-	NIK_DEFINE_BLOCK_SEGMENT_PASS(5, b)
-	NIK_DEFINE_BLOCK_SEGMENT_PASS(6, b)
-	NIK_DEFINE_BLOCK_SEGMENT_PASS(7, b)
-	NIK_DEFINE_BLOCK_SEGMENT_PASS(8, b)
-	NIK_DEFINE_BLOCK_SEGMENT_PASS(9, b)
+	NIK_DEFINE_BLOCK_SEGMENT_PASS(0)
+	NIK_DEFINE_BLOCK_SEGMENT_PASS(1)
+	NIK_DEFINE_BLOCK_SEGMENT_PASS(2)
+	NIK_DEFINE_BLOCK_SEGMENT_PASS(3)
+	NIK_DEFINE_BLOCK_SEGMENT_PASS(4)
+	NIK_DEFINE_BLOCK_SEGMENT_PASS(5)
+	NIK_DEFINE_BLOCK_SEGMENT_PASS(6)
+	NIK_DEFINE_BLOCK_SEGMENT_PASS(7)
+	NIK_DEFINE_BLOCK_SEGMENT_PASS(8)
+	NIK_DEFINE_BLOCK_SEGMENT_PASS(9)
 
-	template<auto b>
-	struct T_block<BN::segment, BT::pause, _zero, b>
+	template<auto... filler>
+	struct T_block<BN::segment, BT::pause, _zero, filler...>
 	{
-		template<auto d, auto n, auto s, auto... Vs>
-		nik_ces auto result = machination(U_block_segment<b>, U_pack_Vs<n, s, Vs...>);
+		template<auto d, auto n, auto b, auto s, auto... Vs>
+		nik_ces auto result = machination(U_block_segment, U_pack_Vs<n, b, s, Vs...>);
 	};
 
-	template<auto b>
-	struct T_block<BN::segment, BT::halt, _zero, b>
+	template<auto... filler>
+	struct T_block<BN::segment, BT::halt, _zero, filler...>
 	{
-		template<auto d, auto n, auto s, auto... Vs>
+		template<auto d, auto n, auto b, auto s, auto... Vs>
 		nik_ces auto result = to_list_<b, decltype(s){s+Vs}...>;
 	};
 

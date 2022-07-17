@@ -20,16 +20,11 @@
 namespace cctmp_one_cycle_generics {
 
 	template<auto U> using T_store_U				= typename cctmp::template T_store_U<U>;
-	template<typename... Ts> using tuple				= typename cctmp::template tuple<Ts...>;
-
-	nik_ce auto _return_						= cctmp_generics::_return_;
 
 	template<typename T> nik_ce auto U_store_T			= cctmp::template U_store_T<T>;
 	template<template<auto...> class B> nik_ce auto U_store_B	= cctmp::template U_store_B<B>;
 
-	template<auto V> nik_ce auto _constant_				= cctmp::template _constant_<V>;
-	template<auto V> nik_ce auto _is_equal_				= cctmp::template _is_equal_<V>;
-
+	nik_ce auto _return_						= cctmp_generics::_return_;
 	nik_ce auto _cp_						= cctmp_generics::_cp_;
 	nik_ce auto _ps_						= cctmp_generics::_ps_;
 

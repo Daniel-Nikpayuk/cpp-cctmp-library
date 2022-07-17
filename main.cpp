@@ -25,12 +25,12 @@
 #include"00_cctmp_grammar.hpp"
 #include"01_cctmp_block.hpp"
 #include"02_cctmp_machine.hpp"
-//#include"03_cctmp_functional.hpp"
+#include"03_cctmp_functional.hpp"
 //#include"04_cctmp_front.hpp"
-//#include"05_generic_assembly.hpp"
-//#include"06_one_cycle_generics.hpp"
-//#include"07_one_cycle_specifics.hpp"
-//#include"08_one_cycle_defaults.hpp"
+#include"05_generic_assembly.hpp"
+#include"06_one_cycle_generics.hpp"
+#include"07_one_cycle_specifics.hpp"
+#include"08_one_cycle_defaults.hpp"
 //#include"09_domain_specifics.hpp"
 //#include"10_big_numbers.hpp"
 //#include"11_cryptography.hpp"
@@ -40,7 +40,7 @@
 
 /***********************************************************************************************************************/
 
-//	using namespace cctmp;
+	using namespace cctmp;
 //	using namespace cctmp_generics;
 //	using namespace cctmp_one_cycle_specs;
 
@@ -66,7 +66,6 @@
 
 /***********************************************************************************************************************/
 
-/*
 	constexpr auto p = U_pack_Vs
 	<
 	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
@@ -95,7 +94,6 @@
 
 		99, 0, 5, 41
 	>;
-*/
 
 /***********************************************************************************************************************/
 
@@ -217,10 +215,6 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	printf("%d\n", cctmp::overload<cctmp::_if_then_else_, true , 5, 6>);
-	//	printf("%d\n", cctmp::overload<cctmp::_if_then_else_, false, 5, 6>);
-	//	printf("%d\n", cctmp::overload<cctmp::_add_, 5, 6>);
-
 	//	int size = 10;//argc;
 
 	//	int  arr[size];

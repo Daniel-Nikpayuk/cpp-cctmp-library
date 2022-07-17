@@ -274,17 +274,6 @@ namespace cctmp {
 	template<auto Op, auto... Ws>
 	nik_ce auto U_alias = U_store_T<T_alias<Op, Ws...>>;
 
-	// auto template:
-
-		template<auto Op, auto... Ws>
-		struct B_alias
-		{
-			template<auto... Vs>
-			using result = T_alias<Op, Ws..., Vs...>;
-
-		}; template<auto Op, auto... Ws>
-			nik_ce auto H_alias = U_store_B<B_alias<Op, Ws...>::template result>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -697,17 +686,6 @@ namespace cctmp {
 		}; template<auto f, auto... Vs>
 			nik_ce auto _curry_ = U_higher_order<HigherOrder::curry, f, Vs...>;
 
-		// auto template:
-
-			template<auto... Ws>
-			struct B_curry
-			{
-				template<auto... Vs>
-				using result = T_grammar<Grammar::higher_order, HigherOrder::curry, Ws..., Vs...>;
-
-			}; template<auto... Ws>
-				nik_ce auto H_curry = U_store_B<B_curry<Ws...>::template result>;
-
 /***********************************************************************************************************************/
 
 // comparison:
@@ -774,57 +752,58 @@ namespace cctmp {
 		// grammatical:
 
 			nik_ces key_type custom				=  0;
-			nik_ces key_type procedure			=  1;
-			nik_ces key_type method				=  2;
-			nik_ces key_type tailor				=  3;
+			nik_ces key_type nested				=  1;
+			nik_ces key_type procedure			=  2;
+			nik_ces key_type method				=  3;
+			nik_ces key_type tailor				=  4;
 
 		// basis:
 
-			nik_ces key_type type_to_const			=  4;
-			nik_ces key_type if_then_else			=  5;
-			nik_ces key_type list_id			=  6;
+			nik_ces key_type type_to_const			=  5;
+			nik_ces key_type if_then_else			=  6;
+			nik_ces key_type list_id			=  7;
 
 		// comparison:
 
-			nik_ces key_type same				=  7;
-			nik_ces key_type csame				=  8;
-			nik_ces key_type similar			=  9;
-			nik_ces key_type is_int_type			= 10;
-			nik_ces key_type not_int_type			= 11;
+			nik_ces key_type same				=  8;
+			nik_ces key_type csame				=  9;
+			nik_ces key_type similar			= 10;
+			nik_ces key_type is_int_type			= 11;
+			nik_ces key_type not_int_type			= 12;
 
 		// functional:
 
-			nik_ces key_type to_list			= 12;
-			nik_ces key_type array_to_list			= 13;
-			nik_ces key_type to_array			= 14;
+			nik_ces key_type to_list			= 13;
+			nik_ces key_type array_to_list			= 14;
+			nik_ces key_type to_array			= 15;
 
-			nik_ces key_type is_null			= 15;
-			nik_ces key_type length				= 16;
+			nik_ces key_type is_null			= 16;
+			nik_ces key_type length				= 17;
 
-			nik_ces key_type car				= 17;
-			nik_ces key_type cdr				= 18;
-			nik_ces key_type cadr				= 19;
+			nik_ces key_type car				= 18;
+			nik_ces key_type cdr				= 19;
+			nik_ces key_type cadr				= 20;
 
-			nik_ces key_type map				= 20;
-			nik_ces key_type find				= 21;
+			nik_ces key_type map				= 21;
+			nik_ces key_type find				= 22;
 
 		// variadic:
 
-			nik_ces key_type f0_unpack			= 22;
-			nik_ces key_type f1_unpack			= 23;
-			nik_ces key_type f2_unpack			= 24;
+			nik_ces key_type f0_unpack			= 23;
+			nik_ces key_type f1_unpack			= 24;
+			nik_ces key_type f2_unpack			= 25;
 
-			nik_ces key_type b0_unpack			= 25;
-			nik_ces key_type b1_unpack			= 26;
-			nik_ces key_type b2_unpack			= 27;
+			nik_ces key_type b0_unpack			= 26;
+			nik_ces key_type b1_unpack			= 27;
+			nik_ces key_type b2_unpack			= 28;
 
-			nik_ces key_type list_to_list			= 28;
-			nik_ces key_type list_to_array			= 29;
+			nik_ces key_type list_to_list			= 29;
+			nik_ces key_type list_to_array			= 30;
 
-			nik_ces key_type zip				= 30;
-			nik_ces key_type unite				= 31;
-			nik_ces key_type cons				= 32;
-			nik_ces key_type push				= 33;
+			nik_ces key_type zip				= 31;
+			nik_ces key_type unite				= 32;
+			nik_ces key_type cons				= 33;
+			nik_ces key_type push				= 34;
 	};
 
 /***********************************************************************************************************************/
@@ -858,6 +837,13 @@ namespace cctmp {
 		nik_ce auto overload<Alias::custom, Op, Vs...> = T_store_U<Op>::template result<Vs...>;
 
 		nik_ce auto _custom_ = Alias::custom;
+
+	// nested:
+
+		template<auto d, auto Op, auto... Vs>
+		nik_ce auto overload<Alias::nested, d, Op, Vs...> = T_store_U<Op>::template result<d, Vs...>;
+
+		nik_ce auto _nested_ = Alias::nested;
 
 	// procedure:
 

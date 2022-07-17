@@ -478,7 +478,7 @@ namespace cctmp {
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
-			nik_ce auto val	= NIK_FUNCTION_BLOCK(3, d, n, U_block_filter<>, Vs)(U_null_Vs);
+			nik_ce auto val	= NIK_FUNCTION_BLOCK(3, d, n, U_block_cut<>, Vs)(U_null_Vs);
 
 			if nik_ce (is_machination<decltype(val)>)
 
@@ -510,7 +510,7 @@ namespace cctmp {
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
-			nik_ce auto val	= NIK_FUNCTION_BLOCK(3, d, n, U_block_filter<>, U_restore_T<Args>)(U_null_Vs);
+			nik_ce auto val	= NIK_FUNCTION_BLOCK(3, d, n, U_block_cut<>, U_restore_T<Args>)(U_null_Vs);
 
 			if nik_ce (is_machination<decltype(val)>)
 
@@ -539,11 +539,7 @@ namespace cctmp {
 			template<auto...> typename B, auto p, auto n, auto rtn, auto... _Vs,
 			typename Heap0, template<auto...> typename B1, auto X0, auto... Xs, typename... Heaps
 		>
-		nik_ces auto result
-		(
-			nik_avp(B<p, n, rtn, _Vs...>*),
-			Heap0 H0, nik_vp(H1)(B1<X0, Xs...>*), Heaps... Hs
-		)
+		nik_ces auto result(nik_avp(B<p, n, rtn, _Vs...>*), Heap0 H0, nik_vp(H1)(B1<X0, Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto val = T_block_function::template result<d, p, n, rtn, _Vs...>;
 
@@ -676,10 +672,10 @@ namespace cctmp {
 	{
 		template
 		<
-			NIK_CONTR_PARAMS, auto... Vs, auto Op, template<auto...> typename B0, auto... Ws,
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws,
 			template<auto...> typename B1, auto... Xs, typename... Heaps
 		>
-		nik_ces auto result(nik_vp(H0)(B0<Op, Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::dec];
@@ -693,7 +689,7 @@ namespace cctmp {
 				nik_ce auto key = ins[MI::key];
 				nik_ce auto act = ins[MI::act];
 				nik_ce auto nd	= d+1-n;
-				nik_ce auto val = overload<U_grammar<key, act>, Op, nd, Ws...>;
+				nik_ce auto val = overload<U_grammar<key, act>, nd, Ws...>;
 
 				if nik_ce (is_machination<decltype(val)>)
 
@@ -729,10 +725,10 @@ namespace cctmp {
 	{
 		template
 		<
-			NIK_CONTR_PARAMS, auto... Vs, auto Op, template<auto...> typename B0, auto... Ws,
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws,
 			template<auto...> typename B1, auto... Xs, typename... Heaps
 		>
-		nik_ces auto result(nik_vp(H0)(B0<Op, Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::dec];
@@ -746,7 +742,7 @@ namespace cctmp {
 				nik_ce auto key = ins[MI::key];
 				nik_ce auto act = ins[MI::act];
 				nik_ce auto nd	= d+1-n;
-				nik_ce auto val = overload<U_grammar<key, act>, Op, nd, Ws...>;
+				nik_ce auto val = overload<U_grammar<key, act>, nd, Ws...>;
 
 				if nik_ce (is_machination<decltype(val)>)
 
@@ -1152,6 +1148,12 @@ namespace cctmp {
 		// grammatical:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto custom = a_action<Alias::custom, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto nested = a_action<Alias::nested, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
 		nik_ce auto procedure = a_action<Alias::procedure, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
@@ -1266,6 +1268,7 @@ namespace cctmp {
 	nik_ce instr_type compel = instruction<MN::call, MT::compel, dec, ctn, Grammar::alias, act>;
 
 		nik_ce auto _custom = Alias::custom;
+		nik_ce auto _nested = Alias::nested;
 		nik_ce auto _method = Alias::method;
 
 /***********************************************************************************************************************/
