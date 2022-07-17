@@ -109,6 +109,146 @@ namespace cctmp_program
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// united:
+
+	// Not currently needed, keeping for possible later use.
+
+/***********************************************************************************************************************/
+
+// insert:
+
+/*
+	struct TP_united_insert
+	{
+		nik_ces key_type exit_case = 4;
+
+		nik_ces auto c = controller
+		<
+			custom < _h1_pair            >,
+			branch <           exit_case >,
+			write  < _zero   , _argument >,
+			compel < _custom , _value    >,
+
+			// exit_case:
+
+			value  < _zero   , _register >
+		>;
+
+		template<auto d, auto HEq, auto HCmp, auto V, auto... Vs>
+		nik_ces auto _result()
+		{
+			nik_ce auto R0 = U_pack_Vs<Vs...>;
+			nik_ce auto H0 = U_pack_Vs<UP_match, HEq, V, Vs...>;
+			nik_ce auto H1 = U_null_Vs;
+			nik_ce auto H2 = U_null_Vs;
+			nik_ce auto A0 = U_pack_Vs<UP_ordered_insert, HCmp, V, Vs...>;
+
+			return T_start::template result<d, c, R0>(H0, H1, H2, A0);
+		}
+
+		template<auto d, auto HEq, auto HCmp, auto V, auto... Vs>
+		nik_ces auto result = _result<d, HEq, HCmp, V, Vs...>();
+
+	}; nik_ce auto UP_united_insert = U_store_T<TP_united_insert>;
+
+	template<auto HEq, auto HCmp, auto V, auto... Vs>
+	nik_ce auto pack_united_insert = TP_united_insert::template result<MD::initial_depth, HEq, HCmp, V, Vs...>;
+
+	template<auto p, auto V, auto HEq = H_curry_equal, auto HCmp = H_curry_less_than, auto d = MD::initial_depth>
+	nik_ce auto list_united_insert = unpack_<p, U_custom, UP_united_insert, d, HEq, HCmp, V>;
+*/
+
+/***********************************************************************************************************************/
+
+// monoid:
+
+/*
+	template<auto HEq = H_curry_equal, auto HCmp = H_curry_less_than>
+	struct TP_united_monoid
+	{
+		template<auto d, auto p, auto V>
+		nik_ces auto result = unpack_<p, U_custom, UP_united_insert, d, HEq, HCmp, V>;
+
+	}; template<auto HEq = H_curry_equal, auto HCmp = H_curry_less_than>
+		nik_ce auto UP_united_monoid = U_store_T<TP_united_monoid<HEq, HCmp>>;
+*/
+
+/***********************************************************************************************************************/
+
+// (fold) union:
+
+/*
+	struct TP_united_fold
+	{
+		template<auto d, auto HEq, auto HCmp, auto V, auto... Vs>
+		nik_ces auto result = TP_cascade::template result<d, UP_united_monoid<HEq, HCmp>, V, Vs...>;
+
+	}; nik_ce auto UP_united_fold = U_store_T<TP_united_fold>;
+
+	template<auto HEq, auto HCmp, auto V, auto... Vs>
+	nik_ce auto pack_united_fold = TP_united_fold::template result<MD::initial_depth, HEq, HCmp, V, Vs...>;
+
+	template
+	<
+		auto p,
+		auto HEq = H_curry_equal, auto HCmp = H_curry_less_than,
+		auto V = U_null_Vs, auto d = MD::initial_depth
+	>
+	nik_ce auto list_united_fold = unpack_<p, U_custom, UP_united_fold, d, HEq, HCmp, V>;
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// compare:
+
+	// Not currently needed, keeping for possible later use.
+	// Doesn't scale performantly for frequent comparisons.
+
+/***********************************************************************************************************************/
+
+/*
+	struct TP_compare
+	{
+		template<auto key, auto act>
+		nik_ces auto c = controller
+		<
+			find   <                         >,
+			write  < _zero ,       _argument >,
+			find   <                         >,
+			stage  <                         >,
+			action < key   , act , _value    >
+		>;
+
+		template<auto d, auto V0, auto V1, auto... Vs, auto key, auto act, template<auto...> class B>
+		nik_ces auto _result(nik_avp(T_overload<key, act>*), nik_avp(T_store_B<B>*))
+		{
+			nik_ce auto Pred0 = U_store_T<B<V0>>;
+			nik_ce auto Pred1 = U_store_T<B<V1>>;
+
+			nik_ce auto H0    = U_pack_Vs<Pred1, Vs...>;
+			nik_ce auto H1    = U_null_Vs;
+			nik_ce auto H2    = U_null_Vs;
+			nik_ce auto A0    = U_pack_Vs<Pred0, Vs...>;
+
+			return T_start::template result<d, c<key, act>>(H0, H1, H2, A0);
+		}
+
+		template<auto d, auto Op, auto H, auto V0, auto V1, auto... Vs>
+		nik_ces auto result = _result<d, V0, V1, Vs...>(Op, H);
+
+	}; nik_ce auto UP_compare = U_store_T<TP_compare>;
+
+	template<auto Op, auto H, auto V0, auto V1, auto... Vs>
+	nik_ce auto pack_compare = TP_compare::template result<MD::initial_depth, Op, H, V0, V1, Vs...>;
+
+	template<auto p, auto Op, auto V0, auto V1, auto H = H_partial_same, auto d = MD::initial_depth>
+	nik_ce auto list_compare = unpack_<p, U_custom, UP_compare, d, Op, H, V0, V1>;
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // factorial:
 
 	//	printf("%llu\n", cctmp_program::factorial_v0<uint_type{20}>);

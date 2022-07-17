@@ -119,9 +119,7 @@ namespace cctmp_one_cycle_generics {
 
 	template<auto S> nik_ce auto end_			= T_store_U<S>::end_position;
 
-	template<auto S> nik_ce auto pre_end_prev_		= T_store_U<S>::pre_end_prev;
-	template<auto S> nik_ce auto end_prev_			= T_store_U<S>::end_prev;
-
+	template<auto S> nik_ce auto pre_end_next_		= T_store_U<S>::pre_end_next;
 	template<auto S> nik_ce auto end_next_			= T_store_U<S>::end_next;
 	template<auto S> nik_ce auto post_end_next_		= T_store_U<S>::post_end_next;
 
@@ -260,7 +258,7 @@ namespace cctmp_one_cycle_generics {
 		<
 			label<precycle_<S>>,
 
-				lift   < end_<S> ,     pre_end_prev_<S> , end_<S>           >,
+				lift   < end_<S> ,     pre_end_next_<S> , end_<S>           >,
 				lift   < out_<S> ,     pre_out_next_<S> , out_<S>           >,
 				lift   <  in_<S> ,      pre_in_next_<S> ,  in_<S>           >,
 
@@ -313,7 +311,7 @@ namespace cctmp_one_cycle_generics {
 		nik_ces auto  in_position		=  InPosition;
 		nik_ces auto end_position		= EndPosition;
 
-		nik_ces auto pre_end_prev		= PreEndPrev;
+		nik_ces auto pre_end_next		= PreEndPrev;
 		nik_ces auto pre_out_next		= PreOutNext;
 		nik_ces auto  pre_in_next		= PreInNext;
 
@@ -623,7 +621,7 @@ namespace cctmp_one_cycle_generics {
 		<
 			label<precycle_<S>>,
 
-				lift   <    end_<S> ,     pre_end_prev_<S> ,    end_<S>              >,
+				lift   <    end_<S> ,     pre_end_next_<S> ,    end_<S>              >,
 				lift   <    out_<S> ,     pre_out_next_<S> ,    out_<S>              >,
 				lift   < car_in_<S> ,  pre_car_in_next_<S> , car_in_<S>              >,
 				lift   < cdr_in_<S> ,  pre_cdr_in_next_<S> , cdr_in_<S>              >,
@@ -682,7 +680,7 @@ namespace cctmp_one_cycle_generics {
 		nik_ces auto cdr_in_position		= CdrInPosition;
 		nik_ces auto    end_position		=   EndPosition;
 
-		nik_ces auto    pre_end_prev		=   PreEndPrev;
+		nik_ces auto    pre_end_next		=   PreEndPrev;
 		nik_ces auto    pre_out_next		=   PreOutNext;
 		nik_ces auto pre_car_in_next		= PreCarInNext;
 		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
@@ -719,7 +717,7 @@ namespace cctmp_one_cycle_generics {
 		<
 			label<precycle_<S>>,
 
-				lift   <    end_<S> ,      pre_end_prev_<S> ,    end_<S>                           >,
+				lift   <    end_<S> ,      pre_end_next_<S> ,    end_<S>                           >,
 				lift   <    out_<S> ,      pre_out_next_<S> ,    out_<S>                           >,
 				lift   < car_in_<S> ,   pre_car_in_next_<S> , car_in_<S>                           >,
 				lift   < cdr_in_<S> ,   pre_cdr_in_next_<S> , cdr_in_<S>                           >,
@@ -792,7 +790,7 @@ namespace cctmp_one_cycle_generics {
 		nik_ces auto cdr_in_position		= CdrInPosition;
 		nik_ces auto    end_position		=   EndPosition;
 
-		nik_ces auto    pre_end_prev		=   PreEndPrev;
+		nik_ces auto    pre_end_next		=   PreEndPrev;
 		nik_ces auto    pre_out_next		=   PreOutNext;
 		nik_ces auto pre_car_in_next		= PreCarInNext;
 		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
@@ -833,7 +831,7 @@ namespace cctmp_one_cycle_generics {
 		<
 			label<precycle_<S>>,
 
-				lift   <    end_<S> ,      pre_end_prev_<S> ,    end_<S>              >,
+				lift   <    end_<S> ,      pre_end_next_<S> ,    end_<S>              >,
 				lift   < car_in_<S> ,   pre_car_in_next_<S> , car_in_<S>              >,
 				lift   < cdr_in_<S> ,   pre_cdr_in_next_<S> , cdr_in_<S>              >,
 
@@ -889,7 +887,7 @@ namespace cctmp_one_cycle_generics {
 		nik_ces auto cdr_in_position		= CdrInPosition;
 		nik_ces auto    end_position		=   EndPosition;
 
-		nik_ces auto    pre_end_prev		=   PreEndPrev;
+		nik_ces auto    pre_end_next		=   PreEndPrev;
 		nik_ces auto pre_car_in_next		= PreCarInNext;
 		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
 

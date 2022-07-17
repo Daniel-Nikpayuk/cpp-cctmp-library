@@ -438,22 +438,37 @@
 
 // (block):
 
-	#define NIK_BEGIN_BLOCK(_p_, _b_, _d_, _n_)									\
+	#define NIK_BEGIN_BLOCK_TYPE(_p_, _b_, _d_, _n_)								\
 															\
 		T_block													\
 		<													\
 			BN::_b_,											\
 			BD::next_note(_d_, _n_),									\
-			BD::next_length_ ## _p_(_d_, _n_)								\
+			BD::next_length_ ## _p_(_d_, _n_)
+
+	#define NIK_END_BLOCK_TYPE											\
 															\
-		>::template result											\
+		>
+
+	#define NIK_BEGIN_BLOCK_RESULT(_p_, _d_, _n_)									\
+															\
+		result													\
 		<													\
 			BD::next_depth(_d_),										\
 			BD::next_index_ ## _p_(_d_, _n_)
 
-	#define NIK_END_BLOCK												\
+	#define NIK_END_BLOCK_RESULT											\
 															\
 		>
+
+	#define NIK_BEGIN_BLOCK(_p_, _b_, _d_, _n_)									\
+															\
+		NIK_BEGIN_BLOCK_TYPE(_p_, _b_, _d_, _n_) NIK_END_BLOCK_TYPE::template					\
+		NIK_BEGIN_BLOCK_RESULT(_p_, _d_, _n_)
+
+	#define NIK_END_BLOCK												\
+															\
+		NIK_END_BLOCK_RESULT
 
 	#define NIK_VARIABLE_BLOCK(_p_, _d_, _n_, _h_, _v_)								\
 															\
@@ -463,9 +478,10 @@
 															\
 		NIK_BEGIN_BLOCK(_p_, function, _d_, _n_), _h_, _v_... NIK_END_BLOCK
 
-	#define NIK_SEGMENT_BLOCK(_p_, _d_, _n_, _s_, _v_)								\
+	#define NIK_SEGMENT_BLOCK(_p_, _b_, _d_, _n_, _s_, _v_)								\
 															\
-		NIK_BEGIN_BLOCK(_p_, segment, _d_, _n_), _s_, _v_... NIK_END_BLOCK
+		NIK_BEGIN_BLOCK_TYPE(_p_, segment, _d_, _n_), _b_ NIK_END_BLOCK_TYPE::template				\
+		NIK_BEGIN_BLOCK_RESULT(_p_, _d_, _n_), _s_, _v_... NIK_END_BLOCK_RESULT
 
 	#define NIK_FOLD_BLOCK(_p_, _d_, _n_, _o_, _s_, _v_)								\
 															\
@@ -513,17 +529,18 @@
 			}												\
 		};
 
-	#define NIK_DEFINE_BLOCK_SEGMENT_PASS(_p_)									\
+	#define NIK_DEFINE_BLOCK_SEGMENT_PASS(_p_, _b_)									\
 															\
-		template<auto... filler>										\
-		struct T_block<BN::segment, BT::pass, _p_, filler...>							\
+		template<auto _b_>											\
+		struct T_block<BN::segment, BT::pass, _p_, _b_>								\
 		{													\
 			template<auto d, auto n, auto s, auto... Vs>							\
-			nik_ces auto result = NIK_BEGIN_BLOCK(_p_, segment, d, n), s,					\
+			nik_ces auto result = NIK_BEGIN_BLOCK_TYPE(_p_, segment, d, n), _b_				\
+			NIK_END_BLOCK_TYPE::template NIK_BEGIN_BLOCK_RESULT(_p_, d, n), s,				\
 															\
 				Vs..., NIK_2_N_INDEX_SEGMENT(_p_, decltype(s){sizeof...(Vs)})				\
 															\
-			NIK_END_BLOCK;											\
+			NIK_END_BLOCK_RESULT;										\
 		};
 
 	#define NIK_DEFINE_BLOCK_FOLD_PASS(_p_)										\

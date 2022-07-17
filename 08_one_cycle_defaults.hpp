@@ -34,7 +34,7 @@ namespace cctmp_one_cycle_specs {
 
 // to values:
 
-	template<auto p, auto Op = U_tag_value>
+	template<auto p, auto Op = U_member_value>
 	nik_ce auto direct_to_values = unpack_
 	<
 		p,
@@ -61,8 +61,17 @@ namespace cctmp_one_cycle_specs {
 
 // write:
 
+	// direct:
+
+	struct T_direct_write
+	{
+		template<auto d, auto defs, auto... Vs>
+		nik_ces auto result = TP_write::template result<d, H_partial_similar, defs, Vs...>;
+
+	}; nik_ce auto U_direct_write = U_store_T<T_direct_write>;
+
 	template<auto defs, auto... Vs>
-	nik_ce auto direct_write = pack_write<H_partial_similar, defs, Vs...>;
+	nik_ce auto direct_write = T_direct_write::template result<MD::initial_depth, defs, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -73,13 +82,18 @@ namespace cctmp_one_cycle_specs {
 
 // write:
 
-	// temporary:
+	struct T_conceptual_write
+	{
+		template<auto d, auto defs, auto... Vs>
+		nik_ces auto result = TP_merge::template result
+		<
+			d, H_partial_similar, UP_unpack<U_direct_write>, defs, Vs...
+		>;
+
+	}; nik_ce auto U_conceptual_write = U_store_T<T_conceptual_write>;
 
 	template<auto defs, auto... Vs>
-	nik_ce auto conceptual_write = defs;
-
-//	template<auto defs, auto... Vs>
-//	nik_ce auto conceptual_write = pack_write<H_partial_similar, defs, Vs...>;
+	nik_ce auto conceptual_write = T_conceptual_write::template result<MD::initial_depth, defs, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -143,7 +157,7 @@ namespace cctmp_one_cycle_specs {
 			>,
 			_out_ival_
 			<
-				_type_      < Ival::closing >,
+				_type_      < _closing      >,
 				_next_      < _increment_<> >
 			>,
 			_break_
@@ -165,27 +179,29 @@ namespace cctmp_one_cycle_specs {
 		template<auto label, auto position, auto out_ival, auto break_, auto action>
 		nik_ce auto _conceptual_repeat(nik_avp(T_pack_Vs<label, position, out_ival, break_, action>*))
 		{
-			using label_etc			= etc_label<TR::id, label>;
-			using position_etc		= etc_position<TR::repeat, position>;
-			using cycle_etc			= etc_cycle<TR::repeat, out_ival, break_, action>;
-			using precycle_etc		= etc_precycle<TR::repeat, cycle_etc>;
-			using postcycle_etc		= etc_postcycle<TR::repeat, cycle_etc>;
+			nik_ce auto label_etc		= tr_<T_label, TR::repeat, label>;
+			nik_ce auto position_etc	= tr_<T_position, TR::repeat, position>;
+			nik_ce auto cycle_etc		= tr_<T_cycle, TR::repeat, out_ival, break_, action>;
+			nik_ce auto precycle_etc	= tr_<T_precycle, TR::repeat, cycle_etc>;
+			nik_ce auto postcycle_etc	= tr_<T_postcycle, TR::repeat, cycle_etc>;
 
-			return etc_repeat
-			<
-				label_etc,
-				position_etc,
-				precycle_etc,
-				cycle_etc,
-				postcycle_etc
-			>;
+			return out_ival;
+		//	return member_value<T_store_U<cycle_etc>::out_next>;
+		//	return etc_repeat
+		//	<
+		//		label_etc,
+		//		position_etc,
+		//		precycle_etc,
+		//		cycle_etc,
+		//		postcycle_etc
+		//	>;
 		}
 
 		template<auto p>
-		nik_ce auto let_conceptual_repeat = alias
+		nik_ce auto let_conceptual_repeat = _conceptual_repeat(p);/*alias
 		<
 			AOP::list_to_template, _conceptual_repeat(p), H_repeat_specification
-		>;
+		>;*/
 
 		template<auto... Vs>
 		nik_ce auto conceptual_repeat = let_conceptual_repeat
@@ -215,7 +231,7 @@ namespace cctmp_one_cycle_specs {
 			_in_position_          < _one          >,
 			_end_position_         < _two          >,
 
-			_pre_end_prev_         < _id_          >,
+			_pre_end_next_         < _id_          >,
 			_pre_out_next_         < _id_          >,
 			_pre_in_next_          < _id_          >,
 
@@ -258,12 +274,12 @@ namespace cctmp_one_cycle_specs {
 			>,
 			_out_ival_
 			<
-				_type_      < Ival::closing >,
+				_type_      < _closing      >,
 				_next_      < _increment_<> >
 			>,
 			_in_ival_
 			<
-				_type_      < Ival::closing >,
+				_type_      < _closing      >,
 				_next_      < _increment_<> >,
 				_prev_      < _decrement_<> >
 			>,
@@ -284,11 +300,11 @@ namespace cctmp_one_cycle_specs {
 		template<auto label, auto position, auto out_ival, auto in_ival, auto break_, auto action>
 		nik_ce auto _conceptual_map(nik_avp(T_pack_Vs<label, position, out_ival, in_ival, break_, action>*))
 		{
-			using label_etc			= etc_label<TR::id, label>;
-			using position_etc		= etc_position<TR::map, position>;
-			using cycle_etc			= etc_cycle<TR::map, out_ival, in_ival, break_, action>;
-			using precycle_etc		= etc_precycle<TR::map, cycle_etc>;
-			using postcycle_etc		= etc_postcycle<TR::map, cycle_etc>;
+			nik_ce auto label_etc		= tr_<T_label, TR::id, label>;
+			nik_ce auto position_etc	= tr_<T_position, TR::map, position>;
+			nik_ce auto cycle_etc		= tr_<T_cycle, TR::map, out_ival, in_ival, break_, action>;
+			nik_ce auto precycle_etc	= tr_<T_precycle, TR::map, cycle_etc>;
+			nik_ce auto postcycle_etc	= tr_<T_postcycle, TR::map, cycle_etc>;
 
 			return etc_map
 			<
@@ -489,7 +505,7 @@ namespace cctmp_one_cycle_specs {
 			_cdr_in_position_      < _two          >,
 			_end_position_         < _three        >,
 
-			_pre_end_prev_         < _id_          >,
+			_pre_end_next_         < _id_          >,
 			_pre_out_next_         < _id_          >,
 			_pre_car_in_next_      < _id_          >,
 			_pre_cdr_in_next_      < _id_          >,
@@ -563,7 +579,7 @@ namespace cctmp_one_cycle_specs {
 			_cdr_in_position_       < _four             >,
 			_end_position_          < _five             >,
 
-			_pre_end_prev_          < _id_              >,
+			_pre_end_next_          < _id_              >,
 			_pre_out_next_          < _id_              >,
 			_pre_car_in_next_       < _id_              >,
 			_pre_cdr_in_next_       < _id_              >,
@@ -639,7 +655,7 @@ namespace cctmp_one_cycle_specs {
 			_cdr_in_position_       < _two          >,
 			_end_position_          < _three        >,
 
-			_pre_end_prev_          < _id_          >,
+			_pre_end_next_          < _id_          >,
 			_pre_car_in_next_       < _id_          >,
 			_pre_cdr_in_next_       < _id_          >,
 

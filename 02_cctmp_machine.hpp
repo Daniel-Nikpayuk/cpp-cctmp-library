@@ -83,6 +83,7 @@ namespace cctmp {
 		nik_ces key_type insert				= 16;
 
 		nik_ces key_type pause				= 13;
+		nik_ces key_type debug				= 14;
 	};
 
 	using MT = InstrNote;
@@ -229,6 +230,9 @@ namespace cctmp {
 
 // machine:
 
+	// Arbitrary list_id input for greater utility,
+	// U_pack_Vs for internal output for greater generality.
+
 	template<key_type, key_type, auto...> struct T_machine;
 
 	// H0: Holds operators.
@@ -248,7 +252,12 @@ namespace cctmp {
 	template<auto... Vs>
 	nik_ce auto start = U_pack_Vs<Vs...>;
 
-	template<auto d, auto... Hs, nik_vp(p)(T_pack_Vs<Hs...>*), auto m, auto c, auto i, auto...Vs>
+	template
+	<
+		auto d,
+		template<auto...> typename B, auto... Hs, nik_vp(p)(B<Hs...>*),
+		auto m, auto c, auto i, auto...Vs
+	>
 	nik_ce auto start<d, p, m, c, i, Vs...> = NIK_MACHINE(d, m, c, i, Vs)(Hs...);
 
 	struct T_start
@@ -285,13 +294,13 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::call, MT::copy_r_pos, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), Heaps... Hs)
+		template<NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws, typename... Heaps>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
 			nik_ce auto ctn	= ins[MI::ctn];
-			nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, U_car, Vs);
+			nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, U_block_car, Vs);
 
 			if nik_ce (is_machination<decltype(val)>)
 
@@ -316,13 +325,17 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::call, MT::copy_j_pos, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws,
+			template<auto...> typename B1, auto... Xs, typename... Heaps
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
 			nik_ce auto ctn	= ins[MI::ctn];
-			nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, U_car, Xs);
+			nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, U_block_car, Xs);
 
 			if nik_ce (is_machination<decltype(val)>)
 
@@ -347,13 +360,17 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::call, MT::copy_c_pos, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename Heap1, auto... Ys, typename... Args>
-		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), Heap1 H1, nik_vp(H2)(T_pack_Vs<Ys...>*), Args... As)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws,
+			typename Heap1, template<auto...> typename B2, auto... Ys, typename... Args
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heap1 H1, nik_vp(H2)(B2<Ys...>*), Args... As)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
 			nik_ce auto ctn	= ins[MI::ctn];
-			nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, U_car, Ys);
+			nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, U_block_car, Ys);
 
 			if nik_ce (is_machination<decltype(val)>)
 
@@ -378,13 +395,17 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::call, MT::copy_a_pos, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename Heap1, typename Heap2, typename... Args>
-		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), Heap1 H1, Heap2 H2, Args... As)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws,
+			typename Heap1, typename Heap2, typename... Args
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heap1 H1, Heap2 H2, Args... As)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
 			nik_ce auto ctn	= ins[MI::ctn];
-			nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, U_car, U_restore_T<Args>);
+			nik_ce auto val	= NIK_VARIABLE_BLOCK(3, d, n, U_block_car, U_restore_T<Args>);
 
 			if nik_ce (is_machination<decltype(val)>)
 
@@ -411,11 +432,10 @@ namespace cctmp {
 	{
 		template
 		<
-			NIK_CONTR_PARAMS, auto... Vs,
-			auto n, auto rtn, auto... _Vs,
-			auto... Ws, auto... Xs, typename... Heaps
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B, auto n, auto rtn, auto... _Vs,
+			template<auto...> typename B0, auto... Ws, typename... Heaps
 		>
-		nik_ces auto result(nik_avp(T_pack_Vs<n, rtn, _Vs...>*), nik_vp(H0)(T_pack_Vs<Ws...>*), Heaps... Hs)
+		nik_ces auto result(nik_avp(B<n, rtn, _Vs...>*), nik_vp(H0)(B0<Ws...>*), Heaps... Hs)
 		{
 			nik_ce auto ins = MD::instr(c, i);
 			nik_ce auto ctn = ins[MI::ctn];
@@ -449,12 +469,16 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::call, MT::cut_r_pos, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, typename Heap0, auto X0, auto... Xs, typename... Heaps>
-		nik_ces auto result(Heap0 H0, nik_vp(H1)(T_pack_Vs<X0, Xs...>*), Heaps... Hs)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, typename Heap0,
+			template<auto...> typename B1, auto X0, auto... Xs, typename... Heaps
+		>
+		nik_ces auto result(Heap0 H0, nik_vp(H1)(B1<X0, Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
-			nik_ce auto val	= NIK_FUNCTION_BLOCK(3, d, n, U_block_filter, Vs)(U_null_Vs);
+			nik_ce auto val	= NIK_FUNCTION_BLOCK(3, d, n, U_block_filter<>, Vs)(U_null_Vs);
 
 			if nik_ce (is_machination<decltype(val)>)
 
@@ -463,7 +487,7 @@ namespace cctmp {
 			{
 				nik_ce auto v0 = tuple_value<0>(val);
 				nik_ce auto v1 = tuple_value<1>(val);
-				nik_ce auto h0 = alias<AOP::unite, v0, v1, X0>;
+				nik_ce auto h0 = listload_<Alias::unite, v0, v1, X0>;
 
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, Hs...);
 			}
@@ -477,12 +501,16 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::call, MT::cut_a_pos, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, typename Heap0, auto X0, auto... Xs, typename Heap2, typename... Args>
-		nik_ces auto result(Heap0 H0, nik_vp(H1)(T_pack_Vs<X0, Xs...>*), Heap2 H2, Args... As)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, typename Heap0,
+			template<auto...> typename B1, auto X0, auto... Xs, typename Heap2, typename... Args
+		>
+		nik_ces auto result(Heap0 H0, nik_vp(H1)(B1<X0, Xs...>*), Heap2 H2, Args... As)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::pos];
-			nik_ce auto val	= NIK_FUNCTION_BLOCK(3, d, n, U_block_filter, U_restore_T<Args>)(U_null_Vs);
+			nik_ce auto val	= NIK_FUNCTION_BLOCK(3, d, n, U_block_filter<>, U_restore_T<Args>)(U_null_Vs);
 
 			if nik_ce (is_machination<decltype(val)>)
 
@@ -491,7 +519,7 @@ namespace cctmp {
 			{
 				nik_ce auto v0 = tuple_value<0>(val);
 				nik_ce auto v1 = tuple_value<1>(val);
-				nik_ce auto h0 = alias<AOP::unite, v0, v1, X0>;
+				nik_ce auto h0 = listload_<Alias::unite, v0, v1, X0>;
 
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, As...);
 			}
@@ -508,13 +536,13 @@ namespace cctmp {
 		template
 		<
 			NIK_CONTR_PARAMS, auto... Vs,
-			auto p, auto n, auto rtn, auto... _Vs,
-			typename Heap0, auto X0, auto... Xs, typename... Heaps
+			template<auto...> typename B, auto p, auto n, auto rtn, auto... _Vs,
+			typename Heap0, template<auto...> typename B1, auto X0, auto... Xs, typename... Heaps
 		>
 		nik_ces auto result
 		(
-			nik_avp(T_pack_Vs<p, n, rtn, _Vs...>*),
-			Heap0 H0, nik_vp(H1)(T_pack_Vs<X0, Xs...>*), Heaps... Hs
+			nik_avp(B<p, n, rtn, _Vs...>*),
+			Heap0 H0, nik_vp(H1)(B1<X0, Xs...>*), Heaps... Hs
 		)
 		{
 			nik_ce auto val = T_block_function::template result<d, p, n, rtn, _Vs...>;
@@ -526,7 +554,7 @@ namespace cctmp {
 			{
 				nik_ce auto v0 = tuple_value<0>(val);
 				nik_ce auto v1 = tuple_value<1>(val);
-				nik_ce auto h0 = alias<AOP::unite, v0, v1, X0>;
+				nik_ce auto h0 = listload_<Alias::unite, v0, v1, X0>;
 
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, Hs...);
 			}
@@ -545,8 +573,12 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::call, MT::action, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws,
+			template<auto...> typename B1, auto... Xs, typename... Heaps
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::dec];
@@ -559,7 +591,7 @@ namespace cctmp {
 				nik_ce auto ctn = ins[MI::ctn];
 				nik_ce auto key = ins[MI::key];
 				nik_ce auto act = ins[MI::act];
-				nik_ce auto val = overload<U_overload<key, act>, Ws...>;
+				nik_ce auto val = overload<U_grammar<key, act>, Ws...>;
 
 				if nik_ce (ctn == MI::h1)
 
@@ -589,8 +621,12 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::recall, MT::action, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws,
+			template<auto...> typename B1, auto... Xs, typename... Heaps
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::dec];
@@ -603,7 +639,7 @@ namespace cctmp {
 				nik_ce auto ctn	= ins[MI::ctn];
 				nik_ce auto key	= ins[MI::key];
 				nik_ce auto act	= ins[MI::act];
-				nik_ce auto val = overload<U_overload<key, act>, Ws...>;
+				nik_ce auto val = overload<U_grammar<key, act>, Ws...>;
 
 				if nik_ce (ctn == MI::h1)
 
@@ -638,8 +674,12 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::call, MT::compel, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto Op, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Op, Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, auto Op, template<auto...> typename B0, auto... Ws,
+			template<auto...> typename B1, auto... Xs, typename... Heaps
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Op, Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::dec];
@@ -653,7 +693,7 @@ namespace cctmp {
 				nik_ce auto key = ins[MI::key];
 				nik_ce auto act = ins[MI::act];
 				nik_ce auto nd	= d+1-n;
-				nik_ce auto val = overload<U_overload<key, act>, Op, nd, Ws...>;
+				nik_ce auto val = overload<U_grammar<key, act>, Op, nd, Ws...>;
 
 				if nik_ce (is_machination<decltype(val)>)
 
@@ -687,8 +727,12 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::recall, MT::compel, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto Op, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Op, Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, auto Op, template<auto...> typename B0, auto... Ws,
+			template<auto...> typename B1, auto... Xs, typename... Heaps
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Op, Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n	= ins[MI::dec];
@@ -702,7 +746,7 @@ namespace cctmp {
 				nik_ce auto key = ins[MI::key];
 				nik_ce auto act = ins[MI::act];
 				nik_ce auto nd	= d+1-n;
-				nik_ce auto val = overload<U_overload<key, act>, Op, nd, Ws...>;
+				nik_ce auto val = overload<U_grammar<key, act>, Op, nd, Ws...>;
 
 				if nik_ce (is_machination<decltype(val)>)
 
@@ -743,8 +787,12 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::recall, MT::propel, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, typename _U, auto... _Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(_U, nik_avp(T_pack_Vs<_Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, typename _U, template<auto...> typename B, auto... _Ws,
+			template<auto...> typename B1, auto... Xs, typename... Heaps
+		>
+		nik_ces auto result(_U, nik_avp(B<_Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins = MD::instr(c, i);
 			nik_ce auto ctn = ins[MI::ctn];
@@ -786,8 +834,12 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::move_j_all, MT::id, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, auto... Xs, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), nik_vp(H1)(T_pack_Vs<Xs...>*), Heaps... Hs)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws,
+			template<auto...> typename B1, auto... Xs, typename... Heaps
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
 		{
 			return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<Ws..., Xs...>, U_null_Vs, Hs...);
 		}
@@ -805,8 +857,8 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::paste_r_all, MT::id, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename... Heaps>
-		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), Heaps... Hs)
+		template<NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws, typename... Heaps>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)
 		{
 			return NIK_MACHINE(d, MT::id, c, i, Ws)(U_null_Vs, Hs...);
 		}
@@ -817,8 +869,12 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::paste_a_all, MT::id, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, auto... Ws, typename Heap1, typename Heap2, typename... Args>
-		nik_ces auto result(nik_vp(H0)(T_pack_Vs<Ws...>*), Heap1 H1, Heap2 H2, Args... As)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws,
+			typename Heap1, typename Heap2, typename... Args
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heap1 H1, Heap2 H2, Args... As)
 		{
 			return NIK_MACHINE(d, MT::id, c, i, Vs)(U_null_Vs, H1, H2, Ws...);
 		}
@@ -851,8 +907,12 @@ namespace cctmp {
 	template<auto... filler>
 	struct T_machine<MN::go_to, MT::conditional, filler...>
 	{
-		template<NIK_CONTR_PARAMS, auto... Vs, typename Heap0, bool X0, auto... Xs, typename... Heaps>
-		nik_ces auto result(Heap0 H0, nik_vp(H1)(T_pack_Vs<X0, Xs...>*), Heaps... Hs)
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, typename Heap0,
+			template<auto...> typename B1, bool X0, auto... Xs, typename... Heaps
+		>
+		nik_ces auto result(Heap0 H0, nik_vp(H1)(B1<X0, Xs...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto ni	= X0 ? ins[MI::pos] : i;
@@ -876,24 +936,20 @@ namespace cctmp {
 		struct T_same_car
 		{
 			template<auto W, auto Z>
-			nik_ces auto result = overload<U_same, W, unpack_<Z, U_car>>;
+			nik_ces auto result = overload<Alias::same, W, unpack_<Z, Alias::car>>;
 
 		}; nik_ces auto U_same_car = U_store_T<T_same_car>;
 
 		template
 		<
-			NIK_CONTR_PARAMS, auto... Vs,
-			auto W0, auto... Xs, typename Heap2, auto... Zs, typename... Args
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto W0,
+			template<auto...> typename B1, auto... Xs, typename Heap2,
+			template<auto...> typename B3, auto... Zs, typename... Args
 		>
-		nik_ces auto result
-		(
-			nik_vp(H0)(T_pack_Vs<W0>*),
-			nik_vp(H1)(T_pack_Vs<Xs...>*), Heap2 H2,
-			nik_vp(A0)(T_pack_Vs<Zs...>*), Args... As
-		)
+		nik_ces auto result(nik_vp(H0)(B0<W0>*), nik_vp(H1)(B1<Xs...>*), Heap2 H2, nik_vp(A0)(B3<Zs...>*), Args... As)
 		{
 			nik_ce auto size = sizeof...(Zs);
-			nik_ce auto pos	 = find_<U_partial<U_custom, U_same_car, W0>, Zs...>;
+			nik_ce auto pos	 = find_<U_alias<U_same_car, W0>, Zs...>;
 
 			if nik_ce (pos == size)
 
@@ -917,14 +973,13 @@ namespace cctmp {
 	{
 		template
 		<
-			NIK_CONTR_PARAMS, auto... Vs,
-			auto W0, auto X0, auto... Xs, typename Heap2, auto... Zs, typename... Args
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto W0,
+			template<auto...> typename B1, auto X0, auto... Xs, typename Heap2,
+			template<auto...> typename B3, auto... Zs, typename... Args
 		>
 		nik_ces auto result
 		(
-			nik_vp(H0)(T_pack_Vs<W0>*),
-			nik_vp(H1)(T_pack_Vs<X0, Xs...>*), Heap2 H2,
-			nik_vp(A0)(T_pack_Vs<Zs...>*), Args... As
+			nik_vp(H0)(B0<W0>*), nik_vp(H1)(B1<X0, Xs...>*), Heap2 H2, nik_vp(A0)(B3<Zs...>*), Args... As
 		)
 		{
 			nik_ce auto Z0 = U_pack_Vs<W0, X0>;
@@ -956,6 +1011,24 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
+
+// debug:
+
+	template<auto... filler>
+	struct T_machine<MN::halt, MT::debug, filler...>
+	{
+		template<NIK_CONTR_PARAMS, auto... Vs, typename... Heaps>
+		nik_ces auto result(Heaps... Hs)
+		{
+			nik_ce auto cs = tuple<decltype(d), decltype(m), decltype(c), decltype(i)>(d, m, c, i);
+			nik_ce auto rs = tuple<decltype(Vs)...>(Vs...);
+			nik_ce auto hs = tuple<Heaps...>(U_restore_T<Heaps>...);
+
+			return tuple<decltype(cs), decltype(rs), decltype(hs)>(cs, rs, hs);
+		}
+	};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -971,178 +1044,229 @@ namespace cctmp {
 	nik_ce instr_type action = instruction<MN::call, MT::action, dec, ctn, key, act>;
 
 		template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-		nik_ce instr_type f_action = action<OL::function, act, ctn, dec>;
+		nik_ce instr_type f_action = action<Grammar::function, act, ctn, dec>;
 
 		template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-		nik_ce instr_type h_action = action<OL::higher_order, act, ctn, dec>;
+		nik_ce instr_type h_action = action<Grammar::higher_order, act, ctn, dec>;
 
 		template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-		nik_ce instr_type a_action = action<OL::alias, act, ctn, dec>;
+		nik_ce instr_type a_action = action<Grammar::alias, act, ctn, dec>;
 
 	// function:
 
 		// comparison:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto equal = f_action<FOP::equal, ctn, dec>;
+		nik_ce auto equal = f_action<Function::equal, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto not_equal = f_action<FOP::not_equal, ctn, dec>;
+		nik_ce auto not_equal = f_action<Function::not_equal, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto less_than = f_action<FOP::less_than, ctn, dec>;
+		nik_ce auto less_than = f_action<Function::less_than, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto less_than_or_equal = f_action<FOP::less_than_or_equal, ctn, dec>;
+		nik_ce auto less_than_or_equal = f_action<Function::less_than_or_equal, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto greater_than = f_action<FOP::greater_than, ctn, dec>;
+		nik_ce auto greater_than = f_action<Function::greater_than, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto greater_than_or_equal = f_action<FOP::greater_than_or_equal, ctn, dec>;
+		nik_ce auto greater_than_or_equal = f_action<Function::greater_than_or_equal, ctn, dec>;
 
 		// logical:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto not_ = f_action<FOP::not_, ctn, dec>;
+		nik_ce auto not_ = f_action<Function::not_, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto and_ = f_action<FOP::and_, ctn, dec>;
+		nik_ce auto and_ = f_action<Function::and_, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto or_ = f_action<FOP::or_, ctn, dec>;
+		nik_ce auto or_ = f_action<Function::or_, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto implies = f_action<FOP::implies, ctn, dec>;
+		nik_ce auto implies = f_action<Function::implies, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto equivalent = f_action<FOP::equivalent, ctn, dec>;
+		nik_ce auto equivalent = f_action<Function::equivalent, ctn, dec>;
 
 		// arithmetic:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto add = f_action<FOP::add, ctn, dec>;
+		nik_ce auto add = f_action<Function::add, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto subtract = f_action<FOP::subtract, ctn, dec>;
+		nik_ce auto subtract = f_action<Function::subtract, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto multiply = f_action<FOP::multiply, ctn, dec>;
+		nik_ce auto multiply = f_action<Function::multiply, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto divide = f_action<FOP::divide, ctn, dec>;
+		nik_ce auto divide = f_action<Function::divide, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto modulo = f_action<FOP::modulo, ctn, dec>;
+		nik_ce auto modulo = f_action<Function::modulo, ctn, dec>;
 
 		// bitwise:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto upshift = f_action<FOP::upshift, ctn, dec>;
+		nik_ce auto upshift = f_action<Function::upshift, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto downshift = f_action<FOP::downshift, ctn, dec>;
+		nik_ce auto downshift = f_action<Function::downshift, ctn, dec>;
 
 		// algebraic:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto product = f_action<FOP::tuple, ctn, dec>;
+		nik_ce auto product = f_action<Function::tuple, ctn, dec>;
 
 	// higher order:
 
 		// computational:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto apply = h_action<HOP::apply, ctn, dec>;
+		nik_ce auto apply = h_action<HigherOrder::apply, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _three>
-		nik_ce auto bind = h_action<HOP::bind, ctn, dec>;
+		nik_ce auto bind = h_action<HigherOrder::bind, ctn, dec>;
 
 			// comparison:
 
 			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto is_equal = h_action<HOP::is_equal, ctn, dec>;
+			nik_ce auto is_equal = h_action<HigherOrder::is_equal, ctn, dec>;
 
 			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto is_zero = h_action<HOP::is_zero, ctn, dec>;
+			nik_ce auto is_zero = h_action<HigherOrder::is_zero, ctn, dec>;
 
 			// arithmetic:
 
 			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto increment = h_action<HOP::increment, ctn, dec>;
+			nik_ce auto increment = h_action<HigherOrder::increment, ctn, dec>;
 
 			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto decrement = h_action<HOP::decrement, ctn, dec>;
+			nik_ce auto decrement = h_action<HigherOrder::decrement, ctn, dec>;
 
 	// alias:
-
-		// basis:
-
-		// comparison:
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto same = a_action<AOP::same, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto csame = a_action<AOP::csame, ctn, dec>;
-
-		// functional:
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto to_list = a_action<AOP::to_list, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto length = a_action<AOP::length, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto map = a_action<AOP::map, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto zip = a_action<AOP::zip, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto is_null = a_action<AOP::is_null, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto car = a_action<AOP::car, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto cdr = a_action<AOP::cdr, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto cadr = a_action<AOP::cadr, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto unite = a_action<AOP::unite, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto find = a_action<AOP::find, ctn, dec>;
 
 		// grammatical:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto custom = a_action<AOP::custom, ctn, dec>;
+		nik_ce auto procedure = a_action<Alias::procedure, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto procedure = a_action<AOP::procedure, ctn, dec>;
+		nik_ce auto method = a_action<Alias::method, ctn, dec>;
 
 		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto method = a_action<AOP::method, ctn, dec>;
+		nik_ce auto tailor = a_action<Alias::tailor, ctn, dec>;
 
-		// unpack:
+		// basis:
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto type_to_const = a_action<Alias::type_to_const, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto if_then_else = a_action<Alias::if_then_else, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto list_id = a_action<Alias::list_id, ctn, dec>;
+
+		// comparison:
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto same = a_action<Alias::same, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto csame = a_action<Alias::csame, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto similar = a_action<Alias::similar, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto is_int_type = a_action<Alias::is_int_type, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto not_int_type = a_action<Alias::not_int_type, ctn, dec>;
+
+		// functional:
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto to_list = a_action<Alias::to_list, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto array_to_list = a_action<Alias::array_to_list, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto to_array = a_action<Alias::to_array, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto is_null = a_action<Alias::is_null, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto length = a_action<Alias::length, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto car = a_action<Alias::car, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto cdr = a_action<Alias::cdr, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto cadr = a_action<Alias::cadr, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto map = a_action<Alias::map, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto find = a_action<Alias::find, ctn, dec>;
+
+		// variadic:
 
 		template<key_type ctn = _h1, depth_type dec = _three>
-		nik_ce auto unpack = a_action<AOP::unpack, ctn, dec>;
+		nik_ce auto f0_unpack = a_action<Alias::f0_unpack, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _three>
+		nik_ce auto f1_unpack = a_action<Alias::f1_unpack, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _three>
+		nik_ce auto f2_unpack = a_action<Alias::f2_unpack, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _three>
+		nik_ce auto b0_unpack = a_action<Alias::b0_unpack, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _three>
+		nik_ce auto b1_unpack = a_action<Alias::b1_unpack, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _three>
+		nik_ce auto b2_unpack = a_action<Alias::b2_unpack, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto list_to_list = a_action<Alias::list_to_list, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto list_to_array = a_action<Alias::list_to_array, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto zip = a_action<Alias::zip, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto unite = a_action<Alias::unite, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto cons = a_action<Alias::cons, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto push = a_action<Alias::push, ctn, dec>;
 
 /***********************************************************************************************************************/
 
 // compel:
 
 	template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-	nik_ce instr_type compel = instruction<MN::call, MT::compel, dec, ctn, OL::alias, act>;
+	nik_ce instr_type compel = instruction<MN::call, MT::compel, dec, ctn, Grammar::alias, act>;
 
-		nik_ce auto _custom = AOP::custom;
-		nik_ce auto _method = AOP::method;
+		nik_ce auto _custom = Alias::custom;
+		nik_ce auto _method = Alias::method;
 
 /***********************************************************************************************************************/
 
@@ -1177,6 +1301,13 @@ namespace cctmp {
 
 	template<key_type...>
 	nik_ce instr_type mem_insert = instruction<MN::memoize, MT::insert>;
+
+/***********************************************************************************************************************/
+
+// debugging:
+
+	template<key_type...>
+	nik_ce instr_type debug = instruction<MN::halt, MT::debug>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

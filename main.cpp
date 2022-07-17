@@ -25,11 +25,11 @@
 #include"00_cctmp_grammar.hpp"
 #include"01_cctmp_block.hpp"
 #include"02_cctmp_machine.hpp"
-#include"03_cctmp_functional.hpp"
+//#include"03_cctmp_functional.hpp"
 //#include"04_cctmp_front.hpp"
-#include"05_generic_assembly.hpp"
-#include"06_one_cycle_generics.hpp"
-#include"07_one_cycle_specifics.hpp"
+//#include"05_generic_assembly.hpp"
+//#include"06_one_cycle_generics.hpp"
+//#include"07_one_cycle_specifics.hpp"
 //#include"08_one_cycle_defaults.hpp"
 //#include"09_domain_specifics.hpp"
 //#include"10_big_numbers.hpp"
@@ -44,7 +44,7 @@
 //	using namespace cctmp_generics;
 //	using namespace cctmp_one_cycle_specs;
 
-	template<auto... Vs> constexpr auto U_pack_Vs = cctmp::template U_pack_Vs<Vs...>;
+//	template<auto... Vs> constexpr auto U_pack_Vs = cctmp::template U_pack_Vs<Vs...>;
 
 /***********************************************************************************************************************/
 
@@ -142,12 +142,16 @@
 
 /***********************************************************************************************************************/
 
-/*
 // repeat:
 
-	constexpr auto repeat_dspec		= cctmp_one_cycle_specs::template direct_repeat<>;
-	using T_repeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_dspec>;
+//	constexpr auto repeat_dspec		= cctmp_one_cycle_specs::template direct_repeat<>;
+//	constexpr auto closed			= cctmp_one_cycle_specs::_closed;
+//	constexpr auto closed_type		= cctmp_one_cycle_specs::template _type_<closed>;
+//	constexpr auto closed_ival		= cctmp_one_cycle_specs::template _out_ival_<closed_type>;
+//	constexpr auto repeat_cspec		= cctmp_one_cycle_specs::template conceptual_repeat<closed_ival>;
+//	using T_repeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_cspec>;
 
+/*
 // map:
 
 	constexpr auto map_dspec_id_		= cctmp_one_cycle_specs::template direct_map<>;
@@ -213,12 +217,18 @@
 
 	int main(int argc, char *argv[])
 	{
+	//	printf("%d\n", cctmp::overload<cctmp::_if_then_else_, true , 5, 6>);
+	//	printf("%d\n", cctmp::overload<cctmp::_if_then_else_, false, 5, 6>);
+	//	printf("%d\n", cctmp::overload<cctmp::_add_, 5, 6>);
+
 	//	int size = 10;//argc;
 
 	//	int  arr[size];
 	//	int  arr_id[size];
 	//	int  arr_sq[size];
 	//	int* arr_ptr[size];
+
+	//	printf("%d\n", repeat_cspec);
 
 // repeat:
 
