@@ -267,8 +267,8 @@ namespace cctmp_generics {
 
 	// arg:
 
-		template<auto op, auto f0, auto... fs>
-		nik_ce auto _argcompose_ = _subcompose_<op, U_pack_Vs<f0, fs...>, segment<sizeof...(fs) + 1>>;
+		template<auto op, auto... fs>
+		nik_ce auto _argcompose_ = _subcompose_<op, U_pack_Vs<fs...>, segment<sizeof...(fs)>>;
 
 /***********************************************************************************************************************/
 

@@ -19,70 +19,45 @@
 
 namespace cctmp_one_cycle_specs {
 
-//	using key_type						= typename cctmp::key_type;
-
-//	nik_ce auto _zero					= cctmp::_zero;
-//	nik_ce auto _one					= cctmp::_one;
-//	nik_ce auto _two					= cctmp::_two;
-//	nik_ce auto _three					= cctmp::_three;
-//	nik_ce auto _four					= cctmp::_four;
-//	nik_ce auto _five					= cctmp::_five;
+	using key_type						= typename cctmp::key_type;
 
 	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
-//	template<auto... Vs> using T_pack_Vs			= typename cctmp::template T_pack_Vs<Vs...>;
 
 	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
-//	template<template<auto...> class B>
-//	nik_ce auto U_store_B					= cctmp::template U_store_B<B>;
 	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
 
-//	template<auto... Vs> nik_ce auto overload		= cctmp::template overload<Vs...>;
-//	using Alias						= typename cctmp::Alias;
+	template<auto... Vs> nik_ce auto overload		= cctmp::template overload<Vs...>;
 
-//	nik_ce auto _id_					= cctmp::_id_;
-//	nik_ce auto _equal_					= cctmp::_equal_;
-//	nik_ce auto _assign_					= cctmp::_assign_;
-//	nik_ce auto _dereference_				= cctmp::_dereference_;
+	nik_ce auto _id_					= cctmp::_id_;
 
-//	template<auto... Vs> nik_ce auto _constant_		= cctmp::template _constant_<Vs...>;
-//	template<auto... Vs> nik_ce auto _increment_		= cctmp::template _increment_<Vs...>;
-//	template<auto... Vs> nik_ce auto _decrement_		= cctmp::template _decrement_<Vs...>;
+	nik_ce auto _same_					= cctmp::_same_;
+	nik_ce auto _if_then_else_				= cctmp::_if_then_else_;
 
-//	nik_ce auto _similar_					= cctmp::_similar_;
-//	nik_ce auto _map_					= cctmp::_map_;
-
-//	template<auto... Vs> nik_ce auto unpack_		= cctmp::template unpack_<Vs...>;
-
-//	template<auto... Vs> nik_ce auto U_partial		= cctmp::template U_partial<Vs...>;
-//	template<auto... Vs> nik_ce auto H_partial		= cctmp::template H_partial<Vs...>;
-//	nik_ce auto H_partial_similar				= H_partial<U_similar>;
-
-//	using MD						= typename cctmp::MD;
-
-//	using TP_write						= typename cctmp_functional::TP_write;
-//	using TP_merge						= typename cctmp_functional::TP_merge;
-//	template<auto... Vs> nik_ce auto UP_unpack		= cctmp_functional::template UP_unpack<Vs...>;
-
-//	nik_ce auto _d_assign_i_				= cctmp_generics::template _argcompose_
-//								<
-//									_assign_, _dereference_, _id_
-//								>;
-
-//	template<auto... Vs> nik_ce auto _argcompose_		= cctmp_generics::template _argcompose_<Vs...>;
-//	template<auto... Vs> nik_ce auto _side_			= cctmp_generics::template _side_<Vs...>;
-
-//	nik_ce auto H_repeat_specification			= cctmp_one_cycle_generics::H_repeat_specification;
-//	nik_ce auto H_map_specification				= cctmp_one_cycle_generics::H_map_specification;
-//	nik_ce auto H_fold_specification			= cctmp_one_cycle_generics::H_fold_specification;
-//	nik_ce auto H_find_first_specification			= cctmp_one_cycle_generics::H_find_first_specification;
-//	nik_ce auto H_find_all_specification			= cctmp_one_cycle_generics::H_find_all_specification;
-//	nik_ce auto H_zip_specification				= cctmp_one_cycle_generics::H_zip_specification;
-//	nik_ce auto H_fasten_specification			= cctmp_one_cycle_generics::H_fasten_specification;
-//	nik_ce auto H_glide_specification			= cctmp_one_cycle_generics::H_glide_specification;
+	template<auto... Vs> nik_ce auto _argcompose_		= cctmp_generics::template _argcompose_<Vs...>;
+	template<auto... Vs> nik_ce auto _side_			= cctmp_generics::template _side_<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// conveniences:
+
+/***********************************************************************************************************************/
+
+// same:
+
+	template<auto V0, auto V1>
+	nik_ce auto same = overload<_same_, V0, V1>;
+
+// if_then_else:
+
+	template<auto p, auto a, auto c>
+	nik_ce auto if_then_else = overload<_if_then_else_, p, a, c>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 
 // operators:
 
@@ -99,9 +74,6 @@ namespace cctmp_one_cycle_specs {
 
 	template<auto U>
 	nik_ce auto member_value = T_member_value::template result<U>;
-
-	template<auto... Vs>
-	nik_ce auto to_value = U_pack_Vs<member_value<Vs>...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -291,7 +263,6 @@ namespace cctmp_one_cycle_specs {
 
 	// id:
 
-/*
 		template<auto... Vs> struct _label			{ };
 		template<auto... Vs> nik_ce auto _label_		= U_store_T<_label<Vs...>>;
 
@@ -310,7 +281,6 @@ namespace cctmp_one_cycle_specs {
 		template<auto f> nik_ce auto _match_			= U_store_T<_match<f>>;
 		template<auto f> nik_ce auto _postmatch_		= U_store_T<_postmatch<f>>;
 		template<auto f> nik_ce auto _done_			= U_store_T<_done<f>>;
-*/
 
 /***********************************************************************************************************************/
 
@@ -318,7 +288,6 @@ namespace cctmp_one_cycle_specs {
 
 	// id:
 
-/*
 		template<auto... Vs> struct _position			{ };
 		template<auto... Vs> nik_ce auto _position_		= U_store_T<_position<Vs...>>;
 
@@ -337,13 +306,11 @@ namespace cctmp_one_cycle_specs {
 		template<auto f> nik_ce auto _car_in_			= U_store_T<_car_in<f>>;
 		template<auto f> nik_ce auto _cdr_in_			= U_store_T<_cdr_in<f>>;
 		template<auto f> nik_ce auto _end_			= U_store_T<_end<f>>;
-*/
 
 /***********************************************************************************************************************/
 
 // interval:
 
-/*
 	struct Interval
 	{
 		nik_ces char open	[] = "()";
@@ -381,7 +348,6 @@ namespace cctmp_one_cycle_specs {
 
 		template<auto f> struct _prev				{ };
 		template<auto f> nik_ce auto _prev_			= U_store_T<_prev<f>>;
-*/
 
 /***********************************************************************************************************************/
 
@@ -389,7 +355,6 @@ namespace cctmp_one_cycle_specs {
 
 	// id:
 
-/*
 		template<auto... Vs> struct _break			{ };
 		template<auto... Vs> nik_ce auto _break_		= U_store_T<_break<Vs...>>;
 
@@ -413,7 +378,6 @@ namespace cctmp_one_cycle_specs {
 		template<auto f> nik_ce auto _car_in_arg_		= U_store_T<_car_in_arg<f>>;
 		template<auto f> nik_ce auto _cdr_in_arg_		= U_store_T<_cdr_in_arg<f>>;
 		template<auto f> nik_ce auto _end_arg_			= U_store_T<_end_arg<f>>;
-*/
 
 /***********************************************************************************************************************/
 
@@ -421,10 +385,8 @@ namespace cctmp_one_cycle_specs {
 
 	// id:
 
-/*
 		template<auto... Vs> struct _action			{ };
 		template<auto... Vs> nik_ce auto _action_		= U_store_T<_action<Vs...>>;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -439,7 +401,6 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
-/*
 	struct Translator
 	{
 		nik_ces key_type id		= 0;
@@ -455,17 +416,17 @@ namespace cctmp_one_cycle_specs {
 	};
 
 	using TR = Translator;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // etc:
 
-/*
 	template<template<key_type, typename...> class T_etc, key_type Key, auto... Vs>
-	nik_ce auto tr_ = U_store_T<T_etc<Key, T_store_U<Vs>...>>;
-*/
+	using T_tr = T_etc<Key, T_store_U<Vs>...>;
+
+	template<template<key_type, typename...> class T_etc, key_type Key, auto... Vs>
+	nik_ce auto tr_ = U_store_T<T_tr<T_etc, Key, Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -473,7 +434,6 @@ namespace cctmp_one_cycle_specs {
 
 	// labels:
 
-/*
 		template<key_type, typename...> struct T_cycle;
 		template<key_type, typename...> struct T_precycle;
 		template<key_type, typename...> struct T_postcycle;
@@ -521,7 +481,6 @@ namespace cctmp_one_cycle_specs {
 		// ival:
 
 		template<key_type, typename...> struct T_ival;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -532,27 +491,23 @@ namespace cctmp_one_cycle_specs {
 
 // labels:
 
-/*
 	template<auto Precycle  > struct T_precycle  <TR::id,  _precycle<Precycle  >> { nik_ces auto value = Precycle; };
 	template<auto Cycle     > struct T_cycle     <TR::id,     _cycle<Cycle     >> { nik_ces auto value = Cycle; };
 	template<auto Postcycle > struct T_postcycle <TR::id, _postcycle<Postcycle >> { nik_ces auto value = Postcycle; };
 	template<auto Match     > struct T_match     <TR::id,     _match<Match     >> { nik_ces auto value = Match; };
 	template<auto Postmatch > struct T_postmatch <TR::id, _postmatch<Postmatch >> { nik_ces auto value = Postmatch; };
 	template<auto Done      > struct T_done      <TR::id,      _done<Done      >> { nik_ces auto value = Done; };
-*/
 
 /***********************************************************************************************************************/
 
 // positions:
 
-/*
 	template<auto Out   > struct T_out    <TR::id, _out    <Out   >> { nik_ces auto value = Out; };
 	template<auto Aux   > struct T_aux    <TR::id, _aux    <Aux   >> { nik_ces auto value = Aux; };
 	template<auto In    > struct T_in     <TR::id, _in     <In    >> { nik_ces auto value = In; };
 	template<auto CarIn > struct T_car_in <TR::id, _car_in <CarIn >> { nik_ces auto value = CarIn; };
 	template<auto CdrIn > struct T_cdr_in <TR::id, _cdr_in <CdrIn >> { nik_ces auto value = CdrIn; };
 	template<auto End   > struct T_end    <TR::id, _end    <End   >> { nik_ces auto value = End; };
-*/
 
 /***********************************************************************************************************************/
 
@@ -563,22 +518,17 @@ namespace cctmp_one_cycle_specs {
 	//	template<typename Prev, typename IsPeek>
 	//	struct T_pre_next<TR::id, Prev, IsPeek>
 	//	{
-	//		nik_ces auto is_last	= !alias<AOP::same, Prev::value, _id_> && IsPeek::value;
-	//		nik_ces auto value	=  alias<AOP::if_then_else, is_last, Prev::value, _id_>;
+	//		nik_ces auto is_last	= !same<Prev::value, _id_> && IsPeek::value;
+	//		nik_ces auto value	=  if_then_else<is_last, Prev::value, _id_>;
 	//	};
 
 	// next:
 
-/*
 		template<typename Ival, typename Next>
 		struct T_pre_next<TR::id, Ival, Next>
 		{
-			nik_ces auto value = alias
-			<
-				AOP::if_then_else, member_value<Ival::is_left_open>, Next::value, _id_
-			>;
+			nik_ces auto value = if_then_else<member_value<Ival::is_left_open>, Next::value, _id_>;
 		};
-*/
 
 /***********************************************************************************************************************/
 
@@ -586,7 +536,6 @@ namespace cctmp_one_cycle_specs {
 
 	// next:
 
-/*
 		template<auto Op>
 		struct T_next<TR::id, _prev<Op>>
 		{
@@ -619,22 +568,13 @@ namespace cctmp_one_cycle_specs {
 			nik_ces auto value = (Ival[1] == ')');
 		};
 
-		struct tmp
-		{
-			nik_ces auto value = false;
-		};
-
 		template<auto Ival>
 		struct T_ival<TR::id, _type<Ival>>
 		{
-		//	nik_ces auto _Type_		= _type_<Ival>;
-		//	nik_ces auto is_left_open	= tr_< T_is_left_open    , TR::id , _Type_ >;
-		//	nik_ces auto is_right_closed	= tr_< T_is_right_closed , TR::id , _Type_ >;
-		//	nik_ces auto is_right_open	= tr_< T_is_right_open   , TR::id , _Type_ >;
-
-			nik_ces auto is_left_open	= U_store_T<tmp>;
-			nik_ces auto is_right_closed	= U_store_T<tmp>;
-			nik_ces auto is_right_open	= U_store_T<tmp>;
+			nik_ces auto _Type_		= _type_<Ival>;
+			nik_ces auto is_left_open	= tr_< T_is_left_open    , TR::id , _Type_ >;
+			nik_ces auto is_right_closed	= tr_< T_is_right_closed , TR::id , _Type_ >;
+			nik_ces auto is_right_open	= tr_< T_is_right_open   , TR::id , _Type_ >;
 		};
 
 	// is peek:
@@ -644,7 +584,6 @@ namespace cctmp_one_cycle_specs {
 		{
 			nik_ces auto value = (Ival::value[1] == ')') && (... || (Ivals::value[1] == ']'));
 		};
-*/
 
 /***********************************************************************************************************************/
 
@@ -652,14 +591,10 @@ namespace cctmp_one_cycle_specs {
 
 	// assign function:
 
-/*
 		template<typename Ival, typename AssignFunc>
 		struct T_post_assign_function<TR::id, Ival, AssignFunc>
 		{
-			nik_ces auto value = alias
-			<
-				AOP::if_then_else, member_value<Ival::is_right_closed>, AssignFunc::value, _id_
-			>;
+			nik_ces auto value = if_then_else<member_value<Ival::is_right_closed>, AssignFunc::value, _id_>;
 		};
 
 	// next:
@@ -668,9 +603,8 @@ namespace cctmp_one_cycle_specs {
 		struct T_post_next<TR::id, Ival0, Ival1, Next1>
 		{
 			nik_ces auto is_next	= Ival0::is_right_closed::value && Ival1::is_right_open::value;
-			nik_ces auto value	= alias<AOP::if_then_else, is_next, Next1::value, _id_>;
+			nik_ces auto value	= if_then_else<is_next, Next1::value, _id_>;
 		};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -679,68 +613,29 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
-/*
-	template
-	<
-		typename label,
-		typename position,
-		typename precycle,
-		typename cycle,
-		typename postcycle
-	>
-	nik_ce auto _etc_repeat = to_value
-	<
-		label::precycle,
-		label::cycle,
-		label::postcycle,
-
-		position::out,
-		position::end,
-		position::in,
-
-		precycle::pre_out_next,
-
-		cycle::loop_predicate,
-		cycle::assign_function,
-		cycle::out_next,
-
-		postcycle::post_assign_function
-	>;
-
-	template<auto... Vs>
-	nik_ce auto etc_repeat = _etc_repeat<T_store_U<Vs>...>;
-*/
-
-/***********************************************************************************************************************/
-
 // loop predicate:
 
-/*
 	template<auto Op, auto OutArg, auto EndArg>
 	struct T_loop_predicate<TR::repeat, _op<Op>, _out_arg<OutArg>, _end_arg<EndArg>>
 	{
-		nik_ces auto value = _argcompose_<Op, OutArg, EndArg>; // don't build if you don't have to.
+		nik_ces auto value = _argcompose_<Op, OutArg, EndArg>; // don't build if you don't have to?
 	};
-*/
 
 /***********************************************************************************************************************/
 
 // assign function:
 
-/*
 	template<auto Op, auto OutArg, auto InArg>
 	struct T_assign_function<TR::repeat, _op<Op>, _out_arg<OutArg>, _in_arg<InArg>>
 	{
-		nik_ces auto assign_function	= _argcompose_<Op, OutArg, InArg>; // don't build if you don't have to.
+		nik_ces auto assign_function	= _argcompose_<Op, OutArg, InArg>; // don't build if you don't have to?
 		nik_ces auto value		= _side_<assign_function>;
 	};
-*/
 
 /***********************************************************************************************************************/
 
 // label:
 
-/*
 	template<auto _Precycle_, auto _Cycle_, auto _Postcycle_>
 	struct T_label<TR::repeat, _label<_Precycle_, _Cycle_, _Postcycle_>>
 	{
@@ -748,13 +643,11 @@ namespace cctmp_one_cycle_specs {
 		nik_ces auto cycle		= tr_<     T_cycle, TR::id,     _Cycle_ >;
 		nik_ces auto postcycle		= tr_< T_postcycle, TR::id, _Postcycle_ >;
 	};
-*/
 
 /***********************************************************************************************************************/
 
 // position:
 
-/*
 	template<auto _Out_, auto _End_, auto _In_>
 	struct T_position<TR::repeat, _position<_Out_, _End_, _In_>>
 	{
@@ -762,13 +655,11 @@ namespace cctmp_one_cycle_specs {
 		nik_ces auto end	= tr_< T_end, TR::id, _End_ >;
 		nik_ces auto in		= tr_<  T_in, TR::id,  _In_ >;
 	};
-*/
 
 /***********************************************************************************************************************/
 
 // cycle:
 
-/*
 	template
 	<
 		auto _Type_, auto  _Next_,
@@ -788,28 +679,23 @@ namespace cctmp_one_cycle_specs {
 		nik_ces auto assign_function		= tr_< T_assign_function, TR::repeat, _Op1_, _Arg11_, _Arg12_ >;
 
 		nik_ces auto out_next			= tr_< T_next, TR::id, _Next_ >;
-	//	nik_ces auto out_ival			= tr_< T_ival, TR::id, _Type_ >;
-		nik_ces auto out_ival			= tr_< T_ival, TR::id, _type_<_closing> >;
+		nik_ces auto out_ival			= tr_< T_ival, TR::id, _Type_ >;
 	};
-*/
 
 /***********************************************************************************************************************/
 
 // precycle:
 
-/*
 	template<typename Cycle>
 	struct T_precycle<TR::repeat, Cycle>
 	{
 		nik_ces auto pre_out_next = tr_<T_pre_next, TR::id, Cycle::out_ival, Cycle::out_next>;
 	};
-*/
 
 /***********************************************************************************************************************/
 
 // postcycle:
 
-/*
 	template<typename Cycle>
 	struct T_postcycle<TR::repeat, Cycle>
 	{
@@ -818,7 +704,6 @@ namespace cctmp_one_cycle_specs {
 			T_post_assign_function, TR::id, Cycle::out_ival, Cycle::assign_function
 		>;
 	};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

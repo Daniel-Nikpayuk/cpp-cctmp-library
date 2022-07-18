@@ -19,6 +19,74 @@
 
 namespace cctmp_one_cycle_specs {
 
+	nik_ce auto _zero					= cctmp::_zero;
+	nik_ce auto _one					= cctmp::_one;
+	nik_ce auto _two					= cctmp::_two;
+	nik_ce auto _three					= cctmp::_three;
+	nik_ce auto _four					= cctmp::_four;
+	nik_ce auto _five					= cctmp::_five;
+
+	template<auto... Vs> using T_pack_Vs			= typename cctmp::template T_pack_Vs<Vs...>;
+
+	nik_ce auto _equal_					= cctmp::_equal_;
+	nik_ce auto _assign_					= cctmp::_assign_;
+	nik_ce auto _dereference_				= cctmp::_dereference_;
+
+	template<auto... Vs> nik_ce auto _constant_		= cctmp::template _constant_<Vs...>;
+	template<auto... Vs> nik_ce auto _increment_		= cctmp::template _increment_<Vs...>;
+	template<auto... Vs> nik_ce auto _decrement_		= cctmp::template _decrement_<Vs...>;
+
+	nik_ce auto _list_id_					= cctmp::_list_id_;
+	nik_ce auto _similar_					= cctmp::_similar_;
+	nik_ce auto _car_					= cctmp::_car_;
+	nik_ce auto _map_					= cctmp::_map_;
+
+	template<auto... Vs> nik_ce auto unpack_		= cctmp::template unpack_<Vs...>;
+
+	using MD						= typename cctmp::MD;
+
+	template<auto... Vs> nik_ce auto UP_unpack		= cctmp_functional::template UP_unpack<Vs...>;
+
+	using TP_write						= typename cctmp_functional::TP_write;
+	using TP_merge						= typename cctmp_functional::TP_merge;
+
+	nik_ce auto _d_assign_i_				= cctmp_generics::template _argcompose_
+								<
+									_assign_, _dereference_, _id_
+								>;
+
+	nik_ce auto H_repeat_specification			= cctmp_one_cycle_generics::H_repeat_specification;
+	nik_ce auto H_map_specification				= cctmp_one_cycle_generics::H_map_specification;
+	nik_ce auto H_fold_specification			= cctmp_one_cycle_generics::H_fold_specification;
+	nik_ce auto H_find_first_specification			= cctmp_one_cycle_generics::H_find_first_specification;
+	nik_ce auto H_find_all_specification			= cctmp_one_cycle_generics::H_find_all_specification;
+	nik_ce auto H_zip_specification				= cctmp_one_cycle_generics::H_zip_specification;
+	nik_ce auto H_fasten_specification			= cctmp_one_cycle_generics::H_fasten_specification;
+	nik_ce auto H_glide_specification			= cctmp_one_cycle_generics::H_glide_specification;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// conveniences:
+
+/***********************************************************************************************************************/
+
+// list_id:
+
+	template<auto p>
+	nik_ce auto list_id = overload<_list_id_, p>;
+
+// UL_car:
+
+	struct TL_car
+	{
+		template<auto p>
+		nik_ces auto result = unpack_<p, _car_>;
+	};
+
+	nik_ce auto UL_car = U_store_T<TL_car>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -34,10 +102,8 @@ namespace cctmp_one_cycle_specs {
 
 // to spec:
 
-/*
-	template<auto direct, auto H_spec, auto Op = U_member_value>
-	nik_ce auto direct_to_values = unpack_<direct, _map_, H_spec, Op>;
-*/
+	template<auto direct, auto H_spec>
+	nik_ce auto direct_to_spec = unpack_<direct, _map_, H_spec, UL_car>;
 
 /***********************************************************************************************************************/
 
@@ -45,17 +111,15 @@ namespace cctmp_one_cycle_specs {
 
 	// direct:
 
-/*
 	struct T_direct_write
 	{
 		template<auto d, auto defs, auto... Vs>
-		nik_ces auto result = TP_write::template result<d, H_partial_similar, defs, Vs...>;
+		nik_ces auto result = TP_write::template result<d, list_id<defs>, _similar_, defs, Vs...>;
 
 	}; nik_ce auto U_direct_write = U_store_T<T_direct_write>;
 
 	template<auto defs, auto... Vs>
 	nik_ce auto direct_write = T_direct_write::template result<MD::initial_depth, defs, Vs...>;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -66,20 +130,18 @@ namespace cctmp_one_cycle_specs {
 
 // write:
 
-/*
 	struct T_conceptual_write
 	{
 		template<auto d, auto defs, auto... Vs>
 		nik_ces auto result = TP_merge::template result
 		<
-			d, H_partial_similar, UP_unpack<U_direct_write>, defs, Vs...
+			d, list_id<defs>, _similar_, UP_unpack<U_direct_write>, defs, Vs...
 		>;
 
 	}; nik_ce auto U_conceptual_write = U_store_T<T_conceptual_write>;
 
 	template<auto defs, auto... Vs>
 	nik_ce auto conceptual_write = T_conceptual_write::template result<MD::initial_depth, defs, Vs...>;
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -93,7 +155,6 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
-/*
 		nik_ce auto direct_repeat_defaults = U_pack_Vs
 		<
 			_precycle_label_       < _zero         >,
@@ -121,7 +182,6 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_repeat_defaults, Vs...>,
 			H_repeat_specification
 		>;
-*/
 
 /***********************************************************************************************************************/
 
@@ -129,7 +189,6 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
-/*
 		nik_ces auto conceptual_repeat_defaults = U_pack_Vs
 		<
 			_label_
@@ -168,36 +227,39 @@ namespace cctmp_one_cycle_specs {
 		template<auto label, auto position, auto out_ival, auto break_, auto action>
 		nik_ce auto _conceptual_repeat(nik_avp(T_pack_Vs<label, position, out_ival, break_, action>*))
 		{
-			nik_ce auto label_etc		= tr_<T_label, TR::repeat, label>;
-			nik_ce auto position_etc	= tr_<T_position, TR::repeat, position>;
-			nik_ce auto cycle_etc		= tr_<T_cycle, TR::repeat, out_ival, break_, action>;
-			nik_ce auto precycle_etc	= tr_<T_precycle, TR::repeat, cycle_etc>;
-			nik_ce auto postcycle_etc	= tr_<T_postcycle, TR::repeat, cycle_etc>;
+			using label_etc		= T_tr<T_label, TR::repeat, label>;
+			using position_etc	= T_tr<T_position, TR::repeat, position>;
+			using cycle_etc		= T_tr<T_cycle, TR::repeat, out_ival, break_, action>;
+			using precycle_etc	= T_tr<T_precycle, TR::repeat,  U_store_T<cycle_etc>>;
+			using postcycle_etc	= T_tr<T_postcycle, TR::repeat, U_store_T<cycle_etc>>;
 
-			return out_ival;
-		//	return member_value<T_store_U<cycle_etc>::out_next>;
-		//	return etc_repeat
-		//	<
-		//		label_etc,
-		//		position_etc,
-		//		precycle_etc,
-		//		cycle_etc,
-		//		postcycle_etc
-		//	>;
+			return overload
+			<
+				_map_, H_repeat_specification, U_member_value,
+
+				label_etc::precycle,
+				label_etc::cycle,
+				label_etc::postcycle,
+
+				position_etc::out,
+				position_etc::end,
+				position_etc::in,
+
+				precycle_etc::pre_out_next,
+
+				cycle_etc::loop_predicate,
+				cycle_etc::assign_function,
+				cycle_etc::out_next,
+
+				postcycle_etc::post_assign_function
+			>;
 		}
 
-		template<auto p>
-		nik_ce auto let_conceptual_repeat = _conceptual_repeat(p);alias
-		<
-			AOP::list_to_template, _conceptual_repeat(p), H_repeat_specification
-		>;
-
 		template<auto... Vs>
-		nik_ce auto conceptual_repeat = let_conceptual_repeat
-		<
+		nik_ce auto conceptual_repeat = _conceptual_repeat
+		(
 			conceptual_write<conceptual_repeat_defaults, Vs...>
-		>;
-*/
+		);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -40,11 +40,11 @@
 
 /***********************************************************************************************************************/
 
-	using namespace cctmp;
+//	using namespace cctmp;
 //	using namespace cctmp_generics;
 //	using namespace cctmp_one_cycle_specs;
 
-//	template<auto... Vs> constexpr auto U_pack_Vs = cctmp::template U_pack_Vs<Vs...>;
+	template<auto... Vs> constexpr auto U_pack_Vs = cctmp::template U_pack_Vs<Vs...>;
 
 /***********************************************************************************************************************/
 
@@ -66,6 +66,7 @@
 
 /***********************************************************************************************************************/
 
+/*
 	constexpr auto p = U_pack_Vs
 	<
 	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
@@ -94,12 +95,12 @@
 
 		99, 0, 5, 41
 	>;
+*/
 
 /***********************************************************************************************************************/
 
 // functions:
 
-/*
 	constexpr int sq(int x)			{ return x*x; }
 	constexpr auto _sq_			= cctmp::template _apply_<sq>;
 
@@ -136,18 +137,19 @@
 						<
 							_d_assign_add_, _id_, _deref_, _deref_
 						>;
-*/
 
 /***********************************************************************************************************************/
 
 // repeat:
 
-//	constexpr auto repeat_dspec		= cctmp_one_cycle_specs::template direct_repeat<>;
+	constexpr auto repeat_dspec		= cctmp_one_cycle_specs::template direct_repeat<>;
+	using T_drepeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_dspec>;
+
 //	constexpr auto closed			= cctmp_one_cycle_specs::_closed;
 //	constexpr auto closed_type		= cctmp_one_cycle_specs::template _type_<closed>;
 //	constexpr auto closed_ival		= cctmp_one_cycle_specs::template _out_ival_<closed_type>;
 //	constexpr auto repeat_cspec		= cctmp_one_cycle_specs::template conceptual_repeat<closed_ival>;
-//	using T_repeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_cspec>;
+//	using T_crepeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_cspec>;
 
 /*
 // map:
@@ -215,19 +217,19 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	int size = 10;//argc;
+		int size = 10;//argc;
 
-	//	int  arr[size];
+		int  arr[size];
 	//	int  arr_id[size];
 	//	int  arr_sq[size];
 	//	int* arr_ptr[size];
 
-	//	printf("%d\n", repeat_cspec);
-
 // repeat:
 
+	//	printf("%d\n", repeat_dspec);
+
 	//	repeat_array(arr, arr+size, argc);
-	//	T_repeat::result(arr, arr+size, argc);
+		T_drepeat::result(arr, arr+size, argc);
 	//	print_array(arr, arr+size);
 
 // map:
