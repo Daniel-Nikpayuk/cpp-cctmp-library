@@ -955,10 +955,10 @@ namespace cctmp_program
 	//	printf("%llu\n", cctmp_functional::pack_ordered_replace<_less_than_, 0,    3, 4, 5, 9>);
 	//	printf("%llu\n", cctmp_functional::list_ordered_replace<p, 0>);
 
-	//	printf("%llu\n", cctmp_functional::pack_union<H_curry_equal, H_curry_less_than, U_null_Vs, 9,    3, 4, 5, 9>);
-
 	//	printf("%llu\n", cctmp_functional::pack_sort<_less_than_, U_null_Vs, 3, 4, 5, 9>);
 	//	printf("%llu\n", cctmp_functional::list_sort<p>);		// gcc 2.854s / clang 7.166s
+
+	//	printf("%llu\n", cctmp_functional::pack_union<H_curry_equal, H_curry_less_than, U_null_Vs, 9,    3, 4, 5, 9>);
 
 	//	constexpr auto def_specs	= U_pack_Vs<0, 1, 2, 3, 4, 5>;
 	//	constexpr auto specs0		= U_pack_Vs<3, 5, 0>;

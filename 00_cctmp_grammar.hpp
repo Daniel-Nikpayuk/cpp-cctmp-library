@@ -151,6 +151,14 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// array:
+
+	template<typename Type, Type... Vs>
+	nik_ce Type array[] = { Vs... };
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // tuple:
 
 /***********************************************************************************************************************/
@@ -165,14 +173,6 @@ namespace cctmp {
 
 		nik_ce tuple(const T & v, const Ts &... vs) : value{v}, rest{vs...} { }
 	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// array:
-
-	template<typename Type, Type... Vs>
-	nik_ce Type array[] = { Vs... };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -776,34 +776,35 @@ namespace cctmp {
 			nik_ces key_type to_list			= 13;
 			nik_ces key_type array_to_list			= 14;
 			nik_ces key_type to_array			= 15;
+			nik_ces key_type to_tuple			= 16;
 
-			nik_ces key_type is_null			= 16;
-			nik_ces key_type length				= 17;
+			nik_ces key_type is_null			= 17;
+			nik_ces key_type length				= 18;
 
-			nik_ces key_type car				= 18;
-			nik_ces key_type cdr				= 19;
-			nik_ces key_type cadr				= 20;
+			nik_ces key_type car				= 19;
+			nik_ces key_type cdr				= 20;
+			nik_ces key_type cadr				= 21;
 
-			nik_ces key_type map				= 21;
-			nik_ces key_type find				= 22;
+			nik_ces key_type map				= 22;
+			nik_ces key_type find				= 23;
 
 		// variadic:
 
-			nik_ces key_type f0_unpack			= 23;
-			nik_ces key_type f1_unpack			= 24;
-			nik_ces key_type f2_unpack			= 25;
+			nik_ces key_type f0_unpack			= 24;
+			nik_ces key_type f1_unpack			= 25;
+			nik_ces key_type f2_unpack			= 26;
 
-			nik_ces key_type b0_unpack			= 26;
-			nik_ces key_type b1_unpack			= 27;
-			nik_ces key_type b2_unpack			= 28;
+			nik_ces key_type b0_unpack			= 27;
+			nik_ces key_type b1_unpack			= 28;
+			nik_ces key_type b2_unpack			= 29;
 
-			nik_ces key_type list_to_list			= 29;
-			nik_ces key_type list_to_array			= 30;
+			nik_ces key_type list_to_list			= 30;
+			nik_ces key_type list_to_array			= 31;
 
-			nik_ces key_type zip				= 31;
-			nik_ces key_type unite				= 32;
-			nik_ces key_type cons				= 33;
-			nik_ces key_type push				= 34;
+			nik_ces key_type zip				= 32;
+			nik_ces key_type unite				= 33;
+			nik_ces key_type cons				= 34;
+			nik_ces key_type push				= 35;
 	};
 
 /***********************************************************************************************************************/
@@ -973,6 +974,13 @@ namespace cctmp {
 		nik_ce auto overload<Alias::to_array, U, Vs...> = array<T_store_U<U>, Vs...>;
 
 		nik_ce auto _to_array_ = Alias::to_array;
+
+	// to tuple:
+
+		template<auto... Vs>
+		nik_ce auto overload<Alias::to_tuple, Vs...> = tuple<decltype(Vs)...>(Vs...);
+
+		nik_ce auto _to_tuple_ = Alias::to_tuple;
 
 	// is_null:
 

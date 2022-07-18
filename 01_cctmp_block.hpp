@@ -101,7 +101,7 @@ namespace cctmp {
 			nik_ce auto l = to_list_<bl, Ws...>;
 			nik_ce auto r = overload<Op, br, Vs...>;
 
-			return tuple<decltype(l), decltype(r)>(l, r);
+			return overload<Alias::to_tuple, l, r>;
 		}
 	};
 
@@ -138,7 +138,7 @@ namespace cctmp {
 			nik_ce auto r = to_list_<br, Vs...>;
 			nik_ce auto p = to_list_<bp, l, r>;
 
-			return tuple<decltype(p), decltype(V0)>(p, V0);
+			return overload<Alias::to_tuple, p, V0>;
 		}
 
 	}; template<auto bl = H_id, auto br = H_id, auto bp = H_id>
@@ -611,14 +611,6 @@ namespace cctmp {
 	using T_block_tuple		= T_block<BN::tuple, BT::start, _zero>;
 	nik_ce auto U_block_tuple	= U_store_T<T_block_tuple>;
 
-	// value:
-
-		template<index_type n, typename... Ts>
-		constexpr auto & tuple_value(tuple<Ts...> & t) { return NIK_TUPLE_BLOCK(3, 500, n, Ts)(t); }
-
-		template<index_type n, typename... Ts>
-		constexpr const auto & tuple_value(const tuple<Ts...> & t) { return NIK_TUPLE_BLOCK(3, 500, n, Ts)(t); }
-
 	NIK_DEFINE_BLOCK_TUPLE_PASS(0)
 	NIK_DEFINE_BLOCK_TUPLE_PASS(1)
 	NIK_DEFINE_BLOCK_TUPLE_PASS(2)
@@ -654,6 +646,18 @@ namespace cctmp {
 		template<auto d, auto n, typename... Ts>
 		nik_ces const auto & result(const tuple<Ts...> & t) { return t.value; }
 	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// tuple value:
+
+	template<index_type n, typename... Ts>
+	nik_ce auto & tuple_value(tuple<Ts...> & t) { return NIK_TUPLE_BLOCK(3, 500, n, Ts)(t); }
+
+	template<index_type n, typename... Ts>
+	nik_ce const auto & tuple_value(const tuple<Ts...> & t) { return NIK_TUPLE_BLOCK(3, 500, n, Ts)(t); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

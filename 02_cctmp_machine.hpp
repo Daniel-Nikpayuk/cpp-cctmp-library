@@ -40,10 +40,10 @@ namespace cctmp {
 		nik_ces key_type call				=  1;
 		nik_ces key_type recall				=  2;
 
-		nik_ces key_type move_j_all			=  3;
-		nik_ces key_type paste_r_all			=  4;
-		nik_ces key_type paste_a_all			=  5;
+		nik_ces key_type paste_r_all			=  3;
+		nik_ces key_type paste_a_all			=  4;
 
+		nik_ces key_type stage				=  5;
 		nik_ces key_type go_to				=  6;
 		nik_ces key_type memoize			=  7;
 
@@ -78,12 +78,12 @@ namespace cctmp {
 		nik_ces key_type compel				= 11;
 		nik_ces key_type propel				= 12;
 
-		nik_ces key_type conditional			= 14;
-		nik_ces key_type lookup				= 15;
-		nik_ces key_type insert				= 16;
+		nik_ces key_type conditional			= 13;
+		nik_ces key_type lookup				= 14;
+		nik_ces key_type insert				= 15;
 
-		nik_ces key_type pause				= 13;
-		nik_ces key_type debug				= 14;
+		nik_ces key_type pause				= 16;
+		nik_ces key_type debug				= 17;
 	};
 
 	using MT = InstrNote;
@@ -102,7 +102,7 @@ namespace cctmp {
 
 		nik_ces key_type pos					= 3;
 		nik_ces key_type dec					= 3;
-		nik_ces key_type rtn					= 3;
+		nik_ces key_type mov					= 3;
 
 		nik_ces key_type ctn					= 4;
 		nik_ces key_type key					= 5;
@@ -122,6 +122,11 @@ namespace cctmp {
 		nik_ces key_type h1					= 2;
 		nik_ces key_type h1_pair				= 3; // C++17 specific.
 		nik_ces key_type value					= 4;
+
+		// stages:
+
+		nik_ces key_type first					= 0;
+		nik_ces key_type all					= 1;
 
 		nik_ces index_type length     (type i)			{ return i[size]; }
 		nik_ces bool       is_optimal (cindex_type n)		{ return (n < _eight); }
@@ -160,6 +165,9 @@ namespace cctmp {
 	nik_ce auto _h1			= MI::h1;
 	nik_ce auto _h1_pair		= MI::h1_pair;
 	nik_ce auto _value		= MI::value;
+
+	nik_ce auto _first		= MI::first;
+	nik_ce auto _all		= MI::all;
 
 	template<index_type... Vs>
 	nik_ce instr_type instruction = array<index_type, sizeof...(Vs), Vs...>;
@@ -821,29 +829,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// move:
-
-/***********************************************************************************************************************/
-
-// junction:
-
-	template<auto... filler>
-	struct T_machine<MN::move_j_all, MT::id, filler...>
-	{
-		template
-		<
-			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws,
-			template<auto...> typename B1, auto... Xs, typename... Heaps
-		>
-		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
-		{
-			return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<Ws..., Xs...>, U_null_Vs, Hs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // paste:
 
 /***********************************************************************************************************************/
@@ -873,6 +858,36 @@ namespace cctmp {
 		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heap1 H1, Heap2 H2, Args... As)
 		{
 			return NIK_MACHINE(d, MT::id, c, i, Vs)(U_null_Vs, H1, H2, Ws...);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// stage:
+
+/***********************************************************************************************************************/
+
+// id:
+
+	template<auto... filler>
+	struct T_machine<MN::stage, MT::id, filler...>
+	{
+		template
+		<
+			NIK_CONTR_PARAMS, auto... Vs, template<auto...> typename B0, auto... Ws,
+			template<auto...> typename B1, auto X0, auto... Xs, typename... Heaps
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), nik_vp(H1)(B1<X0, Xs...>*), Heaps... Hs)
+		{
+			nik_ce auto ins	= MD::instr(c, i);
+			nik_ce auto mov = ins[MI::mov];
+
+			if nik_ce (mov == MI::first)
+
+				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<Ws..., X0>, U_pack_Vs<Xs...>, Hs...);
+			else
+				return NIK_MACHINE(d, MT::id, c, i, Vs)(U_pack_Vs<Ws..., X0, Xs...>, U_null_Vs, Hs...);
 		}
 	};
 
@@ -981,7 +996,7 @@ namespace cctmp {
 			nik_ce auto Z0 = U_pack_Vs<W0, X0>;
 			nik_ce auto a0 = U_pack_Vs<Z0, Zs...>;
 
-			return tuple<decltype(a0), decltype(X0)>(a0, X0);
+			return overload<Alias::to_tuple, a0, X0>;
 		}
 	};
 
@@ -1016,11 +1031,11 @@ namespace cctmp {
 		template<NIK_CONTR_PARAMS, auto... Vs, typename... Heaps>
 		nik_ces auto result(Heaps... Hs)
 		{
-			nik_ce auto cs = tuple<decltype(d), decltype(m), decltype(c), decltype(i)>(d, m, c, i);
-			nik_ce auto rs = tuple<decltype(Vs)...>(Vs...);
-			nik_ce auto hs = tuple<Heaps...>(U_restore_T<Heaps>...);
+			nik_ce auto cs = overload<Alias::to_tuple, d, m, c, i>;
+			nik_ce auto rs = overload<Alias::to_tuple, Vs...>;
+			nik_ce auto hs = overload<Alias::to_tuple, U_restore_T<Heaps>...>;
 
-			return tuple<decltype(cs), decltype(rs), decltype(hs)>(cs, rs, hs);
+			return overload<Alias::to_tuple, cs, rs, hs>;
 		}
 	};
 
@@ -1236,6 +1251,9 @@ namespace cctmp {
 		template<key_type ctn = _h1, depth_type dec = _three>
 		nik_ce auto b0_unpack = a_action<Alias::b0_unpack, ctn, dec>;
 
+			template<key_type ctn = _h1, depth_type dec = _three>
+			nik_ce auto unpack = b0_unpack<ctn, dec>;
+
 		template<key_type ctn = _h1, depth_type dec = _three>
 		nik_ce auto b1_unpack = a_action<Alias::b1_unpack, ctn, dec>;
 
@@ -1287,11 +1305,11 @@ namespace cctmp {
 	template<index_type pos, key_type loc> // reverse order for user friendliness.
 	nik_ce instr_type cut = instruction<MN::call, MI::cut_note(loc), pos>;
 
-	template<key_type...>
-	nik_ce instr_type stage = instruction<MN::move_j_all, MT::id>;
-
 	template<key_type loc>
 	nik_ce instr_type paste = instruction<MI::paste_name(loc), MT::id>;
+
+	template<key_type mov = _first>
+	nik_ce instr_type stage = instruction<MN::stage, MT::id, mov>;
 
 	template<key_type...>
 	nik_ce instr_type cycle = instruction<MN::go_to, MT::id, _zero>;

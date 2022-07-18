@@ -142,8 +142,8 @@
 
 // repeat:
 
-	constexpr auto repeat_dspec		= cctmp_one_cycle_specs::template direct_repeat<>;
-	using T_drepeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_dspec>;
+//	constexpr auto repeat_dspec		= cctmp_one_cycle_specs::template direct_repeat<>;
+//	using T_drepeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_dspec>;
 
 //	constexpr auto closed			= cctmp_one_cycle_specs::_closed;
 //	constexpr auto closed_type		= cctmp_one_cycle_specs::template _type_<closed>;
@@ -226,10 +226,13 @@
 
 // repeat:
 
-	//	printf("%d\n", repeat_dspec);
-
+	//	printf("%d\n", cctmp_functional::list_at<repeat_cspec, 0>);
 	//	repeat_array(arr, arr+size, argc);
-		T_drepeat::result(arr, arr+size, argc);
+
+	//	T_drepeat::result(arr, arr+size, argc);
+	//	print_array(arr, arr+size);
+
+	//	T_crepeat::result(arr, arr+size, argc);
 	//	print_array(arr, arr+size);
 
 // map:

@@ -29,19 +29,22 @@ namespace cctmp_functional {
 
 	nik_ce auto _zero					= cctmp::_zero;
 	nik_ce auto _one					= cctmp::_one;
+	nik_ce auto _two					= cctmp::_two;
 
 	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
 	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
 
+	template<auto... Vs> nik_ce auto overload		= cctmp::template overload<Vs...>;
+	template<auto... Vs> nik_ce auto U_alias		= cctmp::template U_alias<Vs...>;
+
 	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
 	nik_ce auto H_id					= cctmp::H_id;
 
-	template<typename... Ts> using tuple			= typename cctmp::template tuple<Ts...>;
-
 	nik_ce auto _less_than_					= cctmp::_less_than_;
-	nik_ce auto _same_					= cctmp::_same_;
 
-	template<auto... Vs> nik_ce auto U_alias		= cctmp::template U_alias<Vs...>;
+	nik_ce auto _same_					= cctmp::_same_;
+	nik_ce auto _to_tuple_					= cctmp::_to_tuple_;
+	nik_ce auto _unite_					= cctmp::_unite_;
 
 	nik_ce auto U_block_car					= cctmp::U_block_car;
 
@@ -70,16 +73,21 @@ namespace cctmp_functional {
 	nik_ce auto _constant					= cctmp::_constant;
 	nik_ce auto _value					= cctmp::_value;
 
+	nik_ce auto _all					= cctmp::_all;
+
 	nik_ce auto _nested					= cctmp::_nested;
 
 	template<auto... Vs> nik_ce auto find			= cctmp::template find<Vs...>;
-	template<auto... Vs> nik_ce auto compel			= cctmp::template compel<Vs...>;
+	template<auto... Vs> nik_ce auto f2_unpack		= cctmp::template f2_unpack<Vs...>;
 	template<auto... Vs> nik_ce auto unite			= cctmp::template unite<Vs...>;
-	template<auto... Vs> nik_ce auto cut			= cctmp::template cut<Vs...>;
+
+	template<auto... Vs> nik_ce auto compel			= cctmp::template compel<Vs...>;
+
 	template<auto... Vs> nik_ce auto copy			= cctmp::template copy<Vs...>;
 	template<auto... Vs> nik_ce auto write			= cctmp::template write<Vs...>;
+	template<auto... Vs> nik_ce auto cut			= cctmp::template cut<Vs...>;
 	template<auto... Vs> nik_ce auto paste			= cctmp::template paste<Vs...>;
-	template<auto...> nik_ce auto stage			= cctmp::template stage<>;
+	template<auto... Vs> nik_ce auto stage			= cctmp::template stage<Vs...>;
 
 	template<auto... Vs> nik_ce auto controller		= cctmp::template controller<Vs...>;
 
@@ -284,8 +292,8 @@ namespace cctmp_functional {
 		<
 			compel < _nested , _h1_pair  >,
 			copy   < _zero   , _constant >,
-			stage  <                     >,
-			unite  <              _value >
+			stage  <           _all      >,
+			unite  <           _value    >
 		>;
 
 		template<auto d, auto n, auto b, auto... Vs>
@@ -316,9 +324,9 @@ namespace cctmp_functional {
 		<
 			compel < _nested , _h1_pair  >,
 			copy   < _zero   , _constant >,
-			stage  <                     >,
+			stage  <           _all      >,
 			copy   < _zero   , _register >,
-			unite  <             _value  >
+			unite  <           _value    >
 		>;
 
 		template<auto d, auto n, auto b, auto V, auto... Vs>
@@ -374,10 +382,10 @@ namespace cctmp_functional {
 		<
 			find   <                     >,
 			copy   < _zero   , _constant >,
-			stage  <                     >,
+			stage  <           _all      >,
 			compel < _nested , _h1_pair  >,
 			copy   < _one    , _constant >,
-			stage  <                     >,
+			stage  <           _all      >,
 			copy   < _zero   , _register >,
 			unite  <           _value    >
 		>;
@@ -494,27 +502,29 @@ namespace cctmp_functional {
 	{
 		nik_ces auto c = controller
 		<
-			find   <                     >,
-			copy   < _zero   , _constant >,
-			stage  <                     >,
-			compel < _nested , _h1_pair  >,
-			cut    < _zero   , _register >,
-			paste  <           _register >,
-			write  < _zero   , _argument >,
-			stage  <                     >,
-			compel < _nested             >,
-			write  < _zero   , _register >,
-			stage  <                     >,
-			unite  <           _value    >
+			find      <                     >,
+			copy      < _zero   , _constant >,
+			stage     <           _all      >,
+			compel    < _nested , _h1_pair  >,
+			stage     <                     >,
+			paste     <           _register >,
+			write     < _zero   , _argument >,
+			stage     <                     >,
+			compel    < _nested             >,
+			copy      < _zero   , _register >,
+			copy      < _one    , _constant >,
+			copy      < _two    , _constant >,
+			stage     <                     >,
+			f2_unpack <           _value    >
 		>;
 
 		template<auto d, auto b, auto Pred, auto Op, auto V, auto... Vs>
-		nik_ces auto result = T_start::template result<d, c, U_null_Vs>
+		nik_ces auto result = T_start::template result<d, c>
 		(
 		 	U_pack_Vs<U_alias<Pred, V>, Vs...>,
 			U_pack_Vs<H_id, H_id, H_id, Vs...>,
-			U_pack_Vs<UP_alter>,
-			U_pack_Vs<b, Op, V>
+			U_pack_Vs<UP_alter, _unite_, b>,
+			U_pack_Vs<Op, V>
 		);
 
 	}; nik_ce auto UP_modify = U_store_T<TP_modify>;
@@ -576,7 +586,7 @@ namespace cctmp_functional {
 			nik_ce auto pos  = find_<U_alias<Pred, V>, Vs...>;
 			nik_ce auto size = sizeof...(Vs);
 
-			return tuple<bool, decltype(pos)>(bool{pos < size}, pos);
+			return overload<_to_tuple_, bool{pos < size}, pos>;
 		}
 
 		template<auto Pred, auto V, auto... Vs>

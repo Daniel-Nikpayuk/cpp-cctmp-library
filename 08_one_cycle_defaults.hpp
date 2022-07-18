@@ -38,7 +38,6 @@ namespace cctmp_one_cycle_specs {
 
 	nik_ce auto _list_id_					= cctmp::_list_id_;
 	nik_ce auto _similar_					= cctmp::_similar_;
-	nik_ce auto _car_					= cctmp::_car_;
 	nik_ce auto _map_					= cctmp::_map_;
 
 	template<auto... Vs> nik_ce auto unpack_		= cctmp::template unpack_<Vs...>;
@@ -77,16 +76,6 @@ namespace cctmp_one_cycle_specs {
 	template<auto p>
 	nik_ce auto list_id = overload<_list_id_, p>;
 
-// UL_car:
-
-	struct TL_car
-	{
-		template<auto p>
-		nik_ces auto result = unpack_<p, _car_>;
-	};
-
-	nik_ce auto UL_car = U_store_T<TL_car>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -103,7 +92,7 @@ namespace cctmp_one_cycle_specs {
 // to spec:
 
 	template<auto direct, auto H_spec>
-	nik_ce auto direct_to_spec = unpack_<direct, _map_, H_spec, UL_car>;
+	nik_ce auto direct_to_spec = unpack_<direct, _map_, H_spec, U_member_value>;
 
 /***********************************************************************************************************************/
 
