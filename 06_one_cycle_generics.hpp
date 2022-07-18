@@ -270,6 +270,7 @@ namespace cctmp_one_cycle_generics {
 
 				lift   < out_<S> , post_assign_func_<S> ,  in_<S>           >,
 				lift   < out_<S> ,    post_out_next_<S> , out_<S>           >,
+				lift   <  in_<S> ,     post_in_next_<S> ,  in_<S>           >,
 				lift   < end_<S> ,    post_end_next_<S> , end_<S>           >,
 
 				_return_
@@ -294,7 +295,7 @@ namespace cctmp_one_cycle_generics {
 		auto OutPosition, auto InPosition, auto EndPosition,
 		auto PreEndPrev, auto PreOutNext, auto PreInNext,
 		auto LoopPredicate, auto AssignFunction, auto OutNext, auto InNext,
-		auto PostAssignFunction, auto PostOutNext, auto PostEndNext
+		auto PostAssignFunction, auto PostOutNext, auto PostInNext, auto PostEndNext
 	>
 	struct T_map_specification
 	{
@@ -317,6 +318,7 @@ namespace cctmp_one_cycle_generics {
 
 		nik_ces auto post_assign_function	= PostAssignFunction;
 		nik_ces auto post_out_next		=    PostOutNext;
+		nik_ces auto  post_in_next		=     PostInNext;
 		nik_ces auto post_end_next		=    PostEndNext;
 	};
 
@@ -638,6 +640,7 @@ namespace cctmp_one_cycle_generics {
 				lift   <    out_<S> , post_assign_func_<S> ,    _ps_                 >,
 				lift   <    out_<S> ,    post_out_next_<S> ,    out_<S>              >,
 				lift   < car_in_<S> , post_car_in_next_<S> , car_in_<S>              >,
+				lift   < cdr_in_<S> , post_cdr_in_next_<S> , cdr_in_<S>              >,
 				lift   <    end_<S> ,    post_end_next_<S> ,    end_<S>              >,
 
 				_return_
@@ -662,7 +665,8 @@ namespace cctmp_one_cycle_generics {
 		auto OutPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
 		auto PreEndPrev, auto PreOutNext, auto PreCarInNext, auto PreCdrInNext,
 		auto LoopPredicate, auto ActFunction, auto AssignFunction, auto OutNext, auto CarInNext, auto CdrInNext,
-		auto PostActFunction, auto PostAssignFunction, auto PostOutNext, auto PostCarInNext, auto PostEndNext
+		auto PostActFunction, auto PostAssignFunction,
+			auto PostOutNext, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
 	>
 	struct T_zip_specification
 	{
@@ -691,6 +695,7 @@ namespace cctmp_one_cycle_generics {
 		nik_ces auto post_assign_function	= PostAssignFunction;
 		nik_ces auto    post_out_next		=    PostOutNext;
 		nik_ces auto post_car_in_next		=  PostCarInNext;
+		nik_ces auto post_cdr_in_next		=  PostCdrInNext;
 		nik_ces auto    post_end_next		=    PostEndNext;
 	};
 
@@ -740,6 +745,7 @@ namespace cctmp_one_cycle_generics {
 				lift   <    out_<S> ,  post_assign_func_<S> ,    _ps_                              >,
 				lift   <    out_<S> ,     post_out_next_<S> ,    out_<S>                           >,
 				lift   < car_in_<S> ,  post_car_in_next_<S> , car_in_<S>                           >,
+				lift   < cdr_in_<S> ,  post_cdr_in_next_<S> , cdr_in_<S>                           >,
 				lift   <    end_<S> ,     post_end_next_<S> ,    end_<S>                           >,
 
 				_return_
@@ -770,7 +776,7 @@ namespace cctmp_one_cycle_generics {
 		auto LoopPredicate, auto ActFunction, auto AssignFunction, auto AuxNext, auto CombineFunction, auto InNext,
 			auto OutNext, auto CarInNext, auto CdrInNext,
 		auto PostActFunction, auto PostAssignFunction, auto PostCombineFunction,
-			auto PostOutNext, auto PostCarInNext, auto PostEndNext
+			auto PostOutNext, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
 	>
 	struct T_fasten_specification
 	{
@@ -805,6 +811,7 @@ namespace cctmp_one_cycle_generics {
 		nik_ces auto post_combine_function	= PostCombineFunction;
 		nik_ces auto     post_out_next		=     PostOutNext;
 		nik_ces auto  post_car_in_next		=   PostCarInNext;
+		nik_ces auto  post_cdr_in_next		=   PostCdrInNext;
 		nik_ces auto     post_end_next		=     PostEndNext;
 	};
 
@@ -845,6 +852,7 @@ namespace cctmp_one_cycle_generics {
 				lift   <    _cp_    ,     post_act_func_<S> , car_in_<S> , cdr_in_<S> >,
 				lift   <    out_<S> , post_combine_func_<S> ,    out_<S> ,    _ps_    >,
 				lift   < car_in_<S> ,  post_car_in_next_<S> , car_in_<S>              >,
+				lift   < cdr_in_<S> ,  post_cdr_in_next_<S> , cdr_in_<S>              >,
 				lift   <    end_<S> ,     post_end_next_<S> ,    end_<S>              >,
 
 				_return_
@@ -869,7 +877,7 @@ namespace cctmp_one_cycle_generics {
 		auto OutPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
 		auto PreEndPrev, auto PreCarInNext, auto PreCdrInNext,
 		auto LoopPredicate, auto ActFunction, auto CombineFunction, auto CarInNext, auto CdrInNext,
-		auto PostActFunction, auto PostCombineFunction, auto PostCarInNext, auto PostEndNext
+		auto PostActFunction, auto PostCombineFunction, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
 	>
 	struct T_glide_specification
 	{
@@ -895,6 +903,7 @@ namespace cctmp_one_cycle_generics {
 		nik_ces auto     post_act_function	=     PostActFunction;
 		nik_ces auto post_combine_function	= PostCombineFunction;
 		nik_ces auto  post_car_in_next		=   PostCarInNext;
+		nik_ces auto  post_cdr_in_next		=   PostCdrInNext;
 		nik_ces auto     post_end_next		=     PostEndNext;
 	};
 

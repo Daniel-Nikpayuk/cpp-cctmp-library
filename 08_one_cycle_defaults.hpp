@@ -178,7 +178,7 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
-		nik_ces auto conceptual_repeat_defaults = U_pack_Vs
+		nik_ce auto conceptual_repeat_defaults = U_pack_Vs
 		<
 			_label_
 			<
@@ -216,11 +216,13 @@ namespace cctmp_one_cycle_specs {
 		template<auto label, auto position, auto out_ival, auto break_, auto action>
 		nik_ce auto _conceptual_repeat(nik_avp(T_pack_Vs<label, position, out_ival, break_, action>*))
 		{
+			nik_ce auto ival_etc	= tr_<T_ival, TR::repeat, out_ival>;
+
 			using label_etc		= T_tr<T_label, TR::repeat, label>;
 			using position_etc	= T_tr<T_position, TR::repeat, position>;
-			using cycle_etc		= T_tr<T_cycle, TR::repeat, out_ival, break_, action>;
-			using precycle_etc	= T_tr<T_precycle, TR::repeat,  U_store_T<cycle_etc>>;
-			using postcycle_etc	= T_tr<T_postcycle, TR::repeat, U_store_T<cycle_etc>>;
+			using cycle_etc		= T_tr<T_cycle, TR::repeat, break_, action, ival_etc>;
+			using precycle_etc	= T_tr<T_precycle, TR::repeat,  ival_etc>;
+			using postcycle_etc	= T_tr<T_postcycle, TR::repeat, ival_etc, U_store_T<cycle_etc>>;
 
 			return overload
 			<
@@ -262,7 +264,6 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
-/*
 		nik_ce auto direct_map_defaults = U_pack_Vs
 		<
 			_precycle_label_       < _zero         >,
@@ -295,14 +296,14 @@ namespace cctmp_one_cycle_specs {
 			direct_write<direct_map_defaults, Vs...>,
 			H_map_specification
 		>;
-*/
 
 /***********************************************************************************************************************/
 
 // conceptual:
 
-/*
-		nik_ces auto conceptual_map_defaults = U_pack_Vs
+	// default:
+
+		nik_ce auto conceptual_map_defaults = U_pack_Vs
 		<
 			_label_
 			<
@@ -319,7 +320,8 @@ namespace cctmp_one_cycle_specs {
 			_out_ival_
 			<
 				_type_      < _closing      >,
-				_next_      < _increment_<> >
+				_next_      < _increment_<> >,
+				_prev_      < _decrement_<> >
 			>,
 			_in_ival_
 			<
@@ -341,37 +343,51 @@ namespace cctmp_one_cycle_specs {
 			>
 		>;
 
+	// spec:
+
 		template<auto label, auto position, auto out_ival, auto in_ival, auto break_, auto action>
 		nik_ce auto _conceptual_map(nik_avp(T_pack_Vs<label, position, out_ival, in_ival, break_, action>*))
 		{
-			nik_ce auto label_etc		= tr_<T_label, TR::id, label>;
-			nik_ce auto position_etc	= tr_<T_position, TR::map, position>;
-			nik_ce auto cycle_etc		= tr_<T_cycle, TR::map, out_ival, in_ival, break_, action>;
-			nik_ce auto precycle_etc	= tr_<T_precycle, TR::map, cycle_etc>;
-			nik_ce auto postcycle_etc	= tr_<T_postcycle, TR::map, cycle_etc>;
+			nik_ce auto ival_etc	= tr_<T_ival, TR::map, out_ival, in_ival>;
 
-			return etc_map
+			using label_etc		= T_tr<T_label, TR::map, label>;
+			using position_etc	= T_tr<T_position, TR::map, position>;
+			using cycle_etc		= T_tr<T_cycle, TR::map, break_, action, ival_etc>;
+			using precycle_etc	= T_tr<T_precycle, TR::map, ival_etc>;
+			using postcycle_etc	= T_tr<T_postcycle, TR::map, ival_etc, U_store_T<cycle_etc>>;
+
+			return overload
 			<
-				label_etc,
-				position_etc,
-				precycle_etc,
-				cycle_etc,
-				postcycle_etc
+				_map_, H_map_specification, U_member_value,
+
+				label_etc::precycle,
+				label_etc::cycle,
+				label_etc::postcycle,
+
+				position_etc::out,
+				position_etc::in,
+				position_etc::end,
+
+				precycle_etc::pre_end_next,
+				precycle_etc::pre_out_next,
+				precycle_etc::pre_in_next,
+
+				cycle_etc::loop_predicate,
+				cycle_etc::assign_function,
+				cycle_etc::out_next,
+				cycle_etc::in_next,
+
+				postcycle_etc::post_assign_function,
+				postcycle_etc::post_out_next,
+				postcycle_etc::post_end_next
 			>;
 		}
 
-		template<auto p>
-		nik_ce auto let_conceptual_map = alias
-		<
-			AOP::list_to_template, _conceptual_map(p), H_map_specification
-		>;
-
 		template<auto... Vs>
-		nik_ce auto conceptual_map = let_conceptual_map
-		<
+		nik_ce auto conceptual_map = _conceptual_map
+		(
 			conceptual_write<conceptual_map_defaults, Vs...>
-		>;
-*/
+		);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

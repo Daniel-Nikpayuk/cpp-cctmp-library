@@ -142,76 +142,112 @@
 
 // repeat:
 
-//	constexpr auto repeat_dspec		= cctmp_one_cycle_specs::template direct_repeat<>;
-//	using T_drepeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_dspec>;
-
 //	constexpr auto closed			= cctmp_one_cycle_specs::_closed;
 //	constexpr auto closed_type		= cctmp_one_cycle_specs::template _type_<closed>;
 //	constexpr auto closed_ival		= cctmp_one_cycle_specs::template _out_ival_<closed_type>;
-//	constexpr auto repeat_cspec		= cctmp_one_cycle_specs::template conceptual_repeat<closed_ival>;
-//	using T_crepeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_cspec>;
 
-/*
+//	constexpr auto repeat_dspec		= cctmp_one_cycle_specs::template direct_repeat<>;
+//	constexpr auto repeat_cspec		= cctmp_one_cycle_specs::template conceptual_repeat<closed_ival>;
+
+//	using Td_repeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_dspec>;
+//	using Tc_repeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_cspec>;
+
 // map:
 
-	constexpr auto map_dspec_id_		= cctmp_one_cycle_specs::template direct_map<>;
-	using T_map_id				= typename cctmp_one_cycle_generics::template T_map<map_dspec_id_>;
+//	constexpr auto _map_function_sq_	= cctmp_one_cycle_specs::template _assign_function_<_d_assign_sq_>;
 
-	constexpr auto _map_function_sq_	= cctmp_one_cycle_specs::template _assign_function_<_d_assign_sq_>;
-	constexpr auto map_dspec_sq_		= cctmp_one_cycle_specs::template direct_map<_map_function_sq_>;
-	using T_map_sq				= typename cctmp_one_cycle_generics::template T_map<map_dspec_sq_>;
+//	constexpr auto map_dspec_id_		= cctmp_one_cycle_specs::template direct_map<>;
+//	constexpr auto map_dspec_sq_		= cctmp_one_cycle_specs::template direct_map<_map_function_sq_>;
+//	constexpr auto map_cspec_id_		= cctmp_one_cycle_specs::template conceptual_map<>;
+//	constexpr auto map_cspec_sq_		= cctmp_one_cycle_specs::template conceptual_map<_map_function_sq_>;
+
+//	using Td_map_id				= typename cctmp_one_cycle_generics::template T_map<map_dspec_id_>;
+//	using Td_map_sq				= typename cctmp_one_cycle_generics::template T_map<map_dspec_sq_>;
+//	using Tc_map_id				= typename cctmp_one_cycle_generics::template T_map<map_cspec_id_>;
+//	using Tc_map_sq				= typename cctmp_one_cycle_generics::template T_map<map_cspec_sq_>;
 
 // fold:
 
-	constexpr auto _fold_function_add_	= cctmp_one_cycle_specs::template _combine_function_<_add_>;
+//	constexpr auto _fold_function_add_	= cctmp_one_cycle_specs::template _combine_function_<_add_>;
 
-	constexpr auto fold_dspec_add_		= cctmp_one_cycle_specs::template direct_fold<_fold_function_add_>;
-	using T_fold_add			= typename cctmp_one_cycle_generics::template T_fold<fold_dspec_add_>;
+//	constexpr auto fold_dspec_add_		= cctmp_one_cycle_specs::template direct_fold<_fold_function_add_>;
+//	constexpr auto fold_cspec_add_		= cctmp_one_cycle_specs::template conceptual_fold<_fold_function_add_>;
+
+//	using Td_fold_add			= typename cctmp_one_cycle_generics::template T_fold<fold_dspec_add_>;
+//	using Tc_fold_add			= typename cctmp_one_cycle_generics::template T_fold<fold_cspec_add_>;
 
 // find first:
 
-	constexpr auto _find_first_pred_is_25_	= cctmp_one_cycle_specs::template _act_predicate_<_is_25_d_>;
-	constexpr auto find_first_dspec_is_25_	= cctmp_one_cycle_specs::template direct_find_first<_find_first_pred_is_25_>;
-	using T_find_first_is_25		= typename cctmp_one_cycle_generics::template T_find_first<find_first_dspec_is_25_>;
+//	constexpr auto _find_first_pred_is_25_	= cctmp_one_cycle_specs::template _act_predicate_<_is_25_d_>;
+
+//	constexpr auto find_first_dspec_is_25_	= cctmp_one_cycle_specs::template direct_find_first<_find_first_pred_is_25_>;
+//	constexpr auto find_first_cspec_is_25_	= cctmp_one_cycle_specs::template conceptual_find_first<_find_first_pred_is_25_>;
+
+//	using Td_find_first_is_25		= typename cctmp_one_cycle_generics::template T_find_first<find_first_dspec_is_25_>;
+//	using Tc_find_first_is_25		= typename cctmp_one_cycle_generics::template T_find_first<find_first_cspec_is_25_>;
 
 // find all:
 
-	constexpr auto find_all_dspec_is_25_	= cctmp_one_cycle_specs::template direct_find_all<_find_first_pred_is_25_>;
-	using T_find_all_is_25			= typename cctmp_one_cycle_generics::template T_find_all<find_all_dspec_is_25_>;
+//	constexpr auto find_all_dspec_is_25_	= cctmp_one_cycle_specs::template direct_find_all<_find_first_pred_is_25_>;
+//	constexpr auto find_all_cspec_is_25_	= cctmp_one_cycle_specs::template conceptual_find_all<_find_first_pred_is_25_>;
+
+//	using Td_find_all_is_25			= typename cctmp_one_cycle_generics::template T_find_all<find_all_dspec_is_25_>;
+//	using Tc_find_all_is_25			= typename cctmp_one_cycle_generics::template T_find_all<find_all_cspec_is_25_>;
 
 // zip:
 
-	constexpr auto _zip_function_add_	= cctmp_one_cycle_specs::template _act_function_<_add_dd_>;
-	constexpr auto _zip_assign_		= cctmp_one_cycle_specs::template _assign_function_<_d_assign_i_>;
-	constexpr auto zip_dspec_add_		= cctmp_one_cycle_specs::template direct_zip
-						<
-							_zip_function_add_, _zip_assign_
-						>;
-	using T_zip_add				= typename cctmp_one_cycle_generics::template T_zip<zip_dspec_add_>;
+//	constexpr auto _zip_function_add_	= cctmp_one_cycle_specs::template _act_function_<_add_dd_>;
+//	constexpr auto _zip_assign_		= cctmp_one_cycle_specs::template _assign_function_<_d_assign_i_>;
+
+//	constexpr auto zip_dspec_add_		= cctmp_one_cycle_specs::template direct_zip
+//						<
+//							_zip_function_add_, _zip_assign_
+//						>;
+//	constexpr auto zip_cspec_add_		= cctmp_one_cycle_specs::template conceptual_zip
+//						<
+//							_zip_function_add_, _zip_assign_
+//						>;
+
+//	using Td_zip_add			= typename cctmp_one_cycle_generics::template T_zip<zip_dspec_add_>;
+//	using Tc_zip_add			= typename cctmp_one_cycle_generics::template T_zip<zip_cspec_add_>;
 
 // fasten:
 
-	constexpr auto _fasten_function_add_	= cctmp_one_cycle_specs::template _act_function_<_mod_add_dd_>;
-	constexpr auto _fasten_combine_add_	= cctmp_one_cycle_specs::template _combine_function_<_mod_add_di_>;
-	constexpr auto _fasten_aux_next_	= cctmp_one_cycle_specs::template _aux_next_<_carry0_add_ddd_>;
-	constexpr auto _fasten_in_next_		= cctmp_one_cycle_specs::template _in_next_<_carry1_add_dii_>;
-	constexpr auto fasten_dspec_add_	= cctmp_one_cycle_specs::template direct_fasten
-						<
-							_fasten_function_add_, _fasten_combine_add_,
-							_fasten_aux_next_, _fasten_in_next_
-						>;
-	using T_fasten_mod_add			= typename cctmp_one_cycle_generics::template T_fasten<fasten_dspec_add_>;
+//	constexpr auto _fasten_function_add_	= cctmp_one_cycle_specs::template _act_function_<_mod_add_dd_>;
+//	constexpr auto _fasten_combine_add_	= cctmp_one_cycle_specs::template _combine_function_<_mod_add_di_>;
+//	constexpr auto _fasten_aux_next_	= cctmp_one_cycle_specs::template _aux_next_<_carry0_add_ddd_>;
+//	constexpr auto _fasten_in_next_		= cctmp_one_cycle_specs::template _in_next_<_carry1_add_dii_>;
+
+//	constexpr auto fasten_dspec_add_	= cctmp_one_cycle_specs::template direct_fasten
+//						<
+//							_fasten_function_add_, _fasten_combine_add_,
+//							_fasten_aux_next_, _fasten_in_next_
+//						>;
+//	constexpr auto fasten_cspec_add_	= cctmp_one_cycle_specs::template conceptual_fasten
+//						<
+//							_fasten_function_add_, _fasten_combine_add_,
+//							_fasten_aux_next_, _fasten_in_next_
+//						>;
+
+//	using Td_fasten_mod_add			= typename cctmp_one_cycle_generics::template T_fasten<fasten_dspec_add_>;
+//	using Tc_fasten_mod_add			= typename cctmp_one_cycle_generics::template T_fasten<fasten_cspec_add_>;
 
 // glide:
 
-	constexpr auto _glide_function_add_	= cctmp_one_cycle_specs::template _act_function_<_add_dd_>;
-	constexpr auto _glide_combine_add_	= cctmp_one_cycle_specs::template _combine_function_<_add_>;
-	constexpr auto glide_dspec_add_		= cctmp_one_cycle_specs::template direct_glide
-						<
-							_glide_function_add_, _glide_combine_add_
-						>;
-	using T_glide_add			= typename cctmp_one_cycle_generics::template T_glide<glide_dspec_add_>;
-*/
+//	constexpr auto _glide_function_add_	= cctmp_one_cycle_specs::template _act_function_<_add_dd_>;
+//	constexpr auto _glide_combine_add_	= cctmp_one_cycle_specs::template _combine_function_<_add_>;
+
+//	constexpr auto glide_dspec_add_		= cctmp_one_cycle_specs::template direct_glide
+//						<
+//							_glide_function_add_, _glide_combine_add_
+//						>;
+//	constexpr auto glide_cspec_add_		= cctmp_one_cycle_specs::template conceptual_glide
+//						<
+//							_glide_function_add_, _glide_combine_add_
+//						>;
+
+//	using Td_glide_add			= typename cctmp_one_cycle_generics::template T_glide<glide_dspec_add_>;
+//	using Tc_glide_add			= typename cctmp_one_cycle_generics::template T_glide<glide_cspec_add_>;
 
 /***********************************************************************************************************************/
 
@@ -220,8 +256,8 @@
 		int size = 10;//argc;
 
 		int  arr[size];
-	//	int  arr_id[size];
-	//	int  arr_sq[size];
+		int  arr_id[size];
+		int  arr_sq[size];
 	//	int* arr_ptr[size];
 
 // repeat:
@@ -229,18 +265,18 @@
 	//	printf("%d\n", cctmp_functional::list_at<repeat_cspec, 0>);
 	//	repeat_array(arr, arr+size, argc);
 
-	//	T_drepeat::result(arr, arr+size, argc);
+	//	Td_repeat::result(arr, arr+size, argc);
 	//	print_array(arr, arr+size);
 
-	//	T_crepeat::result(arr, arr+size, argc);
+	//	Tc_repeat::result(arr, arr+size, argc);
 	//	print_array(arr, arr+size);
 
 // map:
 
-	//	T_map_id::template result(arr_id, 0, size);
+	//	Td_map_id::template result(arr_id, 0, size);
 	//	print_array(arr_id, arr_id+size);
 
-	//	T_map_sq::template result(arr_sq, 0, size);
+	//	Td_map_sq::template result(arr_sq, 0, size);
 	//	print_array(arr_sq, arr_sq+size);
 
 // fold:
