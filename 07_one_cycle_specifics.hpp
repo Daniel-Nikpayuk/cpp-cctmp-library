@@ -403,7 +403,7 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// translators:
+// translator:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -416,11 +416,16 @@ namespace cctmp_one_cycle_specs {
 	{
 		nik_ces key_type id		= 0;
 
+		// singular:
+
 		nik_ces key_type repeat		= 1;
-		nik_ces key_type map		= 2;
-		nik_ces key_type fold		= 3;
-		nik_ces key_type find_first	= 4;
-		nik_ces key_type find_all	= 5;
+		nik_ces key_type fold		= 2;
+		nik_ces key_type find_first	= 3;
+		nik_ces key_type find_all	= 4;
+
+		// plural:
+
+		nik_ces key_type map		= 5;
 		nik_ces key_type zip		= 6;
 		nik_ces key_type fasten		= 7;
 		nik_ces key_type glide		= 8;
@@ -433,11 +438,19 @@ namespace cctmp_one_cycle_specs {
 
 // etc:
 
-	template<template<key_type, typename...> class T_etc, key_type Key, auto... Vs>
-	using T_tr = T_etc<Key, T_store_U<Vs>...>;
+	template<template<key_type, typename...> class Etc, key_type Key, typename... Ts>
+	using T_etc = Etc<Key, Ts...>;
 
-	template<template<key_type, typename...> class T_etc, key_type Key, auto... Vs>
-	nik_ce auto tr_ = U_store_T<T_tr<T_etc, Key, Vs...>>;
+	template<template<key_type, typename...> class Etc, key_type Key, typename... Ts>
+	nik_ce auto U_etc = U_store_T<T_etc<Etc, Key, Ts...>>;
+
+// tr:
+
+	template<template<key_type, typename...> class Etc, key_type Key, auto... Vs>
+	using T_tr = Etc<Key, T_store_U<Vs>...>;
+
+	template<template<key_type, typename...> class Etc, key_type Key, auto... Vs>
+	nik_ce auto U_tr = U_store_T<T_tr<Etc, Key, Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -464,27 +477,36 @@ namespace cctmp_one_cycle_specs {
 	// ival:
 
 		template<key_type, typename...> struct T_is_left_open;
-		template<key_type, typename...> struct T_is_right_closed;
 		template<key_type, typename...> struct T_is_right_open;
+		template<key_type, typename...> struct T_is_right_closed;
 
+	// axis:
+
+		template<key_type, typename...> struct T_is_last;
 		template<key_type, typename...> struct T_is_primary;
 		template<key_type, typename...> struct T_is_secondary;
 		template<key_type, typename...> struct T_is_tertiary;
+
+		template<key_type, typename...> struct T_next;
 
 	// cycle:
 
 		template<key_type, typename...> struct T_loop_predicate;
 		template<key_type, typename...> struct T_assign_function;
-		template<key_type, typename...> struct T_next;
+		template<key_type, typename...> struct T_cycle_next;
 
 	// precycle:
 
 		template<key_type, typename...> struct T_pre_next;
+		template<key_type, typename...> struct T_pre_t_prev;
 
 	// postcycle:
 
 		template<key_type, typename...> struct T_post_assign_function;
 		template<key_type, typename...> struct T_post_next;
+		template<key_type, typename...> struct T_post_p_next;
+		template<key_type, typename...> struct T_post_s_next;
+		template<key_type, typename...> struct T_post_t_next;
 
 // composite:
 
@@ -492,6 +514,9 @@ namespace cctmp_one_cycle_specs {
 		template<key_type, typename...> struct T_position;
 
 		template<key_type, typename...> struct T_ival;
+		template<key_type, typename...> struct T_axis;
+
+		template<key_type, typename...> struct T_ivals;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -533,33 +558,30 @@ namespace cctmp_one_cycle_specs {
 		};
 
 		template<auto Ival>
-		struct T_is_right_closed<TR::id, _type<Ival>>
-		{
-			nik_ces auto value = (Ival[1] == ']');
-		};
-
-		template<auto Ival>
 		struct T_is_right_open<TR::id, _type<Ival>>
 		{
 			nik_ces auto value = (Ival[1] == ')');
 		};
 
-	// is primary:
-
-	//	template<typename Prev, typename IsPeek>
-	//	struct T_is_primary<TR::id, Prev, IsPeek>
-	//	{
-	//		nik_ces auto is_last	= !same<Prev::value, _id_> && IsPeek::value;
-	//		nik_ces auto value	=  if_then_else<is_last, Prev::value, _id_>;
-	//	};
-
-	// is tertiary:
-
-		template<typename Ival, typename... Ivals>
-		struct T_is_tertiary<TR::id, Ival, Ivals...>
+		template<auto Ival>
+		struct T_is_right_closed<TR::id, _type<Ival>>
 		{
-			nik_ces auto value = (Ival::value[1] == ')') && (... || (Ivals::value[1] == ']'));
+			nik_ces auto value = (Ival[1] == ']');
 		};
+
+	// id:
+
+		template<typename _Type>
+		struct T_ival<TR::id, _Type>
+		{
+			nik_ces auto is_left_open	= U_etc < T_is_left_open    , TR::id , _Type >;
+			nik_ces auto is_right_open	= U_etc < T_is_right_open   , TR::id , _Type >;
+			nik_ces auto is_right_closed	= U_etc < T_is_right_closed , TR::id , _Type >;
+		};
+
+/***********************************************************************************************************************/
+
+// axis:
 
 	// next:
 
@@ -575,16 +597,99 @@ namespace cctmp_one_cycle_specs {
 			nik_ces auto value = Op;
 		};
 
+	// is last:
+
+		template<typename Ival0, typename... Ivals>
+		struct T_is_last<TR::id, Ival0, Ivals...>
+		{
+			nik_ces auto l_is_right_open		= member_value<Ival0::is_right_open>;
+			nik_ces auto rs_have_right_closed	= (... || member_value<Ivals::is_right_closed>);
+			nik_ces auto value			= l_is_right_open && rs_have_right_closed;
+		};
+
+	// is primary:
+
+		template<typename IsLast, typename Ival>
+		struct T_is_primary<TR::id, IsLast, Ival>
+		{
+			nik_ces auto value = IsLast::value && !same<member_value<Ival::prev>, _id_>;
+		};
+
+	// is secondary:
+
+		template<typename IsLast, typename IsPrimary, typename... Ivals>
+		struct T_is_secondary<TR::id, IsLast, IsPrimary, Ivals...>
+		{
+			nik_ces auto last_not_primary		= IsLast::value && !IsPrimary::value;
+			nik_ces auto rs_all_bidirectional	= (... && !same<member_value<Ivals::right_closed_prev>, _id_>);
+			nik_ces auto value			= last_not_primary && rs_all_bidirectional;
+		};
+
+	// is tertiary:
+
+		template<typename IsLast, typename IsPrimary, typename IsSecondary>
+		struct T_is_tertiary<TR::id, IsLast, IsPrimary, IsSecondary>
+		{
+			nik_ces auto value = IsLast::value && !IsPrimary::value && !IsSecondary::value;
+		};
+
+	// unidirectional:
+
+		template<typename _Next>
+		struct T_axis<TR::id, _Next>
+		{
+			nik_ces auto next = U_etc < T_next , TR::id , _Next >;
+		};
+
+	// bidirectional:
+
+		template<typename _Next, typename _Prev>
+		struct T_axis<TR::id, _Next, _Prev>
+		{
+			nik_ces auto prev = U_etc < T_next , TR::id , _Prev >;
+			nik_ces auto next = U_etc < T_next , TR::id , _Next >;
+		};
+
+/***********************************************************************************************************************/
+
+// cycle:
+
+	// next:
+
+		template<typename Axis>
+		struct T_cycle_next<TR::id, Axis>
+		{
+			nik_ces auto value = member_value<Axis::next>;
+		};
+
 /***********************************************************************************************************************/
 
 // precycle:
 
+	// tertiary prev:
+
+		template<typename IsPrimary, typename Axis>
+		struct T_pre_t_prev<TR::id, IsPrimary, Axis>
+		{
+			nik_ces auto value = if_then_else
+			<
+				IsPrimary::value,
+				member_value<Axis::prev>,
+				_id_
+			>;
+		};
+
 	// next:
 
-		template<typename IsLeftOpen, typename Next>
-		struct T_pre_next<TR::id, IsLeftOpen, Next>
+		template<typename Ival, typename Axis>
+		struct T_pre_next<TR::id, Ival, Axis>
 		{
-			nik_ces auto value = if_then_else<IsLeftOpen::value, Next::value, _id_>;
+			nik_ces auto value = if_then_else
+			<
+				member_value<Ival::is_left_open>,
+				member_value<Axis::next>,
+				_id_
+			>;
 		};
 
 /***********************************************************************************************************************/
@@ -593,25 +698,63 @@ namespace cctmp_one_cycle_specs {
 
 	// assign function:
 
-		template<typename IsRightClosed, typename AssignFunc>
-		struct T_post_assign_function<TR::id, IsRightClosed, AssignFunc>
+		template<typename Ival, typename Cycle>
+		struct T_post_assign_function<TR::id, Ival, Cycle>
 		{
-			nik_ces auto value = if_then_else<IsRightClosed::value, AssignFunc::value, _id_>;
+			nik_ces auto value = if_then_else
+			<
+				member_value<Ival::is_right_closed>,
+				member_value<Cycle::assign_func>,
+				_id_
+			>;
 		};
 
 	// next:
 
-		template<typename Ival0, typename Ival1, typename Next1>
-		struct T_post_next<TR::id, Ival0, Ival1, Next1>
+		template<typename Ival0, typename Ival1, typename Axis1>
+		struct T_post_next<TR::id, Ival0, Ival1, Axis1>
 		{
-			nik_ces auto is_next	= Ival0::is_right_closed::value && Ival1::is_right_open::value;
-			nik_ces auto value	= if_then_else<is_next, Next1::value, _id_>;
+			nik_ces auto l_is_right_closed	= member_value<Ival0::is_right_closed>;
+			nik_ces auto r_is_right_open	= member_value<Ival1::is_right_open>;
+			nik_ces auto value		= if_then_else
+			<
+				(l_is_right_closed && r_is_right_open), // too complicated!
+				member_value<Axis1::next>,
+				_id_
+			>;
+		};
+
+	// primary next:
+
+		template<typename IsPrimary, typename Axis>
+		struct T_post_p_next<TR::id, IsPrimary, Axis>
+		{
+		};
+
+	// secondary next:
+
+		template<typename IsSecondary, typename Ivals>
+		struct T_post_s_next<TR::id, IsSecondary, Ivals>
+		{
+		};
+
+	// tertiary next:
+
+		template<typename IsPrimary, typename Axis>
+		struct T_post_t_next<TR::id, IsPrimary, Axis>
+		{
+			nik_ces auto value = if_then_else
+			<
+				IsPrimary::value,
+				member_value<Axis::next>,
+				_id_
+			>;
 		};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// repeat:
+// repeat (singular):
 
 /***********************************************************************************************************************/
 
@@ -620,9 +763,9 @@ namespace cctmp_one_cycle_specs {
 	template<auto _Precycle_, auto _Cycle_, auto _Postcycle_>
 	struct T_label<TR::repeat, _label<_Precycle_, _Cycle_, _Postcycle_>>
 	{
-		nik_ces auto precycle		= tr_<  T_precycle, TR::id,  _Precycle_ >;
-		nik_ces auto cycle		= tr_<     T_cycle, TR::id,     _Cycle_ >;
-		nik_ces auto postcycle		= tr_< T_postcycle, TR::id, _Postcycle_ >;
+		nik_ces auto precycle	= U_tr <  T_precycle, TR::id,  _Precycle_ >;
+		nik_ces auto cycle	= U_tr <     T_cycle, TR::id,     _Cycle_ >;
+		nik_ces auto postcycle	= U_tr < T_postcycle, TR::id, _Postcycle_ >;
 	};
 
 /***********************************************************************************************************************/
@@ -632,22 +775,20 @@ namespace cctmp_one_cycle_specs {
 	template<auto _Out_, auto _End_, auto _In_>
 	struct T_position<TR::repeat, _position<_Out_, _End_, _In_>>
 	{
-		nik_ces auto out	= tr_< T_out, TR::id, _Out_ >;
-		nik_ces auto end	= tr_< T_end, TR::id, _End_ >;
-		nik_ces auto in		= tr_<  T_in, TR::id,  _In_ >;
+		nik_ces auto out	= U_tr < T_out, TR::id, _Out_ >;
+		nik_ces auto end	= U_tr < T_end, TR::id, _End_ >;
+		nik_ces auto in		= U_tr <  T_in, TR::id,  _In_ >;
 	};
 
 /***********************************************************************************************************************/
 
-// ival:
+// ivals:
 
 	template<auto _Type_, auto _Next_>
-	struct T_ival<TR::repeat, _out_ival<_Type_, _Next_>>
+	struct T_ivals<TR::repeat, _out_ival<_Type_, _Next_>>
 	{
-		nik_ces auto is_left_open	= tr_< T_is_left_open    , TR::id , _Type_ >;
-		nik_ces auto is_right_closed	= tr_< T_is_right_closed , TR::id , _Type_ >;
-		nik_ces auto is_right_open	= tr_< T_is_right_open   , TR::id , _Type_ >;
-		nik_ces auto next		= tr_< T_next, TR::id, _Next_ >;
+		nik_ces auto out_ival	= U_tr < T_ival, TR::id, _Type_ >;
+		nik_ces auto out_axis	= U_tr < T_axis, TR::id, _Next_ >;
 	};
 
 /***********************************************************************************************************************/
@@ -680,7 +821,7 @@ namespace cctmp_one_cycle_specs {
 		auto _Op0_, auto _Arg01_, auto _Arg02_,
 		auto _Op1_, auto _Arg11_, auto _Arg12_,
 
-		typename Ival
+		typename Ivals
 	>
 	struct T_cycle
 	<
@@ -689,41 +830,63 @@ namespace cctmp_one_cycle_specs {
 		_break  < _Op0_ , _Arg01_ , _Arg02_ >,
 		_action < _Op1_ , _Arg11_ , _Arg12_ >,
 
-		Ival
+		Ivals
 	>
 	{
-		nik_ces auto loop_predicate		= tr_< T_loop_predicate , TR::repeat, _Op0_, _Arg01_, _Arg02_ >;
-		nik_ces auto assign_function		= tr_< T_assign_function, TR::repeat, _Op1_, _Arg11_, _Arg12_ >;
-		nik_ces auto out_next			= Ival::next;
+		nik_ces auto loop_predicate		= U_tr < T_loop_predicate , TR::repeat, _Op0_, _Arg01_, _Arg02_ >;
+		nik_ces auto assign_function		= U_tr < T_assign_function, TR::repeat, _Op1_, _Arg11_, _Arg12_ >;
+
+		nik_ces auto out_next			= U_tr < T_cycle_next, TR::id, Ivals::out_axis >;
 	};
 
 /***********************************************************************************************************************/
 
 // precycle:
 
-	template<typename Ival>
-	struct T_precycle<TR::repeat, Ival>
+	template<typename Ivals>
+	struct T_precycle<TR::repeat, Ivals>
 	{
-		nik_ces auto pre_out_next = tr_<T_pre_next, TR::id, Ival::is_left_open, Ival::next>;
+		nik_ces auto pre_out_next = U_tr<T_pre_next, TR::id, Ivals::out_ival, Ivals::out_axis>;
 	};
 
 /***********************************************************************************************************************/
 
 // postcycle:
 
-	template<typename Ival, typename Cycle>
-	struct T_postcycle<TR::repeat, Ival, Cycle>
+	template<typename Ivals, typename Cycle>
+	struct T_postcycle<TR::repeat, Ivals, Cycle>
 	{
-		nik_ces auto post_assign_function = tr_
+		nik_ces auto post_assign_function = U_tr
 		<
-			T_post_assign_function, TR::id, Ival::is_right_closed, Cycle::assign_function
+			T_post_assign_function, TR::id, Ivals::out_ival, U_store_T<Cycle>
 		>;
 	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// map:
+// fold (singular):
+
+/***********************************************************************************************************************/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// find first (singular):
+
+/***********************************************************************************************************************/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// find all (singular):
+
+/***********************************************************************************************************************/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// map (plural):
 
 /***********************************************************************************************************************/
 
@@ -739,9 +902,9 @@ namespace cctmp_one_cycle_specs {
 	template<auto _Out_, auto _In_, auto _End_>
 	struct T_position<TR::map, _position<_Out_, _In_, _End_>>
 	{
-		nik_ces auto out	= tr_< T_out, TR::id, _Out_ >;
-		nik_ces auto in		= tr_<  T_in, TR::id,  _In_ >;
-		nik_ces auto end	= tr_< T_end, TR::id, _End_ >;
+		nik_ces auto out	= U_tr < T_out, TR::id, _Out_ >;
+		nik_ces auto in		= U_tr <  T_in, TR::id,  _In_ >;
+		nik_ces auto end	= U_tr < T_end, TR::id, _End_ >;
 	};
 
 /***********************************************************************************************************************/
@@ -761,29 +924,35 @@ namespace cctmp_one_cycle_specs {
 		 _in_ival <  _InType_ ,  _InNext_ ,  _InPrev_ >
 	>
 	{
-		nik_ces auto out_is_left_open		= tr_< T_is_left_open    , TR::id , _OutType_ >;
-		nik_ces auto out_prev			= tr_< T_next, TR::id, _OutPrev_ >;
-		nik_ces auto out_next			= tr_< T_next, TR::id, _OutNext_ >;
+		nik_ces auto out_ival	= U_tr < T_ival, TR::id, _OutType_             >;
+		nik_ces auto out_axis	= U_tr < T_axis, TR::id, _OutNext_ , _OutPrev_ >;
 
-		nik_ces auto in_is_left_open		= tr_< T_is_left_open    , TR::id , _InType_ >;
-		nik_ces auto in_is_right_closed		= tr_< T_is_right_closed , TR::id , _InType_ >;
-		nik_ces auto in_is_right_open		= tr_< T_is_right_open   , TR::id , _InType_ >;
-		nik_ces auto in_prev			= tr_< T_next, TR::id, _InPrev_ >;
-		nik_ces auto in_next			= tr_< T_next, TR::id, _InNext_ >;
+		nik_ces auto in_ival	= U_tr < T_ival, TR::id,  _InType_             >;
+		nik_ces auto in_axis	= U_tr < T_axis, TR::id,  _InNext_ ,  _InPrev_ >;
+	};
 
-	//	nik_ces auto is_primary			= tr_< T_is_primary   , TR::id, in_ival, out_ival >;
-	//	nik_ces auto is_secondary		= tr_< T_is_secondary , TR::id, in_ival, out_ival >;
-	//	nik_ces auto is_tertiary		= tr_< T_is_tertiary  , TR::id, in_ival, out_ival >;
+/***********************************************************************************************************************/
+
+// axis:
+
+	template<typename Ivals>
+	struct T_axis<TR::map, Ivals>
+	{
+		nik_ces auto is_last		= U_tr < T_is_last, TR::id , Ivals::in_ival , Ivals::out_ival >;
+
+		nik_ces auto is_primary		= U_tr < T_is_primary   , TR::id, is_last , Ivals::in_ival              >;
+		nik_ces auto is_secondary	= U_tr < T_is_secondary , TR::id, is_last , is_primary, Ivals::out_ival >;
+		nik_ces auto is_tertiary	= U_tr < T_is_tertiary  , TR::id, is_last , is_primary, is_secondary    >;
 	};
 
 /***********************************************************************************************************************/
 
 // loop predicate:
 
-	template<typename IsTertiary, typename InNext, auto Op, auto InArg, auto EndArg>
-	struct T_loop_predicate<TR::map, IsTertiary, InNext, _op<Op>, _in_arg<InArg>, _end_arg<EndArg>>
+	template<typename IsTertiary, typename InAxis, auto Op, auto InArg, auto EndArg>
+	struct T_loop_predicate<TR::map, IsTertiary, InAxis, _op<Op>, _in_arg<InArg>, _end_arg<EndArg>>
 	{
-		nik_ces auto in_arg	= IsTertiary::value ? InNext::value : InArg;
+		nik_ces auto in_arg	= if_then_else<IsTertiary::value, member_value<InAxis::next>, InArg>;
 		nik_ces auto value	= _argcompose_<Op, in_arg, EndArg>;
 	};
 
@@ -803,7 +972,7 @@ namespace cctmp_one_cycle_specs {
 		auto _Op0_, auto _Arg01_, auto _Arg02_,
 		auto _Op1_, auto _Arg11_, auto _Arg12_,
 
-		typename Ival
+		typename Axis, typename Ivals
 	>
 	struct T_cycle
 	<
@@ -812,7 +981,7 @@ namespace cctmp_one_cycle_specs {
 		_break  < _Op0_ , _Arg01_ , _Arg02_ >,
 		_action < _Op1_ , _Arg11_ , _Arg12_ >,
 
-		Ival
+		Axis, Ivals
 	>
 	{
 		//	0. All intervals are tethered to the one with an explicitly declared endpoint.
@@ -823,86 +992,65 @@ namespace cctmp_one_cycle_specs {
 		//	5. If (4), then for each other right endpoint, when open, iterate postcycle.
 		//	6. If prev and peek, iterate end to reset postcycle.
 
-		nik_ces auto loop_predicate		= tr_
+		nik_ces auto loop_predicate		= U_tr
 							<
 								T_loop_predicate, TR::map,
-								Ival::is_tertiary, Ival::in_next,
+								Axis::is_tertiary, Ivals::in_axis,
 								_Op0_, _Arg01_, _Arg02_
 							>;
-		nik_ces auto assign_function		= tr_< T_assign_function, TR::map, _Op1_, _Arg11_, _Arg12_ >;
-		nik_ces auto out_next			= Ival::out_next;
-		nik_ces auto in_next			= Ival::in_next;
+		nik_ces auto assign_function		= U_tr< T_assign_function, TR::map, _Op1_, _Arg11_, _Arg12_ >;
+
+		nik_ces auto out_next			= U_tr < T_cycle_next, TR::id, Ivals::out_axis >;
+		nik_ces auto in_next			= U_tr < T_cycle_next, TR::id, Ivals::in_axis >;
 	};
 
 /***********************************************************************************************************************/
 
 // precycle:
 
-	template<typename Ival>
-	struct T_precycle<TR::map, Ival>
+	template<typename Axis, typename Ivals>
+	struct T_precycle<TR::map, Axis, Ivals>
 	{
-		nik_ces auto pre_end_next = tr_< T_pre_next, TR::id, Ival::is_primary       , Ival::in_prev  >;
-		nik_ces auto pre_out_next = tr_< T_pre_next, TR::id, Ival::out_is_left_open , Ival::out_next >;
-		nik_ces auto pre_in_next  = tr_< T_pre_next, TR::id, Ival::in_is_left_open  , Ival::in_next  >;
+		nik_ces auto pre_end_next = U_tr < T_pre_t_prev , TR::id, Axis::is_primary , Ivals::in_axis  >;
+		nik_ces auto pre_out_next = U_tr < T_pre_next   , TR::id, Ivals::out_ival  , Ivals::out_axis >;
+		nik_ces auto pre_in_next  = U_tr < T_pre_next   , TR::id, Ivals::in_ival   , Ivals::in_axis  >;
 	};
 
 /***********************************************************************************************************************/
 
 // postcycle:
 
-/*
-	template<typename Ival, typename Cycle>
-	struct T_postcycle<TR::map, Ival, Cycle>
+	template<typename Axis, typename Ivals, typename Cycle>
+	struct T_postcycle<TR::map, Axis, Ivals, Cycle>
 	{
-		nik_ces auto post_assign_function = tr_
+		nik_ces auto post_assign_function = U_tr
 		<
-			T_post_assign_function, TR::id, cycle::in_ival, cycle::assign_function
+			T_post_assign_function, TR::id, Ivals::in_ival, U_store_T<Cycle>
 		>;
 
-		nik_ces auto post_out_next = tr_<T_post_next, TR::id, cycle::in_ival, cycle::out_ival, cycle::out_next>;
-		nik_ces auto post_end_next = tr_<T_post_next, TR::id, cycle::in_ival, cycle::end_ival, cycle::end_next>;
+		nik_ces auto post_out_next = U_tr <T_post_s_next , TR::id, Axis::is_secondary , U_store_T<Ivals> >;
+		nik_ces auto post_in_next  = U_tr <T_post_p_next , TR::id, Axis::is_primary   , Ivals::in_axis   >;
+		nik_ces auto post_end_prev = U_tr <T_post_t_next , TR::id, Axis::is_primary   , Ivals::in_axis   >;
 	};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// fold:
-
-/***********************************************************************************************************************/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// find first:
+// zip (plural):
 
 /***********************************************************************************************************************/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// find all:
+// fasten (plural):
 
 /***********************************************************************************************************************/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// zip:
-
-/***********************************************************************************************************************/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// fasten:
-
-/***********************************************************************************************************************/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// glide:
+// glide (plural):
 
 /***********************************************************************************************************************/
 

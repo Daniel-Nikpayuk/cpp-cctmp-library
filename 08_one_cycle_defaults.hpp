@@ -216,33 +216,37 @@ namespace cctmp_one_cycle_specs {
 		template<auto label, auto position, auto out_ival, auto break_, auto action>
 		nik_ce auto _conceptual_repeat(nik_avp(T_pack_Vs<label, position, out_ival, break_, action>*))
 		{
-			nik_ce auto ival_etc	= tr_<T_ival, TR::repeat, out_ival>;
+			using T_label_etc	= T_tr<T_label, TR::repeat, label>;
+			using T_position_etc	= T_tr<T_position, TR::repeat, position>;
 
-			using label_etc		= T_tr<T_label, TR::repeat, label>;
-			using position_etc	= T_tr<T_position, TR::repeat, position>;
-			using cycle_etc		= T_tr<T_cycle, TR::repeat, break_, action, ival_etc>;
-			using precycle_etc	= T_tr<T_precycle, TR::repeat,  ival_etc>;
-			using postcycle_etc	= T_tr<T_postcycle, TR::repeat, ival_etc, U_store_T<cycle_etc>>;
+			using T_ivals_etc	= T_tr<T_ivals, TR::repeat, out_ival>;
+			nik_ce auto ivals_etc	= U_store_T<T_ivals_etc>;
+
+			using T_cycle_etc	= T_tr<T_cycle, TR::repeat, break_, action, ivals_etc>;
+			nik_ce auto cycle_etc	= U_store_T<T_cycle_etc>;
+
+			using T_precycle_etc	= T_tr<T_precycle, TR::repeat, ivals_etc>;
+			using T_postcycle_etc	= T_tr<T_postcycle, TR::repeat, ivals_etc, cycle_etc>;
 
 			return overload
 			<
 				_map_, H_repeat_specification, U_member_value,
 
-				label_etc::precycle,
-				label_etc::cycle,
-				label_etc::postcycle,
+				T_label_etc::precycle,
+				T_label_etc::cycle,
+				T_label_etc::postcycle,
 
-				position_etc::out,
-				position_etc::end,
-				position_etc::in,
+				T_position_etc::out,
+				T_position_etc::end,
+				T_position_etc::in,
 
-				precycle_etc::pre_out_next,
+				T_precycle_etc::pre_out_next,
 
-				cycle_etc::loop_predicate,
-				cycle_etc::assign_function,
-				cycle_etc::out_next,
+				T_cycle_etc::loop_predicate,
+				T_cycle_etc::assign_function,
+				T_cycle_etc::out_next,
 
-				postcycle_etc::post_assign_function
+				T_postcycle_etc::post_assign_function
 			>;
 		}
 
@@ -348,38 +352,45 @@ namespace cctmp_one_cycle_specs {
 		template<auto label, auto position, auto out_ival, auto in_ival, auto break_, auto action>
 		nik_ce auto _conceptual_map(nik_avp(T_pack_Vs<label, position, out_ival, in_ival, break_, action>*))
 		{
-			nik_ce auto ival_etc	= tr_<T_ival, TR::map, out_ival, in_ival>;
+			using T_label_etc	= T_tr<T_label, TR::map, label>;
+			using T_position_etc	= T_tr<T_position, TR::map, position>;
 
-			using label_etc		= T_tr<T_label, TR::map, label>;
-			using position_etc	= T_tr<T_position, TR::map, position>;
-			using cycle_etc		= T_tr<T_cycle, TR::map, break_, action, ival_etc>;
-			using precycle_etc	= T_tr<T_precycle, TR::map, ival_etc>;
-			using postcycle_etc	= T_tr<T_postcycle, TR::map, ival_etc, U_store_T<cycle_etc>>;
+			using T_ivals_etc	= T_tr<T_ivals, TR::map, out_ival, in_ival>;
+			nik_ce auto ivals_etc	= U_store_T<T_ivals_etc>;
+
+			using T_axis_etc	= T_tr<T_axis, TR::map, ivals_etc>;
+			nik_ce auto axis_etc	= U_store_T<T_axis_etc>;
+
+			using T_cycle_etc	= T_tr<T_cycle, TR::map, break_, action, axis_etc, ivals_etc>;
+			nik_ce auto cycle_etc	= U_store_T<T_cycle_etc>;
+
+			using T_precycle_etc	= T_tr<T_precycle, TR::map, axis_etc, ivals_etc>;
+			using T_postcycle_etc	= T_tr<T_postcycle, TR::map, axis_etc, ivals_etc, cycle_etc>;
 
 			return overload
 			<
 				_map_, H_map_specification, U_member_value,
 
-				label_etc::precycle,
-				label_etc::cycle,
-				label_etc::postcycle,
+				T_label_etc::precycle,
+				T_label_etc::cycle,
+				T_label_etc::postcycle,
 
-				position_etc::out,
-				position_etc::in,
-				position_etc::end,
+				T_position_etc::out,
+				T_position_etc::in,
+				T_position_etc::end,
 
-				precycle_etc::pre_end_next,
-				precycle_etc::pre_out_next,
-				precycle_etc::pre_in_next,
+				T_precycle_etc::pre_end_next,
+				T_precycle_etc::pre_out_next,
+				T_precycle_etc::pre_in_next,
 
-				cycle_etc::loop_predicate,
-				cycle_etc::assign_function,
-				cycle_etc::out_next,
-				cycle_etc::in_next,
+				T_cycle_etc::loop_predicate,
+				T_cycle_etc::assign_function,
+				T_cycle_etc::out_next,
+				T_cycle_etc::in_next,
 
-				postcycle_etc::post_assign_function,
-				postcycle_etc::post_out_next,
-				postcycle_etc::post_end_next
+				T_postcycle_etc::post_assign_function,
+				T_postcycle_etc::post_out_next,
+				T_postcycle_etc::post_end_next
 			>;
 		}
 
