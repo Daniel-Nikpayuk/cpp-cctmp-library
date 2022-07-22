@@ -1142,22 +1142,6 @@ namespace cctmp {
 		template<key_type ctn = _h1, depth_type dec = _three>
 		nik_ce auto bind = h_action<HigherOrder::bind, ctn, dec>;
 
-			// comparison:
-
-			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto is_equal = h_action<HigherOrder::is_equal, ctn, dec>;
-
-			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto is_zero = h_action<HigherOrder::is_zero, ctn, dec>;
-
-			// arithmetic:
-
-			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto increment = h_action<HigherOrder::increment, ctn, dec>;
-
-			template<key_type ctn = _h1, depth_type dec = _two>
-			nik_ce auto decrement = h_action<HigherOrder::decrement, ctn, dec>;
-
 	// alias:
 
 		// grammatical:

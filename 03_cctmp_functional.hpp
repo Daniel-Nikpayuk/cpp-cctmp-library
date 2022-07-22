@@ -42,6 +42,7 @@ namespace cctmp_functional {
 
 	nik_ce auto _less_than_					= cctmp::_less_than_;
 
+	nik_ce auto _if_then_else_				= cctmp::_if_then_else_;
 	nik_ce auto _same_					= cctmp::_same_;
 	nik_ce auto _to_tuple_					= cctmp::_to_tuple_;
 	nik_ce auto _unite_					= cctmp::_unite_;
@@ -57,6 +58,7 @@ namespace cctmp_functional {
 	using T_block_variable					= typename cctmp::T_block_variable;
 	using T_block_function					= typename cctmp::T_block_function;
 	using T_block_segment					= typename cctmp::T_block_segment;
+	using T_block_sifter					= typename cctmp::T_block_sifter;
 	using T_block_fold					= typename cctmp::T_block_fold;
 	using T_block_parse					= typename cctmp::T_block_parse;
 	using T_block_cascade					= typename cctmp::T_block_cascade;
@@ -222,6 +224,33 @@ namespace cctmp_functional {
 
 	template<auto n, auto s = index_type{0}, auto b = H_id>
 	nik_ce auto segment = T_segment::template result<MD::initial_depth, n, b, s>;
+
+// sifter:
+
+	struct TP_sifter
+	{
+		template<auto d, auto b, auto op, auto... Vs>
+		nik_ces auto result = T_block_sifter::template _result<d, sizeof...(Vs), b, Vs...>
+		(
+			overload
+			<
+				_if_then_else_,
+				overload<op, Vs>,
+				U_pack_Vs<U_null_Vs>,
+				U_null_Vs
+			>...
+		);
+
+	}; nik_ce auto UP_sifter = U_store_T<TP_sifter>;
+
+	using TL_sifter		= TP_unpack<UP_sifter>;
+	nik_ce auto UL_sifter	= UP_unpack<UP_sifter>;
+
+	template<auto op, auto... Vs>
+	nik_ce auto pack_sifter = TP_sifter::template result<MD::initial_depth, H_id, op, Vs...>;
+
+	template<auto p, auto op, auto b = H_id, auto d = MD::initial_depth>
+	nik_ce auto list_sifter = TL_sifter::template result<d, p, b, op>;
 
 // fold:
 

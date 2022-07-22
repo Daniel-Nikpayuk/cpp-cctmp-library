@@ -192,9 +192,9 @@ namespace cctmp_one_cycle_specs {
 				_end_       < _one          >,
 				_in_        < _two          >
 			>,
-			_out_ival_
+			_out_iter_
 			<
-				_type_      < _closing      >,
+				_ival_      < _closing      >,
 				_next_      < _increment_<> >
 			>,
 			_break_
@@ -213,13 +213,13 @@ namespace cctmp_one_cycle_specs {
 
 	// spec:
 
-		template<auto label, auto position, auto out_ival, auto break_, auto action>
-		nik_ce auto _conceptual_repeat(nik_avp(T_pack_Vs<label, position, out_ival, break_, action>*))
+		template<auto label, auto position, auto out_iter, auto break_, auto action>
+		nik_ce auto _conceptual_repeat(nik_avp(T_pack_Vs<label, position, out_iter, break_, action>*))
 		{
 			using T_label_etc	= T_tr<T_label, TR::repeat, label>;
 			using T_position_etc	= T_tr<T_position, TR::repeat, position>;
 
-			using T_ivals_etc	= T_tr<T_ivals, TR::repeat, out_ival>;
+			using T_ivals_etc	= T_tr<T_ivals, TR::repeat, out_iter>;
 			nik_ce auto ivals_etc	= U_store_T<T_ivals_etc>;
 
 			using T_cycle_etc	= T_tr<T_cycle, TR::repeat, break_, action, ivals_etc>;
@@ -321,15 +321,15 @@ namespace cctmp_one_cycle_specs {
 				_in_        < _one          >,
 				_end_       < _two          >
 			>,
-			_out_ival_
+			_out_iter_
 			<
-				_type_      < _closing      >,
+				_ival_      < _closing      >,
 				_next_      < _increment_<> >,
 				_prev_      < _decrement_<> >
 			>,
-			_in_ival_
+			_in_iter_
 			<
-				_type_      < _closing      >,
+				_ival_      < _closing      >,
 				_next_      < _increment_<> >,
 				_prev_      < _decrement_<> >
 			>,
@@ -349,13 +349,13 @@ namespace cctmp_one_cycle_specs {
 
 	// spec:
 
-		template<auto label, auto position, auto out_ival, auto in_ival, auto break_, auto action>
-		nik_ce auto _conceptual_map(nik_avp(T_pack_Vs<label, position, out_ival, in_ival, break_, action>*))
+		template<auto label, auto position, auto out_iter, auto in_iter, auto break_, auto action>
+		nik_ce auto _conceptual_map(nik_avp(T_pack_Vs<label, position, out_iter, in_iter, break_, action>*))
 		{
 			using T_label_etc	= T_tr<T_label, TR::map, label>;
 			using T_position_etc	= T_tr<T_position, TR::map, position>;
 
-			using T_ivals_etc	= T_tr<T_ivals, TR::map, out_ival, in_ival>;
+			using T_ivals_etc	= T_tr<T_ivals, TR::map, out_iter, in_iter>;
 			nik_ce auto ivals_etc	= U_store_T<T_ivals_etc>;
 
 			using T_axis_etc	= T_tr<T_axis, TR::map, ivals_etc>;

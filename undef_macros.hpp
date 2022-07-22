@@ -40,6 +40,8 @@
 
 #undef NIK_AUTO
 
+#undef NIK_VARIADIC_AUTO
+
 #undef NIK_TYPENAME
 
 #undef NIK_PLUS
@@ -59,6 +61,12 @@
 #undef NIK_V_1
 
 #undef NIK_T_V_1
+
+#undef NIK_WS_1
+
+#undef NIK_AVP_B_WS_1
+
+#undef NIK_CAR_V_WS_1
 
 #undef NIK_OP_1
 
@@ -104,15 +112,15 @@
 
 #undef NIK_2_N_AUTO_VARS
 
+#undef NIK_2_N_VARIADIC_AUTO_VARS
+
 #undef NIK_2_N_VARS
 
 #undef NIK_2_N_TYPENAME_VARS
 
-#undef NIK_2_N_ARG_VARS
+#undef NIK_2_N_INDEX_SEGMENT
 
 #undef NIK_2_N_TUPLE_VARS
-
-#undef NIK_2_N_INDEX_SEGMENT
 
 #undef NIK_2_N_MONOID_CALLS
 
@@ -134,6 +142,8 @@
 
 #undef NIK_SEGMENT_BLOCK
 
+#undef NIK_SIFTER_BLOCK
+
 #undef NIK_FOLD_BLOCK
 
 #undef NIK_PARSE_BLOCK
@@ -149,6 +159,8 @@
 #undef NIK_DEFINE_BLOCK_FUNCTION_PASS
 
 #undef NIK_DEFINE_BLOCK_SEGMENT_PASS
+
+#undef NIK_DEFINE_BLOCK_SIFTER_PASS
 
 #undef NIK_DEFINE_BLOCK_FOLD_PASS
 

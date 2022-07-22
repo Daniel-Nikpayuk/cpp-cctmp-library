@@ -591,28 +591,16 @@ namespace cctmp {
 	{
 		// basis:
 
-			nik_ces key_type cast				=  0;
-			nik_ces key_type constant			=  1;
+			nik_ces key_type cast			=  0;
+			nik_ces key_type constant		=  1;
 
-			nik_ces key_type apply				=  2;
-			nik_ces key_type bind				=  3;
-			nik_ces key_type curry				=  4;
+			nik_ces key_type apply			=  2;
+			nik_ces key_type bind			=  3;
+			nik_ces key_type curry			=  4;
 
 		// comparison:
 
-			nik_ces key_type match				=  5;
-
-		// curried:
-
-			// comparison:
-
-				nik_ces key_type is_equal		=  6;
-				nik_ces key_type is_zero		=  7;
-
-			// arithmetic:
-
-				nik_ces key_type increment		=  8;
-				nik_ces key_type decrement		=  9;
+			nik_ces key_type match			=  5;
 	};
 
 /***********************************************************************************************************************/
@@ -713,7 +701,7 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// curried:
+// curried (syntactic sugar):
 
 	// comparison:
 
@@ -725,6 +713,26 @@ namespace cctmp {
 		// is_zero:
 
 			nik_ce auto _is_zero_ = _is_equal_<_zero>;
+
+		// is_less_than:
+
+			template<auto V>
+			nik_ce auto _is_less_than_ = _curry_<_greater_than_, V>;
+
+		// is_less_than_or_equal:
+
+			template<auto V>
+			nik_ce auto _is_less_than_or_equal_ = _curry_<_greater_than_or_equal_, V>;
+
+		// is_greater_than:
+
+			template<auto V>
+			nik_ce auto _is_greater_than_ = _curry_<_less_than_, V>;
+
+		// is_greater_than_or_equal:
+
+			template<auto V>
+			nik_ce auto _is_greater_than_or_equal_ = _curry_<_less_than_or_equal_, V>;
 
 	// arithmetic:
 

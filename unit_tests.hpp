@@ -939,6 +939,9 @@ namespace cctmp_program
 
 	//	printf("%llu\n", cctmp_functional::segment<unsigned{10}>);
 
+	//	printf("%d\n", cctmp_functional::pack_sifter<_is_greater_than_<4>, 0, 3, 4, 5, 9>);
+	//	printf("%d\n", cctmp_functional::list_sifter<p, _is_greater_than_<4>>);
+
 	//	printf("%d\n", cctmp_functional::pack_fold<_add_, 0, 3, 4, 5, 9>);
 	//	printf("%d\n", cctmp_functional::list_fold<p, _add_, 0>);
 

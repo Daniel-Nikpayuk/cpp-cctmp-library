@@ -181,13 +181,14 @@ namespace cctmp {
 		nik_ces key_type function	=  2;
 
 		nik_ces key_type segment	=  3;
+		nik_ces key_type sifter		=  4;
 
-		nik_ces key_type fold		=  4;
-		nik_ces key_type parse		=  5;
-		nik_ces key_type cascade	=  6;
+		nik_ces key_type fold		=  5;
+		nik_ces key_type parse		=  6;
+		nik_ces key_type cascade	=  7;
 
-		nik_ces key_type argument	=  7;
-		nik_ces key_type tuple		=  8;
+		nik_ces key_type argument	=  8;
+		nik_ces key_type tuple		=  9;
 	};
 
 	using BN = BlockName;
@@ -403,6 +404,55 @@ namespace cctmp {
 	{
 		template<auto d, auto n, auto b, auto s, auto... Vs>
 		nik_ces auto result = to_list_<b, decltype(s){s+Vs}...>;
+	};
+
+/***********************************************************************************************************************/
+
+// sifter:
+
+	template<auto... filler>
+	struct T_block<BN::sifter, BT::start, _zero, filler...>
+	{
+		nik_ces auto U_block_sifter = U_store_T<T_block>;
+
+		template<auto d, auto n, auto b, auto... Vs, typename... Packs>
+		nik_ces auto _result(Packs... ps) { return NIK_SIFTER_BLOCK(9, d, n, b, Vs)(ps...); }
+
+		template<auto d, auto p, auto n, auto b, auto... Vs>
+		nik_ces auto result = overload<Alias::tailor, U_block_sifter, p, d, n, b, Vs...>;
+	};
+
+	using T_block_sifter		= T_block<BN::sifter, BT::start, _zero>;
+	nik_ce auto U_block_sifter	= U_store_T<T_block_sifter>;
+
+	NIK_DEFINE_BLOCK_SIFTER_PASS(0)
+	NIK_DEFINE_BLOCK_SIFTER_PASS(1)
+	NIK_DEFINE_BLOCK_SIFTER_PASS(2)
+	NIK_DEFINE_BLOCK_SIFTER_PASS(3)
+	NIK_DEFINE_BLOCK_SIFTER_PASS(4)
+	NIK_DEFINE_BLOCK_SIFTER_PASS(5)
+	NIK_DEFINE_BLOCK_SIFTER_PASS(6)
+	NIK_DEFINE_BLOCK_SIFTER_PASS(7)
+	NIK_DEFINE_BLOCK_SIFTER_PASS(8)
+	NIK_DEFINE_BLOCK_SIFTER_PASS(9)
+
+	template<auto... filler>
+	struct T_block<BN::sifter, BT::pause, _zero, filler...>
+	{
+		template<auto d, auto n, auto b, auto... Vs, typename... Packs>
+		nik_ces auto result(Packs...)
+		{
+			nik_ce auto p = U_pack_Vs<U_restore_T<Packs>...>;
+
+			return machination(U_block_sifter, U_pack_Vs<p, n, b, Vs...>);
+		}
+	};
+
+	template<auto... filler>
+	struct T_block<BN::sifter, BT::halt, _zero, filler...>
+	{
+		template<auto d, auto n, auto b, auto... Vs, typename... Packs>
+		nik_ces auto result(Packs...) { return to_list_<b, Vs...>; }
 	};
 
 /***********************************************************************************************************************/
