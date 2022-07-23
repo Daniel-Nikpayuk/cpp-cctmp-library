@@ -21,9 +21,40 @@ namespace cctmp_one_cycle_specs {
 
 	using key_type						= typename cctmp::key_type;
 
-	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
+	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
 
+	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
+	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
+
+	template<auto... Vs> nik_ce auto overload		= cctmp::template overload<Vs...>;
+
+	nik_ce auto _id_					= cctmp::_id_;
+	nik_ce auto _and_					= cctmp::_and_;
+	nik_ce auto _or_					= cctmp::_or_;
+
+	nik_ce auto _same_					= cctmp::_same_;
+	nik_ce auto _if_then_else_				= cctmp::_if_then_else_;
+
+	template<auto... Vs> nik_ce auto _argcompose_		= cctmp_generics::template _argcompose_<Vs...>;
 	template<auto... Vs> nik_ce auto _side_			= cctmp_generics::template _side_<Vs...>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// conveniences:
+
+/***********************************************************************************************************************/
+
+// same:
+
+	template<auto V0, auto V1>
+	nik_ce auto same = overload<_same_, V0, V1>;
+
+// if_then_else:
+
+	template<auto p, auto a, auto c>
+	nik_ce auto if_then_else = overload<_if_then_else_, p, a, c>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -307,13 +338,6 @@ namespace cctmp_one_cycle_specs {
 
 // break:
 
-	struct Break
-	{
-		nik_ces key_type primary	= 0;
-		nik_ces key_type secondary	= 1;
-		nik_ces key_type tertiary	= 2;
-	};
-
 	// id:
 
 		template<auto... Vs> struct _break			{ };
@@ -366,19 +390,14 @@ namespace cctmp_one_cycle_specs {
 	{
 		nik_ces key_type id		= 0;
 
-		// singular:
+		// base:
 
-		nik_ces key_type repeat		= 1;
-		nik_ces key_type fold		= 2;
-		nik_ces key_type find_first	= 3;
-		nik_ces key_type find_all	= 4;
-
-		// plural:
-
-		nik_ces key_type map		= 5;
-		nik_ces key_type zip		= 6;
-		nik_ces key_type fasten		= 7;
-		nik_ces key_type glide		= 8;
+		nik_ces key_type tag		= 1;
+		nik_ces key_type ival		= 2;
+		nik_ces key_type axis		= 3;
+		nik_ces key_type cycle		= 4;
+		nik_ces key_type precycle	= 5;
+		nik_ces key_type postcycle	= 6;
 	};
 
 	using TN = TranslatorName;
@@ -391,18 +410,33 @@ namespace cctmp_one_cycle_specs {
 	{
 		nik_ces key_type id				=  0;
 
-		nik_ces key_type tag_value			=  1;
+		nik_ces key_type value				=  1;
 
-		nik_ces key_type is_left_open			=  3;
-		nik_ces key_type is_right_open			=  4;
-		nik_ces key_type is_right_closed		=  5;
+		nik_ces key_type is_left_open			=  2;
+		nik_ces key_type is_right_open			=  3;
+		nik_ces key_type is_right_closed		=  4;
 
-		nik_ces key_type next				=  6;
+		nik_ces key_type next				=  5;
 
-		nik_ces key_type is_last			=  7;
-		nik_ces key_type is_primary_last		=  8;
-		nik_ces key_type is_secondary_last		=  9;
-		nik_ces key_type is_tertiary_last		= 10;
+		nik_ces key_type is_last			=  6;
+		nik_ces key_type is_primary_last		=  7;
+		nik_ces key_type is_secondary_last		=  8;
+		nik_ces key_type is_tertiary_last		=  9;
+
+		nik_ces key_type is_post_assign_function	= 10;
+		nik_ces key_type is_post_note_next		= 11;
+		nik_ces key_type is_post_root_next		= 12;
+		nik_ces key_type is_post_tone_prev		= 13;
+
+		nik_ces key_type argcompose			= 14;
+		nik_ces key_type sidecompose			= 15;
+		nik_ces key_type peek				= 16;
+
+		nik_ces key_type tonic_prev			= 17;
+		nik_ces key_type note_next			= 18;
+
+		nik_ces key_type assign_function		= 19;
+		nik_ces key_type tonic_next			= 20;
 	};
 
 	using TT = TranslatorNote;
@@ -410,45 +444,26 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// id:
-
-	template<template<auto> typename Tag, auto Value, nik_vp(t)(Tag<Value>*)>
-	nik_ce auto translate<TN:::id, TT::tag_value, t> = Value;
-
-	template<auto tag>
-	nik_ce auto tag_value = translate<TN:::id, TT::tag_value, tag>;
+// etc (conveniences):
 
 /***********************************************************************************************************************/
 
 // ival:
 
-	// is bidirectional:
+	// is left open:
 
-		template<auto axis>
-		nik_ce auto is_bidirectional = !same<T_store_U<axis>::prev, _id_>;
+		template<auto ival_etc>
+		nik_ce auto is_left_open = T_store_U<ival_etc>::is_left_open;
 
 	// is right open:
 
-		template<auto ival>
-		nik_ce auto is_right_open = T_store_U<ival>::is_right_open;
+		template<auto ival_etc>
+		nik_ce auto is_right_open = T_store_U<ival_etc>::is_right_open;
 
 	// is right closed:
 
-		template<auto ival>
-		nik_ce auto is_right_closed = T_store_U<ival>::is_right_closed;
-
-// (translate):
-
-	// endpoints:
-
-		template<auto Ival, nik_vp(t)(_ival<Ival>*)>
-		nik_ce auto translate<TN:::id, TT::is_left_open, t> = (Ival[0] == '(');
-
-		template<auto Ival, nik_vp(t)(_ival<Ival>*)>
-		nik_ce auto translate<TN:::id, TT::is_right_open, t> = (Ival[1] == ')');
-
-		template<auto Ival, nik_vp(t)(_ival<Ival>*)>
-		nik_ce auto translate<TN:::id, TT::is_right_closed, t> = (Ival[1] == ']');
+		template<auto ival_etc>
+		nik_ce auto is_right_closed = T_store_U<ival_etc>::is_right_closed;
 
 /***********************************************************************************************************************/
 
@@ -456,63 +471,18 @@ namespace cctmp_one_cycle_specs {
 
 	// prev:
 
-		template<auto axis>
-		nik_ce auto axis_prev = T_store_U<axis>::prev;
+		template<auto axis_etc>
+		nik_ce auto axis_prev = T_store_U<axis_etc>::prev;
 
 	// next:
 
-		template<auto note_axis>
-		nik_ce auto axis_next = T_store_U<axis>::next;
+		template<auto axis_etc>
+		nik_ce auto axis_next = T_store_U<axis_etc>::next;
 
-// (translate):
+	// is bidirectional:
 
-	// is last:
-
-		template<auto root_ival, auto... tone_ivals>
-		nik_ce auto translate<TN:::id, TT::is_last, root_ival, tone_ivals...> =
-			is_right_open<root_ival> && overload<_or_, is_right_closed<tone_ivals>...>;
-
-	// is primary last:
-
-		template<auto is_last, auto root_axis>
-		nik_ce auto translate<TN:::id, TT::is_primary_last, is_last, root_axis> =
-			is_last && is_bidirectional<root_axis>;
-
-	// is secondary last:
-
-		template<auto is_last, auto is_secondary_last, auto... right_closed_tone_axes>
-		nik_ce auto translate<TN:::id, TT::is_secondary_last, is_last, is_secondary_last, right_closed_tone_axes...> =
-			overload<_and_, is_last, !is_primary_last, is_bidirectional<right_closed_tone_axes>...>;
-
-	// is tertiary last:
-
-		template<auto is_last, auto is_primary_last, auto is_secondary_last>
-		nik_ce auto translate<TN:::id, TT::is_tertiary_last, is_last, is_primary_last, is_secondary_last> =
-			is_last && !is_primary_last && !is_secondary_last;
-
-	// is post assign function:
-
-		template<auto is_last, auto is_secondary_last, auto root_ival>
-		nik_ce auto translate<TN:::id, TT::is_post_assign_function, is_last, is_secondary_last, root_ival> =
-			is_right_closed<root_ival> || (is_last && !is_secondary_last);
-
-	// is post note next:
-
-		template<auto root_ival, auto note_ival>
-		nik_ce auto translate<TN:::id, TT::is_post_note_next, root_ival, note_ival> =
-			is_right_closed<root_ival> && is_right_open<note_ival>;
-
-	// is post root next:
-
-		template<auto is_primary_last, auto is_tertiary_last>
-		nik_ce auto translate<TN:::id, TT::is_post_root_next, is_primary_last, is_tertiary_last> =
-			is_primary_last || is_tertiary_last;
-
-	// is post tone prev:
-
-		template<auto is_secondary_last, auto tone_ival>
-		nik_ce auto translate<TN:::id, TT::is_post_tone_prev, is_secondary_last, tone_ival> =
-			is_secondary_last && is_right_closed<tone_ival>;
+		template<auto axis_etc>
+		nik_ce auto is_bidirectional = !same<axis_prev<axis_etc>, _id_>;
 
 /***********************************************************************************************************************/
 
@@ -520,83 +490,214 @@ namespace cctmp_one_cycle_specs {
 
 	// assign function:
 
-		template<auto cycle>
-		nik_ce auto assign_function = T_store_U<cycle>::assign_function;
+		template<auto cycle_etc>
+		nik_ce auto assign_function = T_store_U<cycle_etc>::assign_function;
 
-// (translate):
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-	// tag argcompose:
+// tag:
 
-		template<auto... ops>
-		nik_ce auto translate<TN:::id, TT::tag_argcompose, ops...> = _argcompose_<tag_value<ops>...>;
+/***********************************************************************************************************************/
 
-	// tag peek argcompose:
+// value:
 
-		template<auto is_tertiary, auto root_axis, auto op, auto l_arg, auto r_arg>
-		nik_ce auto translate<TN:::id, TT::tag_peek_argcompose, ops...> = _argcompose_
-		<
-			tag_value<op>,
+	template<template<auto> typename Tag, auto Value, nik_vp(t)(Tag<Value>*)>
+	nik_ce auto translate<TN::tag, TT::value, t> = Value;
 
-			if_then_else
-			<
-				is_tertiary, axis_next<root_axis>, tag_value<l_arg>
-			>,
+	// syntactic sugar:
 
-			tag_value<r_arg>
-		>;
+		template<auto tag>
+		nik_ce auto tag_value = translate<TN::tag, TT::value, tag>;
 
-	// tag side argcompose:
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-		template<auto... ops>
-		nik_ce auto translate<TN:::id, TT::tag_side_argcompose, ops...> = _side_<_argcompose_<tag_value<ops>...>;
+// ival:
 
+/***********************************************************************************************************************/
+
+// is left open:
+
+	template<auto ival_tag>
+	nik_ce auto translate<TN::ival, TT::is_left_open, ival_tag>	= (tag_value<ival_tag>[0] == '(');
+
+/***********************************************************************************************************************/
+
+// is right open:
+
+	template<auto ival_tag>
+	nik_ce auto translate<TN::ival, TT::is_right_open, ival_tag>	= (tag_value<ival_tag>[1] == ')');
+
+/***********************************************************************************************************************/
+
+// is right closed:
+
+	template<auto ival_tag>
+	nik_ce auto translate<TN::ival, TT::is_right_closed, ival_tag>	= (tag_value<ival_tag>[1] == ']');
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// axis:
+
+/***********************************************************************************************************************/
+
+// is last:
+
+	template<auto root_ival_etc, auto... tone_ival_etcs>
+	nik_ce auto translate<TN::axis, TT::is_last, root_ival_etc, tone_ival_etcs...> =
+		is_right_open<root_ival_etc> && overload<_or_, is_right_closed<tone_ival_etcs>...>;
+
+/***********************************************************************************************************************/
+
+// is primary last:
+
+	template<auto is_last, auto root_axis_etc>
+	nik_ce auto translate<TN::axis, TT::is_primary_last, is_last, root_axis_etc> =
+		is_last && is_bidirectional<root_axis_etc>;
+
+/***********************************************************************************************************************/
+
+// is secondary last:
+
+	template
+	<
+		auto is_last, auto is_primary_last,
+		template<auto...> typename B, auto... right_closed_tone_axis_etcs,
+		nik_vp(p)(B<right_closed_tone_axis_etcs...>*)
+	>
+	nik_ce auto translate<TN::axis, TT::is_secondary_last, is_last, is_primary_last, p> =
+		overload<_and_, is_last, !is_primary_last, is_bidirectional<right_closed_tone_axis_etcs>...>;
+
+/***********************************************************************************************************************/
+
+// is tertiary last:
+
+	template<auto is_last, auto is_primary_last, auto is_secondary_last>
+	nik_ce auto translate<TN::axis, TT::is_tertiary_last, is_last, is_primary_last, is_secondary_last> =
+		is_last && !is_primary_last && !is_secondary_last;
+
+/***********************************************************************************************************************/
+
+// is post assign function:
+
+	template<auto is_last, auto is_secondary_last, auto root_ival_etc>
+	nik_ce auto translate<TN::axis, TT::is_post_assign_function, is_last, is_secondary_last, root_ival_etc> =
+		is_right_closed<root_ival_etc> || (is_last && !is_secondary_last);
+
+/***********************************************************************************************************************/
+
+// is post note next:
+
+	template<auto root_ival_etc, auto note_ival_etc>
+	nik_ce auto translate<TN::axis, TT::is_post_note_next, root_ival_etc, note_ival_etc> =
+		is_right_closed<root_ival_etc> && is_right_open<note_ival_etc>;
+
+/***********************************************************************************************************************/
+
+// is post root next:
+
+	template<auto is_primary_last, auto is_tertiary_last>
+	nik_ce auto translate<TN::axis, TT::is_post_root_next, is_primary_last, is_tertiary_last> =
+		is_primary_last || is_tertiary_last;
+
+/***********************************************************************************************************************/
+
+// is post tone prev:
+
+	template<auto is_secondary_last, auto tone_ival_etc>
+	nik_ce auto translate<TN::axis, TT::is_post_tone_prev, is_secondary_last, tone_ival_etc> =
+		is_secondary_last && is_right_closed<tone_ival_etc>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// cycle:
+
+/***********************************************************************************************************************/
+
+// argcompose:
+
+	template<auto... op_tags>
+	nik_ce auto translate<TN::cycle, TT::argcompose, op_tags...> = _argcompose_<tag_value<op_tags>...>;
+
+/***********************************************************************************************************************/
+
+// side argcompose:
+
+	template<auto... op_tags>
+	nik_ce auto translate<TN::cycle, TT::sidecompose, op_tags...> = _side_<_argcompose_<tag_value<op_tags>...>>;
+
+/***********************************************************************************************************************/
+
+// peek:
+
+	template<auto is_tertiary, auto root_axis_etc, auto root_arg_tag>
+	nik_ce auto translate<TN::cycle, TT::peek, is_tertiary, root_axis_etc, root_arg_tag> = if_then_else
+	<
+		is_tertiary, axis_next<root_axis_etc>, tag_value<root_arg_tag>
+	>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // precycle:
 
-	// tonic prev:
+/***********************************************************************************************************************/
 
-		template<auto is_primary_last, auto root_axis>
-		nik_ce auto translate<TN:::id, TT::pre_tonic_prev, is_primary_last, root_axis> = if_then_else
-		<
-			is_primary_last, axis_prev<root_axis>, _id_
-		>;
+// tonic prev:
 
-	// note next:
+	template<auto is_primary_last, auto root_axis_etc>
+	nik_ce auto translate<TN::precycle, TT::tonic_prev, is_primary_last, root_axis_etc> = if_then_else
+	<
+		is_primary_last, axis_prev<root_axis_etc>, _id_
+	>;
 
-		template<auto note_ival, auto note_axis>
-		nik_ce auto translate<TN:::id, TT::pre_note_next, note_ival, note_axis> = if_then_else
-		<
-			is_left_open<note_ival>, axis_next<note_axis>, _id_
-		>;
+/***********************************************************************************************************************/
 
+// note next:
+
+	template<auto note_ival_etc, auto note_axis_etc>
+	nik_ce auto translate<TN::precycle, TT::note_next, note_ival_etc, note_axis_etc> = if_then_else
+	<
+		is_left_open<note_ival_etc>, axis_next<note_axis_etc>, _id_
+	>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // postcycle:
 
-	// assign function:
+/***********************************************************************************************************************/
 
-		template<auto is_post_assign_function, auto cycle>
-		nik_ce auto translate<TN:::id, TT::post_assign_function, cycle> = if_then_else
-		<
-			is_post_assign_function, assign_function<cycle>, _id_
-		>;
+// assign function:
 
-	// note next:
+	template<auto is_post_assign_function, auto cycle_etc>
+	nik_ce auto translate<TN::postcycle, TT::assign_function, is_post_assign_function, cycle_etc> = if_then_else
+	<
+		is_post_assign_function, assign_function<cycle_etc>, _id_
+	>;
 
-		template<>
-		nik_ce auto translate<TN:::id, TT::> = if_then_else
-		<
-			is_post_note_next, axis_next<note_axis>, _id_
-		>;
+/***********************************************************************************************************************/
 
-	// tonic next:
+// note next:
 
-		template<auto is_primary_last, auto root_axis>
-		nik_ce auto translate<TN:::id, TT::post_tonic_next, is_primary_last, root_axis> = if_then_else
-		<
-			is_primary_last, axis_next<root_axis>, _id_
-		>;
+	template<auto is_post_note_next, auto note_axis_etc>
+	nik_ce auto translate<TN::postcycle, TT::note_next, is_post_note_next, note_axis_etc> = if_then_else
+	<
+		is_post_note_next, axis_next<note_axis_etc>, _id_
+	>;
+
+/***********************************************************************************************************************/
+
+// tonic next:
+
+	template<auto is_primary_last, auto root_axis_etc>
+	nik_ce auto translate<TN::postcycle, TT::tonic_next, is_primary_last, root_axis_etc> = if_then_else
+	<
+		is_primary_last, axis_next<root_axis_etc>, _id_
+	>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

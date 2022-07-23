@@ -19,64 +19,54 @@
 
 namespace cctmp_one_cycle_specs {
 
-	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
-
-	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
-
-	template<auto... Vs> nik_ce auto overload		= cctmp::template overload<Vs...>;
-
-	nik_ce auto _id_					= cctmp::_id_;
-
-	nik_ce auto _same_					= cctmp::_same_;
-	nik_ce auto _if_then_else_				= cctmp::_if_then_else_;
-
-	template<auto... Vs> nik_ce auto _argcompose_		= cctmp_generics::template _argcompose_<Vs...>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// conveniences:
-
-/***********************************************************************************************************************/
-
-// same:
-
-	template<auto V0, auto V1>
-	nik_ce auto same = overload<_same_, V0, V1>;
-
-// if_then_else:
-
-	template<auto p, auto a, auto c>
-	nik_ce auto if_then_else = overload<_if_then_else_, p, a, c>;
+// etc:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
-// operators:
+// names:
 
-/***********************************************************************************************************************/
-
-// member value:
-
-	struct T_member_value
+	struct TranslatorName
 	{
-		template<auto U>
-		nik_ces auto result = T_store_U<U>::value;
+		nik_ces key_type id		= 0;
 
-	}; nik_ce auto U_member_value = U_store_T<T_member_value>;
+		// singular:
 
-	template<auto U>
-	nik_ce auto member_value = T_member_value::template result<U>;
+		nik_ces key_type repeat		= 1;
+		nik_ces key_type fold		= 2;
+		nik_ces key_type find_first	= 3;
+		nik_ces key_type find_all	= 4;
+
+		// plural:
+
+		nik_ces key_type map		= 5;
+		nik_ces key_type zip		= 6;
+		nik_ces key_type fasten		= 7;
+		nik_ces key_type glide		= 8;
+	};
+
+	using TN = TranslatorName;
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
-// translator:
+// structs:
 
-/***********************************************************************************************************************/
+	template<key_type, typename...> struct T_label;
+	template<key_type, typename...> struct T_position;
+
+	template<key_type, typename...> struct T_ival;
+	template<key_type, typename...> struct T_axis;
+
+	template<key_type, typename...> struct T_ivals;
+
+	template<key_type, typename...> struct T_cycle;
+	template<key_type, typename...> struct T_precycle;
+	template<key_type, typename...> struct T_postcycle;
+
 /***********************************************************************************************************************/
 
 // etc:
@@ -94,76 +84,6 @@ namespace cctmp_one_cycle_specs {
 
 	template<template<key_type, typename...> class Etc, key_type Key, auto... Vs>
 	nik_ce auto U_tr = U_store_T<T_tr<Etc, Key, Vs...>>;
-
-/***********************************************************************************************************************/
-
-// atomic:
-
-	// labels:
-
-		template<key_type, typename...> struct T_cycle;
-		template<key_type, typename...> struct T_precycle;
-		template<key_type, typename...> struct T_postcycle;
-		template<key_type, typename...> struct T_match;
-		template<key_type, typename...> struct T_postmatch;
-		template<key_type, typename...> struct T_done;
-
-	// positions:
-
-		template<key_type, typename...> struct T_out;
-		template<key_type, typename...> struct T_aux;
-		template<key_type, typename...> struct T_in;
-		template<key_type, typename...> struct T_car_in;
-		template<key_type, typename...> struct T_cdr_in;
-		template<key_type, typename...> struct T_end;
-
-	// ival:
-
-		template<key_type, typename...> struct T_is_left_open;
-		template<key_type, typename...> struct T_is_right_open;
-		template<key_type, typename...> struct T_is_right_closed;
-
-	// axis:
-
-		template<key_type, typename...> struct T_is_last;
-		template<key_type, typename...> struct T_is_primary_last;
-		template<key_type, typename...> struct T_is_secondary_last;
-		template<key_type, typename...> struct T_is_tertiary_last;
-
-		template<key_type, typename...> struct T_is_post_assign_function;
-		template<key_type, typename...> struct T_is_post_note_next;
-		template<key_type, typename...> struct T_is_post_root_next;
-		template<key_type, typename...> struct T_is_post_tone_prev;
-
-		template<key_type, typename...> struct T_next;
-
-	// cycle:
-
-		template<key_type, typename...> struct T_loop_predicate;
-		template<key_type, typename...> struct T_assign_function;
-		template<key_type, typename...> struct T_note_next;
-
-	// precycle:
-
-		template<key_type, typename...> struct T_pre_tonic_prev;
-		template<key_type, typename...> struct T_pre_note_next;
-
-	// postcycle:
-
-		template<key_type, typename...> struct T_post_assign_function;
-		template<key_type, typename...> struct T_post_note_prev;
-		template<key_type, typename...> struct T_post_note_next;
-		template<key_type, typename...> struct T_post_tonic_next;
-
-// composite:
-
-		template<key_type, typename...> struct T_label;
-		template<key_type, typename...> struct T_position;
-
-		template<key_type, typename...> struct T_ival;
-		template<key_type, typename...> struct T_axis;
-
-		template<key_type, typename...> struct T_ivals;
 
 /***********************************************************************************************************************/
 
