@@ -25,12 +25,20 @@ namespace cctmp_one_cycle_specs {
 
 // etc:
 
+	template<key_type Name, key_type Note, typename... Ts> struct T_etc;
+	template<key_type Name, key_type Note, typename... Ts> nik_ce auto U_etc = U_store_T<T_etc<Name, Note, Ts...>>;
+
+// tr:
+
+	template<key_type Name, key_type Note, auto... Vs> using T_tr		= T_etc<Name, Note, T_store_U<Vs>...>;
+	template<key_type Name, key_type Note, auto... Vs> nik_ce auto U_tr	= U_store_T<T_tr<Name, Note, Vs...>>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // names:
 
-	struct TranslatorName
+	struct ConfigurationName
 	{
 		nik_ces key_type id		= 0;
 
@@ -49,41 +57,29 @@ namespace cctmp_one_cycle_specs {
 		nik_ces key_type glide		= 8;
 	};
 
-	using TN = TranslatorName;
+	using CN = ConfigurationName;
 
 /***********************************************************************************************************************/
 
-// structs:
+// note:
 
-	template<key_type, typename...> struct T_label;
-	template<key_type, typename...> struct T_position;
+	struct ConfigurationNote
+	{
+		nik_ces key_type id			=  0;
 
-	template<key_type, typename...> struct T_ival;
-	template<key_type, typename...> struct T_axis;
+		nik_ces key_type label			=  1;
+		nik_ces key_type position		=  2;
 
-	template<key_type, typename...> struct T_ivals;
+		nik_ces key_type ival			=  3;
+		nik_ces key_type axis			=  4;
+		nik_ces key_type ivals			=  5;
 
-	template<key_type, typename...> struct T_cycle;
-	template<key_type, typename...> struct T_precycle;
-	template<key_type, typename...> struct T_postcycle;
+		nik_ces key_type cycle			=  6;
+		nik_ces key_type precycle		=  7;
+		nik_ces key_type postcycle		=  8;
+	};
 
-/***********************************************************************************************************************/
-
-// etc:
-
-	template<template<key_type, typename...> class Etc, key_type Key, typename... Ts>
-	using T_etc = Etc<Key, Ts...>;
-
-	template<template<key_type, typename...> class Etc, key_type Key, typename... Ts>
-	nik_ce auto U_etc = U_store_T<T_etc<Etc, Key, Ts...>>;
-
-// tr:
-
-	template<template<key_type, typename...> class Etc, key_type Key, auto... Vs>
-	using T_tr = Etc<Key, T_store_U<Vs>...>;
-
-	template<template<key_type, typename...> class Etc, key_type Key, auto... Vs>
-	nik_ce auto U_tr = U_store_T<T_tr<Etc, Key, Vs...>>;
+	using CT = ConfigurationNote;
 
 /***********************************************************************************************************************/
 
@@ -91,12 +87,12 @@ namespace cctmp_one_cycle_specs {
 
 	// id:
 
-		template<typename _Note>
-		struct T_ival<TR::id, _Note>
+		template<auto Note>
+		struct T_etc<CN::id, CT::ival, _note<Note>>
 		{
-			nik_ces auto is_left_open	= U_etc < T_is_left_open    , TR::id , _Note >;
-			nik_ces auto is_right_open	= U_etc < T_is_right_open   , TR::id , _Note >;
-			nik_ces auto is_right_closed	= U_etc < T_is_right_closed , TR::id , _Note >;
+			nik_ces auto is_left_open	= ival < TT::is_left_open    , Note >;
+			nik_ces auto is_right_open	= ival < TT::is_right_open   , Note >;
+			nik_ces auto is_right_closed	= ival < TT::is_right_closed , Note >;
 		};
 
 /***********************************************************************************************************************/
@@ -105,19 +101,19 @@ namespace cctmp_one_cycle_specs {
 
 	// unidirectional:
 
-		template<typename _Next>
-		struct T_axis<TR::id, _Next>
+		template<auto Next>
+		struct T_etc<CN::id, CT::axis, _next<Next>>
 		{
-			nik_ces auto next = U_etc < T_next , TR::id , _Next >;
+			nik_ces auto next = Next;
 		};
 
 	// bidirectional:
 
-		template<typename _Next, typename _Prev>
-		struct T_axis<TR::id, _Next, _Prev>
+		template<auto Next, auto Prev>
+		struct T_etc<CN::id, CT::axis, _next<Next>, _prev<Prev>>
 		{
-			nik_ces auto prev = U_etc < T_next , TR::id , _Prev >;
-			nik_ces auto next = U_etc < T_next , TR::id , _Next >;
+			nik_ces auto prev = Prev;
+			nik_ces auto next = Next;
 		};
 
 /***********************************************************************************************************************/
@@ -130,11 +126,11 @@ namespace cctmp_one_cycle_specs {
 // label:
 
 	template<auto _Precycle_, auto _Cycle_, auto _Postcycle_>
-	struct T_label<TR::repeat, _label<_Precycle_, _Cycle_, _Postcycle_>>
+	struct T_etc<CN::repeat, CT::label, _label<_Precycle_, _Cycle_, _Postcycle_>>
 	{
-		nik_ces auto precycle	= U_tr <  T_precycle, TR::id,  _Precycle_ >;
-		nik_ces auto cycle	= U_tr <     T_cycle, TR::id,     _Cycle_ >;
-		nik_ces auto postcycle	= U_tr < T_postcycle, TR::id, _Postcycle_ >;
+		nik_ces auto precycle	= tag_value <  _Precycle_ >;
+		nik_ces auto cycle	= tag_value <     _Cycle_ >;
+		nik_ces auto postcycle	= tag_value < _Postcycle_ >;
 	};
 
 /***********************************************************************************************************************/
@@ -142,22 +138,22 @@ namespace cctmp_one_cycle_specs {
 // position:
 
 	template<auto _Out_, auto _End_, auto _In_>
-	struct T_position<TR::repeat, _position<_Out_, _End_, _In_>>
+	struct T_etc<CN::repeat, CT::position, _position<_Out_, _End_, _In_>>
 	{
-		nik_ces auto out	= U_tr < T_out, TR::id, _Out_ >;
-		nik_ces auto end	= U_tr < T_end, TR::id, _End_ >;
-		nik_ces auto in		= U_tr <  T_in, TR::id,  _In_ >;
+		nik_ces auto out	= tag_value < _Out_ >;
+		nik_ces auto end	= tag_value < _End_ >;
+		nik_ces auto in		= tag_value <  _In_ >;
 	};
 
 /***********************************************************************************************************************/
 
 // ivals:
 
-	template<auto _Type_, auto _Next_>
-	struct T_ivals<TR::repeat, _out_ival<_Type_, _Next_>>
+	template<auto _Note_, auto _Next_>
+	struct T_etc<CN::repeat, CT::ivals, _out_ival<_Note_, _Next_>>
 	{
-		nik_ces auto out_ival	= U_tr < T_ival, TR::id, _Type_ >;
-		nik_ces auto out_axis	= U_tr < T_axis, TR::id, _Next_ >;
+		nik_ces auto out_ival	= U_tr < CN::id, CT::ival, _Note_ >;
+		nik_ces auto out_axis	= U_tr < CN::id, CT::axis, _Next_ >;
 	};
 
 /***********************************************************************************************************************/
@@ -171,9 +167,9 @@ namespace cctmp_one_cycle_specs {
 
 		typename Ivals
 	>
-	struct T_cycle
+	struct T_etc
 	<
-		TR::repeat,
+		CN::repeat, CT::cycle,
 
 		_break  < _Op0_ , _Arg01_ , _Arg02_ >,
 		_action < _Op1_ , _Arg11_ , _Arg12_ >,
@@ -181,10 +177,10 @@ namespace cctmp_one_cycle_specs {
 		Ivals
 	>
 	{
-		nik_ces auto loop_predicate		= U_tr < T_loop_predicate , TR::repeat, _Op0_, _Arg01_, _Arg02_ >;
-		nik_ces auto assign_function		= U_tr < T_assign_function, TR::repeat, _Op1_, _Arg11_, _Arg12_ >;
+		nik_ces auto loop_predicate	= cycle < TT::argcompose  , _Op0_, _Arg01_, _Arg02_ >;
+		nik_ces auto assign_function	= cycle < TT::sidecompose , _Op1_, _Arg11_, _Arg12_ >;
 
-		nik_ces auto out_next			= U_tr < T_cycle_next, TR::id, Ivals::out_axis >;
+		nik_ces auto out_next		= axis_next < Ivals::out_axis >;
 	};
 
 /***********************************************************************************************************************/
@@ -192,9 +188,9 @@ namespace cctmp_one_cycle_specs {
 // precycle:
 
 	template<typename Ivals>
-	struct T_precycle<TR::repeat, Ivals>
+	struct T_etc<CN::repeat, CT::precycle, Ivals>
 	{
-		nik_ces auto pre_out_next = U_tr<T_pre_next, TR::id, Ivals::out_ival, Ivals::out_axis>;
+		nik_ces auto pre_out_next = precycle < TT::note_next , Ivals::out_ival , Ivals::out_axis >;
 	};
 
 /***********************************************************************************************************************/
@@ -202,12 +198,14 @@ namespace cctmp_one_cycle_specs {
 // postcycle:
 
 	template<typename Ivals, typename Cycle>
-	struct T_postcycle<TR::repeat, Ivals, Cycle>
+	struct T_etc<CN::repeat, CT::postcycle, Ivals, Cycle>
 	{
-		nik_ces auto post_assign_function = U_tr
-		<
-			T_post_assign_function, TR::id, Ivals::out_ival, U_store_T<Cycle>
-		>;
+		nik_ces auto is_post_assign_function	= is_right_closed<Ivals::out_ival>;
+		nik_ces auto post_assign_function	= postcycle
+							<
+								TT::assign_function,
+								is_post_assign_function, U_store_T<Cycle>
+							>;
 	};
 
 /***********************************************************************************************************************/
@@ -241,18 +239,18 @@ namespace cctmp_one_cycle_specs {
 // label:
 
 	template<typename Label>
-	struct T_label<TR::map, Label> : public T_label<TR::repeat, Label> { };
+	struct T_etc<CN::map, CT::label, Label> : public T_label<CN::repeat, Label> { };
 
 /***********************************************************************************************************************/
 
 // position:
 
 	template<auto _Out_, auto _In_, auto _End_>
-	struct T_position<TR::map, _position<_Out_, _In_, _End_>>
+	struct T_etc<CN::map, CT::position, _position<_Out_, _In_, _End_>>
 	{
-		nik_ces auto out	= U_tr < T_out, TR::id, _Out_ >;
-		nik_ces auto in		= U_tr <  T_in, TR::id,  _In_ >;
-		nik_ces auto end	= U_tr < T_end, TR::id, _End_ >;
+		nik_ces auto out	= tag_value < _Out_ >;
+		nik_ces auto in		= tag_value <  _In_ >;
+		nik_ces auto end	= tag_value < _End_ >;
 	};
 
 /***********************************************************************************************************************/
@@ -261,22 +259,22 @@ namespace cctmp_one_cycle_specs {
 
 	template
 	<
-		auto _OutType_, auto _OutNext_, auto _OutPrev_,
-		auto  _InType_, auto  _InNext_, auto  _InPrev_
+		auto _OutNote_, auto _OutNext_, auto _OutPrev_,
+		auto  _InNote_, auto  _InNext_, auto  _InPrev_
 	>
-	struct T_ival
+	struct T_etc
 	<
-		TR::map,
+		CN::map, CT::ivals,
 
-		_out_ival < _OutType_ , _OutNext_ , _OutPrev_ >,
-		 _in_ival <  _InType_ ,  _InNext_ ,  _InPrev_ >
+		_out_ival < _OutNote_ , _OutNext_ , _OutPrev_ >,
+		 _in_ival <  _InNote_ ,  _InNext_ ,  _InPrev_ >
 	>
 	{
-		nik_ces auto out_ival	= U_tr < T_ival, TR::id, _OutType_             >;
-		nik_ces auto out_axis	= U_tr < T_axis, TR::id, _OutNext_ , _OutPrev_ >;
+		nik_ces auto out_ival	= U_tr < CN::id, CT::ival, _OutNote_             >;
+		nik_ces auto out_axis	= U_tr < CN::id, CT::axis, _OutNext_ , _OutPrev_ >;
 
-		nik_ces auto in_ival	= U_tr < T_ival, TR::id,  _InType_             >;
-		nik_ces auto in_axis	= U_tr < T_axis, TR::id,  _InNext_ ,  _InPrev_ >;
+		nik_ces auto in_ival	= U_tr < CN::id, CT::ival,  _InNote_             >;
+		nik_ces auto in_axis	= U_tr < CN::id, CT::axis,  _InNext_ ,  _InPrev_ >;
 	};
 
 /***********************************************************************************************************************/
@@ -284,13 +282,15 @@ namespace cctmp_one_cycle_specs {
 // axis:
 
 	template<typename Ivals>
-	struct T_axis<TR::map, Ivals>
+	struct T_etc<CN::map, CT::axis, Ivals>
 	{
-		nik_ces auto is_last		= U_tr < T_is_last, TR::id , Ivals::in_ival , Ivals::out_ival >;
+		nik_ces auto is_last       = axis < TT::is_last            , Ivals::in_ival , Ivals::out_ival >;
+		nik_ces auto is_primary	   = axis < TT::is_primary_last    , is_last        , Ivals::in_ival  >;
 
-		nik_ces auto is_primary		= U_tr < T_is_primary   , TR::id, is_last , Ivals::in_ival              >;
-		nik_ces auto is_secondary	= U_tr < T_is_secondary , TR::id, is_last , is_primary, Ivals::out_ival >;
-		nik_ces auto is_tertiary	= U_tr < T_is_tertiary  , TR::id, is_last , is_primary, is_secondary    >;
+		nik_ces auto closed_rights = axis < TT::only_closed_rights , Ivals::out_ival >;
+
+		nik_ces auto is_secondary  = axis < TT::is_secondary_last  , is_last , is_primary, closed_rights >;
+		nik_ces auto is_tertiary   = axis < TT::is_tertiary_last   , is_last , is_primary, is_secondary  >;
 	};
 
 /***********************************************************************************************************************/
@@ -304,9 +304,9 @@ namespace cctmp_one_cycle_specs {
 
 		typename Axis, typename Ivals
 	>
-	struct T_cycle
+	struct T_etc
 	<
-		TR::map,
+		CN::map, CT::cycle,
 
 		_break  < _Op0_ , _Arg01_ , _Arg02_ >,
 		_action < _Op1_ , _Arg11_ , _Arg12_ >,
@@ -322,16 +322,13 @@ namespace cctmp_one_cycle_specs {
 		//	5. If (4), then for each other right endpoint, when open, iterate postcycle.
 		//	6. If prev and peek, iterate end to reset postcycle.
 
-		nik_ces auto loop_predicate		= U_tr
-							<
-								T_loop_predicate, TR::map,
-								Axis::is_tertiary, Ivals::in_axis,
-								_Op0_, _Arg01_, _Arg02_
-							>;
-		nik_ces auto assign_function		= U_tr< T_assign_function, TR::map, _Op1_, _Arg11_, _Arg12_ >;
+		nik_ces auto loop_arg			= cycle<TT::peek, Axis::is_tertiary, Ivals::in_axis, _Arg01_>;
 
-		nik_ces auto out_next			= U_tr < T_cycle_next, TR::id, Ivals::out_axis >;
-		nik_ces auto in_next			= U_tr < T_cycle_next, TR::id, Ivals::in_axis >;
+		nik_ces auto loop_predicate		= cycle < TT::argcompose  , _Op0_ , loop_arg , _Arg02_ >;
+		nik_ces auto assign_function		= cycle < TT::sidecompose , _Op1_ , _Arg11_  , _Arg12_ >;
+
+		nik_ces auto out_next			= axis_next < Ivals::out_axis >;
+		nik_ces auto in_next			= axis_next < Ivals::in_axis  >;
 	};
 
 /***********************************************************************************************************************/
@@ -339,11 +336,11 @@ namespace cctmp_one_cycle_specs {
 // precycle:
 
 	template<typename Axis, typename Ivals>
-	struct T_precycle<TR::map, Axis, Ivals>
+	struct T_etc<CN::map, CT::precycle, Axis, Ivals>
 	{
-		nik_ces auto pre_end_next = U_tr < T_pre_t_prev , TR::id, Axis::is_primary , Ivals::in_axis  >;
-		nik_ces auto pre_out_next = U_tr < T_pre_next   , TR::id, Ivals::out_ival  , Ivals::out_axis >;
-		nik_ces auto pre_in_next  = U_tr < T_pre_next   , TR::id, Ivals::in_ival   , Ivals::in_axis  >;
+		nik_ces auto pre_end_next = precycle < TT::tonic_prev , Axis::is_primary_last , Ivals::in_axis  >;
+		nik_ces auto pre_out_next = precycle < TT::note_next  , Ivals::out_ival       , Ivals::out_axis >;
+		nik_ces auto pre_in_next  = precycle < TT::note_next  , Ivals::in_ival        , Ivals::in_axis  >;
 	};
 
 /***********************************************************************************************************************/
@@ -351,16 +348,24 @@ namespace cctmp_one_cycle_specs {
 // postcycle:
 
 	template<typename Axis, typename Ivals, typename Cycle>
-	struct T_postcycle<TR::map, Axis, Ivals, Cycle>
+	struct T_etc<CN::map, CT::postcycle, Axis, Ivals, Cycle>
 	{
-		nik_ces auto post_assign_function = U_tr
-		<
-			T_post_assign_function, TR::id, Ivals::in_ival, U_store_T<Cycle>
-		>;
+		nik_ces auto is_post_assign		= axis
+							<
+								TT::is_post_assign_function, Axis::is_last,
+								Axis::is_secondary_last, Ivals::in_ival
+							>;
+		nik_ces auto is_post_root_next		= axis
+							<
+								TT::is_post_root_next,
+								Ivals::is_primary_last, Ivals::is_tertiary_last
+							>;
 
-		nik_ces auto post_out_next = U_tr <T_post_s_next , TR::id, Axis::is_secondary , U_store_T<Ivals> >;
-		nik_ces auto post_in_next  = U_tr <T_post_p_next , TR::id, Axis::is_primary   , Ivals::in_axis   >;
-		nik_ces auto post_end_prev = U_tr <T_post_t_next , TR::id, Axis::is_primary   , Ivals::in_axis   >;
+		nik_ces auto post_assign_function = postcycle<TT::assign_function, is_post_assign, U_store_T<Cycle>>;
+
+	//	nik_ces auto post_out_next = postcycle < TT::tone_next  , U_store_T<Axis>       , U_store_T<Ivals> >;
+		nik_ces auto post_in_next  = postcycle < TT::note_next  , is_post_root_next     , Ivals::in_axis   >;
+		nik_ces auto post_end_prev = postcycle < TT::tonic_next , Axis::is_primary_last , Ivals::in_axis   >;
 	};
 
 /***********************************************************************************************************************/

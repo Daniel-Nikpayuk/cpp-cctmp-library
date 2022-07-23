@@ -38,6 +38,8 @@ namespace cctmp_one_cycle_specs {
 	template<auto... Vs> nik_ce auto _argcompose_		= cctmp_generics::template _argcompose_<Vs...>;
 	template<auto... Vs> nik_ce auto _side_			= cctmp_generics::template _side_<Vs...>;
 
+	template<auto... Vs> nik_ce auto pack_sifter		= cctmp_functional::template pack_sifter<Vs...>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -386,7 +388,7 @@ namespace cctmp_one_cycle_specs {
 
 // names:
 
-	struct TranslatorName
+	struct TranslateName
 	{
 		nik_ces key_type id		= 0;
 
@@ -400,13 +402,13 @@ namespace cctmp_one_cycle_specs {
 		nik_ces key_type postcycle	= 6;
 	};
 
-	using TN = TranslatorName;
+	using TN = TranslateName;
 
 /***********************************************************************************************************************/
 
 // notes:
 
-	struct TranslatorNote
+	struct TranslateNote
 	{
 		nik_ces key_type id				=  0;
 
@@ -420,26 +422,28 @@ namespace cctmp_one_cycle_specs {
 
 		nik_ces key_type is_last			=  6;
 		nik_ces key_type is_primary_last		=  7;
-		nik_ces key_type is_secondary_last		=  8;
-		nik_ces key_type is_tertiary_last		=  9;
+		nik_ces key_type only_closed_rights		=  8;
+		nik_ces key_type is_secondary_last		=  9;
+		nik_ces key_type is_tertiary_last		= 10;
 
-		nik_ces key_type is_post_assign_function	= 10;
-		nik_ces key_type is_post_note_next		= 11;
-		nik_ces key_type is_post_root_next		= 12;
-		nik_ces key_type is_post_tone_prev		= 13;
+		nik_ces key_type is_post_assign_function	= 11;
+		nik_ces key_type is_post_note_next		= 12;
+		nik_ces key_type is_post_root_next		= 13;
+		nik_ces key_type is_post_tone_prev		= 14;
 
-		nik_ces key_type argcompose			= 14;
-		nik_ces key_type sidecompose			= 15;
-		nik_ces key_type peek				= 16;
+		nik_ces key_type argcompose			= 15;
+		nik_ces key_type sidecompose			= 16;
+		nik_ces key_type peek				= 17;
 
-		nik_ces key_type tonic_prev			= 17;
-		nik_ces key_type note_next			= 18;
+		nik_ces key_type tonic_prev			= 18;
+		nik_ces key_type note_next			= 19;
 
-		nik_ces key_type assign_function		= 19;
-		nik_ces key_type tonic_next			= 20;
+		nik_ces key_type assign_function		= 20;
+		nik_ces key_type tone_next			= 21;
+		nik_ces key_type tonic_next			= 22;
 	};
 
-	using TT = TranslatorNote;
+	using TT = TranslateNote;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -462,8 +466,15 @@ namespace cctmp_one_cycle_specs {
 
 	// is right closed:
 
+		struct T_is_right_closed 
+		{
+			template<auto ival_etc>
+			nik_ces auto result = T_store_U<ival_etc>::is_right_closed;
+
+		}; nik_ce auto U_is_right_closed = U_store_T<T_is_right_closed>;
+
 		template<auto ival_etc>
-		nik_ce auto is_right_closed = T_store_U<ival_etc>::is_right_closed;
+		nik_ce auto is_right_closed = T_is_right_closed::template result<ival_etc>;
 
 /***********************************************************************************************************************/
 
@@ -493,6 +504,41 @@ namespace cctmp_one_cycle_specs {
 		template<auto cycle_etc>
 		nik_ce auto assign_function = T_store_U<cycle_etc>::assign_function;
 
+	// peek:
+
+		template<auto is_tertiary_last, typename RootAxis, template<auto> typename Tag, auto RootArg>
+		nik_ce auto dispatch_peek(nik_avp(RootAxis*), nik_avp(Tag<RootArg>*))
+		{
+			if nik_ce (is_tertiary_last) return _argcompose_<RootArg, RootAxis::next>;
+			else                         return RootArg;
+		}
+
+/***********************************************************************************************************************/
+
+// postcycle:
+
+	// tone next:
+
+/*
+		template<auto is_secondary_last, typename ToneAxis>
+		nik_ce auto dispatch_tone_next(nik_avp(ToneAxis*))
+		{
+			if nik_ce (is_secondary_last)
+			{
+				return _argcompose_<RootArg, RootAxis::next>;
+			}
+			else
+			{
+			}
+		}
+
+	template<auto is_secondary_last, auto tone_axis_etc>
+	nik_ce auto translate<TN::postcycle, TT::tone_next, is_secondary_last, tone_axis_etc> = if_then_else
+	<
+		is_post_note_next, axis_next<note_axis_etc>, _id_
+	>;
+*/
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -515,31 +561,37 @@ namespace cctmp_one_cycle_specs {
 
 // ival:
 
+	template<auto... Vs>
+	nik_ces auto ival = translate<TN::ival, Vs...>;
+
 /***********************************************************************************************************************/
 
 // is left open:
 
-	template<auto ival_tag>
-	nik_ce auto translate<TN::ival, TT::is_left_open, ival_tag>	= (tag_value<ival_tag>[0] == '(');
+	template<auto ival>
+	nik_ce auto translate<TN::ival, TT::is_left_open, ival>		= (ival[0] == '(');
 
 /***********************************************************************************************************************/
 
 // is right open:
 
-	template<auto ival_tag>
-	nik_ce auto translate<TN::ival, TT::is_right_open, ival_tag>	= (tag_value<ival_tag>[1] == ')');
+	template<auto ival>
+	nik_ce auto translate<TN::ival, TT::is_right_open, ival>	= (ival[1] == ')');
 
 /***********************************************************************************************************************/
 
 // is right closed:
 
-	template<auto ival_tag>
-	nik_ce auto translate<TN::ival, TT::is_right_closed, ival_tag>	= (tag_value<ival_tag>[1] == ']');
+	template<auto ival>
+	nik_ce auto translate<TN::ival, TT::is_right_closed, ival>	= (ival[1] == ']');
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // axis:
+
+	template<auto... Vs>
+	nik_ces auto axis = translate<TN::axis, Vs...>;
 
 /***********************************************************************************************************************/
 
@@ -559,7 +611,17 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
+// only closed rights:
+
+	template<auto... ival_etcs>
+	nik_ce auto translate<TN::axis, TT::only_closed_rights, ival_etcs...> =
+		pack_sifter<U_is_right_closed, ival_etcs...>;
+
+/***********************************************************************************************************************/
+
 // is secondary last:
+
+		// if p is empty, then !is_last
 
 	template
 	<
@@ -615,6 +677,9 @@ namespace cctmp_one_cycle_specs {
 
 // cycle:
 
+	template<auto... Vs>
+	nik_ces auto cycle = translate<TN::cycle, Vs...>;
+
 /***********************************************************************************************************************/
 
 // argcompose:
@@ -634,15 +699,19 @@ namespace cctmp_one_cycle_specs {
 // peek:
 
 	template<auto is_tertiary, auto root_axis_etc, auto root_arg_tag>
-	nik_ce auto translate<TN::cycle, TT::peek, is_tertiary, root_axis_etc, root_arg_tag> = if_then_else
+	nik_ce auto translate<TN::cycle, TT::peek, is_tertiary, root_axis_etc, root_arg_tag> = dispatch_peek
 	<
-		is_tertiary, axis_next<root_axis_etc>, tag_value<root_arg_tag>
-	>;
+		is_tertiary
+
+	>(root_axis_etc, root_arg_tag);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // precycle:
+
+	template<auto... Vs>
+	nik_ces auto precycle = translate<TN::precycle, Vs...>;
 
 /***********************************************************************************************************************/
 
@@ -669,6 +738,9 @@ namespace cctmp_one_cycle_specs {
 
 // postcycle:
 
+	template<auto... Vs>
+	nik_ces auto postcycle = translate<TN::postcycle, Vs...>;
+
 /***********************************************************************************************************************/
 
 // assign function:
@@ -681,7 +753,7 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
-// note next:
+// note (root) next:
 
 	template<auto is_post_note_next, auto note_axis_etc>
 	nik_ce auto translate<TN::postcycle, TT::note_next, is_post_note_next, note_axis_etc> = if_then_else
@@ -691,7 +763,28 @@ namespace cctmp_one_cycle_specs {
 
 /***********************************************************************************************************************/
 
+// tone next:
+
+//	template<auto is_secondary_last, auto tone_axis_etc>
+//	nik_ce auto translate<TN::postcycle, TT::tone_next, is_secondary_last, tone_axis_etc> = if_then_else
+//	<
+//		is_post_note_next, axis_next<note_axis_etc>, _id_
+//	>;
+
+	// if not last:
+
+		// if root is right closed and tone is right open, then next.
+
+	// if last:
+
+		// if (primary or tertiary) and tone is right open, then next.
+		// if secondary and tone is right closed, then prev.
+
+/***********************************************************************************************************************/
+
 // tonic next:
+
+	// is this accurate ? is primary or tertiary ?
 
 	template<auto is_primary_last, auto root_axis_etc>
 	nik_ce auto translate<TN::postcycle, TT::tonic_next, is_primary_last, root_axis_etc> = if_then_else
