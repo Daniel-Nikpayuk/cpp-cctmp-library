@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-namespace cctmp_one_cycle_specs {
+namespace cctmp_one_cycle_generics {
 
 	nik_ce auto _zero					= cctmp::_zero;
 	nik_ce auto _one					= cctmp::_one;
@@ -40,7 +40,7 @@ namespace cctmp_one_cycle_specs {
 	nik_ce auto _similar_					= cctmp::_similar_;
 	nik_ce auto _map_					= cctmp::_map_;
 
-	template<auto... Vs> nik_ce auto unpack_		= cctmp::template unpack_<Vs...>;
+	template<auto... Vs> nik_ce auto to_list_		= cctmp::template to_list_<Vs...>;
 
 	using MD						= typename cctmp::MD;
 
@@ -54,14 +54,14 @@ namespace cctmp_one_cycle_specs {
 									_assign_, _dereference_, _id_
 								>;
 
-	nik_ce auto H_repeat_specification			= cctmp_one_cycle_generics::H_repeat_specification;
-	nik_ce auto H_map_specification				= cctmp_one_cycle_generics::H_map_specification;
-	nik_ce auto H_fold_specification			= cctmp_one_cycle_generics::H_fold_specification;
-	nik_ce auto H_find_first_specification			= cctmp_one_cycle_generics::H_find_first_specification;
-	nik_ce auto H_find_all_specification			= cctmp_one_cycle_generics::H_find_all_specification;
-	nik_ce auto H_zip_specification				= cctmp_one_cycle_generics::H_zip_specification;
-	nik_ce auto H_fasten_specification			= cctmp_one_cycle_generics::H_fasten_specification;
-	nik_ce auto H_glide_specification			= cctmp_one_cycle_generics::H_glide_specification;
+	nik_ce auto H_repeat_specification			= cctmp_one_cycle_assembly::H_repeat_specification;
+	nik_ce auto H_map_specification				= cctmp_one_cycle_assembly::H_map_specification;
+	nik_ce auto H_fold_specification			= cctmp_one_cycle_assembly::H_fold_specification;
+	nik_ce auto H_find_first_specification			= cctmp_one_cycle_assembly::H_find_first_specification;
+	nik_ce auto H_find_all_specification			= cctmp_one_cycle_assembly::H_find_all_specification;
+	nik_ce auto H_zip_specification				= cctmp_one_cycle_assembly::H_zip_specification;
+	nik_ce auto H_fasten_specification			= cctmp_one_cycle_assembly::H_fasten_specification;
+	nik_ce auto H_glide_specification			= cctmp_one_cycle_assembly::H_glide_specification;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -236,21 +236,20 @@ namespace cctmp_one_cycle_specs {
 		template<auto label, auto position, auto out_iter, auto break_, auto action>
 		nik_ce auto _conceptual_repeat(nik_avp(T_pack_Vs<label, position, out_iter, break_, action>*))
 		{
-			using T_label_etc	= T_tr<T_label, TR::repeat, label>;
-			using T_position_etc	= T_tr<T_position, TR::repeat, position>;
+			nik_ce auto chord_etc	= U_chord_ < Chord::repeat , out_iter >;
 
-			using T_ivals_etc	= T_tr<T_ivals, TR::repeat, out_iter>;
-			nik_ce auto ivals_etc	= U_store_T<T_ivals_etc>;
+			using T_label_etc	= T_accord_ < AN::repeat , AT::label    , label    >;
+			using T_position_etc	= T_accord_ < AN::repeat , AT::position , position >;
 
-			using T_cycle_etc	= T_tr<T_cycle, TR::repeat, break_, action, ivals_etc>;
-			nik_ce auto cycle_etc	= U_store_T<T_cycle_etc>;
+			using T_cycle_etc	= T_accord_ < AN::repeat  , AT::cycle , chord_etc , break_ , action >;
+			nik_ce auto cycle_etc	= U_store_T < T_cycle_etc >;
 
-			using T_precycle_etc	= T_tr<T_precycle, TR::repeat, ivals_etc>;
-			using T_postcycle_etc	= T_tr<T_postcycle, TR::repeat, ivals_etc, cycle_etc>;
+			using T_precycle_etc	= T_accord_ < AN::repeat , AT::precycle  , chord_etc >;
+			using T_postcycle_etc	= T_accord_ < AN::repeat , AT::postcycle , chord_etc , cycle_etc >;
 
-			return overload
+			return to_list_
 			<
-				_map_, H_repeat_specification, U_member_value,
+				H_repeat_specification,
 
 				T_label_etc::precycle,
 				T_label_etc::cycle,
@@ -327,6 +326,7 @@ namespace cctmp_one_cycle_specs {
 
 	// default:
 
+/*
 		nik_ce auto conceptual_map_defaults = U_pack_Vs
 		<
 			_label_
@@ -419,6 +419,7 @@ namespace cctmp_one_cycle_specs {
 		(
 			conceptual_write<conceptual_map_defaults, Vs...>
 		);
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -792,5 +793,5 @@ namespace cctmp_one_cycle_specs {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // cctmp_one_cycle_specs
+} // cctmp_one_cycle_generics
 

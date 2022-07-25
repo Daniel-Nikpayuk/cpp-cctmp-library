@@ -28,10 +28,10 @@
 #include"03_cctmp_functional.hpp"
 //#include"04_cctmp_front.hpp"
 #include"05_generic_assembly.hpp"
-#include"06_one_cycle_generics.hpp"
-#include"07_one_cycle_atomics.hpp"
-//#include"08_one_cycle_specifics.hpp"
-//#include"09_one_cycle_defaults.hpp"
+#include"06_one_cycle_assembly.hpp"
+#include"07_one_cycle_specifics.hpp"
+#include"08_one_cycle_accords.hpp"
+#include"09_one_cycle_generics.hpp"
 //#include"10_domain_specifics.hpp"
 //#include"11_big_numbers.hpp"
 //#include"12_cryptography.hpp"
@@ -41,11 +41,11 @@
 
 /***********************************************************************************************************************/
 
-	using namespace cctmp;
+//	using namespace cctmp;
 //	using namespace cctmp_generics;
-//	using namespace cctmp_one_cycle_specs;
+//	using namespace cctmp_one_cycle_generics;
 
-//	template<auto... Vs> constexpr auto U_pack_Vs = cctmp::template U_pack_Vs<Vs...>;
+	template<auto... Vs> constexpr auto U_pack_Vs = cctmp::template U_pack_Vs<Vs...>;
 
 /***********************************************************************************************************************/
 
@@ -67,34 +67,36 @@
 
 /***********************************************************************************************************************/
 
+/*
 	constexpr auto p = U_pack_Vs
 	<
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
 
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
 
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
 
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
-		16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
+	//	16, 7, 12, 3, 1,  200, 99, 0, 5, 41,
 
 		99, 0, 5, 41
 	>;
+*/
 
 /***********************************************************************************************************************/
 
@@ -143,112 +145,112 @@
 
 // repeat:
 
-//	constexpr auto closed			= cctmp_one_cycle_specs::_closed;
-//	constexpr auto closed_type		= cctmp_one_cycle_specs::template _type_<closed>;
-//	constexpr auto closed_ival		= cctmp_one_cycle_specs::template _out_ival_<closed_type>;
+//	constexpr auto closed			= cctmp_one_cycle_generics::_closed;
+//	constexpr auto closed_ival		= cctmp_one_cycle_generics::template _ival_<closed>;
+//	constexpr auto closed_iter		= cctmp_one_cycle_generics::template _out_iter_<closed_ival>;
 
-//	constexpr auto repeat_dspec		= cctmp_one_cycle_specs::template direct_repeat<>;
-//	constexpr auto repeat_cspec		= cctmp_one_cycle_specs::template conceptual_repeat<closed_ival>;
+//	constexpr auto repeat_dspec		= cctmp_one_cycle_generics::template direct_repeat<>;
+//	constexpr auto repeat_cspec		= cctmp_one_cycle_generics::template conceptual_repeat<closed_iter>;
 
-//	using Td_repeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_dspec>;
-//	using Tc_repeat				= typename cctmp_one_cycle_generics::template T_repeat<repeat_cspec>;
+//	using Td_repeat				= typename cctmp_one_cycle_assembly::template T_repeat<repeat_dspec>;
+//	using Tc_repeat				= typename cctmp_one_cycle_assembly::template T_repeat<repeat_cspec>;
 
 // map:
 
-//	constexpr auto _map_function_sq_	= cctmp_one_cycle_specs::template _assign_function_<_d_assign_sq_>;
+//	constexpr auto _map_function_sq_	= cctmp_one_cycle_generics::template _assign_function_<_d_assign_sq_>;
 
-//	constexpr auto map_dspec_id_		= cctmp_one_cycle_specs::template direct_map<>;
-//	constexpr auto map_dspec_sq_		= cctmp_one_cycle_specs::template direct_map<_map_function_sq_>;
-//	constexpr auto map_cspec_id_		= cctmp_one_cycle_specs::template conceptual_map<>;
-//	constexpr auto map_cspec_sq_		= cctmp_one_cycle_specs::template conceptual_map<_map_function_sq_>;
+//	constexpr auto map_dspec_id_		= cctmp_one_cycle_generics::template direct_map<>;
+//	constexpr auto map_dspec_sq_		= cctmp_one_cycle_generics::template direct_map<_map_function_sq_>;
+//	constexpr auto map_cspec_id_		= cctmp_one_cycle_generics::template conceptual_map<>;
+//	constexpr auto map_cspec_sq_		= cctmp_one_cycle_generics::template conceptual_map<_map_function_sq_>;
 
-//	using Td_map_id				= typename cctmp_one_cycle_generics::template T_map<map_dspec_id_>;
-//	using Td_map_sq				= typename cctmp_one_cycle_generics::template T_map<map_dspec_sq_>;
-//	using Tc_map_id				= typename cctmp_one_cycle_generics::template T_map<map_cspec_id_>;
-//	using Tc_map_sq				= typename cctmp_one_cycle_generics::template T_map<map_cspec_sq_>;
+//	using Td_map_id				= typename cctmp_one_cycle_assembly::template T_map<map_dspec_id_>;
+//	using Td_map_sq				= typename cctmp_one_cycle_assembly::template T_map<map_dspec_sq_>;
+//	using Tc_map_id				= typename cctmp_one_cycle_assembly::template T_map<map_cspec_id_>;
+//	using Tc_map_sq				= typename cctmp_one_cycle_assembly::template T_map<map_cspec_sq_>;
 
 // fold:
 
-//	constexpr auto _fold_function_add_	= cctmp_one_cycle_specs::template _combine_function_<_add_>;
+//	constexpr auto _fold_function_add_	= cctmp_one_cycle_generics::template _combine_function_<_add_>;
 
-//	constexpr auto fold_dspec_add_		= cctmp_one_cycle_specs::template direct_fold<_fold_function_add_>;
-//	constexpr auto fold_cspec_add_		= cctmp_one_cycle_specs::template conceptual_fold<_fold_function_add_>;
+//	constexpr auto fold_dspec_add_		= cctmp_one_cycle_generics::template direct_fold<_fold_function_add_>;
+//	constexpr auto fold_cspec_add_		= cctmp_one_cycle_generics::template conceptual_fold<_fold_function_add_>;
 
-//	using Td_fold_add			= typename cctmp_one_cycle_generics::template T_fold<fold_dspec_add_>;
-//	using Tc_fold_add			= typename cctmp_one_cycle_generics::template T_fold<fold_cspec_add_>;
+//	using Td_fold_add			= typename cctmp_one_cycle_assembly::template T_fold<fold_dspec_add_>;
+//	using Tc_fold_add			= typename cctmp_one_cycle_assembly::template T_fold<fold_cspec_add_>;
 
 // find first:
 
-//	constexpr auto _find_first_pred_is_25_	= cctmp_one_cycle_specs::template _act_predicate_<_is_25_d_>;
+//	constexpr auto _find_first_pred_is_25_	= cctmp_one_cycle_generics::template _act_predicate_<_is_25_d_>;
 
-//	constexpr auto find_first_dspec_is_25_	= cctmp_one_cycle_specs::template direct_find_first<_find_first_pred_is_25_>;
-//	constexpr auto find_first_cspec_is_25_	= cctmp_one_cycle_specs::template conceptual_find_first<_find_first_pred_is_25_>;
+//	constexpr auto find_first_dspec_is_25_	= cctmp_one_cycle_generics::template direct_find_first<_find_first_pred_is_25_>;
+//	constexpr auto find_first_cspec_is_25_	= cctmp_one_cycle_generics::template conceptual_find_first<_find_first_pred_is_25_>;
 
-//	using Td_find_first_is_25		= typename cctmp_one_cycle_generics::template T_find_first<find_first_dspec_is_25_>;
-//	using Tc_find_first_is_25		= typename cctmp_one_cycle_generics::template T_find_first<find_first_cspec_is_25_>;
+//	using Td_find_first_is_25		= typename cctmp_one_cycle_assembly::template T_find_first<find_first_dspec_is_25_>;
+//	using Tc_find_first_is_25		= typename cctmp_one_cycle_assembly::template T_find_first<find_first_cspec_is_25_>;
 
 // find all:
 
-//	constexpr auto find_all_dspec_is_25_	= cctmp_one_cycle_specs::template direct_find_all<_find_first_pred_is_25_>;
-//	constexpr auto find_all_cspec_is_25_	= cctmp_one_cycle_specs::template conceptual_find_all<_find_first_pred_is_25_>;
+//	constexpr auto find_all_dspec_is_25_	= cctmp_one_cycle_generics::template direct_find_all<_find_first_pred_is_25_>;
+//	constexpr auto find_all_cspec_is_25_	= cctmp_one_cycle_generics::template conceptual_find_all<_find_first_pred_is_25_>;
 
-//	using Td_find_all_is_25			= typename cctmp_one_cycle_generics::template T_find_all<find_all_dspec_is_25_>;
-//	using Tc_find_all_is_25			= typename cctmp_one_cycle_generics::template T_find_all<find_all_cspec_is_25_>;
+//	using Td_find_all_is_25			= typename cctmp_one_cycle_assembly::template T_find_all<find_all_dspec_is_25_>;
+//	using Tc_find_all_is_25			= typename cctmp_one_cycle_assembly::template T_find_all<find_all_cspec_is_25_>;
 
 // zip:
 
-//	constexpr auto _zip_function_add_	= cctmp_one_cycle_specs::template _act_function_<_add_dd_>;
-//	constexpr auto _zip_assign_		= cctmp_one_cycle_specs::template _assign_function_<_d_assign_i_>;
+//	constexpr auto _zip_function_add_	= cctmp_one_cycle_generics::template _act_function_<_add_dd_>;
+//	constexpr auto _zip_assign_		= cctmp_one_cycle_generics::template _assign_function_<_d_assign_i_>;
 
-//	constexpr auto zip_dspec_add_		= cctmp_one_cycle_specs::template direct_zip
+//	constexpr auto zip_dspec_add_		= cctmp_one_cycle_generics::template direct_zip
 //						<
 //							_zip_function_add_, _zip_assign_
 //						>;
-//	constexpr auto zip_cspec_add_		= cctmp_one_cycle_specs::template conceptual_zip
+//	constexpr auto zip_cspec_add_		= cctmp_one_cycle_generics::template conceptual_zip
 //						<
 //							_zip_function_add_, _zip_assign_
 //						>;
 
-//	using Td_zip_add			= typename cctmp_one_cycle_generics::template T_zip<zip_dspec_add_>;
-//	using Tc_zip_add			= typename cctmp_one_cycle_generics::template T_zip<zip_cspec_add_>;
+//	using Td_zip_add			= typename cctmp_one_cycle_assembly::template T_zip<zip_dspec_add_>;
+//	using Tc_zip_add			= typename cctmp_one_cycle_assembly::template T_zip<zip_cspec_add_>;
 
 // fasten:
 
-//	constexpr auto _fasten_function_add_	= cctmp_one_cycle_specs::template _act_function_<_mod_add_dd_>;
-//	constexpr auto _fasten_combine_add_	= cctmp_one_cycle_specs::template _combine_function_<_mod_add_di_>;
-//	constexpr auto _fasten_aux_next_	= cctmp_one_cycle_specs::template _aux_next_<_carry0_add_ddd_>;
-//	constexpr auto _fasten_in_next_		= cctmp_one_cycle_specs::template _in_next_<_carry1_add_dii_>;
+//	constexpr auto _fasten_function_add_	= cctmp_one_cycle_generics::template _act_function_<_mod_add_dd_>;
+//	constexpr auto _fasten_combine_add_	= cctmp_one_cycle_generics::template _combine_function_<_mod_add_di_>;
+//	constexpr auto _fasten_aux_next_	= cctmp_one_cycle_generics::template _aux_next_<_carry0_add_ddd_>;
+//	constexpr auto _fasten_in_next_		= cctmp_one_cycle_generics::template _in_next_<_carry1_add_dii_>;
 
-//	constexpr auto fasten_dspec_add_	= cctmp_one_cycle_specs::template direct_fasten
+//	constexpr auto fasten_dspec_add_	= cctmp_one_cycle_generics::template direct_fasten
 //						<
 //							_fasten_function_add_, _fasten_combine_add_,
 //							_fasten_aux_next_, _fasten_in_next_
 //						>;
-//	constexpr auto fasten_cspec_add_	= cctmp_one_cycle_specs::template conceptual_fasten
+//	constexpr auto fasten_cspec_add_	= cctmp_one_cycle_generics::template conceptual_fasten
 //						<
 //							_fasten_function_add_, _fasten_combine_add_,
 //							_fasten_aux_next_, _fasten_in_next_
 //						>;
 
-//	using Td_fasten_mod_add			= typename cctmp_one_cycle_generics::template T_fasten<fasten_dspec_add_>;
-//	using Tc_fasten_mod_add			= typename cctmp_one_cycle_generics::template T_fasten<fasten_cspec_add_>;
+//	using Td_fasten_mod_add			= typename cctmp_one_cycle_assembly::template T_fasten<fasten_dspec_add_>;
+//	using Tc_fasten_mod_add			= typename cctmp_one_cycle_assembly::template T_fasten<fasten_cspec_add_>;
 
 // glide:
 
-//	constexpr auto _glide_function_add_	= cctmp_one_cycle_specs::template _act_function_<_add_dd_>;
-//	constexpr auto _glide_combine_add_	= cctmp_one_cycle_specs::template _combine_function_<_add_>;
+//	constexpr auto _glide_function_add_	= cctmp_one_cycle_generics::template _act_function_<_add_dd_>;
+//	constexpr auto _glide_combine_add_	= cctmp_one_cycle_generics::template _combine_function_<_add_>;
 
-//	constexpr auto glide_dspec_add_		= cctmp_one_cycle_specs::template direct_glide
+//	constexpr auto glide_dspec_add_		= cctmp_one_cycle_generics::template direct_glide
 //						<
 //							_glide_function_add_, _glide_combine_add_
 //						>;
-//	constexpr auto glide_cspec_add_		= cctmp_one_cycle_specs::template conceptual_glide
+//	constexpr auto glide_cspec_add_		= cctmp_one_cycle_generics::template conceptual_glide
 //						<
 //							_glide_function_add_, _glide_combine_add_
 //						>;
 
-//	using Td_glide_add			= typename cctmp_one_cycle_generics::template T_glide<glide_dspec_add_>;
-//	using Tc_glide_add			= typename cctmp_one_cycle_generics::template T_glide<glide_cspec_add_>;
+//	using Td_glide_add			= typename cctmp_one_cycle_assembly::template T_glide<glide_dspec_add_>;
+//	using Tc_glide_add			= typename cctmp_one_cycle_assembly::template T_glide<glide_cspec_add_>;
 
 /***********************************************************************************************************************/
 
