@@ -436,7 +436,7 @@ namespace cctmp_one_cycle_generics {
 	struct T_note_is_right_closed
 	{
 		template<auto tone>
-		nik_ces auto result = T_store_U<tone>::axis::is_right_closed;
+		nik_ces auto result = T_store_U<tone>::ival::is_right_closed;
 
 	}; nik_ce auto U_note_is_right_closed = U_store_T<T_note_is_right_closed>;
 

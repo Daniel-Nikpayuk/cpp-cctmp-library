@@ -54,10 +54,14 @@ namespace cctmp_one_cycle_generics {
 
 	template<key_type Name, key_type Note, typename... Ts> struct T_accord;
 
-	template<key_type Name, key_type Note, typename... Ts> nik_ce auto U_accord	= U_store_T<T_accord<Name, Note, Ts...>>;
+	template<key_type Name, key_type Note, typename... Ts>
+	nik_ce auto U_accord = U_store_T<T_accord<Name, Note, Ts...>>;
 
-	template<key_type Name, key_type Note, auto... Vs> using T_accord_		= T_accord<Name, Note, T_store_U<Vs>...>;
-	template<key_type Name, key_type Note, auto... Vs> nik_ce auto U_accord_	= U_store_T<T_accord_<Name, Note, Vs...>>;
+	template<key_type Name, key_type Note, auto... Vs>
+	using T_accord_ = T_accord<Name, Note, T_store_U<Vs>...>;
+
+	template<key_type Name, key_type Note, auto... Vs>
+	nik_ce auto U_accord_ = U_store_T<T_accord_<Name, Note, Vs...>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -133,19 +137,19 @@ namespace cctmp_one_cycle_generics {
 		else                                    return arg;
 	}
 
-	template<auto arg, typename root, typename quality>
-	nik_ce auto peek_value = _peek_value<arg, root, quality>();
+	template<auto arg_tag, typename root, typename quality>
+	nik_ce auto peek_value = _peek_value<tag_value<arg_tag>, root, quality>();
 
 /***********************************************************************************************************************/
 
 // loop argcompose:
 
-	template<auto op_tag, auto arg0_tag, auto arg1_tag, typename root, typename quality>
+	template<auto op_tag, auto arg1_tag, auto arg2_tag, typename root, typename quality>
 	nik_ce auto tr_loopcompose = _argcompose_
 	<
 		 tag_value <   op_tag                  >,
-		peek_value < arg0_tag , root , quality >,
-		 tag_value < arg1_tag                  >
+		peek_value < arg1_tag , root , quality >,
+		 tag_value < arg2_tag                  >
 	>;
 
 /***********************************************************************************************************************/
@@ -171,6 +175,49 @@ namespace cctmp_one_cycle_generics {
 		note::axis::next,
 		_id_
 	>;
+
+/***********************************************************************************************************************/
+
+// post assign function:
+
+	template<auto is_post_assign_function, typename cycle>
+	nik_ce auto tr_post_assign_function = if_then_else
+	<
+		is_post_assign_function,
+		cycle::assign_function,
+		_id_
+	>;
+
+/***********************************************************************************************************************/
+
+// post note next:
+
+	template<auto is_post_note_next, typename note>
+	nik_ce auto tr_post_note_next = if_then_else
+	<
+		is_post_note_next,
+		note::axis::next,
+		_id_
+	>;
+
+/***********************************************************************************************************************/
+
+// post tone next:
+
+	template<typename tone, typename quality>
+	nik_ce auto _post_tone_next()
+	{
+		nik_ce auto is_prev	= quality::augmented::is_tone && tone::ival::is_right_closed;
+		nik_ce auto maybe_next	= quality::minor::holds       || quality::augmented::is_early;
+		nik_ce auto is_next	= maybe_next                  && tone::ival::is_right_open;
+
+		if nik_ce      (is_prev) return tone::axis::prev;
+		else if nik_ce (is_next) return tone::axis::next;
+		else                     return _id_;
+	}
+
+	template<typename tone, typename quality>
+	nik_ce auto tr_post_tone_next = _post_tone_next<tone, quality>();
 
 /***********************************************************************************************************************/
 
@@ -259,12 +306,7 @@ namespace cctmp_one_cycle_generics {
 	template<typename Chord, typename Cycle>
 	struct T_accord<AN::repeat, AT::postcycle, Chord, Cycle>
 	{
-		nik_ces auto post_assign_function = if_then_else
-		<
-			Chord::out::ival::is_right_closed,
-			Cycle::assign_function,
-			_id_
-		>;
+		nik_ces auto post_assign_function = tr_post_assign_function<Chord::out::ival::is_right_closed, Cycle>;
 	};
 
 /***********************************************************************************************************************/
@@ -382,26 +424,19 @@ namespace cctmp_one_cycle_generics {
 	template<typename Chord, typename Cycle>
 	struct T_accord<AN::map, AT::postcycle, Chord, Cycle>
 	{
-	//	nik_ces auto closed_rights = axis < TT::only_closed_rights , Ivals::out_ival >;
-	//	nik_ces auto is_secondary  = axis < TT::is_secondary_last  , is_last , is_primary, closed_rights >;
-	//	nik_ces auto is_tertiary   = axis < TT::is_tertiary_last   , is_last , is_primary, is_secondary  >;
+		private:
 
-	//	nik_ces auto is_post_assign		= axis
-	//						<
-	//							TT::is_post_assign_function, Axis::is_last,
-	//							Axis::is_secondary_last, Ivals::in_ival
-	//						>;
-	//	nik_ces auto is_post_root_next		= axis
-	//						<
-	//							TT::is_post_root_next,
-	//							Ivals::is_primary_last, Ivals::is_tertiary_last
-	//						>;
+			nik_ces auto in_is_right_closed		= Chord::in::ival::is_right_closed;
+			nik_ces auto loop_broke_early		= Chord::quality::augmented::is_early;
+			nik_ces auto is_post_assign		= in_is_right_closed || loop_broke_early;
 
-	//	nik_ces auto post_assign_function = postcycle<TT::assign_function, is_post_assign, U_store_T<Cycle>>;
+		public:
 
-	//	nik_ces auto post_out_next = postcycle < TT::tone_next  , U_store_T<Axis>       , U_store_T<Ivals> >;
-	//	nik_ces auto post_in_next  = postcycle < TT::note_next  , is_post_root_next     , Ivals::in_axis   >;
-		nik_ces auto post_end_next	= tr_post_tonic_next < typename Chord::in , typename Chord::quality >;
+			nik_ces auto post_assign_function	= tr_post_assign_function<is_post_assign, Cycle>;
+
+			nik_ces auto post_out_next = tr_post_tone_next  < typename Chord::out , typename Chord::quality >;
+			nik_ces auto post_in_next  = tr_post_note_next  < loop_broke_early    , typename Chord::in      >;
+			nik_ces auto post_end_next = tr_post_tonic_next < typename Chord::in  , typename Chord::quality >;
 	};
 
 /***********************************************************************************************************************/

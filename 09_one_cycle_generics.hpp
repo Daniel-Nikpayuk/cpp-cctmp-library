@@ -239,7 +239,7 @@ namespace cctmp_one_cycle_generics {
 			using T_label_etc	= T_accord_ < AN::repeat , AT::label    , label    >;
 			using T_position_etc	= T_accord_ < AN::repeat , AT::position , position >;
 
-			using T_cycle_etc	= T_accord_ < AN::repeat  , AT::cycle , chord_etc , break_ , action >;
+			using T_cycle_etc	= T_accord_ < AN::repeat , AT::cycle , chord_etc , break_ , action >;
 			nik_ce auto cycle_etc	= U_store_T < T_cycle_etc >;
 
 			using T_precycle_etc	= T_accord_ < AN::repeat , AT::precycle  , chord_etc >;
@@ -306,6 +306,7 @@ namespace cctmp_one_cycle_generics {
 
 			_post_assign_function_ < _id_          >,
 			_post_out_next_        < _id_          >,
+			_post_in_next_         < _id_          >,
 			_post_end_next_        < _id_          >
 		>;
 
@@ -324,7 +325,6 @@ namespace cctmp_one_cycle_generics {
 
 	// default:
 
-/*
 		nik_ce auto conceptual_map_defaults = U_pack_Vs
 		<
 			_label_
@@ -370,24 +370,20 @@ namespace cctmp_one_cycle_generics {
 		template<auto label, auto position, auto out_iter, auto in_iter, auto break_, auto action>
 		nik_ce auto _conceptual_map(nik_avp(T_pack_Vs<label, position, out_iter, in_iter, break_, action>*))
 		{
-			using T_label_etc	= T_tr<T_label, TR::map, label>;
-			using T_position_etc	= T_tr<T_position, TR::map, position>;
+			nik_ce auto chord_etc	= U_chord_ < Chord::map , out_iter , in_iter >;
 
-			using T_ivals_etc	= T_tr<T_ivals, TR::map, out_iter, in_iter>;
-			nik_ce auto ivals_etc	= U_store_T<T_ivals_etc>;
+			using T_label_etc	= T_accord_ < AN::map , AT::label    , label    >;
+			using T_position_etc	= T_accord_ < AN::map , AT::position , position >;
 
-			using T_axis_etc	= T_tr<T_axis, TR::map, ivals_etc>;
-			nik_ce auto axis_etc	= U_store_T<T_axis_etc>;
+			using T_cycle_etc	= T_accord_ < AN::map , AT::cycle , chord_etc , break_ , action >;
+			nik_ce auto cycle_etc	= U_store_T < T_cycle_etc >;
 
-			using T_cycle_etc	= T_tr<T_cycle, TR::map, break_, action, axis_etc, ivals_etc>;
-			nik_ce auto cycle_etc	= U_store_T<T_cycle_etc>;
+			using T_precycle_etc	= T_accord_ < AN::map , AT::precycle  , chord_etc >;
+			using T_postcycle_etc	= T_accord_ < AN::map , AT::postcycle , chord_etc , cycle_etc >;
 
-			using T_precycle_etc	= T_tr<T_precycle, TR::map, axis_etc, ivals_etc>;
-			using T_postcycle_etc	= T_tr<T_postcycle, TR::map, axis_etc, ivals_etc, cycle_etc>;
-
-			return overload
+			return to_list_
 			<
-				_map_, H_map_specification, U_member_value,
+				H_map_specification,
 
 				T_label_etc::precycle,
 				T_label_etc::cycle,
@@ -397,7 +393,7 @@ namespace cctmp_one_cycle_generics {
 				T_position_etc::in,
 				T_position_etc::end,
 
-				T_precycle_etc::pre_end_next,
+				T_precycle_etc::pre_end_prev,
 				T_precycle_etc::pre_out_next,
 				T_precycle_etc::pre_in_next,
 
@@ -408,6 +404,7 @@ namespace cctmp_one_cycle_generics {
 
 				T_postcycle_etc::post_assign_function,
 				T_postcycle_etc::post_out_next,
+				T_postcycle_etc::post_in_next,
 				T_postcycle_etc::post_end_next
 			>;
 		}
@@ -417,7 +414,6 @@ namespace cctmp_one_cycle_generics {
 		(
 			conceptual_write<conceptual_map_defaults, Vs...>
 		);
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

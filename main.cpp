@@ -102,7 +102,6 @@
 
 // functions:
 
-/*
 	constexpr int sq(int x)			{ return x*x; }
 	constexpr auto _sq_			= cctmp::template _apply_<sq>;
 
@@ -139,33 +138,34 @@
 						<
 							_d_assign_add_, _id_, _deref_, _deref_
 						>;
-*/
 
 /***********************************************************************************************************************/
 
 // repeat:
 
+//	constexpr auto repeat_dspec		= cctmp_one_cycle_generics::template direct_repeat<>;
+//	using Td_repeat				= typename cctmp_one_cycle_assembly::template T_repeat<repeat_dspec>;
+
 //	constexpr auto closed			= cctmp_one_cycle_generics::_closed;
 //	constexpr auto closed_ival		= cctmp_one_cycle_generics::template _ival_<closed>;
 //	constexpr auto closed_iter		= cctmp_one_cycle_generics::template _out_iter_<closed_ival>;
-
-//	constexpr auto repeat_dspec		= cctmp_one_cycle_generics::template direct_repeat<>;
 //	constexpr auto repeat_cspec		= cctmp_one_cycle_generics::template conceptual_repeat<closed_iter>;
-
-//	using Td_repeat				= typename cctmp_one_cycle_assembly::template T_repeat<repeat_dspec>;
 //	using Tc_repeat				= typename cctmp_one_cycle_assembly::template T_repeat<repeat_cspec>;
 
 // map:
 
-//	constexpr auto _map_function_sq_	= cctmp_one_cycle_generics::template _assign_function_<_d_assign_sq_>;
-
+//	constexpr auto _map_function_dsq_	= cctmp_one_cycle_generics::template _assign_function_<_d_assign_sq_>;
 //	constexpr auto map_dspec_id_		= cctmp_one_cycle_generics::template direct_map<>;
-//	constexpr auto map_dspec_sq_		= cctmp_one_cycle_generics::template direct_map<_map_function_sq_>;
-//	constexpr auto map_cspec_id_		= cctmp_one_cycle_generics::template conceptual_map<>;
-//	constexpr auto map_cspec_sq_		= cctmp_one_cycle_generics::template conceptual_map<_map_function_sq_>;
-
+//	constexpr auto map_dspec_sq_		= cctmp_one_cycle_generics::template direct_map<_map_function_dsq_>;
 //	using Td_map_id				= typename cctmp_one_cycle_assembly::template T_map<map_dspec_id_>;
 //	using Td_map_sq				= typename cctmp_one_cycle_assembly::template T_map<map_dspec_sq_>;
+
+//	constexpr auto _in_arg_id_		= cctmp_one_cycle_generics::template _in_arg_<_id_>;
+//	constexpr auto _map_function_cid_	= cctmp_one_cycle_generics::template _action_<_in_arg_id_>;
+//	constexpr auto _in_arg_sq_		= cctmp_one_cycle_generics::template _in_arg_<_sq_>;
+//	constexpr auto _map_function_csq_	= cctmp_one_cycle_generics::template _action_<_in_arg_sq_>;
+//	constexpr auto map_cspec_id_		= cctmp_one_cycle_generics::template conceptual_map<_map_function_cid_>;
+//	constexpr auto map_cspec_sq_		= cctmp_one_cycle_generics::template conceptual_map<_map_function_csq_>;
 //	using Tc_map_id				= typename cctmp_one_cycle_assembly::template T_map<map_cspec_id_>;
 //	using Tc_map_sq				= typename cctmp_one_cycle_assembly::template T_map<map_cspec_sq_>;
 
@@ -280,6 +280,12 @@
 	//	print_array(arr_id, arr_id+size);
 
 	//	Td_map_sq::template result(arr_sq, 0, size);
+	//	print_array(arr_sq, arr_sq+size);
+
+	//	Tc_map_id::template result(arr_id, 0, size);
+	//	print_array(arr_id, arr_id+size);
+
+	//	Tc_map_sq::template result(arr_sq, 0, size);
 	//	print_array(arr_sq, arr_sq+size);
 
 // fold:
