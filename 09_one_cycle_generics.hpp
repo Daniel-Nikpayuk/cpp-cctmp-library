@@ -26,8 +26,6 @@ namespace cctmp_one_cycle_generics {
 	nik_ce auto _four					= cctmp::_four;
 	nik_ce auto _five					= cctmp::_five;
 
-	template<auto... Vs> using T_pack_Vs			= typename cctmp::template T_pack_Vs<Vs...>;
-
 	nik_ce auto _equal_					= cctmp::_equal_;
 	nik_ce auto _assign_					= cctmp::_assign_;
 	nik_ce auto _dereference_				= cctmp::_dereference_;

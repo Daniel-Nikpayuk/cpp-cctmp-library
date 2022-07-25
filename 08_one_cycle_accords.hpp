@@ -28,8 +28,6 @@ namespace cctmp_one_cycle_generics {
 
 	template<auto... Vs> nik_ce auto _argcompose_		= cctmp_generics::template _argcompose_<Vs...>;
 
-	template<auto... Vs> nik_ce auto pack_sifter		= cctmp_functional::template pack_sifter<Vs...>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -125,6 +123,68 @@ namespace cctmp_one_cycle_generics {
 	nik_ce auto tr_sidecompose = _side_<tr_argcompose<op_tags...>>;
 
 /***********************************************************************************************************************/
+
+// peek value:
+
+	template<auto arg, typename root, typename quality>
+	nik_ce auto _peek_value()
+	{
+		if nik_ce (quality::augmented::is_peek) return _argcompose_<arg, root::axis::next>;
+		else                                    return arg;
+	}
+
+	template<auto arg, typename root, typename quality>
+	nik_ce auto peek_value = _peek_value<arg, root, quality>();
+
+/***********************************************************************************************************************/
+
+// loop argcompose:
+
+	template<auto op_tag, auto arg0_tag, auto arg1_tag, typename root, typename quality>
+	nik_ce auto tr_loopcompose = _argcompose_
+	<
+		 tag_value <   op_tag                  >,
+		peek_value < arg0_tag , root , quality >,
+		 tag_value < arg1_tag                  >
+	>;
+
+/***********************************************************************************************************************/
+
+// pre tonic prev:
+
+	template<typename root, typename quality>
+	nik_ce auto tr_pre_tonic_prev = if_then_else
+	<
+		quality::augmented::is_root,
+		root::axis::prev,
+		_id_
+	>;
+
+/***********************************************************************************************************************/
+
+// pre note next:
+
+	template<typename note>
+	nik_ce auto tr_pre_note_next = if_then_else
+	<
+		note::ival::is_left_open,
+		note::axis::next,
+		_id_
+	>;
+
+/***********************************************************************************************************************/
+
+// post tonic next:
+
+	template<typename root, typename quality>
+	nik_ce auto tr_post_tonic_next = if_then_else
+	<
+		quality::augmented::is_root,
+		root::axis::next,
+		_id_
+	>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // repeat (ray):
@@ -189,12 +249,7 @@ namespace cctmp_one_cycle_generics {
 	template<typename Chord>
 	struct T_accord<AN::repeat, AT::precycle, Chord>
 	{
-		nik_ces auto pre_out_next = if_then_else
-		<
-			Chord::out::ival::is_left_open,
-			Chord::out::axis::next,
-			_id_
-		>;
+		nik_ces auto pre_out_next = tr_pre_note_next<typename Chord::out>;
 	};
 
 /***********************************************************************************************************************/
@@ -279,7 +334,6 @@ namespace cctmp_one_cycle_generics {
 
 // cycle:
 
-/*
 	template
 	<
 		typename Chord,
@@ -289,70 +343,66 @@ namespace cctmp_one_cycle_generics {
 	>
 	struct T_accord
 	<
-		AN::map, AT::cycle, Chord
+		AN::map, AT::cycle, Chord,
 
 		_break  < _Op0_ , _Arg01_ , _Arg02_ >,
 		_action < _Op1_ , _Arg11_ , _Arg12_ >
 	>
 	{
-		nik_ces auto loop_arg			= cycle<TT::peek, Axis::is_tertiary, Ivals::in_axis, _Arg01_>;
+		private:
 
-		nik_ces auto loop_predicate		= cycle < TT::argcompose  , _Op0_ , loop_arg , _Arg02_ >;
-		nik_ces auto assign_function		= cycle < TT::sidecompose , _Op1_ , _Arg11_  , _Arg12_ >;
+			using in		= typename Chord::in;
+			using quality		= typename Chord::quality;
 
-		nik_ces auto out_next			= axis_next < Ivals::out_axis >;
-		nik_ces auto in_next			= axis_next < Ivals::in_axis  >;
+		public:
+
+			nik_ces auto loop_predicate	= tr_loopcompose < _Op0_, _Arg01_ , _Arg02_ , in , quality >;
+			nik_ces auto assign_function	= tr_sidecompose < _Op1_, _Arg11_ , _Arg12_                >;
+
+			nik_ces auto out_next		= Chord::out::axis::next;
+			nik_ces auto in_next		= Chord::in::axis::next;
 	};
-*/
 
 /***********************************************************************************************************************/
 
 // precycle:
 
-/*
-	template<typename Axis, typename Ivals>
-	struct T_accord<AN::map, AT::precycle, Axis, Ivals>
+	template<typename Chord>
+	struct T_accord<AN::map, AT::precycle, Chord>
 	{
-		nik_ces auto is_last       = axis < TT::is_last            , Ivals::in_ival , Ivals::out_ival >;
-		nik_ces auto is_primary	   = axis < TT::is_primary_last    , is_last        , Ivals::in_ival  >;
-
-		nik_ces auto closed_rights = axis < TT::only_closed_rights , Ivals::out_ival >;
-
-		nik_ces auto is_secondary  = axis < TT::is_secondary_last  , is_last , is_primary, closed_rights >;
-		nik_ces auto is_tertiary   = axis < TT::is_tertiary_last   , is_last , is_primary, is_secondary  >;
-
-		nik_ces auto pre_end_next = precycle < TT::tonic_prev , Axis::is_primary_last , Ivals::in_axis  >;
-		nik_ces auto pre_out_next = precycle < TT::note_next  , Ivals::out_ival       , Ivals::out_axis >;
-		nik_ces auto pre_in_next  = precycle < TT::note_next  , Ivals::in_ival        , Ivals::in_axis  >;
+		nik_ces auto pre_end_prev	= tr_pre_tonic_prev < typename Chord::in  , typename Chord::quality >;
+		nik_ces auto pre_out_next	= tr_pre_note_next  < typename Chord::out                           >;
+		nik_ces auto pre_in_next	= tr_pre_note_next  < typename Chord::in                            >;
 	};
-*/
 
 /***********************************************************************************************************************/
 
 // postcycle:
 
-/*
-	template<typename Axis, typename Ivals, typename Cycle>
-	struct T_accord<AN::map, AT::postcycle, Axis, Ivals, Cycle>
+	template<typename Chord, typename Cycle>
+	struct T_accord<AN::map, AT::postcycle, Chord, Cycle>
 	{
-		nik_ces auto is_post_assign		= axis
-							<
-								TT::is_post_assign_function, Axis::is_last,
-								Axis::is_secondary_last, Ivals::in_ival
-							>;
-		nik_ces auto is_post_root_next		= axis
-							<
-								TT::is_post_root_next,
-								Ivals::is_primary_last, Ivals::is_tertiary_last
-							>;
+	//	nik_ces auto closed_rights = axis < TT::only_closed_rights , Ivals::out_ival >;
+	//	nik_ces auto is_secondary  = axis < TT::is_secondary_last  , is_last , is_primary, closed_rights >;
+	//	nik_ces auto is_tertiary   = axis < TT::is_tertiary_last   , is_last , is_primary, is_secondary  >;
 
-		nik_ces auto post_assign_function = postcycle<TT::assign_function, is_post_assign, U_store_T<Cycle>>;
+	//	nik_ces auto is_post_assign		= axis
+	//						<
+	//							TT::is_post_assign_function, Axis::is_last,
+	//							Axis::is_secondary_last, Ivals::in_ival
+	//						>;
+	//	nik_ces auto is_post_root_next		= axis
+	//						<
+	//							TT::is_post_root_next,
+	//							Ivals::is_primary_last, Ivals::is_tertiary_last
+	//						>;
+
+	//	nik_ces auto post_assign_function = postcycle<TT::assign_function, is_post_assign, U_store_T<Cycle>>;
 
 	//	nik_ces auto post_out_next = postcycle < TT::tone_next  , U_store_T<Axis>       , U_store_T<Ivals> >;
-		nik_ces auto post_in_next  = postcycle < TT::note_next  , is_post_root_next     , Ivals::in_axis   >;
-		nik_ces auto post_end_prev = postcycle < TT::tonic_next , Axis::is_primary_last , Ivals::in_axis   >;
+	//	nik_ces auto post_in_next  = postcycle < TT::note_next  , is_post_root_next     , Ivals::in_axis   >;
+		nik_ces auto post_end_next	= tr_post_tonic_next < typename Chord::in , typename Chord::quality >;
 	};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

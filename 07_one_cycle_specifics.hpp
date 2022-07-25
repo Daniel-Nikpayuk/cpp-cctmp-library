@@ -22,6 +22,7 @@ namespace cctmp_one_cycle_generics {
 	using key_type						= typename cctmp::key_type;
 
 	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
+	template<auto... Vs> using T_pack_Vs			= typename cctmp::template T_pack_Vs<Vs...>;
 
 	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
 
@@ -32,6 +33,8 @@ namespace cctmp_one_cycle_generics {
 	nik_ce auto _or_					= cctmp::_or_;
 
 	nik_ce auto _same_					= cctmp::_same_;
+
+	template<auto... Vs> nik_ce auto pack_sifter		= cctmp_functional::template pack_sifter<Vs...>;
 
 	template<auto... Vs> nik_ce auto _side_			= cctmp_generics::template _side_<Vs...>;
 
@@ -424,6 +427,31 @@ namespace cctmp_one_cycle_generics {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// translators:
+
+/***********************************************************************************************************************/
+
+// is tone augmented:
+
+	struct T_note_is_right_closed
+	{
+		template<auto tone>
+		nik_ces auto result = T_store_U<tone>::axis::is_right_closed;
+
+	}; nik_ce auto U_note_is_right_closed = U_store_T<T_note_is_right_closed>;
+
+	template<auto holds, auto... right_closed_tones>
+	nik_ce auto _is_tone_augmented(nik_avp(T_pack_Vs<right_closed_tones...>*))
+	{
+		return overload<_and_, holds, T_store_U<right_closed_tones>::axis::is_bidirectional...>;
+	}
+
+	template<auto holds, auto... tones>
+	nik_ce auto tr_is_tone_augmented = _is_tone_augmented<holds>(pack_sifter<U_note_is_right_closed, tones...>);
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // note:
 
 /***********************************************************************************************************************/
@@ -524,53 +552,59 @@ namespace cctmp_one_cycle_generics {
 
 // major:
 
-	template<typename... Ivals>
-	struct T_chord<Chord::major, Ivals...>
+	template<typename... Notes>
+	struct T_chord<Chord::major, Notes...>
 	{
-		nik_ces auto is_major = overload<_and_, Ivals::is_right_open...>;
+		nik_ces auto holds = overload<_and_, Notes::ival::is_right_open...>;
 	};
 
 /***********************************************************************************************************************/
 
 // minor:
 
-	template<typename RootIval, typename... ToneIvals>
-	struct T_chord<Chord::minor, RootIval, ToneIvals...>
+	template<typename Root, typename... Tones>
+	struct T_chord<Chord::minor, Root, Tones...>
 	{
-		nik_ces auto is_minor = RootIval::is_right_closed && overload<_or_, ToneIvals::is_right_open...>;
+		nik_ces auto holds = Root::ival::is_right_closed && overload<_or_, Tones::ival::is_right_open...>;
 	};
 
 /***********************************************************************************************************************/
 
 // diminished:
 
-	template<typename... Ivals>
-	struct T_chord<Chord::diminished, Ivals...>
+	template<typename... Notes>
+	struct T_chord<Chord::diminished, Notes...>
 	{
-		nik_ces auto is_diminished = overload<_and_, Ivals::is_right_closed...>;
+		nik_ces auto holds = overload<_and_, Notes::ival::is_right_closed...>;
 	};
 
 /***********************************************************************************************************************/
 
 // augmented:
 
-	template<typename RootIval, typename... ToneIvals>
-	struct T_chord<Chord::augmented, RootIval, ToneIvals...>
+	template<typename Root, typename... Tones>
+	struct T_chord<Chord::augmented, Root, Tones...>
 	{
-		nik_ces auto is_augmented = RootIval::is_right_open && overload<_or_, ToneIvals::is_right_closed...>;
+		nik_ces auto holds	= Root::ival::is_right_open && overload<_or_, Tones::ival::is_right_closed...>;
+
+		nik_ces auto is_root	= holds && Root::axis::is_bidirectional;
+		nik_ces auto is_tone	= tr_is_tone_augmented<holds, U_store_T<Tones>...>;
+
+		nik_ces auto is_peek	= holds && !is_root && !is_tone;
+		nik_ces auto is_early	= is_root || is_peek;
 	};
 
 /***********************************************************************************************************************/
 
 // composite:
 
-	template<typename RootIval, typename... ToneIvals>
-	struct T_chord<Chord::quality, RootIval, ToneIvals...>
+	template<typename Root, typename... Tones>
+	struct T_chord<Chord::quality, Root, Tones...>
 	{
-		using major		= T_chord < Chord::major      , RootIval , ToneIvals... >;
-		using minor		= T_chord < Chord::minor      , RootIval , ToneIvals... >;
-		using diminished	= T_chord < Chord::diminished , RootIval , ToneIvals... >;
-		using augmented		= T_chord < Chord::augmented  , RootIval , ToneIvals... >;
+		using major		= T_chord < Chord::major      , Root , Tones... >;
+		using minor		= T_chord < Chord::minor      , Root , Tones... >;
+		using diminished	= T_chord < Chord::diminished , Root , Tones... >;
+		using augmented		= T_chord < Chord::augmented  , Root , Tones... >;
 	};
 
 /***********************************************************************************************************************/
@@ -626,7 +660,7 @@ namespace cctmp_one_cycle_generics {
 		using out		= T_chord < Chord::note , OutIter >;
 		using in		= T_chord < Chord::note ,  InIter >;
 
-		using quality		= T_chord < Chord::quality , typename in::ival , typename out::ival >;
+		using quality		= T_chord < Chord::quality , in , out >;
 	};
 
 /***********************************************************************************************************************/
