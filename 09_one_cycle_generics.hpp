@@ -31,7 +31,6 @@ namespace cctmp_one_cycle_generics {
 	nik_ce auto _assign_					= cctmp::_assign_;
 	nik_ce auto _dereference_				= cctmp::_dereference_;
 
-	template<auto... Vs> nik_ce auto _constant_		= cctmp::template _constant_<Vs...>;
 	template<auto... Vs> nik_ce auto _increment_		= cctmp::template _increment_<Vs...>;
 	template<auto... Vs> nik_ce auto _decrement_		= cctmp::template _decrement_<Vs...>;
 
@@ -587,8 +586,8 @@ namespace cctmp_one_cycle_generics {
 		<
 			_precycle_label_        < _zero             >,
 			_cycle_label_           < _one              >,
-			_found_label_           < _two              >,
-			_postcycle_label_       < _three            >,
+			_postcycle_label_       < _two              >,
+			_found_label_           < _three            >,
 			_done_label_            < _four             >,
 
 			_out_position_          < _zero             >,
@@ -601,10 +600,10 @@ namespace cctmp_one_cycle_generics {
 			_match_predicate_       < _constant_<false> >,
 			_in_next_               < _increment_<>     >,
 
-			_found_mutate_function_ < _d_assign_i_      >,
-			_found_out_next_        < _increment_<>     >,
+			_post_match_predicate_  < _constant_<false> >,
 
-			_post_match_predicate_  < _constant_<false> >
+			_found_mutate_function_ < _d_assign_i_      >,
+			_found_out_next_        < _increment_<>     >
 		>;
 
 	// spec:
@@ -627,8 +626,8 @@ namespace cctmp_one_cycle_generics {
 			<
 				_precycle_  < _zero             >,
 				_cycle_     < _one              >,
-				_found_     < _two              >,
-				_postcycle_ < _three            >,
+				_postcycle_ < _two              >,
+				_found_     < _three            >,
 				_done_      < _four             >
 			>,
 			_default_unary_position_,
@@ -666,20 +665,20 @@ namespace cctmp_one_cycle_generics {
 			using T_cycle_etc	= T_accord_ < AN::find_first , AT::cycle , chord_etc , break_ , match >;
 			nik_ce auto cycle_etc	= U_store_T < T_cycle_etc >;
 
-			using T_found_etc	= T_accord_ < AN::find_first , AT::found     , mutate    , out_iter  >;
 			using T_precycle_etc	= T_accord_ < AN::find_first , AT::precycle  , chord_etc             >;
 			using T_postcycle_etc	= T_accord_ < AN::find_first , AT::postcycle , chord_etc , cycle_etc >;
+			using T_found_etc	= T_accord_ < AN::find_first , AT::found     , mutate    , out_iter  >;
 
 			return to_list_
 			<
 				H_find_first_specification,
-				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::found,
-					T_label_etc::postcycle, T_label_etc::done,
+				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::postcycle,
+					T_label_etc::found, T_label_etc::done,
 				T_position_etc::out, T_position_etc::in, T_position_etc::end,
 				T_precycle_etc::pre_in_next,
 				T_cycle_etc::loop_predicate, T_cycle_etc::match_predicate, T_cycle_etc::in_next,
-				T_found_etc::found_mutate_function, T_found_etc::found_out_next,
-				T_postcycle_etc::post_match_predicate
+				T_postcycle_etc::post_match_predicate,
+				T_found_etc::found_mutate_function, T_found_etc::found_out_next
 			>;
 		}
 
@@ -704,8 +703,8 @@ namespace cctmp_one_cycle_generics {
 		<
 			_precycle_label_            < _zero             >,
 			_cycle_label_               < _one              >,
-			_found_label_               < _two              >,
-			_postcycle_label_           < _three            >,
+			_postcycle_label_           < _two              >,
+			_found_label_               < _three            >,
 			_postfound_label_           < _four             >,
 			_done_label_                < _five             >,
 
@@ -719,11 +718,11 @@ namespace cctmp_one_cycle_generics {
 			_match_predicate_           < _constant_<false> >,
 			_in_next_                   < _increment_<>     >,
 
+			_post_match_predicate_      < _constant_<false> >,
+
 			_found_mutate_function_     < _d_assign_i_      >,
 			_found_out_next_            < _increment_<>     >,
 			_found_in_next_             < _increment_<>     >,
-
-			_post_match_predicate_      < _constant_<false> >,
 
 			_postfound_mutate_function_ < _d_assign_i_      >,
 			_postfound_out_next_        < _increment_<>     >
@@ -749,8 +748,8 @@ namespace cctmp_one_cycle_generics {
 			<
 				_precycle_  < _zero             >,
 				_cycle_     < _one              >,
-				_found_     < _two              >,
-				_postcycle_ < _three            >,
+				_postcycle_ < _two              >,
+				_found_     < _three            >,
 				_postfound_ < _four             >,
 				_done_      < _five             >
 			>,
@@ -789,24 +788,24 @@ namespace cctmp_one_cycle_generics {
 			using T_cycle_etc	= T_accord_ < AN::find_all , AT::cycle , chord_etc , break_ , match >;
 			nik_ce auto cycle_etc	= U_store_T < T_cycle_etc >;
 
-			using T_found_etc	= T_accord_ < AN::find_all , AT::found , chord_etc , mutate , out_iter >;
-			nik_ce auto found_etc	= U_store_T < T_found_etc >;
-
 			using T_precycle_etc	= T_accord_ < AN::find_all , AT::precycle  , chord_etc             >;
 			using T_postcycle_etc	= T_accord_ < AN::find_all , AT::postcycle , chord_etc , cycle_etc >;
+
+			using T_found_etc	= T_accord_ < AN::find_all , AT::found , chord_etc , mutate , out_iter >;
+			nik_ce auto found_etc	= U_store_T < T_found_etc >;
 
 			using T_postfound_etc	= T_accord_ < AN::find_all , AT::postfound , found_etc >;
 
 			return to_list_
 			<
 				H_find_all_specification,
-				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::found,
-					T_label_etc::postcycle, T_label_etc::postfound, T_label_etc::done,
+				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::postcycle,
+					T_label_etc::found, T_label_etc::postfound, T_label_etc::done,
 				T_position_etc::out, T_position_etc::in, T_position_etc::end,
 				T_precycle_etc::pre_in_next,
 				T_cycle_etc::loop_predicate, T_cycle_etc::match_predicate, T_cycle_etc::in_next,
-				T_found_etc::found_mutate_function, T_found_etc::found_out_next, T_found_etc::found_in_next,
 				T_postcycle_etc::post_match_predicate,
+				T_found_etc::found_mutate_function, T_found_etc::found_out_next, T_found_etc::found_in_next,
 				T_postfound_etc::postfound_mutate_function, T_postfound_etc::postfound_out_next
 			>;
 		}
@@ -1182,11 +1181,12 @@ namespace cctmp_one_cycle_generics {
 				H_glide_specification,
 				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::postcycle,
 				T_position_etc::out, T_position_etc::car_in, T_position_etc::cdr_in, T_position_etc::end,
-				T_precycle_etc::pre_end_in_prev, T_precycle_etc::pre_car_in_next, T_precycle_etc::pre_cdr_in_next,
+				T_precycle_etc::pre_end_prev, T_precycle_etc::pre_car_in_next, T_precycle_etc::pre_cdr_in_next,
 				T_cycle_etc::loop_predicate, T_cycle_etc::action_function, T_cycle_etc::combine_function,
 					T_cycle_etc::car_in_next, T_cycle_etc::cdr_in_next,
 				T_postcycle_etc::post_action_function, T_postcycle_etc::post_combine_function,
-					T_cycle_etc::post_car_in_next, T_cycle_etc::post_cdr_in_next, T_cycle_etc::post_end_next
+					T_postcycle_etc::post_car_in_next, T_postcycle_etc::post_cdr_in_next,
+					T_postcycle_etc::post_end_next
 			>;
 		}
 
