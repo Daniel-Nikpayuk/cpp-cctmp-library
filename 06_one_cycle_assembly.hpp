@@ -47,8 +47,8 @@ namespace cctmp_one_cycle_assembly {
 	template<auto S> nik_ce auto  precycle_			= T_store_U<S>::precycle_label;
 	template<auto S> nik_ce auto     cycle_			= T_store_U<S>::cycle_label;
 	template<auto S> nik_ce auto postcycle_			= T_store_U<S>::postcycle_label;
-	template<auto S> nik_ce auto     match_			= T_store_U<S>::match_label;
-	template<auto S> nik_ce auto postmatch_			= T_store_U<S>::postmatch_label;
+	template<auto S> nik_ce auto     found_			= T_store_U<S>::found_label;
+	template<auto S> nik_ce auto postfound_			= T_store_U<S>::postfound_label;
 	template<auto S> nik_ce auto      done_			= T_store_U<S>::done_label;
 
 /***********************************************************************************************************************/
@@ -65,9 +65,9 @@ namespace cctmp_one_cycle_assembly {
 
 	template<auto S> nik_ce auto pre_out_next_		= T_store_U<S>::pre_out_next;
 	template<auto S> nik_ce auto out_next_			= T_store_U<S>::out_next;
-	template<auto S> nik_ce auto match_out_next_		= T_store_U<S>::match_out_next;
+	template<auto S> nik_ce auto found_out_next_		= T_store_U<S>::found_out_next;
 	template<auto S> nik_ce auto post_out_next_		= T_store_U<S>::post_out_next;
-	template<auto S> nik_ce auto postmatch_out_next_	= T_store_U<S>::postmatch_out_next;
+	template<auto S> nik_ce auto postfound_out_next_	= T_store_U<S>::postfound_out_next;
 
 /***********************************************************************************************************************/
 
@@ -85,7 +85,7 @@ namespace cctmp_one_cycle_assembly {
 
 	template<auto S> nik_ce auto pre_in_next_		= T_store_U<S>::pre_in_next;
 	template<auto S> nik_ce auto in_next_			= T_store_U<S>::in_next;
-	template<auto S> nik_ce auto match_in_next_		= T_store_U<S>::match_in_next;
+	template<auto S> nik_ce auto found_in_next_		= T_store_U<S>::found_in_next;
 	template<auto S> nik_ce auto post_in_next_		= T_store_U<S>::post_in_next;
 
 /***********************************************************************************************************************/
@@ -132,10 +132,14 @@ namespace cctmp_one_cycle_assembly {
 
 /***********************************************************************************************************************/
 
-// action:
+// match:
 
-	template<auto S> nik_ce auto action_pred_		= T_store_U<S>::action_predicate;
-	template<auto S> nik_ce auto post_action_pred_		= T_store_U<S>::post_action_predicate;
+	template<auto S> nik_ce auto match_pred_		= T_store_U<S>::match_predicate;
+	template<auto S> nik_ce auto post_match_pred_		= T_store_U<S>::post_match_predicate;
+
+/***********************************************************************************************************************/
+
+// action:
 
 	template<auto S> nik_ce auto action_func_		= T_store_U<S>::action_function;
 	template<auto S> nik_ce auto post_action_func_		= T_store_U<S>::post_action_function;
@@ -153,8 +157,8 @@ namespace cctmp_one_cycle_assembly {
 
 	template<auto S> nik_ce auto mutate_func_		= T_store_U<S>::mutate_function;
 	template<auto S> nik_ce auto post_mutate_func_		= T_store_U<S>::post_mutate_function;
-	template<auto S> nik_ce auto match_mutate_func_		= T_store_U<S>::match_mutate_function;
-	template<auto S> nik_ce auto postmatch_mutate_func_	= T_store_U<S>::postmatch_mutate_function;
+	template<auto S> nik_ce auto found_mutate_func_		= T_store_U<S>::found_mutate_function;
+	template<auto S> nik_ce auto postfound_mutate_func_	= T_store_U<S>::postfound_mutate_function;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -425,21 +429,21 @@ namespace cctmp_one_cycle_assembly {
 
 				test   <                   loop_pred_<S> ,  in_<S> , end_<S> >,
 				branch <                   postcycle_<S>                     >,
-				test   <                 action_pred_<S> ,  in_<S>           >,
-				branch <                       match_<S>                     >,
+				test   <                  match_pred_<S> ,  in_<S>           >,
+				branch <                       found_<S>                     >,
 				lift   <  in_<S> ,           in_next_<S> ,  in_<S>           >,
 				go_to  <                       cycle_<S>                     >,
 
-			label<match_<S>>,
+			label<found_<S>>,
 
-				lift   < out_<S> , match_mutate_func_<S> ,  in_<S>           >,
-				lift   < out_<S> ,    match_out_next_<S> , out_<S>           >,
+				lift   < out_<S> , found_mutate_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,    found_out_next_<S> , out_<S>           >,
 				go_to  <                        done_<S>                     >,
 
 			label<postcycle_<S>>,
 
-				test   <            post_action_pred_<S> ,  in_<S>           >,
-				branch <                       match_<S>                     >,
+				test   <             post_match_pred_<S> ,  in_<S>           >,
+				branch <                       found_<S>                     >,
 
 			label<done_<S>>,
 
@@ -461,18 +465,18 @@ namespace cctmp_one_cycle_assembly {
 
 	template
 	<
-		auto PrecycleLabel, auto CycleLabel, auto MatchLabel, auto PostcycleLabel, auto DoneLabel,
+		auto PrecycleLabel, auto CycleLabel, auto FoundLabel, auto PostcycleLabel, auto DoneLabel,
 		auto OutPosition, auto InPosition, auto EndPosition,
 		auto PreInNext,
-		auto LoopPredicate, auto ActionPredicate, auto InNext,
-		auto MatchMutateFunction, auto MatchOutNext,
-		auto PostActionPredicate
+		auto LoopPredicate, auto MatchPredicate, auto InNext,
+		auto FoundMutateFunction, auto FoundOutNext,
+		auto PostMatchPredicate
 	>
 	struct T_find_first_specification
 	{
 		nik_ces auto  precycle_label		=  PrecycleLabel;
 		nik_ces auto     cycle_label		=     CycleLabel;
-		nik_ces auto     match_label		=     MatchLabel;
+		nik_ces auto     found_label		=     FoundLabel;
 		nik_ces auto postcycle_label		= PostcycleLabel;
 		nik_ces auto      done_label		=      DoneLabel;
 
@@ -482,14 +486,14 @@ namespace cctmp_one_cycle_assembly {
 
 		nik_ces auto  pre_in_next		= PreInNext;
 
-		nik_ces auto   loop_predicate		=   LoopPredicate;
-		nik_ces auto action_predicate		= ActionPredicate;
-		nik_ces auto     in_next		=     InNext;
+		nik_ces auto  loop_predicate		=  LoopPredicate;
+		nik_ces auto match_predicate		= MatchPredicate;
+		nik_ces auto    in_next			=    InNext;
 
-		nik_ces auto match_mutate_function	= MatchMutateFunction;
-		nik_ces auto    match_out_next		=    MatchOutNext;
+		nik_ces auto found_mutate_function	= FoundMutateFunction;
+		nik_ces auto    found_out_next		=    FoundOutNext;
 
-		nik_ces auto post_action_predicate	= PostActionPredicate;
+		nik_ces auto post_match_predicate	= PostMatchPredicate;
 	};
 
 	nik_ce auto H_find_first_specification = U_store_B<T_find_first_specification>;
@@ -520,28 +524,28 @@ namespace cctmp_one_cycle_assembly {
 
 				test   <                       loop_pred_<S> ,  in_<S> , end_<S> >,
 				branch <                       postcycle_<S>                     >,
-				test   <                     action_pred_<S> ,  in_<S>           >,
-				branch <                           match_<S>                     >,
+				test   <                      match_pred_<S> ,  in_<S>           >,
+				branch <                           found_<S>                     >,
 				lift   <  in_<S> ,               in_next_<S> ,  in_<S>           >,
 				go_to  <                           cycle_<S>                     >,
 
-			label<match_<S>>,
+			label<found_<S>>,
 
-				lift   < out_<S> ,     match_mutate_func_<S> ,  in_<S>           >,
-				lift   < out_<S> ,        match_out_next_<S> , out_<S>           >,
-				lift   <  in_<S> ,         match_in_next_<S> ,  in_<S>           >,
+				lift   < out_<S> ,     found_mutate_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,        found_out_next_<S> , out_<S>           >,
+				lift   <  in_<S> ,         found_in_next_<S> ,  in_<S>           >,
 				go_to  <                           cycle_<S>                     >,
 
 			label<postcycle_<S>>,
 
-				test   <                post_action_pred_<S> ,  in_<S>           >,
-				branch <                       postmatch_<S>                     >,
+				test   <                 post_match_pred_<S> ,  in_<S>           >,
+				branch <                       postfound_<S>                     >,
 				go_to  <                            done_<S>                     >,
 
-			label<postmatch_<S>>,
+			label<postfound_<S>>,
 
-				lift   < out_<S> , postmatch_mutate_func_<S> ,  in_<S>           >,
-				lift   < out_<S> ,    postmatch_out_next_<S> , out_<S>           >,
+				lift   < out_<S> , postfound_mutate_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,    postfound_out_next_<S> , out_<S>           >,
 
 			label<done_<S>>,
 
@@ -563,22 +567,22 @@ namespace cctmp_one_cycle_assembly {
 
 	template
 	<
-		auto PrecycleLabel, auto CycleLabel, auto MatchLabel,
-			auto PostcycleLabel, auto PostmatchLabel, auto DoneLabel,
+		auto PrecycleLabel, auto CycleLabel, auto FoundLabel,
+			auto PostcycleLabel, auto PostfoundLabel, auto DoneLabel,
 		auto OutPosition, auto InPosition, auto EndPosition,
 		auto PreInNext,
-		auto LoopPredicate, auto ActionPredicate, auto InNext,
-		auto MatchMutateFunction, auto MatchOutNext, auto MatchInNext,
-		auto PostActionPredicate,
-		auto PostmatchMutateFunction, auto PostmatchOutNext
+		auto LoopPredicate, auto MatchPredicate, auto InNext,
+		auto FoundMutateFunction, auto FoundOutNext, auto FoundInNext,
+		auto PostMatchPredicate,
+		auto PostfoundMutateFunction, auto PostfoundOutNext
 	>
 	struct T_find_all_specification
 	{
 		nik_ces auto  precycle_label		=  PrecycleLabel;
 		nik_ces auto     cycle_label		=     CycleLabel;
-		nik_ces auto     match_label		=     MatchLabel;
+		nik_ces auto     found_label		=     FoundLabel;
 		nik_ces auto postcycle_label		= PostcycleLabel;
-		nik_ces auto postmatch_label		= PostmatchLabel;
+		nik_ces auto postfound_label		= PostfoundLabel;
 		nik_ces auto      done_label		=      DoneLabel;
 
 		nik_ces auto out_position		= OutPosition;
@@ -587,18 +591,18 @@ namespace cctmp_one_cycle_assembly {
 
 		nik_ces auto  pre_in_next		= PreInNext;
 
-		nik_ces auto   loop_predicate		=   LoopPredicate;
-		nik_ces auto action_predicate		= ActionPredicate;
-		nik_ces auto     in_next		=     InNext;
+		nik_ces auto  loop_predicate		=  LoopPredicate;
+		nik_ces auto match_predicate		= MatchPredicate;
+		nik_ces auto    in_next			=    InNext;
 
-		nik_ces auto match_mutate_function	= MatchMutateFunction;
-		nik_ces auto    match_out_next		=    MatchOutNext;
-		nik_ces auto     match_in_next		=     MatchInNext;
+		nik_ces auto found_mutate_function	= FoundMutateFunction;
+		nik_ces auto    found_out_next		=    FoundOutNext;
+		nik_ces auto     found_in_next		=     FoundInNext;
 
-		nik_ces auto post_action_predicate	= PostActionPredicate;
+		nik_ces auto post_match_predicate	= PostMatchPredicate;
 
-		nik_ces auto postmatch_mutate_function	= PostmatchMutateFunction;
-		nik_ces auto    postmatch_out_next	=    PostmatchOutNext;
+		nik_ces auto postfound_mutate_function	= PostfoundMutateFunction;
+		nik_ces auto    postfound_out_next	=    PostfoundOutNext;
 	};
 
 	nik_ce auto H_find_all_specification = U_store_B<T_find_all_specification>;

@@ -70,8 +70,8 @@ namespace cctmp_one_cycle_generics {
 	template<auto f> struct _cycle_label				{ nik_ces auto value = f; };
 	template<auto f> struct _postcycle_label			{ nik_ces auto value = f; };
 
-	template<auto f> struct _match_label				{ nik_ces auto value = f; };
-	template<auto f> struct _postmatch_label			{ nik_ces auto value = f; };
+	template<auto f> struct _found_label				{ nik_ces auto value = f; };
+	template<auto f> struct _postfound_label			{ nik_ces auto value = f; };
 
 	template<auto f> struct _done_label				{ nik_ces auto value = f; };
 
@@ -81,8 +81,8 @@ namespace cctmp_one_cycle_generics {
 	template<auto f> nik_ce auto _cycle_label_			= U_store_T<_cycle_label<f>>;
 	template<auto f> nik_ce auto _postcycle_label_			= U_store_T<_postcycle_label<f>>;
 
-	template<auto f> nik_ce auto _match_label_			= U_store_T<_match_label<f>>;
-	template<auto f> nik_ce auto _postmatch_label_			= U_store_T<_postmatch_label<f>>;
+	template<auto f> nik_ce auto _found_label_			= U_store_T<_found_label<f>>;
+	template<auto f> nik_ce auto _postfound_label_			= U_store_T<_postfound_label<f>>;
 
 	template<auto f> nik_ce auto _done_label_			= U_store_T<_done_label<f>>;
 
@@ -111,14 +111,14 @@ namespace cctmp_one_cycle_generics {
 	template<auto f> struct _pre_out_next				{ nik_ces auto value = f; };
 	template<auto f> struct _out_next				{ nik_ces auto value = f; };
 	template<auto f> struct _post_out_next				{ nik_ces auto value = f; };
-	template<auto f> struct _match_out_next				{ nik_ces auto value = f; };
-	template<auto f> struct _postmatch_out_next			{ nik_ces auto value = f; };
+	template<auto f> struct _found_out_next				{ nik_ces auto value = f; };
+	template<auto f> struct _postfound_out_next			{ nik_ces auto value = f; };
 
 	template<auto f> nik_ce auto _pre_out_next_			= U_store_T<_pre_out_next<f>>;
 	template<auto f> nik_ce auto _out_next_				= U_store_T<_out_next<f>>;
 	template<auto f> nik_ce auto _post_out_next_			= U_store_T<_post_out_next<f>>;
-	template<auto f> nik_ce auto _match_out_next_			= U_store_T<_match_out_next<f>>;
-	template<auto f> nik_ce auto _postmatch_out_next_		= U_store_T<_postmatch_out_next<f>>;
+	template<auto f> nik_ce auto _found_out_next_			= U_store_T<_found_out_next<f>>;
+	template<auto f> nik_ce auto _postfound_out_next_		= U_store_T<_postfound_out_next<f>>;
 
 /***********************************************************************************************************************/
 
@@ -135,12 +135,12 @@ namespace cctmp_one_cycle_generics {
 	template<auto f> struct _pre_in_next				{ nik_ces auto value = f; };
 	template<auto f> struct _in_next				{ nik_ces auto value = f; };
 	template<auto f> struct _post_in_next				{ nik_ces auto value = f; };
-	template<auto f> struct _match_in_next				{ nik_ces auto value = f; };
+	template<auto f> struct _found_in_next				{ nik_ces auto value = f; };
 
 	template<auto f> nik_ce auto _pre_in_next_			= U_store_T<_pre_in_next<f>>;
 	template<auto f> nik_ce auto _in_next_				= U_store_T<_in_next<f>>;
 	template<auto f> nik_ce auto _post_in_next_			= U_store_T<_post_in_next<f>>;
-	template<auto f> nik_ce auto _match_in_next_			= U_store_T<_match_in_next<f>>;
+	template<auto f> nik_ce auto _found_in_next_			= U_store_T<_found_in_next<f>>;
 
 /***********************************************************************************************************************/
 
@@ -188,18 +188,20 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
-// action:
+// match:
 
-	template<auto f> struct _action_predicate			{ nik_ces auto value = f; };
-	template<auto f> struct _post_action_predicate			{ nik_ces auto value = f; };
+	template<auto f> struct _match_predicate			{ nik_ces auto value = f; };
+	template<auto f> struct _post_match_predicate			{ nik_ces auto value = f; };
+
+	template<auto f> nik_ce auto _match_predicate_			= U_store_T<_match_predicate<f>>;
+	template<auto f> nik_ce auto _post_match_predicate_		= U_store_T<_post_match_predicate<f>>;
+
+/***********************************************************************************************************************/
+
+// action:
 
 	template<auto f> struct _action_function			{ nik_ces auto value = f; };
 	template<auto f> struct _post_action_function			{ nik_ces auto value = f; };
-
-	//
-
-	template<auto f> nik_ce auto _action_predicate_			= U_store_T<_action_predicate<f>>;
-	template<auto f> nik_ce auto _post_action_predicate_		= U_store_T<_post_action_predicate<f>>;
 
 	template<auto f> nik_ce auto _action_function_			= U_store_T<_action_function<f>>;
 	template<auto f> nik_ce auto _post_action_function_		= U_store_T<_post_action_function<f>>;
@@ -222,13 +224,13 @@ namespace cctmp_one_cycle_generics {
 
 	template<auto f> struct _mutate_function			{ nik_ces auto value = _side_<f>; };
 	template<auto f> struct _post_mutate_function			{ nik_ces auto value = _side_<f>; };
-	template<auto f> struct _match_mutate_function			{ nik_ces auto value = _side_<f>; };
-	template<auto f> struct _postmatch_mutate_function		{ nik_ces auto value = _side_<f>; };
+	template<auto f> struct _found_mutate_function			{ nik_ces auto value = _side_<f>; };
+	template<auto f> struct _postfound_mutate_function		{ nik_ces auto value = _side_<f>; };
 
 	template<auto f> nik_ce auto _mutate_function_			= U_store_T<_mutate_function<f>>;
 	template<auto f> nik_ce auto _post_mutate_function_		= U_store_T<_post_mutate_function<f>>;
-	template<auto f> nik_ce auto _match_mutate_function_		= U_store_T<_match_mutate_function<f>>;
-	template<auto f> nik_ce auto _postmatch_mutate_function_	= U_store_T<_postmatch_mutate_function<f>>;
+	template<auto f> nik_ce auto _found_mutate_function_		= U_store_T<_found_mutate_function<f>>;
+	template<auto f> nik_ce auto _postfound_mutate_function_	= U_store_T<_postfound_mutate_function<f>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -250,15 +252,15 @@ namespace cctmp_one_cycle_generics {
 		template<auto f> struct _precycle			{ };
 		template<auto f> struct _cycle				{ };
 		template<auto f> struct _postcycle			{ };
-		template<auto f> struct _match				{ };
-		template<auto f> struct _postmatch			{ };
+		template<auto f> struct _found				{ };
+		template<auto f> struct _postfound			{ };
 		template<auto f> struct _done				{ };
 
 		template<auto f> nik_ce auto _precycle_			= U_store_T<_precycle<f>>;
 		template<auto f> nik_ce auto _cycle_			= U_store_T<_cycle<f>>;
 		template<auto f> nik_ce auto _postcycle_		= U_store_T<_postcycle<f>>;
-		template<auto f> nik_ce auto _match_			= U_store_T<_match<f>>;
-		template<auto f> nik_ce auto _postmatch_		= U_store_T<_postmatch<f>>;
+		template<auto f> nik_ce auto _found_			= U_store_T<_found<f>>;
+		template<auto f> nik_ce auto _postfound_		= U_store_T<_postfound<f>>;
 		template<auto f> nik_ce auto _done_			= U_store_T<_done<f>>;
 
 /***********************************************************************************************************************/
@@ -309,6 +311,11 @@ namespace cctmp_one_cycle_generics {
 		template<auto... Vs> struct _out_iter			{ };
 		template<auto... Vs> nik_ce auto _out_iter_		= U_store_T<_out_iter<Vs...>>;
 
+	// aux:
+
+		template<auto... Vs> struct _aux_iter			{ };
+		template<auto... Vs> nik_ce auto _aux_iter_		= U_store_T<_aux_iter<Vs...>>;
+
 	// in:
 
 		template<auto... Vs> struct _in_iter			{ };
@@ -350,12 +357,21 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
+// match:
+
+	// id:
+
+		template<auto... Vs> struct _match			{ };
+		template<auto... Vs> nik_ce auto _match_		= U_store_T<_match<Vs...>>;
+
+/***********************************************************************************************************************/
+
 // action:
 
 	// id:
 
 		template<auto... Vs> struct _action			{ };
-		template<auto... Vs> nik_ce auto _action_			= U_store_T<_action<Vs...>>;
+		template<auto... Vs> nik_ce auto _action_		= U_store_T<_action<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -744,8 +760,8 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
-	template<typename OutIter, typename CarInIter, typename CdrInIter>
-	struct T_chord<Chord::glide, OutIter, CarInIter, CdrInIter>
+	template<typename CarInIter, typename CdrInIter>
+	struct T_chord<Chord::glide, CarInIter, CdrInIter>
 	{
 		using car_in		= T_chord < Chord::note , CarInIter >;
 		using cdr_in		= T_chord < Chord::note , CdrInIter >;

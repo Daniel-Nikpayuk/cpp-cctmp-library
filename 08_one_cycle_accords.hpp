@@ -104,8 +104,8 @@ namespace cctmp_one_cycle_generics {
 		nik_ces key_type precycle		=  4;
 		nik_ces key_type postcycle		=  5;
 
-		nik_ces key_type match			=  6;
-		nik_ces key_type postmatch		=  7;
+		nik_ces key_type found			=  6;
+		nik_ces key_type postfound		=  7;
 		nik_ces key_type done			=  8;
 	};
 
@@ -177,6 +177,18 @@ namespace cctmp_one_cycle_generics {
 	<
 		note::ival::is_left_open,
 		note::axis::next,
+		_id_
+	>;
+
+/***********************************************************************************************************************/
+
+// post match predicate:
+
+	template<auto is_post_match_predicate, typename cycle>
+	nik_ce auto tr_post_match_predicate = if_then_else
+	<
+		is_post_match_predicate,
+		cycle::match_predicate,
 		_id_
 	>;
 
@@ -311,8 +323,8 @@ namespace cctmp_one_cycle_generics {
 		_mutate < _Op1_ , _Arg11_ , _Arg12_ >
 	>
 	{
-		nik_ces auto loop_predicate	= tr_argcompose  < _Op0_, _Arg01_, _Arg02_ >;
-		nik_ces auto mutate_function	= tr_sidecompose < _Op1_, _Arg11_, _Arg12_ >;
+		nik_ces auto loop_predicate	= tr_argcompose  < _Op0_ , _Arg01_ , _Arg02_ >;
+		nik_ces auto mutate_function	= tr_sidecompose < _Op1_ , _Arg11_ , _Arg12_ >;
 
 		nik_ces auto out_next		= Chord::out::axis::next;
 	};
@@ -382,8 +394,8 @@ namespace cctmp_one_cycle_generics {
 		_combine < _Op1_ , _Arg11_ , _Arg12_ >
 	>
 	{
-		nik_ces auto loop_predicate	= tr_argcompose < _Op0_, _Arg01_, _Arg02_ >;
-		nik_ces auto combine_function	= tr_argcompose < _Op1_, _Arg11_, _Arg12_ >;
+		nik_ces auto loop_predicate	= tr_argcompose < _Op0_ , _Arg01_ , _Arg02_ >;
+		nik_ces auto combine_function	= tr_argcompose < _Op1_ , _Arg11_ , _Arg12_ >;
 
 		nik_ces auto in_next		= Chord::in::axis::next;
 	};
@@ -417,14 +429,14 @@ namespace cctmp_one_cycle_generics {
 
 // label:
 
-	template<auto _Precycle_, auto _Cycle_, auto _Match_, auto _Postcycle_, auto _Done_>
-	struct T_accord<AN::find_first, AT::label, _label<_Precycle_, _Cycle_, _Match_, _Postcycle_, _Done_>>
+	template<auto _Precycle_, auto _Cycle_, auto _Found_, auto _Postcycle_, auto _Done_>
+	struct T_accord<AN::find_first, AT::label, _label<_Precycle_, _Cycle_, _Found_, _Postcycle_, _Done_>>
 	{
 		// should static assert against tagnames.
 
 		nik_ces auto precycle		= tag_value <  _Precycle_ >;
 		nik_ces auto cycle		= tag_value <     _Cycle_ >;
-		nik_ces auto match		= tag_value <     _Match_ >;
+		nik_ces auto found		= tag_value <     _Found_ >;
 		nik_ces auto postcycle		= tag_value < _Postcycle_ >;
 		nik_ces auto done		= tag_value <      _Done_ >;
 	};
@@ -451,36 +463,32 @@ namespace cctmp_one_cycle_generics {
 	<
 		AN::find_first, AT::cycle, Chord,
 
-		_break   < _Op0_ , _Arg01_ , _Arg02_ >,
-		_action  < _Op1_ , _Arg11_ , _Arg12_ >
+		_break < _Op0_ , _Arg01_ , _Arg02_ >,
+		_match < _Op1_ , _Arg11_ , _Arg12_ >
 	>
 	{
-		nik_ces auto loop_predicate	= tr_argcompose < _Op0_, _Arg01_, _Arg02_ >;
-		nik_ces auto action_predicate	= tr_argcompose < _Op1_, _Arg11_, _Arg12_ >;
+		nik_ces auto loop_predicate	= tr_argcompose < _Op0_ , _Arg01_ , _Arg02_ >;
+		nik_ces auto match_predicate	= tr_argcompose < _Op1_ , _Arg11_ , _Arg12_ >;
 
 		nik_ces auto in_next		= Chord::in::axis::next;
 	};
 
 /***********************************************************************************************************************/
 
-// match:
+// found:
 
-	template
-	<
-		typename Chord,
-
-		auto _Op_, auto _Arg1_, auto _Arg2_
-	>
+	template<auto _Op_, auto _Arg1_, auto _Arg2_, auto _Next_>
 	struct T_accord
 	<
-		AN::find_first, AT::match, Chord,
+		AN::find_first, AT::found,
 
-		_mutate < _Op_ , _Arg1_ , _Arg2_ >
+		_mutate   < _Op_ , _Arg1_ , _Arg2_ >,
+		_out_iter <                 _Next_ >
 	>
 	{
-		nik_ces auto match_mutate_function	= tr_sidecompose < _Op_, _Arg1_, _Arg2_ >;
+		nik_ces auto found_mutate_function	= tr_sidecompose < _Op_, _Arg1_, _Arg2_ >;
 
-		nik_ces auto out_next			= Chord::out::axis::next;
+		nik_ces auto found_out_next		= tag_value < _Next_ >;
 	};
 
 /***********************************************************************************************************************/
@@ -500,7 +508,7 @@ namespace cctmp_one_cycle_generics {
 	template<typename Chord, typename Cycle>
 	struct T_accord<AN::find_first, AT::postcycle, Chord, Cycle>
 	{
-		nik_ces auto post_action_predicate = tr_post_action_function<Chord::in::ival::is_right_closed, Cycle>;
+		nik_ces auto post_match_predicate = tr_post_match_predicate<Chord::in::ival::is_right_closed, Cycle>;
 	};
 
 /***********************************************************************************************************************/
@@ -509,6 +517,104 @@ namespace cctmp_one_cycle_generics {
 // find all (ray):
 
 /***********************************************************************************************************************/
+
+// label:
+
+	template<auto _Precycle_, auto _Cycle_, auto _Found_, auto _Postcycle_, auto _Postfound_, auto _Done_>
+	struct T_accord<AN::find_all, AT::label, _label<_Precycle_, _Cycle_, _Found_, _Postcycle_, _Postfound_, _Done_>>
+	{
+		// should static assert against tagnames.
+
+		nik_ces auto precycle		= tag_value <  _Precycle_ >;
+		nik_ces auto cycle		= tag_value <     _Cycle_ >;
+		nik_ces auto found		= tag_value <     _Found_ >;
+		nik_ces auto postcycle		= tag_value < _Postcycle_ >;
+		nik_ces auto postfound		= tag_value < _Postfound_ >;
+		nik_ces auto done		= tag_value <      _Done_ >;
+	};
+
+/***********************************************************************************************************************/
+
+// position:
+
+	template<typename Position>
+	struct T_accord<AN::find_all, AT::position, Position> : public T_accord<AN::fold, AT::position, Position> { };
+
+/***********************************************************************************************************************/
+
+// cycle:
+
+	template
+	<
+		typename Chord,
+
+		auto _Op0_, auto _Arg01_, auto _Arg02_,
+		auto _Op1_, auto _Arg11_, auto _Arg12_
+	>
+	struct T_accord
+	<
+		AN::find_all, AT::cycle, Chord,
+
+		_break < _Op0_ , _Arg01_ , _Arg02_ >,
+		_match < _Op1_ , _Arg11_ , _Arg12_ >
+	>
+	{
+		nik_ces auto loop_predicate	= tr_argcompose < _Op0_ , _Arg01_ , _Arg02_ >;
+		nik_ces auto match_predicate	= tr_argcompose < _Op1_ , _Arg11_ , _Arg12_ >;
+
+		nik_ces auto in_next		= Chord::in::axis::next;
+	};
+
+/***********************************************************************************************************************/
+
+// found:
+
+	template<typename Chord, auto _Op_, auto _Arg1_, auto _Arg2_, auto _Next_>
+	struct T_accord
+	<
+		AN::find_all, AT::found, Chord,
+
+		_mutate   < _Op_ , _Arg1_ , _Arg2_ >,
+		_out_iter <                 _Next_ >
+	>
+	{
+		nik_ces auto found_mutate_function	= tr_sidecompose < _Op_, _Arg1_, _Arg2_ >;
+
+		nik_ces auto found_out_next		= tag_value < _Next_ >;
+		nik_ces auto found_in_next		= Chord::in::axis::next;
+	};
+
+/***********************************************************************************************************************/
+
+// precycle:
+
+	template<typename Chord>
+	struct T_accord<AN::find_all, AT::precycle, Chord>
+	{
+		nik_ces auto pre_in_next = tr_pre_note_next<typename Chord::in>;
+	};
+
+/***********************************************************************************************************************/
+
+// postcycle:
+
+	template<typename Chord, typename Cycle>
+	struct T_accord<AN::find_all, AT::postcycle, Chord, Cycle>
+	{
+		nik_ces auto post_match_predicate = tr_post_match_predicate<Chord::in::ival::is_right_closed, Cycle>;
+	};
+
+/***********************************************************************************************************************/
+
+// postfound:
+
+	template<typename Found>
+	struct T_accord<AN::find_all, AT::postfound, Found>
+	{
+		nik_ces auto postfound_mutate_function	= Found::postfound_mutate_function;
+
+		nik_ces auto postfound_out_next		= Found::postfound_out_next;
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -571,8 +677,8 @@ namespace cctmp_one_cycle_generics {
 
 		public:
 
-			nik_ces auto loop_predicate	= tr_loopcompose < _Op0_, _Arg01_ , _Arg02_ , in , quality >;
-			nik_ces auto mutate_function	= tr_sidecompose < _Op1_, _Arg11_ , _Arg12_                >;
+			nik_ces auto loop_predicate	= tr_loopcompose < _Op0_ , _Arg01_ , _Arg02_ , in , quality >;
+			nik_ces auto mutate_function	= tr_sidecompose < _Op1_ , _Arg11_ , _Arg12_                >;
 
 			nik_ces auto out_next		= Chord::out::axis::next;
 			nik_ces auto in_next		= Chord::in::axis::next;
@@ -667,9 +773,9 @@ namespace cctmp_one_cycle_generics {
 
 		public:
 
-			nik_ces auto loop_predicate	= tr_loopcompose < _Op0_, _Arg01_ , _Arg02_ , cdr_in , quality >;
-			nik_ces auto action_function	= tr_argcompose  < _Op1_, _Arg11_ , _Arg12_                    >;
-			nik_ces auto mutate_function	= tr_sidecompose < _Op2_, _Arg21_ , _Arg22_                    >;
+			nik_ces auto loop_predicate	= tr_loopcompose < _Op0_ , _Arg01_ , _Arg02_ , cdr_in , quality >;
+			nik_ces auto action_function	= tr_argcompose  < _Op1_ , _Arg11_ , _Arg12_                    >;
+			nik_ces auto mutate_function	= tr_sidecompose < _Op2_ , _Arg21_ , _Arg22_                    >;
 
 			nik_ces auto out_next		= Chord::out::axis::next;
 			nik_ces auto car_in_next	= Chord::car_in::axis::next;
@@ -720,12 +826,201 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
+// label:
+
+	template<typename Label>
+	struct T_accord<AN::fasten, AT::label, Label> : public T_accord<AN::repeat, AT::label, Label> { };
+
+/***********************************************************************************************************************/
+
+// position:
+
+	template<auto _Out_, auto _Aux_, auto _In_, auto _CarIn_, auto _CdrIn_, auto _End_>
+	struct T_accord<AN::fasten, AT::position, _position<_Out_, _Aux_, _In_, _CarIn_, _CdrIn_, _End_>>
+	{
+		// should static assert against tagnames.
+
+		nik_ces auto out	= tag_value <   _Out_ >;
+		nik_ces auto aux	= tag_value <   _Aux_ >;
+		nik_ces auto in		= tag_value <    _In_ >;
+		nik_ces auto car_in	= tag_value < _CarIn_ >;
+		nik_ces auto cdr_in	= tag_value < _CdrIn_ >;
+		nik_ces auto end	= tag_value <   _End_ >;
+	};
+
+/***********************************************************************************************************************/
+
+// cycle:
+
+	template
+	<
+		typename Chord,
+
+		auto _Op0_, auto _Arg01_, auto _Arg02_,
+		auto _Op1_, auto _Arg11_, auto _Arg12_,
+		auto _Op2_, auto _Arg21_, auto _Arg22_,
+		auto _Op3_, auto _Arg31_, auto _Arg32_,
+		auto _Op4_, auto _Arg41_, auto _Arg42_,
+		auto _Op5_, auto _Arg51_, auto _Arg52_, auto _Arg53_
+	>
+	struct T_accord
+	<
+		AN::fasten, AT::cycle, Chord,
+
+		_break    < _Op0_ , _Arg01_ , _Arg02_           >,
+		_action   < _Op1_ , _Arg11_ , _Arg12_           >,
+		_combine  < _Op2_ , _Arg21_ , _Arg22_           >,
+		_mutate   < _Op3_ , _Arg31_ , _Arg32_           >,
+		_in_iter  < _Op4_ , _Arg41_ , _Arg42_           >,
+		_aux_iter < _Op5_ , _Arg51_ , _Arg52_ , _Arg53_ >
+	>
+	{
+		private:
+
+			using cdr_in		= typename Chord::cdr_in;
+			using quality		= typename Chord::quality;
+
+		public:
+
+			nik_ces auto loop_predicate	= tr_loopcompose < _Op0_ , _Arg01_ , _Arg02_ , cdr_in , quality >;
+			nik_ces auto action_function	= tr_argcompose  < _Op1_ , _Arg11_ , _Arg12_                    >;
+			nik_ces auto combine_function	= tr_argcompose  < _Op2_ , _Arg21_ , _Arg22_                    >;
+			nik_ces auto mutate_function	= tr_sidecompose < _Op3_ , _Arg31_ , _Arg32_                    >;
+			nik_ces auto in_next		= tr_argcompose  < _Op4_ , _Arg41_ , _Arg42_                    >;
+			nik_ces auto aux_next		= tr_argcompose  < _Op5_ , _Arg51_ , _Arg52_ , _Arg53_          >;
+
+			nik_ces auto out_next		= Chord::out::axis::next;
+			nik_ces auto car_in_next	= Chord::car_in::axis::next;
+			nik_ces auto cdr_in_next	= Chord::cdr_in::axis::next;
+	};
+
+/***********************************************************************************************************************/
+
+// precycle:
+
+	template<typename Chord>
+	struct T_accord<AN::fasten, AT::precycle, Chord>
+	{
+		nik_ces auto pre_end_prev	= tr_pre_tonic_prev < typename Chord::cdr_in , typename Chord::quality >;
+		nik_ces auto pre_out_next	= tr_pre_note_next  < typename Chord::out                              >;
+		nik_ces auto pre_car_in_next	= tr_pre_note_next  < typename Chord::car_in                           >;
+		nik_ces auto pre_cdr_in_next	= tr_pre_note_next  < typename Chord::cdr_in                           >;
+	};
+
+/***********************************************************************************************************************/
+
+// postcycle:
+
+	template<typename Chord, typename Cycle>
+	struct T_accord<AN::fasten, AT::postcycle, Chord, Cycle>
+	{
+		private:
+
+			nik_ces auto cdr_in_is_right_closed	= Chord::cdr_in::ival::is_right_closed;
+			nik_ces auto loop_broke_early		= Chord::quality::augmented::is_early;
+			nik_ces auto is_post_operate		= cdr_in_is_right_closed || loop_broke_early;
+
+		public:
+
+			nik_ces auto post_action_function	= tr_post_action_function  < is_post_operate , Cycle >;
+			nik_ces auto post_combine_function	= tr_post_combine_function < is_post_operate , Cycle >;
+			nik_ces auto post_mutate_function	= tr_post_mutate_function  < is_post_operate , Cycle >;
+
+		nik_ces auto post_out_next    = tr_post_tone_next  < typename Chord::out    , typename Chord::quality >;
+		nik_ces auto post_car_in_next = tr_post_tone_next  < typename Chord::car_in , typename Chord::quality >;
+		nik_ces auto post_cdr_in_next = tr_post_note_next  < loop_broke_early       , typename Chord::cdr_in  >;
+		nik_ces auto post_end_next    = tr_post_tonic_next < typename Chord::cdr_in , typename Chord::quality >;
+	};
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // glide (line):
 
 /***********************************************************************************************************************/
+
+// label:
+
+	template<typename Label>
+	struct T_accord<AN::glide, AT::label, Label> : public T_accord<AN::repeat, AT::label, Label> { };
+
+/***********************************************************************************************************************/
+
+// position:
+
+	template<typename Position>
+	struct T_accord<AN::glide, AT::position, Position> : public T_accord<AN::zip, AT::position, Position> { };
+
+/***********************************************************************************************************************/
+
+// cycle:
+
+	template
+	<
+		typename Chord,
+
+		auto _Op0_, auto _Arg01_, auto _Arg02_,
+		auto _Op1_, auto _Arg11_, auto _Arg12_,
+		auto _Op2_, auto _Arg21_, auto _Arg22_
+	>
+	struct T_accord
+	<
+		AN::glide, AT::cycle, Chord,
+
+		_break   < _Op0_ , _Arg01_ , _Arg02_ >,
+		_action  < _Op1_ , _Arg11_ , _Arg12_ >,
+		_combine < _Op2_ , _Arg21_ , _Arg22_ >
+	>
+	{
+		private:
+
+			using cdr_in		= typename Chord::cdr_in;
+			using quality		= typename Chord::quality;
+
+		public:
+
+			nik_ces auto loop_predicate	= tr_loopcompose < _Op0_ , _Arg01_ , _Arg02_ , cdr_in , quality >;
+			nik_ces auto action_function	= tr_argcompose  < _Op1_ , _Arg11_ , _Arg12_ >;
+			nik_ces auto combine_function	= tr_argcompose  < _Op2_ , _Arg21_ , _Arg22_ >;
+
+			nik_ces auto car_in_next	= Chord::car_in::axis::next;
+			nik_ces auto cdr_in_next	= Chord::cdr_in::axis::next;
+	};
+
+/***********************************************************************************************************************/
+
+// precycle:
+
+	template<typename Chord>
+	struct T_accord<AN::glide, AT::precycle, Chord>
+	{
+		nik_ces auto pre_end_prev	= tr_pre_tonic_prev < typename Chord::cdr_in , typename Chord::quality >;
+		nik_ces auto pre_car_in_next	= tr_pre_note_next  < typename Chord::car_in                           >;
+		nik_ces auto pre_cdr_in_next	= tr_pre_note_next  < typename Chord::cdr_in                           >;
+	};
+
+/***********************************************************************************************************************/
+
+// postcycle:
+
+	template<typename Chord, typename Cycle>
+	struct T_accord<AN::glide, AT::postcycle, Chord, Cycle>
+	{
+		private:
+
+			nik_ces auto cdr_in_is_right_closed	= Chord::cdr_in::ival::is_right_closed;
+			nik_ces auto loop_broke_early		= Chord::quality::augmented::is_early;
+			nik_ces auto is_post_operate		= cdr_in_is_right_closed || loop_broke_early;
+
+		public:
+
+			nik_ces auto post_action_function	= tr_post_action_function  < is_post_operate , Cycle >;
+			nik_ces auto post_combine_function	= tr_post_combine_function < is_post_operate , Cycle >;
+
+		nik_ces auto post_car_in_next = tr_post_tone_next  < typename Chord::car_in , typename Chord::quality >;
+		nik_ces auto post_cdr_in_next = tr_post_note_next  < loop_broke_early       , typename Chord::cdr_in  >;
+		nik_ces auto post_end_next    = tr_post_tonic_next < typename Chord::cdr_in , typename Chord::quality >;
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

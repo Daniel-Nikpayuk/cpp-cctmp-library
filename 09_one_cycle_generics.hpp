@@ -117,8 +117,6 @@ namespace cctmp_one_cycle_generics {
 
 // write:
 
-	// direct:
-
 	struct T_direct_write
 	{
 		template<auto d, auto defs, auto... Vs>
@@ -150,6 +148,124 @@ namespace cctmp_one_cycle_generics {
 
 	template<auto defs, auto... Vs>
 	nik_ce auto conceptual_write = T_conceptual_write::template result<MD::initial_depth, defs, Vs...>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// (conceptual) defaults:
+
+/***********************************************************************************************************************/
+
+// label:
+
+	nik_ce auto _default_label_ =_label_
+	<
+		_precycle_  < _zero         >,
+		_cycle_     < _one          >,
+		_postcycle_ < _two          >
+	>;
+
+// unary position:
+
+	nik_ce auto _default_unary_position_ = _position_
+	<
+		_out_       < _zero         >,
+		_in_        < _one          >,
+		_end_       < _two          >
+	>;
+
+// binary position:
+
+	nik_ce auto _default_binary_position_ = _position_
+	<
+		_out_       < _zero         >,
+		_car_in_    < _one          >,
+		_cdr_in_    < _two          >,
+		_end_       < _three        >
+	>;
+
+// out_iter:
+
+	nik_ce auto _default_out_iter_ = _out_iter_
+	<
+		_ival_      < _closing      >,
+		_next_      < _increment_<> >,
+		_prev_      < _decrement_<> >
+	>;
+
+// in_iter:
+
+	nik_ce auto _default_in_iter_ = _in_iter_
+	<
+		_ival_      < _closing      >,
+		_next_      < _increment_<> >,
+		_prev_      < _decrement_<> >
+	>;
+
+// car_in_iter:
+
+	nik_ce auto _default_car_in_iter_ = _car_in_iter_
+	<
+		_ival_      < _closing      >,
+		_next_      < _increment_<> >,
+		_prev_      < _decrement_<> >
+	>;
+
+// cdr_in_iter:
+
+	nik_ce auto _default_cdr_in_iter_ = _cdr_in_iter_
+	<
+		_ival_      < _closing      >,
+		_next_      < _increment_<> >,
+		_prev_      < _decrement_<> >
+	>;
+
+// unary break:
+
+	nik_ce auto _default_unary_break_ = _break_
+	<
+		_op_        < _equal_       >,
+		_in_arg_    < _id_          >,
+		_end_arg_   < _id_          >
+	>;
+
+// binary break:
+
+	nik_ce auto _default_binary_break_ = _break_
+	<
+		_op_         < _equal_       >,
+		_cdr_in_arg_ < _id_          >,
+		_end_arg_    < _id_          >
+	>;
+
+// binary action:
+
+	nik_ce auto _default_binary_action_ = _action_
+	<
+		_op_         < _tuple_       >,
+		_car_in_arg_ < _dereference_ >,
+		_cdr_in_arg_ < _dereference_ >
+	>;
+
+// unary mutate:
+
+	template<auto f = _dereference_>
+	nik_ce auto _default_unary_mutate_ = _mutate_
+	<
+		_op_        < _assign_      >,
+		_out_arg_   < _dereference_ >,
+		_in_arg_    < f             >
+	>;
+
+// binary mutate:
+
+	nik_ce auto _default_binary_mutate_ = _mutate_
+	<
+		_op_        < _assign_      >,
+		_out_arg_   < _dereference_ >,
+		_ps_arg_    < _id_          >
+	>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -187,8 +303,7 @@ namespace cctmp_one_cycle_generics {
 		template<auto... Vs>
 		nik_ce auto direct_repeat = direct_to_spec
 		<
-			direct_write<direct_repeat_defaults, Vs...>,
-			H_repeat_specification
+			direct_write<direct_repeat_defaults, Vs...>, H_repeat_specification
 		>;
 
 /***********************************************************************************************************************/
@@ -199,12 +314,8 @@ namespace cctmp_one_cycle_generics {
 
 		nik_ce auto conceptual_repeat_defaults = U_pack_Vs
 		<
-			_label_
-			<
-				_precycle_  < _zero         >,
-				_cycle_     < _one          >,
-				_postcycle_ < _two          >
-			>,
+			_default_label_,
+
 			_position_
 			<
 				_out_       < _zero         >,
@@ -249,21 +360,10 @@ namespace cctmp_one_cycle_generics {
 			return to_list_
 			<
 				H_repeat_specification,
-
-				T_label_etc::precycle,
-				T_label_etc::cycle,
-				T_label_etc::postcycle,
-
-				T_position_etc::out,
-				T_position_etc::end,
-				T_position_etc::in,
-
+				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::postcycle,
+				T_position_etc::out, T_position_etc::end, T_position_etc::in,
 				T_precycle_etc::pre_out_next,
-
-				T_cycle_etc::loop_predicate,
-				T_cycle_etc::mutate_function,
-				T_cycle_etc::out_next,
-
+				T_cycle_etc::loop_predicate, T_cycle_etc::mutate_function, T_cycle_etc::out_next,
 				T_postcycle_etc::post_mutate_function
 			>;
 		}
@@ -316,8 +416,7 @@ namespace cctmp_one_cycle_generics {
 		template<auto... Vs>
 		nik_ce auto direct_map = direct_to_spec
 		<
-			direct_write<direct_map_defaults, Vs...>,
-			H_map_specification
+			direct_write<direct_map_defaults, Vs...>, H_map_specification
 		>;
 
 /***********************************************************************************************************************/
@@ -328,42 +427,12 @@ namespace cctmp_one_cycle_generics {
 
 		nik_ce auto conceptual_map_defaults = U_pack_Vs
 		<
-			_label_
-			<
-				_precycle_  < _zero         >,
-				_cycle_     < _one          >,
-				_postcycle_ < _two          >
-			>,
-			_position_
-			<
-				_out_       < _zero         >,
-				_in_        < _one          >,
-				_end_       < _two          >
-			>,
-			_out_iter_
-			<
-				_ival_      < _closing      >,
-				_next_      < _increment_<> >,
-				_prev_      < _decrement_<> >
-			>,
-			_in_iter_
-			<
-				_ival_      < _closing      >,
-				_next_      < _increment_<> >,
-				_prev_      < _decrement_<> >
-			>,
-			_break_
-			<
-				_op_        < _equal_       >,
-				_in_arg_    < _id_          >,
-				_end_arg_   < _id_          >
-			>,
-			_mutate_
-			<
-				_op_        < _assign_      >,
-				_out_arg_   < _dereference_ >,
-				_in_arg_    < _dereference_ >
-			>
+			_default_label_,
+			_default_unary_position_,
+			_default_out_iter_,
+			_default_in_iter_,
+			_default_unary_break_,
+			_default_unary_mutate_<>
 		>;
 
 	// spec:
@@ -385,28 +454,13 @@ namespace cctmp_one_cycle_generics {
 			return to_list_
 			<
 				H_map_specification,
-
-				T_label_etc::precycle,
-				T_label_etc::cycle,
-				T_label_etc::postcycle,
-
-				T_position_etc::out,
-				T_position_etc::in,
-				T_position_etc::end,
-
-				T_precycle_etc::pre_end_prev,
-				T_precycle_etc::pre_out_next,
-				T_precycle_etc::pre_in_next,
-
-				T_cycle_etc::loop_predicate,
-				T_cycle_etc::mutate_function,
-				T_cycle_etc::out_next,
-				T_cycle_etc::in_next,
-
-				T_postcycle_etc::post_mutate_function,
-				T_postcycle_etc::post_out_next,
-				T_postcycle_etc::post_in_next,
-				T_postcycle_etc::post_end_next
+				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::postcycle,
+				T_position_etc::out, T_position_etc::in, T_position_etc::end,
+				T_precycle_etc::pre_end_prev, T_precycle_etc::pre_out_next, T_precycle_etc::pre_in_next,
+				T_cycle_etc::loop_predicate, T_cycle_etc::mutate_function,
+					T_cycle_etc::out_next, T_cycle_etc::in_next,
+				T_postcycle_etc::post_mutate_function, T_postcycle_etc::post_out_next,
+					T_postcycle_etc::post_in_next, T_postcycle_etc::post_end_next
 			>;
 		}
 
@@ -452,8 +506,7 @@ namespace cctmp_one_cycle_generics {
 		template<auto... Vs>
 		nik_ce auto direct_fold = direct_to_spec
 		<
-			direct_write<direct_fold_defaults, Vs...>,
-			H_fold_specification
+			direct_write<direct_fold_defaults, Vs...>, H_fold_specification
 		>;
 
 /***********************************************************************************************************************/
@@ -464,32 +517,17 @@ namespace cctmp_one_cycle_generics {
 
 		nik_ce auto conceptual_fold_defaults = U_pack_Vs
 		<
-			_label_
-			<
-				_precycle_  < _zero         >,
-				_cycle_     < _one          >,
-				_postcycle_ < _two          >
-			>,
-			_position_
-			<
-				_out_       < _zero         >,
-				_in_        < _one          >,
-				_end_       < _two          >
-			>,
+			_default_label_,
+			_default_unary_position_,
 			_in_iter_
 			<
 				_ival_      < _closing      >,
 				_next_      < _increment_<> >
 			>,
-			_break_
-			<
-				_op_        < _equal_       >,
-				_in_arg_    < _id_          >,
-				_end_arg_   < _id_          >
-			>,
+			_default_unary_break_,
 			_combine_
 			<
-				_op_        < _assign_      >,
+				_op_        < _tuple_       >,
 				_out_arg_   < _id_          >,
 				_in_arg_    < _dereference_ >
 			>
@@ -514,21 +552,10 @@ namespace cctmp_one_cycle_generics {
 			return to_list_
 			<
 				H_fold_specification,
-
-				T_label_etc::precycle,
-				T_label_etc::cycle,
-				T_label_etc::postcycle,
-
-				T_position_etc::out,
-				T_position_etc::in,
-				T_position_etc::end,
-
+				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::postcycle,
+				T_position_etc::out, T_position_etc::in, T_position_etc::end,
 				T_precycle_etc::pre_in_next,
-
-				T_cycle_etc::loop_predicate,
-				T_cycle_etc::combine_function,
-				T_cycle_etc::in_next,
-
+				T_cycle_etc::loop_predicate, T_cycle_etc::combine_function, T_cycle_etc::in_next,
 				T_postcycle_etc::post_combine_function
 			>;
 		}
@@ -556,12 +583,11 @@ namespace cctmp_one_cycle_generics {
 
 	// default:
 
-/*
 		nik_ce auto direct_find_first_defaults = U_pack_Vs
 		<
 			_precycle_label_        < _zero             >,
 			_cycle_label_           < _one              >,
-			_match_label_           < _two              >,
+			_found_label_           < _two              >,
 			_postcycle_label_       < _three            >,
 			_done_label_            < _four             >,
 
@@ -572,13 +598,13 @@ namespace cctmp_one_cycle_generics {
 			_pre_in_next_           < _id_              >,
 
 			_loop_predicate_        < _equal_           >,
-			_action_predicate_      < _constant_<false> >,
+			_match_predicate_       < _constant_<false> >,
 			_in_next_               < _increment_<>     >,
 
-			_match_mutate_function_ < _d_assign_i_      >,
-			_match_out_next_        < _increment_<>     >,
+			_found_mutate_function_ < _d_assign_i_      >,
+			_found_out_next_        < _increment_<>     >,
 
-			_post_action_predicate_ < _constant_<false> >
+			_post_match_predicate_  < _constant_<false> >
 		>;
 
 	// spec:
@@ -586,14 +612,82 @@ namespace cctmp_one_cycle_generics {
 		template<auto... Vs>
 		nik_ce auto direct_find_first = direct_to_spec
 		<
-			direct_write<direct_find_first_defaults, Vs...>,
-			H_find_first_specification
+			direct_write<direct_find_first_defaults, Vs...>, H_find_first_specification
 		>;
-*/
 
 /***********************************************************************************************************************/
 
 // conceptual:
+
+	// default:
+
+		nik_ce auto conceptual_find_first_defaults = U_pack_Vs
+		<
+			_label_
+			<
+				_precycle_  < _zero             >,
+				_cycle_     < _one              >,
+				_found_     < _two              >,
+				_postcycle_ < _three            >,
+				_done_      < _four             >
+			>,
+			_default_unary_position_,
+			_out_iter_
+			<
+				_next_      < _increment_<>     >
+			>,
+			_in_iter_
+			<
+				_ival_      < _closing          >,
+				_next_      < _increment_<>     >
+			>,
+			_default_unary_break_,
+			_match_
+			<
+				_op_        < _constant_<false> >,
+				_in_arg_    < _dereference_     >
+			>,
+			_default_unary_mutate_<_id_>
+		>;
+
+	// spec:
+
+		template<auto label, auto position, auto out_iter, auto in_iter, auto break_, auto match, auto mutate>
+		nik_ce auto _conceptual_find_first
+		(
+			nik_avp(T_pack_Vs<label, position, out_iter, in_iter, break_, match, mutate>*)
+		)
+		{
+			nik_ce auto chord_etc	= U_chord_ < Chord::find_first , in_iter >;
+
+			using T_label_etc	= T_accord_ < AN::find_first , AT::label    , label    >;
+			using T_position_etc	= T_accord_ < AN::find_first , AT::position , position >;
+
+			using T_cycle_etc	= T_accord_ < AN::find_first , AT::cycle , chord_etc , break_ , match >;
+			nik_ce auto cycle_etc	= U_store_T < T_cycle_etc >;
+
+			using T_found_etc	= T_accord_ < AN::find_first , AT::found     , mutate    , out_iter  >;
+			using T_precycle_etc	= T_accord_ < AN::find_first , AT::precycle  , chord_etc             >;
+			using T_postcycle_etc	= T_accord_ < AN::find_first , AT::postcycle , chord_etc , cycle_etc >;
+
+			return to_list_
+			<
+				H_find_first_specification,
+				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::found,
+					T_label_etc::postcycle, T_label_etc::done,
+				T_position_etc::out, T_position_etc::in, T_position_etc::end,
+				T_precycle_etc::pre_in_next,
+				T_cycle_etc::loop_predicate, T_cycle_etc::match_predicate, T_cycle_etc::in_next,
+				T_found_etc::found_mutate_function, T_found_etc::found_out_next,
+				T_postcycle_etc::post_match_predicate
+			>;
+		}
+
+		template<auto... Vs>
+		nik_ce auto conceptual_find_first = _conceptual_find_first
+		(
+			conceptual_write<conceptual_find_first_defaults, Vs...>
+		);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -606,14 +700,13 @@ namespace cctmp_one_cycle_generics {
 
 	// default:
 
-/*
 		nik_ce auto direct_find_all_defaults = U_pack_Vs
 		<
 			_precycle_label_            < _zero             >,
 			_cycle_label_               < _one              >,
-			_match_label_               < _two              >,
+			_found_label_               < _two              >,
 			_postcycle_label_           < _three            >,
-			_postmatch_label_           < _four             >,
+			_postfound_label_           < _four             >,
 			_done_label_                < _five             >,
 
 			_out_position_              < _zero             >,
@@ -623,17 +716,17 @@ namespace cctmp_one_cycle_generics {
 			_pre_in_next_               < _id_              >,
 
 			_loop_predicate_            < _equal_           >,
-			_action_predicate_          < _constant_<false> >,
+			_match_predicate_           < _constant_<false> >,
 			_in_next_                   < _increment_<>     >,
 
-			_match_mutate_function_     < _d_assign_i_      >,
-			_match_out_next_            < _increment_<>     >,
-			_match_in_next_             < _increment_<>     >,
+			_found_mutate_function_     < _d_assign_i_      >,
+			_found_out_next_            < _increment_<>     >,
+			_found_in_next_             < _increment_<>     >,
 
-			_post_action_predicate_     < _constant_<false> >,
+			_post_match_predicate_      < _constant_<false> >,
 
-			_postmatch_mutate_function_ < _d_assign_i_      >,
-			_postmatch_out_next_        < _increment_<>     >
+			_postfound_mutate_function_ < _d_assign_i_      >,
+			_postfound_out_next_        < _increment_<>     >
 		>;
 
 	// spec:
@@ -641,14 +734,88 @@ namespace cctmp_one_cycle_generics {
 		template<auto... Vs>
 		nik_ce auto direct_find_all = direct_to_spec
 		<
-			direct_write<direct_find_all_defaults, Vs...>,
-			H_find_all_specification
+			direct_write<direct_find_all_defaults, Vs...>, H_find_all_specification
 		>;
-*/
 
 /***********************************************************************************************************************/
 
 // conceptual:
+
+	// default:
+
+		nik_ce auto conceptual_find_all_defaults = U_pack_Vs
+		<
+			_label_
+			<
+				_precycle_  < _zero             >,
+				_cycle_     < _one              >,
+				_found_     < _two              >,
+				_postcycle_ < _three            >,
+				_postfound_ < _four             >,
+				_done_      < _five             >
+			>,
+			_default_unary_position_,
+			_out_iter_
+			<
+				_next_      < _increment_<>     >
+			>,
+			_in_iter_
+			<
+				_ival_      < _closing          >,
+				_next_      < _increment_<>     >
+			>,
+			_default_unary_break_,
+			_match_
+			<
+				_op_        < _constant_<false> >,
+				_in_arg_    < _dereference_     >
+			>,
+			_default_unary_mutate_<_id_>
+		>;
+
+	// spec:
+
+		template<auto label, auto position, auto out_iter, auto in_iter, auto break_, auto match, auto mutate>
+		nik_ce auto _conceptual_find_all
+		(
+			nik_avp(T_pack_Vs<label, position, out_iter, in_iter, break_, match, mutate>*)
+		)
+		{
+			nik_ce auto chord_etc	= U_chord_ < Chord::find_all , in_iter >;
+
+			using T_label_etc	= T_accord_ < AN::find_all , AT::label    , label    >;
+			using T_position_etc	= T_accord_ < AN::find_all , AT::position , position >;
+
+			using T_cycle_etc	= T_accord_ < AN::find_all , AT::cycle , chord_etc , break_ , match >;
+			nik_ce auto cycle_etc	= U_store_T < T_cycle_etc >;
+
+			using T_found_etc	= T_accord_ < AN::find_all , AT::found , chord_etc , mutate , out_iter >;
+			nik_ce auto found_etc	= U_store_T < T_found_etc >;
+
+			using T_precycle_etc	= T_accord_ < AN::find_all , AT::precycle  , chord_etc             >;
+			using T_postcycle_etc	= T_accord_ < AN::find_all , AT::postcycle , chord_etc , cycle_etc >;
+
+			using T_postfound_etc	= T_accord_ < AN::find_all , AT::postfound , found_etc >;
+
+			return to_list_
+			<
+				H_find_all_specification,
+				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::found,
+					T_label_etc::postcycle, T_label_etc::postfound, T_label_etc::done,
+				T_position_etc::out, T_position_etc::in, T_position_etc::end,
+				T_precycle_etc::pre_in_next,
+				T_cycle_etc::loop_predicate, T_cycle_etc::match_predicate, T_cycle_etc::in_next,
+				T_found_etc::found_mutate_function, T_found_etc::found_out_next, T_found_etc::found_in_next,
+				T_postcycle_etc::post_match_predicate,
+				T_postfound_etc::postfound_mutate_function, T_postfound_etc::postfound_out_next
+			>;
+		}
+
+		template<auto... Vs>
+		nik_ce auto conceptual_find_all = _conceptual_find_all
+		(
+			conceptual_write<conceptual_find_all_defaults, Vs...>
+		);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -698,8 +865,7 @@ namespace cctmp_one_cycle_generics {
 		template<auto... Vs>
 		nik_ce auto direct_zip = direct_to_spec
 		<
-			direct_write<direct_zip_defaults, Vs...>,
-			H_zip_specification
+			direct_write<direct_zip_defaults, Vs...>, H_zip_specification
 		>;
 
 /***********************************************************************************************************************/
@@ -710,55 +876,14 @@ namespace cctmp_one_cycle_generics {
 
 		nik_ce auto conceptual_zip_defaults = U_pack_Vs
 		<
-			_label_
-			<
-				_precycle_  < _zero         >,
-				_cycle_     < _one          >,
-				_postcycle_ < _two          >
-			>,
-			_position_
-			<
-				_out_       < _zero         >,
-				_car_in_    < _one          >,
-				_cdr_in_    < _two          >,
-				_end_       < _three        >
-			>,
-			_out_iter_
-			<
-				_ival_      < _closing      >,
-				_next_      < _increment_<> >,
-				_prev_      < _decrement_<> >
-			>,
-			_car_in_iter_
-			<
-				_ival_      < _closing      >,
-				_next_      < _increment_<> >,
-				_prev_      < _decrement_<> >
-			>,
-			_cdr_in_iter_
-			<
-				_ival_      < _closing      >,
-				_next_      < _increment_<> >,
-				_prev_      < _decrement_<> >
-			>,
-			_break_
-			<
-				_op_         < _equal_       >,
-				_cdr_in_arg_ < _id_          >,
-				_end_arg_    < _id_          >
-			>,
-			_action_
-			<
-				_op_         < _tuple_       >,
-				_car_in_arg_ < _dereference_ >,
-				_cdr_in_arg_ < _dereference_ >
-			>,
-			_mutate_
-			<
-				_op_        < _assign_      >,
-				_out_arg_   < _dereference_ >,
-				_ps_arg_    < _id_          >
-			>
+			_default_label_,
+			_default_binary_position_,
+			_default_out_iter_,
+			_default_car_in_iter_,
+			_default_cdr_in_iter_,
+			_default_binary_break_,
+			_default_binary_action_,
+			_default_binary_mutate_
 		>;
 
 	// spec:
@@ -787,34 +912,15 @@ namespace cctmp_one_cycle_generics {
 			return to_list_
 			<
 				H_zip_specification,
-
-				T_label_etc::precycle,
-				T_label_etc::cycle,
-				T_label_etc::postcycle,
-
-				T_position_etc::out,
-				T_position_etc::car_in,
-				T_position_etc::cdr_in,
-				T_position_etc::end,
-
-				T_precycle_etc::pre_end_prev,
-				T_precycle_etc::pre_out_next,
-				T_precycle_etc::pre_car_in_next,
-				T_precycle_etc::pre_cdr_in_next,
-
-				T_cycle_etc::loop_predicate,
-				T_cycle_etc::action_function,
-				T_cycle_etc::mutate_function,
-				T_cycle_etc::out_next,
-				T_cycle_etc::car_in_next,
-				T_cycle_etc::cdr_in_next,
-
-				T_postcycle_etc::post_action_function,
-				T_postcycle_etc::post_mutate_function,
-				T_postcycle_etc::post_out_next,
-				T_postcycle_etc::post_car_in_next,
-				T_postcycle_etc::post_cdr_in_next,
-				T_postcycle_etc::post_end_next
+				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::postcycle,
+				T_position_etc::out, T_position_etc::car_in, T_position_etc::cdr_in, T_position_etc::end,
+				T_precycle_etc::pre_end_prev, T_precycle_etc::pre_out_next,
+					T_precycle_etc::pre_car_in_next, T_precycle_etc::pre_cdr_in_next,
+				T_cycle_etc::loop_predicate, T_cycle_etc::action_function, T_cycle_etc::mutate_function,
+					T_cycle_etc::out_next, T_cycle_etc::car_in_next, T_cycle_etc::cdr_in_next,
+				T_postcycle_etc::post_action_function, T_postcycle_etc::post_mutate_function,
+					T_postcycle_etc::post_out_next, T_postcycle_etc::post_car_in_next,
+					T_postcycle_etc::post_cdr_in_next, T_postcycle_etc::post_end_next
 			>;
 		}
 
@@ -836,7 +942,6 @@ namespace cctmp_one_cycle_generics {
 
 	// default:
 
-/*
 		nik_ce auto direct_fasten_defaults = U_pack_Vs
 		<
 			_precycle_label_        < _zero             >,
@@ -870,6 +975,7 @@ namespace cctmp_one_cycle_generics {
 			_post_combine_function_ < _id_              >,
 			_post_out_next_         < _id_              >,
 			_post_car_in_next_      < _id_              >,
+			_post_cdr_in_next_      < _id_              >,
 			_post_end_next_         < _id_              >
 		>;
 
@@ -878,14 +984,109 @@ namespace cctmp_one_cycle_generics {
 		template<auto... Vs>
 		nik_ce auto direct_fasten = direct_to_spec
 		<
-			direct_write<direct_fasten_defaults, Vs...>,
-			H_fasten_specification
+			direct_write<direct_fasten_defaults, Vs...>, H_fasten_specification
 		>;
-*/
 
 /***********************************************************************************************************************/
 
 // conceptual:
+
+	// default:
+
+		nik_ce auto conceptual_fasten_defaults = U_pack_Vs
+		<
+			_default_label_,
+			_position_
+			<
+				_out_       < _zero              >,
+				_aux_       < _one               >,
+				_in_        < _two               >,
+				_car_in_    < _three             >,
+				_cdr_in_    < _four              >,
+				_end_       < _five              >
+			>,
+			_default_out_iter_,
+			_default_car_in_iter_,
+			_default_cdr_in_iter_,
+			_default_binary_break_,
+			_default_binary_action_,
+			_combine_
+			<
+				_op_         < _tuple_           >,
+				_out_arg_    < _dereference_     >,
+				_in_arg_     < _id_              >
+			>,
+			_default_binary_mutate_,
+			_in_iter_
+			<
+				_op_         < _constant_<false> >,
+				_out_arg_    < _dereference_     >,
+				_in_arg_     < _id_              >,
+				_aux_arg_    < _id_              >
+			>,
+			_aux_iter_
+			<
+				_op_         < _constant_<false> >,
+				_out_arg_    < _dereference_     >,
+				_car_in_arg_ < _dereference_     >,
+				_cdr_in_arg_ < _dereference_     >
+			>
+		>;
+
+	// spec:
+
+		template
+		<
+			auto label, auto position, auto out_iter, auto car_in_iter, auto cdr_in_iter,
+			auto break_, auto action, auto combine, auto mutate, auto in_iter, auto aux_iter
+		>
+		nik_ce auto _conceptual_fasten
+		(
+			nik_avp(T_pack_Vs
+			<
+				label, position, out_iter, car_in_iter, cdr_in_iter,
+				break_, action, combine, mutate, in_iter, aux_iter
+			>*)
+		)
+		{
+			nik_ce auto chord_etc	= U_chord_ < Chord::fasten , out_iter , car_in_iter , cdr_in_iter >;
+
+			using T_label_etc	= T_accord_ < AN::fasten , AT::label    , label    >;
+			using T_position_etc	= T_accord_ < AN::fasten , AT::position , position >;
+
+			using T_cycle_etc	= T_accord_
+						<
+							AN::fasten , AT::cycle ,
+							chord_etc  , break_    , action , combine , mutate , in_iter , aux_iter
+						>;
+			nik_ce auto cycle_etc	= U_store_T < T_cycle_etc >;
+
+			using T_precycle_etc	= T_accord_ < AN::fasten , AT::precycle  , chord_etc >;
+			using T_postcycle_etc	= T_accord_ < AN::fasten , AT::postcycle , chord_etc , cycle_etc >;
+
+			return to_list_
+			<
+				H_fasten_specification,
+				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::postcycle,
+				T_position_etc::out, T_position_etc::aux, T_position_etc::in,
+					T_position_etc::car_in, T_position_etc::cdr_in, T_position_etc::end,
+				T_precycle_etc::pre_end_prev, T_precycle_etc::pre_out_next,
+					T_precycle_etc::pre_car_in_next, T_precycle_etc::pre_cdr_in_next,
+				T_cycle_etc::loop_predicate, T_cycle_etc::action_function, T_cycle_etc::mutate_function,
+					T_cycle_etc::aux_next, T_cycle_etc::combine_function, T_cycle_etc::in_next,
+					T_cycle_etc::out_next, T_cycle_etc::car_in_next, T_cycle_etc::cdr_in_next,
+				T_postcycle_etc::post_action_function, T_postcycle_etc::post_mutate_function,
+					T_postcycle_etc::post_combine_function, T_postcycle_etc::post_out_next,
+					T_postcycle_etc::post_car_in_next, T_postcycle_etc::post_cdr_in_next,
+					T_postcycle_etc::post_end_next
+			>;
+		}
+
+		template<auto... Vs>
+		nik_ce auto conceptual_fasten = _conceptual_fasten
+		(
+			conceptual_write<conceptual_fasten_defaults, Vs...>
+		);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -899,7 +1100,6 @@ namespace cctmp_one_cycle_generics {
 
 	// default:
 
-/*
 		nik_ce auto direct_glide_defaults = U_pack_Vs
 		<
 			_precycle_label_        < _zero         >,
@@ -924,6 +1124,7 @@ namespace cctmp_one_cycle_generics {
 			_post_action_function_  < _id_          >,
 			_post_combine_function_ < _id_          >,
 			_post_car_in_next_      < _id_          >,
+			_post_cdr_in_next_      < _id_          >,
 			_post_end_next_         < _id_          >
 		>;
 
@@ -932,14 +1133,68 @@ namespace cctmp_one_cycle_generics {
 		template<auto... Vs>
 		nik_ce auto direct_glide = direct_to_spec
 		<
-			direct_write<direct_glide_defaults, Vs...>,
-			H_glide_specification
+			direct_write<direct_glide_defaults, Vs...>, H_glide_specification
 		>;
-*/
 
 /***********************************************************************************************************************/
 
 // conceptual:
+
+	// default:
+
+		nik_ce auto conceptual_glide_defaults = U_pack_Vs
+		<
+			_default_label_,
+			_default_binary_position_,
+			_default_car_in_iter_,
+			_default_cdr_in_iter_,
+			_default_binary_break_,
+			_default_binary_action_,
+			_combine_
+			<
+				_op_        < _tuple_       >,
+				_out_arg_   < _id_          >,
+				_ps_arg_    < _id_          >
+			>
+		>;
+
+	// spec:
+
+		template<auto label, auto position, auto car_in_iter, auto cdr_in_iter, auto break_, auto action, auto combine>
+		nik_ce auto _conceptual_glide
+		(
+			nik_avp(T_pack_Vs<label, position, car_in_iter, cdr_in_iter, break_, action, combine>*)
+		)
+		{
+			nik_ce auto chord_etc	= U_chord_ < Chord::glide , car_in_iter , cdr_in_iter >;
+
+			using T_label_etc	= T_accord_ < AN::glide , AT::label    , label    >;
+			using T_position_etc	= T_accord_ < AN::glide , AT::position , position >;
+
+			using T_cycle_etc	= T_accord_ < AN::glide , AT::cycle , chord_etc , break_ , action , combine >;
+			nik_ce auto cycle_etc	= U_store_T < T_cycle_etc >;
+
+			using T_precycle_etc	= T_accord_ < AN::glide , AT::precycle  , chord_etc >;
+			using T_postcycle_etc	= T_accord_ < AN::glide , AT::postcycle , chord_etc , cycle_etc >;
+
+			return to_list_
+			<
+				H_glide_specification,
+				T_label_etc::precycle, T_label_etc::cycle, T_label_etc::postcycle,
+				T_position_etc::out, T_position_etc::car_in, T_position_etc::cdr_in, T_position_etc::end,
+				T_precycle_etc::pre_end_in_prev, T_precycle_etc::pre_car_in_next, T_precycle_etc::pre_cdr_in_next,
+				T_cycle_etc::loop_predicate, T_cycle_etc::action_function, T_cycle_etc::combine_function,
+					T_cycle_etc::car_in_next, T_cycle_etc::cdr_in_next,
+				T_postcycle_etc::post_action_function, T_postcycle_etc::post_combine_function,
+					T_cycle_etc::post_car_in_next, T_cycle_etc::post_cdr_in_next, T_cycle_etc::post_end_next
+			>;
+		}
+
+		template<auto... Vs>
+		nik_ce auto conceptual_glide = _conceptual_glide
+		(
+			conceptual_write<conceptual_glide_defaults, Vs...>
+		);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
