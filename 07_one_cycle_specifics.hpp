@@ -188,21 +188,21 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
-// act:
+// action:
 
-	template<auto f> struct _act_predicate				{ nik_ces auto value = f; };
-	template<auto f> struct _post_act_predicate			{ nik_ces auto value = f; };
+	template<auto f> struct _action_predicate			{ nik_ces auto value = f; };
+	template<auto f> struct _post_action_predicate			{ nik_ces auto value = f; };
 
-	template<auto f> struct _act_function				{ nik_ces auto value = f; };
-	template<auto f> struct _post_act_function			{ nik_ces auto value = f; };
+	template<auto f> struct _action_function			{ nik_ces auto value = f; };
+	template<auto f> struct _post_action_function			{ nik_ces auto value = f; };
 
 	//
 
-	template<auto f> nik_ce auto _act_predicate_			= U_store_T<_act_predicate<f>>;
-	template<auto f> nik_ce auto _post_act_predicate_		= U_store_T<_post_act_predicate<f>>;
+	template<auto f> nik_ce auto _action_predicate_			= U_store_T<_action_predicate<f>>;
+	template<auto f> nik_ce auto _post_action_predicate_		= U_store_T<_post_action_predicate<f>>;
 
-	template<auto f> nik_ce auto _act_function_			= U_store_T<_act_function<f>>;
-	template<auto f> nik_ce auto _post_act_function_		= U_store_T<_post_act_function<f>>;
+	template<auto f> nik_ce auto _action_function_			= U_store_T<_action_function<f>>;
+	template<auto f> nik_ce auto _post_action_function_		= U_store_T<_post_action_function<f>>;
 
 /***********************************************************************************************************************/
 
@@ -216,19 +216,19 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
-// assign:
+// mutate:
 
 	// requires a _side_ tag to lift properly.
 
-	template<auto f> struct _assign_function			{ nik_ces auto value = _side_<f>; };
-	template<auto f> struct _post_assign_function			{ nik_ces auto value = _side_<f>; };
-	template<auto f> struct _match_assign_function			{ nik_ces auto value = _side_<f>; };
-	template<auto f> struct _postmatch_assign_function		{ nik_ces auto value = _side_<f>; };
+	template<auto f> struct _mutate_function			{ nik_ces auto value = _side_<f>; };
+	template<auto f> struct _post_mutate_function			{ nik_ces auto value = _side_<f>; };
+	template<auto f> struct _match_mutate_function			{ nik_ces auto value = _side_<f>; };
+	template<auto f> struct _postmatch_mutate_function		{ nik_ces auto value = _side_<f>; };
 
-	template<auto f> nik_ce auto _assign_function_			= U_store_T<_assign_function<f>>;
-	template<auto f> nik_ce auto _post_assign_function_		= U_store_T<_post_assign_function<f>>;
-	template<auto f> nik_ce auto _match_assign_function_		= U_store_T<_match_assign_function<f>>;
-	template<auto f> nik_ce auto _postmatch_assign_function_	= U_store_T<_postmatch_assign_function<f>>;
+	template<auto f> nik_ce auto _mutate_function_			= U_store_T<_mutate_function<f>>;
+	template<auto f> nik_ce auto _post_mutate_function_		= U_store_T<_post_mutate_function<f>>;
+	template<auto f> nik_ce auto _match_mutate_function_		= U_store_T<_match_mutate_function<f>>;
+	template<auto f> nik_ce auto _postmatch_mutate_function_	= U_store_T<_postmatch_mutate_function<f>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -314,6 +314,16 @@ namespace cctmp_one_cycle_generics {
 		template<auto... Vs> struct _in_iter			{ };
 		template<auto... Vs> nik_ce auto _in_iter_		= U_store_T<_in_iter<Vs...>>;
 
+	// car in:
+
+		template<auto... Vs> struct _car_in_iter		{ };
+		template<auto... Vs> nik_ce auto _car_in_iter_		= U_store_T<_car_in_iter<Vs...>>;
+
+	// cdr in:
+
+		template<auto... Vs> struct _cdr_in_iter		{ };
+		template<auto... Vs> nik_ce auto _cdr_in_iter_		= U_store_T<_cdr_in_iter<Vs...>>;
+
 	// ival:
 
 		template<auto f> struct _ival				{ };
@@ -338,27 +348,6 @@ namespace cctmp_one_cycle_generics {
 		template<auto... Vs> struct _break			{ };
 		template<auto... Vs> nik_ce auto _break_		= U_store_T<_break<Vs...>>;
 
-	// op:
-
-		template<auto f> struct _op				{ };
-		template<auto f> nik_ce auto _op_			= U_store_T<_op<f>>;
-
-	// arg:
-
-		template<auto f> struct _out_arg			{ };
-		template<auto f> struct _aux_arg			{ };
-		template<auto f> struct _in_arg				{ };
-		template<auto f> struct _car_in_arg			{ };
-		template<auto f> struct _cdr_in_arg			{ };
-		template<auto f> struct _end_arg			{ };
-
-		template<auto f> nik_ce auto _out_arg_			= U_store_T<_out_arg<f>>;
-		template<auto f> nik_ce auto _in_arg_			= U_store_T<_in_arg<f>>;
-		template<auto f> nik_ce auto _aux_arg_			= U_store_T<_aux_arg<f>>;
-		template<auto f> nik_ce auto _car_in_arg_		= U_store_T<_car_in_arg<f>>;
-		template<auto f> nik_ce auto _cdr_in_arg_		= U_store_T<_cdr_in_arg<f>>;
-		template<auto f> nik_ce auto _end_arg_			= U_store_T<_end_arg<f>>;
-
 /***********************************************************************************************************************/
 
 // action:
@@ -366,7 +355,52 @@ namespace cctmp_one_cycle_generics {
 	// id:
 
 		template<auto... Vs> struct _action			{ };
-		template<auto... Vs> nik_ce auto _action_		= U_store_T<_action<Vs...>>;
+		template<auto... Vs> nik_ce auto _action_			= U_store_T<_action<Vs...>>;
+
+/***********************************************************************************************************************/
+
+// combine:
+
+	// id:
+
+		template<auto... Vs> struct _combine			{ };
+		template<auto... Vs> nik_ce auto _combine_		= U_store_T<_combine<Vs...>>;
+
+/***********************************************************************************************************************/
+
+// mutate:
+
+	// id:
+
+		template<auto... Vs> struct _mutate			{ };
+		template<auto... Vs> nik_ce auto _mutate_		= U_store_T<_mutate<Vs...>>;
+
+/***********************************************************************************************************************/
+
+// operate (generic):
+
+	// op:
+
+		template<auto f> struct _op				{ };
+		template<auto f> nik_ce auto _op_			= U_store_T<_op<f>>;
+
+	// arg:
+
+		template<auto f> struct _ps_arg				{ };
+		template<auto f> struct _out_arg			{ };
+		template<auto f> struct _aux_arg			{ };
+		template<auto f> struct _in_arg				{ };
+		template<auto f> struct _car_in_arg			{ };
+		template<auto f> struct _cdr_in_arg			{ };
+		template<auto f> struct _end_arg			{ };
+
+		template<auto f> nik_ce auto _ps_arg_			= U_store_T<_ps_arg<f>>;
+		template<auto f> nik_ce auto _out_arg_			= U_store_T<_out_arg<f>>;
+		template<auto f> nik_ce auto _in_arg_			= U_store_T<_in_arg<f>>;
+		template<auto f> nik_ce auto _aux_arg_			= U_store_T<_aux_arg<f>>;
+		template<auto f> nik_ce auto _car_in_arg_		= U_store_T<_car_in_arg<f>>;
+		template<auto f> nik_ce auto _cdr_in_arg_		= U_store_T<_cdr_in_arg<f>>;
+		template<auto f> nik_ce auto _end_arg_			= U_store_T<_end_arg<f>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -633,6 +667,12 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
+	template<typename InIter>
+	struct T_chord<Chord::fold, InIter>
+	{
+		using in = T_chord < Chord::note , InIter >;
+	};
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -640,12 +680,18 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
+	template<typename InIter>
+	struct T_chord<Chord::find_first, InIter> : public T_chord<Chord::fold, InIter> { };
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // find all (ray):
 
 /***********************************************************************************************************************/
+
+	template<typename InIter>
+	struct T_chord<Chord::find_all, InIter> : public T_chord<Chord::fold, InIter> { };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -670,6 +716,16 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
+	template<typename OutIter, typename CarInIter, typename CdrInIter>
+	struct T_chord<Chord::zip, OutIter, CarInIter, CdrInIter>
+	{
+		using out		= T_chord < Chord::note ,   OutIter >;
+		using car_in		= T_chord < Chord::note , CarInIter >;
+		using cdr_in		= T_chord < Chord::note , CdrInIter >;
+
+		using quality		= T_chord < Chord::quality , cdr_in , out , car_in >;
+	};
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -677,12 +733,25 @@ namespace cctmp_one_cycle_generics {
 
 /***********************************************************************************************************************/
 
+	template<typename OutIter, typename CarInIter, typename CdrInIter>
+	struct T_chord<Chord::fasten, OutIter, CarInIter, CdrInIter> :
+		public T_chord<Chord::zip, OutIter, CarInIter, CdrInIter> { };
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // glide (line):
 
 /***********************************************************************************************************************/
+
+	template<typename OutIter, typename CarInIter, typename CdrInIter>
+	struct T_chord<Chord::glide, OutIter, CarInIter, CdrInIter>
+	{
+		using car_in		= T_chord < Chord::note , CarInIter >;
+		using cdr_in		= T_chord < Chord::note , CdrInIter >;
+
+		using quality		= T_chord < Chord::quality , cdr_in , car_in >;
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

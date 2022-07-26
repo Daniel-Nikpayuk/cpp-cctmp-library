@@ -132,13 +132,13 @@ namespace cctmp_one_cycle_assembly {
 
 /***********************************************************************************************************************/
 
-// act:
+// action:
 
-	template<auto S> nik_ce auto act_pred_			= T_store_U<S>::act_predicate;
-	template<auto S> nik_ce auto post_act_pred_		= T_store_U<S>::post_act_predicate;
+	template<auto S> nik_ce auto action_pred_		= T_store_U<S>::action_predicate;
+	template<auto S> nik_ce auto post_action_pred_		= T_store_U<S>::post_action_predicate;
 
-	template<auto S> nik_ce auto act_func_			= T_store_U<S>::act_function;
-	template<auto S> nik_ce auto post_act_func_		= T_store_U<S>::post_act_function;
+	template<auto S> nik_ce auto action_func_		= T_store_U<S>::action_function;
+	template<auto S> nik_ce auto post_action_func_		= T_store_U<S>::post_action_function;
 
 /***********************************************************************************************************************/
 
@@ -149,12 +149,12 @@ namespace cctmp_one_cycle_assembly {
 
 /***********************************************************************************************************************/
 
-// assign:
+// mutate:
 
-	template<auto S> nik_ce auto assign_func_		= T_store_U<S>::assign_function;
-	template<auto S> nik_ce auto post_assign_func_		= T_store_U<S>::post_assign_function;
-	template<auto S> nik_ce auto match_assign_func_		= T_store_U<S>::match_assign_function;
-	template<auto S> nik_ce auto postmatch_assign_func_	= T_store_U<S>::postmatch_assign_function;
+	template<auto S> nik_ce auto mutate_func_		= T_store_U<S>::mutate_function;
+	template<auto S> nik_ce auto post_mutate_func_		= T_store_U<S>::post_mutate_function;
+	template<auto S> nik_ce auto match_mutate_func_		= T_store_U<S>::match_mutate_function;
+	template<auto S> nik_ce auto postmatch_mutate_func_	= T_store_U<S>::postmatch_mutate_function;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -184,13 +184,13 @@ namespace cctmp_one_cycle_assembly {
 
 				test   <                  loop_pred_<S> , out_<S> , end_<S> >,
 				branch <                  postcycle_<S>                     >,
-				lift   < out_<S> ,      assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,      mutate_func_<S> ,  in_<S>           >,
 				lift   < out_<S> ,         out_next_<S> , out_<S>           >,
 				go_to  <                      cycle_<S>                     >,
 
 			label<postcycle_<S>>,
 
-				lift   < out_<S> , post_assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> , post_mutate_func_<S> ,  in_<S>           >,
 
 				_return_
 		>;
@@ -213,8 +213,8 @@ namespace cctmp_one_cycle_assembly {
 		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
 		auto OutPosition, auto EndPosition, auto InPosition,
 		auto PreOutNext,
-		auto LoopPredicate, auto AssignFunction, auto OutNext,
-		auto PostAssignFunction
+		auto LoopPredicate, auto MutateFunction, auto OutNext,
+		auto PostMutateFunction
 	>
 	struct T_repeat_specification
 	{
@@ -229,10 +229,10 @@ namespace cctmp_one_cycle_assembly {
 		nik_ces auto pre_out_next		= PreOutNext;
 
 		nik_ces auto   loop_predicate		=   LoopPredicate;
-		nik_ces auto assign_function		= AssignFunction;
+		nik_ces auto mutate_function		= MutateFunction;
 		nik_ces auto    out_next		=    OutNext;
 
-		nik_ces auto post_assign_function	= PostAssignFunction;
+		nik_ces auto post_mutate_function	= PostMutateFunction;
 	};
 
 	nik_ce auto H_repeat_specification = U_store_B<T_repeat_specification>;
@@ -261,14 +261,14 @@ namespace cctmp_one_cycle_assembly {
 
 				test   <                  loop_pred_<S> ,  in_<S> , end_<S> >,
 				branch <                  postcycle_<S>                     >,
-				lift   < out_<S> ,      assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,      mutate_func_<S> ,  in_<S>           >,
 				lift   < out_<S> ,         out_next_<S> , out_<S>           >,
 				lift   <  in_<S> ,          in_next_<S> ,  in_<S>           >,
 				go_to  <                      cycle_<S>                     >,
 
 			label<postcycle_<S>>,
 
-				lift   < out_<S> , post_assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> , post_mutate_func_<S> ,  in_<S>           >,
 				lift   < out_<S> ,    post_out_next_<S> , out_<S>           >,
 				lift   <  in_<S> ,     post_in_next_<S> ,  in_<S>           >,
 				lift   < end_<S> ,    post_end_next_<S> , end_<S>           >,
@@ -294,8 +294,8 @@ namespace cctmp_one_cycle_assembly {
 		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
 		auto OutPosition, auto InPosition, auto EndPosition,
 		auto PreEndPrev, auto PreOutNext, auto PreInNext,
-		auto LoopPredicate, auto AssignFunction, auto OutNext, auto InNext,
-		auto PostAssignFunction, auto PostOutNext, auto PostInNext, auto PostEndNext
+		auto LoopPredicate, auto MutateFunction, auto OutNext, auto InNext,
+		auto PostMutateFunction, auto PostOutNext, auto PostInNext, auto PostEndNext
 	>
 	struct T_map_specification
 	{
@@ -309,17 +309,17 @@ namespace cctmp_one_cycle_assembly {
 
 		nik_ces auto pre_end_next		= PreEndPrev;
 		nik_ces auto pre_out_next		= PreOutNext;
-		nik_ces auto  pre_in_next		= PreInNext;
+		nik_ces auto  pre_in_next		=  PreInNext;
 
 		nik_ces auto   loop_predicate		=   LoopPredicate;
-		nik_ces auto assign_function		= AssignFunction;
+		nik_ces auto mutate_function		= MutateFunction;
 		nik_ces auto    out_next		=    OutNext;
 		nik_ces auto     in_next		=     InNext;
 
-		nik_ces auto post_assign_function	= PostAssignFunction;
-		nik_ces auto post_out_next		=    PostOutNext;
-		nik_ces auto  post_in_next		=     PostInNext;
-		nik_ces auto post_end_next		=    PostEndNext;
+		nik_ces auto post_mutate_function	= PostMutateFunction;
+		nik_ces auto    post_out_next		=    PostOutNext;
+		nik_ces auto     post_in_next		=     PostInNext;
+		nik_ces auto    post_end_next		=    PostEndNext;
 	};
 
 	nik_ce auto H_map_specification = U_store_B<T_map_specification>;
@@ -425,20 +425,20 @@ namespace cctmp_one_cycle_assembly {
 
 				test   <                   loop_pred_<S> ,  in_<S> , end_<S> >,
 				branch <                   postcycle_<S>                     >,
-				test   <                    act_pred_<S> ,  in_<S>           >,
+				test   <                 action_pred_<S> ,  in_<S>           >,
 				branch <                       match_<S>                     >,
 				lift   <  in_<S> ,           in_next_<S> ,  in_<S>           >,
 				go_to  <                       cycle_<S>                     >,
 
 			label<match_<S>>,
 
-				lift   < out_<S> , match_assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> , match_mutate_func_<S> ,  in_<S>           >,
 				lift   < out_<S> ,    match_out_next_<S> , out_<S>           >,
 				go_to  <                        done_<S>                     >,
 
 			label<postcycle_<S>>,
 
-				test   <               post_act_pred_<S> ,  in_<S>           >,
+				test   <            post_action_pred_<S> ,  in_<S>           >,
 				branch <                       match_<S>                     >,
 
 			label<done_<S>>,
@@ -464,9 +464,9 @@ namespace cctmp_one_cycle_assembly {
 		auto PrecycleLabel, auto CycleLabel, auto MatchLabel, auto PostcycleLabel, auto DoneLabel,
 		auto OutPosition, auto InPosition, auto EndPosition,
 		auto PreInNext,
-		auto LoopPredicate, auto ActPredicate, auto InNext,
-		auto MatchAssignFunction, auto MatchOutNext,
-		auto PostActPredicate
+		auto LoopPredicate, auto ActionPredicate, auto InNext,
+		auto MatchMutateFunction, auto MatchOutNext,
+		auto PostActionPredicate
 	>
 	struct T_find_first_specification
 	{
@@ -482,14 +482,14 @@ namespace cctmp_one_cycle_assembly {
 
 		nik_ces auto  pre_in_next		= PreInNext;
 
-		nik_ces auto loop_predicate		= LoopPredicate;
-		nik_ces auto  act_predicate		=  ActPredicate;
-		nik_ces auto   in_next			=   InNext;
+		nik_ces auto   loop_predicate		=   LoopPredicate;
+		nik_ces auto action_predicate		= ActionPredicate;
+		nik_ces auto     in_next		=     InNext;
 
-		nik_ces auto match_assign_function	= MatchAssignFunction;
+		nik_ces auto match_mutate_function	= MatchMutateFunction;
 		nik_ces auto    match_out_next		=    MatchOutNext;
 
-		nik_ces auto post_act_predicate		= PostActPredicate;
+		nik_ces auto post_action_predicate	= PostActionPredicate;
 	};
 
 	nik_ce auto H_find_first_specification = U_store_B<T_find_first_specification>;
@@ -520,27 +520,27 @@ namespace cctmp_one_cycle_assembly {
 
 				test   <                       loop_pred_<S> ,  in_<S> , end_<S> >,
 				branch <                       postcycle_<S>                     >,
-				test   <                        act_pred_<S> ,  in_<S>           >,
+				test   <                     action_pred_<S> ,  in_<S>           >,
 				branch <                           match_<S>                     >,
 				lift   <  in_<S> ,               in_next_<S> ,  in_<S>           >,
 				go_to  <                           cycle_<S>                     >,
 
 			label<match_<S>>,
 
-				lift   < out_<S> ,     match_assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> ,     match_mutate_func_<S> ,  in_<S>           >,
 				lift   < out_<S> ,        match_out_next_<S> , out_<S>           >,
 				lift   <  in_<S> ,         match_in_next_<S> ,  in_<S>           >,
 				go_to  <                           cycle_<S>                     >,
 
 			label<postcycle_<S>>,
 
-				test   <                   post_act_pred_<S> ,  in_<S>           >,
+				test   <                post_action_pred_<S> ,  in_<S>           >,
 				branch <                       postmatch_<S>                     >,
 				go_to  <                            done_<S>                     >,
 
 			label<postmatch_<S>>,
 
-				lift   < out_<S> , postmatch_assign_func_<S> ,  in_<S>           >,
+				lift   < out_<S> , postmatch_mutate_func_<S> ,  in_<S>           >,
 				lift   < out_<S> ,    postmatch_out_next_<S> , out_<S>           >,
 
 			label<done_<S>>,
@@ -563,13 +563,14 @@ namespace cctmp_one_cycle_assembly {
 
 	template
 	<
-		auto PrecycleLabel, auto CycleLabel, auto MatchLabel, auto PostcycleLabel, auto PostmatchLabel, auto DoneLabel,
+		auto PrecycleLabel, auto CycleLabel, auto MatchLabel,
+			auto PostcycleLabel, auto PostmatchLabel, auto DoneLabel,
 		auto OutPosition, auto InPosition, auto EndPosition,
 		auto PreInNext,
-		auto LoopPredicate, auto ActPredicate, auto InNext,
-		auto MatchAssignFunction, auto MatchOutNext, auto MatchInNext,
-		auto PostActPredicate,
-		auto PostmatchAssignFunction, auto PostmatchOutNext
+		auto LoopPredicate, auto ActionPredicate, auto InNext,
+		auto MatchMutateFunction, auto MatchOutNext, auto MatchInNext,
+		auto PostActionPredicate,
+		auto PostmatchMutateFunction, auto PostmatchOutNext
 	>
 	struct T_find_all_specification
 	{
@@ -586,17 +587,17 @@ namespace cctmp_one_cycle_assembly {
 
 		nik_ces auto  pre_in_next		= PreInNext;
 
-		nik_ces auto loop_predicate		= LoopPredicate;
-		nik_ces auto  act_predicate		=  ActPredicate;
-		nik_ces auto   in_next			=   InNext;
+		nik_ces auto   loop_predicate		=   LoopPredicate;
+		nik_ces auto action_predicate		= ActionPredicate;
+		nik_ces auto     in_next		=     InNext;
 
-		nik_ces auto match_assign_function	= MatchAssignFunction;
+		nik_ces auto match_mutate_function	= MatchMutateFunction;
 		nik_ces auto    match_out_next		=    MatchOutNext;
 		nik_ces auto     match_in_next		=     MatchInNext;
 
-		nik_ces auto post_act_predicate		= PostActPredicate;
+		nik_ces auto post_action_predicate	= PostActionPredicate;
 
-		nik_ces auto postmatch_assign_function	= PostmatchAssignFunction;
+		nik_ces auto postmatch_mutate_function	= PostmatchMutateFunction;
 		nik_ces auto    postmatch_out_next	=    PostmatchOutNext;
 	};
 
@@ -627,8 +628,8 @@ namespace cctmp_one_cycle_assembly {
 
 				test   <                     loop_pred_<S> , cdr_in_<S> ,    end_<S> >,
 				branch <                     postcycle_<S>                           >,
-				lift   <    _cp_    ,         act_func_<S> , car_in_<S> , cdr_in_<S> >,
-				lift   <    out_<S> ,      assign_func_<S> ,    _ps_                 >,
+				lift   <    _cp_    ,      action_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    out_<S> ,      mutate_func_<S> ,    _ps_                 >,
 				lift   <    out_<S> ,         out_next_<S> ,    out_<S>              >,
 				lift   < car_in_<S> ,      car_in_next_<S> , car_in_<S>              >,
 				lift   < cdr_in_<S> ,      cdr_in_next_<S> , cdr_in_<S>              >,
@@ -636,8 +637,8 @@ namespace cctmp_one_cycle_assembly {
 
 			label<postcycle_<S>>,
 
-				lift   <    _cp_    ,    post_act_func_<S> , car_in_<S> , cdr_in_<S> >,
-				lift   <    out_<S> , post_assign_func_<S> ,    _ps_                 >,
+				lift   <    _cp_    , post_action_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    out_<S> , post_mutate_func_<S> ,    _ps_                 >,
 				lift   <    out_<S> ,    post_out_next_<S> ,    out_<S>              >,
 				lift   < car_in_<S> , post_car_in_next_<S> , car_in_<S>              >,
 				lift   < cdr_in_<S> , post_cdr_in_next_<S> , cdr_in_<S>              >,
@@ -664,8 +665,8 @@ namespace cctmp_one_cycle_assembly {
 		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
 		auto OutPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
 		auto PreEndPrev, auto PreOutNext, auto PreCarInNext, auto PreCdrInNext,
-		auto LoopPredicate, auto ActFunction, auto AssignFunction, auto OutNext, auto CarInNext, auto CdrInNext,
-		auto PostActFunction, auto PostAssignFunction,
+		auto LoopPredicate, auto ActionFunction, auto MutateFunction, auto OutNext, auto CarInNext, auto CdrInNext,
+		auto PostActionFunction, auto PostMutateFunction,
 			auto PostOutNext, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
 	>
 	struct T_zip_specification
@@ -685,14 +686,14 @@ namespace cctmp_one_cycle_assembly {
 		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
 
 		nik_ces auto   loop_predicate		=   LoopPredicate;
-		nik_ces auto    act_function		=    ActFunction;
-		nik_ces auto assign_function		= AssignFunction;
+		nik_ces auto action_function		= ActionFunction;
+		nik_ces auto mutate_function		= MutateFunction;
 		nik_ces auto    out_next		=    OutNext;
 		nik_ces auto car_in_next		=  CarInNext;
 		nik_ces auto cdr_in_next		=  CdrInNext;
 
-		nik_ces auto    post_act_function	=    PostActFunction;
-		nik_ces auto post_assign_function	= PostAssignFunction;
+		nik_ces auto post_action_function	= PostActionFunction;
+		nik_ces auto post_mutate_function	= PostMutateFunction;
 		nik_ces auto    post_out_next		=    PostOutNext;
 		nik_ces auto post_car_in_next		=  PostCarInNext;
 		nik_ces auto post_cdr_in_next		=  PostCdrInNext;
@@ -726,11 +727,11 @@ namespace cctmp_one_cycle_assembly {
 
 				test   <                      loop_pred_<S> , cdr_in_<S> ,    end_<S>              >,
 				branch <                      postcycle_<S>                                        >,
-				lift   <    _cp_    ,          act_func_<S> , car_in_<S> , cdr_in_<S>              >,
-				lift   <    out_<S> ,       assign_func_<S> ,    _ps_                              >,
+				lift   <    _cp_    ,       action_func_<S> , car_in_<S> , cdr_in_<S>              >,
+				lift   <    out_<S> ,       mutate_func_<S> ,    _ps_                              >,
 				lift   <    aux_<S> ,          aux_next_<S> ,    out_<S> , car_in_<S> , cdr_in_<S> >,
 				lift   <    _cp_    ,      combine_func_<S> ,    out_<S> ,     in_<S>              >,
-				lift   <    out_<S> ,       assign_func_<S> ,    _ps_                              >,
+				lift   <    out_<S> ,       mutate_func_<S> ,    _ps_                              >,
 				lift   <     in_<S> ,           in_next_<S> ,    out_<S> ,     in_<S> ,    aux_<S> >,
 				lift   <    out_<S> ,          out_next_<S> ,    out_<S>                           >,
 				lift   < car_in_<S> ,       car_in_next_<S> , car_in_<S>                           >,
@@ -739,10 +740,10 @@ namespace cctmp_one_cycle_assembly {
 
 			label<postcycle_<S>>,
 
-				lift   <    _cp_    ,     post_act_func_<S> , car_in_<S> , cdr_in_<S>              >,
-				lift   <    out_<S> ,  post_assign_func_<S> ,    _ps_                              >,
+				lift   <    _cp_    ,  post_action_func_<S> , car_in_<S> , cdr_in_<S>              >,
+				lift   <    out_<S> ,  post_mutate_func_<S> ,    _ps_                              >,
 				lift   <    _cp_    , post_combine_func_<S> ,    out_<S> ,  in_<S>                 >,
-				lift   <    out_<S> ,  post_assign_func_<S> ,    _ps_                              >,
+				lift   <    out_<S> ,  post_mutate_func_<S> ,    _ps_                              >,
 				lift   <    out_<S> ,     post_out_next_<S> ,    out_<S>                           >,
 				lift   < car_in_<S> ,  post_car_in_next_<S> , car_in_<S>                           >,
 				lift   < cdr_in_<S> ,  post_cdr_in_next_<S> , cdr_in_<S>                           >,
@@ -771,11 +772,12 @@ namespace cctmp_one_cycle_assembly {
 	template
 	<
 		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
-		auto OutPosition, auto AuxPosition, auto InPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
+		auto OutPosition, auto AuxPosition, auto InPosition, auto CarInPosition,
+			auto CdrInPosition, auto EndPosition,
 		auto PreEndPrev, auto PreOutNext, auto PreCarInNext, auto PreCdrInNext,
-		auto LoopPredicate, auto ActFunction, auto AssignFunction, auto AuxNext, auto CombineFunction, auto InNext,
-			auto OutNext, auto CarInNext, auto CdrInNext,
-		auto PostActFunction, auto PostAssignFunction, auto PostCombineFunction,
+		auto LoopPredicate, auto ActionFunction, auto MutateFunction, auto AuxNext, auto CombineFunction,
+			auto InNext, auto OutNext, auto CarInNext, auto CdrInNext,
+		auto PostActionFunction, auto PostMutateFunction, auto PostCombineFunction,
 			auto PostOutNext, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
 	>
 	struct T_fasten_specification
@@ -797,8 +799,8 @@ namespace cctmp_one_cycle_assembly {
 		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
 
 		nik_ces auto    loop_predicate		=    LoopPredicate;
-		nik_ces auto     act_function		=     ActFunction;
-		nik_ces auto  assign_function		=  AssignFunction;
+		nik_ces auto  action_function		=  ActionFunction;
+		nik_ces auto  mutate_function		=  MutateFunction;
 		nik_ces auto     aux_next		=     AuxNext;
 		nik_ces auto combine_function		= CombineFunction;
 		nik_ces auto      in_next		=      InNext;
@@ -806,8 +808,8 @@ namespace cctmp_one_cycle_assembly {
 		nik_ces auto  car_in_next		=   CarInNext;
 		nik_ces auto  cdr_in_next		=   CdrInNext;
 
-		nik_ces auto     post_act_function	=     PostActFunction;
-		nik_ces auto  post_assign_function	=  PostAssignFunction;
+		nik_ces auto  post_action_function	=  PostActionFunction;
+		nik_ces auto  post_mutate_function	=  PostMutateFunction;
 		nik_ces auto post_combine_function	= PostCombineFunction;
 		nik_ces auto     post_out_next		=     PostOutNext;
 		nik_ces auto  post_car_in_next		=   PostCarInNext;
@@ -841,7 +843,7 @@ namespace cctmp_one_cycle_assembly {
 
 				test   <                      loop_pred_<S> , cdr_in_<S> ,    end_<S> >,
 				branch <                      postcycle_<S>                           >,
-				lift   <    _cp_    ,          act_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    _cp_    ,       action_func_<S> , car_in_<S> , cdr_in_<S> >,
 				lift   <    out_<S> ,      combine_func_<S> ,    out_<S> ,    _ps_    >,
 				lift   < car_in_<S> ,       car_in_next_<S> , car_in_<S>              >,
 				lift   < cdr_in_<S> ,       cdr_in_next_<S> , cdr_in_<S>              >,
@@ -849,7 +851,7 @@ namespace cctmp_one_cycle_assembly {
 
 			label<postcycle_<S>>,
 
-				lift   <    _cp_    ,     post_act_func_<S> , car_in_<S> , cdr_in_<S> >,
+				lift   <    _cp_    ,  post_action_func_<S> , car_in_<S> , cdr_in_<S> >,
 				lift   <    out_<S> , post_combine_func_<S> ,    out_<S> ,    _ps_    >,
 				lift   < car_in_<S> ,  post_car_in_next_<S> , car_in_<S>              >,
 				lift   < cdr_in_<S> ,  post_cdr_in_next_<S> , cdr_in_<S>              >,
@@ -876,8 +878,9 @@ namespace cctmp_one_cycle_assembly {
 		auto PrecycleLabel, auto CycleLabel, auto PostcycleLabel,
 		auto OutPosition, auto CarInPosition, auto CdrInPosition, auto EndPosition,
 		auto PreEndPrev, auto PreCarInNext, auto PreCdrInNext,
-		auto LoopPredicate, auto ActFunction, auto CombineFunction, auto CarInNext, auto CdrInNext,
-		auto PostActFunction, auto PostCombineFunction, auto PostCarInNext, auto PostCdrInNext, auto PostEndNext
+		auto LoopPredicate, auto ActionFunction, auto CombineFunction, auto CarInNext, auto CdrInNext,
+		auto PostActionFunction, auto PostCombineFunction, auto PostCarInNext,
+			auto PostCdrInNext, auto PostEndNext
 	>
 	struct T_glide_specification
 	{
@@ -895,12 +898,12 @@ namespace cctmp_one_cycle_assembly {
 		nik_ces auto pre_cdr_in_next		= PreCdrInNext;
 
 		nik_ces auto    loop_predicate		=    LoopPredicate;
-		nik_ces auto     act_function		=     ActFunction;
+		nik_ces auto   action_function		=  ActionFunction;
 		nik_ces auto combine_function		= CombineFunction;
 		nik_ces auto  car_in_next		=   CarInNext;
 		nik_ces auto  cdr_in_next		=   CdrInNext;
 
-		nik_ces auto     post_act_function	=     PostActFunction;
+		nik_ces auto  post_action_function	=  PostActionFunction;
 		nik_ces auto post_combine_function	= PostCombineFunction;
 		nik_ces auto  post_car_in_next		=   PostCarInNext;
 		nik_ces auto  post_cdr_in_next		=   PostCdrInNext;

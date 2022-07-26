@@ -27,6 +27,7 @@ namespace cctmp_one_cycle_generics {
 	nik_ce auto _five					= cctmp::_five;
 
 	nik_ce auto _equal_					= cctmp::_equal_;
+	nik_ce auto _tuple_					= cctmp::_tuple_;
 	nik_ce auto _assign_					= cctmp::_assign_;
 	nik_ce auto _dereference_				= cctmp::_dereference_;
 
@@ -175,10 +176,10 @@ namespace cctmp_one_cycle_generics {
 			_pre_out_next_         < _id_          >,
 
 			_loop_predicate_       < _equal_       >,
-			_assign_function_      < _d_assign_i_  >,
+			_mutate_function_      < _d_assign_i_  >,
 			_out_next_             < _increment_<> >,
 
-			_post_assign_function_ < _id_          >
+			_post_mutate_function_ < _id_          >
 		>;
 
 	// spec:
@@ -221,7 +222,7 @@ namespace cctmp_one_cycle_generics {
 				_out_arg_   < _id_          >,
 				_end_arg_   < _id_          >
 			>,
-			_action_
+			_mutate_
 			<
 				_op_        < _assign_      >,
 				_out_arg_   < _dereference_ >,
@@ -260,10 +261,10 @@ namespace cctmp_one_cycle_generics {
 				T_precycle_etc::pre_out_next,
 
 				T_cycle_etc::loop_predicate,
-				T_cycle_etc::assign_function,
+				T_cycle_etc::mutate_function,
 				T_cycle_etc::out_next,
 
-				T_postcycle_etc::post_assign_function
+				T_postcycle_etc::post_mutate_function
 			>;
 		}
 
@@ -300,11 +301,11 @@ namespace cctmp_one_cycle_generics {
 			_pre_in_next_          < _id_          >,
 
 			_loop_predicate_       < _equal_       >,
-			_assign_function_      < _d_assign_i_  >,
+			_mutate_function_      < _d_assign_i_  >,
 			_out_next_             < _increment_<> >,
 			_in_next_              < _increment_<> >,
 
-			_post_assign_function_ < _id_          >,
+			_post_mutate_function_ < _id_          >,
 			_post_out_next_        < _id_          >,
 			_post_in_next_         < _id_          >,
 			_post_end_next_        < _id_          >
@@ -357,7 +358,7 @@ namespace cctmp_one_cycle_generics {
 				_in_arg_    < _id_          >,
 				_end_arg_   < _id_          >
 			>,
-			_action_
+			_mutate_
 			<
 				_op_        < _assign_      >,
 				_out_arg_   < _dereference_ >,
@@ -398,11 +399,11 @@ namespace cctmp_one_cycle_generics {
 				T_precycle_etc::pre_in_next,
 
 				T_cycle_etc::loop_predicate,
-				T_cycle_etc::assign_function,
+				T_cycle_etc::mutate_function,
 				T_cycle_etc::out_next,
 				T_cycle_etc::in_next,
 
-				T_postcycle_etc::post_assign_function,
+				T_postcycle_etc::post_mutate_function,
 				T_postcycle_etc::post_out_next,
 				T_postcycle_etc::post_in_next,
 				T_postcycle_etc::post_end_next
@@ -427,7 +428,6 @@ namespace cctmp_one_cycle_generics {
 
 	// default:
 
-/*
 		nik_ce auto direct_fold_defaults = U_pack_Vs
 		<
 			_precycle_label_        < _zero         >,
@@ -455,11 +455,89 @@ namespace cctmp_one_cycle_generics {
 			direct_write<direct_fold_defaults, Vs...>,
 			H_fold_specification
 		>;
-*/
 
 /***********************************************************************************************************************/
 
 // conceptual:
+
+	// default:
+
+		nik_ce auto conceptual_fold_defaults = U_pack_Vs
+		<
+			_label_
+			<
+				_precycle_  < _zero         >,
+				_cycle_     < _one          >,
+				_postcycle_ < _two          >
+			>,
+			_position_
+			<
+				_out_       < _zero         >,
+				_in_        < _one          >,
+				_end_       < _two          >
+			>,
+			_in_iter_
+			<
+				_ival_      < _closing      >,
+				_next_      < _increment_<> >
+			>,
+			_break_
+			<
+				_op_        < _equal_       >,
+				_in_arg_    < _id_          >,
+				_end_arg_   < _id_          >
+			>,
+			_combine_
+			<
+				_op_        < _assign_      >,
+				_out_arg_   < _id_          >,
+				_in_arg_    < _dereference_ >
+			>
+		>;
+
+	// spec:
+
+		template<auto label, auto position, auto in_iter, auto break_, auto action>
+		nik_ce auto _conceptual_fold(nik_avp(T_pack_Vs<label, position, in_iter, break_, action>*))
+		{
+			nik_ce auto chord_etc	= U_chord_ < Chord::fold , in_iter >;
+
+			using T_label_etc	= T_accord_ < AN::fold , AT::label    , label    >;
+			using T_position_etc	= T_accord_ < AN::fold , AT::position , position >;
+
+			using T_cycle_etc	= T_accord_ < AN::fold , AT::cycle , chord_etc , break_ , action >;
+			nik_ce auto cycle_etc	= U_store_T < T_cycle_etc >;
+
+			using T_precycle_etc	= T_accord_ < AN::fold , AT::precycle  , chord_etc >;
+			using T_postcycle_etc	= T_accord_ < AN::fold , AT::postcycle , chord_etc , cycle_etc >;
+
+			return to_list_
+			<
+				H_fold_specification,
+
+				T_label_etc::precycle,
+				T_label_etc::cycle,
+				T_label_etc::postcycle,
+
+				T_position_etc::out,
+				T_position_etc::in,
+				T_position_etc::end,
+
+				T_precycle_etc::pre_in_next,
+
+				T_cycle_etc::loop_predicate,
+				T_cycle_etc::combine_function,
+				T_cycle_etc::in_next,
+
+				T_postcycle_etc::post_combine_function
+			>;
+		}
+
+		template<auto... Vs>
+		nik_ce auto conceptual_fold = _conceptual_fold
+		(
+			conceptual_write<conceptual_fold_defaults, Vs...>
+		);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -494,13 +572,13 @@ namespace cctmp_one_cycle_generics {
 			_pre_in_next_           < _id_              >,
 
 			_loop_predicate_        < _equal_           >,
-			_act_predicate_         < _constant_<false> >,
+			_action_predicate_      < _constant_<false> >,
 			_in_next_               < _increment_<>     >,
 
-			_match_assign_function_ < _d_assign_i_      >,
+			_match_mutate_function_ < _d_assign_i_      >,
 			_match_out_next_        < _increment_<>     >,
 
-			_post_act_predicate_    < _constant_<false> >
+			_post_action_predicate_ < _constant_<false> >
 		>;
 
 	// spec:
@@ -516,7 +594,6 @@ namespace cctmp_one_cycle_generics {
 /***********************************************************************************************************************/
 
 // conceptual:
-
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -546,16 +623,16 @@ namespace cctmp_one_cycle_generics {
 			_pre_in_next_               < _id_              >,
 
 			_loop_predicate_            < _equal_           >,
-			_act_predicate_             < _constant_<false> >,
+			_action_predicate_          < _constant_<false> >,
 			_in_next_                   < _increment_<>     >,
 
-			_match_assign_function_     < _d_assign_i_      >,
+			_match_mutate_function_     < _d_assign_i_      >,
 			_match_out_next_            < _increment_<>     >,
-			 _match_in_next_            < _increment_<>     >,
+			_match_in_next_             < _increment_<>     >,
 
-			_post_act_predicate_        < _constant_<false> >,
+			_post_action_predicate_     < _constant_<false> >,
 
-			_postmatch_assign_function_ < _d_assign_i_      >,
+			_postmatch_mutate_function_ < _d_assign_i_      >,
 			_postmatch_out_next_        < _increment_<>     >
 		>;
 
@@ -573,8 +650,6 @@ namespace cctmp_one_cycle_generics {
 
 // conceptual:
 
-
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -587,7 +662,6 @@ namespace cctmp_one_cycle_generics {
 
 	// default:
 
-/*
 		nik_ce auto direct_zip_defaults = U_pack_Vs
 		<
 			_precycle_label_       < _zero         >,
@@ -605,16 +679,17 @@ namespace cctmp_one_cycle_generics {
 			_pre_cdr_in_next_      < _id_          >,
 
 			_loop_predicate_       < _equal_       >,
-			_act_function_         < _id_          >,
-			_assign_function_      < _d_assign_i_  >,
+			_action_function_      < _id_          >,
+			_mutate_function_      < _d_assign_i_  >,
 			_out_next_             < _increment_<> >,
 			_car_in_next_          < _increment_<> >,
 			_cdr_in_next_          < _increment_<> >,
 
-			_post_act_function_    < _id_          >,
-			_post_assign_function_ < _id_          >,
+			_post_action_function_ < _id_          >,
+			_post_mutate_function_ < _id_          >,
 			_post_out_next_        < _id_          >,
 			_post_car_in_next_     < _id_          >,
+			_post_cdr_in_next_     < _id_          >,
 			_post_end_next_        < _id_          >
 		>;
 
@@ -626,28 +701,128 @@ namespace cctmp_one_cycle_generics {
 			direct_write<direct_zip_defaults, Vs...>,
 			H_zip_specification
 		>;
-*/
 
 /***********************************************************************************************************************/
 
 // conceptual:
 
-		//	0. If bidirectional and last, reverse iterate end.
-		//	1. For each left endpoint, if open, then iterate.
-		//	2. Evaluate the common (closing) loop.
-		//	3. If there exists any right endpoint, which is closed, then act/combine.
-		//	4. If (3), then for each right endpoint, when open, iterate.
-		//	5. If bidirectional and last, iterate end to reset.
+	// default:
 
-	//	lift < end , end_prev_<Spec> , end >,	// boolean_before_loop < is_end_prev_before_<Spec>
-	//	lift < out , out_next_<Spec> , out >,	// boolean_before_loop < is_out_next_before_<Spec>
-	//	lift < in  , in_next_<Spec>  , in  >,	// boolean_before_loop < is_in_next_before_<Spec>
+		nik_ce auto conceptual_zip_defaults = U_pack_Vs
+		<
+			_label_
+			<
+				_precycle_  < _zero         >,
+				_cycle_     < _one          >,
+				_postcycle_ < _two          >
+			>,
+			_position_
+			<
+				_out_       < _zero         >,
+				_car_in_    < _one          >,
+				_cdr_in_    < _two          >,
+				_end_       < _three        >
+			>,
+			_out_iter_
+			<
+				_ival_      < _closing      >,
+				_next_      < _increment_<> >,
+				_prev_      < _decrement_<> >
+			>,
+			_car_in_iter_
+			<
+				_ival_      < _closing      >,
+				_next_      < _increment_<> >,
+				_prev_      < _decrement_<> >
+			>,
+			_cdr_in_iter_
+			<
+				_ival_      < _closing      >,
+				_next_      < _increment_<> >,
+				_prev_      < _decrement_<> >
+			>,
+			_break_
+			<
+				_op_         < _equal_       >,
+				_cdr_in_arg_ < _id_          >,
+				_end_arg_    < _id_          >
+			>,
+			_action_
+			<
+				_op_         < _tuple_       >,
+				_car_in_arg_ < _dereference_ >,
+				_cdr_in_arg_ < _dereference_ >
+			>,
+			_mutate_
+			<
+				_op_        < _assign_      >,
+				_out_arg_   < _dereference_ >,
+				_ps_arg_    < _id_          >
+			>
+		>;
 
+	// spec:
 
-	//	lift < out , act_func_<Spec>   , in  >,	// boolean_after_loop < is_act_func_after_<Spec>
-	//	lift < out , out_next_<Spec>   , out >,	// boolean_after_loop < is_out_next_after_<Spec>
-	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
-	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
+		template
+		<
+			auto label, auto position, auto out_iter, auto car_in_iter,
+			auto cdr_in_iter, auto break_, auto action, auto mutate
+		>
+		nik_ce auto _conceptual_zip
+		(
+			nik_avp(T_pack_Vs<label, position, out_iter, car_in_iter, cdr_in_iter, break_, action, mutate>*)
+		)
+		{
+			nik_ce auto chord_etc	= U_chord_ < Chord::zip , out_iter , car_in_iter , cdr_in_iter >;
+
+			using T_label_etc	= T_accord_ < AN::zip , AT::label    , label    >;
+			using T_position_etc	= T_accord_ < AN::zip , AT::position , position >;
+
+			using T_cycle_etc	= T_accord_ < AN::zip , AT::cycle , chord_etc , break_ , action , mutate >;
+			nik_ce auto cycle_etc	= U_store_T < T_cycle_etc >;
+
+			using T_precycle_etc	= T_accord_ < AN::zip , AT::precycle  , chord_etc >;
+			using T_postcycle_etc	= T_accord_ < AN::zip , AT::postcycle , chord_etc , cycle_etc >;
+
+			return to_list_
+			<
+				H_zip_specification,
+
+				T_label_etc::precycle,
+				T_label_etc::cycle,
+				T_label_etc::postcycle,
+
+				T_position_etc::out,
+				T_position_etc::car_in,
+				T_position_etc::cdr_in,
+				T_position_etc::end,
+
+				T_precycle_etc::pre_end_prev,
+				T_precycle_etc::pre_out_next,
+				T_precycle_etc::pre_car_in_next,
+				T_precycle_etc::pre_cdr_in_next,
+
+				T_cycle_etc::loop_predicate,
+				T_cycle_etc::action_function,
+				T_cycle_etc::mutate_function,
+				T_cycle_etc::out_next,
+				T_cycle_etc::car_in_next,
+				T_cycle_etc::cdr_in_next,
+
+				T_postcycle_etc::post_action_function,
+				T_postcycle_etc::post_mutate_function,
+				T_postcycle_etc::post_out_next,
+				T_postcycle_etc::post_car_in_next,
+				T_postcycle_etc::post_cdr_in_next,
+				T_postcycle_etc::post_end_next
+			>;
+		}
+
+		template<auto... Vs>
+		nik_ce auto conceptual_zip = _conceptual_zip
+		(
+			conceptual_write<conceptual_zip_defaults, Vs...>
+		);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -681,8 +856,8 @@ namespace cctmp_one_cycle_generics {
 			_pre_cdr_in_next_       < _id_              >,
 
 			_loop_predicate_        < _equal_           >,
-			_act_function_          < _id_              >,
-			_assign_function_       < _d_assign_i_      >,
+			_action_function_       < _id_              >,
+			_mutate_function_       < _d_assign_i_      >,
 			_aux_next_              < _constant_<false> >,
 			_combine_function_      < _id_              >,
 			_in_next_               < _constant_<false> >,
@@ -690,8 +865,8 @@ namespace cctmp_one_cycle_generics {
 			_car_in_next_           < _increment_<>     >,
 			_cdr_in_next_           < _increment_<>     >,
 
-			_post_act_function_     < _id_              >,
-			_post_assign_function_  < _id_              >,
+			_post_action_function_  < _id_              >,
+			_post_mutate_function_  < _id_              >,
 			_post_combine_function_ < _id_              >,
 			_post_out_next_         < _id_              >,
 			_post_car_in_next_      < _id_              >,
@@ -711,23 +886,6 @@ namespace cctmp_one_cycle_generics {
 /***********************************************************************************************************************/
 
 // conceptual:
-
-		//	0. If bidirectional and last, reverse iterate end.
-		//	1. For each left endpoint, if open, then iterate.
-		//	2. Evaluate the common (closing) loop.
-		//	3. If there exists any right endpoint, which is closed, then act/combine.
-		//	4. If (3), then for each right endpoint, when open, iterate.
-		//	5. If bidirectional and last, iterate end to reset.
-
-	//	lift < end , end_prev_<Spec> , end >,	// boolean_before_loop < is_end_prev_before_<Spec>
-	//	lift < out , out_next_<Spec> , out >,	// boolean_before_loop < is_out_next_before_<Spec>
-	//	lift < in  , in_next_<Spec>  , in  >,	// boolean_before_loop < is_in_next_before_<Spec>
-
-
-	//	lift < out , act_func_<Spec>   , in  >,	// boolean_after_loop < is_act_func_after_<Spec>
-	//	lift < out , out_next_<Spec>   , out >,	// boolean_after_loop < is_out_next_after_<Spec>
-	//	lift < in  , in_next_<Spec>    , in  >,	// boolean_after_loop < is_in_next_after_<Spec>
-	//	lift < end , end_next_<Spec>   , end >,	// boolean_after_loop < is_end_next_after_<Spec>
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -758,12 +916,12 @@ namespace cctmp_one_cycle_generics {
 			_pre_cdr_in_next_       < _id_          >,
 
 			_loop_predicate_        < _equal_       >,
-			_act_function_          < _id_          >,
+			_action_function_       < _id_          >,
 			_combine_function_      < _id_          >,
 			_car_in_next_           < _increment_<> >,
 			_cdr_in_next_           < _increment_<> >,
 
-			_post_act_function_     < _id_          >,
+			_post_action_function_  < _id_          >,
 			_post_combine_function_ < _id_          >,
 			_post_car_in_next_      < _id_          >,
 			_post_end_next_         < _id_          >
