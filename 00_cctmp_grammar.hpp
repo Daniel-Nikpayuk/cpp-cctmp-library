@@ -25,49 +25,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// constant:
-
-/***********************************************************************************************************************/
-
-// [0-10]:
-
-	using key_type  = unsigned char;
-	using ckey_type = key_type const;
-
-	nik_ces key_type _zero		=   0;
-	nik_ces key_type _one		=   1;
-	nik_ces key_type _two		=   2;
-	nik_ces key_type _three		=   3;
-	nik_ces key_type _four		=   4;
-	nik_ces key_type _five		=   5;
-	nik_ces key_type _six		=   6;
-	nik_ces key_type _seven		=   7;
-	nik_ces key_type _eight		=   8;
-	nik_ces key_type _nine		=   9;
-	nik_ces key_type _ten		=  10;
-
-// [2^0-2^9]:
-
-	using index_type  = unsigned short;
-	using cindex_type = index_type const;
-
-	nik_ces index_type _2_0		=   1;
-	nik_ces index_type _2_1		=   2;
-	nik_ces index_type _2_2		=   4;
-	nik_ces index_type _2_3		=   8;
-	nik_ces index_type _2_4		=  16;
-	nik_ces index_type _2_5		=  32;
-	nik_ces index_type _2_6		=  64;
-	nik_ces index_type _2_7		= 128;
-	nik_ces index_type _2_8		= 256;
-	nik_ces index_type _2_9		= 512;
-
-	using depth_type  = unsigned short;
-	using cdepth_type = depth_type const;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // store:
 
 /***********************************************************************************************************************/
@@ -208,6 +165,49 @@ namespace cctmp {
 
 	template<auto f>
 	nik_ce auto in_types = FunctionModule<decltype(f)>::in_types;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// subnumbers:
+
+/***********************************************************************************************************************/
+
+// [0-10]:
+
+	using key_type  = unsigned char;
+	using ckey_type = key_type const;
+
+	nik_ces key_type _zero		=   0;
+	nik_ces key_type _one		=   1;
+	nik_ces key_type _two		=   2;
+	nik_ces key_type _three		=   3;
+	nik_ces key_type _four		=   4;
+	nik_ces key_type _five		=   5;
+	nik_ces key_type _six		=   6;
+	nik_ces key_type _seven		=   7;
+	nik_ces key_type _eight		=   8;
+	nik_ces key_type _nine		=   9;
+	nik_ces key_type _ten		=  10;
+
+// [2^0-2^9]:
+
+	using index_type  = unsigned short;
+	using cindex_type = index_type const;
+
+	nik_ces index_type _2_0		=   1;
+	nik_ces index_type _2_1		=   2;
+	nik_ces index_type _2_2		=   4;
+	nik_ces index_type _2_3		=   8;
+	nik_ces index_type _2_4		=  16;
+	nik_ces index_type _2_5		=  32;
+	nik_ces index_type _2_6		=  64;
+	nik_ces index_type _2_7		= 128;
+	nik_ces index_type _2_8		= 256;
+	nik_ces index_type _2_9		= 512;
+
+	using depth_type  = unsigned short;
+	using cdepth_type = depth_type const;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -776,43 +776,52 @@ namespace cctmp {
 			nik_ces key_type same				=  8;
 			nik_ces key_type csame				=  9;
 			nik_ces key_type similar			= 10;
-			nik_ces key_type is_int_type			= 11;
-			nik_ces key_type not_int_type			= 12;
 
 		// functional:
 
-			nik_ces key_type to_list			= 13;
-			nik_ces key_type array_to_list			= 14;
-			nik_ces key_type to_array			= 15;
-			nik_ces key_type to_tuple			= 16;
+			nik_ces key_type to_list			= 11;
+			nik_ces key_type array_to_list			= 12;
+			nik_ces key_type to_array			= 13;
+			nik_ces key_type to_tuple			= 14;
 
-			nik_ces key_type is_null			= 17;
-			nik_ces key_type length				= 18;
+			nik_ces key_type is_null			= 15;
+			nik_ces key_type length				= 16;
 
-			nik_ces key_type car				= 19;
-			nik_ces key_type cdr				= 20;
-			nik_ces key_type cadr				= 21;
+			nik_ces key_type car				= 17;
+			nik_ces key_type cdr				= 18;
+			nik_ces key_type cadr				= 19;
 
-			nik_ces key_type map				= 22;
-			nik_ces key_type find				= 23;
+			nik_ces key_type map				= 20;
+			nik_ces key_type find				= 21;
 
 		// variadic:
 
-			nik_ces key_type f0_unpack			= 24;
-			nik_ces key_type f1_unpack			= 25;
-			nik_ces key_type f2_unpack			= 26;
+			nik_ces key_type f0_unpack			= 22;
+			nik_ces key_type f1_unpack			= 23;
+			nik_ces key_type f2_unpack			= 24;
 
-			nik_ces key_type b0_unpack			= 27;
-			nik_ces key_type b1_unpack			= 28;
-			nik_ces key_type b2_unpack			= 29;
+			nik_ces key_type b0_unpack			= 25;
+			nik_ces key_type b1_unpack			= 26;
+			nik_ces key_type b2_unpack			= 27;
 
-			nik_ces key_type list_to_list			= 30;
-			nik_ces key_type list_to_array			= 31;
+			nik_ces key_type list_to_list			= 28;
+			nik_ces key_type list_to_array			= 29;
 
-			nik_ces key_type zip				= 32;
-			nik_ces key_type unite				= 33;
-			nik_ces key_type cons				= 34;
-			nik_ces key_type push				= 35;
+			nik_ces key_type zip				= 30;
+			nik_ces key_type unite				= 31;
+			nik_ces key_type cons				= 32;
+			nik_ces key_type push				= 33;
+
+		// subnumber:
+
+			nik_ces key_type is_unsigned			= 34;
+			nik_ces key_type not_unsigned			= 35;
+
+			nik_ces key_type is_signed			= 36;
+			nik_ces key_type not_signed			= 37;
+
+			nik_ces key_type is_integer			= 38;
+			nik_ces key_type not_integer			= 39;
 	};
 
 /***********************************************************************************************************************/
@@ -934,29 +943,6 @@ namespace cctmp {
 		>;
 
 		nik_ce auto _similar_ = Alias::similar;
-
-	// is_int_type:
-
-		template<auto V>                         nik_ce auto overload<Alias::is_int_type, V> = false;
-		template<nik_vp(V)(unsigned char     *)> nik_ce auto overload<Alias::is_int_type, V> = true;
-		template<nik_vp(V)(  signed char     *)> nik_ce auto overload<Alias::is_int_type, V> = true;
-		template<nik_vp(V)(unsigned short    *)> nik_ce auto overload<Alias::is_int_type, V> = true;
-		template<nik_vp(V)(  signed short    *)> nik_ce auto overload<Alias::is_int_type, V> = true;
-		template<nik_vp(V)(unsigned int      *)> nik_ce auto overload<Alias::is_int_type, V> = true;
-		template<nik_vp(V)(  signed int      *)> nik_ce auto overload<Alias::is_int_type, V> = true;
-		template<nik_vp(V)(unsigned long     *)> nik_ce auto overload<Alias::is_int_type, V> = true;
-		template<nik_vp(V)(  signed long     *)> nik_ce auto overload<Alias::is_int_type, V> = true;
-		template<nik_vp(V)(unsigned long long*)> nik_ce auto overload<Alias::is_int_type, V> = true;
-		template<nik_vp(V)(  signed long long*)> nik_ce auto overload<Alias::is_int_type, V> = true;
-
-		nik_ce auto _is_int_type_ = Alias::is_int_type;
-
-	// not_int_type:
-
-		template<auto V>
-		nik_ce auto overload<Alias::not_int_type, V> = not(overload<Alias::is_int_type, V>);
-
-		nik_ce auto _not_int_type_ = Alias::not_int_type;
 
 /***********************************************************************************************************************/
 
@@ -1141,6 +1127,60 @@ namespace cctmp {
 		nik_ce auto overload<Alias::push, b, p, Vs...> = overload<Alias::unite, b, p, U_null_Vs, Vs...>;
 
 		nik_ce auto _push_ = Alias::push;
+
+/***********************************************************************************************************************/
+
+// subnumber:
+
+	// is unsigned:
+
+		template<auto V>                         nik_ce auto overload<Alias::is_unsigned, V> = false;
+		template<nik_vp(V)(unsigned char     *)> nik_ce auto overload<Alias::is_unsigned, V> = true;
+		template<nik_vp(V)(unsigned short    *)> nik_ce auto overload<Alias::is_unsigned, V> = true;
+		template<nik_vp(V)(unsigned int      *)> nik_ce auto overload<Alias::is_unsigned, V> = true;
+		template<nik_vp(V)(unsigned long     *)> nik_ce auto overload<Alias::is_unsigned, V> = true;
+		template<nik_vp(V)(unsigned long long*)> nik_ce auto overload<Alias::is_unsigned, V> = true;
+
+		nik_ce auto _is_unsigned_ = Alias::is_unsigned;
+
+	// not unsigned:
+
+		template<auto V>
+		nik_ce auto overload<Alias::not_unsigned, V> = not(overload<Alias::is_unsigned, V>);
+
+		nik_ce auto _not_unsigned_ = Alias::not_unsigned;
+
+	// is signed:
+
+		template<auto V>                       nik_ce auto overload<Alias::is_signed, V> = false;
+		template<nik_vp(V)(signed char     *)> nik_ce auto overload<Alias::is_signed, V> = true;
+		template<nik_vp(V)(signed short    *)> nik_ce auto overload<Alias::is_signed, V> = true;
+		template<nik_vp(V)(signed int      *)> nik_ce auto overload<Alias::is_signed, V> = true;
+		template<nik_vp(V)(signed long     *)> nik_ce auto overload<Alias::is_signed, V> = true;
+		template<nik_vp(V)(signed long long*)> nik_ce auto overload<Alias::is_signed, V> = true;
+
+		nik_ce auto _is_signed_ = Alias::is_signed;
+
+	// not signed:
+
+		template<auto V>
+		nik_ce auto overload<Alias::not_signed, V> = not(overload<Alias::is_signed, V>);
+
+		nik_ce auto _not_signed_ = Alias::not_signed;
+
+	// is integer:
+
+		template<auto V>
+		nik_ce auto overload<Alias::is_integer, V> = overload<Alias::is_unsigned, V> || overload<Alias::is_signed, V>;
+
+		nik_ce auto _is_integer_ = Alias::is_integer;
+
+	// not integer:
+
+		template<auto V>
+		nik_ce auto overload<Alias::not_integer, V> = not(overload<Alias::is_integer, V>);
+
+		nik_ce auto _not_integer_ = Alias::not_integer;
 
 /***********************************************************************************************************************/
 

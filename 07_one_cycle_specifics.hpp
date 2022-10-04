@@ -19,12 +19,12 @@
 
 namespace cctmp_one_cycle_generics {
 
-	using key_type						= typename cctmp::key_type;
-
 	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
 	template<auto... Vs> using T_pack_Vs			= typename cctmp::template T_pack_Vs<Vs...>;
 
 	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
+
+	using key_type						= typename cctmp::key_type;
 
 	template<auto... Vs> nik_ce auto overload		= cctmp::template overload<Vs...>;
 

@@ -25,14 +25,14 @@
 
 namespace cctmp_functional {
 
+	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
+	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
+
 	using index_type					= typename cctmp::index_type;
 
 	nik_ce auto _zero					= cctmp::_zero;
 	nik_ce auto _one					= cctmp::_one;
 	nik_ce auto _two					= cctmp::_two;
-
-	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
-	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
 
 	template<auto... Vs> nik_ce auto overload		= cctmp::template overload<Vs...>;
 	template<auto... Vs> nik_ce auto U_alias		= cctmp::template U_alias<Vs...>;

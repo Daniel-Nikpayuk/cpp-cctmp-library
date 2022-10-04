@@ -33,10 +33,11 @@
 #include"08_one_cycle_accords.hpp"
 #include"09_one_cycle_generics.hpp"
 //#include"10_domain_specifics.hpp"
-//#include"11_big_numbers.hpp"
-//#include"12_cryptography.hpp"
-//#include"13_numerical.hpp"
-//#include"14_signal_processing.hpp"
+//#include"11_numerical.hpp"
+//#include"12_big_numbers.hpp"
+//#include"13_cryptography.hpp"
+//#include"14_linear_algebra.hpp"
+//#include"15_signal_processing.hpp"
 #include"undef_macros.hpp"
 
 /***********************************************************************************************************************/

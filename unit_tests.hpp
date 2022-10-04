@@ -1002,6 +1002,19 @@ namespace cctmp_program
 
 // (direct/conceptual) interpretation tests:
 
+	template<auto... Vs>
+	constexpr auto U_pack_Vs = cctmp::template U_pack_Vs<Vs...>;
+
+	template<typename B, typename E>
+	void print_array(B b, E e)
+	{
+		while (b != e)
+		{
+			printf("%d, ", *b);
+			++b;
+		}
+	}
+
 /***********************************************************************************************************************/
 
 // functions:

@@ -23,12 +23,6 @@ namespace cctmp_generics {
 
 // cctmp:
 
-	using key_type						= typename cctmp::key_type;
-	using index_type					= typename cctmp::index_type;
-
-	nik_ce auto _zero					= cctmp::_zero;
-	nik_ce auto _one					= cctmp::_one;
-
 	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
 	template<auto... Vs> using T_pack_Vs			= typename cctmp::template T_pack_Vs<Vs...>;
 
@@ -38,13 +32,18 @@ namespace cctmp_generics {
 	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
 
 	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
+	nik_ce auto H_id					= cctmp::H_id;
 
 	template<typename T, auto... Vs> nik_ce auto array	= cctmp::template array<T, Vs...>;
 
 	template<auto V> using T_out_type			= typename cctmp::template T_out_type<V>;
 	template<auto V> nik_ce auto in_types			= cctmp::template in_types<V>;
 
-	nik_ce auto H_id					= cctmp::H_id;
+	using key_type						= typename cctmp::key_type;
+	using index_type					= typename cctmp::index_type;
+
+	nik_ce auto _zero					= cctmp::_zero;
+	nik_ce auto _one					= cctmp::_one;
 
 	template<auto... Vs> nik_ce auto overload		= cctmp::template overload<Vs...>;
 	template<auto... Vs> nik_ce auto U_alias		= cctmp::template U_alias<Vs...>;
@@ -56,8 +55,6 @@ namespace cctmp_generics {
 	template<auto... Vs> nik_ce auto _bind_			= cctmp::template _bind_<Vs...>;
 
 	nik_ce auto _same_					= cctmp::_same_;
-	nik_ce auto _is_int_type_				= cctmp::_is_int_type_;
-	nik_ce auto _not_int_type_				= cctmp::_not_int_type_;
 	nik_ce auto _length_					= cctmp::_length_;
 	nik_ce auto _car_					= cctmp::_car_;
 	nik_ce auto _map_					= cctmp::_map_;
@@ -66,6 +63,8 @@ namespace cctmp_generics {
 	nik_ce auto _cons_					= cctmp::_cons_;
 	nik_ce auto _push_					= cctmp::_push_;
 	nik_ce auto _unite_					= cctmp::_unite_;
+	nik_ce auto _is_integer_				= cctmp::_is_integer_;
+	nik_ce auto _not_integer_				= cctmp::_not_integer_;
 
 	template<auto... Vs> nik_ce auto unpack_		= cctmp::template unpack_<Vs...>;
 	template<auto... Vs> nik_ce auto find_			= cctmp::template find_<Vs...>;
@@ -101,10 +100,10 @@ namespace cctmp_generics {
 	template<auto V0, auto V1>
 	nik_ce auto same = overload<_same_, V0, V1>;
 
-// has int type:
+// is soft (cast) index:
 
 	template<auto V>
-	nik_ce auto has_int_type = overload<_is_int_type_, U_store_T<decltype(V)>>;
+	nik_ce auto is_soft_index = overload<_is_integer_, U_store_T<decltype(V)>>;
 
 // length:
 
@@ -275,7 +274,7 @@ namespace cctmp_generics {
 // tuple apply:
 
 //	template<auto f, typename T, typename... Ts, index_type... tuple_indices>
-//	constexpr auto tuple_apply(const tuple<T, Ts...> & t, nik_vp(pack)(T_pack_Vs<tuple_indices...>*))
+//	nik_ce auto tuple_apply(const tuple<T, Ts...> & t, nik_vp(pack)(T_pack_Vs<tuple_indices...>*))
 //	{
 //		return f(tuple_value<tuple_indices>(t)...);
 //	}
@@ -578,23 +577,23 @@ namespace cctmp_generics {
 	struct LiftDispatch
 	{
 		template<auto... ns>
-		nik_ces auto find_non_int = find_<_not_int_type_, U_store_T<decltype(ns)>...>;
+		nik_ces auto find_non_index = find_<_not_integer_, U_store_T<decltype(ns)>...>;
 
 		template<auto p, auto... ns>
-		nik_ces auto is_all_ints = (p == sizeof...(ns));
+		nik_ces auto are_all_indices = (p == sizeof...(ns));
 
 		template<auto V>
 		nik_ces index_type map_index()
 		{
-			if nik_ce (has_int_type<V>) return V + _one;
+			if nik_ce (is_soft_index<V>) return V + _one;
 			else return _zero;
 		}
 
-		template<bool all_ints, auto... ns>
+		template<bool all_indices, auto... ns>
 		nik_ces auto index_list()
 		{
-			if nik_ce (all_ints) return U_pack_Vs<index_type{ns}...>;
-			else                 return U_pack_Vs<map_index<ns>()...>;
+			if nik_ce (all_indices) return U_pack_Vs<index_type{ns}...>;
+			else                    return U_pack_Vs<map_index<ns>()...>;
 		}
 
 		template<auto f, auto... ns, auto name, auto... ms>
@@ -603,14 +602,14 @@ namespace cctmp_generics {
 			if nik_ce (same<f, _id_>) return _lifted_id_;
 			else
 			{
-				nik_ce auto p		= find_non_int<ns...>;
-				nik_ce auto all_ints	= is_all_ints<p, ns...>;
+				nik_ce auto p		= find_non_index<ns...>;
+				nik_ce auto all_indices	= are_all_indices<p, ns...>;
 
 				nik_ce auto f_ns_p	= U_pack_Vs<overload<_constant_<_id_>, ns>...>;
-				nik_ce auto ns_p	= index_list<all_ints, ns...>();
+				nik_ce auto ns_p	= index_list<all_indices, ns...>();
 				nik_ce auto nf		= _subcompose_<f, f_ns_p, ns_p>;
 
-				using T_dispatched_lift = T_lift<name, ms..., nf, all_ints>;
+				using T_dispatched_lift = T_lift<name, ms..., nf, all_indices>;
 
 				return U_store_T<T_dispatched_lift>;
 			}
@@ -631,9 +630,9 @@ namespace cctmp_generics {
 		template<auto V, auto... Vs>
 		nik_ce auto _lift()
 		{
-			if      nik_ce (same<V, _cp_>)    return FD::template result<Vs...>(U_copy);
-			else if nik_ce (!has_int_type<V>) return FD::template result<V, Vs...>(U_effect);
-			else                              return _lift_maybe<V, Vs...>();
+			if      nik_ce (same<V, _cp_>)     return FD::template result<Vs...>(U_copy);
+			else if nik_ce (!is_soft_index<V>) return FD::template result<V, Vs...>(U_effect);
+			else                               return _lift_maybe<V, Vs...>();
 		}
 
 		template<auto... Vs>

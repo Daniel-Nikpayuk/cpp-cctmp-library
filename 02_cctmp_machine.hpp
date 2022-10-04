@@ -1183,12 +1183,6 @@ namespace cctmp {
 		template<key_type ctn = _h1, depth_type dec = _two>
 		nik_ce auto similar = a_action<Alias::similar, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto is_int_type = a_action<Alias::is_int_type, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto not_int_type = a_action<Alias::not_int_type, ctn, dec>;
-
 		// functional:
 
 		template<key_type ctn = _h1, depth_type dec = _two>
@@ -1261,6 +1255,20 @@ namespace cctmp {
 
 		template<key_type ctn = _h1, depth_type dec = _two>
 		nik_ce auto push = a_action<Alias::push, ctn, dec>;
+
+		// subnumber:
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto is_unsigned = a_action<Alias::is_unsigned, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto not_unsigned = a_action<Alias::not_unsigned, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto is_signed = a_action<Alias::is_signed, ctn, dec>;
+
+		template<key_type ctn = _h1, depth_type dec = _two>
+		nik_ce auto not_signed = a_action<Alias::not_signed, ctn, dec>;
 
 /***********************************************************************************************************************/
 

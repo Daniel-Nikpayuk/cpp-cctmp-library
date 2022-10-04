@@ -30,9 +30,9 @@ mawk "$mawk_prog_rest"  "01_cctmp_block.hpp"         >> "cpp_cctmp_library.hpp" 
 mawk "$mawk_prog_rest"  "02_cctmp_machine.hpp"       >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "03_cctmp_functional.hpp"    >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "05_generic_assembly.hpp"    >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "06_one_cycle_assembly.hpp"  >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "07_one_cycle_specifics.hpp" >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "08_one_cycle_accords.hpp"   >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "09_one_cycle_generics.hpp"  >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "undef_macros.hpp"           >> "cpp_cctmp_library.hpp"
-
-#mawk "$mawk_prog_rest"  "06_one_cycle_generics.hpp"  >> "cpp_cctmp_library.hpp" &&
-#mawk "$mawk_prog_rest"  "07_one_cycle_specifics.hpp" >> "cpp_cctmp_library.hpp" &&
-#mawk "$mawk_prog_rest"  "08_one_cycle_defaults.hpp"  >> "cpp_cctmp_library.hpp" &&
 
