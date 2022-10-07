@@ -57,6 +57,30 @@ namespace cctmp {
 	using T_store_U = T_restore_T<decltype(U)>;
 
 /***********************************************************************************************************************/
+
+// constant:
+
+	// void:
+
+		nik_ce auto U_void = U_store_T<void>;
+
+	// unsigned:
+
+		nik_ce auto U_unsigned_char			= U_store_T < unsigned char      >;
+		nik_ce auto U_unsigned_short			= U_store_T < unsigned short     >;
+		nik_ce auto U_unsigned_int			= U_store_T < unsigned int       >;
+		nik_ce auto U_unsigned_long			= U_store_T < unsigned long      >;
+		nik_ce auto U_unsigned_long_long		= U_store_T < unsigned long long >;
+
+	// signed:
+
+		nik_ce auto U_signed_char			= U_store_T < signed char      >;
+		nik_ce auto U_signed_short			= U_store_T < signed short     >;
+		nik_ce auto U_signed_int			= U_store_T < signed int       >;
+		nik_ce auto U_signed_long			= U_store_T < signed long      >;
+		nik_ce auto U_signed_long_long			= U_store_T < signed long long >;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // packs:

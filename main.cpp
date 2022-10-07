@@ -28,22 +28,47 @@
 #include"03_cctmp_functional.hpp"
 //#include"04_cctmp_front.hpp"
 #include"05_generic_assembly.hpp"
-#include"06_one_cycle_assembly.hpp"
-#include"07_one_cycle_specifics.hpp"
-#include"08_one_cycle_accords.hpp"
-#include"09_one_cycle_generics.hpp"
-//#include"10_domain_specifics.hpp"
-//#include"11_numerical.hpp"
-//#include"12_big_numbers.hpp"
-//#include"13_cryptography.hpp"
-//#include"14_linear_algebra.hpp"
-//#include"15_signal_processing.hpp"
+//#include"06_generic_optimizers.hpp"
+#include"07_one_cycle_assembly.hpp"
+#include"08_one_cycle_specifics.hpp"
+#include"09_one_cycle_accords.hpp"
+#include"10_one_cycle_generics.hpp"
+//#include"11_domain_specifics.hpp"
+#include"12_byte_ring.hpp"
+//#include"13_byte_array_ring.hpp"
+//#include"14_cryptography.hpp"
+//#include"15_linear_algebra.hpp"
+//#include"16_signal_processing.hpp"
 #include"undef_macros.hpp"
 
 /***********************************************************************************************************************/
 
+	template<auto V> using unsigned_limit	= cctmp_byte_ring::template unsigned_limit<V>;
+	template<auto V> using   signed_limit	= cctmp_byte_ring::template   signed_limit<V>;
+
+	using Bytes		= cctmp_byte_ring::Bytes;
+	using ring_type		= cctmp_byte_ring::template ring<Bytes::_1>;
+//	using prev_type		= typename ring_type::prev_type;
+
+/***********************************************************************************************************************/
+
+	using uchar_limit = unsigned_limit<cctmp::U_unsigned_char>;
+	using schar_limit = signed_limit<uchar_limit::U_signed_type>;
+
 	int main(int argc, char *argv[])
 	{
+		printf("%llu\n", uchar_limit::minimum);
+		printf("%llu\n", uchar_limit::maximum);
+
+		printf("%lli\n", schar_limit::minimum);
+		printf("%lli\n", schar_limit::maximum);
+
+	//	ring_type x{1};
+	//	ring_type y{2};
+	//	ring_type z = x + y;
+
+	//	printf("%hhu\n", z.to_builtin());
+
 		return 0;
 	}
 
