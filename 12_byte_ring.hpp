@@ -21,30 +21,43 @@
 
 namespace cctmp_byte_ring {
 
-	template<auto U> using T_store_U			= typename cctmp::template T_store_U<U>;
-//	template<auto... Vs> using T_pack_Vs			= typename cctmp::template T_pack_Vs<Vs...>;
+	template<auto U> using T_store_U				= typename cctmp::template T_store_U<U>;
+	template<auto... Vs> using T_pack_Vs				= typename cctmp::template T_pack_Vs<Vs...>;
 
-//	template<typename T> nik_ce auto U_store_T		= cctmp::template U_store_T<T>;
+//	template<typename T> nik_ce auto U_store_T			= cctmp::template U_store_T<T>;
 
-	template<auto... Vs> nik_ce auto U_pack_Vs		= cctmp::template U_pack_Vs<Vs...>;
+	template<auto... Vs> nik_ce auto U_pack_Vs			= cctmp::template U_pack_Vs<Vs...>;
 
-	nik_ce auto U_unsigned_char				= cctmp::U_unsigned_char;
-	nik_ce auto U_unsigned_short				= cctmp::U_unsigned_short;
-	nik_ce auto U_unsigned_int				= cctmp::U_unsigned_int;
-	nik_ce auto U_unsigned_long				= cctmp::U_unsigned_long;
-	nik_ce auto U_unsigned_long_long			= cctmp::U_unsigned_long_long;
+	template<typename T, auto... Vs> nik_ce auto array		= cctmp::template array<T, Vs...>;
 
-	nik_ce auto U_signed_char				= cctmp::U_signed_char;
-	nik_ce auto U_signed_short				= cctmp::U_signed_short;
-	nik_ce auto U_signed_int				= cctmp::U_signed_int;
-	nik_ce auto U_signed_long				= cctmp::U_signed_long;
-	nik_ce auto U_signed_long_long				= cctmp::U_signed_long_long;
+	nik_ce auto U_unsigned_char					= cctmp::U_unsigned_char;
+	nik_ce auto U_unsigned_short					= cctmp::U_unsigned_short;
+	nik_ce auto U_unsigned_int					= cctmp::U_unsigned_int;
+	nik_ce auto U_unsigned_long					= cctmp::U_unsigned_long;
+	nik_ce auto U_unsigned_long_long				= cctmp::U_unsigned_long_long;
 
-	using key_type						= typename cctmp::key_type;
+	nik_ce auto U_signed_char					= cctmp::U_signed_char;
+	nik_ce auto U_signed_short					= cctmp::U_signed_short;
+	nik_ce auto U_signed_int					= cctmp::U_signed_int;
+	nik_ce auto U_signed_long					= cctmp::U_signed_long;
+	nik_ce auto U_signed_long_long					= cctmp::U_signed_long_long;
 
-	nik_ce auto _zero					= cctmp::_zero;
-	nik_ce auto _one					= cctmp::_one;
-	nik_ce auto _eight					= cctmp::_eight;
+	using key_type							= typename cctmp::key_type;
+
+	nik_ce auto _zero						= cctmp::_zero;
+	nik_ce auto _one						= cctmp::_one;
+	nik_ce auto _eight						= cctmp::_eight;
+
+	template<auto... Vs> nik_ce auto overload			= cctmp::template overload<Vs...>;
+
+	template<auto V> nik_ce auto _match_				= cctmp::template _match_<V>;
+	template<auto V> nik_ce auto _is_greater_than_or_equal_		= cctmp::template _is_greater_than_or_equal_<V>;
+
+	nik_ce auto _length_						= cctmp::_length_;
+
+	template<auto... Vs> nik_ce auto unpack_			= cctmp::template unpack_<Vs...>;
+
+	template<auto... Vs> nik_ce auto list_at			= cctmp_functional::template list_at<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -54,14 +67,6 @@ namespace cctmp_byte_ring {
 
 	template<key_type, auto... Vs>
 	nik_ce auto builtin = U_pack_Vs<Vs...>;
-
-	// (find) helper:
-
-	//	template<auto width, typename ArrType>
-	//	nik_ce auto limits_width_match(ArrType limit) { return (limit[_zero] >= width); }
-
-	//	template<auto width, typename ArrType>
-	//	nik_ce auto U_match_width = _match_<_apply_<limits_width_match<width, ArrType>>>;
 
 /***********************************************************************************************************************/
 
@@ -77,7 +82,16 @@ namespace cctmp_byte_ring {
 			nik_ces key_type _long				=  3;
 			nik_ces key_type _long_long			=  4;
 
-			nik_ces key_type length				=  5;
+			nik_ces auto indices				= U_pack_Vs
+									<
+										_char,
+										_short,
+										_int,
+										_long,
+										_long_long
+									>;
+
+			nik_ces key_type length				=  unpack_<indices, _length_>;
 
 		// operators:
 
@@ -177,189 +191,48 @@ namespace cctmp_byte_ring {
 		template<auto... Vs> nik_ce auto builtin<Builtin::_signed, Builtin::_long_long , Vs...> = U_signed_long_long;
 
 /***********************************************************************************************************************/
-
-// generic:
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// bits:
+// ring:
 
-	enum struct Bits
+/***********************************************************************************************************************/
+
+// byte size:
+
+	template<key_type ByteSize>
+	class ring
 	{
-		_8,
-		_16,
-		_32,
-		_64
-	};
+			template<key_type... indices>
+			nik_ces auto to_byte_size_array(nik_avp(T_pack_Vs<indices...>*))
+			{
+				return array
+				<
+					key_type,
+					sizeof(T_store_U<builtin<Builtin::_unsigned, indices>>)...
+				>;
+			}
 
-/***********************************************************************************************************************/
+			template<key_type byte_size>
+			nik_ces auto index = overload
+			<
+				_match_<_is_greater_than_or_equal_<byte_size>>,
+				to_byte_size_array(Builtin::indices),
+				Builtin::length
+			>;
 
-// bytes:
-
-	enum struct Bytes
-	{
-		_1,
-		_2,
-		_4,
-		_8
-	};
-
-/***********************************************************************************************************************/
-
-// protoring:
-
-//	template<Bytes... byte_size> struct protoring;
-
-/***********************************************************************************************************************/
-
-// cast:
-
-/*
-	template<Bytes... filler>
-	class protoring<Bytes::_1, filler...>
-	{
-		public:
-
-			using prev_type				= void;
-			using next_type				= ring<Bytes::_2, filler...>;
-
-			using builtin_type			= unsigned char;
-
-			nik_ces builtin_type bit_size		= 8;
-			nik_ces builtin_type byte_size		= 1;
-
-			nik_ces builtin_type zero		= 0;
-			nik_ces builtin_type one		= 1;
-
-		private:
-
-			builtin_type value;
+			nik_ces auto type = list_at<Builtin::indices, index<ByteSize>>;
 
 		public:
 
-		[[nodiscard]] explicit nik_ce ring() : value(0) { };
-		[[nodiscard]] explicit nik_ce ring(builtin_type v) : value(v) { };
+			nik_ces auto U_unsigned_type		= builtin<Builtin::_unsigned, type>;
+			using builtin_type			= T_store_U<U_unsigned_type>;
 
-		[[nodiscard]] const ring & operator = (builtin_type v) { value = v; return *this; }
-		[[nodiscard]] const ring & operator = (const ring & v) { value = v.value; return *this; }
+			nik_ces builtin_type byte_size		= sizeof(builtin_type);
+			nik_ces builtin_type bit_size		= _eight * byte_size;
 
-		[[nodiscard]] const ring operator + (const ring & v) const { return ring{(builtin_type)(value + v.value)}; }
-		[[nodiscard]] const ring operator - (const ring & v) const { return ring{(builtin_type)(value - v.value)}; }
-		[[nodiscard]] const ring operator * (const ring & v) const { return ring{(builtin_type)(value * v.value)}; }
-		[[nodiscard]] const ring operator / (const ring & v) const { return ring{(builtin_type)(value / v.value)}; }
-
-		[[nodiscard]] builtin_type to_builtin() const { return value; }
-	};
-*/
-
-	// find (width to type-index):
-
-	//	template<auto width>
-	//	nik_ce auto integer<Limit::uint_find, width> = integer
-	//	<
-	//		Limit::uint_type,
-	//		overload
-	//		<
-	//			U_match_width<width, culim_type>,
-	//			uint_limits,
-	//			Limit::_length
-	//		>
-	//	>;
-
-	//	nik_ce auto _uint_find_ = Limit::uint_find;
-
-	// increment (casting):
-
-		// currently unsafe---no bounds check:
-
-	//	template<auto V>
-	//	nik_ce auto integer<Limit::uint_increment, V> = integer
-	//	<
-	//		Limit::uint_find,
-	//		(integer<Limit::uint_width, V> << 1)
-	//	>;
-
-	//	nik_ce auto _uint_increment_ = Limit::uint_increment;
-
-	// decrement (casting):
-
-		// currently unsafe---no bounds check:
-
-	//	template<auto V>
-	//	nik_ce auto integer<Limit::uint_decrement, V> = integer
-	//	<
-	//		Limit::uint_find,
-	//		(integer<Limit::uint_width, V> >> 1)
-	//	>;
-
-	//	nik_ce auto _uint_decrement_ = Limit::uint_decrement;
-
-	// find (width to type-index):
-
-	//	template<auto width>
-	//	nik_ce auto integer<Limit::sint_find, width> = integer
-	//	<
-	//		Limit::sint_type,
-	//		overload
-	//		<
-	//			U_match_width<width, cslim_type>,
-	//			sint_limits,
-	//			Limit::_length
-	//		>
-	//	>;
-
-	//	nik_ce auto _sint_find_ = Limit::sint_find;
-
-	// increment (casting):
-
-		// currently unsafe---no bounds check:
-
-	//	template<auto V>
-	//	nik_ce auto integer<Limit::sint_increment, V> = integer
-	//	<
-	//		Limit::sint_find,
-	//		(integer<Limit::sint_width, V> << 1)
-	//	>;
-
-	//	nik_ce auto _sint_increment_ = Limit::sint_increment;
-
-	// decrement (casting):
-
-		// currently unsafe---no bounds check:
-
-	//	template<auto V>
-	//	nik_ce auto integer<Limit::sint_decrement, V> = integer
-	//	<
-	//		Limit::sint_find,
-	//		(integer<Limit::sint_width, V> >> 1)
-	//	>;
-
-	//	nik_ce auto _sint_decrement_ = Limit::sint_decrement;
-
-/***********************************************************************************************************************/
-
-	template<Bytes... byte_size> struct ring;
-
-/***********************************************************************************************************************/
-
-// one byte:
-
-	template<Bytes... filler>
-	class ring<Bytes::_1, filler...>
-	{
-		public:
-
-			using prev_type				= void;
-			using next_type				= ring<Bytes::_2, filler...>;
-
-			using builtin_type			= unsigned char;
-
-			nik_ces builtin_type bit_size		= 8;
-			nik_ces builtin_type byte_size		= 1;
-
-			nik_ces builtin_type zero		= 0;
-			nik_ces builtin_type one		= 1;
+			using prev_type				= ring<(byte_size >> 1)>;
+			using next_type				= ring<(byte_size << 1)>;
 
 		private:
 
@@ -383,83 +256,29 @@ namespace cctmp_byte_ring {
 
 /***********************************************************************************************************************/
 
-// two bytes:
+// policy:
 
-	template<Bytes... filler>
-	class ring<Bytes::_2, filler...>
+	struct Policy
 	{
-		public:
-
-			using prev_type				= ring<Bytes::_1, filler...>;
-			using next_type				= ring<Bytes::_4, filler...>;
-
-			using builtin_type			= unsigned short;
-
-			nik_ces builtin_type bit_size		= 16;
-			nik_ces builtin_type byte_size		= 2;
-
-			nik_ces builtin_type zero		= 0;
-			nik_ces builtin_type one		= 1;
-
-		private:
-
-			builtin_type value;
-
-		public:
-
-		[[nodiscard]] explicit nik_ce ring() : value(0) { };
-		[[nodiscard]] explicit nik_ce ring(builtin_type v) : value(v) { };
-
-		[[nodiscard]] const ring & operator = (builtin_type v) { value = v; return *this; }
-		[[nodiscard]] const ring & operator = (const ring & v) { value = v.value; return *this; }
-
-		[[nodiscard]] const ring operator + (const ring & v) const { return ring{(builtin_type)(value + v.value)}; }
-		[[nodiscard]] const ring operator - (const ring & v) const { return ring{(builtin_type)(value - v.value)}; }
-		[[nodiscard]] const ring operator * (const ring & v) const { return ring{(builtin_type)(value * v.value)}; }
-		[[nodiscard]] const ring operator / (const ring & v) const { return ring{(builtin_type)(value / v.value)}; }
-
-		[[nodiscard]] builtin_type to_builtin() const { return value; }
+		nik_ces key_type byte_size		=  0;
+		nik_ces key_type bit_size		=  1;
+		nik_ces key_type builtin_type		=  2;
 	};
 
 /***********************************************************************************************************************/
 
-// four bytes:
+// syntactic sugar:
 
-	template<Bytes... filler>
-	class ring<Bytes::_4, filler...>
+	template<auto V, auto P>
+	nik_ce auto ring_parameter()
 	{
-		public:
+		if      constexpr (P == Policy::byte_size) return V;
+		else if constexpr (P == Policy::bit_size ) return V / _eight;
+		else                                       return sizeof(T_store_U<V>);
+	}
 
-			using prev_type				= ring<Bytes::_2, filler...>;
-			using next_type				= ring<Bytes::_8, filler...>;
-
-			using builtin_type			= unsigned int;
-
-			nik_ces builtin_type bit_size		= 32;
-			nik_ces builtin_type byte_size		= 4;
-
-			nik_ces builtin_type zero		= 0;
-			nik_ces builtin_type one		= 1;
-
-		private:
-
-			builtin_type value;
-
-		public:
-
-		[[nodiscard]] explicit nik_ce ring() : value(0) { };
-		[[nodiscard]] explicit nik_ce ring(builtin_type v) : value(v) { };
-
-		[[nodiscard]] const ring & operator = (builtin_type v) { value = v; return *this; }
-		[[nodiscard]] const ring & operator = (const ring & v) { value = v.value; return *this; }
-
-		[[nodiscard]] const ring operator + (const ring & v) const { return ring{value + v.value}; }
-		[[nodiscard]] const ring operator - (const ring & v) const { return ring{value - v.value}; }
-		[[nodiscard]] const ring operator * (const ring & v) const { return ring{value * v.value}; }
-		[[nodiscard]] const ring operator / (const ring & v) const { return ring{value / v.value}; }
-
-		[[nodiscard]] builtin_type to_builtin() const { return value; }
-	};
+	template<auto V, auto P = Policy::byte_size>
+	using make_ring = ring<ring_parameter<V, P>()>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

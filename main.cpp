@@ -46,28 +46,31 @@
 	template<auto V> using unsigned_limit	= cctmp_byte_ring::template unsigned_limit<V>;
 	template<auto V> using   signed_limit	= cctmp_byte_ring::template   signed_limit<V>;
 
-	using Bytes		= cctmp_byte_ring::Bytes;
-	using ring_type		= cctmp_byte_ring::template ring<Bytes::_1>;
+	using ring_policy	= typename cctmp_byte_ring::Policy;
+
+	using ring_type		= cctmp_byte_ring::template make_ring<8, ring_policy::bit_size>;
 //	using prev_type		= typename ring_type::prev_type;
 
 /***********************************************************************************************************************/
 
-	using uchar_limit = unsigned_limit<cctmp::U_unsigned_char>;
-	using schar_limit = signed_limit<uchar_limit::U_signed_type>;
+//	using uchar_limit = unsigned_limit<cctmp::U_unsigned_char>;
+//	using schar_limit = signed_limit<uchar_limit::U_signed_type>;
 
 	int main(int argc, char *argv[])
 	{
-		printf("%llu\n", uchar_limit::minimum);
-		printf("%llu\n", uchar_limit::maximum);
+	//	printf("%d\n", ring_type::U_unsigned_type);
 
-		printf("%lli\n", schar_limit::minimum);
-		printf("%lli\n", schar_limit::maximum);
+	//	printf("%llu\n", uchar_limit::minimum);
+	//	printf("%llu\n", uchar_limit::maximum);
 
-	//	ring_type x{1};
-	//	ring_type y{2};
-	//	ring_type z = x + y;
+	//	printf("%lli\n", schar_limit::minimum);
+	//	printf("%lli\n", schar_limit::maximum);
 
-	//	printf("%hhu\n", z.to_builtin());
+		ring_type x{1};
+		ring_type y{2};
+		ring_type z = x - y;
+
+		printf("%hhu\n", z.to_builtin());
 
 		return 0;
 	}
