@@ -33,21 +33,15 @@ namespace cctmp {
 
 	struct InstrName
 	{
-		nik_ces key_type id				=  0;
-		nik_ces key_type identity			= id; // convenience for
-								      // default params.
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
 
-		nik_ces key_type call				=  1;
-		nik_ces key_type recall				=  2;
-
-		nik_ces key_type paste_r_all			=  3;
-		nik_ces key_type paste_a_all			=  4;
-
-		nik_ces key_type stage				=  5;
-		nik_ces key_type go_to				=  6;
-		nik_ces key_type memoize			=  7;
-
-		nik_ces key_type halt				=  8;
+			call        , recall      ,
+			paste_r_all , paste_a_all ,
+			stage       , jump        , memoize ,
+			halt
+		};
 	};
 
 	using MN = InstrName;
@@ -58,32 +52,17 @@ namespace cctmp {
 
 	struct InstrNote
 	{
-		nik_ces key_type id				=  0;
-		nik_ces key_type identity			= id;	// convenience for
-									// default params.
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
 
-		nik_ces key_type start				=  1;
-
-		nik_ces key_type copy_r_pos			=  2;
-		nik_ces key_type copy_j_pos			=  3;
-		nik_ces key_type copy_c_pos			=  4;
-		nik_ces key_type copy_a_pos			=  5;
-		nik_ces key_type copy				=  6;
-
-		nik_ces key_type cut_r_pos			=  7;
-		nik_ces key_type cut_a_pos			=  8;
-		nik_ces key_type cut				=  9;
-
-		nik_ces key_type action				= 10;
-		nik_ces key_type compel				= 11;
-		nik_ces key_type propel				= 12;
-
-		nik_ces key_type conditional			= 13;
-		nik_ces key_type lookup				= 14;
-		nik_ces key_type insert				= 15;
-
-		nik_ces key_type pause				= 16;
-		nik_ces key_type debug				= 17;
+			start      ,
+			copy_r_pos , copy_j_pos , copy_c_pos , copy_a_pos , copy ,
+			cut_r_pos  , cut_a_pos  , cut        ,
+			action     , compel     , propel     ,
+			go_to      , branch     , lookup     , insert     ,
+			pause      , debug
+		};
 	};
 
 	using MT = InstrNote;
@@ -94,44 +73,44 @@ namespace cctmp {
 
 	struct InstrLocs
 	{
-		using type						= index_type const * const;
+		using type = gcindex_type* const;
 
-		nik_ces key_type size					= 0;
-		nik_ces key_type name					= 1;
-		nik_ces key_type note					= 2;
-
-		nik_ces key_type pos					= 3;
-		nik_ces key_type dec					= 3;
-		nik_ces key_type mov					= 3;
-
-		nik_ces key_type ctn					= 4;
-		nik_ces key_type key					= 5;
-		nik_ces key_type act					= 6;
+		enum Position : gkey_type
+		{
+			size = 0,
+			name , note      ,
+			pos  , dec = pos , mov = pos ,
+			ctn  , syn       , key       , act
+		};
 
 		// locations:
 
-		nik_ces key_type _register				= 0;
-		nik_ces key_type _junction				= 1;
-		nik_ces key_type _constant				= 2;
-		nik_ces key_type _argument				= 3;
+		enum Location : gkey_type
+		{
+			_register = 0,
+			_junction , _constant , _argument
+		};
 
 		// actions:
 
-		nik_ces key_type h0					= 0;
-		nik_ces key_type h0_write				= 1;
-		nik_ces key_type h1					= 2;
-		nik_ces key_type h1_pair				= 3; // C++17 specific.
-		nik_ces key_type value					= 4;
+		enum Action : gkey_type
+		{
+			h0 = 0,
+			h0_write , h1 , h1_pair , value // h1_pair is C++17 specific.
+		};
 
 		// stages:
 
-		nik_ces key_type first					= 0;
-		nik_ces key_type all					= 1;
+		enum Stage : gkey_type
+		{
+			first = 0,
+			all
+		};
 
-		nik_ces index_type length     (type i)			{ return i[size]; }
-		nik_ces bool       is_optimal (cindex_type n)		{ return (n < _eight); }
+		nik_ces gindex_type length     (type i)         { return i[size]; }
+		nik_ces bool        is_optimal (gcindex_type n) { return (n < _eight); }
 
-		nik_ces auto copy_note(ckey_type l)
+		nik_ces auto copy_note(gckey_type l)
 		{
 			if      (l == _register) return MT::copy_r_pos;
 			else if (l == _junction) return MT::copy_j_pos;
@@ -139,13 +118,13 @@ namespace cctmp {
 			else                     return MT::copy_a_pos;
 		}
 
-		nik_ces auto cut_note(ckey_type l)
+		nik_ces auto cut_note(gckey_type l)
 		{
 			if   (l == _register) return MT::cut_r_pos;
 			else                  return MT::cut_a_pos;
 		}
 
-		nik_ces auto paste_name(ckey_type l)
+		nik_ces auto paste_name(gckey_type l)
 		{
 			if   (l == _register) return MN::paste_r_all;
 			else                  return MN::paste_a_all;
@@ -154,6 +133,7 @@ namespace cctmp {
 
 	using MI			= InstrLocs;
 	using instr_type		= typename MI::type;
+	using cinstr_type		= instr_type const;
 
 	nik_ce auto _register		= MI::_register;
 	nik_ce auto _junction		= MI::_junction;
@@ -169,8 +149,8 @@ namespace cctmp {
 	nik_ce auto _first		= MI::first;
 	nik_ce auto _all		= MI::all;
 
-	template<index_type... Vs>
-	nik_ce instr_type instruction = array<index_type, sizeof...(Vs), Vs...>;
+	template<auto... Vs>
+	nik_ce instr_type instruction = array<gindex_type, sizeof...(Vs), (gindex_type) Vs...>;
 
 /***********************************************************************************************************************/
 
@@ -178,18 +158,21 @@ namespace cctmp {
 
 	struct InstrContr
 	{
-		using type					= instr_type const * const;
+		using type = cinstr_type* const;
 
-		nik_ces key_type size				= 0;
+		enum Position : gkey_type
+		{
+			size = 0
+		};
 
-		nik_ces index_type length (type l)		{ return l[size][MI::size]; }
+		nik_ces gindex_type length (type l) { return l[size][MI::size]; }
 	};
 
 	using MC		= InstrContr;
 	using contr_type	= typename MC::type;
 
-	template<instr_type... Vs>
-	nik_ce contr_type controller = array<instr_type, array<index_type, sizeof...(Vs)>, Vs...>;
+	template<auto... Vs>
+	nik_ce contr_type controller = array<instr_type, array<gindex_type, sizeof...(Vs)>, Vs...>;
 
 /***********************************************************************************************************************/
 
@@ -199,34 +182,34 @@ namespace cctmp {
 	{
 		// defaults:
 
-			nik_ces depth_type initial_depth = 500;
-			nik_ces index_type initial_index = _zero;
+			nik_ces gdepth_type initial_depth = 500;
+			nik_ces gindex_type initial_index = _zero;
 
 		// accessors:
 
-			nik_ces auto instr(contr_type c, cindex_type i)
+			nik_ces auto instr(contr_type c, gcindex_type i)
 				{ return c[i]; }
 
 		// navigators:
 
-			nik_ces key_type next_name(cdepth_type d, ckey_type m, contr_type c, cindex_type i)
+			nik_ces gkey_type next_name(gcdepth_type d, gckey_type m, contr_type c, gcindex_type i)
 			{
-				if (d == 0)		return MN::halt;
-				else if (m != MT::id)	return MN::recall;
-				else			return c[i+1][MI::name];
+				if (d == 0)           return MN::halt;
+				else if (m != MT::id) return MN::recall;
+				else                  return c[i+1][MI::name];
 			}
 
-			nik_ces key_type next_note(cdepth_type d, ckey_type m, contr_type c, cindex_type i)
+			nik_ces gkey_type next_note(gcdepth_type d, gckey_type m, contr_type c, gcindex_type i)
 			{
-				if (d == 0)		return MT::pause;
-				else if (m != MT::id)	return m;
-				else			return c[i+1][MI::note];
+				if (d == 0)           return MT::pause;
+				else if (m != MT::id) return m;
+				else                  return c[i+1][MI::note];
 			}
 
-			nik_ces depth_type next_depth(cdepth_type d)
+			nik_ces gdepth_type next_depth(gcdepth_type d)
 				{ return d - bool{d != 0}; }
 
-			nik_ces index_type next_index(cdepth_type d, ckey_type m, contr_type, cindex_type i)
+			nik_ces gindex_type next_index(gcdepth_type d, gckey_type m, contr_type, gcindex_type i)
 				{ return i + bool{d != 0 && m == MT::id}; }
 	};
 
@@ -241,7 +224,10 @@ namespace cctmp {
 	// Arbitrary list_id input for greater utility,
 	// U_pack_Vs for internal output for greater generality.
 
-	template<key_type, key_type, auto...> struct T_machine;
+	template<gkey_type, gkey_type, auto...> struct T_machine;
+
+	template<auto Name, auto Note, auto... Vs>
+	nik_ce auto U_machine = U_store_T<T_machine<Name, Note, Vs...>>;
 
 	// H0: Holds operators.
 	// H1: Holds stack parameters.
@@ -288,7 +274,7 @@ namespace cctmp {
 	};
 
 	using T_machine_start		= T_machine<MN::call, MT::start>;
-	nik_ce auto U_machine_start	= U_store_T<T_machine_start>;
+	nik_ce auto U_machine_start	= U_machine<MN::call, MT::start>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -495,7 +481,7 @@ namespace cctmp {
 			{
 				nik_ce auto v0 = tuple_value<0>(val);
 				nik_ce auto v1 = tuple_value<1>(val);
-				nik_ce auto h0 = listload_<Alias::unite, v0, v1, X0>;
+				nik_ce auto h0 = listload_<_unite_, v0, v1, X0>;
 
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, Hs...);
 			}
@@ -527,7 +513,7 @@ namespace cctmp {
 			{
 				nik_ce auto v0 = tuple_value<0>(val);
 				nik_ce auto v1 = tuple_value<1>(val);
-				nik_ce auto h0 = listload_<Alias::unite, v0, v1, X0>;
+				nik_ce auto h0 = listload_<_unite_, v0, v1, X0>;
 
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, As...);
 			}
@@ -558,7 +544,7 @@ namespace cctmp {
 			{
 				nik_ce auto v0 = tuple_value<0>(val);
 				nik_ce auto v1 = tuple_value<1>(val);
-				nik_ce auto h0 = listload_<Alias::unite, v0, v1, X0>;
+				nik_ce auto h0 = listload_<_unite_, v0, v1, X0>;
 
 				return NIK_MACHINE(d, MT::id, c, i, Vs)(h0, U_pack_Vs<Xs...>, Hs...);
 			}
@@ -593,9 +579,10 @@ namespace cctmp {
 			else
 			{
 				nik_ce auto ctn = ins[MI::ctn];
+				nik_ce auto syn = ins[MI::syn];
 				nik_ce auto key = ins[MI::key];
 				nik_ce auto act = ins[MI::act];
-				nik_ce auto val = overload<U_grammar<key, act>, Ws...>;
+				nik_ce auto val = eval<U_grammar<syn, key, act>, Ws...>;
 
 				if nik_ce (ctn == MI::h1)
 
@@ -641,9 +628,10 @@ namespace cctmp {
 			else
 			{
 				nik_ce auto ctn	= ins[MI::ctn];
+				nik_ce auto syn = ins[MI::syn];
 				nik_ce auto key	= ins[MI::key];
 				nik_ce auto act	= ins[MI::act];
-				nik_ce auto val = overload<U_grammar<key, act>, Ws...>;
+				nik_ce auto val = eval<U_grammar<syn, key, act>, Ws...>;
 
 				if nik_ce (ctn == MI::h1)
 
@@ -694,10 +682,11 @@ namespace cctmp {
 			else
 			{
 				nik_ce auto ctn	= ins[MI::ctn];
+				nik_ce auto syn = ins[MI::syn];
 				nik_ce auto key = ins[MI::key];
 				nik_ce auto act = ins[MI::act];
 				nik_ce auto nd	= d+1-n;
-				nik_ce auto val = overload<U_grammar<key, act>, nd, Ws...>;
+				nik_ce auto val = eval<U_grammar<syn, key, act>, nd, Ws...>;
 
 				if nik_ce (is_machination<decltype(val)>)
 
@@ -747,10 +736,11 @@ namespace cctmp {
 			else
 			{
 				nik_ce auto ctn	= ins[MI::ctn];
+				nik_ce auto syn = ins[MI::syn];
 				nik_ce auto key = ins[MI::key];
 				nik_ce auto act = ins[MI::act];
 				nik_ce auto nd	= d+1-n;
-				nik_ce auto val = overload<U_grammar<key, act>, nd, Ws...>;
+				nik_ce auto val = eval<U_grammar<syn, key, act>, nd, Ws...>;
 
 				if nik_ce (is_machination<decltype(val)>)
 
@@ -894,14 +884,14 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// go to:
+// jump:
 
 /***********************************************************************************************************************/
 
-// id:
+// go to:
 
 	template<auto... filler>
-	struct T_machine<MN::go_to, MT::id, filler...>
+	struct T_machine<MN::jump, MT::go_to, filler...>
 	{
 		template<NIK_CONTR_PARAMS, auto... Vs, typename... Heaps>
 		nik_ces auto result(Heaps... Hs)
@@ -913,10 +903,10 @@ namespace cctmp {
 		}
 	};
 
-// conditional:
+// branch:
 
 	template<auto... filler>
-	struct T_machine<MN::go_to, MT::conditional, filler...>
+	struct T_machine<MN::jump, MT::branch, filler...>
 	{
 		template
 		<
@@ -947,9 +937,9 @@ namespace cctmp {
 		struct T_same_car
 		{
 			template<auto W, auto Z>
-			nik_ces auto result = overload<Alias::same, W, unpack_<Z, Alias::car>>;
+			nik_ces auto result = eval<_same_, W, unpack_<Z, _car_>>;
 
-		}; nik_ces auto U_same_car = U_store_T<T_same_car>;
+		}; nik_ces auto _same_car_ = U_custom_T<T_same_car>;
 
 		template
 		<
@@ -960,7 +950,7 @@ namespace cctmp {
 		nik_ces auto result(nik_vp(H0)(B0<W0>*), nik_vp(H1)(B1<Xs...>*), Heap2 H2, nik_vp(A0)(B3<Zs...>*), Args... As)
 		{
 			nik_ce auto size = sizeof...(Zs);
-			nik_ce auto pos	 = find_<U_alias<U_same_car, W0>, Zs...>;
+			nik_ce auto pos	 = find_<_alias_<_same_car_, W0>, Zs...>;
 
 			if nik_ce (pos == size)
 
@@ -996,14 +986,14 @@ namespace cctmp {
 			nik_ce auto Z0 = U_pack_Vs<W0, X0>;
 			nik_ce auto a0 = U_pack_Vs<Z0, Zs...>;
 
-			return overload<Alias::to_tuple, a0, X0>;
+			return eval<_to_tuple_, a0, X0>;
 		}
 	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// halters:
+// halt:
 
 /***********************************************************************************************************************/
 
@@ -1031,11 +1021,11 @@ namespace cctmp {
 		template<NIK_CONTR_PARAMS, auto... Vs, typename... Heaps>
 		nik_ces auto result(Heaps... Hs)
 		{
-			nik_ce auto cs = overload<Alias::to_tuple, d, m, c, i>;
-			nik_ce auto rs = overload<Alias::to_tuple, Vs...>;
-			nik_ce auto hs = overload<Alias::to_tuple, U_restore_T<Heaps>...>;
+			nik_ce auto cs = eval<_to_tuple_, d, m, c, i>;
+			nik_ce auto rs = eval<_to_tuple_, Vs...>;
+			nik_ce auto hs = eval<_to_tuple_, U_restore_T<Heaps>...>;
 
-			return overload<Alias::to_tuple, cs, rs, hs>;
+			return eval<_to_tuple_, cs, rs, hs>;
 		}
 	};
 
@@ -1051,275 +1041,344 @@ namespace cctmp {
 
 		// reverse order for user friendliness:
 
-	template<key_type key, key_type act, key_type ctn = _h1, depth_type dec = _two>
-	nik_ce instr_type action = instruction<MN::call, MT::action, dec, ctn, key, act>;
+	template<auto syn, auto key, auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+	nik_ce instr_type action = instruction<MN::call, MT::action, dec, ctn, syn, key, act>;
 
-		template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-		nik_ce instr_type f_action = action<Grammar::function, act, ctn, dec>;
+		template<auto key, auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type arg_action = action<Shape::argument, key, act, ctn, dec>;
 
-		template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-		nik_ce instr_type h_action = action<Grammar::higher_order, act, ctn, dec>;
+		template<auto key, auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type par_action = action<Shape::parameter, key, act, ctn, dec>;
 
-		template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-		nik_ce instr_type a_action = action<Grammar::alias, act, ctn, dec>;
+	// overload:
 
-	// function:
+		template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type overload_arg_action = arg_action<Pattern::overload, act, ctn, dec>;
 
 		// comparison:
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto equal = f_action<Function::equal, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto equal = overload_arg_action<Overload::equal, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto not_equal = f_action<Function::not_equal, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto not_equal = overload_arg_action<Overload::not_equal, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto less_than = f_action<Function::less_than, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto less_than = overload_arg_action<Overload::less_than, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto less_than_or_equal = f_action<Function::less_than_or_equal, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto less_than_or_equal = overload_arg_action<Overload::less_than_or_equal, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto greater_than = f_action<Function::greater_than, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto greater_than = overload_arg_action<Overload::greater_than, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto greater_than_or_equal = f_action<Function::greater_than_or_equal, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto greater_than_or_equal = overload_arg_action<Overload::greater_than_or_equal, ctn, dec>;
 
 		// logical:
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto not_ = f_action<Function::not_, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto not_ = overload_arg_action<Overload::not_, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto and_ = f_action<Function::and_, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto and_ = overload_arg_action<Overload::and_, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto or_ = f_action<Function::or_, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto or_ = overload_arg_action<Overload::or_, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto implies = f_action<Function::implies, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto implies = overload_arg_action<Overload::implies, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto equivalent = f_action<Function::equivalent, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto equivalent = overload_arg_action<Overload::equivalent, ctn, dec>;
 
 		// arithmetic:
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto add = f_action<Function::add, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto add = overload_arg_action<Overload::add, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto subtract = f_action<Function::subtract, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto subtract = overload_arg_action<Overload::subtract, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto multiply = f_action<Function::multiply, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto multiply = overload_arg_action<Overload::multiply, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto divide = f_action<Function::divide, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto divide = overload_arg_action<Overload::divide, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto modulo = f_action<Function::modulo, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto modulo = overload_arg_action<Overload::modulo, ctn, dec>;
 
 		// bitwise:
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto upshift = f_action<Function::upshift, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto upshift = overload_arg_action<Overload::upshift, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto downshift = f_action<Function::downshift, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto downshift = overload_arg_action<Overload::downshift, ctn, dec>;
 
-		// algebraic:
+	// abstract:
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto product = f_action<Function::tuple, ctn, dec>;
-
-	// higher order:
-
-		// computational:
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto apply = h_action<HigherOrder::apply, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _three>
-		nik_ce auto bind = h_action<HigherOrder::bind, ctn, dec>;
-
-	// alias:
-
-		// grammatical:
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto custom = a_action<Alias::custom, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto nested = a_action<Alias::nested, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto procedure = a_action<Alias::procedure, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto method = a_action<Alias::method, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto tailor = a_action<Alias::tailor, ctn, dec>;
-
-		// basis:
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto type_to_const = a_action<Alias::type_to_const, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto if_then_else = a_action<Alias::if_then_else, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto list_id = a_action<Alias::list_id, ctn, dec>;
+		template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type abstract_par_action = par_action<Pattern::abstract, act, ctn, dec>;
 
 		// comparison:
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto same = a_action<Alias::same, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto csame = a_action<Alias::csame, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto similar = a_action<Alias::similar, ctn, dec>;
-
-		// functional:
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto to_list = a_action<Alias::to_list, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto array_to_list = a_action<Alias::array_to_list, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto to_array = a_action<Alias::to_array, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto is_null = a_action<Alias::is_null, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto length = a_action<Alias::length, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto car = a_action<Alias::car, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto cdr = a_action<Alias::cdr, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto cadr = a_action<Alias::cadr, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto map = a_action<Alias::map, ctn, dec>;
-
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto find = a_action<Alias::find, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto same = abstract_par_action<Abstract::same, ctn, dec>;
 
 		// variadic:
 
-		template<key_type ctn = _h1, depth_type dec = _three>
-		nik_ce auto f0_unpack = a_action<Alias::f0_unpack, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto is_null = abstract_par_action<Abstract::is_null, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _three>
-		nik_ce auto f1_unpack = a_action<Alias::f1_unpack, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto length = abstract_par_action<Abstract::length, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _three>
-		nik_ce auto f2_unpack = a_action<Alias::f2_unpack, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto car = abstract_par_action<Abstract::car, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _three>
-		nik_ce auto b0_unpack = a_action<Alias::b0_unpack, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto cadr = abstract_par_action<Abstract::cadr, ctn, dec>;
 
-			template<key_type ctn = _h1, depth_type dec = _three>
-			nik_ce auto unpack = b0_unpack<ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto find = abstract_par_action<Abstract::find, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _three>
-		nik_ce auto b1_unpack = a_action<Alias::b1_unpack, ctn, dec>;
+	// access:
 
-		template<key_type ctn = _h1, depth_type dec = _three>
-		nik_ce auto b2_unpack = a_action<Alias::b2_unpack, ctn, dec>;
+		template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type access_par_action = par_action<Pattern::access, act, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto list_to_list = a_action<Alias::list_to_list, ctn, dec>;
+		// basis:
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto list_to_array = a_action<Alias::list_to_array, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto to_const = access_par_action<Access::to_const, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto zip = a_action<Alias::zip, ctn, dec>;
+		// comparison:
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto unite = a_action<Alias::unite, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto csame = access_par_action<Access::csame, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto cons = a_action<Alias::cons, ctn, dec>;
+	// list:
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto push = a_action<Alias::push, ctn, dec>;
+		template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type list_par_action = par_action<Pattern::list, act, ctn, dec>;
 
-		// subnumber:
+		// basis:
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto is_unsigned = a_action<Alias::is_unsigned, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto name = list_par_action<List::name, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto not_unsigned = a_action<Alias::not_unsigned, ctn, dec>;
+		// comparison:
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto is_signed = a_action<Alias::is_signed, ctn, dec>;
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto similar = list_par_action<List::similar, ctn, dec>;
 
-		template<key_type ctn = _h1, depth_type dec = _two>
-		nik_ce auto not_signed = a_action<Alias::not_signed, ctn, dec>;
+		// variadic:
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto to_list = list_par_action<List::to_list, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _three>
+			nik_ce auto f0_unpack = list_par_action<List::f0_unpack, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _three>
+			nik_ce auto f1_unpack = list_par_action<List::f1_unpack, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _three>
+			nik_ce auto f2_unpack = list_par_action<List::f2_unpack, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _three>
+			nik_ce auto b0_unpack = list_par_action<List::b0_unpack, ctn, dec>;
+
+				template<gkey_type ctn = _h1, gdepth_type dec = _three>
+				nik_ce auto unpack = b0_unpack<ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _three>
+			nik_ce auto b1_unpack = list_par_action<List::b1_unpack, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _three>
+			nik_ce auto b2_unpack = list_par_action<List::b2_unpack, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto rename = list_par_action<List::rename, ctn, dec>;
+
+		// functional:
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto cdr = list_par_action<List::cdr, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto map = list_par_action<List::map, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto zip = list_par_action<List::zip, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto unite = list_par_action<List::unite, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto cons = list_par_action<List::cons, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto push = list_par_action<List::push, ctn, dec>;
+
+	// boolean:
+
+		template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type boolean_par_action = par_action<Pattern::boolean, act, ctn, dec>;
+
+		// basis:
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto if_then_else = boolean_par_action<Boolean::if_then_else, ctn, dec>;
+
+	// number:
+
+		template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type number_par_action = par_action<Pattern::number, act, ctn, dec>;
+
+		// basis:
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto is_unsigned = number_par_action<Number::is_unsigned, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto not_unsigned = number_par_action<Number::not_unsigned, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto is_signed = number_par_action<Number::is_signed, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto not_signed = number_par_action<Number::not_signed, ctn, dec>;
+
+	// pointer:
+
+		// basis:
+
+	// reference:
+
+		// basis:
+
+	// array:
+
+		template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type array_par_action = par_action<Pattern::array, act, ctn, dec>;
+
+		// meta:
+
+		// basis:
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto to_array = array_par_action<Array::to_array, ctn, dec>;
+
+	// function:
+
+		template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type function_par_action = par_action<Pattern::function, act, ctn, dec>;
+
+		// meta:
+
+		// call:
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto custom = function_par_action<Function::custom, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto nested = function_par_action<Function::nested, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto procedure = function_par_action<Function::procedure, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto method = function_par_action<Function::method, ctn, dec>;
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto tailor = function_par_action<Function::tailor, ctn, dec>;
+
+	// sequence:
+
+		template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type sequence_arg_action = arg_action<Pattern::sequence, act, ctn, dec>;
+
+		// meta:
+
+		// basis:
+
+	// tuple:
+
+		template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type tuple_arg_action = arg_action<Pattern::tuple, act, ctn, dec>;
+
+		// meta:
+
+		// basis:
+
+	// identity:
+
+		template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+		nik_ce instr_type identity_par_action = par_action<Pattern::identity, act, ctn, dec>;
+
+		// list to:
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto list_to_array = identity_par_action<Identity::list_to_array, ctn, dec>;
+
+		// array to:
+
+			template<gkey_type ctn = _h1, gdepth_type dec = _two>
+			nik_ce auto array_to_list = identity_par_action<Identity::array_to_list, ctn, dec>;
 
 /***********************************************************************************************************************/
 
 // compel:
 
-	template<key_type act, key_type ctn = _h1, depth_type dec = _two>
-	nik_ce instr_type compel = instruction<MN::call, MT::compel, dec, ctn, Grammar::alias, act>;
+	template<auto act, gkey_type ctn = _h1, gdepth_type dec = _two>
+	nik_ce instr_type compel = instruction<MN::call, MT::compel, dec, ctn, Shape::parameter, Pattern::function, act>;
 
-		nik_ce auto _custom = Alias::custom;
-		nik_ce auto _nested = Alias::nested;
-		nik_ce auto _method = Alias::method;
+		nik_ce auto _custom = Function::custom;
+		nik_ce auto _nested = Function::nested;
+		nik_ce auto _method = Function::method;
 
 /***********************************************************************************************************************/
 
 // machine:
 
-	template<index_type pos, key_type loc, key_type ctn = _h0> // reverse order for user friendliness.
+	template<gindex_type pos, gkey_type loc, gkey_type ctn = _h0> // reverse order for user friendliness.
 	nik_ce instr_type copy = instruction<MN::call, MI::copy_note(loc), pos, ctn>;
 
-		template<index_type pos, key_type loc>
+		template<gindex_type pos, gkey_type loc>
 		nik_ce instr_type write = copy<pos, loc, _h0_write>;
 
-		template<index_type pos, key_type loc>
+		template<gindex_type pos, gkey_type loc>
 		nik_ce instr_type value = copy<pos, loc, _value>;
 
-	template<index_type pos, key_type loc> // reverse order for user friendliness.
+	template<gindex_type pos, gkey_type loc> // reverse order for user friendliness.
 	nik_ce instr_type cut = instruction<MN::call, MI::cut_note(loc), pos>;
 
-	template<key_type loc>
+	template<gkey_type loc>
 	nik_ce instr_type paste = instruction<MI::paste_name(loc), MT::id>;
 
-	template<key_type mov = _first>
+	template<gkey_type mov = _first>
 	nik_ce instr_type stage = instruction<MN::stage, MT::id, mov>;
 
-	template<key_type...>
-	nik_ce instr_type cycle = instruction<MN::go_to, MT::id, _zero>;
+	template<gkey_type...>
+	nik_ce instr_type cycle = instruction<MN::jump, MT::go_to, _zero>;
 
-	template<key_type pos>
-	nik_ce instr_type branch = instruction<MN::go_to, MT::conditional, pos>;
+	template<gkey_type pos>
+	nik_ce instr_type branch = instruction<MN::jump, MT::branch, pos>;
 
-	template<key_type pos>
+	template<gkey_type pos>
 	nik_ce instr_type mem_lookup = instruction<MN::memoize, MT::lookup, pos>;
 
-	template<key_type...>
+	template<gkey_type...>
 	nik_ce instr_type mem_insert = instruction<MN::memoize, MT::insert>;
 
 /***********************************************************************************************************************/
 
 // debugging:
 
-	template<key_type...>
+	template<gkey_type...>
 	nik_ce instr_type debug = instruction<MN::halt, MT::debug>;
 
 /***********************************************************************************************************************/

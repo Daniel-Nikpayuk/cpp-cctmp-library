@@ -63,6 +63,52 @@ namespace cctmp_program
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// at:
+
+/***********************************************************************************************************************/
+
+	int main(int argc, char *argv[])
+	{
+		printf("%d\n", unpack_<p, _2_6_at_, 511>);
+
+		// load:   gcc - 0.43s  /  clang - 1.16s
+
+		// N = 3:  gcc - 0.57s  /  clang - 1.92s
+		// N = 4:  gcc - 0.49s  /  clang - 1.56s
+		// N = 5:  gcc - 0.45s  /  clang - 1.43s
+		// N = 6:  gcc - 0.45s  /  clang - 1.33s
+		// N = 7:  gcc - 0.46s  /  clang - 1.32s
+		// N = 8:  gcc - 0.53s  /  clang - 1.37s
+		// N = 9:  gcc - 0.62s  /  clang - 1.54s
+
+		// adjusted:
+
+		// N = 3:  gcc - 0.14s  /  clang - 0.76s
+		// N = 4:  gcc - 0.06s  /  clang - 0.40s
+		// N = 5:  gcc - 0.02s  /  clang - 0.27s
+		// N = 6:  gcc - 0.02s  /  clang - 0.17s
+		// N = 7:  gcc - 0.03s  /  clang - 0.16s
+		// N = 8:  gcc - 0.10s  /  clang - 0.21s
+		// N = 9:  gcc - 0.19s  /  clang - 0.38s
+
+		printf("%d\n", unpack_<p, _2_6_erase_, 511>);
+
+		// load:   gcc - 0.43s  /  clang - 1.16s
+
+		// N = 3:  gcc - 0.76s  /  clang - 2.71s
+		// N = 4:  gcc - 0.63s  /  clang - 1.93s
+		// N = 5:  gcc - 0.51s  /  clang - 1.59s
+		// N = 6:  gcc - 0.48s  /  clang - 1.41s
+		// N = 7:  gcc - 0.50s  /  clang - 1.40s
+		// N = 8:  gcc - 0.60s  /  clang - 1.43s
+		// N = 9:  gcc - 0.73s  /  clang - 1.62s
+
+		return 0;
+	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // sort:
 
 /***********************************************************************************************************************/
@@ -907,59 +953,87 @@ namespace cctmp_program
 
 // dump:
 
-	//	printf("%s\n", call<Overload::same, U_char, U_char> ? "true" : "false");
-	//	printf("%llu\n", call<Overload::map, cctmp::template increment_op<>, p>);
-	//	printf("%hu\n", call<Overload::find, cctmp::template is_zero_op<>, p>);
+	//	constexpr auto p = U_pack_Vs
+	//	<
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
 
-	//	printf("%d\n",   cctmp_functional::pack_at<0, 3, 4, 5, 9>);
-	//	printf("%d\n",   cctmp_functional::list_at<p, 0>);
-	//	printf("%llu\n", cctmp_functional::pack_left<0, 3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_left<p, 0>);
-	//	printf("%llu\n", cctmp_functional::pack_right<0, 3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_right<p, 0>);
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
 
-	//	constexpr auto p_split = cctmp_functional::pack_split<0, 3, 4, 5, 9>;
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+	//		0, 3, 4, 5, 9,  0, 3, 4, 5, 9,
+
+	//		0, 3, 4, 5, 9
+	//	>;
+
+	//	printf("%s\n"  , eval<_same_, U_char, U_char> ? "true" : "false");
+	//	printf("%s\n"  , eval<_same_, U_char, U_void> ? "true" : "false");
+
+	//	printf("%d\n"  , cctmp_algorithm::pack_at<4,  0, 3, 4, 5, 9>);
+	//	printf("%d\n"  , cctmp_algorithm::list_at<p, 4>);
+	//	printf("%llu\n", cctmp_algorithm::pack_left<5,  0, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_algorithm::list_left<p, 5>);
+	//	printf("%llu\n", cctmp_algorithm::pack_right<5,  0, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_algorithm::list_right<p, 0>);
+
+	//	constexpr auto p_split = cctmp_algorithm::pack_split<2,  0, 3, 4, 5, 9>;
 	//	printf("%llu, %llu\n", tuple_value<0>(p_split), tuple_value<1>(p_split));
-	//	constexpr auto l_split = cctmp_functional::list_split<p, 4>;
+	//	constexpr auto l_split = cctmp_algorithm::list_split<p, 4>;
 	//	printf("%llu, %llu\n", tuple_value<0>(l_split), tuple_value<1>(l_split));
 
-	//	constexpr auto p_cut = cctmp_functional::pack_cut<0, 3, 4, 5, 9>;
+	//	constexpr auto p_cut = cctmp_algorithm::pack_cut<2,  0, 3, 4, 5, 9>;
 	//	printf("%llu, %llu\n", tuple_value<0>(p_cut), tuple_value<1>(p_cut));
-	//	constexpr auto l_cut = cctmp_functional::list_cut<p, 3>;
+	//	constexpr auto l_cut = cctmp_algorithm::list_cut<p, 3>;
 	//	printf("%llu, %llu\n", tuple_value<0>(l_cut), tuple_value<1>(l_cut));
 
-	//	constexpr auto p_alter = cctmp_functional::pack_alter<0, 3, 4, 5, 9>;
+	//	constexpr auto p_alter = cctmp_algorithm::pack_alter<2,  0, 3, 4, 5, 9>;
 	//	constexpr auto l_alter = unpack_<tuple_value<0>(p_alter), _car_>;
 	//	constexpr auto r_alter = unpack_<tuple_value<0>(p_alter), _cadr_>;
 	//	printf("%llu, %llu, %llu\n", l_alter, r_alter, tuple_value<1>(p_alter));
-	//	constexpr auto p_alter = cctmp_functional::list_alter<p, 3>;
+	//	constexpr auto p_alter = cctmp_algorithm::list_alter<p, 3>;
 	//	constexpr auto l_alter = unpack_<tuple_value<0>(p_alter), _car_>;
 	//	constexpr auto r_alter = unpack_<tuple_value<0>(p_alter), _cadr_>;
 	//	printf("%llu, %llu, %llu\n", l_alter, r_alter, tuple_value<1>(p_alter));
 
-	//	printf("%llu\n", cctmp_functional::segment<unsigned{10}>);
+	//	printf("%llu\n", cctmp_algorithm::segment<unsigned{10}>);
 
-	//	printf("%d\n", cctmp_functional::pack_sifter<_is_greater_than_<4>, 0, 3, 4, 5, 9>);
-	//	printf("%d\n", cctmp_functional::list_sifter<p, _is_greater_than_<4>>);
+	//	printf("%d\n", cctmp_algorithm::pack_sifter<_is_greater_than_<4>, 0, 3, 4, 5, 9>);
+	//	printf("%d\n", cctmp_algorithm::list_sifter<p, _is_greater_than_<4>>);
 
-	//	printf("%d\n", cctmp_functional::pack_fold<_add_, 0, 3, 4, 5, 9>);
-	//	printf("%d\n", cctmp_functional::list_fold<p, _add_, 0>);
+	//	printf("%d\n", cctmp_algorithm::pack_fold<_add_, 0, 3, 4, 5, 9>);
+	//	printf("%d\n", cctmp_algorithm::list_fold<p, _add_, 0>);
 
-	//	printf("%llu\n", cctmp_functional::pack_erase<0, 3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_erase<p, 0>);
-	//	printf("%llu\n", cctmp_functional::pack_insert<0, 7,    3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_insert<p, 0, 7>);
-	//	printf("%llu\n", cctmp_functional::pack_replace<1, 7,    3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_replace<p, 1, 7>);
+	//	printf("%llu\n", cctmp_algorithm::pack_erase<1,  0, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_algorithm::list_erase<p, 1>);
+	//	printf("%llu\n", cctmp_algorithm::pack_insert<1, 7,  0, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_algorithm::list_insert<p, 1, 7>);
+	//	printf("%llu\n", cctmp_algorithm::pack_replace<1, 7,   0, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_algorithm::list_replace<p, 1, 7>);
 
-	//	printf("%llu\n", cctmp_functional::pack_ordered_insert<_less_than_, 0,    3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_ordered_insert<p, 0>);
+	//	printf("%llu\n", cctmp_algorithm::pack_ordered_insert<_less_than_, 1,    0, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_algorithm::list_ordered_insert<p, 1>);
 
-	//	printf("%llu\n", cctmp_functional::pack_ordered_replace<_less_than_, 0,    3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_ordered_replace<p, 0>);
+	//	printf("%llu\n", cctmp_algorithm::pack_ordered_replace<_less_than_, 2,  0, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_algorithm::list_ordered_replace<p, 2>);
 
-	//	printf("%llu\n", cctmp_functional::pack_sort<_less_than_, U_null_Vs, 3, 4, 5, 9>);
-	//	printf("%llu\n", cctmp_functional::list_sort<p>);		// gcc 2.854s / clang 7.166s
+	//	printf("%llu\n", cctmp_algorithm::pack_sort<_less_than_, U_null_Vs, 0, 3, 4, 5, 9>);
+	//	printf("%llu\n", cctmp_algorithm::list_sort<p>);		// gcc 2.854s / clang 7.166s
 
 	//	printf("%llu\n", cctmp_functional::pack_union<H_curry_equal, H_curry_less_than, U_null_Vs, 9,    3, 4, 5, 9>);
 
@@ -1294,6 +1368,167 @@ namespace cctmp_program
 
 	//	auto cval = Tc_glide_add::template result(0, arr_id, arr_sq, arr_sq+size);
 	//	printf("%d\n", cval);
+
+/***********************************************************************************************************************/
+
+// half digit division (baseline):
+
+	unsigned d = 10;
+
+	unsigned long x0[] = { 1, 1 };
+	unsigned *x1 = (unsigned*) x0;
+	unsigned *i = x1 + 2;
+
+	unsigned q[4];
+	for (unsigned *k = q; k < q + 4; ++k) *k = 0;
+	unsigned *j = q;
+
+	unsigned long r = 0;
+	unsigned *hl = (unsigned*) &r;
+
+	unsigned low = 0;
+	unsigned high = 1;
+
+	while (i > x1)
+	{
+		hl[low] = *i;
+
+		if (r >= d)
+		{
+			*j = r / d;
+			hl[low] = r % d;
+			hl[high] = 0;
+		}
+		else
+		{
+			hl[high] = hl[low];
+			hl[low] = 0;
+		}
+
+		--i;
+
+		if (hl[high] == 0)
+		{
+			hl[high] = hl[low];
+			hl[low] = 0;
+			++j;
+		}
+	}
+
+		hl[low] = *i;
+
+		*j = r / d;
+		r %= d;
+
+		++j;
+
+	printf("quotient: ");
+
+	for (unsigned *k = q; k < q + (j - q); ++k) printf("%u, ", *k);
+	printf("\n");
+
+	printf("remainder: %lu\n", r);
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// make static experiments:
+
+/***********************************************************************************************************************/
+
+// doesn't work:
+
+/*
+	template<typename Type>
+	constexpr auto remake_array(Type(*f)())
+	{
+		constexpr auto val = f();
+
+		return val;
+	}
+
+	constexpr auto g = []() { return 12; }; // doesn't work
+
+	constexpr auto val = remake_array(g);
+*/
+
+/***********************************************************************************************************************/
+
+// doesn't work:
+
+/*
+	template<typename... Cs>
+	constexpr auto make_array(Cs... cs)
+	{
+		return array<int, (constexpr) cs()...>;
+	}
+
+	struct value
+	{
+		int v;
+
+		constexpr value(int V) : v{V} { }
+
+		constexpr int operator () () { return v; }
+	};
+
+	constexpr auto int_array = make_array // doesn't work
+	(
+		value (   5 ),
+		value (   7 ),
+		value (   3 ),
+		value ( -14 ),
+		value (   0 ),
+		value (   9 )
+	);
+*/
+
+/***********************************************************************************************************************/
+
+// works, but is too limited:
+
+/*
+	template<int(*callable)()>
+	constexpr auto make_array()
+	{
+		constexpr auto val = array<int, callable()>;
+
+		return val;
+	}
+
+	constexpr auto f = []() { return 9; };
+
+	constexpr auto int_array = make_array
+	<
+		f
+	>();
+*/
+
+/***********************************************************************************************************************/
+
+// works:
+
+	template<auto f>
+	constexpr auto remake_array()
+	{
+		constexpr auto val = f();
+
+		return val.key[0];
+	}
+
+	template<auto f>
+	constexpr auto make_array()
+	{
+		constexpr auto out_type = cctmp::out_type<f>;
+
+		constexpr auto val = remake_array<f>();
+
+		return val;
+	}
+
+	constexpr auto f() { return binding("is_zero", _is_zero_); }
+
+	constexpr auto int_array = make_array<f>();
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -1,6 +1,12 @@
 # cpp-cctmp-library
 -------------------
 
+A C++20 general purpose library starting with a meta-circular compiler which
+lexes, parses, then translates constexpr cstrings into continuation passing
+template metaprogramming (TMP) grammar as its intermediate representation (IR).
+The actual compiler finishes translating the C++ typesafe IR
+(which is just regular C++ grammar) into actual architecture assembly.
+
 A C++17 "calculus of constructions" compile time register machine library.
 
 This repository includes two file generators (bash scripts):

@@ -83,7 +83,7 @@
 
 	#define NIK_OVER()												\
 															\
-		overload<
+		eval<
 
 	#define NIK_REST()												\
 															\
@@ -113,21 +113,80 @@
 															\
 		T ## _n_ v ## _n_
 
-	#define NIK_WS_1(_n_)												\
+	#define NIK_FS_1(_n_)												\
 															\
-		Ws ## _n_
+		Fs ## _n_
 
-	#define NIK_AVP_B_WS_1(_n_)											\
+	#define NIK_AVP_B_FS_1(_n_)											\
 															\
-		nik_avp(B<Ws ## _n_...>*)
+		nik_avp(B<Fs ## _n_...>*)
 
-	#define NIK_CAR_V_WS_1(_n_)											\
+	#define NIK_CALL_OP_V_1(_n_)											\
 															\
-		overload<Alias::car, V ## _n_, Ws ## _n_>...
+		eval<Op, _n_, V ## _n_>
+
+	#define NIK_CALL_FS_V_1(_n_)											\
+															\
+		eval<Fs ## _n_, _n_, V ## _n_>...
 
 	#define NIK_OP_1(_n_)												\
 															\
-		op
+		Op
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// variables:
+
+/***********************************************************************************************************************/
+
+// identifiers:
+
+	#define NIK_0_TO_0_IDS(_l_, _m_, _r_)										\
+															\
+		_l_() _m_(0)
+
+	#define NIK_0_TO_1_IDS(_l_, _m_, _r_)										\
+															\
+		NIK_0_TO_0_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(1)
+
+	#define NIK_0_TO_2_IDS(_l_, _m_, _r_)										\
+															\
+		NIK_0_TO_1_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(2)
+
+	#define NIK_0_TO_3_IDS(_l_, _m_, _r_)										\
+															\
+		NIK_0_TO_2_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(3)
+
+	#define NIK_0_TO_4_IDS(_l_, _m_, _r_)										\
+															\
+		NIK_0_TO_3_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(4)
+
+	#define NIK_0_TO_5_IDS(_l_, _m_, _r_)										\
+															\
+		NIK_0_TO_4_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(5)
+
+	#define NIK_0_TO_6_IDS(_l_, _m_, _r_)										\
+															\
+		NIK_0_TO_5_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(6)
+
+	#define NIK_0_TO_7_IDS(_l_, _m_, _r_)										\
+															\
+		NIK_0_TO_6_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(7)
+
+/***********************************************************************************************************************/
+
+// auto:
+
+	#define NIK_0_TO_N_AUTO_VARS(_n_, _v_)										\
+															\
+		NIK_0_TO_ ## _n_ ## _IDS(NIK_AUTO, _v_, NIK_COMMA)
+
+// values:
+
+	#define NIK_0_TO_N_VARS(_n_, _v_)										\
+															\
+		NIK_0_TO_ ## _n_ ## _IDS(NIK_EMPTY, _v_, NIK_COMMA)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -424,166 +483,239 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// eval:
+
+/***********************************************************************************************************************/
+
+	#define NIK_DEFINE_EVAL_AT(_p_)											\
+															\
+		template<NIK_0_TO_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs>						\
+		nik_ce auto eval<_at_, gindex_type{_p_}, NIK_0_TO_N_VARS(_p_, NIK_V_1), Vs...> = NIK_V_1(_p_);
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// abstract:
+
+/***********************************************************************************************************************/
+
+	#define NIK_ABSTRACT_PARAMS											\
+															\
+		auto d, auto m, auto c, auto i
+
+/***********************************************************************************************************************/
+
+	#define NIK_BEGIN_ABSTRACT(_a_, _d_, _m_, _c_, _i_)								\
+															\
+		T_ ## _a_												\
+		<													\
+			AD::next_name(_d_, _m_, _c_, _i_),								\
+			AD::next_note(_d_, _m_, _c_, _i_)								\
+															\
+		>::template result											\
+		<													\
+			AD::next_depth(_d_),										\
+			_m_, _c_,											\
+			AD::next_index(_d_, _m_, _c_, _i_)								\
+
+	#define NIK_END_ABSTRACT 											\
+															\
+		>
+
+	#define NIK_ABSTRACT(_a_, _d_, _m_, _c_, _i_, _v_)								\
+															\
+		NIK_BEGIN_ABSTRACT(_a_, _d_, _m_, _c_, _i_), _v_...  NIK_END_ABSTRACT
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // block:
 
 /***********************************************************************************************************************/
 
-// next length:
-
-	#define NIK_BLOCK_DISPATCH_NEXT_LENGTH(_n_)									\
+	#define NIK_BLOCK_PARAMS											\
 															\
-		nik_ces key_type next_length_ ## _n_(cdepth_type d, cindex_type n)					\
-		{													\
-			if (d == 0) return _zero;									\
-			else        return max_length_ ## _n_(n);							\
-		}
+		NIK_ABSTRACT_PARAMS, auto n
 
 /***********************************************************************************************************************/
 
-// next index:
-
-	#define NIK_BLOCK_DISPATCH_NEXT_INDEX(_n_)									\
+	#define NIK_BEGIN_BLOCK(_d_, _m_, _c_, _i_, _n_)								\
 															\
-		nik_ces index_type next_index_ ## _n_(cdepth_type d, cindex_type n)					\
-		{													\
-			if (d == 0) return n;										\
-			else        return n - max_index_ ## _n_(n);							\
-		}
+		NIK_BEGIN_ABSTRACT(block, _d_, _m_, _c_, _i_), _n_
+
+	#define NIK_END_BLOCK	 											\
+															\
+		NIK_END_ABSTRACT
+
+	#define NIK_BLOCK(_d_, _m_, _c_, _i_, _n_, _v_)									\
+															\
+		NIK_BEGIN_BLOCK(_d_, _m_, _c_, _i_, _n_), _v_...  NIK_END_BLOCK
 
 /***********************************************************************************************************************/
 
-// (block):
+// drop:
 
-	#define NIK_BEGIN_BLOCK(_p_, _b_, _d_, _n_)									\
-															\
-		T_block													\
-		<													\
-			BN::_b_,											\
-			BD::next_note(_d_, _n_),									\
-			BD::next_length_ ## _p_(_d_, _n_)								\
-															\
-		>::template result											\
-		<													\
-			BD::next_depth(_d_),										\
-			BD::next_index_ ## _p_(_d_, _n_)
-
-	#define NIK_END_BLOCK												\
-															\
-		>
-
-	#define NIK_VARIABLE_BLOCK(_p_, _d_, _n_, _h_, _v_)								\
-															\
-		NIK_BEGIN_BLOCK(_p_, variable, _d_, _n_), _h_, _v_... NIK_END_BLOCK
-
-	#define NIK_FUNCTION_BLOCK(_p_, _d_, _n_, _h_, _v_)								\
-															\
-		NIK_BEGIN_BLOCK(_p_, function, _d_, _n_), _h_, _v_... NIK_END_BLOCK
-
-	#define NIK_SEGMENT_BLOCK(_p_, _d_, _n_, _b_, _s_, _v_)								\
-															\
-		NIK_BEGIN_BLOCK(_p_, segment, _d_, _n_), _b_, _s_, _v_... NIK_END_BLOCK
-
-	#define NIK_SIFTER_BLOCK(_p_, _d_, _n_, _b_, _v_)								\
-															\
-		NIK_BEGIN_BLOCK(_p_, sifter, _d_, _n_), _b_, _v_... NIK_END_BLOCK
-
-	#define NIK_FOLD_BLOCK(_p_, _d_, _n_, _o_, _s_, _v_)								\
-															\
-		NIK_BEGIN_BLOCK(_p_, fold, _d_, _n_), _o_, _s_, _v_... NIK_END_BLOCK
-
-	#define NIK_PARSE_BLOCK(_p_, _d_, _n_, _o_, _s_, _v_)								\
-															\
-		NIK_BEGIN_BLOCK(_p_, parse, _d_, _n_), _o_, _s_, _v_... NIK_END_BLOCK
-
-	#define NIK_CASCADE_BLOCK(_p_, _d_, _n_, _o_, _s_, _v_)								\
-															\
-		NIK_BEGIN_BLOCK(_p_, cascade, _d_, _n_), _o_, _s_, _v_... NIK_END_BLOCK
-
-	#define NIK_ARGUMENT_BLOCK(_p_, _d_, _n_, _t_)									\
-															\
-		NIK_BEGIN_BLOCK(_p_, argument, _d_, _n_), _t_... NIK_END_BLOCK
-
-	#define NIK_TUPLE_BLOCK(_p_, _d_, _n_, _t_)									\
-															\
-		NIK_BEGIN_BLOCK(_p_, tuple, _d_, _n_), _t_... NIK_END_BLOCK
-
-/***********************************************************************************************************************/
-
-// pass:
-
-	#define NIK_DEFINE_BLOCK_VARIABLE_PASS(_p_)									\
+	#define NIK_DEFINE_BLOCK_DROP(_p_)										\
 															\
 		template<auto... filler>										\
-		struct T_block<BN::variable, BT::pass, _p_, filler...>							\
+		struct T_block<BN::drop, BT::_2_ ## _p_, filler...>							\
 		{													\
-			template<auto d, auto n, auto rtn, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs>			\
-			nik_ces auto result = NIK_VARIABLE_BLOCK(_p_, d, n, rtn, Vs);					\
-		};
-
-	#define NIK_DEFINE_BLOCK_FUNCTION_PASS(_p_)									\
-															\
-		template<auto... filler>										\
-		struct T_block<BN::function, BT::pass, _p_, filler...>							\
-		{													\
-			template											\
-			<												\
-				auto d, auto n, auto rtn, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,			\
-		       		template<auto...> typename B, auto... Ws						\
-			>												\
-			nik_ces auto result(nik_avp(B<Ws...>*))					 			\
+			template<NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs, typename... Heaps>	\
+			nik_ces auto result(Heaps... Hs)								\
 			{												\
-				return NIK_FUNCTION_BLOCK(_p_, d, n, rtn, Vs)						\
-						(U_pack_Vs<Ws..., NIK_2_N_VARS(_p_, NIK_V_1)>);				\
+				return NIK_BLOCK(d, m, c, i, n, Vs)(Hs...);						\
 			}												\
 		};
 
-	#define NIK_DEFINE_BLOCK_SEGMENT_PASS(_p_)									\
-															\
-		template<auto... filler>										\
-		struct T_block<BN::segment, BT::pass, _p_, filler...>							\
-		{													\
-			template<auto d, auto n, auto b, auto s, auto... Vs>						\
-			nik_ces auto result = NIK_BEGIN_BLOCK(_p_, segment, d, n), b, s,				\
-															\
-				Vs..., NIK_2_N_INDEX_SEGMENT(_p_, decltype(s){sizeof...(Vs)})				\
-															\
-			NIK_END_BLOCK;											\
-		};
+/***********************************************************************************************************************/
 
-	#define NIK_DEFINE_BLOCK_SIFTER_PASS(_p_)									\
+// heap:
+
+	#define NIK_DEFINE_BLOCK_HEAP(_p_)										\
 															\
 		template<auto... filler>										\
-		struct T_block<BN::sifter, BT::pass, _p_, filler...>							\
+		struct T_block<BN::heap, BT::_2_ ## _p_, filler...>							\
 		{													\
 			template											\
 			<												\
-				auto d, auto n, auto b, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,			\
-				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_p_, NIK_WS_1),		\
-				typename... Packs									\
+				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,				\
+				typename Heap0, typename Heap1, typename Heap2,						\
+				template<auto...> typename B3, auto... Ws, typename... Heaps				\
 			>												\
-			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_AVP_B_WS_1), Packs... ps)				\
+			nik_ces auto result(Heap0 H0, Heap1 H1, Heap2 H2, nik_vp(H3)(B3<Ws...>*), Heaps... Hs)		\
 			{												\
-				return NIK_BEGIN_BLOCK(_p_, sifter, d, n), b,						\
+				nik_ce auto nH3 = U_store_T<B3<Ws..., NIK_2_N_VARS(_p_, NIK_V_1)>>;			\
 															\
-					Vs..., NIK_2_N_VARS(_p_, NIK_CAR_V_WS_1)					\
-															\
-				NIK_END_BLOCK(ps...);									\
+				return NIK_BLOCK(d, m, c, i, n, Vs)(H0, H1, H2, nH3, Hs...);				\
 			}												\
 		};
 
-	#define NIK_DEFINE_BLOCK_FOLD_PASS(_p_)										\
+/***********************************************************************************************************************/
+
+// turn:
+
+	#define NIK_DEFINE_BLOCK_TURN(_p_)										\
 															\
 		template<auto... filler>										\
-		struct T_block<BN::fold, BT::pass, _p_, filler...>							\
+		struct T_block<BN::turn, BT::_2_ ## _p_, filler...>							\
 		{													\
-			template<auto d, auto n, auto op, auto V, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs>		\
-			nik_ces auto result = NIK_BEGIN_BLOCK(_p_, fold, d, n), op,					\
+			template											\
+			<												\
+				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,				\
+				typename Heap0, template<auto...> typename B1, auto Lookup, auto... Ops,		\
+				typename Heap2, typename Heap3, typename... Heaps					\
+			>												\
+			nik_ces auto result										\
+			(												\
+				Heap0 H0, nik_vp(H1)(B1<Lookup, Ops...>*),						\
+				Heap2 H2, Heap3 H3, Heaps... Hs								\
+			)												\
+			{												\
+				nik_ce auto ins	= BD::instr(c, i);							\
+				nik_ce auto Op  = eval<Lookup, ins[BI::pos], Ops...>;					\
 															\
-				NIK_2_N_ACTION_FOLDS(_p_, NIK_OVER, NIK_OP_1, V, NIK_V_1, NIK_R_ANG, NIK_COMMA),	\
-				Vs...											\
+				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
 															\
-			NIK_END_BLOCK;											\
+					NIK_2_N_VARS(_p_, NIK_V_1), Vs...						\
+															\
+				NIK_END_BLOCK(H0, H1, H2, H3, NIK_2_N_VARS(_p_, NIK_CALL_OP_V_1), Hs...);		\
+			}												\
 		};
+
+/***********************************************************************************************************************/
+
+// sift:
+
+	#define NIK_DEFINE_BLOCK_SIFT(_p_)										\
+															\
+		template<auto... filler>										\
+		struct T_block<BN::sift, BT::_2_ ## _p_, filler...>							\
+		{													\
+			template											\
+			<												\
+				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,				\
+				typename Heap0, typename Heap1, typename Heap2, typename Heap3,				\
+				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_p_, NIK_FS_1),		\
+				typename... Heaps									\
+			>												\
+			nik_ces auto result										\
+			(												\
+				Heap0 H0, Heap1 H1, Heap2 H2, Heap3 H3,							\
+				NIK_2_N_VARS(_p_, NIK_AVP_B_FS_1), Heaps... Hs						\
+			)												\
+			{												\
+				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
+															\
+					NIK_2_N_VARS(_p_, NIK_CALL_FS_V_1), Vs...					\
+															\
+				NIK_END_BLOCK(H0, H1, H2, H3, Hs...);							\
+			}												\
+		};
+
+/***********************************************************************************************************************/
+
+// filter:
+
+	#define NIK_DEFINE_BLOCK_FILTER(_p_)										\
+															\
+		template<auto... filler>										\
+		struct T_block<BN::filter, BT::_2_ ## _p_, filler...>							\
+		{													\
+			template											\
+			<												\
+				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,				\
+				typename Heap0, typename Heap1, typename Heap2, typename Heap3,				\
+				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_p_, NIK_FS_1),		\
+				typename... Heaps									\
+			>												\
+			nik_ces auto result										\
+			(												\
+				Heap0 H0, Heap1 H1, Heap2 H2, Heap3 H3,							\
+				NIK_2_N_VARS(_p_, NIK_AVP_B_FS_1), Heaps... Hs						\
+			)												\
+			{												\
+				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
+															\
+					Vs..., NIK_2_N_VARS(_p_, NIK_CALL_FS_V_1)					\
+															\
+				NIK_END_BLOCK(H0, H1, H2, H3, Hs...);							\
+			}												\
+		};
+
+/***********************************************************************************************************************/
+
+// fold:
+
+	#define NIK_DEFINE_BLOCK_FOLD(_p_)										\
+															\
+		template<auto... filler>										\
+		struct T_block<BN::fold, BT::_2_ ## _p_, filler...>							\
+		{													\
+			template											\
+			<												\
+				NIK_BLOCK_PARAMS, auto V, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,			\
+				template<auto...> typename B, auto Lookup, auto... Ops, typename... Heaps		\
+			>												\
+			nik_ces auto result(nik_vp(H0)(B<Lookup, Ops...>*), Heaps... Hs)				\
+			{												\
+				nik_ce auto ins	= BD::instr(c, i);							\
+				nik_ce auto Op  = eval<Lookup, ins[BI::pos], Ops...>;					\
+															\
+				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
+															\
+					NIK_2_N_ACTION_FOLDS								\
+					(										\
+						_p_, NIK_OVER, NIK_OP_1, V, NIK_V_1, NIK_R_ANG, NIK_COMMA		\
+															\
+					), Vs...									\
+															\
+				NIK_END_BLOCK(H0, Hs...);								\
+			}												\
+		};
+
+/***********************************************************************************************************************/
+
+// argument:
 
 	#define NIK_DEFINE_BLOCK_ARGUMENT_PASS(_p_)									\
 															\
@@ -596,6 +728,10 @@
 				return NIK_ARGUMENT_BLOCK(_p_, d, n, Ts)(vs...);					\
 			}												\
 		};
+
+/***********************************************************************************************************************/
+
+// tuple:
 
 	#define NIK_DEFINE_BLOCK_TUPLE_PASS(_p_)									\
 															\
@@ -620,34 +756,17 @@
 
 // machine:
 
-/***********************************************************************************************************************/
-
-	#define NIK_CONTR_PARAMS											\
-															\
-		auto d, auto m, auto c, auto i
-
-/***********************************************************************************************************************/
-
 	#define NIK_BEGIN_MACHINE(_d_, _m_, _c_, _i_)									\
 															\
-		T_machine												\
-		<													\
-			MD::next_name(_d_, _m_, _c_, _i_),								\
-			MD::next_note(_d_, _m_, _c_, _i_)								\
-															\
-		>::template result											\
-		<													\
-			MD::next_depth(_d_),										\
-			_m_, _c_,											\
-			MD::next_index(_d_, _m_, _c_, _i_)								\
+		NIK_BEGIN_ABSTRACT(machine, _d_, _m_, _c_, _i_)
 
-	#define NIK_END_MACHINE 											\
+	#define NIK_END_MACHINE	 											\
 															\
-		>
+		NIK_END_ABSTRACT
 
 	#define NIK_MACHINE(_d_, _m_, _c_, _i_, _v_)									\
 															\
-		NIK_BEGIN_MACHINE(_d_, _m_, _c_, _i_), _v_...  NIK_END_MACHINE
+		NIK_ABSTRACT(machine, _d_, _m_, _c_, _i_, _v_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -751,7 +870,7 @@
 
 #define NIK_DEFINE_LABEL_STRUCT(_p_, _n_)										\
 															\
-	template<index_type... filler>											\
+	template<gindex_type... filler>											\
 	struct Label<_n_, filler...>											\
 	{														\
 		NIK_DEFINE_LABELS_0_TO_N(_p_)										\

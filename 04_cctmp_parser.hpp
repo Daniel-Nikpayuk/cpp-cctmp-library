@@ -17,79 +17,134 @@
 **
 ************************************************************************************************************************/
 
-// byte array ring:
+// generic parser:
 
-namespace cctmp_byte_array_ring {
+namespace cctmp_generics {
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// addition:
-
-/***********************************************************************************************************************/
+// cctmp:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// subtraction:
+// node:
 
 /***********************************************************************************************************************/
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
+	// lexemes should hold enough info for the parser to:
 
-// multiplication:
+	// 1) build an error report.
+	// 2) build a table of contents (syntax tree), referencing the given lexemes;
+	//    referencing lines and blocks. Specific lexemes will want to reference
+	//    variable and label assigned values.
+	// 3) build a variable lookup table.
+	// 4) build a label lookup table.
+	// 5) parse according to the tokens (and thus the context free grammar) to validate the source code.
+	// 6) Hold symbolic type info to determine dependencies/errors.
 
-/***********************************************************************************************************************/
-
-// by two:
-
-/***********************************************************************************************************************/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// division:
-
-/***********************************************************************************************************************/
-
-// half digit:
-
-	struct T_division_half_digit
+	template<typename CharType>
+	struct node
 	{
-		nik_ces auto _mutate_		= cctmp_one_cycle_generics::template _mutate_<__>;
-		nik_ces auto repeat_dspec	= cctmp_one_cycle_generics::template direct_repeat
-						<
-						>;
-		using Td_repeat			= typename cctmp_one_cycle_assembly::template T_repeat<repeat_dspec>;
+		using char_type	= CharType;
 
-		template<typename OutType, typename EndType, typename InType>
-		nik_ces auto result(OutType b, EndType e, InType d)
+		const char_type *begin;
+		const char_type *end;
+
+		gindex_type line;  // bool line_inc indicating the number of statements matched ?
+		gindex_type block; // bool block_inc indicating if a new block was entered ?
+
+	//	The parser doesn't need to know the returned policy, it can determine it from the token.
+	//	gkey_type error;
+		gkey_type token;
+
+		nik_ce node() :
+
+			begin {    },
+			end   {    },
+			line  {    },
+			block {    },
+			token {    }
+
+			{ }
+
+		nik_ce node(const char_type *b, const char_type *e, gindex_type _l, gindex_type _b, gkey_type _t) :
+
+			begin {  b },
+			end   {  e },
+			line  { _l },
+			block { _b },
+			token { _t }
+
+			{ }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// source:
+
+/***********************************************************************************************************************/
+
+	template<typename CharType, auto Size>
+	struct source
+	{
+		using char_type			= CharType;
+		using string_type		= char_type const *;
+		using cstring_type		= string_type const;
+		using size_type			= decltype(Size);
+		using entry			= node<CharType>;
+
+		nik_ces size_type size		= Size;
+
+		cstring_type string;
+		cstring_type finish;
+
+		entry syntax[size];
+		size_type syntax_size; // current size
+
+		nik_ce source(const CharType (&s)[Size]) :
+
+			string      { s        },
+			finish      { s + size },
+
+			syntax      {          },
+			syntax_size { _zero    }
+
+			{ parse(); }
+
+		nik_ce void parse()
 		{
-			using HalfOutType	= half_type<OutType>;
-			using HalfEndType	= half_type<EndType>;
+			entry *current		= syntax;
+			gindex_type line	= _zero;
+			gindex_type block	= _zero;
+			gkey_type token		= Token::invalid;
+		}
+	};
 
-			HalfOutType hb		= (HalfOutType) b;
-			HalfEndType he		= ((HalfEndType) e) + 1;
+/***********************************************************************************************************************/
 
-			auto br			= tuple<HalfOutType, InType>(hb, 0);
+// count statements:
 
-			return Td_repeat::result(br, he, d);
+		// skips whitespace as a side effect.
+
+/*
+	nik_ce gstring_type count_statements(gindex_type & count, gstring_type b, gstring_type e)
+	{
+		b = skip_whitespace(b, e);
+
+		while (*b == ';')
+		{
+			++count;
+			b = skip_whitespace(++b, e);
 		}
 
-	}; nik_ce auto _division_half_digit_ = U_store_T<T_division_half_digit>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// remainder:
-
-/***********************************************************************************************************************/
+		return b;
+	}
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // cctmp_byte_array_ring
+} // cctmp_generics
 
