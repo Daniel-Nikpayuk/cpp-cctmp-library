@@ -81,6 +81,10 @@
 															\
 		V
 
+	#define NIK_F0()												\
+															\
+		F0
+
 	#define NIK_OVER()												\
 															\
 		eval<
@@ -109,7 +113,11 @@
 															\
 		V ## _n_
 
-	#define NIK_T_V_1(_n_)												\
+	#define NIK_LV_1(_n_)												\
+															\
+		v ## _n_
+
+	#define NIK_T_LV_1(_n_)												\
 															\
 		T ## _n_ v ## _n_
 
@@ -117,17 +125,33 @@
 															\
 		Fs ## _n_
 
-	#define NIK_AVP_B_FS_1(_n_)											\
+	#define NIK_LFS_1(_n_)												\
 															\
-		nik_avp(B<Fs ## _n_...>*)
+		fs ## _n_
 
-	#define NIK_CALL_OP_V_1(_n_)											\
+	#define NIK_LFS_VP_FS_B_LFS_1(_n_)										\
+															\
+		template<auto...> typename B ## _n_, auto... fs ## _n_, nik_vp(Fs ## _n_)(B ## _n_<fs ## _n_...>*)
+
+	#define NIK_CALL_LFS_LV_1(_n_)											\
+															\
+		T_store_U<fs ## _n_>::result(v ## _n_)...
+
+	#define NIK_CALL_LFS_LV_LV_1(_n_)										\
+															\
+		T_store_U<fs ## _n_>::result(v ## _n_, v)...
+
+	#define NIK_AVP_B_LFS_1(_n_)											\
+															\
+		nik_avp(B<fs ## _n_...>*)
+
+	#define NIK_EVAL_OP_V_1(_n_)											\
 															\
 		eval<Op, _n_, V ## _n_>
 
-	#define NIK_CALL_FS_V_1(_n_)											\
+	#define NIK_EVAL_LFS_V_1(_n_)											\
 															\
-		eval<Fs ## _n_, _n_, V ## _n_>...
+		eval<fs ## _n_, _n_, V ## _n_>...
 
 	#define NIK_OP_1(_n_)												\
 															\
@@ -142,51 +166,162 @@
 
 // identifiers:
 
-	#define NIK_0_TO_0_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_(0)
-
-	#define NIK_0_TO_1_IDS(_l_, _m_, _r_)										\
-															\
-		NIK_0_TO_0_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(1)
-
-	#define NIK_0_TO_2_IDS(_l_, _m_, _r_)										\
-															\
-		NIK_0_TO_1_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(2)
-
-	#define NIK_0_TO_3_IDS(_l_, _m_, _r_)										\
-															\
-		NIK_0_TO_2_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(3)
-
-	#define NIK_0_TO_4_IDS(_l_, _m_, _r_)										\
-															\
-		NIK_0_TO_3_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(4)
-
-	#define NIK_0_TO_5_IDS(_l_, _m_, _r_)										\
-															\
-		NIK_0_TO_4_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(5)
-
-	#define NIK_0_TO_6_IDS(_l_, _m_, _r_)										\
-															\
-		NIK_0_TO_5_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(6)
-
-	#define NIK_0_TO_7_IDS(_l_, _m_, _r_)										\
-															\
-		NIK_0_TO_6_IDS(_l_, _m_, _r_)	_r_()	_l_() _m_(7)
+	#define  NIK_0_IDS(_l_, _m_, _r_)										\
+							// blank space.
+	#define  NIK_1_IDS(_l_, _m_, _r_)										\
+							 						_l_() _m_( 0)
+	#define  NIK_2_IDS(_l_, _m_, _r_)										\
+							 NIK_1_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_( 1)
+	#define  NIK_3_IDS(_l_, _m_, _r_)										\
+							 NIK_2_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_( 2)
+	#define  NIK_4_IDS(_l_, _m_, _r_)										\
+							 NIK_3_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_( 3)
+	#define  NIK_5_IDS(_l_, _m_, _r_)										\
+							 NIK_4_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_( 4)
+	#define  NIK_6_IDS(_l_, _m_, _r_)										\
+							 NIK_5_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_( 5)
+	#define  NIK_7_IDS(_l_, _m_, _r_)										\
+							 NIK_6_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_( 6)
+	#define  NIK_8_IDS(_l_, _m_, _r_)										\
+							 NIK_7_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_( 7)
+	#define  NIK_9_IDS(_l_, _m_, _r_)										\
+							 NIK_8_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_( 8)
+	#define NIK_10_IDS(_l_, _m_, _r_)										\
+							 NIK_9_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_( 9)
+	#define NIK_11_IDS(_l_, _m_, _r_)										\
+							NIK_10_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(10)
+	#define NIK_12_IDS(_l_, _m_, _r_)										\
+							NIK_11_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(11)
+	#define NIK_13_IDS(_l_, _m_, _r_)										\
+							NIK_12_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(12)
+	#define NIK_14_IDS(_l_, _m_, _r_)										\
+							NIK_13_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(13)
+	#define NIK_15_IDS(_l_, _m_, _r_)										\
+							NIK_14_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(14)
+	#define NIK_16_IDS(_l_, _m_, _r_)										\
+							NIK_15_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(15)
+	#define NIK_17_IDS(_l_, _m_, _r_)										\
+							NIK_16_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(16)
+	#define NIK_18_IDS(_l_, _m_, _r_)										\
+							NIK_17_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(17)
+	#define NIK_19_IDS(_l_, _m_, _r_)										\
+							NIK_18_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(18)
+	#define NIK_20_IDS(_l_, _m_, _r_)										\
+							NIK_19_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(19)
+	#define NIK_21_IDS(_l_, _m_, _r_)										\
+							NIK_20_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(20)
+	#define NIK_22_IDS(_l_, _m_, _r_)										\
+							NIK_21_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(21)
+	#define NIK_23_IDS(_l_, _m_, _r_)										\
+							NIK_22_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(22)
+	#define NIK_24_IDS(_l_, _m_, _r_)										\
+							NIK_23_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(23)
+	#define NIK_25_IDS(_l_, _m_, _r_)										\
+							NIK_24_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(24)
+	#define NIK_26_IDS(_l_, _m_, _r_)										\
+							NIK_25_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(25)
+	#define NIK_27_IDS(_l_, _m_, _r_)										\
+							NIK_26_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(26)
+	#define NIK_28_IDS(_l_, _m_, _r_)										\
+							NIK_27_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(27)
+	#define NIK_29_IDS(_l_, _m_, _r_)										\
+							NIK_28_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(28)
+	#define NIK_30_IDS(_l_, _m_, _r_)										\
+							NIK_29_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(29)
+	#define NIK_31_IDS(_l_, _m_, _r_)										\
+							NIK_30_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(30)
+	#define NIK_32_IDS(_l_, _m_, _r_)										\
+							NIK_31_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(31)
+	#define NIK_33_IDS(_l_, _m_, _r_)										\
+							NIK_32_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(32)
+	#define NIK_34_IDS(_l_, _m_, _r_)										\
+							NIK_33_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(33)
+	#define NIK_35_IDS(_l_, _m_, _r_)										\
+							NIK_34_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(34)
+	#define NIK_36_IDS(_l_, _m_, _r_)										\
+							NIK_35_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(35)
+	#define NIK_37_IDS(_l_, _m_, _r_)										\
+							NIK_36_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(36)
+	#define NIK_38_IDS(_l_, _m_, _r_)										\
+							NIK_37_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(37)
+	#define NIK_39_IDS(_l_, _m_, _r_)										\
+							NIK_38_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(38)
+	#define NIK_40_IDS(_l_, _m_, _r_)										\
+							NIK_39_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(39)
+	#define NIK_41_IDS(_l_, _m_, _r_)										\
+							NIK_40_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(40)
+	#define NIK_42_IDS(_l_, _m_, _r_)										\
+							NIK_41_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(41)
+	#define NIK_43_IDS(_l_, _m_, _r_)										\
+							NIK_42_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(42)
+	#define NIK_44_IDS(_l_, _m_, _r_)										\
+							NIK_43_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(43)
+	#define NIK_45_IDS(_l_, _m_, _r_)										\
+							NIK_44_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(44)
+	#define NIK_46_IDS(_l_, _m_, _r_)										\
+							NIK_45_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(45)
+	#define NIK_47_IDS(_l_, _m_, _r_)										\
+							NIK_46_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(46)
+	#define NIK_48_IDS(_l_, _m_, _r_)										\
+							NIK_47_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(47)
+	#define NIK_49_IDS(_l_, _m_, _r_)										\
+							NIK_48_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(48)
+	#define NIK_50_IDS(_l_, _m_, _r_)										\
+							NIK_49_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(49)
+	#define NIK_51_IDS(_l_, _m_, _r_)										\
+							NIK_50_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(50)
+	#define NIK_52_IDS(_l_, _m_, _r_)										\
+							NIK_51_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(51)
+	#define NIK_53_IDS(_l_, _m_, _r_)										\
+							NIK_52_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(52)
+	#define NIK_54_IDS(_l_, _m_, _r_)										\
+							NIK_53_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(53)
+	#define NIK_55_IDS(_l_, _m_, _r_)										\
+							NIK_54_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(54)
+	#define NIK_56_IDS(_l_, _m_, _r_)										\
+							NIK_55_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(55)
+	#define NIK_57_IDS(_l_, _m_, _r_)										\
+							NIK_56_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(56)
+	#define NIK_58_IDS(_l_, _m_, _r_)										\
+							NIK_57_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(57)
+	#define NIK_59_IDS(_l_, _m_, _r_)										\
+							NIK_58_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(58)
+	#define NIK_60_IDS(_l_, _m_, _r_)										\
+							NIK_59_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(59)
+	#define NIK_61_IDS(_l_, _m_, _r_)										\
+							NIK_60_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(60)
+	#define NIK_62_IDS(_l_, _m_, _r_)										\
+							NIK_61_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(61)
+	#define NIK_63_IDS(_l_, _m_, _r_)										\
+							NIK_62_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(62)
+	#define NIK_64_IDS(_l_, _m_, _r_)										\
+							NIK_63_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(63)
 
 /***********************************************************************************************************************/
 
+// eval pads:
+
+	#define NIK_DEFINE_EVAL_PADS(_n_)										\
+															\
+		NIK_ ## _n_ ## _IDS(NIK_EMPTY, NIK_DEFINE_EVAL_PAD, NIK_EMPTY)
+
 // auto:
 
-	#define NIK_0_TO_N_AUTO_VARS(_n_, _v_)										\
+	#define NIK_N_AUTO_VARS(_n_, _v_)										\
 															\
-		NIK_0_TO_ ## _n_ ## _IDS(NIK_AUTO, _v_, NIK_COMMA)
+		NIK_ ## _n_ ## _IDS(NIK_AUTO, _v_, NIK_COMMA)
 
 // values:
 
-	#define NIK_0_TO_N_VARS(_n_, _v_)										\
+	#define NIK_N_VARS(_n_, _v_)											\
 															\
-		NIK_0_TO_ ## _n_ ## _IDS(NIK_EMPTY, _v_, NIK_COMMA)
+		NIK_ ## _n_ ## _IDS(NIK_EMPTY, _v_, NIK_COMMA)
+
+// constants:
+
+	#define NIK_N_CS(_n_, _v_)											\
+															\
+		NIK_ ## _n_ ## _IDS(_v_, NIK_EMPTY_1, NIK_COMMA)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -196,6 +331,8 @@
 /***********************************************************************************************************************/
 
 // upper identifiers:
+
+		// redundant ?
 
 	#define NIK_UPPER_1_IDS(_l_, _m_, _r_)										\
 															\
@@ -487,10 +624,131 @@
 
 /***********************************************************************************************************************/
 
-	#define NIK_DEFINE_EVAL_AT(_p_)											\
+	#define NIK_DEFINE_EVAL_AT(_n_, _s_)										\
 															\
-		template<NIK_0_TO_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs>						\
-		nik_ce auto eval<_at_, gindex_type{_p_}, NIK_0_TO_N_VARS(_p_, NIK_V_1), Vs...> = NIK_V_1(_p_);
+		template<NIK_N_AUTO_VARS(_s_, NIK_V_1), auto... Vs>							\
+		nik_ce auto eval<_at_, gindex_type{_n_}, NIK_N_VARS(_s_, NIK_V_1), Vs...> = NIK_V_1(_n_);
+
+	#define NIK_DEFINE_EVAL_PAD(_n_)										\
+															\
+		template<template<auto...> typename B, nik_vp(b)(T_store_B<B>*), auto V>				\
+		nik_ce auto eval<_pad_, b, V, gindex_type{_n_}> = U_store_T<B<NIK_N_CS(_n_, NIK_V)>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// praxis:
+
+/***********************************************************************************************************************/
+
+// dispatch:
+
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_DISPATCH(_n_)								\
+															\
+		template<gkey_type Name, gkey_type Note, auto F0, auto F1>						\
+		struct T_praxis<Shape::argument, Name, Note, gindex_type{_n_}, F0, F1> : public praxis_arg_unit		\
+		<													\
+			Name, Note, _n_, F0, F1										\
+		> { };
+
+// unit:
+
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_UNIT(_n_)									\
+															\
+		NIK_ ## _n_ ## _IDS(NIK_EMPTY, NIK_DEFINE_PRAXIS_ARGUMENT_DISPATCH, NIK_EMPTY)
+
+/***********************************************************************************************************************/
+
+// select:
+
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_SELECT(_p_)									\
+															\
+		template<NIK_2_N_VARS(_p_, NIK_LFS_VP_FS_B_LFS_1)>							\
+		struct T_praxis<Shape::argument, PN::select, PT::_2_ ## _p_, NIK_2_N_VARS(_p_, NIK_FS_1)>		\
+		{													\
+			template<auto cont, auto... Vs, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts>		\
+			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs)					\
+			{												\
+				using T_cont = T_store_U<cont>;								\
+															\
+				return T_cont::template result<Vs...>(NIK_2_N_VARS(_p_, NIK_CALL_LFS_LV_1), vs...);	\
+			}												\
+		};
+
+// mutate:
+
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_MUTATE(_p_)									\
+															\
+		template<NIK_2_N_VARS(_p_, NIK_LFS_VP_FS_B_LFS_1)>							\
+		struct T_praxis<Shape::argument, PN::mutate, PT::_2_ ## _p_, NIK_2_N_VARS(_p_, NIK_FS_1)>		\
+		{													\
+			template											\
+			<												\
+				auto cont, auto... Vs,									\
+				typename T, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts				\
+			>												\
+			nik_ces auto result(T v, NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs)				\
+			{												\
+				using T_cont = T_store_U<cont>;								\
+															\
+				return T_cont::template result<Vs...>(NIK_2_N_VARS(_p_, NIK_CALL_LFS_LV_LV_1), vs...);	\
+			}												\
+		};
+
+/***********************************************************************************************************************/
+
+// drop:
+
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_DROP(_p_)									\
+															\
+		template<auto... filler>										\
+		struct T_praxis<Shape::argument, PN::drop, PT::_2_ ## _p_, filler...>					\
+		{													\
+			using T_this = T_praxis_arg<PN::drop, PT::_2_ ## _p_, filler...>;				\
+															\
+			template											\
+			<												\
+				auto n, auto cont, auto... Vs,								\
+				NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts					\
+			>												\
+			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs)		 			\
+			{												\
+				using T_cont = T_store_U<cont>;								\
+															\
+				if constexpr (n == 0)									\
+															\
+					return T_cont::template result<Vs...>(vs...);					\
+				else											\
+					return T_this::template result<n-1, cont, Vs...>(vs...);			\
+			}												\
+		};
+
+// rotate:
+
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_ROTATE(_p_)									\
+															\
+		template<auto... filler>										\
+		struct T_praxis<Shape::argument, PN::rotate, PT::_2_ ## _p_, filler...>					\
+		{													\
+			using T_this = T_praxis_arg<PN::rotate, PT::_2_ ## _p_, filler...>;				\
+															\
+			template											\
+			<												\
+				auto n, auto cont, auto... Vs,								\
+				NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts					\
+			>												\
+			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs)		 			\
+			{												\
+				using T_cont = T_store_U<cont>;								\
+															\
+				if constexpr (n == 0)									\
+															\
+					return T_cont::template result<Vs...>(vs..., NIK_2_N_VARS(_p_, NIK_LV_1));	\
+				else											\
+					return T_this::template								\
+							result<n-1, cont, Vs...>(vs..., NIK_2_N_VARS(_p_, NIK_LV_1));	\
+			}												\
+		};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -516,7 +774,7 @@
 		<													\
 			AD::next_depth(_d_),										\
 			_m_, _c_,											\
-			AD::next_index(_d_, _m_, _c_, _i_)								\
+			AD::next_index(_d_, _m_, _c_, _i_)
 
 	#define NIK_END_ABSTRACT 											\
 															\
@@ -618,7 +876,7 @@
 															\
 					NIK_2_N_VARS(_p_, NIK_V_1), Vs...						\
 															\
-				NIK_END_BLOCK(H0, H1, H2, H3, NIK_2_N_VARS(_p_, NIK_CALL_OP_V_1), Hs...);		\
+				NIK_END_BLOCK(H0, H1, H2, H3, NIK_2_N_VARS(_p_, NIK_EVAL_OP_V_1), Hs...);		\
 			}												\
 		};
 
@@ -635,18 +893,18 @@
 			<												\
 				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,				\
 				typename Heap0, typename Heap1, typename Heap2, typename Heap3,				\
-				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_p_, NIK_FS_1),		\
+				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_p_, NIK_LFS_1),		\
 				typename... Heaps									\
 			>												\
 			nik_ces auto result										\
 			(												\
 				Heap0 H0, Heap1 H1, Heap2 H2, Heap3 H3,							\
-				NIK_2_N_VARS(_p_, NIK_AVP_B_FS_1), Heaps... Hs						\
+				NIK_2_N_VARS(_p_, NIK_AVP_B_LFS_1), Heaps... Hs						\
 			)												\
 			{												\
 				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
 															\
-					NIK_2_N_VARS(_p_, NIK_CALL_FS_V_1), Vs...					\
+					NIK_2_N_VARS(_p_, NIK_EVAL_LFS_V_1), Vs...					\
 															\
 				NIK_END_BLOCK(H0, H1, H2, H3, Hs...);							\
 			}												\
@@ -665,18 +923,18 @@
 			<												\
 				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,				\
 				typename Heap0, typename Heap1, typename Heap2, typename Heap3,				\
-				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_p_, NIK_FS_1),		\
+				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_p_, NIK_LFS_1),		\
 				typename... Heaps									\
 			>												\
 			nik_ces auto result										\
 			(												\
 				Heap0 H0, Heap1 H1, Heap2 H2, Heap3 H3,							\
-				NIK_2_N_VARS(_p_, NIK_AVP_B_FS_1), Heaps... Hs						\
+				NIK_2_N_VARS(_p_, NIK_AVP_B_LFS_1), Heaps... Hs						\
 			)												\
 			{												\
 				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
 															\
-					Vs..., NIK_2_N_VARS(_p_, NIK_CALL_FS_V_1)					\
+					Vs..., NIK_2_N_VARS(_p_, NIK_EVAL_LFS_V_1)					\
 															\
 				NIK_END_BLOCK(H0, H1, H2, H3, Hs...);							\
 			}												\
@@ -723,7 +981,7 @@
 		struct T_block<BN::argument, BT::pass, _p_, filler...>							\
 		{													\
 			template<auto d, auto n, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts>			\
-			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_T_V_1), Ts... vs)					\
+			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs)					\
 			{												\
 				return NIK_ARGUMENT_BLOCK(_p_, d, n, Ts)(vs...);					\
 			}												\
@@ -767,114 +1025,6 @@
 	#define NIK_MACHINE(_d_, _m_, _c_, _i_, _v_)									\
 															\
 		NIK_ABSTRACT(machine, _d_, _m_, _c_, _i_, _v_)
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// labels:
-
-/***********************************************************************************************************************/
-
-#define NIK_LABELS_0_TO_0												\
-															\
-	l0<S, T, Ts...>
-
-#define NIK_LABELS_0_TO_1												\
-															\
-	NIK_LABELS_0_TO_0, l1<S, T, Ts...>
-
-#define NIK_LABELS_0_TO_2												\
-															\
-	NIK_LABELS_0_TO_1, l2<S, T, Ts...>
-
-#define NIK_LABELS_0_TO_3												\
-															\
-	NIK_LABELS_0_TO_2, l3<S, T, Ts...>
-
-#define NIK_LABELS_0_TO_4												\
-															\
-	NIK_LABELS_0_TO_3, l4<S, T, Ts...>
-
-#define NIK_LABELS_0_TO_5												\
-															\
-	NIK_LABELS_0_TO_4, l5<S, T, Ts...>
-
-#define NIK_LABELS_0_TO_6												\
-															\
-	NIK_LABELS_0_TO_5, l6<S, T, Ts...>
-
-#define NIK_LABELS_0_TO_7												\
-															\
-	NIK_LABELS_0_TO_6, l7<S, T, Ts...>
-
-/***********************************************************************************************************************/
-
-#define NIK_LABELS_0_TO_N(_n_)												\
-															\
-	NIK_LABELS_0_TO_ ## _n_
-
-#define NIK_DEFINE_LABEL(_m_, _n_)											\
-															\
-	template<auto S, typename T, typename... Ts>									\
-	nik_ces T l ## _m_(Ts... vs)											\
-	{														\
-		return link												\
-		<													\
-			S,												\
-			l ## _m_<S, T, Ts...>,										\
-			NIK_LABELS_0_TO_N(_n_)										\
-															\
-		>(vs...);												\
-	}
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-#define NIK_DEFINE_LABELS_0_TO_0(_n_)											\
-															\
-	NIK_DEFINE_LABEL(0, _n_)
-
-#define NIK_DEFINE_LABELS_0_TO_1(_n_)											\
-															\
-	NIK_DEFINE_LABELS_0_TO_0(_n_) NIK_DEFINE_LABEL(1, _n_)
-
-#define NIK_DEFINE_LABELS_0_TO_2(_n_)											\
-															\
-	NIK_DEFINE_LABELS_0_TO_1(_n_) NIK_DEFINE_LABEL(2, _n_)
-
-#define NIK_DEFINE_LABELS_0_TO_3(_n_)											\
-															\
-	NIK_DEFINE_LABELS_0_TO_2(_n_) NIK_DEFINE_LABEL(3, _n_)
-
-#define NIK_DEFINE_LABELS_0_TO_4(_n_)											\
-															\
-	NIK_DEFINE_LABELS_0_TO_3(_n_) NIK_DEFINE_LABEL(4, _n_)
-
-#define NIK_DEFINE_LABELS_0_TO_5(_n_)											\
-															\
-	NIK_DEFINE_LABELS_0_TO_4(_n_) NIK_DEFINE_LABEL(5, _n_)
-
-#define NIK_DEFINE_LABELS_0_TO_6(_n_)											\
-															\
-	NIK_DEFINE_LABELS_0_TO_5(_n_) NIK_DEFINE_LABEL(6, _n_)
-
-#define NIK_DEFINE_LABELS_0_TO_7(_n_)											\
-															\
-	NIK_DEFINE_LABELS_0_TO_6(_n_) NIK_DEFINE_LABEL(7, _n_)
-
-/***********************************************************************************************************************/
-
-#define NIK_DEFINE_LABELS_0_TO_N(_n_)											\
-															\
-	NIK_DEFINE_LABELS_0_TO_ ## _n_(_n_)
-
-#define NIK_DEFINE_LABEL_STRUCT(_p_, _n_)										\
-															\
-	template<gindex_type... filler>											\
-	struct Label<_n_, filler...>											\
-	{														\
-		NIK_DEFINE_LABELS_0_TO_N(_p_)										\
-	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

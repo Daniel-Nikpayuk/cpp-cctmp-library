@@ -19,6 +19,10 @@
 
 // block:
 
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 namespace cctmp {
 
 /***********************************************************************************************************************/
@@ -646,7 +650,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// algorithms:
+// algorithm:
 
 	template<auto...> struct T_algorithm;
 	template<auto... Vs> nik_ce auto _algorithm_ = U_custom_T<T_algorithm<Vs...>>;
@@ -1111,10 +1115,319 @@ namespace cctmp {
 	template<gindex_type n, typename... Ts>
 	nik_ce const auto & tuple_value(const tuple<Ts...> & t) { return NIK_TUPLE_BLOCK(3, 500, n, Ts)(t); }
 */
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// ordered:
+
+/***********************************************************************************************************************/
+
+// mutate (generic):
+
+/*
+	template<auto Part>
+	struct TP_ordered_mutate
+	{
+		nik_ces auto c = controller
+		<
+			find   <                     >,
+			copy   < _zero   , _constant >,
+			stage  <           _all      >,
+			compel < _nested , _h1_pair  >,
+			copy   < _one    , _constant >,
+			stage  <           _all      >,
+			copy   < _zero   , _register >,
+			unite  <           _value    >
+		>;
+
+		template<auto d, auto b, auto Pred, auto V, auto... Vs>
+		nik_ces auto result = T_start::template result<d, c, V>
+		(
+			U_pack_Vs<_alias_<Pred, V>, Vs...>,
+			U_pack_Vs<H_id, H_id, Vs...>,
+			U_pack_Vs<Part, b>
+		);
+
+	}; template<auto Part>
+		nik_ce auto UP_ordered_mutate = U_custom_T<TP_ordered_mutate<Part>>;
+*/
+
+/***********************************************************************************************************************/
+
+// insert:
+
+/*
+	using TP_ordered_insert		= TP_ordered_mutate<UP_split>;
+	nik_ce auto UP_ordered_insert	= U_custom_T<TP_ordered_insert>;
+
+	using TL_ordered_insert		= TP_unpack<UP_ordered_insert>;
+	nik_ce auto UL_ordered_insert	= UP_unpack<UP_ordered_insert>;
+
+	template<auto Pred, auto V, auto... Vs>
+	nik_ce auto pack_ordered_insert = TP_ordered_insert::template result<MD::initial_depth, H_id, Pred, V, Vs...>;
+
+	template<auto p, auto V, auto Pred = _less_than_, auto b = H_id, auto d = MD::initial_depth>
+	nik_ce auto list_ordered_insert = TL_ordered_insert::template result<d, p, b, Pred, V>;
+*/
+
+/***********************************************************************************************************************/
+
+// replace:
+
+/*
+	using TP_ordered_replace	= TP_ordered_mutate<UP_cut>;
+	nik_ce auto UP_ordered_replace	= U_custom_T<TP_ordered_replace>;
+
+	using TL_ordered_replace	= TP_unpack<UP_ordered_replace>;
+	nik_ce auto UL_ordered_replace	= UP_unpack<UP_ordered_replace>;
+
+	template<auto Pred, auto V, auto... Vs>
+	nik_ce auto pack_ordered_replace = TP_ordered_replace::template result<MD::initial_depth, H_id, Pred, V, Vs...>;
+
+	template<auto p, auto V, auto Pred = _less_than_, auto b = H_id, auto d = MD::initial_depth>
+	nik_ce auto list_ordered_replace = TL_ordered_replace::template result<d, p, b, Pred, V>;
+*/
+
+/***********************************************************************************************************************/
+
+// monoid:
+
+/*
+	template<auto Part, auto Pred = _less_than_, auto b = H_id>
+	struct TP_ordered_monoid
+	{
+		template<auto d, auto p, auto V>
+		nik_ces auto result = unpack_<p, UP_ordered_mutate<Part>, d, b, Pred, V>;
+
+	}; template<auto Part, auto Pred = _less_than_, auto b = H_id>
+		nik_ce auto UP_ordered_monoid = U_custom_T<TP_ordered_monoid<Part, Pred, b>>;
+*/
+
+/***********************************************************************************************************************/
+
+// fold:
+
+/*
+	template<auto Part>
+	struct TP_ordered_fold
+	{
+		template<auto d, auto b, auto Pred, auto V, auto... Vs>
+		nik_ces auto result = TP_cascade::template result<d, UP_ordered_monoid<Part, Pred, b>, V, Vs...>;
+
+	}; template<auto Part>
+		nik_ce auto UP_ordered_fold = U_custom_T<TP_ordered_fold<Part>>;
+*/
+
+/***********************************************************************************************************************/
+
+// sort:
+
+/*
+	using TP_sort		= TP_ordered_fold<UP_split>;
+	nik_ce auto UP_sort	= U_custom_T<TP_sort>;
+
+	using TL_sort		= TP_unpack<UP_sort>;
+	nik_ce auto UL_sort	= UP_unpack<UP_sort>;
+
+	template<auto Pred, auto V, auto... Vs>
+	nik_ce auto pack_sort = TP_sort::template result<MD::initial_depth, H_id, Pred, V, Vs...>;
+
+	template<auto p, auto Pred = _less_than_, auto V = U_null_Vs, auto b = H_id, auto d = MD::initial_depth>
+	nik_ce auto list_sort = TL_sort::template result<d, p, b, Pred, V>;
+*/
+
+/***********************************************************************************************************************/
+
+// write:
+
+/*
+	using TP_write		= TP_ordered_fold<UP_cut>;
+	nik_ce auto UP_write	= U_custom_T<TP_write>;
+
+	using TL_write		= TP_unpack<UP_write>;
+	nik_ce auto UL_write	= UP_unpack<UP_write>;
+
+	template<auto Pred, auto V, auto... Vs>
+	nik_ce auto pack_write = TP_write::template result<MD::initial_depth, H_id, Pred, V, Vs...>;
+
+	template<auto p, auto Pred = _less_than_, auto V = U_null_Vs, auto b = H_id, auto d = MD::initial_depth>
+	nik_ce auto list_write = TL_write::template result<d, p, b, Pred, V>;
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// modify:
+
+/***********************************************************************************************************************/
+
+/*
+	struct TP_modify
+	{
+		nik_ces auto c = controller
+		<
+			find      <                     >,
+			copy      < _zero   , _constant >,
+			stage     <           _all      >,
+			compel    < _nested , _h1_pair  >,
+			stage     <                     >,
+			paste     <           _register >,
+			write     < _zero   , _argument >,
+			stage     <                     >,
+			compel    < _nested             >,
+			copy      < _zero   , _register >,
+			copy      < _one    , _constant >,
+			copy      < _two    , _constant >,
+			stage     <                     >,
+			f2_unpack <           _value    >
+		>;
+
+		template<auto d, auto b, auto Pred, auto Op, auto V, auto... Vs>
+		nik_ces auto result = T_start::template result<d, c>
+		(
+		 	U_pack_Vs<_alias_<Pred, V>, Vs...>,
+			U_pack_Vs<H_id, H_id, H_id, Vs...>,
+			U_pack_Vs<UP_alter, _unite_, b>,
+			U_pack_Vs<Op, V>
+		);
+
+	}; nik_ce auto UP_modify = U_custom_T<TP_modify>;
+*/
+
+/***********************************************************************************************************************/
+
+// monoid:
+
+/*
+	template<auto Op, auto Pred = _same_, auto b = H_id>
+	struct TP_modify_monoid
+	{
+		template<auto d, auto p, auto V>
+		nik_ces auto result = unpack_<p, UP_modify, d, b, Pred, Op, V>;
+
+	}; template<auto Op, auto Pred = _same_, auto b = H_id>
+		nik_ce auto UP_modify_monoid = U_custom_T<TP_modify_monoid<Op, Pred, b>>;
+*/
+
+/***********************************************************************************************************************/
+
+// fold:
+
+/*
+	struct TP_modify_fold
+	{
+		template<auto d, auto b, auto Pred, auto Op, auto V, auto... Vs>
+		nik_ces auto result = TP_cascade::template result<d, UP_modify_monoid<Op, Pred, b>, V, Vs...>;
+
+	}; nik_ce auto UP_modify_fold = U_custom_T<TP_modify_fold>;
+*/
+
+/***********************************************************************************************************************/
+
+// merge:
+
+/*
+	using TP_merge		= TP_modify_fold;
+	nik_ce auto UP_merge	= U_custom_T<TP_merge>;
+
+	using TL_merge		= TP_unpack<UP_merge>;
+	nik_ce auto UL_merge	= UP_unpack<UP_merge>;
+
+	template<auto Pred, auto Op, auto V, auto... Vs>
+	nik_ce auto pack_merge = TP_merge::template result<MD::initial_depth, H_id, Pred, Op, V, Vs...>;
+
+	template<auto p, auto Op, auto Pred = _same_, auto V = U_null_Vs, auto b = H_id, auto d = MD::initial_depth>
+	nik_ce auto list_merge = TL_merge::template result<d, p, b, Pred, Op, V>;
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// match:
+
+	// This operator is intended for use within machine tests, with the _h1_pair option.
+
+/***********************************************************************************************************************/
+
+/*
+	struct TP_match
+	{
+		template<auto Pred, auto V, auto... Vs>
+		nik_ces auto _result()
+		{
+			nik_ce auto pos  = find_<_alias_<Pred, V>, Vs...>;
+			nik_ce auto size = sizeof...(Vs);
+
+			return eval<_to_tuple_, bool{pos < size}, pos>;
+		}
+
+		template<auto Pred, auto V, auto... Vs>
+		nik_ces auto result = _result<Pred, V, Vs...>();
+
+	}; nik_ce auto UP_match = U_custom_T<TP_match>;
+
+	struct TL_match
+	{
+		template<auto p, auto Pred, auto V>
+		nik_ces auto result = unpack_<p, UP_match, Pred, V>;
+
+	}; nik_ce auto UL_match = U_custom_T<TL_match>;
+
+	template<auto Pred, auto V, auto... Vs>
+	nik_ce auto pack_match = TP_match::template result<Pred, V, Vs...>;
+
+	template<auto p, auto V, auto Pred = _same_>
+	nik_ce auto list_match = TL_match::template result<p, Pred, V>;
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// lookup:
+
+/***********************************************************************************************************************/
+
+/*
+	struct TP_lookup
+	{
+
+	}; nik_ce auto UP_lookup = U_custom_T<TP_lookup>;
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace cctmp
+// tuple:
+
+/***********************************************************************************************************************/
+
+// to list:
+
+/*
+	template<auto b, auto c>
+	nik_ce auto return_tuple_to_list()
+	{
+		nik_ce auto t = c();
+
+		return to_list_<b, tuple_value<Is>(t)...>;
+	}
+
+	template<auto b, auto c>
+	nik_ce auto constexpr_tuple_to_list()
+	{
+		nik_ce auto types = c();
+
+		return return_tuple_to_list<c>();
+	}
+
+	template<auto b, auto c>
+	nik_ce auto callable_tuple_to_list = constexpr_tuple_to_list<b, c>()
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+} // cctmp
 

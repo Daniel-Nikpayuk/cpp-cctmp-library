@@ -141,42 +141,42 @@ namespace cctmp {
 
 	// [0-10]:
 
-		using global_key_type			= unsigned char;
-		using gkey_type				= global_key_type;
-		using gckey_type			= global_key_type const;
+		using global_key_type		= unsigned char;
+		using gkey_type			= global_key_type;
+		using gckey_type		= global_key_type const;
 
-		nik_ces gkey_type _zero			=   0;
-		nik_ces gkey_type _one			=   1;
-		nik_ces gkey_type _two			=   2;
-		nik_ces gkey_type _three		=   3;
-		nik_ces gkey_type _four			=   4;
-		nik_ces gkey_type _five			=   5;
-		nik_ces gkey_type _six			=   6;
-		nik_ces gkey_type _seven		=   7;
-		nik_ces gkey_type _eight		=   8;
-		nik_ces gkey_type _nine			=   9;
-		nik_ces gkey_type _ten			=  10;
+		nik_ce gkey_type _zero		=   0;
+		nik_ce gkey_type _one		=   1;
+		nik_ce gkey_type _two		=   2;
+		nik_ce gkey_type _three		=   3;
+		nik_ce gkey_type _four		=   4;
+		nik_ce gkey_type _five		=   5;
+		nik_ce gkey_type _six		=   6;
+		nik_ce gkey_type _seven		=   7;
+		nik_ce gkey_type _eight		=   8;
+		nik_ce gkey_type _nine		=   9;
+		nik_ce gkey_type _ten		=  10;
 
 	// [2^0-2^9]:
 
-		using global_index_type			= unsigned short;
-		using gindex_type			= global_index_type;
-		using gcindex_type			= global_index_type const;
+		using global_index_type		= unsigned short;
+		using gindex_type		= global_index_type;
+		using gcindex_type		= global_index_type const;
 
-		nik_ces gindex_type _2_0		=   1;
-		nik_ces gindex_type _2_1		=   2;
-		nik_ces gindex_type _2_2		=   4;
-		nik_ces gindex_type _2_3		=   8;
-		nik_ces gindex_type _2_4		=  16;
-		nik_ces gindex_type _2_5		=  32;
-		nik_ces gindex_type _2_6		=  64;
-		nik_ces gindex_type _2_7		= 128;
-		nik_ces gindex_type _2_8		= 256;
-		nik_ces gindex_type _2_9		= 512;
+		nik_ce gindex_type _2_0		=   1;
+		nik_ce gindex_type _2_1		=   2;
+		nik_ce gindex_type _2_2		=   4;
+		nik_ce gindex_type _2_3		=   8;
+		nik_ce gindex_type _2_4		=  16;
+		nik_ce gindex_type _2_5		=  32;
+		nik_ce gindex_type _2_6		=  64;
+		nik_ce gindex_type _2_7		= 128;
+		nik_ce gindex_type _2_8		= 256;
+		nik_ce gindex_type _2_9		= 512;
 
-		using global_depth_type			= unsigned short;
-		using gdepth_type			= global_depth_type;
-		using gcdepth_type			= global_depth_type const;
+		using global_depth_type		= unsigned short;
+		using gdepth_type		= global_depth_type;
+		using gcdepth_type		= global_depth_type const;
 
 /***********************************************************************************************************************/
 
@@ -184,6 +184,8 @@ namespace cctmp {
 
 	template<typename Type, Type... Vs>
 	nik_ce Type array[] = { Vs... };
+
+	nik_ce gindex_type array_2_N[] = { _2_0, _2_1, _2_2, _2_3, _2_4, _2_5, _2_6, _2_7, _2_8, _2_9 };
 
 /***********************************************************************************************************************/
 
@@ -317,8 +319,8 @@ namespace cctmp {
 			{
 				// passers:
 
-					map = 0,
-					apply
+					first = 0,
+					second , map , apply
 			};
 		};
 
@@ -395,7 +397,7 @@ namespace cctmp {
 
 				// functional:
 
-					cdr , map , zip , unite , cons , push
+					pad , cdr , map , zip , unite , cons , push
 			};
 		};
 
@@ -463,7 +465,11 @@ namespace cctmp {
 
 				// basis:
 
-					to_array , begin , last , end , apply
+					to_array , begin , last , end , apply ,
+
+				// 2^N:
+
+					log_floor
 			};
 		};
 
@@ -1172,6 +1178,26 @@ namespace cctmp {
 
 // basis:
 
+	// first:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::continuation, Continuation::first, filler...>
+		{
+			template<typename T0, typename... Ts>
+			nik_ces auto result(T0 v0, Ts... vs) { return v0; }
+
+		}; nik_ce auto _first_ = U_arg_continuation<Continuation::first>;
+
+	// second:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::continuation, Continuation::second, filler...>
+		{
+			template<typename T0, typename T1, typename... Ts>
+			nik_ces auto result(T0 v0, T1 v1, Ts... vs) { return v1; }
+
+		}; nik_ce auto _second_ = U_arg_continuation<Continuation::second>;
+
 	// map:
 
 		template<auto c, auto f>
@@ -1393,6 +1419,28 @@ namespace cctmp {
 	//		if nik_ce (leng != sizeof...(Is)) return arr;
 	//		else return array<Type, arr.value[Is]...>;
 	//	}
+
+/***********************************************************************************************************************/
+
+// 2^N:
+
+	// log floor:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::array, Array::log_floor, filler...>
+		{
+			nik_ces auto array_end = T_store_U<_array_end_>::result(array_2_N);
+
+			nik_ces gkey_type result(gcindex_type n)
+			{
+				gcindex_type *k = array_end;
+
+				while (--k != array_2_N) if (*k <= n) break;
+
+				return k - array_2_N;
+			}
+
+		}; nik_ce auto _log_floor_ = U_arg_array<Array::log_floor>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
