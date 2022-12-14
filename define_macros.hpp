@@ -332,7 +332,7 @@
 
 // upper identifiers:
 
-		// redundant ?
+		// redundant (1-64) ?
 
 	#define NIK_UPPER_1_IDS(_l_, _m_, _r_)										\
 															\
@@ -641,21 +641,25 @@
 
 /***********************************************************************************************************************/
 
-// dispatch:
+// base:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_DISPATCH(_n_)								\
+	#define NIK_DEFINE_PRAXIS_BASE(_n_)										\
 															\
-		template<gkey_type Name, gkey_type Note, auto F0, auto F1>						\
-		struct T_praxis<Shape::argument, Name, Note, gindex_type{_n_}, F0, F1> : public praxis_arg_unit		\
+		template												\
 		<													\
-			Name, Note, _n_, F0, F1										\
+			gkey_type Syn, gkey_type Name, gkey_type Note,							\
+			template<auto...> typename B, nik_vp(b)(T_store_B<B>*), auto L, auto R				\
+		>													\
+		struct T_praxis<Syn, Name, Note, b, gindex_type{_n_}, L, R> : public B					\
+		<													\
+			Syn, Name, Note, _n_, L, R									\
 		> { };
 
-// unit:
+// basis:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_UNIT(_n_)									\
+	#define NIK_DEFINE_PRAXIS_BASIS(_n_)										\
 															\
-		NIK_ ## _n_ ## _IDS(NIK_EMPTY, NIK_DEFINE_PRAXIS_ARGUMENT_DISPATCH, NIK_EMPTY)
+		NIK_ ## _n_ ## _IDS(NIK_EMPTY, NIK_DEFINE_PRAXIS_BASE, NIK_EMPTY)
 
 /***********************************************************************************************************************/
 
@@ -674,28 +678,6 @@
 				return T_cont::template result<Vs...>(NIK_2_N_VARS(_p_, NIK_CALL_LFS_LV_1), vs...);	\
 			}												\
 		};
-
-// mutate:
-
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_MUTATE(_p_)									\
-															\
-		template<NIK_2_N_VARS(_p_, NIK_LFS_VP_FS_B_LFS_1)>							\
-		struct T_praxis<Shape::argument, PN::mutate, PT::_2_ ## _p_, NIK_2_N_VARS(_p_, NIK_FS_1)>		\
-		{													\
-			template											\
-			<												\
-				auto cont, auto... Vs,									\
-				typename T, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts				\
-			>												\
-			nik_ces auto result(T v, NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs)				\
-			{												\
-				using T_cont = T_store_U<cont>;								\
-															\
-				return T_cont::template result<Vs...>(NIK_2_N_VARS(_p_, NIK_CALL_LFS_LV_LV_1), vs...);	\
-			}												\
-		};
-
-/***********************************************************************************************************************/
 
 // drop:
 
@@ -723,6 +705,32 @@
 			}												\
 		};
 
+/***********************************************************************************************************************/
+
+// mutate:
+
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_MUTATE(_p_)									\
+															\
+		template<NIK_2_N_VARS(_p_, NIK_LFS_VP_FS_B_LFS_1)>							\
+		struct T_praxis<Shape::argument, PN::mutate, PT::_2_ ## _p_, NIK_2_N_VARS(_p_, NIK_FS_1)>		\
+		{													\
+			template											\
+			<												\
+				auto s, auto cont, auto... Vs,								\
+				typename T, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts				\
+			>												\
+			nik_ces auto result(T v, NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs) -> T_store_U<s>		\
+			{												\
+				using T_cont = T_store_U<cont>;								\
+															\
+				return T_cont::template result								\
+				<											\
+					s, Vs...									\
+															\
+				>(vs..., NIK_2_N_VARS(_p_, NIK_CALL_LFS_LV_LV_1));					\
+			}												\
+		};
+
 // rotate:
 
 	#define NIK_DEFINE_PRAXIS_ARGUMENT_ROTATE(_p_)									\
@@ -734,19 +742,22 @@
 															\
 			template											\
 			<												\
-				auto n, auto cont, auto... Vs,								\
+				auto s, auto n, auto cont, auto... Vs,							\
 				NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts					\
 			>												\
-			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs)		 			\
+			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs) -> T_store_U<s> 			\
 			{												\
 				using T_cont = T_store_U<cont>;								\
 															\
 				if constexpr (n == 0)									\
 															\
-					return T_cont::template result<Vs...>(vs..., NIK_2_N_VARS(_p_, NIK_LV_1));	\
+					return T_cont::template result<s, Vs...>(vs..., NIK_2_N_VARS(_p_, NIK_LV_1));	\
 				else											\
-					return T_this::template								\
-							result<n-1, cont, Vs...>(vs..., NIK_2_N_VARS(_p_, NIK_LV_1));	\
+					return T_this::template result							\
+					<										\
+						s, n-1, cont, Vs...							\
+															\
+					>(vs..., NIK_2_N_VARS(_p_, NIK_LV_1));						\
 			}												\
 		};
 
