@@ -182,9 +182,9 @@ namespace cctmp {
 		nik_ces auto result(Ts... vs)
 		{
 			nik_ce auto Size = sizeof...(Ts);
-			nik_ce auto M    = (Size > _2_N) ? _2_N : Size;
-			nik_ce auto N    = _2_N - M;
-			using T_cont     = T_store_U<_arg_select_pad_<N>>;
+			nik_ce auto o    = (Size > _2_N) ? _2_N : Size;
+			nik_ce auto p    = _2_N - o;
+			using T_cont     = T_store_U<_arg_select_pad_<p>>;
 
 			return T_cont::template result<Vs...>(vs...);
 		}
@@ -197,8 +197,8 @@ namespace cctmp {
 
 // at:
 
-	template<gindex_type r, auto Note = PT::_2_6>
-	nik_ce auto _arg_select_at_ = _arg_select_<Note, H_praxis_unit, r, _pack_null_, _pack_first_>;
+	template<gindex_type k, auto Note = PT::_2_6>
+	nik_ce auto _arg_select_at_ = _arg_select_<Note, H_praxis_unit, k, _pack_null_, _pack_first_>;
 
 /***********************************************************************************************************************/
 
@@ -209,21 +209,21 @@ namespace cctmp {
 	{
 		using T_cont = T_store_U<_arg_pad_2_N_<Note>>;
 
-		template<auto r, auto... Vs, typename... Ts>
+		template<auto k, auto... Vs, typename... Ts>
 		nik_ces auto result(Ts... vs)
-			{ return T_cont::template result<_arg_select_at_<r, Note>, Vs...>(vs...); }
+			{ return T_cont::template result<_arg_select_at_<k, Note>, Vs...>(vs...); }
 
 	}; template<auto Note = PT::_2_6>
 		nik_ce auto _arg_at_2_N_ = U_praxis_arg<PN::at, Note>;
 
 	// syntactic sugar:
 
-		template<auto Note, auto r, typename... Ts>
+		template<auto Note, auto k, typename... Ts>
 		nik_ce auto _2_N_at(Ts... vs) // needs to do its own bounds check now that it pads.
 		{
 			using T_cont = T_store_U<_arg_at_2_N_<Note>>;
 
-			return T_cont::template result<r, _first_>(vs...);
+			return T_cont::template result<k, _first_>(vs...);
 		}
 
 /***********************************************************************************************************************/
@@ -239,11 +239,11 @@ namespace cctmp {
 		template<auto n, auto... Vs, typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto q = n / _2_N;
-			nik_ce auto r = n % _2_N;
+			nik_ce auto m = n / _2_N;
+			nik_ce auto k = n % _2_N;
 
-			if constexpr (q == 0) return _2_N_at<Note, r>(vs...);
-			else return T_cont::template result<q-1, _arg_at_2_N_<Note>, r, Vs...>(vs...);
+			if constexpr (m == 0) return _2_N_at<Note, k>(vs...);
+			else return T_cont::template result<m-1, _arg_at_2_N_<Note>, k, Vs...>(vs...);
 		}
 
 	}; template<auto Note = PT::_2_6>
@@ -305,8 +305,8 @@ namespace cctmp {
 
 // unpad:
 
-	template<gindex_type r, auto Note = PT::_2_6>
-	nik_ce auto _arg_mutate_unpad_ = _arg_mutate_<Note, H_praxis_part, r, _pack_first_, _pack_null_>;
+	template<gindex_type k, auto Note = PT::_2_6>
+	nik_ce auto _arg_mutate_unpad_ = _arg_mutate_<Note, H_praxis_part, k, _pack_first_, _pack_null_>;
 
 /***********************************************************************************************************************/
 
@@ -315,12 +315,12 @@ namespace cctmp {
 	template<auto Note>
 	struct T_praxis<Shape::argument, PN::mutate, PT::unpad, Note>
 	{
-		template<auto r>
-		using T_cont = T_store_U<_arg_mutate_unpad_<r, Note>>;
+		template<auto k>
+		using T_cont = T_store_U<_arg_mutate_unpad_<k, Note>>;
 
-		template<auto s, auto r, auto... Vs, typename... Ts>
+		template<auto s, auto k, auto... Vs, typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
-			{ return T_cont<r>::template result<s, Vs...>(vs...); }
+			{ return T_cont<k>::template result<s, Vs...>(U_null_Vs, vs...); }
 
 	}; template<auto Note = PT::_2_6>
 		nik_ce auto _arg_unpad_2_N_ = U_praxis_arg<PN::mutate, PT::unpad, Note>;
@@ -330,8 +330,8 @@ namespace cctmp {
 
 // replace:
 
-	template<gindex_type r, auto Note = PT::_2_6>
-	nik_ce auto _arg_mutate_replace_ = _arg_mutate_<Note, H_praxis_unit, r, _pack_first_, _pack_second_>;
+	template<gindex_type k, auto Note = PT::_2_6>
+	nik_ce auto _arg_mutate_replace_ = _arg_mutate_<Note, H_praxis_unit, k, _pack_first_, _pack_second_>;
 
 /***********************************************************************************************************************/
 
@@ -344,19 +344,14 @@ namespace cctmp {
 		nik_ces auto rotate  = _arg_rotate_<Note>;
 		nik_ces auto unpad   = _arg_unpad_2_N_<Note>;
 
-		template<auto r>
-		using T_cont = T_store_U<_arg_mutate_replace_<r, Note>>;
+		template<auto k>
+		using T_cont = T_store_U<_arg_mutate_replace_<k, Note>>;
 
-		template<auto s, auto r, auto M, auto N, auto... Vs, typename... Ts>
+		template<auto s, auto k, auto m, auto l, auto... Vs, typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			return T_cont<r>::template result
-			<
-				s,
-				rotate , M ,
-				unpad  , N , Vs...
-
-			>(vs...);
+			if constexpr (m == 0) return T_cont<k>::template result<s, unpad, l, Vs...>(vs...);
+			else return T_cont<k>::template result<s, rotate, m-1, unpad, l, Vs...>(vs...);
 		}
 
 	}; template<auto Note = PT::_2_6>
@@ -364,13 +359,13 @@ namespace cctmp {
 
 	// syntactic sugar:
 
-		template<typename S, auto Note, auto r, auto M, auto N, auto cont, auto... Vs, typename... Ts>
+		template<typename S, auto Note, auto k, auto m, auto l, auto cont, auto... Vs, typename... Ts>
 		nik_ce auto _2_N_replace(Ts... vs) -> S // needs to do its own bounds check now that it pads.
 		{
 			nik_ce auto s = U_store_T<S>;
 			using T_cont  = T_store_U<_arg_replace_2_N_<Note>>;
 
-			return T_cont::template result<s, r, M, N, cont, Vs...>(vs...);
+			return T_cont::template result<s, k, m, l, cont, Vs...>(vs...);
 		}
 
 /***********************************************************************************************************************/
@@ -387,17 +382,17 @@ namespace cctmp {
 		template<auto s, auto n, auto... Vs, typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto q     = n / _2_N;
-			nik_ce auto r     = n % _2_N;
+			nik_ce auto m0 = n / _2_N;
+			nik_ce auto k  = n % _2_N;
 
-			nik_ce auto Size  = sizeof...(Ts);
-			nik_ce auto N     = _2_N - (Size % _2_N);
-			nik_ce auto Block = (Size + N) / _2_N;
-			nik_ce auto M     = Block - q;
-			using T_cont      = T_store_U<_arg_mutate_pad_<N>>;
+			nik_ce auto l  = sizeof...(Ts) - 1;
+			nik_ce auto p  = _2_N - (l % _2_N);
+			nik_ce auto b  = (l + p) / _2_N;
+			nik_ce auto m1 = b - (m0 + 1);
+			using T_cont   = T_store_U<_arg_mutate_pad_<p>>;
 
-			if constexpr (q == 0) return T_cont::template result<s, replace, r, M, N, Vs...>(vs...);
-			else return T_cont::template result<s, rotate, q-1, replace, r, M, N, Vs...>(vs...);
+			if constexpr (m0 == 0) return T_cont::template result<s, replace, k, m1, l, Vs...>(vs...);
+			else return T_cont::template result<s, rotate, m0-1, replace, k, m1, l, Vs...>(vs...);
 		}
 
 	}; template<auto Note = PT::_2_6>
@@ -413,6 +408,56 @@ namespace cctmp {
 
 			return T_cont::template result<s, n, cont, Vs...>(vs...);
 		}
+
+/***********************************************************************************************************************/
+
+	template<auto cont>
+	struct Manual
+	{
+		template<auto s, auto... Vs, typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			using T_cont = T_store_U<cont>;
+
+			return T_cont::template result<Vs...>(vs...);
+		}
+
+	}; template<auto cont>
+		nik_ce auto _manual_ = U_store_T<Manual<cont>>;
+
+		template<auto n, typename T, typename... Ts>
+		nik_ce auto repl(T v, Ts... vs)
+		{
+			return replace<tuple<Ts...>, PT::_2_6, n, _manual_<_to_tuple_>>(v, vs...);
+		}
+
+/***********************************************************************************************************************/
+
+// tuple:
+
+	template<typename... Ts>
+	nik_ce auto print_tuple(const tuple<Ts...> & t)
+	{
+		if constexpr (sizeof...(Ts) == 0) printf("\n");
+		else
+		{
+			printf("%d, ", t.value);
+
+			print_tuple(t.rest);
+		}
+	}
+
+// segment:
+
+	template<auto n, auto... Vs>
+	nik_ce auto _segment()
+	{
+		if constexpr (n == 0) return U_pack_Vs<n, Vs...>;
+		else                  return _segment<n-1, n, Vs...>();
+	}
+
+	template<auto n>
+	nik_ce auto segment = _segment<n>();
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

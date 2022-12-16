@@ -299,12 +299,6 @@
 
 /***********************************************************************************************************************/
 
-// eval pads:
-
-	#define NIK_DEFINE_EVAL_PADS(_n_)										\
-															\
-		NIK_ ## _n_ ## _IDS(NIK_EMPTY, NIK_DEFINE_EVAL_PAD, NIK_EMPTY)
-
 // auto:
 
 	#define NIK_N_AUTO_VARS(_n_, _v_)										\
@@ -624,15 +618,23 @@
 
 /***********************************************************************************************************************/
 
+// at:
+
 	#define NIK_DEFINE_EVAL_AT(_n_, _s_)										\
 															\
 		template<NIK_N_AUTO_VARS(_s_, NIK_V_1), auto... Vs>							\
 		nik_ce auto eval<_at_, gindex_type{_n_}, NIK_N_VARS(_s_, NIK_V_1), Vs...> = NIK_V_1(_n_);
 
+// pad:
+
 	#define NIK_DEFINE_EVAL_PAD(_n_)										\
 															\
 		template<template<auto...> typename B, nik_vp(b)(T_store_B<B>*), auto V>				\
 		nik_ce auto eval<_pad_, b, V, gindex_type{_n_}> = U_store_T<B<NIK_N_CS(_n_, NIK_V)>>;
+
+	#define NIK_DEFINE_EVAL_PADS(_n_)										\
+															\
+		NIK_ ## _n_ ## _IDS(NIK_EMPTY, NIK_DEFINE_EVAL_PAD, NIK_EMPTY)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
