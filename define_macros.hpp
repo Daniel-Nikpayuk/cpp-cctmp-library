@@ -729,7 +729,7 @@
 				<											\
 					s, Vs...									\
 															\
-				>(vs..., NIK_2_N_VARS(_p_, NIK_CALL_LFS_LV_LV_1));					\
+				>(v, NIK_2_N_VARS(_p_, NIK_CALL_LFS_LV_LV_1), vs...);					\
 			}												\
 		};
 
@@ -745,21 +745,49 @@
 			template											\
 			<												\
 				auto s, auto n, auto cont, auto... Vs,							\
-				NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts					\
+				typename T, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts				\
 			>												\
-			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs) -> T_store_U<s> 			\
+			nik_ces auto result(T v, NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs) -> T_store_U<s> 		\
 			{												\
 				using T_cont = T_store_U<cont>;								\
 															\
 				if constexpr (n == 0)									\
 															\
-					return T_cont::template result<s, Vs...>(vs..., NIK_2_N_VARS(_p_, NIK_LV_1));	\
+					return T_cont::template result							\
+					<										\
+						s, Vs...								\
+															\
+					>(v, vs..., NIK_2_N_VARS(_p_, NIK_LV_1));					\
 				else											\
 					return T_this::template result							\
 					<										\
 						s, n-1, cont, Vs...							\
 															\
-					>(vs..., NIK_2_N_VARS(_p_, NIK_LV_1));						\
+					>(v, vs..., NIK_2_N_VARS(_p_, NIK_LV_1));					\
+			}												\
+		};
+
+// unpad:
+
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_UNPAD(_p_)									\
+															\
+		template<NIK_2_N_VARS(_p_, NIK_LFS_VP_FS_B_LFS_1)>							\
+		struct T_praxis<Shape::argument, PN::unpad, PT::_2_ ## _p_, NIK_2_N_VARS(_p_, NIK_FS_1)>		\
+		{													\
+			template											\
+			<												\
+				auto s, auto cont, auto... Vs,								\
+				typename T, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts				\
+			>												\
+			nik_ces auto result(T v, NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs) -> T_store_U<s>		\
+			{												\
+				using T_cont = T_store_U<cont>;								\
+															\
+				return T_cont::template result								\
+				<											\
+					s, Vs...									\
+															\
+				>(v, vs..., NIK_2_N_VARS(_p_, NIK_CALL_LFS_LV_LV_1));					\
 			}												\
 		};
 
