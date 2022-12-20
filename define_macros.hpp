@@ -93,6 +93,10 @@
 															\
 		rest
 
+	#define NIK_LS()												\
+															\
+		s
+
 /***********************************************************************************************************************/
 
 // punctuation_1(_n_):
@@ -664,46 +668,104 @@
 		NIK_ ## _n_ ## _IDS(NIK_EMPTY, NIK_DEFINE_PRAXIS_BASE, NIK_EMPTY)
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// argument:
+
+/***********************************************************************************************************************/
+
+// params:
+
+	#define NIK_PRAX_ARG_L_PARAMS(_c_, _i_, _l_)									\
+															\
+		auto _c_, auto _i_, auto _l_
+
+	#define NIK_PRAX_ARG_R_PARAMS(_v_)										\
+															\
+		auto... _v_
+
+	#define NIK_PRAX_ARG_PARAMS(_c_, _i_, _l_, _v_)									\
+															\
+		NIK_PRAX_ARG_L_PARAMS(_c_, _i_, _l_), NIK_PRAX_ARG_R_PARAMS(_v_)
+
+	#define NIK_PRAX_ARG_SPARAMS(_s_, _c_, _i_, _l_, _v_)								\
+															\
+		auto _s_, NIK_PRAX_ARG_PARAMS(_c_, _i_, _l_, _v_)
+
+/***********************************************************************************************************************/
+
+// machine:
+
+	#define NIK_PRAX_ARG_L(_c_, _i_)										\
+															\
+		T_praxis_arg												\
+		<													\
+			PA::next_name(_c_, _i_),									\
+			PA::next_note(_c_, _i_)										\
+															\
+		>::template result											\
+		<
+
+	#define NIK_PRAX_ARG_M(_c_, _i_, _l_)										\
+															\
+			_c_,												\
+			PA::next_index(_i_),										\
+			_l_
+
+	#define NIK_PRAX_ARG_R(_v_)											\
+															\
+		_v_...>
+
+	#define NIK_PRAX_ARG(_c_, _i_, _l_, _v_)									\
+															\
+		NIK_PRAX_ARG_L(_c_, _i_) NIK_PRAX_ARG_M(_c_, _i_, _l_), NIK_PRAX_ARG_R(_v_)
+
+	#define NIK_PRAX_SARG(_s_, _c_, _i_, _l_, _v_)									\
+															\
+		NIK_PRAX_ARG_L(_c_, _i_) _s_, NIK_PRAX_ARG_M(_c_, _i_, _l_), NIK_PRAX_ARG_R(_v_)
+
+/***********************************************************************************************************************/
 
 // select:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_SELECT(_p_)									\
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_SELECT(_e_)									\
 															\
-		template<NIK_2_N_VARS(_p_, NIK_LFS_VP_FS_B_LFS_1)>							\
-		struct T_praxis<Shape::argument, PN::select, PT::_2_ ## _p_, NIK_2_N_VARS(_p_, NIK_FS_1)>		\
+		template<NIK_2_N_VARS(_e_, NIK_LFS_VP_FS_B_LFS_1)>							\
+		struct T_praxis<Shape::argument, PN::select, PT::_2_ ## _e_, NIK_2_N_VARS(_e_, NIK_FS_1)>		\
 		{													\
-			template<auto cont, auto... Vs, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts>		\
-			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs)					\
+			template											\
+			<												\
+				NIK_PRAX_ARG_PARAMS(c, i, l, Vs),							\
+				NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts					\
+			>												\
+			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs)					\
 			{												\
-				using T_cont = T_store_U<cont>;								\
-															\
-				return T_cont::template result<Vs...>(NIK_2_N_VARS(_p_, NIK_CALL_LFS_LV_1), vs...);	\
+				return NIK_PRAX_ARG(c, i, l, Vs)							\
+					(NIK_2_N_VARS(_e_, NIK_CALL_LFS_LV_1), vs...);					\
 			}												\
 		};
 
 // drop:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_DROP(_p_)									\
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_DROP(_e_)									\
 															\
 		template<auto... filler>										\
-		struct T_praxis<Shape::argument, PN::drop, PT::_2_ ## _p_, filler...>					\
+		struct T_praxis<Shape::argument, PN::drop, PT::_2_ ## _e_, filler...>					\
 		{													\
-			using T_this = T_praxis_arg<PN::drop, PT::_2_ ## _p_, filler...>;				\
+			using T_this = T_praxis_arg<PN::drop, PT::_2_ ## _e_>;						\
 															\
 			template											\
 			<												\
-				auto n, auto cont, auto... Vs,								\
-				NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts					\
+				NIK_PRAX_ARG_SPARAMS(c, i, l, n, Vs),							\
+				NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts					\
 			>												\
-			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs)		 			\
+			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs)		 			\
 			{												\
-				using T_cont = T_store_U<cont>;								\
-															\
 				if constexpr (n == 0)									\
 															\
-					return T_cont::template result<Vs...>(vs...);					\
+					return NIK_PRAX_ARG(c, i, l, Vs)(vs...);					\
 				else											\
-					return T_this::template result<n-1, cont, Vs...>(vs...);			\
+					return T_this::template result<c, i, l, n-1, Vs...>(vs...);			\
 			}												\
 		};
 
@@ -711,83 +773,68 @@
 
 // mutate:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_MUTATE(_p_)									\
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_MUTATE(_e_)									\
 															\
-		template<NIK_2_N_VARS(_p_, NIK_LFS_VP_FS_B_LFS_1)>							\
-		struct T_praxis<Shape::argument, PN::mutate, PT::_2_ ## _p_, NIK_2_N_VARS(_p_, NIK_FS_1)>		\
+		template<NIK_2_N_VARS(_e_, NIK_LFS_VP_FS_B_LFS_1)>							\
+		struct T_praxis<Shape::argument, PN::mutate, PT::_2_ ## _e_, NIK_2_N_VARS(_e_, NIK_FS_1)>		\
 		{													\
 			template											\
 			<												\
-				auto s, auto cont, auto... Vs,								\
-				typename T, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts				\
+				NIK_PRAX_ARG_SPARAMS(s, c, i, l, Vs),							\
+				typename T, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts				\
 			>												\
-			nik_ces auto result(T v, NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs) -> T_store_U<s>		\
+			nik_ces auto result(T v, NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs) -> T_store_U<s>		\
 			{												\
-				using T_cont = T_store_U<cont>;								\
-															\
-				return T_cont::template result								\
-				<											\
-					s, Vs...									\
-															\
-				>(v, NIK_2_N_VARS(_p_, NIK_CALL_LFS_LV_LV_1), vs...);					\
+				return NIK_PRAX_SARG(s, c, i, l, Vs)							\
+					(v, NIK_2_N_VARS(_e_, NIK_CALL_LFS_LV_LV_1), vs...);				\
 			}												\
 		};
 
 // rotate:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_ROTATE(_p_)									\
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_ROTATE(_e_)									\
 															\
 		template<auto... filler>										\
-		struct T_praxis<Shape::argument, PN::rotate, PT::_2_ ## _p_, filler...>					\
+		struct T_praxis<Shape::argument, PN::rotate, PT::_2_ ## _e_, filler...>					\
 		{													\
-			using T_this = T_praxis_arg<PN::rotate, PT::_2_ ## _p_, filler...>;				\
+			using T_this = T_praxis_arg<PN::rotate, PT::_2_ ## _e_>;					\
 															\
 			template											\
 			<												\
-				auto s, auto n, auto cont, auto... Vs,							\
-				typename T, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts				\
+				auto s, NIK_PRAX_ARG_L_PARAMS(c, i, l), auto n, NIK_PRAX_ARG_R_PARAMS(Vs),		\
+				typename T, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts				\
 			>												\
-			nik_ces auto result(T v, NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs) -> T_store_U<s> 		\
+			nik_ces auto result(T v, NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs) -> T_store_U<s> 		\
 			{												\
-				using T_cont = T_store_U<cont>;								\
-															\
 				if constexpr (n == 0)									\
 															\
-					return T_cont::template result							\
-					<										\
-						s, Vs...								\
-															\
-					>(v, vs..., NIK_2_N_VARS(_p_, NIK_LV_1));					\
+					return NIK_PRAX_SARG(s, c, i, l, Vs)						\
+						(v, vs..., NIK_2_N_VARS(_e_, NIK_LV_1));				\
 				else											\
 					return T_this::template result							\
 					<										\
-						s, n-1, cont, Vs...							\
+						s, c, i, l, n-1, Vs...							\
 															\
-					>(v, vs..., NIK_2_N_VARS(_p_, NIK_LV_1));					\
+					>(v, vs..., NIK_2_N_VARS(_e_, NIK_LV_1));					\
 			}												\
 		};
 
 // unpad:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_UNPAD(_p_)									\
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_UNPAD(_e_)									\
 															\
-		template<NIK_2_N_VARS(_p_, NIK_LFS_VP_FS_B_LFS_1)>							\
-		struct T_praxis<Shape::argument, PN::unpad, PT::_2_ ## _p_, NIK_2_N_VARS(_p_, NIK_FS_1)>		\
+		template<NIK_2_N_VARS(_e_, NIK_LFS_VP_FS_B_LFS_1)>							\
+		struct T_praxis<Shape::argument, PN::unpad, PT::_2_ ## _e_, NIK_2_N_VARS(_e_, NIK_FS_1)>		\
 		{													\
 			template											\
 			<												\
-				auto s, auto cont, auto... Vs,								\
-				typename T, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts				\
+				NIK_PRAX_ARG_SPARAMS(s, c, i, l, Vs),							\
+				typename T, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts				\
 			>												\
-			nik_ces auto result(T v, NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs) -> T_store_U<s>		\
+			nik_ces auto result(T v, NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs) -> T_store_U<s>		\
 			{												\
-				using T_cont = T_store_U<cont>;								\
-															\
-				return T_cont::template result								\
-				<											\
-					s, Vs...									\
-															\
-				>(v, vs..., NIK_2_N_VARS(_p_, NIK_CALL_LFS_LV_LV_1));					\
+				return NIK_PRAX_SARG(s, c, i, l, Vs)							\
+					(v, vs..., NIK_2_N_VARS(_e_, NIK_CALL_LFS_LV_LV_1));				\
 			}												\
 		};
 
@@ -823,7 +870,7 @@
 
 	#define NIK_ABSTRACT(_a_, _d_, _m_, _c_, _i_, _v_)								\
 															\
-		NIK_BEGIN_ABSTRACT(_a_, _d_, _m_, _c_, _i_), _v_...  NIK_END_ABSTRACT
+		NIK_BEGIN_ABSTRACT(_a_, _d_, _m_, _c_, _i_), _v_... NIK_END_ABSTRACT
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -848,18 +895,18 @@
 
 	#define NIK_BLOCK(_d_, _m_, _c_, _i_, _n_, _v_)									\
 															\
-		NIK_BEGIN_BLOCK(_d_, _m_, _c_, _i_, _n_), _v_...  NIK_END_BLOCK
+		NIK_BEGIN_BLOCK(_d_, _m_, _c_, _i_, _n_), _v_... NIK_END_BLOCK
 
 /***********************************************************************************************************************/
 
 // drop:
 
-	#define NIK_DEFINE_BLOCK_DROP(_p_)										\
+	#define NIK_DEFINE_BLOCK_DROP(_e_)										\
 															\
 		template<auto... filler>										\
-		struct T_block<BN::drop, BT::_2_ ## _p_, filler...>							\
+		struct T_block<BN::drop, BT::_2_ ## _e_, filler...>							\
 		{													\
-			template<NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs, typename... Heaps>	\
+			template<NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs, typename... Heaps>	\
 			nik_ces auto result(Heaps... Hs)								\
 			{												\
 				return NIK_BLOCK(d, m, c, i, n, Vs)(Hs...);						\
@@ -870,20 +917,20 @@
 
 // heap:
 
-	#define NIK_DEFINE_BLOCK_HEAP(_p_)										\
+	#define NIK_DEFINE_BLOCK_HEAP(_e_)										\
 															\
 		template<auto... filler>										\
-		struct T_block<BN::heap, BT::_2_ ## _p_, filler...>							\
+		struct T_block<BN::heap, BT::_2_ ## _e_, filler...>							\
 		{													\
 			template											\
 			<												\
-				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,				\
+				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,				\
 				typename Heap0, typename Heap1, typename Heap2,						\
 				template<auto...> typename B3, auto... Ws, typename... Heaps				\
 			>												\
 			nik_ces auto result(Heap0 H0, Heap1 H1, Heap2 H2, nik_vp(H3)(B3<Ws...>*), Heaps... Hs)		\
 			{												\
-				nik_ce auto nH3 = U_store_T<B3<Ws..., NIK_2_N_VARS(_p_, NIK_V_1)>>;			\
+				nik_ce auto nH3 = U_store_T<B3<Ws..., NIK_2_N_VARS(_e_, NIK_V_1)>>;			\
 															\
 				return NIK_BLOCK(d, m, c, i, n, Vs)(H0, H1, H2, nH3, Hs...);				\
 			}												\
@@ -893,14 +940,14 @@
 
 // turn:
 
-	#define NIK_DEFINE_BLOCK_TURN(_p_)										\
+	#define NIK_DEFINE_BLOCK_TURN(_e_)										\
 															\
 		template<auto... filler>										\
-		struct T_block<BN::turn, BT::_2_ ## _p_, filler...>							\
+		struct T_block<BN::turn, BT::_2_ ## _e_, filler...>							\
 		{													\
 			template											\
 			<												\
-				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,				\
+				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,				\
 				typename Heap0, template<auto...> typename B1, auto Lookup, auto... Ops,		\
 				typename Heap2, typename Heap3, typename... Heaps					\
 			>												\
@@ -915,9 +962,9 @@
 															\
 				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
 															\
-					NIK_2_N_VARS(_p_, NIK_V_1), Vs...						\
+					NIK_2_N_VARS(_e_, NIK_V_1), Vs...						\
 															\
-				NIK_END_BLOCK(H0, H1, H2, H3, NIK_2_N_VARS(_p_, NIK_EVAL_OP_V_1), Hs...);		\
+				NIK_END_BLOCK(H0, H1, H2, H3, NIK_2_N_VARS(_e_, NIK_EVAL_OP_V_1), Hs...);		\
 			}												\
 		};
 
@@ -925,27 +972,27 @@
 
 // sift:
 
-	#define NIK_DEFINE_BLOCK_SIFT(_p_)										\
+	#define NIK_DEFINE_BLOCK_SIFT(_e_)										\
 															\
 		template<auto... filler>										\
-		struct T_block<BN::sift, BT::_2_ ## _p_, filler...>							\
+		struct T_block<BN::sift, BT::_2_ ## _e_, filler...>							\
 		{													\
 			template											\
 			<												\
-				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,				\
+				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,				\
 				typename Heap0, typename Heap1, typename Heap2, typename Heap3,				\
-				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_p_, NIK_LFS_1),		\
+				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_e_, NIK_LFS_1),		\
 				typename... Heaps									\
 			>												\
 			nik_ces auto result										\
 			(												\
 				Heap0 H0, Heap1 H1, Heap2 H2, Heap3 H3,							\
-				NIK_2_N_VARS(_p_, NIK_AVP_B_LFS_1), Heaps... Hs						\
+				NIK_2_N_VARS(_e_, NIK_AVP_B_LFS_1), Heaps... Hs						\
 			)												\
 			{												\
 				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
 															\
-					NIK_2_N_VARS(_p_, NIK_EVAL_LFS_V_1), Vs...					\
+					NIK_2_N_VARS(_e_, NIK_EVAL_LFS_V_1), Vs...					\
 															\
 				NIK_END_BLOCK(H0, H1, H2, H3, Hs...);							\
 			}												\
@@ -955,27 +1002,27 @@
 
 // filter:
 
-	#define NIK_DEFINE_BLOCK_FILTER(_p_)										\
+	#define NIK_DEFINE_BLOCK_FILTER(_e_)										\
 															\
 		template<auto... filler>										\
-		struct T_block<BN::filter, BT::_2_ ## _p_, filler...>							\
+		struct T_block<BN::filter, BT::_2_ ## _e_, filler...>							\
 		{													\
 			template											\
 			<												\
-				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,				\
+				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,				\
 				typename Heap0, typename Heap1, typename Heap2, typename Heap3,				\
-				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_p_, NIK_LFS_1),		\
+				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_e_, NIK_LFS_1),		\
 				typename... Heaps									\
 			>												\
 			nik_ces auto result										\
 			(												\
 				Heap0 H0, Heap1 H1, Heap2 H2, Heap3 H3,							\
-				NIK_2_N_VARS(_p_, NIK_AVP_B_LFS_1), Heaps... Hs						\
+				NIK_2_N_VARS(_e_, NIK_AVP_B_LFS_1), Heaps... Hs						\
 			)												\
 			{												\
 				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
 															\
-					Vs..., NIK_2_N_VARS(_p_, NIK_EVAL_LFS_V_1)					\
+					Vs..., NIK_2_N_VARS(_e_, NIK_EVAL_LFS_V_1)					\
 															\
 				NIK_END_BLOCK(H0, H1, H2, H3, Hs...);							\
 			}												\
@@ -985,14 +1032,14 @@
 
 // fold:
 
-	#define NIK_DEFINE_BLOCK_FOLD(_p_)										\
+	#define NIK_DEFINE_BLOCK_FOLD(_e_)										\
 															\
 		template<auto... filler>										\
-		struct T_block<BN::fold, BT::_2_ ## _p_, filler...>							\
+		struct T_block<BN::fold, BT::_2_ ## _e_, filler...>							\
 		{													\
 			template											\
 			<												\
-				NIK_BLOCK_PARAMS, auto V, NIK_2_N_AUTO_VARS(_p_, NIK_V_1), auto... Vs,			\
+				NIK_BLOCK_PARAMS, auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,			\
 				template<auto...> typename B, auto Lookup, auto... Ops, typename... Heaps		\
 			>												\
 			nik_ces auto result(nik_vp(H0)(B<Lookup, Ops...>*), Heaps... Hs)				\
@@ -1004,7 +1051,7 @@
 															\
 					NIK_2_N_ACTION_FOLDS								\
 					(										\
-						_p_, NIK_OVER, NIK_OP_1, V, NIK_V_1, NIK_R_ANG, NIK_COMMA		\
+						_e_, NIK_OVER, NIK_OP_1, V, NIK_V_1, NIK_R_ANG, NIK_COMMA		\
 															\
 					), Vs...									\
 															\
@@ -1016,15 +1063,15 @@
 
 // argument:
 
-	#define NIK_DEFINE_BLOCK_ARGUMENT_PASS(_p_)									\
+	#define NIK_DEFINE_BLOCK_ARGUMENT_PASS(_e_)									\
 															\
 		template<auto... filler>										\
-		struct T_block<BN::argument, BT::pass, _p_, filler...>							\
+		struct T_block<BN::parameter, BT::pass, _e_, filler...>							\
 		{													\
-			template<auto d, auto n, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts>			\
-			nik_ces auto result(NIK_2_N_VARS(_p_, NIK_T_LV_1), Ts... vs)					\
+			template<auto d, auto n, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts>			\
+			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs)					\
 			{												\
-				return NIK_ARGUMENT_BLOCK(_p_, d, n, Ts)(vs...);					\
+				return NIK_ARGUMENT_BLOCK(_e_, d, n, Ts)(vs...);					\
 			}												\
 		};
 
@@ -1032,21 +1079,21 @@
 
 // tuple:
 
-	#define NIK_DEFINE_BLOCK_TUPLE_PASS(_p_)									\
+	#define NIK_DEFINE_BLOCK_TUPLE_PASS(_e_)									\
 															\
 		template<auto... filler>										\
-		struct T_block<BN::tuple, BT::pass, _p_, filler...>							\
+		struct T_block<BN::tuple, BT::pass, _e_, filler...>							\
 		{													\
-			template<auto d, auto n, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts>			\
-			nik_ces auto & result(tuple<NIK_2_N_VARS(_p_, NIK_T_1), Ts...> & t)				\
+			template<auto d, auto n, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts>			\
+			nik_ces auto & result(tuple<NIK_2_N_VARS(_e_, NIK_T_1), Ts...> & t)				\
 			{												\
-				return NIK_TUPLE_BLOCK(_p_, d, n, Ts)(NIK_2_N_TUPLE_VARS(_p_, t));			\
+				return NIK_TUPLE_BLOCK(_e_, d, n, Ts)(NIK_2_N_TUPLE_VARS(_e_, t));			\
 			}												\
 															\
-			template<auto d, auto n, NIK_2_N_TYPENAME_VARS(_p_, NIK_T_1), typename... Ts>			\
-			nik_ces const auto & result(const tuple<NIK_2_N_VARS(_p_, NIK_T_1), Ts...> & t)			\
+			template<auto d, auto n, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts>			\
+			nik_ces const auto & result(const tuple<NIK_2_N_VARS(_e_, NIK_T_1), Ts...> & t)			\
 			{												\
-				return NIK_TUPLE_BLOCK(_p_, d, n, Ts)(NIK_2_N_TUPLE_VARS(_p_, t));			\
+				return NIK_TUPLE_BLOCK(_e_, d, n, Ts)(NIK_2_N_TUPLE_VARS(_e_, t));			\
 			}												\
 		};
 
