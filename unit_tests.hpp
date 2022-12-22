@@ -113,16 +113,6 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 
-	template<auto n, typename T, typename... Ts>
-	constexpr auto repl(T v, Ts... vs)
-	{
-		constexpr auto s = U_store_T<tuple<Ts...>>;
-
-		return arg_replace<s, PT::_2_6, n, _to_tuple_>(v, vs...);
-	}
-
-/***********************************************************************************************************************/
-
 // tuple:
 
 	template<typename... Ts>
@@ -136,6 +126,18 @@ namespace cctmp_program
 			print_tuple(t.rest);
 		}
 	}
+
+// unit:
+
+	template<auto n, typename T, typename... Ts>
+	constexpr auto unit_replace(T v, Ts... vs)
+	{
+		constexpr auto s = U_store_T<tuple<Ts...>>;
+
+		return arg_replace<s, PT::_2_6, n, _to_tuple_>(v, vs...);
+	}
+
+/***********************************************************************************************************************/
 
 // segment:
 

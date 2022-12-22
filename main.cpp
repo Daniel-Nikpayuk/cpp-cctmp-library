@@ -27,6 +27,7 @@
 #include"00_cctmp_grammar.hpp"
 #include"01_cctmp_eval.hpp"
 #include"02_cctmp_praxis.hpp"
+//#include"03_cctmp_algorithm.hpp"
 
 #include"undef_macros.hpp"
 
@@ -36,9 +37,51 @@
 
 /***********************************************************************************************************************/
 
+// tuple:
+
+	template<typename... Ts>
+	constexpr auto print_tuple(const tuple<Ts...> & t)
+	{
+		if constexpr (sizeof...(Ts) == 0) printf("\n");
+		else
+		{
+			printf("%d, ", t.value);
+
+			print_tuple(t.rest);
+		}
+	}
+
+// unit:
+
+	template<auto n, typename T, typename... Ts>
+	constexpr auto unit_replace(T v, Ts... vs) // arg_block size 64 has a bug!
+	{
+		constexpr auto s = U_store_T<tuple<Ts...>>;
+
+		return arg_replace<s, n, _to_tuple_>(v, vs...);
+	}
+
+	template<auto n, typename T, typename... Ts>
+	constexpr auto unit_insert(T v, Ts... vs)
+	{
+		constexpr auto s = U_store_T<tuple<T, Ts...>>;
+
+		return arg_insert<s, n, _to_tuple_>(v, vs...);
+	}
+
+	template<auto n, typename T0, typename... Ts>
+	constexpr auto unit_erase(T0 v0, Ts... vs)
+	{
+		constexpr auto s = U_store_T<tuple<Ts...>>;
+
+		return arg_erase<s, n, _to_tuple_>(U_null_Vs, v0, vs...);
+	}
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
-	//	printf("%d\n", arg_at<PT::_2_6, 63, _first_>
+	//	printf("%d\n", arg_at<63>
 	//	(
 	//		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 	//		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
@@ -47,12 +90,14 @@
 	//		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 
 	//		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-	//		0, 1, 2, 3
+	//		0, 1, 2, 33
 	//	));
 
-	//	auto val = repl<6>(-1,    0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+	//	auto val = unit_replace <6>(-1,    0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+	//	auto val = unit_insert  <6>(-1,    0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+	//	auto val = unit_erase   <6>(       0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-	//	auto val = repl<64>
+	//	auto val = unit_replace<63>
 	//	(-1,
 	//	     	0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 	//	     	0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
@@ -61,7 +106,7 @@
 	//	     	0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 
 	//	     	0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-	//	     	0, 1, 2, 3, 4
+	//	     	0, 1, 2, 3
 	//	);
 
 	//	print_tuple(val);

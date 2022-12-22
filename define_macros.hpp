@@ -676,21 +676,17 @@
 
 // params:
 
-	#define NIK_PRAX_ARG_L_PARAMS(_c_, _i_, _l_)									\
-															\
-		auto _c_, auto _i_, auto _l_
-
-	#define NIK_PRAX_ARG_R_PARAMS(_v_)										\
-															\
-		auto... _v_
-
 	#define NIK_PRAX_ARG_PARAMS(_c_, _i_, _l_, _v_)									\
 															\
-		NIK_PRAX_ARG_L_PARAMS(_c_, _i_, _l_), NIK_PRAX_ARG_R_PARAMS(_v_)
+		auto _c_, auto _i_, auto _l_, auto... _v_
 
-	#define NIK_PRAX_ARG_SPARAMS(_s_, _c_, _i_, _l_, _v_)								\
+	#define NIK_PRAX_ARG_XPARAMS(_x_, _c_, _i_, _l_, _v_)								\
 															\
-		auto _s_, NIK_PRAX_ARG_PARAMS(_c_, _i_, _l_, _v_)
+		auto _x_, NIK_PRAX_ARG_PARAMS(_c_, _i_, _l_, _v_)
+
+	#define NIK_PRAX_ARG_EXPARAMS(_e_, _x_, _c_, _i_, _l_, _v_)							\
+															\
+		auto _e_, NIK_PRAX_ARG_XPARAMS(_x_, _c_, _i_, _l_, _v_)
 
 /***********************************************************************************************************************/
 
@@ -706,23 +702,24 @@
 		>::template result											\
 		<
 
-	#define NIK_PRAX_ARG_M(_c_, _i_, _l_)										\
+	#define NIK_PRAX_ARG_R(_c_, _i_, _l_, _v_)									\
 															\
 			_c_,												\
 			PA::next_index(_i_),										\
-			_l_
-
-	#define NIK_PRAX_ARG_R(_v_)											\
-															\
-		_v_...>
+			_l_, _v_...											\
+		>
 
 	#define NIK_PRAX_ARG(_c_, _i_, _l_, _v_)									\
 															\
-		NIK_PRAX_ARG_L(_c_, _i_) NIK_PRAX_ARG_M(_c_, _i_, _l_), NIK_PRAX_ARG_R(_v_)
+		NIK_PRAX_ARG_L(_c_, _i_) NIK_PRAX_ARG_R(_c_, _i_, _l_, _v_)
 
-	#define NIK_PRAX_SARG(_s_, _c_, _i_, _l_, _v_)									\
+	#define NIK_PRAX_XARG(_x_, _c_, _i_, _l_, _v_)									\
 															\
-		NIK_PRAX_ARG_L(_c_, _i_) _s_, NIK_PRAX_ARG_M(_c_, _i_, _l_), NIK_PRAX_ARG_R(_v_)
+		NIK_PRAX_ARG_L(_c_, _i_) _x_, NIK_PRAX_ARG_R(_c_, _i_, _l_, _v_)
+
+	#define NIK_PRAX_EXARG(_e_, _x_, _c_, _i_, _l_, _v_)								\
+															\
+		NIK_PRAX_ARG_L(_c_, _i_) _e_, _x_, NIK_PRAX_ARG_R(_c_, _i_, _l_, _v_)
 
 /***********************************************************************************************************************/
 
@@ -747,25 +744,25 @@
 
 // drop:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_DROP(_e_)									\
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_DROP_SELECTOR(_e_)								\
 															\
 		template<auto... filler>										\
-		struct T_praxis<Shape::argument, PN::drop, PT::_2_ ## _e_, filler...>					\
+		struct T_praxis<Shape::argument, PN::drop, PT::_2_ ## _e_, PT::selector, filler...>			\
 		{													\
-			using T_this = T_praxis_arg<PN::drop, PT::_2_ ## _e_>;						\
+			using T_this = T_praxis_arg<PN::drop, PT::_2_ ## _e_, PT::selector>;				\
 															\
 			template											\
 			<												\
-				NIK_PRAX_ARG_SPARAMS(c, i, l, n, Vs),							\
+				NIK_PRAX_ARG_XPARAMS(m, c, i, l, Vs),							\
 				NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts					\
 			>												\
 			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs)		 			\
 			{												\
-				if constexpr (n == 0)									\
+				if constexpr (m == 0)									\
 															\
 					return NIK_PRAX_ARG(c, i, l, Vs)(vs...);					\
 				else											\
-					return T_this::template result<c, i, l, n-1, Vs...>(vs...);			\
+					return T_this::template result<m-1, c, i, l, Vs...>(vs...);			\
 			}												\
 		};
 
@@ -780,40 +777,40 @@
 		{													\
 			template											\
 			<												\
-				NIK_PRAX_ARG_SPARAMS(s, c, i, l, Vs),							\
+				NIK_PRAX_ARG_XPARAMS(s, c, i, l, Vs),							\
 				typename T, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts				\
 			>												\
 			nik_ces auto result(T v, NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs) -> T_store_U<s>		\
 			{												\
-				return NIK_PRAX_SARG(s, c, i, l, Vs)							\
+				return NIK_PRAX_XARG(s, c, i, l, Vs)							\
 					(v, NIK_2_N_VARS(_e_, NIK_CALL_LFS_LV_LV_1), vs...);				\
 			}												\
 		};
 
 // rotate:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_ROTATE(_e_)									\
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_ROTATE_MUTATOR(_e_)								\
 															\
 		template<auto... filler>										\
-		struct T_praxis<Shape::argument, PN::rotate, PT::_2_ ## _e_, filler...>					\
+		struct T_praxis<Shape::argument, PN::rotate, PT::_2_ ## _e_, PT::mutator, filler...>			\
 		{													\
-			using T_this = T_praxis_arg<PN::rotate, PT::_2_ ## _e_>;					\
+			using T_this = T_praxis_arg<PN::rotate, PT::_2_ ## _e_, PT::mutator>;				\
 															\
 			template											\
 			<												\
-				auto s, NIK_PRAX_ARG_L_PARAMS(c, i, l), auto n, NIK_PRAX_ARG_R_PARAMS(Vs),		\
+				NIK_PRAX_ARG_EXPARAMS(m, s, c, i, l, Vs),						\
 				typename T, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts				\
 			>												\
 			nik_ces auto result(T v, NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs) -> T_store_U<s> 		\
 			{												\
-				if constexpr (n == 0)									\
+				if constexpr (m == 0)									\
 															\
-					return NIK_PRAX_SARG(s, c, i, l, Vs)						\
+					return NIK_PRAX_XARG(s, c, i, l, Vs)						\
 						(v, vs..., NIK_2_N_VARS(_e_, NIK_LV_1));				\
 				else											\
 					return T_this::template result							\
 					<										\
-						s, c, i, l, n-1, Vs...							\
+						m-1, s, c, i, l, Vs...							\
 															\
 					>(v, vs..., NIK_2_N_VARS(_e_, NIK_LV_1));					\
 			}												\
@@ -828,13 +825,37 @@
 		{													\
 			template											\
 			<												\
-				NIK_PRAX_ARG_SPARAMS(s, c, i, l, Vs),							\
+				NIK_PRAX_ARG_XPARAMS(s, c, i, l, Vs),							\
 				typename T, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts				\
 			>												\
 			nik_ces auto result(T v, NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs) -> T_store_U<s>		\
 			{												\
-				return NIK_PRAX_SARG(s, c, i, l, Vs)							\
+				return NIK_PRAX_XARG(s, c, i, l, Vs)							\
 					(v, vs..., NIK_2_N_VARS(_e_, NIK_CALL_LFS_LV_LV_1));				\
+			}												\
+		};
+
+// drop:
+
+	#define NIK_DEFINE_PRAXIS_ARGUMENT_DROP_MUTATOR(_e_)								\
+															\
+		template<auto... filler>										\
+		struct T_praxis<Shape::argument, PN::drop, PT::_2_ ## _e_, PT::mutator, filler...>			\
+		{													\
+			using T_this = T_praxis_arg<PN::drop, PT::_2_ ## _e_, PT::mutator>;				\
+															\
+			template											\
+			<												\
+				NIK_PRAX_ARG_EXPARAMS(m, s, c, i, l, Vs),						\
+				typename T, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts				\
+			>												\
+			nik_ces auto result(T v, NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs)	 			\
+			{												\
+				if constexpr (m == 0)									\
+															\
+					return NIK_PRAX_XARG(s, c, i, l, Vs)(v, vs...);					\
+				else											\
+					return T_this::template result<m-1, s, c, i, l, Vs...>(v, vs...);		\
 			}												\
 		};
 
