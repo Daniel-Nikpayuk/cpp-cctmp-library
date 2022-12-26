@@ -83,19 +83,19 @@ namespace cctmp {
 
 		// accessors:
 
-			nik_ces auto instr(contr_type c, gcindex_type i)
+			nik_ces auto instr(ccontr_type c, gcindex_type i)
 				{ return c[i]; }
 
 		// navigators:
 
-			nik_ces gkey_type next_name(gcdepth_type d, gckey_type m, contr_type c, gcindex_type i)
+			nik_ces gkey_type next_name(gcdepth_type d, gckey_type m, ccontr_type c, gcindex_type i)
 			{
 				if (d == 0)           return PN::halt;
 				else if (m != PT::id) return PN::recall;
 				else                  return c[i+1][PI::name];
 			}
 
-			nik_ces gkey_type next_note(gcdepth_type d, gckey_type m, contr_type c, gcindex_type i)
+			nik_ces gkey_type next_note(gcdepth_type d, gckey_type m, ccontr_type c, gcindex_type i)
 			{
 				if (d == 0)           return PT::pause;
 				else if (m != PT::id) return m;

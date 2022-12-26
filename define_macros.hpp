@@ -57,6 +57,10 @@
 															\
 		.
 
+	#define NIK_L_ANG()												\
+															\
+		<
+
 	#define NIK_R_ANG()												\
 															\
 		>
@@ -85,9 +89,9 @@
 															\
 		F0
 
-	#define NIK_OVER()												\
+	#define NIK_EVAL()												\
 															\
-		eval<
+		eval
 
 	#define NIK_REST()												\
 															\
@@ -133,29 +137,18 @@
 															\
 		fs ## _n_
 
-	#define NIK_LFS_VP_FS_B_LFS_1(_n_)										\
+	#define NIK_BFS_FS_VP_LFS_BFS_FS_1(_n_)										\
 															\
-		template<auto...> typename B ## _n_, auto... fs ## _n_, nik_vp(Fs ## _n_)(B ## _n_<fs ## _n_...>*)
+		template<auto...> typename BFs ## _n_,									\
+		auto... Fs ## _n_, nik_vp(fs ## _n_)(BFs ## _n_<Fs ## _n_...>*)
 
-	#define NIK_CALL_LFS_LV_1(_n_)											\
+	#define NIK_EVAL_FS_V_1(_n_)											\
 															\
-		T_store_U<fs ## _n_>::result(v ## _n_)...
+		eval<Fs ## _n_, V ## _n_>...
 
-	#define NIK_CALL_LFS_LV_LV_1(_n_)										\
+	#define NIK_EVAL_OP_V_V_1(_n_)											\
 															\
-		T_store_U<fs ## _n_>::result(v ## _n_, v)...
-
-	#define NIK_AVP_B_LFS_1(_n_)											\
-															\
-		nik_avp(B<fs ## _n_...>*)
-
-	#define NIK_EVAL_OP_V_1(_n_)											\
-															\
-		eval<Op, _n_, V ## _n_>
-
-	#define NIK_EVAL_LFS_V_1(_n_)											\
-															\
-		eval<fs ## _n_, _n_, V ## _n_>...
+		eval<Op, V ## _n_, V + _n_>
 
 	#define NIK_OP_1(_n_)												\
 															\
@@ -300,6 +293,8 @@
 							NIK_62_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(62)
 	#define NIK_64_IDS(_l_, _m_, _r_)										\
 							NIK_63_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(63)
+	#define NIK_65_IDS(_l_, _m_, _r_)										\
+							NIK_64_IDS(_l_, _m_, _r_)		_r_()	_l_() _m_(64)
 
 /***********************************************************************************************************************/
 
@@ -328,233 +323,35 @@
 
 /***********************************************************************************************************************/
 
-// upper identifiers:
-
-		// redundant (1-64) ?
-
-	#define NIK_UPPER_1_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_(  0)
-
-	#define NIK_UPPER_2_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_(  1)
-
-	#define NIK_UPPER_4_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_(  2) _r_()	_l_() _m_(  3)
-
-	#define NIK_UPPER_8_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_(  4) _r_()	_l_() _m_(  5) _r_()	_l_() _m_(  6) _r_()	_l_() _m_(  7)
-
-	#define NIK_UPPER_16_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_(  8) _r_()	_l_() _m_(  9) _r_()	_l_() _m_( 10) _r_()	_l_() _m_( 11) _r_()		\
-		_l_() _m_( 12) _r_()	_l_() _m_( 13) _r_()	_l_() _m_( 14) _r_()	_l_() _m_( 15)
-
-	#define NIK_UPPER_32_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_( 16) _r_()	_l_() _m_( 17) _r_()	_l_() _m_( 18) _r_()	_l_() _m_( 19) _r_()		\
-		_l_() _m_( 20) _r_()	_l_() _m_( 21) _r_()	_l_() _m_( 22) _r_()	_l_() _m_( 23) _r_()		\
-		_l_() _m_( 24) _r_()	_l_() _m_( 25) _r_()	_l_() _m_( 26) _r_()	_l_() _m_( 27) _r_()		\
-		_l_() _m_( 28) _r_()	_l_() _m_( 29) _r_()	_l_() _m_( 30) _r_()	_l_() _m_( 31)
-
-	#define NIK_UPPER_64_IDS(_l_, _m_, _r_)										\
-															\
-		_l_() _m_( 32) _r_()	_l_() _m_( 33) _r_()	_l_() _m_( 34) _r_()	_l_() _m_( 35) _r_()		\
-		_l_() _m_( 36) _r_()	_l_() _m_( 37) _r_()	_l_() _m_( 38) _r_()	_l_() _m_( 39) _r_()		\
-		_l_() _m_( 40) _r_()	_l_() _m_( 41) _r_()	_l_() _m_( 42) _r_()	_l_() _m_( 43) _r_()		\
-		_l_() _m_( 44) _r_()	_l_() _m_( 45) _r_()	_l_() _m_( 46) _r_()	_l_() _m_( 47) _r_()		\
-		_l_() _m_( 48) _r_()	_l_() _m_( 49) _r_()	_l_() _m_( 50) _r_()	_l_() _m_( 51) _r_()		\
-		_l_() _m_( 52) _r_()	_l_() _m_( 53) _r_()	_l_() _m_( 54) _r_()	_l_() _m_( 55) _r_()		\
-		_l_() _m_( 56) _r_()	_l_() _m_( 57) _r_()	_l_() _m_( 58) _r_()	_l_() _m_( 59) _r_()		\
-		_l_() _m_( 60) _r_()	_l_() _m_( 61) _r_()	_l_() _m_( 62) _r_()	_l_() _m_( 63)
-
-	#define NIK_UPPER_128_IDS(_l_, _m_, _r_)									\
-															\
-		_l_() _m_( 64) _r_()	_l_() _m_( 65) _r_()	_l_() _m_( 66) _r_()	_l_() _m_( 67) _r_()		\
-		_l_() _m_( 68) _r_()	_l_() _m_( 69) _r_()	_l_() _m_( 70) _r_()	_l_() _m_( 71) _r_()		\
-		_l_() _m_( 72) _r_()	_l_() _m_( 73) _r_()	_l_() _m_( 74) _r_()	_l_() _m_( 75) _r_()		\
-		_l_() _m_( 76) _r_()	_l_() _m_( 77) _r_()	_l_() _m_( 78) _r_()	_l_() _m_( 79) _r_()		\
-		_l_() _m_( 80) _r_()	_l_() _m_( 81) _r_()	_l_() _m_( 82) _r_()	_l_() _m_( 83) _r_()		\
-		_l_() _m_( 84) _r_()	_l_() _m_( 85) _r_()	_l_() _m_( 86) _r_()	_l_() _m_( 87) _r_()		\
-		_l_() _m_( 88) _r_()	_l_() _m_( 89) _r_()	_l_() _m_( 90) _r_()	_l_() _m_( 91) _r_()		\
-		_l_() _m_( 92) _r_()	_l_() _m_( 93) _r_()	_l_() _m_( 94) _r_()	_l_() _m_( 95) _r_()		\
-		_l_() _m_( 96) _r_()	_l_() _m_( 97) _r_()	_l_() _m_( 98) _r_()	_l_() _m_( 99) _r_()		\
-		_l_() _m_(100) _r_()	_l_() _m_(101) _r_()	_l_() _m_(102) _r_()	_l_() _m_(103) _r_()		\
-		_l_() _m_(104) _r_()	_l_() _m_(105) _r_()	_l_() _m_(106) _r_()	_l_() _m_(107) _r_()		\
-		_l_() _m_(108) _r_()	_l_() _m_(109) _r_()	_l_() _m_(110) _r_()	_l_() _m_(111) _r_()		\
-		_l_() _m_(112) _r_()	_l_() _m_(113) _r_()	_l_() _m_(114) _r_()	_l_() _m_(115) _r_()		\
-		_l_() _m_(116) _r_()	_l_() _m_(117) _r_()	_l_() _m_(118) _r_()	_l_() _m_(119) _r_()		\
-		_l_() _m_(120) _r_()	_l_() _m_(121) _r_()	_l_() _m_(122) _r_()	_l_() _m_(123) _r_()		\
-		_l_() _m_(124) _r_()	_l_() _m_(125) _r_()	_l_() _m_(126) _r_()	_l_() _m_(127)
-
-	#define NIK_UPPER_256_IDS(_l_, _m_, _r_)									\
-															\
-		_l_() _m_(128) _r_()	_l_() _m_(129) _r_()	_l_() _m_(130) _r_()	_l_() _m_(131) _r_()		\
-		_l_() _m_(132) _r_()	_l_() _m_(133) _r_()	_l_() _m_(134) _r_()	_l_() _m_(135) _r_()		\
-		_l_() _m_(136) _r_()	_l_() _m_(137) _r_()	_l_() _m_(138) _r_()	_l_() _m_(139) _r_()		\
-		_l_() _m_(140) _r_()	_l_() _m_(141) _r_()	_l_() _m_(142) _r_()	_l_() _m_(143) _r_()		\
-		_l_() _m_(144) _r_()	_l_() _m_(145) _r_()	_l_() _m_(146) _r_()	_l_() _m_(147) _r_()		\
-		_l_() _m_(148) _r_()	_l_() _m_(149) _r_()	_l_() _m_(150) _r_()	_l_() _m_(151) _r_()		\
-		_l_() _m_(152) _r_()	_l_() _m_(153) _r_()	_l_() _m_(154) _r_()	_l_() _m_(155) _r_()		\
-		_l_() _m_(156) _r_()	_l_() _m_(157) _r_()	_l_() _m_(158) _r_()	_l_() _m_(159) _r_()		\
-		_l_() _m_(160) _r_()	_l_() _m_(161) _r_()	_l_() _m_(162) _r_()	_l_() _m_(163) _r_()		\
-		_l_() _m_(164) _r_()	_l_() _m_(165) _r_()	_l_() _m_(166) _r_()	_l_() _m_(167) _r_()		\
-		_l_() _m_(168) _r_()	_l_() _m_(169) _r_()	_l_() _m_(170) _r_()	_l_() _m_(171) _r_()		\
-		_l_() _m_(172) _r_()	_l_() _m_(173) _r_()	_l_() _m_(174) _r_()	_l_() _m_(175) _r_()		\
-		_l_() _m_(176) _r_()	_l_() _m_(177) _r_()	_l_() _m_(178) _r_()	_l_() _m_(179) _r_()		\
-		_l_() _m_(180) _r_()	_l_() _m_(181) _r_()	_l_() _m_(182) _r_()	_l_() _m_(183) _r_()		\
-		_l_() _m_(184) _r_()	_l_() _m_(185) _r_()	_l_() _m_(186) _r_()	_l_() _m_(187) _r_()		\
-		_l_() _m_(188) _r_()	_l_() _m_(189) _r_()	_l_() _m_(190) _r_()	_l_() _m_(191) _r_()		\
-		_l_() _m_(192) _r_()	_l_() _m_(193) _r_()	_l_() _m_(194) _r_()	_l_() _m_(195) _r_()		\
-		_l_() _m_(196) _r_()	_l_() _m_(197) _r_()	_l_() _m_(198) _r_()	_l_() _m_(199) _r_()		\
-		_l_() _m_(200) _r_()	_l_() _m_(201) _r_()	_l_() _m_(202) _r_()	_l_() _m_(203) _r_()		\
-		_l_() _m_(204) _r_()	_l_() _m_(205) _r_()	_l_() _m_(206) _r_()	_l_() _m_(207) _r_()		\
-		_l_() _m_(208) _r_()	_l_() _m_(209) _r_()	_l_() _m_(210) _r_()	_l_() _m_(211) _r_()		\
-		_l_() _m_(212) _r_()	_l_() _m_(213) _r_()	_l_() _m_(214) _r_()	_l_() _m_(215) _r_()		\
-		_l_() _m_(216) _r_()	_l_() _m_(217) _r_()	_l_() _m_(218) _r_()	_l_() _m_(219) _r_()		\
-		_l_() _m_(220) _r_()	_l_() _m_(221) _r_()	_l_() _m_(222) _r_()	_l_() _m_(223) _r_()		\
-		_l_() _m_(224) _r_()	_l_() _m_(225) _r_()	_l_() _m_(226) _r_()	_l_() _m_(227) _r_()		\
-		_l_() _m_(228) _r_()	_l_() _m_(229) _r_()	_l_() _m_(230) _r_()	_l_() _m_(231) _r_()		\
-		_l_() _m_(232) _r_()	_l_() _m_(233) _r_()	_l_() _m_(234) _r_()	_l_() _m_(235) _r_()		\
-		_l_() _m_(236) _r_()	_l_() _m_(237) _r_()	_l_() _m_(238) _r_()	_l_() _m_(239) _r_()		\
-		_l_() _m_(240) _r_()	_l_() _m_(241) _r_()	_l_() _m_(242) _r_()	_l_() _m_(243) _r_()		\
-		_l_() _m_(244) _r_()	_l_() _m_(245) _r_()	_l_() _m_(246) _r_()	_l_() _m_(247) _r_()		\
-		_l_() _m_(248) _r_()	_l_() _m_(249) _r_()	_l_() _m_(250) _r_()	_l_() _m_(251) _r_()		\
-		_l_() _m_(252) _r_()	_l_() _m_(253) _r_()	_l_() _m_(254) _r_()	_l_() _m_(255)
-
-	#define NIK_UPPER_512_IDS(_l_, _m_, _r_)									\
-															\
-		_l_() _m_(256) _r_()	_l_() _m_(257) _r_()	_l_() _m_(258) _r_()	_l_() _m_(259) _r_()		\
-		_l_() _m_(260) _r_()	_l_() _m_(261) _r_()	_l_() _m_(262) _r_()	_l_() _m_(263) _r_()		\
-		_l_() _m_(264) _r_()	_l_() _m_(265) _r_()	_l_() _m_(266) _r_()	_l_() _m_(267) _r_()		\
-		_l_() _m_(268) _r_()	_l_() _m_(269) _r_()	_l_() _m_(270) _r_()	_l_() _m_(271) _r_()		\
-		_l_() _m_(272) _r_()	_l_() _m_(273) _r_()	_l_() _m_(274) _r_()	_l_() _m_(275) _r_()		\
-		_l_() _m_(276) _r_()	_l_() _m_(277) _r_()	_l_() _m_(278) _r_()	_l_() _m_(279) _r_()		\
-		_l_() _m_(280) _r_()	_l_() _m_(281) _r_()	_l_() _m_(282) _r_()	_l_() _m_(283) _r_()		\
-		_l_() _m_(284) _r_()	_l_() _m_(285) _r_()	_l_() _m_(286) _r_()	_l_() _m_(287) _r_()		\
-		_l_() _m_(288) _r_()	_l_() _m_(289) _r_()	_l_() _m_(290) _r_()	_l_() _m_(291) _r_()		\
-		_l_() _m_(292) _r_()	_l_() _m_(293) _r_()	_l_() _m_(294) _r_()	_l_() _m_(295) _r_()		\
-		_l_() _m_(296) _r_()	_l_() _m_(297) _r_()	_l_() _m_(298) _r_()	_l_() _m_(299) _r_()		\
-		_l_() _m_(300) _r_()	_l_() _m_(301) _r_()	_l_() _m_(302) _r_()	_l_() _m_(303) _r_()		\
-		_l_() _m_(304) _r_()	_l_() _m_(305) _r_()	_l_() _m_(306) _r_()	_l_() _m_(307) _r_()		\
-		_l_() _m_(308) _r_()	_l_() _m_(309) _r_()	_l_() _m_(310) _r_()	_l_() _m_(311) _r_()		\
-		_l_() _m_(312) _r_()	_l_() _m_(313) _r_()	_l_() _m_(314) _r_()	_l_() _m_(315) _r_()		\
-		_l_() _m_(316) _r_()	_l_() _m_(317) _r_()	_l_() _m_(318) _r_()	_l_() _m_(319) _r_()		\
-		_l_() _m_(320) _r_()	_l_() _m_(321) _r_()	_l_() _m_(322) _r_()	_l_() _m_(323) _r_()		\
-		_l_() _m_(324) _r_()	_l_() _m_(325) _r_()	_l_() _m_(326) _r_()	_l_() _m_(327) _r_()		\
-		_l_() _m_(328) _r_()	_l_() _m_(329) _r_()	_l_() _m_(330) _r_()	_l_() _m_(331) _r_()		\
-		_l_() _m_(332) _r_()	_l_() _m_(333) _r_()	_l_() _m_(334) _r_()	_l_() _m_(335) _r_()		\
-		_l_() _m_(336) _r_()	_l_() _m_(337) _r_()	_l_() _m_(338) _r_()	_l_() _m_(339) _r_()		\
-		_l_() _m_(340) _r_()	_l_() _m_(341) _r_()	_l_() _m_(342) _r_()	_l_() _m_(343) _r_()		\
-		_l_() _m_(344) _r_()	_l_() _m_(345) _r_()	_l_() _m_(346) _r_()	_l_() _m_(347) _r_()		\
-		_l_() _m_(348) _r_()	_l_() _m_(349) _r_()	_l_() _m_(350) _r_()	_l_() _m_(351) _r_()		\
-		_l_() _m_(352) _r_()	_l_() _m_(353) _r_()	_l_() _m_(354) _r_()	_l_() _m_(355) _r_()		\
-		_l_() _m_(356) _r_()	_l_() _m_(357) _r_()	_l_() _m_(358) _r_()	_l_() _m_(359) _r_()		\
-		_l_() _m_(360) _r_()	_l_() _m_(361) _r_()	_l_() _m_(362) _r_()	_l_() _m_(363) _r_()		\
-		_l_() _m_(364) _r_()	_l_() _m_(365) _r_()	_l_() _m_(366) _r_()	_l_() _m_(367) _r_()		\
-		_l_() _m_(368) _r_()	_l_() _m_(369) _r_()	_l_() _m_(370) _r_()	_l_() _m_(371) _r_()		\
-		_l_() _m_(372) _r_()	_l_() _m_(373) _r_()	_l_() _m_(374) _r_()	_l_() _m_(375) _r_()		\
-		_l_() _m_(376) _r_()	_l_() _m_(377) _r_()	_l_() _m_(378) _r_()	_l_() _m_(379) _r_()		\
-		_l_() _m_(380) _r_()	_l_() _m_(381) _r_()	_l_() _m_(382) _r_()	_l_() _m_(383) _r_()		\
-		_l_() _m_(384) _r_()	_l_() _m_(385) _r_()	_l_() _m_(386) _r_()	_l_() _m_(387) _r_()		\
-		_l_() _m_(388) _r_()	_l_() _m_(389) _r_()	_l_() _m_(390) _r_()	_l_() _m_(391) _r_()		\
-		_l_() _m_(392) _r_()	_l_() _m_(393) _r_()	_l_() _m_(394) _r_()	_l_() _m_(395) _r_()		\
-		_l_() _m_(396) _r_()	_l_() _m_(397) _r_()	_l_() _m_(398) _r_()	_l_() _m_(399) _r_()		\
-		_l_() _m_(400) _r_()	_l_() _m_(401) _r_()	_l_() _m_(402) _r_()	_l_() _m_(403) _r_()		\
-		_l_() _m_(404) _r_()	_l_() _m_(405) _r_()	_l_() _m_(406) _r_()	_l_() _m_(407) _r_()		\
-		_l_() _m_(408) _r_()	_l_() _m_(409) _r_()	_l_() _m_(410) _r_()	_l_() _m_(411) _r_()		\
-		_l_() _m_(412) _r_()	_l_() _m_(413) _r_()	_l_() _m_(414) _r_()	_l_() _m_(415) _r_()		\
-		_l_() _m_(416) _r_()	_l_() _m_(417) _r_()	_l_() _m_(418) _r_()	_l_() _m_(419) _r_()		\
-		_l_() _m_(420) _r_()	_l_() _m_(421) _r_()	_l_() _m_(422) _r_()	_l_() _m_(423) _r_()		\
-		_l_() _m_(424) _r_()	_l_() _m_(425) _r_()	_l_() _m_(426) _r_()	_l_() _m_(427) _r_()		\
-		_l_() _m_(428) _r_()	_l_() _m_(429) _r_()	_l_() _m_(430) _r_()	_l_() _m_(431) _r_()		\
-		_l_() _m_(432) _r_()	_l_() _m_(433) _r_()	_l_() _m_(434) _r_()	_l_() _m_(435) _r_()		\
-		_l_() _m_(436) _r_()	_l_() _m_(437) _r_()	_l_() _m_(438) _r_()	_l_() _m_(439) _r_()		\
-		_l_() _m_(440) _r_()	_l_() _m_(441) _r_()	_l_() _m_(442) _r_()	_l_() _m_(443) _r_()		\
-		_l_() _m_(444) _r_()	_l_() _m_(445) _r_()	_l_() _m_(446) _r_()	_l_() _m_(447) _r_()		\
-		_l_() _m_(448) _r_()	_l_() _m_(449) _r_()	_l_() _m_(450) _r_()	_l_() _m_(451) _r_()		\
-		_l_() _m_(452) _r_()	_l_() _m_(453) _r_()	_l_() _m_(454) _r_()	_l_() _m_(455) _r_()		\
-		_l_() _m_(456) _r_()	_l_() _m_(457) _r_()	_l_() _m_(458) _r_()	_l_() _m_(459) _r_()		\
-		_l_() _m_(460) _r_()	_l_() _m_(461) _r_()	_l_() _m_(462) _r_()	_l_() _m_(463) _r_()		\
-		_l_() _m_(464) _r_()	_l_() _m_(465) _r_()	_l_() _m_(466) _r_()	_l_() _m_(467) _r_()		\
-		_l_() _m_(468) _r_()	_l_() _m_(469) _r_()	_l_() _m_(470) _r_()	_l_() _m_(471) _r_()		\
-		_l_() _m_(472) _r_()	_l_() _m_(473) _r_()	_l_() _m_(474) _r_()	_l_() _m_(475) _r_()		\
-		_l_() _m_(476) _r_()	_l_() _m_(477) _r_()	_l_() _m_(478) _r_()	_l_() _m_(479) _r_()		\
-		_l_() _m_(480) _r_()	_l_() _m_(481) _r_()	_l_() _m_(482) _r_()	_l_() _m_(483) _r_()		\
-		_l_() _m_(484) _r_()	_l_() _m_(485) _r_()	_l_() _m_(486) _r_()	_l_() _m_(487) _r_()		\
-		_l_() _m_(488) _r_()	_l_() _m_(489) _r_()	_l_() _m_(490) _r_()	_l_() _m_(491) _r_()		\
-		_l_() _m_(492) _r_()	_l_() _m_(493) _r_()	_l_() _m_(494) _r_()	_l_() _m_(495) _r_()		\
-		_l_() _m_(496) _r_()	_l_() _m_(497) _r_()	_l_() _m_(498) _r_()	_l_() _m_(499) _r_()		\
-		_l_() _m_(500) _r_()	_l_() _m_(501) _r_()	_l_() _m_(502) _r_()	_l_() _m_(503) _r_()		\
-		_l_() _m_(504) _r_()	_l_() _m_(505) _r_()	_l_() _m_(506) _r_()	_l_() _m_(507) _r_()		\
-		_l_() _m_(508) _r_()	_l_() _m_(509) _r_()	_l_() _m_(510) _r_()	_l_() _m_(511)
-
-/***********************************************************************************************************************/
-
 // identifiers:
 
 	#define NIK_2_0_IDS(_l_, _m_, _r_)										\
 															\
-		NIK_UPPER_1_IDS(_l_, _m_, _r_)
+		NIK_1_IDS(_l_, _m_, _r_)
 
 	#define NIK_2_1_IDS(_l_, _m_, _r_)										\
 															\
-		NIK_UPPER_1_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_2_IDS(_l_, _m_, _r_)
+		NIK_2_IDS(_l_, _m_, _r_)
 
 	#define NIK_2_2_IDS(_l_, _m_, _r_)										\
 															\
-		NIK_UPPER_1_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_2_IDS(_l_, _m_, _r_)		_r_()		\
-		NIK_UPPER_4_IDS(_l_, _m_, _r_)
+		NIK_4_IDS(_l_, _m_, _r_)
 
 	#define NIK_2_3_IDS(_l_, _m_, _r_)										\
 															\
-		NIK_UPPER_1_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_2_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_4_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_8_IDS(_l_, _m_, _r_)
+		NIK_8_IDS(_l_, _m_, _r_)
 
 	#define NIK_2_4_IDS(_l_, _m_, _r_)										\
 															\
-		NIK_UPPER_1_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_2_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_4_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_8_IDS(_l_, _m_, _r_)		_r_()		\
-		NIK_UPPER_16_IDS(_l_, _m_, _r_)
+		NIK_16_IDS(_l_, _m_, _r_)
 
 	#define NIK_2_5_IDS(_l_, _m_, _r_)										\
 															\
-		NIK_UPPER_1_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_2_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_4_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_8_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_16_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_32_IDS(_l_, _m_, _r_)
+		NIK_32_IDS(_l_, _m_, _r_)
 
 	#define NIK_2_6_IDS(_l_, _m_, _r_)										\
 															\
-		NIK_UPPER_1_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_2_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_4_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_8_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_16_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_32_IDS(_l_, _m_, _r_)		_r_()		\
-		NIK_UPPER_64_IDS(_l_, _m_, _r_)
-
-	#define NIK_2_7_IDS(_l_, _m_, _r_)										\
-															\
-		NIK_UPPER_1_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_2_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_4_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_8_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_16_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_32_IDS(_l_, _m_, _r_)		_r_()		\
-		NIK_UPPER_64_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_128_IDS(_l_, _m_, _r_)
-
-	#define NIK_2_8_IDS(_l_, _m_, _r_)										\
-															\
-		NIK_UPPER_1_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_2_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_4_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_8_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_16_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_32_IDS(_l_, _m_, _r_)		_r_()		\
-		NIK_UPPER_64_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_128_IDS(_l_, _m_, _r_)	_r_()		\
-	       	NIK_UPPER_256_IDS(_l_, _m_, _r_)
-
-	#define NIK_2_9_IDS(_l_, _m_, _r_)										\
-															\
-		NIK_UPPER_1_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_2_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_4_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_8_IDS(_l_, _m_, _r_)		_r_()		\
-	       	NIK_UPPER_16_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_32_IDS(_l_, _m_, _r_)		_r_()		\
-		NIK_UPPER_64_IDS(_l_, _m_, _r_)		_r_()	NIK_UPPER_128_IDS(_l_, _m_, _r_)	_r_()		\
-	       	NIK_UPPER_256_IDS(_l_, _m_, _r_)	_r_()	NIK_UPPER_512_IDS(_l_, _m_, _r_)
+		NIK_64_IDS(_l_, _m_, _r_)
 
 /***********************************************************************************************************************/
 
@@ -597,23 +394,13 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// monoid calls:
-
-	#define NIK_2_N_MONOID_CALLS(_n_, _l_, _m_)									\
-															\
-		NIK_2_ ## _n_ ## _IDS(_l_, _m_, NIK_COMMA)
-
-// monoid values:
-
-	#define NIK_2_N_MONOID_VARS(_n_, _v_, _r_)									\
-															\
-		NIK_2_ ## _n_ ## _IDS(NIK_EMPTY, _v_, _r_)
-
 // action folds:
 
-	#define NIK_2_N_ACTION_FOLDS(_n_, _l_, _m_, _s_, _v_, _q_, _r_)							\
+	#define NIK_2_N_ACTION_FOLDS(_e_, _a_, _f_, _v_)								\
 															\
-		NIK_2_N_MONOID_CALLS(_n_, _l_, _m_), _s_, NIK_2_N_MONOID_VARS(_n_, _v_, _q_() _r_) _q_()
+		NIK_2_ ## _e_ ## _IDS(_a_, NIK_L_ANG() _f_ ## _1, NIK_COMMA),						\
+		_v_,													\
+		NIK_2_ ## _e_ ## _IDS(NIK_EMPTY, NIK_## _v_ ##_1, NIK_R_ANG() NIK_COMMA) NIK_R_ANG()
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -647,215 +434,196 @@
 
 /***********************************************************************************************************************/
 
-// base:
+// controls:
 
-	#define NIK_DEFINE_PRAXIS_BASE(_n_)										\
+	#define NIK_PRAXIS_CONTROLS(_d_, _c_, _i_, _n_)									\
 															\
-		template												\
-		<													\
-			gkey_type Syn, gkey_type Name, gkey_type Note,							\
-			template<auto...> typename B, nik_vp(b)(T_store_B<B>*), auto L, auto R				\
-		>													\
-		struct T_praxis<Syn, Name, Note, b, gindex_type{_n_}, L, R> : public B					\
-		<													\
-			Syn, Name, Note, _n_, L, R									\
-		> { };
-
-// basis:
-
-	#define NIK_DEFINE_PRAXIS_BASIS(_n_)										\
-															\
-		NIK_ ## _n_ ## _IDS(NIK_EMPTY, NIK_DEFINE_PRAXIS_BASE, NIK_EMPTY)
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// argument:
-
-/***********************************************************************************************************************/
+		auto _d_, auto _c_, auto _i_, auto _n_
 
 // params:
 
-	#define NIK_PRAX_ARG_PARAMS(_c_, _i_, _l_, _v_)									\
+	#define NIK_PRAXIS_PARAMS(_d_, _c_, _i_, _n_, _v_)								\
 															\
-		auto _c_, auto _i_, auto _l_, auto... _v_
-
-	#define NIK_PRAX_ARG_XPARAMS(_x_, _c_, _i_, _l_, _v_)								\
-															\
-		auto _x_, NIK_PRAX_ARG_PARAMS(_c_, _i_, _l_, _v_)
-
-	#define NIK_PRAX_ARG_EXPARAMS(_e_, _x_, _c_, _i_, _l_, _v_)							\
-															\
-		auto _e_, NIK_PRAX_ARG_XPARAMS(_x_, _c_, _i_, _l_, _v_)
+		NIK_PRAXIS_CONTROLS(_d_, _c_, _i_, _n_), auto... _v_
 
 /***********************************************************************************************************************/
 
 // machine:
 
-	#define NIK_PRAX_ARG_L(_c_, _i_)										\
+	#define NIK_PRAXIS_L(_e_, _d_, _c_, _i_)									\
 															\
-		T_praxis_arg												\
+		T_praxis												\
 		<													\
-			PA::next_name(_c_, _i_),									\
-			PA::next_note(_c_, _i_)										\
+			PD::next_name(_d_, _c_, _i_),									\
+			PD::next_note(_d_, _c_, _i_),									\
+			_e_
+
+	#define NIK_PRAXIS_M(_d_, _c_, _i_, _n_)									\
 															\
 		>::template result											\
-		<
-
-	#define NIK_PRAX_ARG_R(_c_, _i_, _l_, _v_)									\
-															\
+		<													\
+			PD::next_depth(_d_),										\
 			_c_,												\
-			PA::next_index(_i_),										\
-			_l_, _v_...											\
+			PD::next_index(_d_, _i_),									\
+			_n_
+
+	#define NIK_PRAXIS_R												\
+															\
 		>
 
-	#define NIK_PRAX_ARG(_c_, _i_, _l_, _v_)									\
+	#define NIK_PRAXIS_BEGIN(_e_, _d_, _c_, _i_, _n_)								\
 															\
-		NIK_PRAX_ARG_L(_c_, _i_) NIK_PRAX_ARG_R(_c_, _i_, _l_, _v_)
+		NIK_PRAXIS_L(_e_, _d_, _c_, _i_) NIK_PRAXIS_M(_d_, _c_, _i_, _n_)
 
-	#define NIK_PRAX_XARG(_x_, _c_, _i_, _l_, _v_)									\
+	#define NIK_PRAXIS_END												\
 															\
-		NIK_PRAX_ARG_L(_c_, _i_) _x_, NIK_PRAX_ARG_R(_c_, _i_, _l_, _v_)
+		NIK_PRAXIS_R
 
-	#define NIK_PRAX_EXARG(_e_, _x_, _c_, _i_, _l_, _v_)								\
+	#define NIK_PRAXIS_TEMPLATE(_e_, _d_, _c_, _i_)									\
 															\
-		NIK_PRAX_ARG_L(_c_, _i_) _e_, _x_, NIK_PRAX_ARG_R(_c_, _i_, _l_, _v_)
+		NIK_PRAXIS_L(_e_, _d_, _c_, _i_)
+
+	#define NIK_PRAXIS_RESULT(_d_, _c_, _i_, _n_, _v_)								\
+															\
+		NIK_PRAXIS_M(_d_, _c_, _i_, _n_), _v_... NIK_PRAXIS_R
+
+	#define NIK_PRAXIS(_e_, _d_, _c_, _i_, _n_, _v_)								\
+															\
+		NIK_PRAXIS_TEMPLATE(_e_, _d_, _c_, _i_) NIK_PRAXIS_RESULT(_d_, _c_, _i_, _n_, _v_) 
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// param:
 
 /***********************************************************************************************************************/
 
-// select:
+// push id:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_SELECT(_e_)									\
-															\
-		template<NIK_2_N_VARS(_e_, NIK_LFS_VP_FS_B_LFS_1)>							\
-		struct T_praxis<Shape::argument, PN::select, PT::_2_ ## _e_, NIK_2_N_VARS(_e_, NIK_FS_1)>		\
-		{													\
-			template											\
-			<												\
-				NIK_PRAX_ARG_PARAMS(c, i, l, Vs),							\
-				NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts					\
-			>												\
-			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs)					\
-			{												\
-				return NIK_PRAX_ARG(c, i, l, Vs)							\
-					(NIK_2_N_VARS(_e_, NIK_CALL_LFS_LV_1), vs...);					\
-			}												\
-		};
-
-// drop:
-
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_DROP_SELECTOR(_e_)								\
+	#define NIK_DEFINE_PRAXIS_PUSH_ID_2_N(_e_)									\
 															\
 		template<auto... filler>										\
-		struct T_praxis<Shape::argument, PN::drop, PT::_2_ ## _e_, PT::selector, filler...>			\
-		{													\
-			using T_this = T_praxis_arg<PN::drop, PT::_2_ ## _e_, PT::selector>;				\
-															\
-			template											\
-			<												\
-				NIK_PRAX_ARG_XPARAMS(m, c, i, l, Vs),							\
-				NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts					\
-			>												\
-			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs)		 			\
-			{												\
-				if constexpr (m == 0)									\
-															\
-					return NIK_PRAX_ARG(c, i, l, Vs)(vs...);					\
-				else											\
-					return T_this::template result<m-1, c, i, l, Vs...>(vs...);			\
-			}												\
-		};
-
-/***********************************************************************************************************************/
-
-// mutate:
-
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_MUTATE(_e_)									\
-															\
-		template<NIK_2_N_VARS(_e_, NIK_LFS_VP_FS_B_LFS_1)>							\
-		struct T_praxis<Shape::argument, PN::mutate, PT::_2_ ## _e_, NIK_2_N_VARS(_e_, NIK_FS_1)>		\
+		struct T_praxis<PN::push, PT::id, _2_ ## _e_, filler...>						\
 		{													\
 			template											\
 			<												\
-				NIK_PRAX_ARG_XPARAMS(s, c, i, l, Vs),							\
-				typename T, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts				\
+				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
+				NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,						\
+				typename Heap0, template<auto...> typename B1, auto... Xs, typename... Heaps		\
 			>												\
-			nik_ces auto result(T v, NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs) -> T_store_U<s>		\
+			nik_ces auto result(Heap0 H0, nik_vp(H1)(B1<Xs...>*), Heaps... Hs)	 			\
 			{												\
-				return NIK_PRAX_XARG(s, c, i, l, Vs)							\
-					(v, NIK_2_N_VARS(_e_, NIK_CALL_LFS_LV_LV_1), vs...);				\
+				nik_ce auto nH1 = U_store_T<B1<Xs..., NIK_2_N_VARS(_e_, NIK_V_1)>>;			\
+															\
+				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
+															\
+					Vs...										\
+															\
+				NIK_PRAXIS_END(H0, nH1, Hs...);								\
 			}												\
 		};
 
-// rotate:
+// left id:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_ROTATE_MUTATOR(_e_)								\
+	#define NIK_DEFINE_PRAXIS_LEFT_ID_2_N(_e_)									\
+															\
+		template<NIK_2_N_VARS(_e_, NIK_BFS_FS_VP_LFS_BFS_FS_1)>							\
+		struct T_praxis<PN::left, PT::id, _2_ ## _e_, NIK_2_N_VARS(_e_, NIK_LFS_1)>				\
+		{													\
+			template											\
+			<												\
+				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
+				NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,						\
+				typename Heap0, template<auto...> typename B1, auto... Xs, typename... Heaps		\
+			>												\
+			nik_ces auto result(Heap0 H0, nik_vp(H1)(B1<Xs...>*), Heaps... Hs)	 			\
+			{												\
+				nik_ce auto nH1 = U_store_T<B1<>>;							\
+															\
+				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
+															\
+					Xs..., NIK_2_N_VARS(_e_, NIK_EVAL_FS_V_1)					\
+															\
+				NIK_PRAXIS_END(H0, nH1, Hs...);								\
+			}												\
+		};
+
+// fold id:
+
+	#define NIK_DEFINE_PRAXIS_FOLD_ID_2_N(_e_)									\
 															\
 		template<auto... filler>										\
-		struct T_praxis<Shape::argument, PN::rotate, PT::_2_ ## _e_, PT::mutator, filler...>			\
-		{													\
-			using T_this = T_praxis_arg<PN::rotate, PT::_2_ ## _e_, PT::mutator>;				\
-															\
-			template											\
-			<												\
-				NIK_PRAX_ARG_EXPARAMS(m, s, c, i, l, Vs),						\
-				typename T, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts				\
-			>												\
-			nik_ces auto result(T v, NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs) -> T_store_U<s> 		\
-			{												\
-				if constexpr (m == 0)									\
-															\
-					return NIK_PRAX_XARG(s, c, i, l, Vs)						\
-						(v, vs..., NIK_2_N_VARS(_e_, NIK_LV_1));				\
-				else											\
-					return T_this::template result							\
-					<										\
-						m-1, s, c, i, l, Vs...							\
-															\
-					>(v, vs..., NIK_2_N_VARS(_e_, NIK_LV_1));					\
-			}												\
-		};
-
-// unpad:
-
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_UNPAD(_e_)									\
-															\
-		template<NIK_2_N_VARS(_e_, NIK_LFS_VP_FS_B_LFS_1)>							\
-		struct T_praxis<Shape::argument, PN::unpad, PT::_2_ ## _e_, NIK_2_N_VARS(_e_, NIK_FS_1)>		\
+		struct T_praxis<PN::fold, PT::id, _2_ ## _e_, filler...>						\
 		{													\
 			template											\
 			<												\
-				NIK_PRAX_ARG_XPARAMS(s, c, i, l, Vs),							\
-				typename T, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts				\
+				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
+				auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,					\
+				template<auto...> typename B0, auto W, auto... Ws, typename... Heaps			\
 			>												\
-			nik_ces auto result(T v, NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs) -> T_store_U<s>		\
+			nik_ces auto result(nik_vp(H0)(B0<W, Ws...>*), Heaps... Hs)	 				\
 			{												\
-				return NIK_PRAX_XARG(s, c, i, l, Vs)							\
-					(v, vs..., NIK_2_N_VARS(_e_, NIK_CALL_LFS_LV_LV_1));				\
+				nik_ce auto ins	= PD::instr(c, i);							\
+				nik_ce auto Op  = eval<W, ins[PI::pos], Ws...>;						\
+															\
+				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
+															\
+					NIK_2_N_ACTION_FOLDS(_e_, NIK_EVAL, NIK_OP, V), Vs...				\
+															\
+				NIK_PRAXIS_END(H0, Hs...);								\
 			}												\
 		};
 
-// drop:
+// sift apply:
 
-	#define NIK_DEFINE_PRAXIS_ARGUMENT_DROP_MUTATOR(_e_)								\
+	#define NIK_DEFINE_PRAXIS_SIFT_APPLY_2_N(_e_)									\
 															\
 		template<auto... filler>										\
-		struct T_praxis<Shape::argument, PN::drop, PT::_2_ ## _e_, PT::mutator, filler...>			\
+		struct T_praxis<PN::sift, PT::apply, _2_ ## _e_, filler...>						\
 		{													\
-			using T_this = T_praxis_arg<PN::drop, PT::_2_ ## _e_, PT::mutator>;				\
-															\
 			template											\
 			<												\
-				NIK_PRAX_ARG_EXPARAMS(m, s, c, i, l, Vs),						\
-				typename T, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts				\
+				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
+				auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,					\
+				template<auto...> typename B0, auto W, auto... Ws, typename... Heaps			\
 			>												\
-			nik_ces auto result(T v, NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs)	 			\
+			nik_ces auto result(nik_vp(H0)(B0<W, Ws...>*), Heaps... Hs)	 				\
 			{												\
-				if constexpr (m == 0)									\
+				nik_ce auto ins	= PD::instr(c, i);							\
+				nik_ce auto Op  = eval<W, ins[PI::pos], Ws...>;						\
 															\
-					return NIK_PRAX_XARG(s, c, i, l, Vs)(v, vs...);					\
-				else											\
-					return T_this::template result<m-1, s, c, i, l, Vs...>(v, vs...);		\
+				return NIK_PRAXIS_L(_2_ ## _e_, d, c, i),						\
+															\
+					NIK_2_N_VARS(_e_, NIK_EVAL_OP_V_V_1)						\
+															\
+				NIK_PRAXIS_M(d, c, i, n),								\
+															\
+					V + _2_ ## _e_, NIK_2_N_VARS(_e_, NIK_V_1), Vs...				\
+															\
+				NIK_PRAXIS_R(Hs...);									\
+			}												\
+		};
+
+// sift id:
+
+	#define NIK_DEFINE_PRAXIS_SIFT_ID_2_N(_e_)									\
+															\
+		template<NIK_2_N_VARS(_e_, NIK_BFS_FS_VP_LFS_BFS_FS_1)>							\
+		struct T_praxis<PN::sift, PT::id, _2_ ## _e_, NIK_2_N_VARS(_e_, NIK_LFS_1)>				\
+		{													\
+			template											\
+			<												\
+				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
+				auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,					\
+				typename... Heaps									\
+			>												\
+			nik_ces auto result(Heaps... Hs)								\
+			{												\
+				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
+															\
+					V, Vs..., NIK_2_N_VARS(_e_, NIK_EVAL_FS_V_1)					\
+															\
+				NIK_PRAXIS_END(Hs...);									\
 			}												\
 		};
 
@@ -892,209 +660,6 @@
 	#define NIK_ABSTRACT(_a_, _d_, _m_, _c_, _i_, _v_)								\
 															\
 		NIK_BEGIN_ABSTRACT(_a_, _d_, _m_, _c_, _i_), _v_... NIK_END_ABSTRACT
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// block:
-
-/***********************************************************************************************************************/
-
-	#define NIK_BLOCK_PARAMS											\
-															\
-		NIK_ABSTRACT_PARAMS, auto n
-
-/***********************************************************************************************************************/
-
-	#define NIK_BEGIN_BLOCK(_d_, _m_, _c_, _i_, _n_)								\
-															\
-		NIK_BEGIN_ABSTRACT(block, _d_, _m_, _c_, _i_), _n_
-
-	#define NIK_END_BLOCK	 											\
-															\
-		NIK_END_ABSTRACT
-
-	#define NIK_BLOCK(_d_, _m_, _c_, _i_, _n_, _v_)									\
-															\
-		NIK_BEGIN_BLOCK(_d_, _m_, _c_, _i_, _n_), _v_... NIK_END_BLOCK
-
-/***********************************************************************************************************************/
-
-// drop:
-
-	#define NIK_DEFINE_BLOCK_DROP(_e_)										\
-															\
-		template<auto... filler>										\
-		struct T_block<BN::drop, BT::_2_ ## _e_, filler...>							\
-		{													\
-			template<NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs, typename... Heaps>	\
-			nik_ces auto result(Heaps... Hs)								\
-			{												\
-				return NIK_BLOCK(d, m, c, i, n, Vs)(Hs...);						\
-			}												\
-		};
-
-/***********************************************************************************************************************/
-
-// heap:
-
-	#define NIK_DEFINE_BLOCK_HEAP(_e_)										\
-															\
-		template<auto... filler>										\
-		struct T_block<BN::heap, BT::_2_ ## _e_, filler...>							\
-		{													\
-			template											\
-			<												\
-				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,				\
-				typename Heap0, typename Heap1, typename Heap2,						\
-				template<auto...> typename B3, auto... Ws, typename... Heaps				\
-			>												\
-			nik_ces auto result(Heap0 H0, Heap1 H1, Heap2 H2, nik_vp(H3)(B3<Ws...>*), Heaps... Hs)		\
-			{												\
-				nik_ce auto nH3 = U_store_T<B3<Ws..., NIK_2_N_VARS(_e_, NIK_V_1)>>;			\
-															\
-				return NIK_BLOCK(d, m, c, i, n, Vs)(H0, H1, H2, nH3, Hs...);				\
-			}												\
-		};
-
-/***********************************************************************************************************************/
-
-// turn:
-
-	#define NIK_DEFINE_BLOCK_TURN(_e_)										\
-															\
-		template<auto... filler>										\
-		struct T_block<BN::turn, BT::_2_ ## _e_, filler...>							\
-		{													\
-			template											\
-			<												\
-				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,				\
-				typename Heap0, template<auto...> typename B1, auto Lookup, auto... Ops,		\
-				typename Heap2, typename Heap3, typename... Heaps					\
-			>												\
-			nik_ces auto result										\
-			(												\
-				Heap0 H0, nik_vp(H1)(B1<Lookup, Ops...>*),						\
-				Heap2 H2, Heap3 H3, Heaps... Hs								\
-			)												\
-			{												\
-				nik_ce auto ins	= BD::instr(c, i);							\
-				nik_ce auto Op  = eval<Lookup, ins[BI::pos], Ops...>;					\
-															\
-				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
-															\
-					NIK_2_N_VARS(_e_, NIK_V_1), Vs...						\
-															\
-				NIK_END_BLOCK(H0, H1, H2, H3, NIK_2_N_VARS(_e_, NIK_EVAL_OP_V_1), Hs...);		\
-			}												\
-		};
-
-/***********************************************************************************************************************/
-
-// sift:
-
-	#define NIK_DEFINE_BLOCK_SIFT(_e_)										\
-															\
-		template<auto... filler>										\
-		struct T_block<BN::sift, BT::_2_ ## _e_, filler...>							\
-		{													\
-			template											\
-			<												\
-				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,				\
-				typename Heap0, typename Heap1, typename Heap2, typename Heap3,				\
-				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_e_, NIK_LFS_1),		\
-				typename... Heaps									\
-			>												\
-			nik_ces auto result										\
-			(												\
-				Heap0 H0, Heap1 H1, Heap2 H2, Heap3 H3,							\
-				NIK_2_N_VARS(_e_, NIK_AVP_B_LFS_1), Heaps... Hs						\
-			)												\
-			{												\
-				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
-															\
-					NIK_2_N_VARS(_e_, NIK_EVAL_LFS_V_1), Vs...					\
-															\
-				NIK_END_BLOCK(H0, H1, H2, H3, Hs...);							\
-			}												\
-		};
-
-/***********************************************************************************************************************/
-
-// filter:
-
-	#define NIK_DEFINE_BLOCK_FILTER(_e_)										\
-															\
-		template<auto... filler>										\
-		struct T_block<BN::filter, BT::_2_ ## _e_, filler...>							\
-		{													\
-			template											\
-			<												\
-				NIK_BLOCK_PARAMS, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,				\
-				typename Heap0, typename Heap1, typename Heap2, typename Heap3,				\
-				template<auto...> typename B, NIK_2_N_VARIADIC_AUTO_VARS(_e_, NIK_LFS_1),		\
-				typename... Heaps									\
-			>												\
-			nik_ces auto result										\
-			(												\
-				Heap0 H0, Heap1 H1, Heap2 H2, Heap3 H3,							\
-				NIK_2_N_VARS(_e_, NIK_AVP_B_LFS_1), Heaps... Hs						\
-			)												\
-			{												\
-				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
-															\
-					Vs..., NIK_2_N_VARS(_e_, NIK_EVAL_LFS_V_1)					\
-															\
-				NIK_END_BLOCK(H0, H1, H2, H3, Hs...);							\
-			}												\
-		};
-
-/***********************************************************************************************************************/
-
-// fold:
-
-	#define NIK_DEFINE_BLOCK_FOLD(_e_)										\
-															\
-		template<auto... filler>										\
-		struct T_block<BN::fold, BT::_2_ ## _e_, filler...>							\
-		{													\
-			template											\
-			<												\
-				NIK_BLOCK_PARAMS, auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,			\
-				template<auto...> typename B, auto Lookup, auto... Ops, typename... Heaps		\
-			>												\
-			nik_ces auto result(nik_vp(H0)(B<Lookup, Ops...>*), Heaps... Hs)				\
-			{												\
-				nik_ce auto ins	= BD::instr(c, i);							\
-				nik_ce auto Op  = eval<Lookup, ins[BI::pos], Ops...>;					\
-															\
-				return NIK_BEGIN_BLOCK(d, m, c, i, n),							\
-															\
-					NIK_2_N_ACTION_FOLDS								\
-					(										\
-						_e_, NIK_OVER, NIK_OP_1, V, NIK_V_1, NIK_R_ANG, NIK_COMMA		\
-															\
-					), Vs...									\
-															\
-				NIK_END_BLOCK(H0, Hs...);								\
-			}												\
-		};
-
-/***********************************************************************************************************************/
-
-// argument:
-
-	#define NIK_DEFINE_BLOCK_ARGUMENT_PASS(_e_)									\
-															\
-		template<auto... filler>										\
-		struct T_block<BN::parameter, BT::pass, _e_, filler...>							\
-		{													\
-			template<auto d, auto n, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts>			\
-			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs)					\
-			{												\
-				return NIK_ARGUMENT_BLOCK(_e_, d, n, Ts)(vs...);					\
-			}												\
-		};
 
 /***********************************************************************************************************************/
 

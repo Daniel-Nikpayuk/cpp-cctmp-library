@@ -27,42 +27,37 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// pack:
+// machination:
 
-	nik_ce auto _pack_null_			= U_pack_Vs <                    >;
-	nik_ce auto _pack_first_		= U_pack_Vs < _first_            >;
-	nik_ce auto _pack_second_		= U_pack_Vs < _second_           >;
-	nik_ce auto _pack_second_first_		= U_pack_Vs < _second_ , _first_ >;
+	// Definition: A liner (trampoliner) is a nest-resulted struct that either returns
+	// its value of interest, or a machination with the same structure as its input.
+	// It is expected that all other nest-resulted structs are defined from such liners.
+
+	// Both T_block and T_machine are implementations of such liners.
 
 /***********************************************************************************************************************/
 
-// padding:
+// struct:
 
-	template<gindex_type n, auto V = U_null_Vs, auto b = H_id>
-	nik_ce auto padding = eval<_pad_, b, V, n>;
-
-	nik_ce gindex_type required_padding(gcindex_type size, gcindex_type _2_N)
+	template<typename U, typename P>
+	struct machination
 	{
-		gcindex_type remainder = size % _2_N;
+		U u;
+		P p;
 
-		if (remainder == 0) return 0;
-		else                return _2_N - remainder;
-	}
+		nik_ce machination(const U & _u, const P & _p) : u{_u}, p{_p} { }
+	};
 
-	nik_ce gindex_type conditional_padding(gcindex_type pos, gcindex_type size, gcindex_type _2_N)
-	{
-		gcindex_type padding = required_padding(size, _2_N);
+/***********************************************************************************************************************/
 
-		if (padding == 0) return 0;
-		else
-		{
-			gcindex_type p_block = pos  / _2_N;
-			gcindex_type s_block = size / _2_N;
+// is machination:
 
-			if (p_block != s_block) return 0;
-			else                    return padding;
-		}
-	}
+	template<typename T>
+	nik_ce bool is_machination = false;
+
+	template<typename U, typename P> nik_ce bool is_machination <       machination<U, P>   > = true;
+	template<typename U, typename P> nik_ce bool is_machination < const machination<U, P>   > = true;
+	template<typename U, typename P> nik_ce bool is_machination < const machination<U, P> & > = true;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -70,28 +65,10 @@ namespace cctmp {
 
 // grammar:
 
-	template<gkey_type, gkey_type, gkey_type, auto...> struct T_praxis;
+	template<gkey_type, gkey_type, gindex_type, auto...> struct T_praxis;
 
-	template<auto Syn, auto Name, auto Note, auto... Vs>
-	nik_ce auto U_praxis = U_store_T<T_praxis<Syn, Name, Note, Vs...>>;
-
-	nik_ce auto H_praxis = U_store_B<T_praxis>;
-
-	// argument:
-
-		template<auto Name, auto Note, auto... Vs>
-		using T_praxis_arg = T_praxis<Shape::argument, Name, Note, Vs...>;
-
-		template<auto Name, auto Note, auto... Vs>
-		nik_ce auto U_praxis_arg = U_praxis<Shape::argument, Name, Note, Vs...>;
-
-	// parameter:
-
-		template<auto Name, auto Note, auto... Vs>
-		using T_praxis_par = T_praxis<Shape::parameter, Name, Note, Vs...>;
-
-		template<auto Name, auto Note, auto... Vs>
-		nik_ce auto U_praxis_par = U_praxis<Shape::parameter, Name, Note, Vs...>;
+	template<auto Name, auto Note, auto _2_N, auto... Vs>
+	nik_ce auto U_praxis = U_store_T<T_praxis<Name, Note, _2_N, Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -102,10 +79,8 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
-			call   , recall  , tail  , halt    ,
-			select , pad     , drop  ,
-			mutate , rotate  , unpad ,
-			fold   ,
+			recall , halt , jump ,
+			pad , push , left , sift , fold ,
 			dimension
 		};
 	};
@@ -121,13 +96,11 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
-			pause    , debug   , arg   , par     ,
-			selector , mutator , block , recurse ,
-			_2_0 , _2_1 , _2_2 , _2_3 , _2_4 , _2_5 , _2_6 , _2_7 , _2_8 , _2_9 ,
+			make    , apply ,
+			if_zero , dec   ,
+			eval    , pause , debug ,
 			dimension
 		};
-
-		nik_ces gindex_type _2_N_from_note(gkey_type n) { return array_2_N[n - _2_0]; }
 	};
 
 	using PT = PraxisNote;
@@ -144,7 +117,7 @@ namespace cctmp {
 		enum Position : gkey_type
 		{
 			size = 0,
-			name , note , pos , num , subpos , subnum ,
+			name , note , pos ,
 			dimension
 		};
 
@@ -183,91 +156,585 @@ namespace cctmp {
 	template<auto... Vs>
 	nik_ce contr_type controller = array<cinstr_type, array<gcindex_type, sizeof...(Vs)>, Vs...>;
 
-	// select:
+/***********************************************************************************************************************/
 
-		// block:
+// dispatch:
 
-			template<auto Note, auto q, auto k, auto f0 = _zero, auto f1 = _one, auto h = _two>
-			nik_ce auto block_select_contr = controller
-			<
-				instruction < PN::pad    , PT::selector , q                  >,
-				instruction < PN::select , PT::id       , k , f0 , f1 , Note >,
-				instruction < PN::call   , PT::arg      , h                  >
-			>;
+	struct PraxisDispatch
+	{
+		// defaults:
 
-		// recurse:
+			nik_ces gindex_type _2_N		= _2_6;
+			nik_ces gdepth_type initial_depth	= 500;
+			nik_ces gindex_type initial_index	= _zero;
 
-			template<auto Note, auto m, auto q, auto k, auto f0 = _zero, auto f1 = _one, auto h = _two>
-			nik_ces auto recurse_select_contr = controller
-			<
-				instruction < PN::drop   , PT::selector , m ,           Note >,
-				instruction < PN::pad    , PT::selector , q                  >,
-				instruction < PN::select , PT::id       , k , f0 , f1 , Note >,
-				instruction < PN::call   , PT::arg      , h                  >
-			>;
+		// accessors:
 
-	// mutate:
+			nik_ces auto instr(ccontr_type c, gcindex_type i)
+				{ return c[i]; }
 
-		// block:
+		// navigators:
 
-			template
-			<
-				auto Note, auto q0, auto q1, auto k, auto j0, auto j1, auto m,
-				auto f0 = _zero, auto f1 = _one, auto h = _two
-			>
-			nik_ce auto block_mutate_contr = controller
-			<
-				instruction < PN::pad    , PT::mutator , q0 , q1             >,
-				instruction < PN::mutate , PT::id      , k  , f0 , f1 , Note >,
-				instruction < PN::unpad  , PT::mutator , j0 , j1 ,      Note >,
-				instruction < PN::drop   , PT::mutator , m  ,           Note >,
-				instruction < PN::tail   , PT::arg     , h                   >
-			>;
+			nik_ces gkey_type next_name(gcdepth_type d, ccontr_type c, gcindex_type i)
+			{
+				if (d == 0) return PN::halt;
+				else        return c[i+1][PI::name];
+			}
 
-		// recurse:
+			nik_ces gkey_type next_note(gcdepth_type d, ccontr_type c, gcindex_type i)
+			{
+				if (d == 0) return PT::pause;
+				else        return c[i+1][PI::note];
+			}
 
-			template
-			<
-				auto Note, auto q0, auto q1, auto m0, auto k, auto m1, auto j0, auto j1, auto m2,
-				auto f0 = _zero, auto f1 = _one, auto h = _two
-			>
-			nik_ce auto recurse_mutate_contr = controller
-			<
-				instruction < PN::pad    , PT::mutator , q0 , q1             >,
-				instruction < PN::rotate , PT::mutator , m0 ,           Note >,
-				instruction < PN::mutate , PT::id      , k  , f0 , f1 , Note >,
-				instruction < PN::rotate , PT::mutator , m1 ,           Note >,
-				instruction < PN::unpad  , PT::mutator , j0 , j1 ,      Note >,
-				instruction < PN::drop   , PT::mutator , m2 ,           Note >,
-				instruction < PN::tail   , PT::arg     , h                   >
-			>;
+			nik_ces gdepth_type next_depth(gcdepth_type d)
+				{ return d - bool{d != 0}; }
+
+			nik_ces gindex_type next_index(gcdepth_type d, gcindex_type i)
+				{ return i + bool{d != 0}; }
+	};
+
+	using PD = PraxisDispatch;
 
 /***********************************************************************************************************************/
 
-// basis:
+// pack:
 
-	NIK_DEFINE_PRAXIS_BASIS(64)
-
-	// base:
-
-		template<gkey_type Syn, gkey_type Name, gkey_type Note>
-		nik_ce auto U_praxis_base = _alias_<_unite_, H_using<T_praxis, Syn, Name, Note>>;
-
-	// unit:
-
-		template<auto Syn, auto Name, auto Note, auto n, auto L, auto R, auto _2_N = PT::_2_N_from_note(Note)>
-		using T_praxis_unit = T_eval<U_praxis_base<Syn, Name, Note>, padding<n, L>, padding<_2_N-(n+1), L>, R>;
-
-		nik_ce auto H_praxis_unit = U_store_B<T_praxis_unit>;
-
-	// part:
-
-		template<auto Syn, auto Name, auto Note, auto n, auto L, auto R, auto _2_N = PT::_2_N_from_note(Note)>
-		using T_praxis_part = T_eval<U_praxis_base<Syn, Name, Note>, padding<n, L>, padding<_2_N-n, R>>;
-
-		nik_ce auto H_praxis_part = U_store_B<T_praxis_part>;
+	nik_ce auto _pack_null_			= U_pack_Vs <                    >;
+	nik_ce auto _pack_first_		= U_pack_Vs < _first_            >;
+	nik_ce auto _pack_second_		= U_pack_Vs < _second_           >;
+	nik_ce auto _pack_second_first_		= U_pack_Vs < _second_ , _first_ >;
 
 /***********************************************************************************************************************/
+
+// padding:
+
+	template<gindex_type n, auto V = U_null_Vs, auto b = H_id>
+	nik_ce auto padding = eval<_pad_, b, V, n>;
+
+	nik_ce gindex_type required_padding(gcindex_type size, gcindex_type _2_N)
+	{
+		gcindex_type remainder = size % _2_N;
+
+		if (remainder == 0) return 0;
+		else                return _2_N - remainder;
+	}
+
+	nik_ce gindex_type conditional_padding(gcindex_type pos, gcindex_type size, gcindex_type _2_N)
+	{
+		gcindex_type remainder = size % _2_N;
+
+		if (remainder == 0) return 0;
+		else
+		{
+			gcindex_type p_block = pos  / _2_N;
+			gcindex_type s_block = size / _2_N;
+
+			if (p_block != s_block) return 0;
+			else                    return _2_N - remainder;
+		}
+	}
+
+/***********************************************************************************************************************/
+
+// start:
+
+	struct T_praxis_start
+	{
+		nik_ces auto _2_N = PD::_2_N;
+		nik_ces auto d    = PD::initial_depth;
+		nik_ces auto i    = PD::initial_index;
+
+		template<auto c, auto n, auto... Vs, typename... Heaps>
+		nik_ces auto result(Heaps... Hs) { return NIK_PRAXIS(_2_N, d, c, i, n, Vs)(Hs...); }
+
+	}; nik_ce auto U_praxis_start = U_custom_T<T_praxis_start>;
+
+/***********************************************************************************************************************/
+
+// restart:
+
+	struct T_praxis_restart
+	{
+		template<auto _2_N, NIK_PRAXIS_PARAMS(d, c, i, n, Vs), template<auto...> typename B, auto... Hs>
+		nik_ces auto _result(nik_avp(B<Hs...>*)) { return NIK_PRAXIS(_2_N, d, c, i, n, Vs)(Hs...); }
+
+		template<auto d, auto p, auto _2_N, auto c, auto i, auto n, auto...Vs>
+		nik_ces auto result = _result<_2_N, d, c, i, n, Vs...>(p);
+
+	}; nik_ce auto U_praxis_restart = U_custom_T<T_praxis_restart>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// push:
+
+/***********************************************************************************************************************/
+
+// id:
+
+	NIK_DEFINE_PRAXIS_PUSH_ID_2_N(6)
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// pad:
+
+/***********************************************************************************************************************/
+
+// make:
+
+	template<gindex_type _2_N>
+	struct T_praxis<PN::pad, PT::make, _2_N>
+	{
+		template
+		<
+			NIK_PRAXIS_PARAMS(d, c, i, n, Vs),
+			typename Heap0, typename Heap1, typename Heap2, typename... Heaps
+		>
+		nik_ces auto result(Heap0 H0, Heap1 H1, Heap2 H2, Heaps... Hs)
+		{
+			nik_ce auto ins = PD::instr(c, i);
+			nik_ce auto nH2 = padding<ins[PI::pos]>;
+
+			return NIK_PRAXIS(_2_N, d, c, i, n, Vs)(H0, H1, nH2, Hs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// apply:
+
+	template<gindex_type _2_N>
+	struct T_praxis<PN::pad, PT::apply, _2_N>
+	{
+		template
+		<
+			NIK_PRAXIS_CONTROLS(d, c, i, n), auto... Vs,
+			typename Heap0, typename Heap1, template<auto...> typename B2, auto... Ys,
+			typename... Heaps
+		>
+		nik_ces auto result(Heap0 H0, Heap1 H1, nik_vp(H2)(B2<Ys...>*), Heaps... Hs)
+		{
+			nik_ce auto nH2 = U_store_T<B2<>>;
+
+			return NIK_PRAXIS_BEGIN(_2_N, d, c, i, n),
+
+				Vs..., Ys...
+
+			NIK_PRAXIS_END(H0, H1, nH2, Hs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// left:
+
+/***********************************************************************************************************************/
+
+// make:
+
+	template<gindex_type _2_N>
+	struct T_praxis<PN::left, PT::make, _2_N>
+	{
+		nik_ces auto p0 = _pack_first_;
+		nik_ces auto p1 = _pack_null_;
+
+		template
+		<
+			NIK_PRAXIS_PARAMS(d, c, i, n, Vs),
+			template<auto...> typename B0, auto W, auto... Ws,
+			typename Heap1, typename Heap2, typename... Heaps
+		>
+		nik_ces auto result(nik_vp(H0)(B0<W, Ws...>*), Heap1 H1, Heap2 H2, Heaps... Hs)
+		{
+			nik_ce auto ins = PD::instr(c, i);
+			nik_ce auto k   = ins[PI::pos];
+			nik_ce auto f0  = padding<k, p0>;
+			nik_ce auto f1  = padding<_2_N-k, p1>;
+			nik_ce auto nH2 = eval<_unite_, H_id, f0, f1>;
+
+			return NIK_PRAXIS(_2_N, d, c, i, n, Vs)(H0, H1, nH2, Hs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// apply:
+
+	template<gindex_type _2_N>
+	struct T_praxis<PN::left, PT::apply, _2_N>
+	{
+		template
+		<
+			NIK_PRAXIS_PARAMS(d, c, i, n, Vs),
+			typename Heap0, typename Heap1, template<auto...> typename B2, auto... Ys,
+			typename... Heaps
+		>
+		nik_ces auto result(Heap0 H0, Heap1 H1, nik_vp(H2)(B2<Ys...>*), Heaps... Hs)
+		{
+			nik_ce auto nH2 = U_store_T<B2<>>;
+
+			return NIK_PRAXIS_TEMPLATE(_2_N, d, c, i),
+
+				Ys...
+
+			NIK_PRAXIS_RESULT(d, c, i, n, Vs)(H0, H1, nH2, Hs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// id:
+
+	NIK_DEFINE_PRAXIS_LEFT_ID_2_N(6)
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// fold:
+
+/***********************************************************************************************************************/
+
+// id:
+
+	NIK_DEFINE_PRAXIS_FOLD_ID_2_N(6)
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// sift:
+
+/***********************************************************************************************************************/
+
+// apply:
+
+	NIK_DEFINE_PRAXIS_SIFT_APPLY_2_N(6)
+
+/***********************************************************************************************************************/
+
+// id:
+
+	NIK_DEFINE_PRAXIS_SIFT_ID_2_N(6)
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// jump:
+
+/***********************************************************************************************************************/
+
+	template<gindex_type _2_N>
+	struct T_praxis<PN::jump, PT::if_zero, _2_N>
+	{
+		template<NIK_PRAXIS_PARAMS(d, c, i, n, Vs), typename... Heaps>
+		nik_ces auto result(Heaps... Hs)
+		{
+			nik_ce auto ins	= PD::instr(c, i);
+			nik_ce auto ni	= (n == 0) ? ins[PI::pos] : i;
+
+			return NIK_PRAXIS(_2_N, d, c, ni, n, Vs)(Hs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// dec:
+
+	template<gindex_type _2_N>
+	struct T_praxis<PN::jump, PT::dec, _2_N>
+	{
+		template<NIK_PRAXIS_PARAMS(d, c, i, n, Vs), typename... Heaps>
+		nik_ces auto result(Heaps... Hs)
+		{
+			nik_ce auto ins	= PD::instr(c, i);
+			nik_ce auto ni	= ins[PI::pos];
+			nik_ce auto nn	= n - 1;
+
+			return NIK_PRAXIS(_2_N, d, c, ni, nn, Vs)(Hs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// halt:
+
+/***********************************************************************************************************************/
+
+// eval:
+
+	template<gindex_type _2_N>
+	struct T_praxis<PN::halt, PT::eval, _2_N>
+	{
+		template
+		<
+			NIK_PRAXIS_PARAMS(d, c, i, n, Vs),
+			template<auto...> typename B0, auto W, auto... Ws, typename... Heaps
+		>
+		nik_ces auto result(nik_vp(H0)(B0<W, Ws...>*), Heaps... Hs)
+		{
+			nik_ce auto ins	= PD::instr(c, i);
+			nik_ce auto Op  = eval<W, ins[PI::pos], Ws...>;
+
+			return eval<Op, Vs...>;
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// pause:
+
+	template<gindex_type _2_N>
+	struct T_praxis<PN::halt, PT::pause, _2_N>
+	{
+		template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto... Vs, typename... Heaps>
+		nik_ces auto result(Heaps... Hs)
+		{
+			nik_ce auto p = U_pack_Vs<U_restore_T<Heaps>...>;
+
+			return machination(U_praxis_restart, U_pack_Vs<p, _2_N, c, i, n, Vs...>);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// debug:
+
+	template<gindex_type _2_N>
+	struct T_praxis<PN::halt, PT::debug, _2_N>
+	{
+		template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto... Vs, typename... Heaps>
+		nik_ces auto result(Heaps... Hs)
+		{
+			nik_ce auto cs = eval<_to_tuple_, _2_N, d, c, i, n>;
+			nik_ce auto rs = eval<_to_tuple_, Vs...>;
+			nik_ce auto hs = eval<_to_tuple_, U_restore_T<Heaps>...>;
+
+			return eval<_to_tuple_, cs, rs, hs>;
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// algorithm:
+
+	template<gkey_type, gkey_type, auto...> struct T_algorithm;
+
+	template<auto Syn, auto Name, auto... Vs>
+	nik_ce auto U_algorithm = U_store_T<T_algorithm<Syn, Name, Vs...>>;
+
+/***********************************************************************************************************************/
+
+// argument:
+
+	template<auto Key, auto... Vs>       using T_algorithm_argument = T_algorithm<Shape::argument, Key, Vs...>;
+	template<auto Key, auto... Vs> nik_ce auto U_algorithm_argument = U_algorithm<Shape::argument, Key, Vs...>;
+
+// parameter:
+
+	template<auto Key, auto... Vs>       using T_algorithm_parameter = T_algorithm<Shape::parameter, Key, Vs...>;
+	template<auto Key, auto... Vs> nik_ce auto U_algorithm_parameter = U_algorithm<Shape::parameter, Key, Vs...>;
+
+/***********************************************************************************************************************/
+
+// names:
+
+	struct AlgorithmName
+	{
+		enum : gkey_type
+		{
+			identity = 0, id = identity, // convenience for default params.
+			left , at , replace , insert , erase ,
+			fold ,
+			sift ,
+			dimension
+		};
+	};
+
+	using AN = AlgorithmName;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// parameter:
+
+/***********************************************************************************************************************/
+
+// left:
+
+	template<auto _2_N>
+	struct T_algorithm<Shape::parameter, AN::left, _2_N>
+	{
+		nik_ces auto H0 = U_pack_Vs<_at_, _list_<>>;
+		nik_ces auto H1 = U_null_Vs;
+		nik_ces auto H2 = U_null_Vs;
+
+		template<auto p, auto l, auto h = _zero, auto loop = _zero, auto done = _three>
+		nik_ces auto contr = controller
+		<
+			instruction < PN::jump , PT::if_zero , done >,
+			instruction < PN::push , PT::id             >,
+			instruction < PN::jump , PT::dec     , loop >,
+			instruction < PN::pad  , PT::make    , p    >,
+			instruction < PN::pad  , PT::apply          >,
+			instruction < PN::left , PT::make    , l    >,
+			instruction < PN::left , PT::apply          >,
+			instruction < PN::left , PT::id             >,
+			instruction < PN::halt , PT::eval    , h    >
+		>;
+
+		template<auto n, auto s, auto... Vs>
+		nik_ces auto _result()
+		{
+			nik_ce auto k = n / _2_N;
+			nik_ce auto j = n % _2_N;
+			nik_ce auto p = conditional_padding(n, s, _2_N);
+
+			nik_ce auto b = (k != 0 && j == 0);
+			nik_ce auto m = k - b;
+			nik_ce auto l = b ? _2_N : j;
+			nik_ce auto c = contr<p, l>;
+
+			return T_praxis_start::template result<c, m, Vs...>(H0, H1, H2);
+		}
+
+		template<auto n, auto... Vs>
+		nik_ces auto result = _result<n, sizeof...(Vs), Vs...>();
+
+	}; template<auto _2_N = _2_6>
+		nik_ce auto _par_left_ = U_custom_T<T_algorithm_parameter<AN::left, _2_N>>;
+
+/***********************************************************************************************************************/
+
+// fold:
+
+/*
+	template<auto _2_N>
+	struct T_algorithm<Shape::parameter, AN::fold, _2_N>
+	{
+		template<auto op>
+		nik_ces auto H0 = U_pack_Vs<_at_, op, _car_>;
+		nik_ces auto H1 = U_null_Vs;
+		nik_ces auto H2 = U_null_Vs;
+
+		template<auto p, auto l, auto u = _zero, auto h = _one, auto loop = _two, auto done = _five>
+		nik_ces auto contr = controller
+		<
+			instruction < PN::pad  , PT::make    , p    >,
+			instruction < PN::pad  , PT::apply          >,
+			instruction < PN::jump , PT::if_zero , done >,
+			instruction < PN::fold , PT::id      , l    >,
+			instruction < PN::jump , PT::dec     , loop >,
+			instruction < PN::fold , PT::id      , u    >,
+			instruction < PN::halt , PT::eval    , h    >
+		>;
+
+		template<auto n, auto op, auto s, auto... Vs>
+		nik_ces auto _result()
+		{
+			nik_ce auto k = n / _2_N;
+			nik_ce auto j = n % _2_N;
+			nik_ce auto p = required_padding(s, _2_N);
+
+			nik_ce auto b = (k != 0 && j == 0);
+			nik_ce auto m = k - b;
+			nik_ce auto l = b ? _2_N : j;
+			nik_ce auto c = contr<p, l>;
+
+			return T_praxis_start::template result<c, m, Vs...>(H0<op>, H1, H2);
+		}
+
+		template<auto n, auto op, auto... Vs>
+		nik_ces auto result = _result<n, op, sizeof...(Vs), Vs...>();
+
+	}; template<auto _2_N = _2_6>
+		nik_ce auto _par_fold_ = U_custom_T<T_algorithm_parameter<AN::fold, _2_N>>;
+*/
+
+/***********************************************************************************************************************/
+
+// sift:
+
+/*
+	template<auto _2_N>
+	struct T_algorithm<Shape::parameter, AN::sift, _2_N>
+	{
+		template<auto op, auto sop>
+		nik_ces auto H0 = U_pack_Vs<_at_, op, sop, _list_<>>;
+		nik_ces auto H1 = U_null_Vs;
+		nik_ces auto H2 = U_null_Vs;
+
+		template<auto p, auto l = _zero, auto u = _one, auto h = _two, auto loop = _two, auto done = _six>
+		nik_ces auto contr = controller
+		<
+			instruction < PN::pad  , PT::make    , p    >,
+			instruction < PN::pad  , PT::apply          >,
+			instruction < PN::jump , PT::if_zero , done >,
+			instruction < PN::sift , PT::apply   , l    >,
+			instruction < PN::sift , PT::id             >,
+			instruction < PN::jump , PT::dec     , loop >,
+			instruction < PN::sift , PT::apply   , u    >,
+			instruction < PN::sift , PT::id             >,
+			instruction < PN::halt , PT::eval    , h    >
+		>;
+
+		template<auto n, auto op, auto sop, auto s, auto... Vs>
+		nik_ces auto _result()
+		{
+			nik_ce auto k = n / _2_N;
+			nik_ce auto j = n % _2_N;
+			nik_ce auto p = required_padding(s, _2_N);
+
+			nik_ce auto b = (k != 0 && j == 0);
+			nik_ce auto m = k - b;
+			nik_ce auto l = b ? _2_N : j;
+			nik_ce auto c = contr<p, l>;
+
+			return T_praxis_start::template result<c, m, Vs...>(H0<op, sop>, H1, H2);
+		}
+
+		template<auto n, auto op, auto... Vs>
+		nik_ces auto result = _result<n, op, sop, sizeof...(Vs), Vs...>();
+
+	}; template<auto _2_N = _2_6>
+		nik_ce auto _par_sift_ = U_custom_T<T_algorithm_parameter<AN::sift, _2_N>>;
+*/
+
+/***********************************************************************************************************************/
+
+// unit (generic):
+
+	template<gkey_type Name, auto... Ws>
+	struct T_algorithm<Shape::parameter, Name, Ws...>
+	{
+		template<auto n, auto... Vs>
+		nik_ces auto result = T_algorithm_parameter
+		<
+			Name,
+			eval<_par_left_<>, n, U_store_T<decltype(Vs)>...>,
+			Ws...
+
+		>::template result<Vs...>;
+
+	}; template<auto Name, auto... Vs>
+		nik_ce auto _par_unit_ = U_custom_T<T_algorithm_parameter<Name, Vs...>>;
+
+/***********************************************************************************************************************/
+
+// at:
+
+	template<template<auto...> typename B, auto... LUs, nik_vp(p)(B<LUs...>*)>
+	struct T_algorithm<Shape::parameter, AN::at, p>
+	{
+		template<T_store_U<LUs>... LVs, auto VN, auto... Vs>
+		nik_ces auto result = VN;
+
+	}; nik_ce auto _par_at_ = _par_unit_<AN::at>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -275,604 +742,61 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// dispatch:
+// unit (generic):
 
-	struct PraxisArgument
+	template<gkey_type Name, auto... Vs>
+	struct T_algorithm<Shape::argument, Name, Vs...>
 	{
-		// defaults:
-
-			nik_ces gindex_type initial_index = _zero;
-
-		// accessors:
-
-			nik_ces auto instr(ccontr_type c, gcindex_type i) { return c[i]; }
-
-		// navigators:
-
-			nik_ces   gkey_type next_name  (ccontr_type c, gcindex_type i) { return c[i+1][PI::name]; }
-			nik_ces   gkey_type next_note  (ccontr_type c, gcindex_type i) { return c[i+1][PI::note]; }
-			nik_ces gindex_type next_index (               gcindex_type i) { return i+1; }
-	};
-
-	using PA = PraxisArgument;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// argument (select):
-
-/***********************************************************************************************************************/
-
-// (start):
-
-	struct T_praxis_arg_select
-	{
-		nik_ces auto i = PA::initial_index;
-
-		template<auto c, auto l, auto... Vs, typename... Ts>
-		nik_ces auto result(Ts... vs) { return NIK_PRAX_ARG(c, i, l, Vs)(vs...); }
-
-	}; nik_ce auto U_praxis_arg_select = U_custom_T<T_praxis_arg_select>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// call:
-
-/***********************************************************************************************************************/
-
-// arg:
-
-	template<auto... filler>
-	struct T_praxis<Shape::argument, PN::call, PT::arg, filler...>
-	{
-		template<NIK_PRAX_ARG_PARAMS(c, i, l, Vs), typename... Ts>
+		template<auto n, typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto ins	   = PA::instr(c, i);
-			nik_ce auto lookup = unpack_<l, _car_>;
-			nik_ce auto pos    = ins[PI::pos] + 1; // adjusted.
-			nik_ce auto cont   = unpack_<l, lookup, gindex_type{pos}>;
-			using T_cont       = T_store_U<cont>;
+			nik_ce auto p = eval<_par_left_<>, n, U_store_T<Ts>...>;
 
-			return T_cont::template result<Vs...>(vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// pad:
-
-/***********************************************************************************************************************/
-
-// selector:
-
-	template<auto... Cs, nik_vp(U)(T_pack_Vs<Cs...>*)>
-	struct T_praxis<Shape::argument, PN::pad, PT::selector, U>
-	{
-		template<NIK_PRAX_ARG_PARAMS(c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs) { return NIK_PRAX_ARG(c, i, l, Vs)(vs..., Cs...); }
-	};
-
-	template<auto... filler>
-	struct T_praxis<Shape::argument, PN::pad, PT::selector, filler...>
-	{
-		template<NIK_PRAX_ARG_PARAMS(c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs)
-		{
-			nik_ce auto ins = PA::instr(c, i);
-			nik_ce auto N   = ins[PI::pos];
-			using T_cont    = T_praxis_arg<PN::pad, PT::selector, padding<N>>;
-
-			return T_cont::template result<c, i, l, Vs...>(vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// drop:
-
-/***********************************************************************************************************************/
-
-// 2^N:
-
-	NIK_DEFINE_PRAXIS_ARGUMENT_DROP_SELECTOR(6)
-
-// selector:
-
-	template<auto... filler>
-	struct T_praxis<Shape::argument, PN::drop, PT::selector, filler...>
-	{
-		template<NIK_PRAX_ARG_PARAMS(c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs)
-		{
-			nik_ce auto ins	= PA::instr(c, i);
-			nik_ce auto m   = ins[PI::pos];
-			using T_cont    = T_praxis_arg<PN::drop, ins[PI::num], PT::selector>;
-
-			if constexpr (m == 0)
-
-				return NIK_PRAX_ARG(c, i, l, Vs)(vs...);
-			else
-				return T_cont::template result<m-1, c, i, l, Vs...>(vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// select:
-
-/***********************************************************************************************************************/
-
-// 2^N:
-
-	NIK_DEFINE_PRAXIS_ARGUMENT_SELECT(6)
-
-// id:
-
-	template<auto... filler>
-	struct T_praxis<Shape::argument, PN::select, PT::id, filler...>
-	{
-		template<NIK_PRAX_ARG_PARAMS(c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs)
-		{
-			nik_ce auto ins    = PA::instr(c, i);
-			nik_ce auto k      = ins[PI::pos];
-			nik_ce auto f0     = ins[PI::num] + 1; // adjusted.
-			nik_ce auto f1     = ins[PI::subpos] + 1; // adjusted.
-			nik_ce auto t      = ins[PI::subnum];
-
-			nik_ce auto lookup = unpack_<l, _car_>;
-			nik_ce auto p0     = unpack_<l, lookup, gindex_type{f0}>;
-			nik_ce auto p1     = unpack_<l, lookup, gindex_type{f1}>;
-			using T_cont       = T_praxis_arg<PN::select, t, H_praxis_unit, k, p0, p1>;
-
-			return T_cont::template result<c, i, l, Vs...>(vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// block:
-
-	template<auto p0, auto p1, auto cont, auto Note>
-	struct T_arg_block_select
-	{
-		nik_ces auto _2_N = PT::_2_N_from_note(Note);
-		nik_ces auto l    = U_pack_Vs<_at_, p0, p1, cont>;
-
-		template<auto k, typename... Ts>
-		nik_ces auto result(Ts... vs) // needs to do its own bounds check now that it pads.
-		{
-			nik_ce auto q = conditional_padding(k, sizeof...(Ts), _2_N);
-			nik_ce auto c = block_select_contr<Note, q, k>;
-
-			return T_praxis_arg_select::template result<c, l>(vs...);
+			return T_algorithm_argument<Name, p, Vs...>::result(vs...);
 		}
 
-	}; template<auto p0, auto p1, auto cont, auto Note>
-		nik_ce auto _arg_block_select_ = U_custom_T<T_arg_block_select<p0, p1, cont, Note>>;
+	}; template<auto Name, auto... Vs>
+		nik_ce auto _arg_unit_ = U_custom_T<T_algorithm_argument<Name, Vs...>>;
+
+/***********************************************************************************************************************/
+
+// at:
+
+	template<template<auto...> typename B, auto... LUs, nik_vp(p)(B<LUs...>*)>
+	struct T_algorithm<Shape::argument, AN::at, p>
+	{
+		template<typename TN, typename... Ts>
+		nik_ces auto result(T_store_U<LUs>... lvs, TN vn, Ts... vs) { return vn; }
+
+	}; nik_ce auto _arg_at_ = _arg_unit_<AN::at>;
 
 	// syntactic sugar:
-
-		// at:
-
-			template<auto k, typename... Ts>
-			nik_ce auto arg_block_at(Ts... vs)
-			{
-				nik_ce auto p0   = _pack_null_;
-				nik_ce auto p1   = _pack_first_;
-				nik_ce auto cont = _first_;
-				nik_ce auto Note = PT::_2_6;
-
-				return T_arg_block_select<p0, p1, cont, Note>::template result<k>(vs...);
-			}
-
-/***********************************************************************************************************************/
-
-// recurse:
-
-	template<auto p0, auto p1, auto cont, auto Note>
-	struct T_arg_recurse_select
-	{
-		nik_ces auto _2_N = PT::_2_N_from_note(Note);
-		nik_ces auto l    = U_pack_Vs<_at_, p0, p1, cont>;
 
 		template<auto n, typename... Ts>
-		nik_ces auto result(Ts... vs) // needs to do its own bounds check now that it pads.
-		{
-			nik_ce auto m = n / _2_N;
-			nik_ce auto k = n % _2_N;
-			nik_ce auto q = conditional_padding(n, sizeof...(Ts), _2_N);
-			nik_ce auto c = recurse_select_contr<Note, m, q, k>;
+		nik_ce auto arg_at(Ts... vs) { return T_algorithm_argument<AN::at>::template result<n>(vs...); }
 
-			return T_praxis_arg_select::template result<c, l>(vs...);
-		}
+/***********************************************************************************************************************/
 
-	}; template<auto p0, auto p1, auto cont, auto Note>
-		nik_ce auto _arg_recurse_select_ = U_custom_T<T_arg_recurse_select<p0, p1, cont, Note>>;
+// replace:
+
+	template<template<auto...> typename B, auto... LUs, nik_vp(p)(B<LUs...>*), auto c>
+	struct T_algorithm<Shape::argument, AN::replace, p, c>
+	{
+		using C = T_store_U<c>;
+
+		template<typename T, typename TN, typename... Ts>
+		nik_ces auto result(T v, T_store_U<LUs>... lvs, TN vn, Ts... vs) { return C::result(lvs..., v, vs...); }
+
+	}; template<auto cont>
+		nik_ce auto _arg_replace_ = _arg_unit_<AN::replace, cont>;
 
 	// syntactic sugar:
 
-		// at:
-
-			template<auto n, typename... Ts>
-			nik_ce auto arg_at(Ts... vs)
-			{
-				nik_ce auto p0   = _pack_null_;
-				nik_ce auto p1   = _pack_first_;
-				nik_ce auto cont = _first_;
-				nik_ce auto Note = PT::_2_6;
-
-				return T_arg_recurse_select<p0, p1, cont, Note>::template result<n>(vs...);
-			}
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// argument (mutate):
-
-/***********************************************************************************************************************/
-
-// (start):
-
-	struct T_praxis_arg_mutate
-	{
-		nik_ces auto i = PA::initial_index;
-
-		template<auto s, auto c, auto l, auto... Vs, typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
-			{ return NIK_PRAX_XARG(s, c, i, l, Vs)(v, vs...); }
-
-	}; nik_ce auto U_praxis_arg_mutate = U_custom_T<T_praxis_arg_mutate>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// tail:
-
-/***********************************************************************************************************************/
-
-// arg:
-
-	template<auto... filler>
-	struct T_praxis<Shape::argument, PN::tail, PT::arg, filler...>
-	{
-		template<NIK_PRAX_ARG_XPARAMS(s, c, i, l, Vs), typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
+		template<auto cont, auto n, typename... Ts>
+		nik_ce auto arg_replace(Ts... vs)
 		{
-			nik_ce auto ins	   = PA::instr(c, i);
-			nik_ce auto lookup = unpack_<l, _car_>;
-			nik_ce auto pos    = ins[PI::pos] + 1; // adjusted.
-			nik_ce auto cont   = unpack_<l, lookup, gindex_type{pos}>;
-			using T_cont       = T_store_U<cont>;
-
-			return T_cont::template result<Vs...>(vs...);
+			return T_algorithm_argument<AN::replace, cont>::template result<n>(vs...);
 		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// rotate:
-
-/***********************************************************************************************************************/
-
-// 2^N:
-
-	NIK_DEFINE_PRAXIS_ARGUMENT_ROTATE_MUTATOR(6)
-
-// mutator:
-
-	template<auto... filler>
-	struct T_praxis<Shape::argument, PN::rotate, PT::mutator, filler...>
-	{
-		template<NIK_PRAX_ARG_XPARAMS(s, c, i, l, Vs), typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto ins	= PA::instr(c, i);
-			nik_ce auto m   = ins[PI::pos];
-			using T_cont    = T_praxis_arg<PN::rotate, ins[PI::num], PT::mutator>;
-
-			if constexpr (m == 0)
-
-				return NIK_PRAX_XARG(s, c, i, l, Vs)(v, vs...);
-			else
-				return T_cont::template result<m-1, s, c, i, l, Vs...>(v, vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// pad:
-
-/***********************************************************************************************************************/
-
-// mutator:
-
-		// matches two packs due to padding limits.
-
-	template<auto... C0s, nik_vp(U0)(T_pack_Vs<C0s...>*), auto... C1s, nik_vp(U1)(T_pack_Vs<C1s...>*)>
-	struct T_praxis<Shape::argument, PN::pad, PT::mutator, U0, U1>
-	{
-		template<NIK_PRAX_ARG_XPARAMS(s, c, i, l, Vs), typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
-			{ return NIK_PRAX_XARG(s, c, i, l, Vs)(v, vs..., C0s..., C1s...); }
-	};
-
-	template<auto... filler>
-	struct T_praxis<Shape::argument, PN::pad, PT::mutator, filler...>
-	{
-		template<NIK_PRAX_ARG_XPARAMS(s, c, i, l, Vs), typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto ins  = PA::instr(c, i);
-			nik_ce auto q0   = ins[PI::pos];
-			nik_ce auto q1   = ins[PI::num];
-			using T_cont     = T_praxis_arg<PN::pad, PT::mutator, padding<q0>, padding<q1>>;
-
-			return T_cont::template result<s, c, i, l, Vs...>(v, vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// unpad:
-
-/***********************************************************************************************************************/
-
-// 2^N:
-
-	NIK_DEFINE_PRAXIS_ARGUMENT_UNPAD(6)
-
-// id:
-
-	template<auto... filler>
-	struct T_praxis<Shape::argument, PN::unpad, PT::mutator, filler...>
-	{
-		template<NIK_PRAX_ARG_XPARAMS(s, c, i, l, Vs), typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto ins	  = PA::instr(c, i);
-			nik_ce auto j0    = ins[PI::pos];
-			nik_ce auto j1    = ins[PI::num];
-			nik_ce auto t     = ins[PI::subpos];
-			nik_ce auto j     = (gindex_type) (j0 + j1);
-			using T_cont      = T_praxis_arg<PN::unpad, t, H_praxis_part, j, _pack_first_, _pack_null_>;
-
-			if constexpr (j == 0)
-
-				return NIK_PRAX_XARG(s, c, i, l, Vs)(v, vs...);
-			else
-				return T_cont::template result<s, c, i, l, Vs...>(v, vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// drop:
-
-/***********************************************************************************************************************/
-
-// 2^N:
-
-	NIK_DEFINE_PRAXIS_ARGUMENT_DROP_MUTATOR(6)
-
-// mutator:
-
-	template<auto... filler>
-	struct T_praxis<Shape::argument, PN::drop, PT::mutator, filler...>
-	{
-		template<NIK_PRAX_ARG_XPARAMS(s, c, i, l, Vs), typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto ins	= PA::instr(c, i);
-			nik_ce auto m   = ins[PI::pos];
-			using T_cont    = T_praxis_arg<PN::drop, ins[PI::num], PT::mutator>;
-
-			if constexpr (m == 0)
-
-				return NIK_PRAX_XARG(s, c, i, l, Vs)(v, vs...);
-			else
-				return T_cont::template result<m-1, s, c, i, l, Vs...>(v, vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// mutate:
-
-/***********************************************************************************************************************/
-
-// 2^N:
-
-	NIK_DEFINE_PRAXIS_ARGUMENT_MUTATE(6)
-
-// id:
-
-	template<auto... filler>
-	struct T_praxis<Shape::argument, PN::mutate, PT::id, filler...>
-	{
-		template<NIK_PRAX_ARG_XPARAMS(s, c, i, l, Vs), typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto ins    = PA::instr(c, i);
-			nik_ce auto k      = ins[PI::pos];
-			nik_ce auto f0     = ins[PI::num] + 1; // adjusted.
-			nik_ce auto f1     = ins[PI::subpos] + 1; // adjusted.
-			nik_ce auto t      = ins[PI::subnum];
-
-			nik_ce auto lookup = unpack_<l, _car_>;
-			nik_ce auto p0     = unpack_<l, lookup, gindex_type{f0}>;
-			nik_ce auto p1     = unpack_<l, lookup, gindex_type{f1}>;
-			using T_cont       = T_praxis_arg<PN::mutate, t, H_praxis_unit, k, p0, p1>;
-
-			return T_cont::template result<s, c, i, l, Vs...>(v, vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// block:
-
-	template<auto p0, auto p1, auto cont, auto Note>
-	struct T_arg_block_mutate
-	{
-		nik_ces auto _2_N = PT::_2_N_from_note(Note);
-		nik_ces auto l    = U_pack_Vs<_at_, p0, p1, cont>;
-
-		template<auto s, auto k, auto q1, auto j1, auto m, auto... Vs, typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s> // needs to do its own bounds check now that it pads.
-		{
-			nik_ce auto q0 = required_padding(sizeof...(Ts), _2_N);
-			nik_ce auto j0 = (sizeof...(Ts) % _2_N);
-			nik_ce auto c  = block_mutate_contr<Note, q0, q1, k, j0, j1, m>;
-
-			return T_praxis_arg_mutate::template result<s, c, l, Vs...>(v, vs...);
-		}
-
-	}; template<auto p0, auto p1, auto cont, auto Note>
-		nik_ce auto _arg_block_mutate_ = U_custom_T<T_arg_block_mutate<p0, p1, cont, Note>>;
-
-	// syntactic sugar:
-
-		// replace:
-
-			template<auto s, auto k, auto cont, auto... Vs, typename T, typename... Ts>
-			nik_ce auto arg_block_replace(T v, Ts... vs) -> T_store_U<s>
-			{
-				nik_ce auto p0   = _pack_first_;
-				nik_ce auto p1   = _pack_second_;
-				nik_ce auto Note = PT::_2_6;
-				nik_ce auto q1   = gindex_type{0};
-				nik_ce auto j1   = gindex_type{0};
-				nik_ce auto m    = gindex_type{0};
-
-				return T_arg_block_mutate<p0, p1, cont, Note>::template
-					result<s, k, q1, j1, m, Vs...>(v, vs...);
-			}
-
-		// insert:
-
-			template<auto s, auto k, auto cont, auto... Vs, typename T, typename... Ts>
-			nik_ce auto arg_block_insert(T v, Ts... vs) -> T_store_U<s>
-			{
-				nik_ce auto p0   = _pack_first_;
-				nik_ce auto p1   = _pack_second_first_;
-				nik_ce auto Note = PT::_2_6;
-				nik_ce auto _2_N = PT::_2_N_from_note(Note);
-				nik_ce auto q1   = gindex_type{_2_N-1};
-				nik_ce auto j1   = gindex_type{1};
-				nik_ce auto m    = gindex_type{1};
-
-				return T_arg_block_mutate<p0, p1, cont, Note>::template
-					result<s, k, q1, j1, m, Vs...>(v, vs...);
-			}
-
-		// erase:
-
-			template<auto s, auto k, auto cont, auto... Vs, typename T, typename... Ts>
-			nik_ce auto arg_block_erase(T v, Ts... vs) -> T_store_U<s>
-			{
-				nik_ce auto p0   = _pack_first_;
-				nik_ce auto p1   = _pack_null_;
-				nik_ce auto Note = PT::_2_6;
-				nik_ce auto q1   = gindex_type{1};
-				nik_ce auto j1   = (gindex_type) -1;
-				nik_ce auto m    = gindex_type{0};
-
-				return T_arg_block_mutate<p0, p1, cont, Note>::template
-					result<s, k, q1, j1, m, Vs...>(v, vs...);
-			}
-
-/***********************************************************************************************************************/
-
-// recurse:
-
-	template<auto p0, auto p1, auto cont, auto Note>
-	struct T_arg_recurse_mutate
-	{
-		nik_ces auto _2_N = PT::_2_N_from_note(Note);
-		nik_ces auto l    = U_pack_Vs<_at_, p0, p1, cont>;
-
-		template<auto s, auto n, auto q1, auto j1, auto m2, auto... Vs, typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s> // needs to do its own bounds check now that it pads.
-		{
-			nik_ce auto m0 = n / _2_N;
-			nik_ce auto k  = n % _2_N;
-
-			nik_ce auto e  = sizeof...(Ts) / _2_N;
-			nik_ce auto j0 = sizeof...(Ts) % _2_N;
-			nik_ce auto m1 = (e + (j0 != 0)) - (m0 + 1);
-
-			nik_ce auto q0 = required_padding(sizeof...(Ts), _2_N);
-			nik_ce auto c  = recurse_mutate_contr<Note, q0, q1, m0, k, m1, j0, j1, m2>;
-
-			return T_praxis_arg_mutate::template result<s, c, l, Vs...>(v, vs...);
-		}
-
-	}; template<auto p0, auto p1, auto cont, auto Note>
-		nik_ce auto _arg_recurse_mutate_ = U_custom_T<T_arg_recurse_mutate<p0, p1, cont, Note>>;
-
-	// syntactic sugar:
-
-		// replace:
-
-			template<auto s, auto n, auto cont, auto... Vs, typename T, typename... Ts>
-			nik_ce auto arg_replace(T v, Ts... vs) -> T_store_U<s>
-			{
-				nik_ce auto p0   = _pack_first_;
-				nik_ce auto p1   = _pack_second_;
-				nik_ce auto Note = PT::_2_6;
-				nik_ce auto q1   = gindex_type{0};
-				nik_ce auto j1   = gindex_type{0};
-				nik_ce auto m2   = gindex_type{0};
-
-				return T_arg_recurse_mutate<p0, p1, cont, Note>::template
-					result<s, n, q1, j1, m2, Vs...>(v, vs...);
-			}
-
-		// insert:
-
-			template<auto s, auto n, auto cont, auto... Vs, typename T, typename... Ts>
-			nik_ce auto arg_insert(T v, Ts... vs) -> T_store_U<s>
-			{
-				nik_ce auto p0   = _pack_first_;
-				nik_ce auto p1   = _pack_second_first_;
-				nik_ce auto Note = PT::_2_6;
-				nik_ce auto _2_N = PT::_2_N_from_note(Note);
-				nik_ce auto q1   = gindex_type{_2_N-1};
-				nik_ce auto j1   = gindex_type{1};
-				nik_ce auto m2   = gindex_type{1};
-
-				return T_arg_recurse_mutate<p0, p1, cont, Note>::template
-					result<s, n, q1, j1, m2, Vs...>(v, vs...);
-			}
-
-		// erase:
-
-			template<auto s, auto n, auto cont, auto... Vs, typename T, typename... Ts>
-			nik_ce auto arg_erase(T v, Ts... vs) -> T_store_U<s>
-			{
-				nik_ce auto p0   = _pack_first_;
-				nik_ce auto p1   = _pack_null_;
-				nik_ce auto Note = PT::_2_6;
-				nik_ce auto q1   = gindex_type{1};
-				nik_ce auto j1   = (gindex_type) -1;
-				nik_ce auto m2   = gindex_type{0};
-
-				return T_arg_recurse_mutate<p0, p1, cont, Note>::template
-					result<s, n, q1, j1, m2, Vs...>(v, vs...);
-			}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
