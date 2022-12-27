@@ -24,9 +24,14 @@
 #include"define_macros.hpp"
 
 #include"00_cctmp_grammar.hpp"
-#include"01_cctmp_eval.hpp"
-#include"02_cctmp_praxis.hpp"
-//#include"03_cctmp_algorithm.hpp"
+#include"01_cctmp_argument.hpp"
+#include"02_cctmp_parameter.hpp"
+#include"03_cctmp_praxis.hpp"
+#include"04_cctmp_machine.hpp"
+//#include"05_cctmp_assembly.hpp"
+//#include"06_cctmp_lexer.hpp"
+//#include"07_cctmp_parser.hpp"
+//#include"08_cctmp_algorithm.hpp"
 
 #include"undef_macros.hpp"
 
@@ -56,7 +61,6 @@
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 		0, 1, 2, 3, 4
 	>;
-*/
 
 	constexpr auto val = arg_at<164>
 	(
@@ -75,12 +79,13 @@
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 		0, 1, 2, 3, 44
 	);
+*/
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", val);
+	//	printf("%d\n", val);
 
 		return 0;
 	}

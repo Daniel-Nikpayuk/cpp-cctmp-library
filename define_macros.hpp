@@ -85,10 +85,6 @@
 															\
 		V
 
-	#define NIK_F0()												\
-															\
-		F0
-
 	#define NIK_EVAL()												\
 															\
 		eval
@@ -96,10 +92,6 @@
 	#define NIK_REST()												\
 															\
 		rest
-
-	#define NIK_LS()												\
-															\
-		s
 
 /***********************************************************************************************************************/
 
@@ -120,18 +112,6 @@
 	#define NIK_V_1(_n_)												\
 															\
 		V ## _n_
-
-	#define NIK_LV_1(_n_)												\
-															\
-		v ## _n_
-
-	#define NIK_T_LV_1(_n_)												\
-															\
-		T ## _n_ v ## _n_
-
-	#define NIK_FS_1(_n_)												\
-															\
-		Fs ## _n_
 
 	#define NIK_LFS_1(_n_)												\
 															\
@@ -448,7 +428,7 @@
 
 /***********************************************************************************************************************/
 
-// machine:
+// space:
 
 	#define NIK_PRAXIS_L(_e_, _d_, _c_, _i_)									\
 															\
@@ -489,7 +469,7 @@
 
 	#define NIK_PRAXIS(_e_, _d_, _c_, _i_, _n_, _v_)								\
 															\
-		NIK_PRAXIS_TEMPLATE(_e_, _d_, _c_, _i_) NIK_PRAXIS_RESULT(_d_, _c_, _i_, _n_, _v_) 
+		NIK_PRAXIS_TEMPLATE(_e_, _d_, _c_, _i_) NIK_PRAXIS_RESULT(_d_, _c_, _i_, _n_, _v_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -538,11 +518,11 @@
 			>												\
 			nik_ces auto result(Heap0 H0, nik_vp(H1)(B1<Xs...>*), Heaps... Hs)	 			\
 			{												\
-				nik_ce auto nH1 = U_store_T<B1<>>;							\
+				nik_ce auto nH1 = U_store_T<B1<Xs..., NIK_2_N_VARS(_e_, NIK_EVAL_FS_V_1)>>;		\
 															\
 				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
 															\
-					Xs..., NIK_2_N_VARS(_e_, NIK_EVAL_FS_V_1)					\
+					Vs...										\
 															\
 				NIK_PRAXIS_END(H0, nH1, Hs...);								\
 			}												\
@@ -630,75 +610,126 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// abstract:
+// assembly:
 
 /***********************************************************************************************************************/
 
-	#define NIK_ABSTRACT_PARAMS											\
+// controls:
+
+	#define NIK_ASSEMBLY_CONTROLS(_s_, _c_, _i_, _l_)								\
 															\
-		auto d, auto m, auto c, auto i
+		auto _s_, auto _c_, auto _i_, auto _l_
+
+// params:
+
+	#define NIK_ASSEMBLY_PARAMS(_s_, _c_, _i_, _l_, _v_)								\
+															\
+		NIK_ASSEMBLY_CONTROLS(_s_, _c_, _i_, _l_), auto... _v_
 
 /***********************************************************************************************************************/
 
-	#define NIK_BEGIN_ABSTRACT(_a_, _d_, _m_, _c_, _i_)								\
+// space:
+
+	#define NIK_ASSEMBLY_L(_c_, _i_)										\
 															\
-		T_ ## _a_												\
+		T_assembly												\
 		<													\
-			AD::next_name(_d_, _m_, _c_, _i_),								\
-			AD::next_note(_d_, _m_, _c_, _i_)								\
+			AD::next_name(_c_, _i_)
+
+	#define NIK_ASSEMBLY_M(_s_, _c_, _i_, _l_)									\
 															\
 		>::template result											\
 		<													\
-			AD::next_depth(_d_),										\
-			_m_, _c_,											\
-			AD::next_index(_d_, _m_, _c_, _i_)
+			_s_, _c_,											\
+			AD::next_index(_c_, _i_),									\
+			_l_
 
-	#define NIK_END_ABSTRACT 											\
+	#define NIK_ASSEMBLY_R 												\
 															\
 		>
 
-	#define NIK_ABSTRACT(_a_, _d_, _m_, _c_, _i_, _v_)								\
+	#define NIK_ASSEMBLY_BEGIN(_s_, _c_, _i_, _l_)									\
 															\
-		NIK_BEGIN_ABSTRACT(_a_, _d_, _m_, _c_, _i_), _v_... NIK_END_ABSTRACT
+		NIK_ASSEMBLY_L(_c_, _i_) NIK_ASSEMBLY_M(_s_, _c_, _i_, _l_)
 
-/***********************************************************************************************************************/
-
-// tuple:
-
-	#define NIK_DEFINE_BLOCK_TUPLE_PASS(_e_)									\
+	#define NIK_ASSEMBLY_END											\
 															\
-		template<auto... filler>										\
-		struct T_block<BN::tuple, BT::pass, _e_, filler...>							\
-		{													\
-			template<auto d, auto n, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts>			\
-			nik_ces auto & result(tuple<NIK_2_N_VARS(_e_, NIK_T_1), Ts...> & t)				\
-			{												\
-				return NIK_TUPLE_BLOCK(_e_, d, n, Ts)(NIK_2_N_TUPLE_VARS(_e_, t));			\
-			}												\
+		NIK_ASSEMBLY_R
+
+	#define NIK_ASSEMBLY_TEMPLATE(_c_, _i_)										\
 															\
-			template<auto d, auto n, NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts>			\
-			nik_ces const auto & result(const tuple<NIK_2_N_VARS(_e_, NIK_T_1), Ts...> & t)			\
-			{												\
-				return NIK_TUPLE_BLOCK(_e_, d, n, Ts)(NIK_2_N_TUPLE_VARS(_e_, t));			\
-			}												\
-		};
+		NIK_ASSEMBLY_L(_c_, _i_)
+
+	#define NIK_ASSEMBLY_RESULT(_s_, _c_, _i_, _l_, _v_)								\
+															\
+		NIK_ASSEMBLY_M(_s_, _c_, _i_, _l_), _v_... NIK_ASSEMBLY_R
+
+	#define NIK_ASSEMBLY(_s_, _c_, _i_, _l_, _v_)									\
+															\
+		NIK_ASSEMBLY_TEMPLATE(_c_, _i_) NIK_ASSEMBLY_RESULT(_s_, _c_, _i_, _l_, _v_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // machine:
 
-	#define NIK_BEGIN_MACHINE(_d_, _m_, _c_, _i_)									\
-															\
-		NIK_BEGIN_ABSTRACT(machine, _d_, _m_, _c_, _i_)
+/***********************************************************************************************************************/
 
-	#define NIK_END_MACHINE	 											\
-															\
-		NIK_END_ABSTRACT
+// controls:
 
-	#define NIK_MACHINE(_d_, _m_, _c_, _i_, _v_)									\
+	#define NIK_MACHINE_CONTROLS(_d_, _m_, _c_, _i_)								\
 															\
-		NIK_ABSTRACT(machine, _d_, _m_, _c_, _i_, _v_)
+		auto _d_, auto _m_, auto _c_, auto _i_
+
+// params:
+
+	#define NIK_MACHINE_PARAMS(_d_, _m_, _c_, _i_, _v_)								\
+															\
+		NIK_MACHINE_CONTROLS(_d_, _m_, _c_, _i_), auto... _v_
+
+/***********************************************************************************************************************/
+
+// space:
+
+	#define NIK_MACHINE_L(_e_, _d_, _m_, _c_, _i_)									\
+															\
+		T_machine												\
+		<													\
+			MD::next_name(_d_, _m_, _c_, _i_),								\
+			MD::next_note(_d_, _m_, _c_, _i_),								\
+			_e_
+
+	#define NIK_MACHINE_M(_d_, _m_, _c_, _i_)									\
+															\
+		>::template result											\
+		<													\
+			MD::next_depth(_d_),										\
+			_m_, _c_,											\
+			MD::next_index(_d_, _m_, _i_)
+
+	#define NIK_MACHINE_R 												\
+															\
+		>
+
+	#define NIK_MACHINE_BEGIN(_e_, _d_, _m_, _c_, _i_)								\
+															\
+		NIK_MACHINE_L(_e_, _d_, _m_, _c_, _i_) NIK_MACHINE_M(_d_, _m_, _c_, _i_)
+
+	#define NIK_MACHINE_END												\
+															\
+		NIK_MACHINE_R
+
+	#define NIK_MACHINE_TEMPLATE(_e_, _d_, _m_, _c_, _i_)								\
+															\
+		NIK_MACHINE_L(_e_, _d_, _m_, _c_, _i_)
+
+	#define NIK_MACHINE_RESULT(_d_, _m_, _c_, _i_, _v_)								\
+															\
+		NIK_MACHINE_M(_d_, _m_, _c_, _i_), _v_... NIK_MACHINE_R
+
+	#define NIK_MACHINE(_e_, _d_, _m_, _c_, _i_, _v_)								\
+															\
+		NIK_MACHINE_TEMPLATE(_e_, _d_, _m_, _c_, _i_) NIK_MACHINE_RESULT(_d_, _m_, _c_, _i_, _v_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

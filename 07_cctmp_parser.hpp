@@ -19,7 +19,7 @@
 
 // generic parser:
 
-namespace cctmp_generics {
+namespace cctmp {
 
 // cctmp:
 

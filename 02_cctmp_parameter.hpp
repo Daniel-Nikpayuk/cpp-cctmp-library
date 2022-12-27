@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// eval:
+// parameter (eval):
 
 	// Privileges template parameters through variable templates and variadic input.
 

@@ -19,17 +19,7 @@
 
 // generic lexer:
 
-namespace cctmp_generics {
-
-// cctmp:
-
-	using gkey_type						= typename cctmp::gkey_type;
-	using gckey_type					= typename cctmp::gckey_type;
-
-	using gindex_type					= typename cctmp::gindex_type;
-	using gcindex_type					= typename cctmp::gcindex_type;
-
-	nik_ce auto _zero					= cctmp::_zero;
+namespace cctmp {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
