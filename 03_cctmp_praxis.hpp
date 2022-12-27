@@ -548,59 +548,125 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// controllers:
+// controls:
 
 /***********************************************************************************************************************/
 
 // left:
 
-	template<auto p, auto l, auto loop = _zero, auto done = _three>
-	nik_ce auto left_contr = controller
-	<
-		instruction < PN::jump , PT::if_zero , done >,
-		instruction < PN::push , PT::id             >,
-		instruction < PN::jump , PT::dec     , loop >,
-		instruction < PN::pad  , PT::make    , p    >,
-		instruction < PN::pad  , PT::apply          >,
-		instruction < PN::left , PT::make    , l    >,
-		instruction < PN::left , PT::apply          >,
-		instruction < PN::left , PT::id             >,
-		instruction < PN::halt , PT::front          >
-	>;
+	struct left_controls
+	{
+		nik_ces auto h0 = U_null_Vs;
+		nik_ces auto h1 = U_null_Vs;
+		nik_ces auto h2 = U_null_Vs;
+
+		template<auto p, auto l, auto loop = _zero, auto done = _three>
+		nik_ces auto contr = controller
+		<
+			instruction < PN::jump , PT::if_zero , done >,
+			instruction < PN::push , PT::id             >,
+			instruction < PN::jump , PT::dec     , loop >,
+			instruction < PN::pad  , PT::make    , p    >,
+			instruction < PN::pad  , PT::apply          >,
+			instruction < PN::left , PT::make    , l    >,
+			instruction < PN::left , PT::apply          >,
+			instruction < PN::left , PT::id             >,
+			instruction < PN::halt , PT::front          >
+		>;
+
+		gindex_type push;
+		gindex_type pad;
+		gindex_type pos;
+
+		nik_ce left_controls(gcindex_type n, gcindex_type s, gcindex_type _2_N) : push{}, pad{}, pos{}
+		{
+			gcindex_type k = n / _2_N;
+			gcindex_type j = n % _2_N;
+			gcindex_type b = (k != 0 && j == 0);
+
+			push = k - b;
+			pad  = conditional_padding(n, s, _2_N);
+			pos  = b ? _2_N : j;
+		}
+	};
 
 /***********************************************************************************************************************/
 
 // sift:
 
-	template<auto p, auto l = _zero, auto u = _one, auto loop = _two, auto done = _six>
-	nik_ce auto sift_contr = controller
-	<
-		instruction < PN::pad  , PT::make    , p    >,
-		instruction < PN::pad  , PT::apply          >,
-		instruction < PN::jump , PT::if_zero , done >,
-		instruction < PN::sift , PT::apply   , l    >,
-		instruction < PN::sift , PT::id             >,
-		instruction < PN::jump , PT::dec     , loop >,
-		instruction < PN::sift , PT::apply   , u    >,
-		instruction < PN::sift , PT::id             >,
-		instruction < PN::halt , PT::rest           >
-	>;
+	struct sift_controls
+	{
+		nik_ces auto h0 = U_null_Vs;
+		nik_ces auto h1 = U_null_Vs;
+		nik_ces auto h2 = U_null_Vs;
+
+		template<auto p, auto l = _zero, auto u = _one, auto loop = _two, auto done = _six>
+		nik_ces auto contr = controller
+		<
+			instruction < PN::pad  , PT::make    , p    >,
+			instruction < PN::pad  , PT::apply          >,
+			instruction < PN::jump , PT::if_zero , done >,
+			instruction < PN::sift , PT::apply   , l    >,
+			instruction < PN::sift , PT::id             >,
+			instruction < PN::jump , PT::dec     , loop >,
+			instruction < PN::sift , PT::apply   , u    >,
+			instruction < PN::sift , PT::id             >,
+			instruction < PN::halt , PT::rest           >
+		>;
+
+		gindex_type push;
+		gindex_type pad;
+		gindex_type pos;
+
+		nik_ce sift_controls(gcindex_type n, gcindex_type s, gcindex_type _2_N) : push{}, pad{}, pos{}
+		{
+			gcindex_type k = n / _2_N;
+			gcindex_type j = n % _2_N;
+			gcindex_type b = (k != 0 && j == 0);
+
+			push = k - b;
+			pad  = conditional_padding(n, s, _2_N);
+			pos  = b ? _2_N : j;
+		}
+	};
 
 /***********************************************************************************************************************/
 
 // fold:
 
-	template<auto p, auto l, auto u = _zero, auto loop = _two, auto done = _five>
-	nik_ce auto fold_contr = controller
-	<
-		instruction < PN::pad  , PT::make    , p    >,
-		instruction < PN::pad  , PT::apply          >,
-		instruction < PN::jump , PT::if_zero , done >,
-		instruction < PN::fold , PT::id      , l    >,
-		instruction < PN::jump , PT::dec     , loop >,
-		instruction < PN::fold , PT::id      , u    >,
-		instruction < PN::halt , PT::first          >
-	>;
+	struct fold_controls
+	{
+		nik_ces auto h0 = U_null_Vs;
+		nik_ces auto h1 = U_null_Vs;
+		nik_ces auto h2 = U_null_Vs;
+
+		template<auto p, auto l, auto u = _zero, auto loop = _two, auto done = _five>
+		nik_ces auto contr = controller
+		<
+			instruction < PN::pad  , PT::make    , p    >,
+			instruction < PN::pad  , PT::apply          >,
+			instruction < PN::jump , PT::if_zero , done >,
+			instruction < PN::fold , PT::id      , l    >,
+			instruction < PN::jump , PT::dec     , loop >,
+			instruction < PN::fold , PT::id      , u    >,
+			instruction < PN::halt , PT::first          >
+		>;
+
+		gindex_type push;
+		gindex_type pad;
+		gindex_type pos;
+
+		nik_ce fold_controls(gcindex_type n, gcindex_type s, gcindex_type _2_N) : push{}, pad{}, pos{}
+		{
+			gcindex_type k = n / _2_N;
+			gcindex_type j = n % _2_N;
+			gcindex_type b = (k != 0 && j == 0);
+
+			push = k - b;
+			pad  = conditional_padding(n, s, _2_N);
+			pos  = b ? _2_N : j;
+		}
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
