@@ -677,59 +677,59 @@
 
 // controls:
 
-	#define NIK_MACHINE_CONTROLS(_d_, _m_, _t_, _c_, _i_)								\
+	#define NIK_MACHINE_CONTROLS(_d_, _m_, _c_, _i_)								\
 															\
-		auto _d_, auto _m_, auto _t_, auto _c_, auto _i_
+		auto _d_, auto _m_, auto _c_, auto _i_
 
 // params:
 
-	#define NIK_MACHINE_PARAMS(_d_, _m_, _t_, _c_, _i_, _v_)							\
+	#define NIK_MACHINE_PARAMS(_d_, _m_, _c_, _i_, _v_)								\
 															\
-		NIK_MACHINE_CONTROLS(_d_, _m_, _t_, _c_, _i_), auto... _v_
+		NIK_MACHINE_CONTROLS(_d_, _m_, _c_, _i_), auto... _v_
 
 /***********************************************************************************************************************/
 
 // space:
 
-	#define NIK_MACHINE_L(_e_, _d_, _m_, _t_, _c_, _i_)								\
+	#define NIK_MACHINE_L(_e_, _d_, _m_, _c_, _i_)									\
 															\
 		T_machine												\
 		<													\
-			MD::next_name(_d_, _m_, _t_, _c_, _i_),								\
-			MD::next_note(_d_, _m_, _t_, _c_, _i_),								\
+			MD::next_name(_d_, _m_, _c_, _i_),								\
+			MD::next_note(_d_, _m_, _c_, _i_),								\
 			_e_
 
-	#define NIK_MACHINE_M(_d_, _m_, _t_, _c_, _i_)									\
+	#define NIK_MACHINE_M(_d_, _m_, _c_, _i_)									\
 															\
 		>::template result											\
 		<													\
 			MD::next_depth(_d_),										\
-			_m_, _t_, _c_,											\
-			MD::next_index(_d_, _m_, _t_, _i_)
+			_m_, _c_,											\
+			MD::next_index(_d_, _m_, _i_)
 
 	#define NIK_MACHINE_R 												\
 															\
 		>
 
-	#define NIK_MACHINE_BEGIN(_e_, _d_, _m_, _t_, _c_, _i_)								\
+	#define NIK_MACHINE_BEGIN(_e_, _d_, _m_, _c_, _i_)								\
 															\
-		NIK_MACHINE_L(_e_, _d_, _m_, _t_, _c_, _i_) NIK_MACHINE_M(_d_, _m_, _t_, _c_, _i_)
+		NIK_MACHINE_L(_e_, _d_, _m_, _c_, _i_) NIK_MACHINE_M(_d_, _m_, _c_, _i_)
 
 	#define NIK_MACHINE_END												\
 															\
 		NIK_MACHINE_R
 
-	#define NIK_MACHINE_TEMPLATE(_e_, _d_, _m_, _t_, _c_, _i_)							\
+	#define NIK_MACHINE_TEMPLATE(_e_, _d_, _m_, _c_, _i_)								\
 															\
-		NIK_MACHINE_L(_e_, _d_, _m_, _t_, _c_, _i_)
+		NIK_MACHINE_L(_e_, _d_, _m_, _c_, _i_)
 
-	#define NIK_MACHINE_RESULT(_d_, _m_, _t_, _c_, _i_, _v_)							\
+	#define NIK_MACHINE_RESULT(_d_, _m_, _c_, _i_, _v_)								\
 															\
-		NIK_MACHINE_M(_d_, _m_, _t_, _c_, _i_), _v_... NIK_MACHINE_R
+		NIK_MACHINE_M(_d_, _m_, _c_, _i_), _v_... NIK_MACHINE_R
 
-	#define NIK_MACHINE(_e_, _d_, _m_, _t_, _c_, _i_, _v_)								\
+	#define NIK_MACHINE(_e_, _d_, _m_, _c_, _i_, _v_)								\
 															\
-		NIK_MACHINE_TEMPLATE(_e_, _d_, _m_, _t_, _c_, _i_) NIK_MACHINE_RESULT(_d_, _m_, _t_, _c_, _i_, _v_)
+		NIK_MACHINE_TEMPLATE(_e_, _d_, _m_, _c_, _i_) NIK_MACHINE_RESULT(_d_, _m_, _c_, _i_, _v_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

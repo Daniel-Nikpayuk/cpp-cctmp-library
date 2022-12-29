@@ -59,13 +59,15 @@ namespace cctmp {
 
 		// Both T_praxis and T_machine are implementations of such liners.
 
-	template<typename U, typename P>
+	template<typename Op, typename Params, typename Heaps>
 	struct machination
 	{
-		U u;
-		P p;
+		Op op;
+		Params ps;
+		Heaps hs;
 
-		nik_ce machination(const U & _u, const P & _p) : u{_u}, p{_p} { }
+		nik_ce machination(const Op & _op, const Params & _ps, const Heaps & _hs) :
+			op{_op}, ps{_ps}, hs{_hs} { }
 	};
 
 /***********************************************************************************************************************/
@@ -75,9 +77,9 @@ namespace cctmp {
 	template<typename T>
 	nik_ce bool is_machination = false;
 
-	template<typename U, typename P> nik_ce bool is_machination <       machination<U, P>   > = true;
-	template<typename U, typename P> nik_ce bool is_machination < const machination<U, P>   > = true;
-	template<typename U, typename P> nik_ce bool is_machination < const machination<U, P> & > = true;
+	template<typename O, typename P, typename H> nik_ce bool is_machination <       machination<O, P, H>   > = true;
+	template<typename O, typename P, typename H> nik_ce bool is_machination < const machination<O, P, H>   > = true;
+	template<typename O, typename P, typename H> nik_ce bool is_machination < const machination<O, P, H> & > = true;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -246,10 +248,9 @@ namespace cctmp {
 	struct T_praxis_start
 	{
 		nik_ces auto _2_N = PD::_2_N;
-		nik_ces auto d    = PD::initial_depth;
 		nik_ces auto i    = PD::initial_index;
 
-		template<auto c, auto n, auto... Vs, typename... Heaps>
+		template<auto d, auto c, auto n, auto... Vs, typename... Heaps>
 		nik_ces auto result(Heaps... Hs) { return NIK_PRAXIS(_2_N, d, c, i, n, Vs)(Hs...); }
 
 	}; nik_ce auto U_praxis_start = U_custom_T<T_praxis_start>;
@@ -280,9 +281,10 @@ namespace cctmp {
 		template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto... Vs, typename... Heaps>
 		nik_ces auto result(Heaps... Hs)
 		{
-			nik_ce auto p = U_pack_Vs<U_restore_T<Heaps>...>;
+			nik_ce auto ps = U_pack_Vs<c, i, n, _2_N, Vs...>;
+			nik_ce auto hs = U_pack_Vs<U_restore_T<Heaps>...>;
 
-			return machination(U_praxis_restart, U_pack_Vs<p, c, i, n, _2_N, Vs...>);
+			return machination(U_praxis_restart, ps, hs);
 		}
 	};
 
