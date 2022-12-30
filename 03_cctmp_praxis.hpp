@@ -598,7 +598,8 @@ namespace cctmp {
 
 	struct sift_controls
 	{
-		nik_ces auto h0 = U_null_Vs;
+		template<auto op, auto sop>
+		nik_ces auto h0 = U_pack_Vs<_at_, op, sop, _list_<>>;
 		nik_ces auto h1 = U_null_Vs;
 		nik_ces auto h2 = U_null_Vs;
 
@@ -627,7 +628,7 @@ namespace cctmp {
 			gcindex_type b = (k != 0 && j == 0);
 
 			push = k - b;
-			pad  = conditional_padding(n, s, _2_N);
+			pad  = required_padding(s, _2_N);
 			pos  = b ? _2_N : j;
 		}
 	};
@@ -638,7 +639,8 @@ namespace cctmp {
 
 	struct fold_controls
 	{
-		nik_ces auto h0 = U_null_Vs;
+		template<auto op>
+		nik_ces auto h0 = U_pack_Vs<_at_, op, _car_>;
 		nik_ces auto h1 = U_null_Vs;
 		nik_ces auto h2 = U_null_Vs;
 
@@ -665,7 +667,7 @@ namespace cctmp {
 			gcindex_type b = (k != 0 && j == 0);
 
 			push = k - b;
-			pad  = conditional_padding(n, s, _2_N);
+			pad  = required_padding(s, _2_N);
 			pos  = b ? _2_N : j;
 		}
 	};

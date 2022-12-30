@@ -85,6 +85,24 @@
 
 /***********************************************************************************************************************/
 
+// apply:
+
+	struct T_machine_nary_apply
+	{
+		template<auto p = _one, auto n = _one>
+		constexpr static auto contr = controller
+		<
+			instruction < MN::propel , MT::call , p , n >,
+			instruction < MN::halt   , MT::eval         >
+		>;
+
+		template<auto Inds, auto Op>
+		constexpr static auto H0 = U_pack_Vs<_car_, Inds, Op>;
+
+		template<auto d, auto Op, auto Inds, auto... Vs>
+		constexpr static auto result = T_machine_start::template result<d, contr<>, Vs...>(H0<Inds, Op>);
+	};
+
 	struct T_machine_binary_apply
 	{
 		constexpr static auto d    = MD::initial_depth;
@@ -92,12 +110,10 @@
 		constexpr static auto heap = T_machine_get::heap;
 		constexpr static auto bs   = U_pack_Vs < heap , regs  , regs >;
 		constexpr static auto ns   = U_pack_Vs < _two , _zero , _one >;
-		constexpr static auto inds = U_pack_Vs<bs, ns>;
-		constexpr static auto c    = T_machine_apply::template contr<>;
+		constexpr static auto Inds = U_pack_Vs<bs, ns>;
 
 		template<auto Op, auto V0, auto V1>
-		constexpr static auto result = T_machine_start::template
-						result<d, c, V0, V1>(T_machine_apply::template H0<inds, Op>);
+		constexpr static auto result = T_machine_nary_apply::template result<d-1, Op, Inds, V0, V1>;
 
 	}; constexpr auto _binary_apply_ = U_custom_T<T_machine_binary_apply>;
 
