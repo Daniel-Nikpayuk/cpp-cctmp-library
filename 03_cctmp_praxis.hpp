@@ -298,11 +298,11 @@ namespace cctmp {
 		template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto... Vs, typename... Heaps>
 		nik_ces auto result(Heaps... Hs)
 		{
-			nik_ce auto cs = eval<_to_tuple_, d, c, i, n, _2_N>;
-			nik_ce auto rs = eval<_to_tuple_, Vs...>;
-			nik_ce auto hs = eval<_to_tuple_, U_restore_T<Heaps>...>;
+			nik_ce auto cs = eval<_list_<>, d, c, i, n, _2_N>;
+			nik_ce auto rs = eval<_list_<>, Vs...>;
+			nik_ce auto hs = eval<_list_<>, U_restore_T<Heaps>...>;
 
-			return eval<_to_tuple_, cs, rs, hs>;
+			return eval<_list_<>, cs, rs, hs>;
 		}
 	};
 

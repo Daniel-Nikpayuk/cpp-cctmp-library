@@ -610,67 +610,6 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// assembly:
-
-/***********************************************************************************************************************/
-
-// controls:
-
-	#define NIK_ASSEMBLY_CONTROLS(_s_, _c_, _i_, _l_)								\
-															\
-		auto _s_, auto _c_, auto _i_, auto _l_
-
-// params:
-
-	#define NIK_ASSEMBLY_PARAMS(_s_, _c_, _i_, _l_, _v_)								\
-															\
-		NIK_ASSEMBLY_CONTROLS(_s_, _c_, _i_, _l_), auto... _v_
-
-/***********************************************************************************************************************/
-
-// space:
-
-	#define NIK_ASSEMBLY_L(_c_, _i_)										\
-															\
-		T_assembly												\
-		<													\
-			AD::next_name(_c_, _i_)
-
-	#define NIK_ASSEMBLY_M(_s_, _c_, _i_, _l_)									\
-															\
-		>::template result											\
-		<													\
-			_s_, _c_,											\
-			AD::next_index(_c_, _i_),									\
-			_l_
-
-	#define NIK_ASSEMBLY_R 												\
-															\
-		>
-
-	#define NIK_ASSEMBLY_BEGIN(_s_, _c_, _i_, _l_)									\
-															\
-		NIK_ASSEMBLY_L(_c_, _i_) NIK_ASSEMBLY_M(_s_, _c_, _i_, _l_)
-
-	#define NIK_ASSEMBLY_END											\
-															\
-		NIK_ASSEMBLY_R
-
-	#define NIK_ASSEMBLY_TEMPLATE(_c_, _i_)										\
-															\
-		NIK_ASSEMBLY_L(_c_, _i_)
-
-	#define NIK_ASSEMBLY_RESULT(_s_, _c_, _i_, _l_, _v_)								\
-															\
-		NIK_ASSEMBLY_M(_s_, _c_, _i_, _l_), _v_... NIK_ASSEMBLY_R
-
-	#define NIK_ASSEMBLY(_s_, _c_, _i_, _l_, _v_)									\
-															\
-		NIK_ASSEMBLY_TEMPLATE(_c_, _i_) NIK_ASSEMBLY_RESULT(_s_, _c_, _i_, _l_, _v_)
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // machine:
 
 /***********************************************************************************************************************/
@@ -730,6 +669,67 @@
 	#define NIK_MACHINE(_e_, _d_, _m_, _c_, _i_, _v_)								\
 															\
 		NIK_MACHINE_TEMPLATE(_e_, _d_, _m_, _c_, _i_) NIK_MACHINE_RESULT(_d_, _m_, _c_, _i_, _v_)
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// assembly:
+
+/***********************************************************************************************************************/
+
+// controls:
+
+	#define NIK_ASSEMBLY_CONTROLS(_s_, _c_, _i_, _l_)								\
+															\
+		auto _s_, auto _c_, auto _i_, auto _l_
+
+// params:
+
+	#define NIK_ASSEMBLY_PARAMS(_s_, _c_, _i_, _l_, _v_)								\
+															\
+		NIK_ASSEMBLY_CONTROLS(_s_, _c_, _i_, _l_), auto... _v_
+
+/***********************************************************************************************************************/
+
+// space:
+
+	#define NIK_ASSEMBLY_L(_c_, _i_)										\
+															\
+		T_assembly												\
+		<													\
+			AD::next_name(_c_, _i_)
+
+	#define NIK_ASSEMBLY_M(_s_, _c_, _i_, _l_)									\
+															\
+		>::template result											\
+		<													\
+			_s_, _c_,											\
+			AD::next_index(_c_, _i_),									\
+			_l_
+
+	#define NIK_ASSEMBLY_R 												\
+															\
+		>
+
+	#define NIK_ASSEMBLY_BEGIN(_s_, _c_, _i_, _l_)									\
+															\
+		NIK_ASSEMBLY_L(_c_, _i_) NIK_ASSEMBLY_M(_s_, _c_, _i_, _l_)
+
+	#define NIK_ASSEMBLY_END											\
+															\
+		NIK_ASSEMBLY_R
+
+	#define NIK_ASSEMBLY_TEMPLATE(_c_, _i_)										\
+															\
+		NIK_ASSEMBLY_L(_c_, _i_)
+
+	#define NIK_ASSEMBLY_RESULT(_s_, _c_, _i_, _l_, _v_)								\
+															\
+		NIK_ASSEMBLY_M(_s_, _c_, _i_, _l_), _v_... NIK_ASSEMBLY_R
+
+	#define NIK_ASSEMBLY(_s_, _c_, _i_, _l_, _v_)									\
+															\
+		NIK_ASSEMBLY_TEMPLATE(_c_, _i_) NIK_ASSEMBLY_RESULT(_s_, _c_, _i_, _l_, _v_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

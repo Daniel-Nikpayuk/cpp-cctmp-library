@@ -254,26 +254,6 @@
 
 #undef NIK_DEFINE_PRAXIS_SIFT_ID_2_N
 
-#undef NIK_ASSEMBLY_CONTROLS
-
-#undef NIK_ASSEMBLY_PARAMS
-
-#undef NIK_ASSEMBLY_L
-
-#undef NIK_ASSEMBLY_M
-
-#undef NIK_ASSEMBLY_R
-
-#undef NIK_ASSEMBLY_BEGIN
-
-#undef NIK_ASSEMBLY_END
-
-#undef NIK_ASSEMBLY_TEMPLATE
-
-#undef NIK_ASSEMBLY_RESULT
-
-#undef NIK_ASSEMBLY
-
 #undef NIK_MACHINE_CONTROLS
 
 #undef NIK_MACHINE_PARAMS
@@ -293,6 +273,26 @@
 #undef NIK_MACHINE_RESULT
 
 #undef NIK_MACHINE
+
+#undef NIK_ASSEMBLY_CONTROLS
+
+#undef NIK_ASSEMBLY_PARAMS
+
+#undef NIK_ASSEMBLY_L
+
+#undef NIK_ASSEMBLY_M
+
+#undef NIK_ASSEMBLY_R
+
+#undef NIK_ASSEMBLY_BEGIN
+
+#undef NIK_ASSEMBLY_END
+
+#undef NIK_ASSEMBLY_TEMPLATE
+
+#undef NIK_ASSEMBLY_RESULT
+
+#undef NIK_ASSEMBLY
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

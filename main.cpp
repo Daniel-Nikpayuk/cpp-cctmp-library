@@ -41,6 +41,7 @@
 
 /***********************************************************************************************************************/
 
+/*
 	constexpr auto val = eval
 	<
 		_par_at_, 164,
@@ -60,7 +61,6 @@
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 		0, 1, 2, 3, 44
 	>;
-/*
 
 	constexpr auto val = arg_at<164>
 	(
@@ -85,9 +85,30 @@
 
 /***********************************************************************************************************************/
 
+	struct T_machine_binary_apply
+	{
+		constexpr static auto d    = MD::initial_depth;
+		constexpr static auto regs = T_machine_get::regs;
+		constexpr static auto heap = T_machine_get::heap;
+		constexpr static auto bs   = U_pack_Vs < heap , regs  , regs >;
+		constexpr static auto ns   = U_pack_Vs < _two , _zero , _one >;
+		constexpr static auto inds = U_pack_Vs<bs, ns>;
+		constexpr static auto c    = T_machine_apply::template contr<>;
+
+		template<auto Op, auto V0, auto V1>
+		constexpr static auto result = T_machine_start::template
+						result<d, c, V0, V1>(T_machine_apply::template H0<inds, Op>);
+
+	}; constexpr auto _binary_apply_ = U_custom_T<T_machine_binary_apply>;
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", val);
+		printf("%d\n", eval<_binary_apply_, _add_, 2, 3>);
+		printf("%d\n", eval<_binary_apply_, _multiply_, 2, 3>);
+
+	//	printf("%d\n", val);
 
 		return 0;
 	}

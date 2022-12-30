@@ -589,6 +589,14 @@ namespace cctmp {
 
 			template<auto V = _one> nik_ce auto _decrement_		= _curry_<_add_, -V>;
 
+		// times:
+
+			template<auto V = _two> nik_ce auto _times_		= _curry_<_multiply_, V>;
+
+		// quotient:
+
+			template<auto V = _two> nik_ce auto _quotient_		= _curry_<_divide_, V>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 

@@ -43,9 +43,9 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			halt   , restart , jump   ,
-			split  , write   , select ,
-			params , action  , compel ,
+			halt   , restart , jump    ,
+			split  , params  , select  ,
+			action , compel  ,
 			dimension
 		};
 	};
@@ -61,12 +61,9 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-
 			pause , debug  , eval  ,
-			test  , value  , regs  ,
-			go_to , branch , call  ,
-			front , back   ,
-			copy  , mutate , paste , cut ,
+			value , values , go_to , branch , call  ,
+			front , back   , copy  , mutate , paste , cut ,
 			dimension
 		};
 	};
@@ -82,8 +79,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-
-			unit , all ,
+			retry , unit , all ,
 			dimension
 		};
 	};
@@ -99,9 +95,8 @@ namespace cctmp {
 		enum Position : gkey_type
 		{
 			size = 0,
-			name , note      ,
-			pos  , dec = pos , mov = pos ,
-			ctn  , syn       , key       , act
+			name , note , pos ,
+			dimension
 		};
 
 		nik_ces gindex_type length (cinstr_type i)  { return i[size]; }
@@ -157,7 +152,8 @@ namespace cctmp {
 				if      (d == 0)        return MT::pause;
 				else if (m == MM::id)   return c[i+1][MI::note];
 				else if (m == MM::unit) return MT::value;
-				else                    return MT::regs;
+				else if (m == MM::all)  return MT::values;
+				else                    return MT::id;
 			}
 
 			nik_ces gdepth_type next_depth(gcdepth_type d)
@@ -169,8 +165,6 @@ namespace cctmp {
 
 	using MD = MachineDispatch;
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // start:
@@ -198,8 +192,13 @@ namespace cctmp {
 	}; nik_ce auto U_machine_restart = U_store_T<T_machine_restart>;
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// revalue (try restart):
+// dependencies:
+
+/***********************************************************************************************************************/
+
+// revalue (conditional restart):
 
 	struct T_machine_revalue
 	{
@@ -209,8 +208,8 @@ namespace cctmp {
 		template<auto...>
 		nik_ces auto contr = controller
 		<
-			instruction < MN::restart , MT::test >,
-			instruction < MN::halt    , MT::eval >
+			instruction < MN::restart , MT::value >,
+			instruction < MN::halt    , MT::eval  >
 		>;
 
 		template<auto V>
@@ -230,7 +229,7 @@ namespace cctmp {
 		nik_ces auto contr = controller
 		<
 			instruction < MN::split  , MT::call , n >,
-			instruction < MN::split  , MT::id       >,
+			instruction < MN::params , MT::id       >,
 			instruction < MN::params , MT::copy     >,
 			instruction < MN::halt   , MT::eval     >
 		>;
@@ -242,25 +241,30 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// lookup:
+// get:
 
-	struct T_machine_lookup
+	struct T_machine_get
 	{
-		nik_ces auto d  = MD::initial_depth;
-		nik_ces auto H0 = U_pack_Vs<_car_>;
-
-		template<auto b, auto n>
+		template<auto n>
 		nik_ces auto contr = controller
 		<
-			instruction < MN::write  , MT::id   , b >,
-			instruction < MN::split  , MT::call , n >,
-			instruction < MN::split  , MT::id       >,
-			instruction < MN::params , MT::copy     >,
+			instruction < MN::select , MT::call , n >,
 			instruction < MN::halt   , MT::eval     >
 		>;
 
-		template<auto b, auto n, auto... Vs>
-		nik_ces auto result = T_machine_start::template result<d, contr<b, n>, Vs...>(H0);
+		nik_ces auto U_at  = U_store_T<T_machine_at>;
+		nik_ces auto U_get = U_store_T<T_machine_get>;
+		nik_ces auto regs  = false;
+		nik_ces auto heap  = true;
+
+		template<auto b>
+		nik_ces auto U_machine = if_then_else_<b, U_get, U_at>;
+
+		template<auto b>
+		using T_machine = T_store_U<U_machine<b>>;
+
+		template<auto b, auto n>
+		nik_ces auto result = T_machine<b>::template contr<n>;
 	};
 
 /***********************************************************************************************************************/
@@ -274,19 +278,46 @@ namespace cctmp {
 		template<auto Inds, auto Op>
 		nik_ces auto H0 = U_pack_Vs<_car_, Inds, Op>;
 
-		template<auto i = _one, auto o = _two>
+		template<auto m = _one, auto n = _one>
 		nik_ces auto contr = controller
 		<
-			instruction < MN::write  , MT::call , i >,
-			instruction < MN::select , MT::id       >,
-			instruction < MN::compel , MT::call , o >,
-			instruction < MN::halt   , MT::eval     >
+			instruction < MN::select , MT::call   , m >,
+			instruction < MN::select , MT::value      >,
+			instruction < MN::select , MT::values     >,
+			instruction < MN::action , MT::call   , n >,
+			instruction < MN::halt   , MT::eval       >
 		>;
 
 		template<auto Inds, auto Op, auto... Vs>
 		nik_ces auto result = T_machine_start::template result<d, contr<>, Vs...>(H0<Inds, Op>);
 	};
 
+/***********************************************************************************************************************/
+
+// propel:
+
+	struct T_machine_propel
+	{
+		nik_ces auto d = MD::initial_depth;
+
+		template<auto Inds, auto Op>
+		nik_ces auto H0 = U_pack_Vs<_car_, Inds, Op>;
+
+		template<auto n = _one>
+		nik_ces auto contr = controller
+		<
+			instruction < MN::select , MT::call   , n >,
+			instruction < MN::select , MT::value      >,
+			instruction < MN::select , MT::values     >,
+			instruction < MN::compel , MT::call       >,
+			instruction < MN::halt   , MT::eval       >
+		>;
+
+		template<auto Inds, auto Op, auto... Vs>
+		nik_ces auto result = T_machine_start::template result<d, contr<>, Vs...>(H0<Inds, Op>);
+	};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -319,11 +350,11 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(d, m, c, i, Vs), typename... Heaps>
 		nik_ces auto result(Heaps... Hs)
 		{
-			nik_ce auto cs = eval<_to_tuple_, d, m, c, i, _2_N>;
-			nik_ce auto rs = eval<_to_tuple_, Vs...>;
-			nik_ce auto hs = eval<_to_tuple_, U_restore_T<Heaps>...>;
+			nik_ce auto cs = eval<_list_<>, d, m, c, i, _2_N>;
+			nik_ce auto rs = eval<_list_<>, Vs...>;
+			nik_ce auto hs = eval<_list_<>, U_restore_T<Heaps>...>;
 
-			return eval<_to_tuple_, cs, rs, hs>;
+			return eval<_list_<>, cs, rs, hs>;
 		}
 	};
 
@@ -352,40 +383,14 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// test:
-
-		// Should assume (m == MM::id):
+// id:
 
 	template<gindex_type _2_N>
-	struct T_machine<MN::restart, MT::test, _2_N>
-	{
-		template<NIK_MACHINE_CONTROLS(d, m, c, i), auto V, auto... Vs, typename... Heaps>
-		nik_ces auto result(Heaps... Hs)
-		{
-			if nik_ce (is_machination<decltype(V)>)
-
-				return NIK_MACHINE(_2_N, d, MM::unit, c, i, Vs)(V.op, V.ps, V.hs, Hs...);
-			else
-				return NIK_MACHINE_BEGIN(_2_N, d, m, c, i),
-
-					V, Vs...
-
-				NIK_MACHINE_END(Hs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// value:
-
-		// Should assume (m == MM::unit):
-
-	template<gindex_type _2_N>
-	struct T_machine<MN::restart, MT::value, _2_N>
+	struct T_machine<MN::restart, MT::id, _2_N>
 	{
 		template
 		<
-			NIK_MACHINE_PARAMS(d, m, c, i, Vs),
+			NIK_MACHINE_CONTROLS(d, m, c, i), auto... Vs,
 			typename Op,
 			template<auto...> typename BP, auto... ps,
 			template<auto...> typename BH, auto... hs,
@@ -398,7 +403,11 @@ namespace cctmp {
 
 			if nik_ce (is_machination<decltype(V)>)
 
-				return NIK_MACHINE(_2_N, d, m, c, i, Vs)(V.op, V.ps, V.hs, Hs...);
+				return NIK_MACHINE_BEGIN(_2_N, d, MM::retry, c, i),
+
+					Vs...
+
+				NIK_MACHINE_END(V.op, V.ps, V.hs, Hs...);
 			else
 				return NIK_MACHINE_BEGIN(_2_N, d, MM::id, c, i),
 
@@ -410,12 +419,36 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// regs:
-
-		// Should assume (m == MM::all):
+// value:
 
 	template<gindex_type _2_N>
-	struct T_machine<MN::restart, MT::regs, _2_N>
+	struct T_machine<MN::restart, MT::value, _2_N>
+	{
+		template<NIK_MACHINE_CONTROLS(d, m, c, i), auto V, auto... Vs, typename... Heaps>
+		nik_ces auto result(Heaps... Hs)
+		{
+			if nik_ce (is_machination<decltype(V)>)
+
+				return NIK_MACHINE_BEGIN(_2_N, d, MM::retry, c, i),
+
+					Vs...
+
+				NIK_MACHINE_END(V.op, V.ps, V.hs, Hs...);
+			else
+				return NIK_MACHINE_BEGIN(_2_N, d, MM::id, c, i),
+
+					V, Vs...
+
+				NIK_MACHINE_END(Hs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// values:
+
+	template<gindex_type _2_N>
+	struct T_machine<MN::restart, MT::values, _2_N>
 	{
 		nik_ces auto sc  = T_machine_revalue::template contr<>;
 		nik_ces auto sH0 = T_machine_revalue::H0;
@@ -426,16 +459,18 @@ namespace cctmp {
 			nik_ce auto has_machination = eval<_or_, is_machination<decltype(Vs)>...>;
 
 			if nik_ce (has_machination)
-			{
-				nik_ce auto sd = MD::next_depth(d);
 
-				return NIK_MACHINE_BEGIN(_2_N, d, m, c, i),
+				return NIK_MACHINE_BEGIN(_2_N, d, MM::all, c, i),
 
-				       T_machine_start::template result<sd, sc, Vs>(sH0)...
+				       T_machine_start::template result<MD::next_depth(d), sc, Vs>(sH0)...
 
 				NIK_MACHINE_END(Hs...);
-			}
-			else return NIK_MACHINE(_2_N, d, MM::id, c, i, Vs)(Hs...);
+			else
+				return NIK_MACHINE_BEGIN(_2_N, d, MM::id, c, i),
+
+					Vs...
+
+				NIK_MACHINE_END(Hs...);
 		}
 	};
 
@@ -491,8 +526,6 @@ namespace cctmp {
 
 // call:
 
-		// Should assume (m == MM::id):
-
 	template<gindex_type _2_N>
 	struct T_machine<MN::split, MT::call, _2_N>
 	{
@@ -509,26 +542,25 @@ namespace cctmp {
 
 					>(lc.h0, lc.h1, lc.h2);
 
-			if nik_ce (is_machination<decltype(V)>)
+			return NIK_MACHINE_BEGIN(_2_N, d, MM::unit, c, i),
 
-				return NIK_MACHINE(_2_N, d, MM::unit, c, i, Vs)(V.op, V.ps, V.hs, Hs...);
-			else
-				return NIK_MACHINE_BEGIN(_2_N, d, m, c, i),
+				V, Vs...
 
-					V, Vs...
-
-				NIK_MACHINE_END(Hs...);
+			NIK_MACHINE_END(Hs...);
 		}
 	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// params:
 
 /***********************************************************************************************************************/
 
 // id:
 
-		// Should assume (m == MM::id):
-
 	template<gindex_type _2_N>
-	struct T_machine<MN::split, MT::id, _2_N>
+	struct T_machine<MN::params, MT::id, _2_N>
 	{
 		template<NIK_MACHINE_CONTROLS(d, m, c, i), auto V, auto...Vs, typename... Heaps>
 		nik_ces auto result(Heaps... Hs)
@@ -548,75 +580,6 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// write:
-
-/***********************************************************************************************************************/
-
-// id:
-
-	template<gindex_type _2_N>
-	struct T_machine<MN::write, MT::id, _2_N>
-	{
-		template
-		<
-			NIK_MACHINE_CONTROLS(d, m, c, i), auto... Vs,
-			template<auto...> typename B, auto... Ws, typename... Heaps
-		>
-		nik_ces auto result(nik_avp(B<Ws...>*), Heaps... Hs)
-		{
-			nik_ce auto ins	= MD::instr(c, i);
-
-			if nik_ce (ins[MI::pos])
-
-				return NIK_MACHINE(_2_N, d, m, c, i, Ws)(Hs...);
-			else
-				return NIK_MACHINE(_2_N, d, m, c, i, Vs)(Hs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// select:
-
-/***********************************************************************************************************************/
-
-// id:
-
-	template<gindex_type _2_N>
-	struct T_machine<MN::select, MT::id, _2_N>
-	{
-		template<auto b, auto n>
-		nik_ces auto sc  = T_machine_lookup::template contr<b, n>;
-		nik_ces auto sH0 = T_machine_lookup::H0;
-
-		template
-		<
-			NIK_MACHINE_CONTROLS(d, m, c, i), auto... Vs,
-			template<auto...> typename BB, auto... bs,
-			template<auto...> typename BN, auto... ns,
-			typename Heap0, typename... Heaps
-		>
-		nik_ces auto result(nik_avp(BB<bs...>*), nik_avp(BN<ns...>*), Heap0 H0, Heaps... Hs)
-		{
-			nik_ce auto sd = MD::next_depth(d);
-
-			return NIK_MACHINE_BEGIN(_2_N, d, MM::all, c, i),
-
-			       T_machine_start::template result<sd, sc<bs, ns>, Vs...>(H0, sH0)...
-
-			NIK_MACHINE_END(H0, Hs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// params:
-
-/***********************************************************************************************************************/
 
 // front:
 
@@ -628,11 +591,7 @@ namespace cctmp {
 	>
 	struct T_machine<MN::params, MT::front, _2_N, ps, hs>
 	{
-		template
-		<
-			NIK_MACHINE_CONTROLS(d, m, c, i),
-			T_store_U<LUs>... LVs, auto... Vs
-		>
+		template<NIK_MACHINE_CONTROLS(d, m, c, i), T_store_U<LUs>... LVs, auto... Vs>
 		nik_ces auto result = NIK_MACHINE_BEGIN(_2_N, d, m, c, i),
 
 			LVs...
@@ -652,11 +611,7 @@ namespace cctmp {
 	>
 	struct T_machine<MN::params, MT::back, _2_N, ps, hs>
 	{
-		template
-		<
-			NIK_MACHINE_CONTROLS(d, m, c, i),
-			T_store_U<LUs>... LVs, auto... Vs
-		>
+		template<NIK_MACHINE_CONTROLS(d, m, c, i), T_store_U<LUs>... LVs, auto... Vs>
 		nik_ces auto result = NIK_MACHINE_BEGIN(_2_N, d, m, c, i),
 
 			Vs...
@@ -676,11 +631,7 @@ namespace cctmp {
 	>
 	struct T_machine<MN::params, MT::copy, _2_N, ps, hs>
 	{
-		template
-		<
-			NIK_MACHINE_CONTROLS(d, m, c, i),
-			T_store_U<LUs>... LVs, auto VN, auto... Vs
-		>
+		template<NIK_MACHINE_CONTROLS(d, m, c, i), T_store_U<LUs>... LVs, auto VN, auto... Vs>
 		nik_ces auto result = NIK_MACHINE_BEGIN(_2_N, d, m, c, i),
 
 			VN, LVs..., VN, Vs...
@@ -700,11 +651,7 @@ namespace cctmp {
 	>
 	struct T_machine<MN::params, MT::mutate, _2_N, ps, hs>
 	{
-		template
-		<
-			NIK_MACHINE_CONTROLS(d, m, c, i),
-			T_store_U<U> V, T_store_U<LUs>... LVs, auto VN, auto... Vs
-		>
+		template<NIK_MACHINE_CONTROLS(d, m, c, i), T_store_U<U> V, T_store_U<LUs>... LVs, auto VN, auto... Vs>
 		nik_ces auto result = NIK_MACHINE_BEGIN(_2_N, d, m, c, i),
 
 			LVs..., V, Vs...
@@ -724,11 +671,7 @@ namespace cctmp {
 	>
 	struct T_machine<MN::params, MT::paste, _2_N, ps, hs>
 	{
-		template
-		<
-			NIK_MACHINE_CONTROLS(d, m, c, i),
-			T_store_U<U> V, T_store_U<LUs>... LVs, auto... Vs
-		>
+		template<NIK_MACHINE_CONTROLS(d, m, c, i), T_store_U<U> V, T_store_U<LUs>... LVs, auto... Vs>
 		nik_ces auto result = NIK_MACHINE_BEGIN(_2_N, d, m, c, i),
 
 			LVs..., V, Vs...
@@ -748,16 +691,100 @@ namespace cctmp {
 	>
 	struct T_machine<MN::params, MT::cut, _2_N, ps, hs>
 	{
-		template
-		<
-			NIK_MACHINE_CONTROLS(d, m, c, i),
-			T_store_U<LUs>... LVs, auto VN, auto... Vs
-		>
+		template<NIK_MACHINE_CONTROLS(d, m, c, i), T_store_U<LUs>... LVs, auto VN, auto... Vs>
 		nik_ces auto result = NIK_MACHINE_BEGIN(_2_N, d, m, c, i),
 
 			LVs..., Vs...
 
 		NIK_MACHINE_END(Hs...);
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// select:
+
+/***********************************************************************************************************************/
+
+// call:
+
+	template<gindex_type _2_N>
+	struct T_machine<MN::select, MT::call, _2_N>
+	{
+		template<auto n>
+		nik_ces auto sc  = T_machine_at::template contr<n>;
+		nik_ces auto sH0 = T_machine_at::H0;
+
+		template
+		<
+			NIK_MACHINE_PARAMS(d, m, c, i, Vs),
+			template<auto...> typename B0, auto... Ws, typename... Heaps
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)
+		{
+			nik_ce auto sd  = MD::next_depth(d);
+			nik_ce auto ins	= MD::instr(c, i);
+			nik_ce auto V   = T_machine_start::template result<sd, sc<ins[MI::pos]>, Ws...>(sH0);
+
+			return NIK_MACHINE_BEGIN(_2_N, d, MM::unit, c, i),
+
+				V, Vs...
+
+			NIK_MACHINE_END(H0, Hs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// value:
+
+	template<gindex_type _2_N>
+	struct T_machine<MN::select, MT::value, _2_N>
+	{
+		template<NIK_MACHINE_CONTROLS(d, m, c, i), auto V, auto... Vs, typename... Heaps>
+		nik_ces auto result(Heaps... Hs)
+		{
+			nik_ce auto bs = unpack_<V, _car_>;
+			nik_ce auto ns = unpack_<V, _cadr_>;
+
+			return NIK_MACHINE_BEGIN(_2_N, d, m, c, i),
+
+				Vs...
+
+			NIK_MACHINE_END(bs, ns, Hs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// values:
+
+		// Assumes (H0 == B0<_car_, Ws...>):
+
+	template<gindex_type _2_N>
+	struct T_machine<MN::select, MT::values, _2_N>
+	{
+		template<auto b, auto n>
+		nik_ces auto sc = T_machine_get::template result<b, n>;
+
+		template
+		<
+			NIK_MACHINE_CONTROLS(d, m, c, i), auto... Vs,
+			template<auto...> typename BB, auto... bs,
+			template<auto...> typename BN, auto... ns,
+			typename Heap0, typename... Heaps
+		>
+		nik_ces auto result(nik_avp(BB<bs...>*), nik_avp(BN<ns...>*), Heap0 H0, Heaps... Hs)
+		{
+			nik_ce auto sd  = MD::next_depth(d);
+			nik_ce auto sH0 = U_restore_T<Heap0>;
+
+			return NIK_MACHINE_BEGIN(_2_N, d, MM::all, c, i),
+
+			       T_machine_start::template result<sd, sc<bs, ns>, Vs...>(sH0)...
+
+			NIK_MACHINE_END(H0, Hs...);
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -769,55 +796,30 @@ namespace cctmp {
 
 // call:
 
-/*
 	template<gindex_type _2_N>
-	struct T_machine<MN::call, MT::action, _2_N>
+	struct T_machine<MN::action, MT::call, _2_N>
 	{
-		template
-		<
-			NIK_MACHINE_PARAMS(d, m, c, i, Vs),
-			template<auto...> typename B0, auto... Ws,
-			template<auto...> typename B1, auto... Xs,
-			typename... Heaps
-		>
-		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), nik_vp(H1)(B1<Xs...>*), Heaps... Hs)
+		template<NIK_MACHINE_CONTROLS(d, m, c, i), auto Op, auto... Vs, typename... Heaps>
+		nik_ces auto result(Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
-			nik_ce auto n	= ins[MI::dec];
+			nik_ce auto n	= ins[MI::pos];
 
 			if nik_ce (n >= d) // analogous to returning a machination.
 
-				return NIK_MACHINE(_2_N, 0, MT::action, c, i, Vs)(H0, H1, Hs...);
+				return NIK_MACHINE_BEGIN(_2_N, _zero, m, c, i-1),
+
+					Op, Vs...
+
+				NIK_MACHINE_END(Hs...);
 			else
-			{
-				nik_ce auto ctn = ins[MI::ctn];
-				nik_ce auto syn = ins[MI::syn];
-				nik_ce auto key = ins[MI::key];
-				nik_ce auto act = ins[MI::act];
-				nik_ce auto val = eval<U_grammar<syn, key, act>, Ws...>;
+				return NIK_MACHINE_BEGIN(_2_N, d, MM::unit, c, i),
 
-				if nik_ce (ctn == MI::h1)
+					eval<Op, Vs...>, Vs...
 
-					return NIK_MACHINE(d, MT::id, c, i, Vs)
-						(U_null_Vs, U_pack_Vs<val, Xs...>, Hs...);
-
-				else if nik_ce (ctn == MI::h1_pair)
-
-					return NIK_MACHINE(_2_N, d, MT::id, c, i, Vs)
-					(
-						U_null_Vs, U_pack_Vs
-						<
-							tuple_value<0>(val),
-							tuple_value<1>(val), Xs...
-
-						>, Hs...
-					);
-				else
-					return val;
-			}
+				NIK_MACHINE_END(Hs...);
 		}
 	};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -837,15 +839,11 @@ namespace cctmp {
 			nik_ce auto sd = MD::next_depth(d);
 			nik_ce auto V  = T_store_U<Op>::template result<sd, Vs...>;
 
-			if nik_ce (is_machination<decltype(V)>)
+			return NIK_MACHINE_BEGIN(_2_N, d, MM::unit, c, i),
 
-				return NIK_MACHINE(_2_N, d, MM::unit, c, i, Vs)(V.op, V.ps, V.hs, Hs...);
-			else
-				return NIK_MACHINE_BEGIN(_2_N, d, m, c, i),
+				V, Vs...
 
-					V, Vs...
-
-				NIK_MACHINE_END(Hs...);
+			NIK_MACHINE_END(Hs...);
 		}
 	};
 
