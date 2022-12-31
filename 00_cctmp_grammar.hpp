@@ -31,7 +31,7 @@ namespace cctmp {
 
 // T -> U:
 
-	template<typename T> nik_ces void store(T) { };
+	template<typename T> nik_ces void store(T) { }
 
 	template<typename T>
 	nik_ce auto U_store_T = store<T*>;

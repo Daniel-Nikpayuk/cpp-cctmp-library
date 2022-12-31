@@ -28,7 +28,7 @@
 #include"02_cctmp_parameter.hpp"
 #include"03_cctmp_praxis.hpp"
 #include"04_cctmp_machine.hpp"
-//#include"05_cctmp_assembly.hpp"
+#include"05_cctmp_assembly.hpp"
 //#include"06_cctmp_lexer.hpp"
 //#include"07_cctmp_parser.hpp"
 //#include"08_cctmp_algorithm.hpp"
@@ -119,10 +119,14 @@
 
 /***********************************************************************************************************************/
 
+	constexpr auto _prax_add_      = _praxis_apply_ < _add_      >;
+	constexpr auto _prax_multiply_ = _praxis_apply_ < _multiply_ >;
+
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", eval<_binary_apply_, _add_, 2, 3>);
-		printf("%d\n", eval<_binary_apply_, _multiply_, 2, 3>);
+	//	printf("%d\n", eval<_par_segment_, 10>);
+	//	printf("%d\n", eval<_binary_apply_, _prax_add_, 2, 3>);
+	//	printf("%d\n", eval<_binary_apply_, _prax_multiply_, 2, 3>);
 
 	//	printf("%d\n", val);
 

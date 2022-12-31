@@ -126,6 +126,10 @@
 															\
 		eval<Fs ## _n_, V ## _n_>...
 
+	#define NIK_EVAL_FS_V_PLUS_ID_1(_n_)										\
+															\
+		eval<Fs ## _n_, V + _n_>...
+
 	#define NIK_EVAL_OP_V_V_1(_n_)											\
 															\
 		eval<Op, V ## _n_, V + _n_>
@@ -359,11 +363,11 @@
 															\
 		NIK_2_ ## _n_ ## _IDS(NIK_TYPENAME, _t_, NIK_COMMA)
 
-// index segment:
+// segment:
 
-	#define NIK_2_N_INDEX_SEGMENT(_n_, _s_)										\
+	#define NIK_2_N_SEGMENT_VARS(_n_, _v_)										\
 															\
-		NIK_2_ ## _n_ ## _IDS(_s_ NIK_PLUS, NIK_ID_1, NIK_COMMA)
+		NIK_2_ ## _n_ ## _IDS(_v_, NIK_PLUS() NIK_ID_1, NIK_COMMA)
 
 // tuple:
 
@@ -489,17 +493,17 @@
 			<												\
 				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
 				NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,						\
-				typename Heap0, template<auto...> typename B1, auto... Xs, typename... Heaps		\
+				template<auto...> typename B0, auto... Ws, typename... Heaps				\
 			>												\
-			nik_ces auto result(Heap0 H0, nik_vp(H1)(B1<Xs...>*), Heaps... Hs)	 			\
+			nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)		 			\
 			{												\
-				nik_ce auto nH1 = U_store_T<B1<Xs..., NIK_2_N_VARS(_e_, NIK_V_1)>>;			\
+				nik_ce auto nH0 = U_store_T<B0<Ws..., NIK_2_N_VARS(_e_, NIK_V_1)>>;			\
 															\
 				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
 															\
 					Vs...										\
 															\
-				NIK_PRAXIS_END(H0, nH1, Hs...);								\
+				NIK_PRAXIS_END(nH0, Hs...);								\
 			}												\
 		};
 
@@ -514,17 +518,17 @@
 			<												\
 				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
 				NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,						\
-				typename Heap0, template<auto...> typename B1, auto... Xs, typename... Heaps		\
+				template<auto...> typename B0, auto... Ws, typename... Heaps				\
 			>												\
-			nik_ces auto result(Heap0 H0, nik_vp(H1)(B1<Xs...>*), Heaps... Hs)	 			\
+			nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)		 			\
 			{												\
-				nik_ce auto nH1 = U_store_T<B1<Xs..., NIK_2_N_VARS(_e_, NIK_EVAL_FS_V_1)>>;		\
+				nik_ce auto nH0 = U_store_T<B0<Ws..., NIK_2_N_VARS(_e_, NIK_EVAL_FS_V_1)>>;		\
 															\
 				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
 															\
 					Vs...										\
 															\
-				NIK_PRAXIS_END(H0, nH1, Hs...);								\
+				NIK_PRAXIS_END(nH0, Hs...);								\
 			}												\
 		};
 
@@ -539,12 +543,12 @@
 			<												\
 				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
 				auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,					\
-				template<auto...> typename B0, auto W, auto... Ws, typename... Heaps			\
+				template<auto...> typename B0, auto... Ws, typename... Heaps				\
 			>												\
-			nik_ces auto result(nik_vp(H0)(B0<W, Ws...>*), Heaps... Hs)	 				\
+			nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)	 				\
 			{												\
 				nik_ce auto ins	= PD::instr(c, i);							\
-				nik_ce auto Op  = eval<W, ins[PI::pos], Ws...>;						\
+				nik_ce auto Op  = eval<_at_, ins[PI::pos], Ws...>;					\
 															\
 				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
 															\
@@ -554,23 +558,59 @@
 			}												\
 		};
 
-// sift apply:
+// segment action:
 
-	#define NIK_DEFINE_PRAXIS_SIFT_APPLY_2_N(_e_)									\
+	#define NIK_DEFINE_PRAXIS_SEGMENT_ACTION_2_N(_e_)								\
 															\
 		template<auto... filler>										\
-		struct T_praxis<PN::sift, PT::apply, _2_ ## _e_, filler...>						\
+		struct T_praxis<PN::segment, PT::action, _2_ ## _e_, filler...>						\
+		{													\
+			template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto V, auto... Vs, typename... Heaps>		\
+			nik_ces auto result(Heaps... Hs)				 				\
+			{												\
+				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
+															\
+					V + _2_ ## _e_, Vs..., NIK_2_N_SEGMENT_VARS(_e_, NIK_V)				\
+															\
+				NIK_PRAXIS_END(Hs...);									\
+			}												\
+		};
+
+// segment id:
+
+	#define NIK_DEFINE_PRAXIS_SEGMENT_ID_2_N(_e_)									\
+															\
+		template<NIK_2_N_VARS(_e_, NIK_BFS_FS_VP_LFS_BFS_FS_1)>							\
+		struct T_praxis<PN::segment, PT::id, _2_ ## _e_, NIK_2_N_VARS(_e_, NIK_LFS_1)>				\
+		{													\
+			template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto V, auto... Vs, typename... Heaps>		\
+			nik_ces auto result(Heaps... Hs)				 				\
+			{												\
+				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
+															\
+					V, Vs..., NIK_2_N_VARS(_e_, NIK_EVAL_FS_V_PLUS_ID_1)				\
+															\
+				NIK_PRAXIS_END(Hs...);									\
+			}												\
+		};
+
+// sift action:
+
+	#define NIK_DEFINE_PRAXIS_SIFT_ACTION_2_N(_e_)									\
+															\
+		template<auto... filler>										\
+		struct T_praxis<PN::sift, PT::action, _2_ ## _e_, filler...>						\
 		{													\
 			template											\
 			<												\
 				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
 				auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,					\
-				template<auto...> typename B0, auto W, auto... Ws, typename... Heaps			\
+				template<auto...> typename B0, auto... Ws, typename... Heaps				\
 			>												\
-			nik_ces auto result(nik_vp(H0)(B0<W, Ws...>*), Heaps... Hs)	 				\
+			nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)	 				\
 			{												\
 				nik_ce auto ins	= PD::instr(c, i);							\
-				nik_ce auto Op  = eval<W, ins[PI::pos], Ws...>;						\
+				nik_ce auto Op  = eval<_at_, ins[PI::pos], Ws...>;					\
 															\
 				return NIK_PRAXIS_L(_2_ ## _e_, d, c, i),						\
 															\
@@ -580,7 +620,7 @@
 															\
 					V + _2_ ## _e_, NIK_2_N_VARS(_e_, NIK_V_1), Vs...				\
 															\
-				NIK_PRAXIS_R(Hs...);									\
+				NIK_PRAXIS_R(H0, Hs...);								\
 			}												\
 		};
 

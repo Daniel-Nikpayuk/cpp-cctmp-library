@@ -117,15 +117,15 @@ namespace cctmp {
 	struct T_machine_left
 	{
 		nik_ces auto d  = MD::initial_depth;
-		nik_ces auto H0 = U_pack_Vs<_at_, _to_list_>;
+		nik_ces auto H0 = U_pack_Vs<_to_list_>;
 
-		template<auto n, auto h = _zero>
+		template<auto n>
 		nik_ces auto contr = controller
 		<
 			instruction < MN::split  , MT::call  , n >,
 			instruction < MN::split  , MT::id        >,
 			instruction < MN::params , MT::front     >,
-			instruction < MN::halt   , MT::eval  , h >
+			instruction < MN::halt   , MT::eval      >
 		>;
 
 		template<auto n, auto... Vs>
@@ -134,12 +134,34 @@ namespace cctmp {
 	}; nik_ce auto _par_left_ = U_custom_T<T_machine_left>;
 
 /***********************************************************************************************************************/
+
+// segment:
+
+	struct T_machine_segment
+	{
+		nik_ces auto d  = MD::initial_depth;
+		nik_ces auto H0 = U_pack_Vs<_car_>;
+
+		template<auto n>
+		nik_ces auto contr = controller
+		<
+			instruction < MN::index , MT::call , n >,
+			instruction < MN::halt  , MT::eval     >
+		>;
+
+		template<auto n>
+		nik_ces auto result = T_machine_start::template result<d, contr<n>>(H0);
+
+	}; nik_ce auto _par_segment_ = U_custom_T<T_machine_segment>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // go to:
 
 /***********************************************************************************************************************/
 
+/*
 	template<auto... filler>
 	struct T_assembly<AN::go_to, filler...>
 	{
@@ -166,6 +188,7 @@ namespace cctmp {
 			else   return NIK_ASSEMBLY(s, c,  i, l, Vs)(vs...);
 		}
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -176,6 +199,7 @@ namespace cctmp {
 
 // unit (generic):
 
+/*
 	template<gkey_type Name, auto... Vs>
 	struct T_algorithm<Shape::argument, Name, Vs...>
 	{
@@ -189,11 +213,13 @@ namespace cctmp {
 
 	}; template<auto Name, auto... Vs>
 		nik_ce auto _arg_unit_ = U_custom_T<T_algorithm_argument<Name, Vs...>>;
+*/
 
 /***********************************************************************************************************************/
 
 // at:
 
+/*
 	template<template<auto...> typename B, auto... LUs, nik_vp(p)(B<LUs...>*)>
 	struct T_algorithm<Shape::argument, GN::at, p>
 	{
@@ -206,11 +232,13 @@ namespace cctmp {
 
 		template<auto n, typename... Ts>
 		nik_ce auto arg_at(Ts... vs) { return T_algorithm_argument<GN::at>::template result<n>(vs...); }
+*/
 
 /***********************************************************************************************************************/
 
 // replace:
 
+/*
 	template<template<auto...> typename B, auto... LUs, nik_vp(p)(B<LUs...>*), auto c>
 	struct T_algorithm<Shape::argument, GN::replace, p, c>
 	{
@@ -229,6 +257,7 @@ namespace cctmp {
 		{
 			return T_algorithm_argument<GN::replace, cont>::template result<n>(vs...);
 		}
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -237,6 +266,7 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+/*
 	template<auto... filler>
 	struct T_assembly<AN::test, filler...>
 	{
@@ -254,6 +284,7 @@ namespace cctmp {
 			return NIK_ASSEMBLY(s, c, i, l, Vs)(val, vs...);
 		}
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -262,6 +293,7 @@ namespace cctmp {
 
 	// helper:
 
+/*
 		template<auto, auto> struct T_assembly_apply;
 
 		template<auto f, auto... Is, nik_vp(p)(T_pack_Vs<Is...>*)>
@@ -270,9 +302,11 @@ namespace cctmp {
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return T_store_U<f>::result(arg_at<Is>(vs...)...); }
 		};
+*/
 
 /***********************************************************************************************************************/
 
+/*
 	template<auto... filler>
 	struct T_assembly<AN::apply, filler...>
 	{
@@ -295,6 +329,7 @@ namespace cctmp {
 			NIK_ASSEMBLY_RESULT(s, c, i, l, Vs)(val, vs...);
 		}
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -323,6 +358,7 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+/*
 	template<auto... filler>
 	struct T_assembly<AN::re_turn, filler...>
 	{
@@ -335,6 +371,7 @@ namespace cctmp {
 			return arg_at<n>(vs...);
 		}
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
