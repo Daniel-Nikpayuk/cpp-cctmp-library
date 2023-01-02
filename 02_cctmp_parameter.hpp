@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -385,6 +385,9 @@ namespace cctmp {
 
 	template<auto b, auto... Vs>
 	nik_ce auto to_list_ = eval<_to_list_, b, Vs...>;
+
+	template<auto b, auto... Vs>
+	nik_ce auto list_ = eval<_to_list_, H_id, Vs...>;
 
 	template<auto p, auto Op, auto... Vs>
 	nik_ce auto unpack_ = eval<_b0_unpack_, p, Op, Vs...>;

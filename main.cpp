@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -85,42 +85,7 @@
 
 /***********************************************************************************************************************/
 
-// apply:
-
-	struct T_machine_nary_apply
-	{
-		template<auto p = _one, auto n = _one>
-		constexpr static auto contr = controller
-		<
-			instruction < MN::propel , MT::call , p , n >,
-			instruction < MN::halt   , MT::eval         >
-		>;
-
-		template<auto Inds, auto Op>
-		constexpr static auto H0 = U_pack_Vs<_car_, Inds, Op>;
-
-		template<auto d, auto Op, auto Inds, auto... Vs>
-		constexpr static auto result = T_machine_start::template result<d, contr<>, Vs...>(H0<Inds, Op>);
-	};
-
-	struct T_machine_binary_apply
-	{
-		constexpr static auto d    = MD::initial_depth;
-		constexpr static auto regs = T_machine_get::regs;
-		constexpr static auto heap = T_machine_get::heap;
-		constexpr static auto bs   = U_pack_Vs < heap , regs  , regs >;
-		constexpr static auto ns   = U_pack_Vs < _two , _zero , _one >;
-		constexpr static auto Inds = U_pack_Vs<bs, ns>;
-
-		template<auto Op, auto V0, auto V1>
-		constexpr static auto result = T_machine_nary_apply::template result<d-1, Op, Inds, V0, V1>;
-
-	}; constexpr auto _binary_apply_ = U_custom_T<T_machine_binary_apply>;
-
 /***********************************************************************************************************************/
-
-	constexpr auto _prax_add_      = _praxis_apply_ < _add_      >;
-	constexpr auto _prax_multiply_ = _praxis_apply_ < _multiply_ >;
 
 	int main(int argc, char *argv[])
 	{

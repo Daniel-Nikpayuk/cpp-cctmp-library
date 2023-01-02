@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -20,6 +20,35 @@
 // assembly:
 
 namespace cctmp {
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// algorithm:
+
+	template<gkey_type, gkey_type, auto...> struct T_algorithm;
+
+	template<auto Name, auto... Vs>
+	nik_ce auto U_algorithm = U_store_T<T_algorithm<Name, Vs...>>;
+
+/***********************************************************************************************************************/
+
+// names:
+
+	struct AlgorithmName
+	{
+		enum : gkey_type
+		{
+			identity = 0, id = identity, // convenience for default params.
+			dimension
+		};
+	};
+
+	using GN = AlgorithmName;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -117,15 +146,15 @@ namespace cctmp {
 	struct T_machine_left
 	{
 		nik_ces auto d  = MD::initial_depth;
-		nik_ces auto H0 = U_pack_Vs<_to_list_>;
+		nik_ces auto H0 = U_pack_Vs<_list_<>>;
 
 		template<auto n>
 		nik_ces auto contr = controller
 		<
-			instruction < MN::split  , MT::call  , n >,
-			instruction < MN::split  , MT::id        >,
-			instruction < MN::params , MT::front     >,
-			instruction < MN::halt   , MT::eval      >
+			instruction < MN::call   , MT::praxis , PN::left , n >,
+			instruction < MN::params , MT::id                    >,
+			instruction < MN::params , MT::front                 >,
+			instruction < MN::halt   , MT::eval                  >
 		>;
 
 		template<auto n, auto... Vs>
@@ -145,12 +174,12 @@ namespace cctmp {
 		template<auto n>
 		nik_ces auto contr = controller
 		<
-			instruction < MN::index , MT::call , n >,
-			instruction < MN::halt  , MT::eval     >
+			instruction < MN::call , MT::praxis , PN::segment , n >,
+			instruction < MN::halt , MT::eval                     >
 		>;
 
 		template<auto n>
-		nik_ces auto result = T_machine_start::template result<d, contr<n>>(H0);
+		nik_ces auto result = T_machine_start::template result<d, contr<n>, _zero>(H0);
 
 	}; nik_ce auto _par_segment_ = U_custom_T<T_machine_segment>;
 

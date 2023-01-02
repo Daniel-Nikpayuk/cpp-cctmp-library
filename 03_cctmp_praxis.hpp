@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -102,7 +102,7 @@ namespace cctmp {
 		{
 			identity = 0, id = identity, // convenience for default params.
 			halt , jump , subset  ,
-			pad  , push ,
+			decl , pad  , push    ,
 			left , fold , segment , sift ,
 			dimension
 		};
@@ -119,8 +119,9 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
-			pause   , debug , front , first , rest , action ,
-			if_zero , dec   , make  ,
+			pause   , action , debug ,
+			front   , first  , rest  ,
+			if_zero , dec    , make  ,
 			dimension
 		};
 	};
@@ -218,7 +219,7 @@ namespace cctmp {
 			else                return _2_N - remainder;
 		}
 
-		nik_ces gindex_type conditional(gcindex_type pos, gcindex_type size, gcindex_type _2_N)
+		nik_ces gindex_type conditional(gcindex_type pos, gcindex_type _2_N, gcindex_type size)
 		{
 			gcindex_type remainder = size % _2_N;
 
@@ -300,7 +301,7 @@ namespace cctmp {
 		NIK_PRAXIS_END();
 
 	}; template<auto Op, auto n = _one>
-		nik_ce auto _praxis_apply_ = U_custom_T<T_praxis_apply<Op, n>>;
+		nik_ce auto _praxis_ = U_custom_T<T_praxis_apply<Op, n>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -355,11 +356,11 @@ namespace cctmp {
 		template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto... Vs, typename... Heaps>
 		nik_ces auto result(Heaps... Hs)
 		{
-			nik_ce auto cs = eval<_list_<>, d, c, i, n, _2_N>;
-			nik_ce auto rs = eval<_list_<>, Vs...>;
-			nik_ce auto hs = eval<_list_<>, U_restore_T<Heaps>...>;
+			nik_ce auto cs = list_<d, c, i, n, _2_N>;
+			nik_ce auto rs = list_<Vs...>;
+			nik_ce auto hs = list_<U_restore_T<Heaps>...>;
 
-			return eval<_list_<>, cs, rs, hs>;
+			return list_<cs, rs, hs>;
 		}
 	};
 
@@ -501,6 +502,29 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// decl(type):
+
+/***********************************************************************************************************************/
+
+// id:
+
+	template<gindex_type _2_N>
+	struct T_praxis<PN::decl, PT::id, _2_N>
+	{
+		template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto... Vs, typename... Heaps>
+		nik_ces auto result(Heaps... Hs)
+		{
+			return NIK_PRAXIS_BEGIN(_2_N, d, c, i, n),
+
+				U_store_T<decltype(Vs)>...
+
+			NIK_PRAXIS_END(Hs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // pad:
 
 /***********************************************************************************************************************/
@@ -616,41 +640,63 @@ namespace cctmp {
 
 // controls:
 
+	template<gkey_type, gindex_type> struct T_praxis_controls;
+
+	template<gindex_type _2_N>
+	struct T_praxis_controls<PN::id, _2_N>
+	{
+		contr_type c;
+		gindex_type n;
+
+		nik_ce T_praxis_controls(ccontr_type _c, gcindex_type _n) : c{_c}, n{_n} { }
+	};
+
 /***********************************************************************************************************************/
 
 // left:
 
-	struct left_controls
+	template<gindex_type _2_N>
+	struct T_praxis_controls<PN::left, _2_N>
 	{
 		nik_ces auto h0 = U_null_Vs;
 
-		template<auto p, auto l, auto loop = _zero, auto done = _three>
+		template<auto pad, auto pos, auto loop = _one, auto done = _four>
 		nik_ces auto contr = controller
 		<
+			instruction < PN::decl   , PT::id             >,
 			instruction < PN::jump   , PT::if_zero , done >,
 			instruction < PN::push   , PT::id             >,
 			instruction < PN::jump   , PT::dec     , loop >,
-			instruction < PN::pad    , PT::make    , p    >,
+			instruction < PN::pad    , PT::make    , pad  >,
 			instruction < PN::pad    , PT::action         >,
-			instruction < PN::subset , PT::make    , l    >,
+			instruction < PN::subset , PT::make    , pos  >,
 			instruction < PN::subset , PT::action         >,
 			instruction < PN::left   , PT::id             >,
 			instruction < PN::halt   , PT::front          >
 		>;
 
-		gindex_type push;
+		template<typename Base, auto n, auto s>
+		nik_ces auto result()
+		{
+			nik_ce auto ctr = Base(n, s);
+			nik_ce auto c   = ctr.template contr<ctr.pad, ctr.pos>;
+
+			return T_praxis_controls<PN::id, _2_N>(c, ctr.n);
+		}
+
 		gindex_type pad;
 		gindex_type pos;
+		gindex_type n;
 
-		nik_ce left_controls(gcindex_type n, gcindex_type s, gcindex_type _2_N) : push{}, pad{}, pos{}
+		nik_ce T_praxis_controls(gcindex_type m, gcindex_type s) : pad{}, pos{}, n{}
 		{
-			gcindex_type k = n / _2_N;
-			gcindex_type j = n % _2_N;
+			gcindex_type k = m / _2_N;
+			gcindex_type j = m % _2_N;
 			gcindex_type b = (k != 0 && j == 0);
 
-			push = k - b;
-			pad  = PP::conditional(n, s, _2_N);
-			pos  = b ? _2_N : j;
+			pad = PP::conditional(m, _2_N, s);
+			pos = b ? _2_N : j;
+			n   = k - b;
 		}
 	};
 
@@ -661,6 +707,27 @@ namespace cctmp {
 	template<auto Op>
 	struct T_fold_safe
 	{
+		template<auto V0, auto V1>
+		nik_ces auto _result()
+		{
+			if nik_ce (is_machination<decltype(V0)>)
+			{
+				// Is this approach worth it?
+
+				return machination(U_praxis_restart, V0);
+			}
+			else return eval<Op, V0, V1>;
+		}
+
+		template<auto V0, auto V1>
+		nik_ces auto result = _result<V0, V1>();
+
+	}; template<auto Op>
+		nik_ce auto _safe_fold_ = U_custom_T<T_fold_safe<Op>>;
+
+	template<auto Op>
+	struct T_fold_last
+	{
 		template<auto V0, auto V1, auto is_na = eval<_same_, V1, PP::_na_>>
 		nik_ces auto result = eval
 		<
@@ -668,7 +735,7 @@ namespace cctmp {
 		>;
 
 	}; template<auto Op>
-		nik_ce auto _safe_fold_ = U_custom_T<T_fold_safe<Op>>;
+		nik_ce auto _last_fold_ = U_custom_T<T_fold_last<Op>>;
 
 	struct fold_controls
 	{
@@ -709,33 +776,43 @@ namespace cctmp {
 
 // segment:
 
-	struct segment_controls
+	template<gindex_type _2_N>
+	struct T_praxis_controls<PN::segment, _2_N>
 	{
 		nik_ces auto h0 = U_pack_Vs<H_id>;
 
-		template<auto l, auto loop = _zero, auto done = _three>
+		template<auto pos, auto loop = _zero, auto done = _three>
 		nik_ces auto contr = controller
 		<
 			instruction < PN::jump    , PT::if_zero , done >,
 			instruction < PN::segment , PT::action         >,
 			instruction < PN::jump    , PT::dec     , loop >,
-			instruction < PN::subset  , PT::make    , l    >,
+			instruction < PN::subset  , PT::make    , pos  >,
 			instruction < PN::subset  , PT::action         >,
 			instruction < PN::segment , PT::id             >,
 			instruction < PN::halt    , PT::rest           >
 		>;
 
-		gindex_type push;
-		gindex_type pos;
-
-		nik_ce segment_controls(gcindex_type n, gcindex_type _2_N) : push{}, pos{}
+		template<typename Base, auto n, auto s>
+		nik_ces auto result()
 		{
-			gcindex_type k = n / _2_N;
-			gcindex_type j = n % _2_N;
+			nik_ce auto ctr = Base(n, s);
+			nik_ce auto c   = ctr.template contr<ctr.pos>;
+
+			return T_praxis_controls<PN::id, _2_N>(c, ctr.n);
+		}
+
+		gindex_type pos;
+		gindex_type n;
+
+		nik_ce T_praxis_controls(gcindex_type m, gcindex_type s) : pos{}, n{}
+		{
+			gcindex_type k = m / _2_N;
+			gcindex_type j = m % _2_N;
 			gcindex_type b = (k != 0 && j == 0);
 
-			push = k - b;
-			pos  = b ? _2_N : j;
+			pos = b ? _2_N : j;
+			n   = k - b;
 		}
 	};
 
