@@ -410,7 +410,7 @@ namespace cctmp {
 
 			// variadic:
 
-				is_null , length , car , cadr , at, find
+				is_null , length , car , cadr , find
 		};
 	};
 
@@ -504,9 +504,17 @@ namespace cctmp {
 
 				if_then_else = 0,
 
+			// lazy:
+
+				stem , costem , distem ,
+
 			// logical:
 
-				not_ , and_ , or_ , implies , equivalent
+				not_ , and_ , or_ , implies , equivalent ,
+
+			// propositional:
+
+				and_wise
 		};
 	};
 
@@ -653,7 +661,7 @@ namespace cctmp {
 
 			// call:
 
-				custom , nested , procedure , method , tailor
+				eval , procedure , method , tailor , alias , custom
 		};
 	};
 

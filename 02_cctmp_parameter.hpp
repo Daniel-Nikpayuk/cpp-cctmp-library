@@ -42,13 +42,6 @@ namespace cctmp {
 	template<auto Key, auto Op, auto... Ws, nik_vp(op)(T_argument<Key, Op, Ws...>*), auto... Vs>
 	nik_ce auto eval<op, Vs...> = T_argument<Key, Op, Ws...>::template result<decltype(Vs)...>(Vs...);
 
-// alias (defined after eval):
-
-	template<auto, auto...> struct T_alias;
-
-	template<auto Op, auto... Ws, nik_vp(op)(T_alias<Op, Ws...>*), auto... Vs>
-	nik_ce auto eval<op, Vs...> = eval<Op, Ws..., Vs...>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -129,8 +122,7 @@ namespace cctmp {
 
 // syntactic sugar:
 
-	template<auto Op, auto... Vs>
-	nik_ce auto find_ = eval<_find_, Op, Vs...>;
+	template<auto Op, auto... Vs> nik_ce auto find_ = eval<_find_, Op, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -367,23 +359,12 @@ namespace cctmp {
 
 // syntactic sugar:
 
-	template<auto Op, auto... Vs>
-	nik_ce auto listload_ = eval<Op, H_id, Vs...>;
-
-	template<auto b, auto... Vs>
-	nik_ce auto to_list_ = eval<_to_list_, b, Vs...>;
-
-	template<auto b, auto... Vs>
-	nik_ce auto list_ = eval<_to_list_, H_id, Vs...>;
-
-	template<auto p, auto Op, auto... Vs>
-	nik_ce auto unpack_ = eval<_b0_unpack_, p, Op, Vs...>;
-
-	template<auto b, auto Op, auto... Vs>
-	nik_ce auto map_ = eval<_map_, b, Op, Vs...>;
-
-	template<auto b, auto Op, auto p, auto... Vs>
-	nik_ce auto zip_ = eval<_zip_, b, Op, p, Vs...>;
+	template<auto Op, auto... Vs>                 nik_ce auto listload_ = eval<Op, H_id, Vs...>;
+	template<auto b, auto... Vs>                  nik_ce auto to_list_  = eval<_to_list_, b, Vs...>;
+	template<auto b, auto... Vs>                  nik_ce auto list_     = eval<_to_list_, H_id, Vs...>;
+	template<auto p, auto Op, auto... Vs>         nik_ce auto unpack_   = eval<_b0_unpack_, p, Op, Vs...>;
+	template<auto b, auto Op, auto... Vs>         nik_ce auto map_      = eval<_map_, b, Op, Vs...>;
+	template<auto b, auto Op, auto p, auto... Vs> nik_ce auto zip_      = eval<_zip_, b, Op, p, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -403,10 +384,57 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// lazy:
+
+	// stem:
+
+		nik_ce auto _stem_ = U_par_boolean<Boolean::stem>;
+
+		template<auto ante, auto conse, auto... Vs>
+		nik_ce auto eval<_stem_, true , ante, conse, Vs...> = ante;
+
+		template<auto ante, auto conse, auto... Vs>
+		nik_ce auto eval<_stem_, false, ante, conse, Vs...> = eval<conse, Vs...>;
+
+	// costem:
+
+		nik_ce auto _costem_ = U_par_boolean<Boolean::costem>;
+
+		template<auto ante, auto conse, auto... Vs>
+		nik_ce auto eval<_costem_, true, ante, conse, Vs...> = eval<ante, Vs...>;
+
+		template<auto ante, auto conse, auto... Vs>
+		nik_ce auto eval<_costem_, false , ante, conse, Vs...> = conse;
+
+	// distem:
+
+		nik_ce auto _distem_ = U_par_boolean<Boolean::distem>;
+
+		template<auto ante, auto conse, auto... Vs>
+		nik_ce auto eval<_distem_, true, ante, conse, Vs...> = eval<ante, Vs...>;
+
+		template<auto ante, auto conse, auto... Vs>
+		nik_ce auto eval<_distem_, false, ante, conse, Vs...> = eval<conse, Vs...>;
+
+/***********************************************************************************************************************/
+
+// propositional:
+
+	// and wise:
+
+		nik_ce auto _and_wise_ = U_par_boolean<Boolean::and_wise>;
+
+		template<template<auto...> typename B, auto... Preds, nik_vp(p)(B<Preds...>*), auto... Vs>
+		nik_ce auto eval<_and_wise_, p, Vs...> = eval<_and_, eval<Preds, Vs>...>;
+
+/***********************************************************************************************************************/
+
 // syntactic sugar:
 
-	template<bool Pred, auto... Vs>
-	nik_ce auto if_then_else_ = eval<_if_then_else_, Pred, Vs...>;
+	template<bool Pred, auto... Vs> nik_ce auto if_then_else_ = eval<_if_then_else_, Pred, Vs...>;
+	template<bool Pred, auto... Vs> nik_ce auto stem_         = eval<_stem_, Pred, Vs...>;
+	template<bool Pred, auto... Vs> nik_ce auto costem_       = eval<_costem_, Pred, Vs...>;
+	template<bool Pred, auto... Vs> nik_ce auto distem_       = eval<_distem_, Pred, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -521,16 +549,9 @@ namespace cctmp {
 		nik_ce auto _to_pointer_ = U_par_pointer<Pointer::to>;
 
 		template<auto U>
-		nik_ce auto eval<_to_pointer_, U> = eval
+		nik_ce auto eval<_to_pointer_, U> = stem_
 		<
-			if_then_else_
-			<
-				eval<_is_pointer_, U>,
-				_nop_,
-				_add_pointer_
-			>,
-
-			U
+			eval<_is_pointer_, U>, U, _add_pointer_, U
 		>;
 
 	// from (optimization):
@@ -594,16 +615,9 @@ namespace cctmp {
 		nik_ce auto _to_reference_ = U_par_reference<Reference::to>;
 
 		template<auto U>
-		nik_ce auto eval<_to_reference_, U> = eval
+		nik_ce auto eval<_to_reference_, U> = stem_
 		<
-			if_then_else_
-			<
-				eval<_is_reference_, U>,
-				_nop_,
-				_add_reference_
-			>,
-
-			U
+			eval<_is_reference_, U>, U, _add_reference_, U
 		>;
 
 	// from (optimization):
@@ -791,36 +805,12 @@ namespace cctmp {
 
 // call:
 
-	// custom:
+	// eval:
 
-		template<auto U>           using T_custom_U = T_par_function<Function::custom, U>;
-		template<auto U>     nik_ce auto U_custom_U = U_store_T<T_custom_U<U>>;
-		template<typename T> nik_ce auto U_custom_T = U_custom_U<U_store_T<T>>;
+		nik_ce auto _eval_ = U_par_function<Function::eval>;
 
-		nik_ce auto _custom_ = U_par_function<Function::custom>;
-
-		template<auto Op, auto... Vs>
-		nik_ce auto eval<_custom_, Op, Vs...> = T_store_U<Op>::template result<Vs...>;
-
-		template<auto Op, nik_vp(op)(T_custom_U<Op>*), auto... Vs>
-		nik_ce auto eval<op, Vs...> = T_store_U<Op>::template result<Vs...>;
-
-		// Required for compile time register machines.
-
-		template<auto Op, nik_vp(op)(T_custom_U<Op>*), auto... Vs>
-		nik_ce auto eval<_custom_, op, Vs...> = T_store_U<Op>::template result<Vs...>;
-
-	// nested:
-
-		nik_ce auto _nested_ = U_par_function<Function::nested>;
-
-		template<auto d, auto Op, auto... Vs>
-		nik_ce auto eval<_nested_, d, Op, Vs...> = T_store_U<Op>::template result<d, Vs...>;
-
-		// Required for compile time register machines.
-
-		template<auto d, auto Op, nik_vp(op)(T_custom_U<Op>*), auto... Vs>
-		nik_ce auto eval<_nested_, d, op, Vs...> = T_store_U<Op>::template result<d, Vs...>;
+		template<auto Op1, auto Op0, auto... Vs>
+		nik_ce auto eval<_eval_, Op1, Op0, Vs...> = eval<Op1, eval<Op0, Vs...>>;
 
 	// procedure:
 
@@ -836,15 +826,6 @@ namespace cctmp {
 		template<auto Op, template<auto...> typename B, auto... Ws, nik_vp(p)(B<Ws...>*), auto... Vs>
 		nik_ce auto eval<_method_, Op, p, Vs...> = T_store_U<Op>::template result<Ws...>(Vs...);
 
-		// Required for compile time register machines.
-
-		template
-		<
-			auto Op, nik_vp(op)(T_custom_U<Op>*),
-			template<auto...> typename B, auto... Ws, nik_vp(p)(B<Ws...>*), auto... Vs
-		>
-		nik_ce auto eval<_method_, op, p, Vs...> = T_store_U<Op>::template result<Ws...>(Vs...);
-
 	// tailor:
 
 		nik_ce auto _tailor_ = U_par_function<Function::tailor>;
@@ -852,26 +833,43 @@ namespace cctmp {
 		template<auto Op, template<auto...> typename B, auto... Ws, nik_vp(p)(B<Ws...>*), auto... Vs>
 		nik_ce auto eval<_tailor_, Op, p, Vs...> = T_store_U<Op>::template result<Vs...>(Ws...);
 
+	// alias:
+
+		template<auto Op, auto... Ws>       using T_alias = T_par_function<Function::alias, Op, Ws...>;
+		template<auto Op, auto... Ws> nik_ce auto _alias_ = U_store_T<T_alias<Op, Ws...>>;
+
+		template<auto Op, auto... Ws, nik_vp(op)(T_alias<Op, Ws...>*), auto... Vs>
+		nik_ce auto eval<op, Vs...> = eval<Op, Ws..., Vs...>;
+
+		// syntactic sugar:
+
+			template<auto H = H_id> nik_ce auto _list_	= _alias_<_to_list_, H>;
+			template<auto H = H_id> nik_ce auto _cdr_list_	= _alias_<_cdr_, H>;
+			template<auto U> nik_ce auto _array_		= _alias_<_to_array_, U>;
+			template<auto F, auto G> nik_ce auto _pose_	= _alias_<_eval_, F, G>;
+			template<auto U> nik_ce auto _id_to_cref_	= _pose_<_to_reference_, _to_const_>;
+			template<auto U> nik_ce auto _cref_to_id_	= _pose_<_from_const_, _from_reference_>;
+
+	// custom:
+
+		template<auto Op>          using T_custom   = T_par_function<Function::custom, Op>;
+		template<auto Op>    nik_ce auto  _custom_  = U_store_T<T_custom<Op>>;
+		template<typename T> nik_ce auto U_custom_T = _custom_<U_store_T<T>>;
+
+		template<auto Op, nik_vp(op)(T_custom<Op>*), auto... Vs>
+		nik_ce auto eval<op, Vs...> = T_store_U<Op>::template result<Vs...>;
+
 /***********************************************************************************************************************/
 
 // syntactic sugar:
 
 	// meta:
 
-		template<auto f>
-		nik_ce auto f_type = eval<_function_type_, f>;
-
-		template<auto f>
-		nik_ce auto arity = eval<_function_arity_, f>;
-
-		template<auto f>
-		nik_ce auto out_type = eval<_function_out_type_, f>;
-
-		template<auto f>
-		using T_out_type = T_store_U<out_type<f>>;
-
-		template<auto f>
-		nik_ce auto in_types = eval<_function_in_types_, f>;
+		template<auto f> nik_ce auto f_type	= eval<_function_type_, f>;
+		template<auto f> nik_ce auto arity	= eval<_function_arity_, f>;
+		template<auto f> nik_ce auto out_type	= eval<_function_out_type_, f>;
+		template<auto f> using T_out_type	= T_store_U<out_type<f>>;
+		template<auto f> nik_ce auto in_types	= eval<_function_in_types_, f>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -916,52 +914,8 @@ namespace cctmp {
 
 	// syntactic sugar:
 
-		template<auto... Vs>
-		using T_eval = T_store_U<eval<Vs...>>;
-
 		template<template<auto...> typename B, auto... Ws>
 		nik_ce auto H_using = U_store_B<T_using<B, Ws...>::template result>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// alias:
-
-/***********************************************************************************************************************/
-
-	template<auto Op, auto... Ws>
-	struct T_alias
-	{
-		template<auto... Vs>
-		nik_ces auto result = eval<Op, Ws..., Vs...>;
-
-	}; template<auto Op, auto... Ws>
-		nik_ce auto _alias_ = U_store_T<T_alias<Op, Ws...>>;
-
-	// syntactic sugar:
-
-		template<auto H = H_id> nik_ce auto _list_	= _alias_<_to_list_, H>;
-		template<auto H = H_id> nik_ce auto _cdr_list_	= _alias_<_cdr_, H>;
-		template<auto U> nik_ce auto _array_		= _alias_<_to_array_, U>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// (recursive eval):
-
-	// In general defer to the compile time register machine,
-	// but there are occassions where this might be preferred.
-
-/***********************************************************************************************************************/
-
-	template<auto... Vs>
-	nik_ce auto reval = eval<reval<Vs>...>;
-
-	template<auto V>
-	nik_ce auto reval<V> = V;
-
-	template<auto... Vs, nik_vp(alias)(T_alias<Vs...>*)>
-	nik_ce auto reval<alias> = eval<reval<Vs>...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

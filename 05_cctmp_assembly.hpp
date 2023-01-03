@@ -48,7 +48,153 @@ namespace cctmp {
 	using GN = AlgorithmName;
 
 /***********************************************************************************************************************/
+
+// params (syntactic sugar):
+
+	nik_ce auto _dpar_at_		= U_custom_T<T_machine_params< MT::copy   , _car_           >>;
+	nik_ce auto _dpar_left_		= U_custom_T<T_machine_params< MT::front  , _list_<>        >>;
+	nik_ce auto _dpar_erase_	= U_custom_T<T_machine_params< MT::cut    , _list_<>        >>;
+	nik_ce auto _dpar_insert_	= U_custom_T<T_machine_params< MT::paste  , _list_<> , _one >>;
+	nik_ce auto _dpar_replace_	= U_custom_T<T_machine_params< MT::mutate , _list_<> , _one >>;
+
+	nik_ce auto _par_at_		= _alias_< _dpar_at_      , MD::initial_depth >;
+	nik_ce auto _par_left_		= _alias_< _dpar_left_    , MD::initial_depth >;
+	nik_ce auto _par_erase_		= _alias_< _dpar_erase_   , MD::initial_depth >;
+	nik_ce auto _par_insert_	= _alias_< _dpar_insert_  , MD::initial_depth >;
+	nik_ce auto _par_replace_	= _alias_< _dpar_replace_ , MD::initial_depth >;
+
 /***********************************************************************************************************************/
+
+// (list) monoids:
+
+	struct T_insert_monoid
+	{
+		template<auto d, auto n, auto V, auto V0>
+		nik_ces auto result = unpack_<V, _dpar_insert_, d, n, V0>;
+
+	}; nik_ce auto _insert_monoid_ = U_custom_T<T_insert_monoid>;
+
+/***********************************************************************************************************************/
+
+// fold:
+
+	struct T_machine_fold
+	{
+		template<auto Op>
+		struct T_last
+		{
+			template<auto V0, auto V1>
+			nik_ces auto result = stem_
+			<
+				eval<PP::_is_na_, V1>, V0, Op, V0, V1
+			>;
+
+		}; template<auto Op>
+			nik_ces auto _last_ = U_custom_T<T_last<Op>>;
+
+		template<auto Op> nik_ces auto sH0 = U_pack_Vs<Op, _last_<Op>>;
+		template<auto Op> nik_ces auto H0  = U_pack_Vs<_car_, sH0<Op>>;
+
+		template<auto n>
+		nik_ces auto contr = controller
+		<
+			instruction < MN::call , MT::praxis , PN::fold , n >,
+			instruction < MN::halt , MT::eval                  >
+		>;
+
+		template<auto d, auto Op, auto V, auto... Vs>
+		nik_ces auto result = T_machine_start::template result<d, contr<sizeof...(Vs)>, V, Vs...>(H0<Op>);
+	};
+
+	nik_ce auto _dpar_fold_ = U_custom_T<T_machine_fold>;
+	nik_ce auto  _par_fold_ = _alias_<_dpar_fold_, MD::initial_depth>;
+
+/***********************************************************************************************************************/
+
+// segment:
+
+	struct T_machine_segment
+	{
+		nik_ces auto sH0 = U_pack_Vs<H_id>;
+		nik_ces auto  H0 = U_pack_Vs<_car_, sH0>;
+
+		template<auto n>
+		nik_ces auto contr = controller
+		<
+			instruction < MN::call , MT::praxis , PN::segment , n >,
+			instruction < MN::halt , MT::eval                     >
+		>;
+
+		template<auto d, auto n>
+		nik_ces auto result = T_machine_start::template result<d, contr<n>, _zero>(H0);
+	};
+
+	nik_ce auto _dpar_segment_ = U_custom_T<T_machine_segment>;
+	nik_ce auto  _par_segment_ = _alias_<_dpar_segment_, MD::initial_depth>;
+
+/***********************************************************************************************************************/
+
+// sift:
+
+	struct T_machine_sift
+	{
+		template<auto Ops>
+		struct T_last
+		{
+			template<auto V, auto N>
+			nik_ces auto result = stem_
+			<
+				eval<PP::_is_na_, V>, _pack_null_, Ops, V, N
+			>;
+
+		}; template<auto Ops>
+			nik_ces auto _last_ = U_custom_T<T_last<Ops>>;
+
+		template<auto Ops> nik_ces auto sH0 = U_pack_Vs<H_id, Ops, _last_<Ops>>;
+		template<auto Ops> nik_ces auto H0  = U_pack_Vs<_car_, sH0<_pack_filter_<Ops>>>;
+
+		template<auto n>
+		nik_ces auto contr = controller
+		<
+			instruction < MN::call , MT::praxis , PN::sift , n >,
+			instruction < MN::halt , MT::eval                  >
+		>;
+
+		template<auto d, auto Ops, auto... Vs>
+		nik_ces auto result = T_machine_start::template result<d, contr<sizeof...(Vs)>, _zero, Vs...>(H0<Ops>);
+	};
+
+	nik_ce auto _dpar_sift_ = U_custom_T<T_machine_sift>;
+	nik_ce auto  _par_sift_ = _alias_<_dpar_sift_, MD::initial_depth>;
+
+/***********************************************************************************************************************/
+
+// sort:
+
+		// Not yet implemented.
+
+	struct T_machine_sort
+	{
+		template<auto Op> nik_ces auto sH0 = U_pack_Vs<H_id, Op>;
+		template<auto Op> nik_ces auto H0  = U_pack_Vs<_car_, sH0<Op>>;
+
+		template<auto n = _one, auto Loop = _one, auto Done = _two>
+		nik_ces auto contr = controller
+		<
+			instruction < MN::jump , MT::branch  , Done >,
+			instruction < MN::call , MT::propel  , n    >,
+			instruction < MN::call , MT::eval           >,
+			instruction < MN::call , MT::cascade , n    >,
+			instruction < MN::jump , MT::go_to   , Loop >,
+			instruction < MN::halt , MT::eval           >
+		>;
+
+		template<auto d, auto Op, auto... Vs>
+		nik_ces auto result = T_machine_start::template result<d, contr<>, U_null_Vs, Vs...>(H0<Op>);
+	};
+
+	nik_ce auto _dpar_sort_ = U_custom_T<T_machine_sort>;
+	nik_ce auto  _par_sort_ = _alias_<_dpar_sort_, MD::initial_depth>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -133,163 +279,6 @@ namespace cctmp {
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 			{ return NIK_ASSEMBLY(s, c, i, l, Vs)(vs...); }
 	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// dependencies:
-
-/***********************************************************************************************************************/
-
-// left:
-
-	struct T_machine_left
-	{
-		nik_ces auto d   = MD::initial_depth;
-		nik_ces auto sH0 = U_null_Vs;
-		nik_ces auto H0  = U_pack_Vs<_list_<>, sH0>;
-
-		template<auto n>
-		nik_ces auto contr = controller
-		<
-			instruction < MN::call   , MT::praxis , PN::left , n >,
-			instruction < MN::params , MT::id                    >,
-			instruction < MN::params , MT::front                 >,
-			instruction < MN::halt   , MT::eval                  >
-		>;
-
-		template<auto n, auto... Vs>
-		nik_ces auto result = T_machine_start::template result<d, contr<n>, Vs...>(H0);
-
-	}; nik_ce auto _par_left_ = U_custom_T<T_machine_left>;
-
-/***********************************************************************************************************************/
-
-// segment:
-
-	struct T_machine_segment
-	{
-		nik_ces auto  d  = MD::initial_depth;
-		nik_ces auto sH0 = U_pack_Vs<H_id>;
-		nik_ces auto  H0 = U_pack_Vs<_car_, sH0>;
-
-		template<auto n>
-		nik_ces auto contr = controller
-		<
-			instruction < MN::call , MT::praxis , PN::segment , n >,
-			instruction < MN::halt , MT::eval                     >
-		>;
-
-		template<auto n>
-		nik_ces auto result = T_machine_start::template result<d, contr<n>, _zero>(H0);
-
-	}; nik_ce auto _par_segment_ = U_custom_T<T_machine_segment>;
-
-/***********************************************************************************************************************/
-
-// fold:
-
-	struct T_machine_fold
-	{
-		nik_ces auto d = MD::initial_depth;
-
-		template<auto Op>
-		struct T_last
-		{
-			template<auto V0, auto V1, auto is_na = eval<_same_, V1, PP::_na_>>
-			nik_ces auto result = eval
-			<
-				if_then_else_<is_na, _car_, Op>, V0, V1
-			>;
-
-		}; template<auto Op>
-			nik_ces auto _last_ = U_custom_T<T_last<Op>>;
-
-		template<auto Op> nik_ces auto sH0 = U_pack_Vs<Op, _last_<Op>>;
-		template<auto Op> nik_ces auto H0  = U_pack_Vs<_car_, sH0<Op>>;
-
-		template<auto n>
-		nik_ces auto contr = controller
-		<
-			instruction < MN::call , MT::praxis , PN::fold , n >,
-			instruction < MN::halt , MT::eval                  >
-		>;
-
-		template<auto Op, auto V, auto... Vs>
-		nik_ces auto result = T_machine_start::template result<d, contr<sizeof...(Vs)>, V, Vs...>(H0<Op>);
-
-	}; nik_ce auto _par_fold_ = U_custom_T<T_machine_fold>;
-
-/***********************************************************************************************************************/
-
-// sift:
-
-		// Design a clean interface to handle index policy.
-
-	struct T_machine_sift
-	{
-		nik_ces auto d = MD::initial_depth;
-
-		template<auto Op>
-		struct T_op
-		{
-			template<auto V, auto N, auto is_true = eval<Op, V>>
-			nik_ces auto result = if_then_else_<is_true, _pack_first_, _pack_null_>;
-
-		}; template<auto Op>
-			nik_ces auto _op_ = U_custom_T<T_op<Op>>;
-
-		template<auto Op>
-		struct T_last
-		{
-			nik_ces auto Alias = _alias_<_car_, _pack_null_>;
-
-			template<auto V, auto N, auto is_na = eval<_same_, V, PP::_na_>>
-			nik_ces auto result = eval
-			<
-				if_then_else_<is_na, Alias, Op>, V, N
-			>;
-
-		}; template<auto Op>
-			nik_ces auto _last_ = U_custom_T<T_last<Op>>;
-
-		template<auto Op> nik_ces auto sH0 = U_pack_Vs<H_id, Op, _last_<Op>>;
-		template<auto Op> nik_ces auto H0  = U_pack_Vs<_car_, sH0<_op_<Op>>>;
-
-		template<auto n>
-		nik_ces auto contr = controller
-		<
-			instruction < MN::call , MT::praxis , PN::sift , n >,
-			instruction < MN::halt , MT::eval                  >
-		>;
-
-		template<auto Op, auto... Vs>
-		nik_ces auto result = T_machine_start::template result<d, contr<sizeof...(Vs)>, _zero, Vs...>(H0<Op>);
-
-	}; nik_ce auto _par_sift_ = U_custom_T<T_machine_sift>;
-
-/***********************************************************************************************************************/
-
-// sort:
-
-	struct T_machine_sort
-	{
-		nik_ces auto d = MD::initial_depth;
-
-		template<auto Op> nik_ces auto sH0 = U_pack_Vs<H_id, Op>;
-		template<auto Op> nik_ces auto H0  = U_pack_Vs<_car_, sH0<Op>>;
-
-		template<auto n = _one>
-		nik_ces auto contr = controller
-		<
-			instruction < MN::call , MT::cascade , n >,
-			instruction < MN::halt , MT::eval        >
-		>;
-
-		template<auto Op, auto... Vs>
-		nik_ces auto result = T_machine_start::template result<d, contr<>, U_null_Vs, Vs...>(H0<Op>);
-
-	}; nik_ce auto _par_sort_ = U_custom_T<T_machine_sort>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
