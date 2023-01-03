@@ -19,6 +19,8 @@
 
 // praxis:
 
+	// Need to decide a safety policy for when (sizeof...(Vs) == 0).
+
 namespace cctmp {
 
 /***********************************************************************************************************************/
@@ -211,25 +213,29 @@ namespace cctmp {
 	{
 		nik_ces void _na_() { }
 
-		nik_ces gindex_type required(gcindex_type size, gcindex_type _2_N)
-		{
-			gcindex_type remainder = size % _2_N;
-
-			if (remainder == 0) return 0;
-			else                return _2_N - remainder;
-		}
-
 		nik_ces gindex_type conditional(gcindex_type pos, gcindex_type _2_N, gcindex_type size)
 		{
 			gcindex_type remainder = size % _2_N;
 
-			if (remainder == 0) return 0;
+			if (remainder == _zero) return _zero;
 			else
 			{
 				gcindex_type p_block = pos  / _2_N;
 				gcindex_type s_block = size / _2_N;
 
-				if (p_block != s_block) return 0;
+				if (p_block != s_block) return _zero;
+				else                    return _2_N - remainder;
+			}
+		}
+
+		nik_ces gindex_type required(gcindex_type _2_N, gcindex_type size)
+		{
+			if (size == _zero) return _2_N;
+			else
+			{
+				gcindex_type remainder = size % _2_N;
+
+				if (remainder == _zero) return _zero;
 				else                    return _2_N - remainder;
 			}
 		}
@@ -658,27 +664,25 @@ namespace cctmp {
 	template<gindex_type _2_N>
 	struct T_praxis_controls<PN::left, _2_N>
 	{
-		nik_ces auto h0 = U_null_Vs;
-
-		template<auto pad, auto pos, auto loop = _one, auto done = _four>
+		template<auto Pad, auto Pos, auto Loop = _one, auto Done = _four>
 		nik_ces auto contr = controller
 		<
 			instruction < PN::decl   , PT::id             >,
-			instruction < PN::jump   , PT::if_zero , done >,
+			instruction < PN::jump   , PT::if_zero , Done >,
 			instruction < PN::push   , PT::id             >,
-			instruction < PN::jump   , PT::dec     , loop >,
-			instruction < PN::pad    , PT::make    , pad  >,
+			instruction < PN::jump   , PT::dec     , Loop >,
+			instruction < PN::pad    , PT::make    , Pad  >,
 			instruction < PN::pad    , PT::action         >,
-			instruction < PN::subset , PT::make    , pos  >,
+			instruction < PN::subset , PT::make    , Pos  >,
 			instruction < PN::subset , PT::action         >,
 			instruction < PN::left   , PT::id             >,
 			instruction < PN::halt   , PT::front          >
 		>;
 
-		template<typename Base, auto n, auto s>
+		template<typename Base, auto M, auto S>
 		nik_ces auto result()
 		{
-			nik_ce auto ctr = Base(n, s);
+			nik_ce auto ctr = Base(M, S);
 			nik_ce auto c   = ctr.template contr<ctr.pad, ctr.pos>;
 
 			return T_praxis_controls<PN::id, _2_N>(c, ctr.n);
@@ -692,7 +696,7 @@ namespace cctmp {
 		{
 			gcindex_type k = m / _2_N;
 			gcindex_type j = m % _2_N;
-			gcindex_type b = (k != 0 && j == 0);
+			const bool   b = (k != 0 && j == 0);
 
 			pad = PP::conditional(m, _2_N, s);
 			pos = b ? _2_N : j;
@@ -704,71 +708,41 @@ namespace cctmp {
 
 // fold:
 
-	template<auto Op>
-	struct T_fold_safe
+	template<gindex_type _2_N>
+	struct T_praxis_controls<PN::fold, _2_N>
 	{
-		template<auto V0, auto V1>
-		nik_ces auto _result()
-		{
-			if nik_ce (is_machination<decltype(V0)>)
-			{
-				// Is this approach worth it?
-
-				return machination(U_praxis_restart, V0);
-			}
-			else return eval<Op, V0, V1>;
-		}
-
-		template<auto V0, auto V1>
-		nik_ces auto result = _result<V0, V1>();
-
-	}; template<auto Op>
-		nik_ce auto _safe_fold_ = U_custom_T<T_fold_safe<Op>>;
-
-	template<auto Op>
-	struct T_fold_last
-	{
-		template<auto V0, auto V1, auto is_na = eval<_same_, V1, PP::_na_>>
-		nik_ces auto result = eval
-		<
-			if_then_else_<is_na, _car_, Op>, V0, V1
-		>;
-
-	}; template<auto Op>
-		nik_ce auto _last_fold_ = U_custom_T<T_fold_last<Op>>;
-
-	struct fold_controls
-	{
-		template<auto op>
-		nik_ces auto h0 = U_pack_Vs<op, _safe_fold_<op>>;
-		nik_ces auto h1 = U_null_Vs;
-		nik_ces auto h2 = U_null_Vs;
-
-		template<auto p, auto l, auto u = _zero, auto loop = _two, auto done = _five>
+		template<auto Pad, auto Pos = _zero, auto Num = _one, auto Loop = _two, auto Done = _five>
 		nik_ces auto contr = controller
 		<
-			instruction < PN::pad  , PT::make    , p    >,
+			instruction < PN::pad  , PT::make    , Pad  >,
 			instruction < PN::pad  , PT::action         >,
-			instruction < PN::jump , PT::if_zero , done >,
-			instruction < PN::fold , PT::id      , l    >,
-			instruction < PN::jump , PT::dec     , loop >,
-			instruction < PN::fold , PT::id      , u    >,
+			instruction < PN::jump , PT::if_zero , Done >,
+			instruction < PN::fold , PT::id      , Pos  >,
+			instruction < PN::jump , PT::dec     , Loop >,
+			instruction < PN::fold , PT::id      , Num  >,
 			instruction < PN::halt , PT::first          >
 		>;
 
-		gindex_type push;
-		gindex_type pad;
-		gindex_type pos;
-
-		nik_ce fold_controls(gcindex_type n, gcindex_type s, gcindex_type _2_N) : push{}, pad{}, pos{}
+		template<typename Base, auto M, auto S>
+		nik_ces auto result()
 		{
-			gcindex_type k = n / _2_N;
-			gcindex_type j = n % _2_N;
-			gcindex_type b = (k != 0 && j == 0);
+			nik_ce auto ctr = Base(M, S);
+			nik_ce auto c   = ctr.template contr<ctr.pad>;
 
-			push = k - b;
-			pad  = PP::required(s, _2_N);
-			pos  = b ? _2_N : j;
+			return T_praxis_controls<PN::id, _2_N>(c, ctr.n);
+		}
+
+		gindex_type pad;
+		gindex_type n;
+
+		nik_ce T_praxis_controls(gcindex_type m, gcindex_type s) : pad{}, n{}
+		{
+			gcindex_type k = m / _2_N;
+			gcindex_type j = m % _2_N;
+			const bool   b = (k != 0 && j == 0);
+
+			pad = PP::required(_2_N, m); // (m == s-1)
+			n   = k - b;
 		}
 	};
 
@@ -779,24 +753,22 @@ namespace cctmp {
 	template<gindex_type _2_N>
 	struct T_praxis_controls<PN::segment, _2_N>
 	{
-		nik_ces auto h0 = U_pack_Vs<H_id>;
-
-		template<auto pos, auto loop = _zero, auto done = _three>
+		template<auto Pos, auto Loop = _zero, auto Done = _three>
 		nik_ces auto contr = controller
 		<
-			instruction < PN::jump    , PT::if_zero , done >,
+			instruction < PN::jump    , PT::if_zero , Done >,
 			instruction < PN::segment , PT::action         >,
-			instruction < PN::jump    , PT::dec     , loop >,
-			instruction < PN::subset  , PT::make    , pos  >,
+			instruction < PN::jump    , PT::dec     , Loop >,
+			instruction < PN::subset  , PT::make    , Pos  >,
 			instruction < PN::subset  , PT::action         >,
 			instruction < PN::segment , PT::id             >,
 			instruction < PN::halt    , PT::rest           >
 		>;
 
-		template<typename Base, auto n, auto s>
+		template<typename Base, auto M, auto S>
 		nik_ces auto result()
 		{
-			nik_ce auto ctr = Base(n, s);
+			nik_ce auto ctr = Base(M, S);
 			nik_ce auto c   = ctr.template contr<ctr.pos>;
 
 			return T_praxis_controls<PN::id, _2_N>(c, ctr.n);
@@ -809,7 +781,7 @@ namespace cctmp {
 		{
 			gcindex_type k = m / _2_N;
 			gcindex_type j = m % _2_N;
-			gcindex_type b = (k != 0 && j == 0);
+			const bool   b = (k != 0 && j == 0);
 
 			pos = b ? _2_N : j;
 			n   = k - b;
@@ -820,40 +792,43 @@ namespace cctmp {
 
 // sift:
 
-	struct sift_controls
+	template<gindex_type _2_N>
+	struct T_praxis_controls<PN::sift, _2_N>
 	{
-		template<auto op, auto sop>
-		nik_ces auto h0 = U_pack_Vs<_at_, op, sop, _list_<>>;
-		nik_ces auto h1 = U_null_Vs;
-		nik_ces auto h2 = U_null_Vs;
-
-		template<auto p, auto l = _zero, auto u = _one, auto loop = _two, auto done = _six>
+		template<auto Pad, auto Pos = _zero, auto Num = _one, auto Loop = _two, auto Done = _six>
 		nik_ces auto contr = controller
 		<
-			instruction < PN::pad  , PT::make    , p    >,
+			instruction < PN::pad  , PT::make    , Pad  >,
 			instruction < PN::pad  , PT::action         >,
-			instruction < PN::jump , PT::if_zero , done >,
-			instruction < PN::sift , PT::action  , l    >,
+			instruction < PN::jump , PT::if_zero , Done >,
+			instruction < PN::sift , PT::action  , Pos  >,
 			instruction < PN::sift , PT::id             >,
-			instruction < PN::jump , PT::dec     , loop >,
-			instruction < PN::sift , PT::action  , u    >,
+			instruction < PN::jump , PT::dec     , Loop >,
+			instruction < PN::sift , PT::action  , Num  >,
 			instruction < PN::sift , PT::id             >,
 			instruction < PN::halt , PT::rest           >
 		>;
 
-		gindex_type push;
-		gindex_type pad;
-		gindex_type pos;
-
-		nik_ce sift_controls(gcindex_type n, gcindex_type s, gcindex_type _2_N) : push{}, pad{}, pos{}
+		template<typename Base, auto M, auto S>
+		nik_ces auto result()
 		{
-			gcindex_type k = n / _2_N;
-			gcindex_type j = n % _2_N;
-			gcindex_type b = (k != 0 && j == 0);
+			nik_ce auto ctr = Base(M, S);
+			nik_ce auto c   = ctr.template contr<ctr.pad>;
 
-			push = k - b;
-			pad  = PP::required(s, _2_N);
-			pos  = b ? _2_N : j;
+			return T_praxis_controls<PN::id, _2_N>(c, ctr.n);
+		}
+
+		gindex_type pad;
+		gindex_type n;
+
+		nik_ce T_praxis_controls(gcindex_type m, gcindex_type s) : pad{}, n{}
+		{
+			gcindex_type k = m / _2_N;
+			gcindex_type j = m % _2_N;
+			const bool   b = (k != 0 && j == 0);
+
+			pad = PP::required(_2_N, m); // (m == s-1)
+			n   = k - b;
 		}
 	};
 

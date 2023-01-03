@@ -393,13 +393,6 @@
 
 /***********************************************************************************************************************/
 
-// at:
-
-	#define NIK_DEFINE_EVAL_AT(_n_, _s_)										\
-															\
-		template<NIK_N_AUTO_VARS(_s_, NIK_V_1), auto... Vs>							\
-		nik_ce auto eval<_at_, gindex_type{_n_}, NIK_N_VARS(_s_, NIK_V_1), Vs...> = NIK_V_1(_n_);
-
 // pad:
 
 	#define NIK_DEFINE_EVAL_PAD(_n_)										\
@@ -543,12 +536,12 @@
 			<												\
 				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
 				auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,					\
-				template<auto...> typename B0, auto... Ws, typename... Heaps				\
+				template<auto...> typename B0, auto W0, auto W1, auto... Ws, typename... Heaps		\
 			>												\
-			nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)	 				\
+			nik_ces auto result(nik_vp(H0)(B0<W0, W1, Ws...>*), Heaps... Hs) 				\
 			{												\
 				nik_ce auto ins	= PD::instr(c, i);							\
-				nik_ce auto Op  = eval<_at_, ins[PI::pos], Ws...>;					\
+				nik_ce auto Op  = if_then_else_<ins[PI::pos], W1, W0>;					\
 															\
 				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
 															\
@@ -605,12 +598,13 @@
 			<												\
 				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
 				auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,					\
-				template<auto...> typename B0, auto... Ws, typename... Heaps				\
+				template<auto...> typename B0, auto W0, auto W1, auto W2, auto... Ws,			\
+				typename... Heaps									\
 			>												\
-			nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)	 				\
+			nik_ces auto result(nik_vp(H0)(B0<W0, W1, W2, Ws...>*), Heaps... Hs) 				\
 			{												\
 				nik_ce auto ins	= PD::instr(c, i);							\
-				nik_ce auto Op  = eval<_at_, ins[PI::pos], Ws...>;					\
+				nik_ce auto Op  = if_then_else_<ins[PI::pos], W2, W1>;					\
 															\
 				return NIK_PRAXIS_L(_2_ ## _e_, d, c, i),						\
 															\

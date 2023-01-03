@@ -109,19 +109,6 @@ namespace cctmp {
 		template<auto V0, auto V1, auto... Vs>
 		nik_ce auto eval<_cadr_, V0, V1, Vs...> = V1;
 
-	// at (2^3):
-
-		nik_ce auto _at_ = U_par_abstract<Abstract::at>;
-
-		NIK_DEFINE_EVAL_AT(0, 1)
-		NIK_DEFINE_EVAL_AT(1, 2)
-		NIK_DEFINE_EVAL_AT(2, 3)
-		NIK_DEFINE_EVAL_AT(3, 4)
-		NIK_DEFINE_EVAL_AT(4, 5)
-		NIK_DEFINE_EVAL_AT(5, 6)
-		NIK_DEFINE_EVAL_AT(6, 7)
-		NIK_DEFINE_EVAL_AT(7, 8)
-
 	// find:
 
 		nik_ce auto _find_ = U_par_abstract<Abstract::find>;
@@ -418,8 +405,8 @@ namespace cctmp {
 
 // syntactic sugar:
 
-	template<auto... Vs>
-	nik_ce auto if_then_else_ = eval<_if_then_else_, Vs...>;
+	template<bool Pred, auto... Vs>
+	nik_ce auto if_then_else_ = eval<_if_then_else_, Pred, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

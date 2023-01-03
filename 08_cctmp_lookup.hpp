@@ -236,7 +236,6 @@ namespace cctmp {
 			binding( "car"               , _praxis_< _car_               >),
 			binding( "nop"               , _praxis_< _nop_               >),
 			binding( "cadr"              , _praxis_< _cadr_              >),
-			binding( "at"                , _praxis_< _at_                >),
 			binding( "find"              , _praxis_< _find_              >),
 
 			binding( "is_const"          , _praxis_< _is_const_          >),
