@@ -690,7 +690,7 @@ namespace cctmp {
 		{
 			gcindex_type k = m / _2_N;
 			gcindex_type j = m % _2_N;
-			const bool   b = (k != 0 && j == 0);
+			gcbool_type  b = (k != 0 && j == 0);
 
 			pad = PP::conditional(m, _2_N, s);
 			pos = b ? _2_N : j;
@@ -733,7 +733,7 @@ namespace cctmp {
 		{
 			gcindex_type k = m / _2_N;
 			gcindex_type j = m % _2_N;
-			const bool   b = (k != 0 && j == 0);
+			gcbool_type  b = (k != 0 && j == 0);
 
 			pad = PP::required(_2_N, m); // (m == s-1)
 			n   = k - b;
@@ -775,7 +775,7 @@ namespace cctmp {
 		{
 			gcindex_type k = m / _2_N;
 			gcindex_type j = m % _2_N;
-			const bool   b = (k != 0 && j == 0);
+			gcbool_type  b = (k != 0 && j == 0);
 
 			pos = b ? _2_N : j;
 			n   = k - b;
@@ -819,7 +819,7 @@ namespace cctmp {
 		{
 			gcindex_type k = m / _2_N;
 			gcindex_type j = m % _2_N;
-			const bool   b = (k != 0 && j == 0);
+			gcbool_type  b = (k != 0 && j == 0);
 
 			pad = PP::required(_2_N, m); // (m == s-1)
 			n   = k - b;

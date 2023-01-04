@@ -158,25 +158,13 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// find:
-
-	template<auto Op>
-	struct T_machine_find
-	{
-		template<auto V, auto... Vs>
-		nik_ces auto result = eval<_find_, _alias_<Op, V>, Vs...>;
-
-	}; template<auto Op>
-		nik_ce auto _machine_find_ = _praxis_<U_custom_T<T_machine_find<Op>>, _three>;
-
-/***********************************************************************************************************************/
-
 // insert sort:
 
 	template<auto Op>
 	struct T_machine_insert_sort
 	{
-		nik_ces auto H0 = U_pack_Vs<_car_, _machine_find_<Op>, _dpar_insert_>;
+		nik_ces auto match = _alias_<_match_, Op>;
+		nik_ces auto H0    = U_pack_Vs<_car_, _praxis_<match, _three>, _dpar_insert_>;
 
 		template<auto f = _one, auto n0 = _one, auto i = _two, auto n1 = _one>
 		nik_ces auto contr = controller

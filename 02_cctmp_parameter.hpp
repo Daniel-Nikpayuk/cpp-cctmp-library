@@ -42,6 +42,11 @@ namespace cctmp {
 	template<auto Key, auto Op, auto... Ws, nik_vp(op)(T_argument<Key, Op, Ws...>*), auto... Vs>
 	nik_ce auto eval<op, Vs...> = T_argument<Key, Op, Ws...>::template result<decltype(Vs)...>(Vs...);
 
+// alias:
+
+	template<auto Op, auto... Ws>       using T_alias  = T_par_function<Function::alias, Op, Ws...>;
+	template<auto Op, auto... Ws> nik_ce auto  _alias_ = U_store_T<T_alias<Op, Ws...>>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -106,7 +111,7 @@ namespace cctmp {
 
 		nik_ce auto _find_ = U_par_abstract<Abstract::find>;
 
-		template<const bool *arr, gindex_type size>
+		template<gcbool_type *arr, gindex_type size>
 		nik_ce auto eval_find()
 		{
 			nik_ce auto U_find = _multifind_<_dereference_>;
@@ -116,13 +121,27 @@ namespace cctmp {
 		}
 
 		template<auto Op, auto... Vs>
-		nik_ce auto eval<_find_, Op, Vs...> = eval_find<array<bool const, eval<Op, Vs>...>, sizeof...(Vs)>();
+		nik_ce auto eval<_find_, Op, Vs...> = eval_find
+		<
+			array<gcbool_type, eval<Op, Vs>...>, sizeof...(Vs)
+		>();
+
+	// match:
+
+		nik_ce auto _match_ = U_par_abstract<Abstract::match>;
+
+		template<auto Op, auto V, auto... Vs>
+		nik_ce auto eval<_match_, Op, V, Vs...> = eval_find
+		<
+			array<gcbool_type, eval<Op, V, Vs>...>, sizeof...(Vs)
+		>();
 
 /***********************************************************************************************************************/
 
 // syntactic sugar:
 
-	template<auto Op, auto... Vs> nik_ce auto find_ = eval<_find_, Op, Vs...>;
+	template<auto Op, auto... Vs> nik_ce auto find_  = eval<_find_, Op, Vs...>;
+	template<auto Op, auto... Vs> nik_ce auto match_ = eval<_match_, Op, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -799,9 +818,6 @@ namespace cctmp {
 		nik_ce auto eval<_tailor_, Op, p, Vs...> = T_store_U<Op>::template result<Vs...>(Ws...);
 
 	// alias:
-
-		template<auto Op, auto... Ws>       using T_alias = T_par_function<Function::alias, Op, Ws...>;
-		template<auto Op, auto... Ws> nik_ce auto _alias_ = U_store_T<T_alias<Op, Ws...>>;
 
 		template<auto Op, auto... Ws, nik_vp(op)(T_alias<Op, Ws...>*), auto... Vs>
 		nik_ce auto eval<op, Vs...> = eval<Op, Ws..., Vs...>;

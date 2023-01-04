@@ -139,6 +139,12 @@ namespace cctmp {
 
 // subnumbers:
 
+	// bool:
+
+		using global_bool_type		= bool;
+		using gbool_type		= global_bool_type;
+		using gcbool_type		= global_bool_type const;
+
 	// [0-10]:
 
 		using global_key_type		= unsigned char;
@@ -410,7 +416,7 @@ namespace cctmp {
 
 			// variadic:
 
-				is_null , length , car , cadr , find
+				is_null , length , car , cadr , find , match
 		};
 	};
 
