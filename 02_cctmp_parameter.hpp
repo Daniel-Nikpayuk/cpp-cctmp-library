@@ -246,47 +246,12 @@ namespace cctmp {
 		template<template<auto...> typename B, nik_vp(b)(T_store_B<B>*), auto... Vs>
 		nik_ce auto eval<_to_list_, b, Vs...> = U_store_T<B<Vs...>>;
 
-	// front (zero) unpack:
-
-		nik_ce auto _f0_unpack_ = U_par_list<List::f0_unpack>;
-
-		template<template<auto...> typename B, auto... Ws, nik_vp(p)(B<Ws...>*), auto... Vs>
-		nik_ce auto eval<_f0_unpack_, p, Vs...> = eval<Ws..., Vs...>;
-
-	// front (one) unpack:
-
-		nik_ce auto _f1_unpack_ = U_par_list<List::f1_unpack>;
-
-		template<template<auto...> typename B, auto... Ws, nik_vp(p)(B<Ws...>*), auto V0, auto... Vs>
-		nik_ce auto eval<_f1_unpack_, p, V0, Vs...> = eval<V0, Ws..., Vs...>;
-
-	// front (two) unpack:
-
-		nik_ce auto _f2_unpack_ = U_par_list<List::f2_unpack>;
-
-		template<template<auto...> typename B, auto... Ws, nik_vp(p)(B<Ws...>*), auto V0, auto V1, auto... Vs>
-		nik_ce auto eval<_f2_unpack_, p, V0, V1, Vs...> = eval<V0, V1, Ws..., Vs...>;
-
 	// back (zero) unpack:
 
 		nik_ce auto _b0_unpack_ = U_par_list<List::b0_unpack>;
 
 		template<template<auto...> typename B, auto... Ws, nik_vp(p)(B<Ws...>*), auto... Vs>
 		nik_ce auto eval<_b0_unpack_, p, Vs...> = eval<Vs..., Ws...>;
-
-	// back (one) unpack:
-
-		nik_ce auto _b1_unpack_ = U_par_list<List::b1_unpack>;
-
-		template<template<auto...> typename B, auto W0, auto... Ws, nik_vp(p)(B<W0, Ws...>*), auto... Vs>
-		nik_ce auto eval<_b1_unpack_, p, Vs...> = eval<W0, Vs..., Ws...>;
-
-	// back (two) unpack:
-
-		nik_ce auto _b2_unpack_ = U_par_list<List::b2_unpack>;
-
-		template<template<auto...> typename B, auto W0, auto W1, auto... Ws, nik_vp(p)(B<W0, W1, Ws...>*), auto... Vs>
-		nik_ce auto eval<_b2_unpack_, p, Vs...> = eval<W0, W1, Vs..., Ws...>;
 
 	// rename:
 

@@ -471,10 +471,7 @@ namespace cctmp {
 
 			// variadic:
 
-				to_list   ,
-				f0_unpack , f1_unpack , f2_unpack ,
-				b0_unpack , b1_unpack , b2_unpack ,
-				rename    ,
+				to_list , b0_unpack , rename ,
 
 			// functional:
 

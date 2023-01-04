@@ -96,6 +96,9 @@
 //	constexpr auto val  = eval<_par_sift_, ops, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11>;
 //	constexpr auto val  = eval<_par_sift_, _is_less_than_<5>, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11>;
 
+//	constexpr auto list0 = U_pack_Vs<0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11>;
+//	constexpr auto val   = eval<_par_insert_sort_, _less_than_, list0, 5>;
+
 /***********************************************************************************************************************/
 
 //	constexpr auto f   = _pose_<_increment_<1>, _times_<2>>;

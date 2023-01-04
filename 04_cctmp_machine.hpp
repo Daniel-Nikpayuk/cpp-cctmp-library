@@ -134,6 +134,11 @@ namespace cctmp {
 			nik_ces gkey_type   initial_mode  = MM::id;
 			nik_ces gindex_type initial_index = _zero;
 
+		// alias:
+
+			template<auto Op>
+			nik_ces auto with_initial_depth = _alias_<Op, initial_depth>;
+
 		// accessors:
 
 			nik_ces auto instr(ccontr_type c, gcindex_type i)
@@ -573,15 +578,15 @@ namespace cctmp {
 	{
 		template
 		<
-			NIK_MACHINE_CONTROLS(d, m, c, i), auto n, auto V, auto V0, auto... Vs,
-			template<auto...> typename B0, auto Op, auto... Ws, typename... Heaps
+			NIK_MACHINE_CONTROLS(d, m, c, i), auto V, auto V0, auto... Vs,
+			template<auto...> typename B0, auto W0, auto W1, auto... Ws, typename... Heaps
 		>
-		nik_ces auto result(nik_vp(H0)(B0<Op, Ws...>*), Heaps... Hs)
+		nik_ces auto result(nik_vp(H0)(B0<W0, W1, Ws...>*), Heaps... Hs)
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto nd  = (ins[MI::pos] <= d) ? d : _zero; // machination short circuit.
 			nik_ce auto sd  = MD::next_depth(nd);
-			nik_ce auto nV  = eval<Op, sd, n, V, V0>;
+			nik_ce auto nV  = eval<W1, sd, V, V0>;
 
 			return NIK_MACHINE_BEGIN(_2_N, nd, MM::unit, c, i),
 
