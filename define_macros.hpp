@@ -729,7 +729,8 @@
 															\
 		T_assembly												\
 		<													\
-			AD::next_name(_c_, _i_)
+			AD::next_name(_c_, _i_),									\
+			AD::next_note(_c_, _i_)
 
 	#define NIK_ASSEMBLY_M(_s_, _c_, _i_, _l_)									\
 															\

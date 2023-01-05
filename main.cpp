@@ -110,6 +110,7 @@
 
 	int main(int argc, char *argv[])
 	{
+	//	printf("%d\n", arg_at<0>(0, 1, 2, 3, 4, 5));
 	//	printf("%d\n", val);
 
 		return 0;

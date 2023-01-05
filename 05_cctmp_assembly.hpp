@@ -25,27 +25,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// algorithm:
-
-	template<gkey_type, gkey_type, auto...> struct T_algorithm;
-
-	template<auto Name, auto... Vs>
-	nik_ce auto U_algorithm = U_store_T<T_algorithm<Name, Vs...>>;
-
-/***********************************************************************************************************************/
-
-// names:
-
-	struct AlgorithmName
-	{
-		enum : gkey_type
-		{
-			identity = 0, id = identity, // convenience for default params.
-			dimension
-		};
-	};
-
-	using GN = AlgorithmName;
+// dependencies:
 
 /***********************************************************************************************************************/
 
@@ -246,7 +226,7 @@ namespace cctmp {
 
 // space:
 
-	template<gkey_type, auto...> struct T_assembly;
+	template<gkey_type, gkey_type, auto...> struct T_assembly;
 
 /***********************************************************************************************************************/
 
@@ -256,16 +236,29 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
-			generic , sift    , replace ,
-			go_to   , test    , branch  ,
-			unary   , binary  , re_turn ,
-			apply   ,
-
+			id = 0, identity = id, // convenience for default params.
+			jump , left , at , replace , select , apply ,
 			dimension
 		};
 	};
 
 	using AN = AssemblyName;
+
+/***********************************************************************************************************************/
+
+// notes:
+
+	struct AssemblyNote
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			go_to , branch ,
+			dimension
+		};
+	};
+
+	using AT = AssemblyNote;
 
 /***********************************************************************************************************************/
 
@@ -275,10 +268,8 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
-			size = 0  , name      , pos ,
-			jmp = pos , op  = pos ,
-			_0        , _1        , _2  ,
-
+			size = 0,
+			name , note , pos ,
 			dimension
 		};
 	};
@@ -305,6 +296,9 @@ namespace cctmp {
 			nik_ces gkey_type next_name(ccontr_type c, gcindex_type i)
 				{ return c[i+1][AI::name]; }
 
+			nik_ces gkey_type next_note(ccontr_type c, gcindex_type i)
+				{ return c[i+1][AI::note]; }
+
 			nik_ces gindex_type next_index(ccontr_type, gcindex_type i)
 				{ return i + 1; }
 	};
@@ -327,221 +321,191 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// go to:
+// dependencies:
+
+	template<gkey_type, auto...> struct T_arg;
 
 /***********************************************************************************************************************/
 
-/*
-	template<auto... filler>
-	struct T_assembly<AN::go_to, filler...>
-	{
-		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto ins = instr(c, i);
-			nik_ce auto ni  = ins[AI::jmp];
-
-			return NIK_ASSEMBLY(s, c, ni, l, Vs)(vs...);
-		}
-	};
+// left:
 
 	template<auto... filler>
-	struct T_assembly<AN::branch, filler...>
+	struct T_arg<AN::left, filler...>
 	{
-		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename BoolType, typename... Ts>
-		nik_ces auto result(BoolType v, Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto ins = instr(c, i);
-			nik_ce auto ni  = ins[AI::jmp];
-
-			if (v) return NIK_ASSEMBLY(s, c, ni, l, Vs)(vs...);
-			else   return NIK_ASSEMBLY(s, c,  i, l, Vs)(vs...);
-		}
-	};
-*/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// argument:
-
-/***********************************************************************************************************************/
-
-// unit (generic):
-
-/*
-	template<gkey_type Name, auto... Vs>
-	struct T_algorithm<Shape::argument, Name, Vs...>
-	{
-		template<auto n, typename... Ts>
+		template<auto Name, auto n, auto... Vs, typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto p = eval<_par_left_<>, n, U_store_T<Ts>...>;
+			nik_ce auto p = eval<_par_left_, n, U_store_T<Ts>...>;
 
-			return T_algorithm_argument<Name, p, Vs...>::result(vs...);
+			return T_arg<Name, p>::template result<Vs...>(vs...);
 		}
-
-	}; template<auto Name, auto... Vs>
-		nik_ce auto _arg_unit_ = U_custom_T<T_algorithm_argument<Name, Vs...>>;
-*/
+	};
 
 /***********************************************************************************************************************/
 
 // at:
 
-/*
 	template<template<auto...> typename B, auto... LUs, nik_vp(p)(B<LUs...>*)>
-	struct T_algorithm<Shape::argument, GN::at, p>
+	struct T_arg<AN::at, p>
 	{
-		template<typename TN, typename... Ts>
+		template<auto... Vs, typename TN, typename... Ts>
 		nik_ces auto result(T_store_U<LUs>... lvs, TN vn, Ts... vs) { return vn; }
-
-	}; nik_ce auto _arg_at_ = _arg_unit_<GN::at>;
-
-	// syntactic sugar:
-
-		template<auto n, typename... Ts>
-		nik_ce auto arg_at(Ts... vs) { return T_algorithm_argument<GN::at>::template result<n>(vs...); }
-*/
-
-/***********************************************************************************************************************/
-
-// replace:
-
-/*
-	template<template<auto...> typename B, auto... LUs, nik_vp(p)(B<LUs...>*), auto c>
-	struct T_algorithm<Shape::argument, GN::replace, p, c>
-	{
-		using C = T_store_U<c>;
-
-		template<typename T, typename TN, typename... Ts>
-		nik_ces auto result(T v, T_store_U<LUs>... lvs, TN vn, Ts... vs) { return C::result(lvs..., v, vs...); }
-
-	}; template<auto cont>
-		nik_ce auto _arg_replace_ = _arg_unit_<GN::replace, cont>;
+	};
 
 	// syntactic sugar:
 
-		template<auto cont, auto n, typename... Ts>
-		nik_ce auto arg_replace(Ts... vs)
-		{
-			return T_algorithm_argument<GN::replace, cont>::template result<n>(vs...);
-		}
-*/
+		template<auto n, auto... Vs, typename... Ts>
+		nik_ce auto arg_at(Ts... vs) { return T_arg<AN::left>::template result<AN::at, n, Vs...>(vs...); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// test:
+// jump:
 
 /***********************************************************************************************************************/
 
-/*
+// go to:
+
 	template<auto... filler>
-	struct T_assembly<AN::test, filler...>
+	struct T_assembly<AN::jump, AT::go_to, filler...>
 	{
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins  = instr(c, i);
-			nik_ce auto _op  = ins[AI::op];
-			nik_ce auto _0   = ins[AI::_0];
-			nik_ce auto test = unpack_<l, _par_at_, _op>;
+			nik_ce auto ins = instr(c, i);
+			nik_ce auto ni  = ins[AI::pos];
 
-			auto arg = arg_at<_0>(vs...);
-			auto val = T_store_U<test>::result(arg);
-
-			return NIK_ASSEMBLY(s, c, i, l, Vs)(val, vs...);
+			return NIK_ASSEMBLY(s, c, ni, l, Vs)(vs...);
 		}
 	};
-*/
+
+/***********************************************************************************************************************/
+
+// branch:
+
+	template<auto... filler>
+	struct T_assembly<AN::jump, AT::branch, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename BoolType, typename... Ts>
+		nik_ces auto result(BoolType v, Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto ins = instr(c, i);
+			nik_ce auto ni  = ins[AI::pos];
+
+			if (v) return NIK_ASSEMBLY(s, c, ni, l, Vs)(vs...);
+			else   return NIK_ASSEMBLY(s, c,  i, l, Vs)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// left:
+
+/***********************************************************************************************************************/
+
+// id:
+
+	template<auto... filler>
+	struct T_assembly<AN::left, AT::id, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto ins	= AD::instr(c, i);
+			nik_ce auto n   = ins[AI::pos];
+			nik_ce auto p   = eval<_par_left_, n, U_store_T<Ts>...>;
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i),
+
+			       p
+
+			NIK_ASSEMBLY_RESULT(s, c, i, l, Vs)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// at:
+
+/***********************************************************************************************************************/
+
+// id:
+
+	template<template<auto...> typename B, auto... LUs, nik_vp(p)(B<LUs...>*)>
+	struct T_assembly<AN::at, AT::id, p>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename TN, typename... Ts>
+		nik_ces auto result(T_store_U<LUs>... lvs, TN vn, Ts... vs) -> T_store_U<s>
+			{ return vn; }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// replace:
+
+/***********************************************************************************************************************/
+
+// id:
+
+	template<template<auto...> typename B, auto... LUs, nik_vp(p)(B<LUs...>*)>
+	struct T_assembly<AN::replace, AT::id, p>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename T, typename TN, typename... Ts>
+		nik_ces auto result(T v, T_store_U<LUs>... lvs, TN vn, Ts... vs) -> T_store_U<s>
+			{ return NIK_ASSEMBLY(s, c, i, l, Vs)(lvs..., v, vs...); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// select:
+
+/***********************************************************************************************************************/
+
+// id:
+
+	template<auto... filler>
+	struct T_assembly<AN::select, AT::id, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto ins	= AD::instr(c, i);
+			nik_ce auto n   = ins[AI::pos];
+			nik_ce auto p   = unpack_<l, _par_at_, n>;
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i),
+
+			       p
+
+			NIK_ASSEMBLY_RESULT(s, c, i, l, Vs)(vs...);
+		}
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // apply:
 
-	// helper:
-
-/*
-		template<auto, auto> struct T_assembly_apply;
-
-		template<auto f, auto... Is, nik_vp(p)(T_pack_Vs<Is...>*)>
-		struct T_assembly_apply<f, p>
-		{
-			template<typename... Ts>
-			nik_ces auto result(Ts... vs) { return T_store_U<f>::result(arg_at<Is>(vs...)...); }
-		};
-*/
-
 /***********************************************************************************************************************/
 
-/*
-	template<auto... filler>
-	struct T_assembly<AN::apply, filler...>
+// id:
+
+	template<template<auto...> typename B, auto Op, auto... Is, nik_vp(p)(B<Op, Is...>*)>
+	struct T_assembly<AN::apply, AT::id, p>
 	{
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins = instr(c, i);
-			nik_ce auto _op = ins[AI::op];
-			nik_ce auto _0  = ins[AI::_0];
-			nik_ce auto _p  = ins[AI::_1];
-			nik_ce auto f   = unpack_<l, _par_at_, _op>;
-			nik_ce auto p   = unpack_<l, _par_at_, _p>;
+			auto val = T_store_U<Op>::template result<>(arg_at<Is>(vs...)...);
 
-			auto val = T_assembly_apply<f, p>::template result<Ts...>(vs...);
-
-			return NIK_ASSEMBLY_TEMPLATE(c, i),
-
-				_0
-
-			NIK_ASSEMBLY_RESULT(s, c, i, l, Vs)(val, vs...);
+			return NIK_ASSEMBLY(s, c, i, l, Vs)(val, vs...);
 		}
 	};
-*/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// resume:
-
-/***********************************************************************************************************************/
-
-/*
-	struct T_assembly_cont
-	{
-		template<auto s, auto l, auto c, auto i, typename... Ts>
-		nik_ces auto result(Ts... vs)
-		{
-			using S = T_store_U<s>;
-
-			return NIK_ASSEMBLY(S, l, c, i)(vs...);
-		}
-	};
-*/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// return:
-
-/***********************************************************************************************************************/
-
-/*
-	template<auto... filler>
-	struct T_assembly<AN::re_turn, filler...>
-	{
-		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto ins	= instr(c, i);
-			nik_ce auto n	= ins[AI::pos];
-
-			return arg_at<n>(vs...);
-		}
-	};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
