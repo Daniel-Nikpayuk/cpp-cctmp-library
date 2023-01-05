@@ -427,13 +427,12 @@
 
 // space:
 
-	#define NIK_PRAXIS_L(_e_, _d_, _c_, _i_)									\
+	#define NIK_PRAXIS_L(_d_, _c_, _i_)										\
 															\
 		T_praxis												\
 		<													\
 			PD::next_name(_d_, _c_, _i_),									\
-			PD::next_note(_d_, _c_, _i_),									\
-			_e_
+			PD::next_note(_d_, _c_, _i_)
 
 	#define NIK_PRAXIS_M(_d_, _c_, _i_, _n_)									\
 															\
@@ -450,15 +449,15 @@
 
 	#define NIK_PRAXIS_BEGIN(_e_, _d_, _c_, _i_, _n_)								\
 															\
-		NIK_PRAXIS_L(_e_, _d_, _c_, _i_) NIK_PRAXIS_M(_d_, _c_, _i_, _n_)
+		NIK_PRAXIS_L(_d_, _c_, _i_), _e_ NIK_PRAXIS_M(_d_, _c_, _i_, _n_)
 
 	#define NIK_PRAXIS_END												\
 															\
 		NIK_PRAXIS_R
 
-	#define NIK_PRAXIS_TEMPLATE(_e_, _d_, _c_, _i_)									\
+	#define NIK_PRAXIS_TEMPLATE(_d_, _c_, _i_)									\
 															\
-		NIK_PRAXIS_L(_e_, _d_, _c_, _i_)
+		NIK_PRAXIS_L(_d_, _c_, _i_)
 
 	#define NIK_PRAXIS_RESULT(_d_, _c_, _i_, _n_, _v_)								\
 															\
@@ -466,7 +465,7 @@
 
 	#define NIK_PRAXIS(_e_, _d_, _c_, _i_, _n_, _v_)								\
 															\
-		NIK_PRAXIS_TEMPLATE(_e_, _d_, _c_, _i_) NIK_PRAXIS_RESULT(_d_, _c_, _i_, _n_, _v_)
+		NIK_PRAXIS_TEMPLATE(_d_, _c_, _i_), _e_ NIK_PRAXIS_RESULT(_d_, _c_, _i_, _n_, _v_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -606,9 +605,9 @@
 				nik_ce auto ins	= PD::instr(c, i);							\
 				nik_ce auto Op  = if_then_else_<ins[PI::pos], W2, W1>;					\
 															\
-				return NIK_PRAXIS_L(_2_ ## _e_, d, c, i),						\
+				return NIK_PRAXIS_L(d, c, i),								\
 															\
-					NIK_2_N_VARS(_e_, NIK_EVAL_OP_V_V_1)						\
+					_2_ ## _e_, NIK_2_N_VARS(_e_, NIK_EVAL_OP_V_V_1)				\
 															\
 				NIK_PRAXIS_M(d, c, i, n),								\
 															\
@@ -664,13 +663,12 @@
 
 // space:
 
-	#define NIK_MACHINE_L(_e_, _d_, _m_, _c_, _i_)									\
+	#define NIK_MACHINE_L(_d_, _m_, _c_, _i_)									\
 															\
 		T_machine												\
 		<													\
 			MD::next_name(_d_, _m_, _c_, _i_),								\
-			MD::next_note(_d_, _m_, _c_, _i_),								\
-			_e_
+			MD::next_note(_d_, _m_, _c_, _i_)
 
 	#define NIK_MACHINE_M(_d_, _m_, _c_, _i_)									\
 															\
@@ -686,15 +684,15 @@
 
 	#define NIK_MACHINE_BEGIN(_e_, _d_, _m_, _c_, _i_)								\
 															\
-		NIK_MACHINE_L(_e_, _d_, _m_, _c_, _i_) NIK_MACHINE_M(_d_, _m_, _c_, _i_)
+		NIK_MACHINE_L(_d_, _m_, _c_, _i_), _e_ NIK_MACHINE_M(_d_, _m_, _c_, _i_)
 
 	#define NIK_MACHINE_END												\
 															\
 		NIK_MACHINE_R
 
-	#define NIK_MACHINE_TEMPLATE(_e_, _d_, _m_, _c_, _i_)								\
+	#define NIK_MACHINE_TEMPLATE(_d_, _m_, _c_, _i_)								\
 															\
-		NIK_MACHINE_L(_e_, _d_, _m_, _c_, _i_)
+		NIK_MACHINE_L(_d_, _m_, _c_, _i_)
 
 	#define NIK_MACHINE_RESULT(_d_, _m_, _c_, _i_, _v_)								\
 															\
@@ -702,7 +700,7 @@
 
 	#define NIK_MACHINE(_e_, _d_, _m_, _c_, _i_, _v_)								\
 															\
-		NIK_MACHINE_TEMPLATE(_e_, _d_, _m_, _c_, _i_) NIK_MACHINE_RESULT(_d_, _m_, _c_, _i_, _v_)
+		NIK_MACHINE_TEMPLATE(_d_, _m_, _c_, _i_), _e_ NIK_MACHINE_RESULT(_d_, _m_, _c_, _i_, _v_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

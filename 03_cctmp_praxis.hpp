@@ -19,8 +19,6 @@
 
 // praxis:
 
-	// Need to decide a safety policy for when (sizeof...(Vs) == 0).
-
 namespace cctmp {
 
 /***********************************************************************************************************************/
@@ -61,16 +59,19 @@ namespace cctmp {
 
 		// Both T_praxis and T_machine are implementations of such liners.
 
-	template<typename Op, typename Params, typename Heaps>
+	template<typename Weights, typename Params, typename Heaps>
 	struct machination
 	{
-		Op op;
+		Weights ws;
 		Params ps;
 		Heaps hs;
 
-		nik_ce machination(const Op & _op, const Params & _ps, const Heaps & _hs) :
-			op{_op}, ps{_ps}, hs{_hs} { }
+		nik_ce machination(const Weights & _ws, const Params & _ps, const Heaps & _hs) :
+			ws{_ws}, ps{_ps}, hs{_hs} { }
 	};
+
+	template<auto ws, auto ps, auto hs>
+	nik_ce auto make_machination() { return machination(ws, ps, hs); }
 
 /***********************************************************************************************************************/
 
@@ -79,9 +80,11 @@ namespace cctmp {
 	template<typename T>
 	nik_ce bool is_machination = false;
 
-	template<typename O, typename P, typename H> nik_ce bool is_machination <       machination<O, P, H>   > = true;
-	template<typename O, typename P, typename H> nik_ce bool is_machination < const machination<O, P, H>   > = true;
-	template<typename O, typename P, typename H> nik_ce bool is_machination < const machination<O, P, H> & > = true;
+	template<typename W, typename P, typename H>
+	nik_ce bool is_machination<machination<W, P, H>(*)()> = true;
+
+	template<typename W, typename P, typename H>
+	nik_ce bool is_machination<machination<W, P, H>(*const)()> = true;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -287,12 +290,21 @@ namespace cctmp {
 
 // restart:
 
+	template<auto... Ws>
 	struct T_praxis_restart
 	{
 		template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto _2_N, auto... Vs, typename... Heaps>
-		nik_ces auto result(Heaps... Hs) { return NIK_PRAXIS(_2_N, d, c, i, n, Vs)(Hs...); }
+		nik_ces auto result(Heaps... Hs)
+		{
+			return NIK_PRAXIS_TEMPLATE(d, c, i),
 
-	}; nik_ce auto U_praxis_restart = U_custom_T<T_praxis_restart>;
+				_2_N, Ws...
+
+			NIK_PRAXIS_RESULT(d, c, i, n, Vs)(Hs...);
+		}
+
+	}; template<auto... Ws> // expected to be a store:
+		nik_ce auto U_praxis_restart = U_store_T<T_praxis_restart<Ws...>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -332,8 +344,8 @@ namespace cctmp {
 
 // pause:
 
-	template<gindex_type _2_N>
-	struct T_praxis<PN::halt, PT::pause, _2_N>
+	template<gindex_type _2_N, auto... Ws>
+	struct T_praxis<PN::halt, PT::pause, _2_N, Ws...>
 	{
 		template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto... Vs, typename... Heaps>
 		nik_ces auto result(Heaps... Hs)
@@ -341,7 +353,7 @@ namespace cctmp {
 			nik_ce auto ps = U_pack_Vs<c, i, n, _2_N, Vs...>;
 			nik_ce auto hs = U_pack_Vs<U_restore_T<Heaps>...>;
 
-			return machination(U_praxis_restart, ps, hs);
+			return make_machination<U_praxis_restart<Ws...>, ps, hs>;
 		}
 	};
 
@@ -349,8 +361,8 @@ namespace cctmp {
 
 // action:
 
-	template<gindex_type _2_N>
-	struct T_praxis<PN::halt, PT::action, _2_N>
+	template<gindex_type _2_N, auto... Ws>
+	struct T_praxis<PN::halt, PT::action, _2_N, Ws...>
 	{
 		template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto Op, auto... Vs, typename... Heaps>
 		nik_ces auto result(Heaps... Hs)
@@ -361,7 +373,7 @@ namespace cctmp {
 				nik_ce auto ps = U_pack_Vs<c, i-1, n, _2_N, Op, Vs...>;
 				nik_ce auto hs = U_pack_Vs<U_restore_T<Heaps>...>;
 
-				return machination(U_praxis_restart, ps, hs);
+				return make_machination<U_praxis_restart<Ws...>, ps, hs>;
 			}
 		}
 	};
@@ -505,9 +517,9 @@ namespace cctmp {
 		>
 		nik_ces auto result(Heap0 H0, nik_avp(B<fs...>*), Heaps... Hs)
 		{
-			return NIK_PRAXIS_TEMPLATE(_2_N, d, c, i),
+			return NIK_PRAXIS_TEMPLATE(d, c, i),
 
-				fs...
+				_2_N, fs...
 
 			NIK_PRAXIS_RESULT(d, c, i, n, Vs)(H0, Hs...);
 		}
@@ -639,6 +651,8 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // controls:
+
+	// Need to decide a safety policy for when (sizeof...(Vs) == 0).
 
 	template<gkey_type, gindex_type> struct T_praxis_controls;
 

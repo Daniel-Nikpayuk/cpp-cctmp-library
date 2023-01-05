@@ -164,7 +164,7 @@ namespace cctmp {
 	struct T_machine_insert_sort
 	{
 		nik_ces auto match = _alias_<_match_, Op>;
-		nik_ces auto H0    = U_pack_Vs<_car_, _praxis_<match, _three>, _dpar_insert_>;
+		nik_ces auto H0    = U_pack_Vs<_car_, _praxis_<match, _one>, _dpar_insert_>;
 
 		template<auto f = _one, auto n0 = _one, auto i = _two, auto n1 = _one>
 		nik_ces auto contr = controller
@@ -196,13 +196,11 @@ namespace cctmp {
 	{
 		nik_ces auto H0 = U_pack_Vs<_car_, _dpar_insert_sort_<Op>>;
 
-		template<auto n0 = _one, auto n1 = _one, auto n2 = _one, auto Loop = _zero, auto Done = _five>
+		template<auto n = _one, auto Loop = _zero, auto Done = _three>
 		nik_ces auto contr = controller
 		<
-			instruction < MN::call , MT::propel  , n0   >,
-			instruction < MN::call , MT::eval    , n1   >,
-			instruction < MN::jump , MT::branch  , Done >,
-			instruction < MN::call , MT::cascade , n2   >,
+			instruction < MN::jump , MT::cascade , Done >,
+			instruction < MN::call , MT::cascade , n    >,
 			instruction < MN::jump , MT::go_to   , Loop >,
 			instruction < MN::halt , MT::eval           >
 		>;
@@ -213,6 +211,34 @@ namespace cctmp {
 
 	template<auto Op> nik_ce auto _dpar_sort_ = U_custom_T<T_machine_sort<Op>>;
 	template<auto Op> nik_ce auto  _par_sort_ = MD::template with_initial_depth<_dpar_sort_<Op>>;
+
+/***********************************************************************************************************************/
+
+// trampoline:
+
+	template<auto Op>
+	struct T_machine_trampoline
+	{
+		nik_ces auto H0 = U_pack_Vs<_car_>;
+
+		template<auto n = _one>
+		nik_ces auto contr = controller
+		<
+			instruction < MN::call , MT::eval , n >,
+			instruction < MN::halt , MT::eval     >
+		>;
+
+		template<auto d, auto... Vs>
+		nik_ces auto result = T_machine_start::template result<MD::next_depth(d), contr<>, Op, Vs...>(H0);
+	};
+
+	template<auto Op> nik_ce auto _dpar_trampoline_ = U_custom_T<T_machine_trampoline<Op>>;
+	template<auto Op> nik_ce auto  _par_trampoline_ = MD::template with_initial_depth<_dpar_trampoline_<Op>>;
+
+	// syntactic sugar:
+
+		template<auto Op> nik_ces auto _dpart_sort_ = _dpar_trampoline_<_dpar_sort_<Op>>;
+		template<auto Op> nik_ces auto _part_sort_ = _par_trampoline_<_dpar_sort_<Op>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
