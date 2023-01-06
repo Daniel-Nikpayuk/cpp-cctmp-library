@@ -112,6 +112,7 @@
 	{
 	//	printf("%d\n", arg_at<0>(0, 1, 2, 3, 4, 5));
 	//	printf("%d\n", val);
+		printf("%d\n", factorial(argc));
 
 		return 0;
 	}

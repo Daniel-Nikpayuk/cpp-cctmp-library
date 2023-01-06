@@ -441,12 +441,7 @@ namespace cctmp {
 			binding( "name"              , _praxis_< _name_              >),
 			binding( "similar"           , _praxis_< _similar_           >),
 			binding( "to_list"           , _praxis_< _to_list_           >),
-			binding( "f0_unpack"         , _praxis_< _f0_unpack_         >),
-			binding( "f1_unpack"         , _praxis_< _f1_unpack_         >),
-			binding( "f2_unpack"         , _praxis_< _f2_unpack_         >),
 			binding( "b0_unpack"         , _praxis_< _b0_unpack_         >),
-			binding( "b1_unpack"         , _praxis_< _b1_unpack_         >),
-			binding( "b2_unpack"         , _praxis_< _b2_unpack_         >),
 			binding( "rename"            , _praxis_< _rename_            >),
 			binding( "pad"               , _praxis_< _pad_               >),
 			binding( "cdr"               , _praxis_< _cdr_               >),
@@ -457,6 +452,9 @@ namespace cctmp {
 			binding( "push"              , _praxis_< _push_              >),
 
 			binding( "if_then_else"      , _praxis_< _if_then_else_      >),
+			binding( "stem"              , _praxis_< _stem_              >),
+			binding( "costem"            , _praxis_< _costem_            >),
+			binding( "distem"            , _praxis_< _distem_            >),
 
 			binding( "is_unsigned"       , _praxis_< _is_unsigned_       >),
 			binding( "not_unsigned"      , _praxis_< _not_unsigned_      >),
@@ -485,8 +483,7 @@ namespace cctmp {
 			binding( "function_out_type" , _praxis_< _function_out_type_ >),
 			binding( "function_in_types" , _praxis_< _function_in_types_ >),
 
-			binding( "custom"            , _praxis_< _custom_            >),
-			binding( "nested"            , _praxis_< _nested_            >),
+			binding( "eval"              , _praxis_< _eval_              >),
 			binding( "procedure"         , _praxis_< _procedure_         >),
 			binding( "method"            , _praxis_< _method_            >),
 			binding( "tailor"            , _praxis_< _tailor_            >),
@@ -516,12 +513,12 @@ namespace cctmp {
 		 	U_char,
 
 			binding( "id"                    , _id_                       ),
-			binding( "equal"                 , _equal_                    ),
-			binding( "not_equal"             , _not_equal_                ),
-			binding( "less_than"             , _less_than_                ),
-			binding( "less_than_or_equal"    , _less_than_or_equal_       ),
-			binding( "greater_than"          , _greater_than_             ),
-			binding( "greater_than_or_equal" , _greater_than_or_equal_    ),
+			binding( "upshift"               , _upshift_                  ),
+			binding( "downshift"             , _downshift_                ),
+
+			binding( "assign"                , _assign_                   ),
+			binding( "dereference"           , _dereference_              ),
+			binding( "to_bool"               , _to_bool_                  ),
 
 			binding( "not"                   , _not_                      ),
 			binding( "and"                   , _and_                      ),
@@ -529,25 +526,22 @@ namespace cctmp {
 			binding( "implies"               , _implies_                  ),
 			binding( "equivalent"            , _equivalent_               ),
 
+			binding( "equal"                 , _equal_                    ),
+			binding( "is_zero"               , _is_zero_                  ),
+			binding( "not_equal"             , _not_equal_                ),
+			binding( "less_than"             , _less_than_                ),
+			binding( "less_than_or_equal"    , _less_than_or_equal_       ),
+			binding( "greater_than"          , _greater_than_             ),
+			binding( "greater_than_or_equal" , _greater_than_or_equal_    ),
+
 			binding( "add"                   , _add_                      ),
 			binding( "subtract"              , _subtract_                 ),
 			binding( "multiply"              , _multiply_                 ),
 			binding( "divide"                , _divide_                   ),
 			binding( "modulo"                , _modulo_                   ),
 
-			binding( "upshift"               , _upshift_                  ),
-			binding( "downshift"             , _downshift_                ),
-
-			binding( "assign"                , _assign_                   ),
-			binding( "dereference"           , _dereference_              ),
-
-			binding( "to_bool"               , _to_bool_                  ),
-			binding( "is_zero"               , _is_zero_                  ),
 			binding( "increment"             , _increment_<1>             ),
 			binding( "decrement"             , _increment_<-1>            ),
-
-			binding( "first"                 , _first_                    ),
-			binding( "second"                , _second_                   ),
 
 			binding( "is_array"              , _is_array_                 ),
 			binding( "array_type"            , _array_type_               ),
@@ -573,54 +567,6 @@ namespace cctmp {
 	};
 
 	nik_ce auto default_assembly_environment = make_environment<default_assembly_lookup>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// case study:
-
-/***********************************************************************************************************************/
-
-// source:
-
-	template
-	<
-		auto       n = 0 , auto        p = 1 ,
-		auto is_zero = 0 , auto multiply = 1 , auto dec = 2 ,
-		auto    loop = 0 , auto     done = 5
-	>
-	nik_ce auto pair_factorial_contr = controller
-	<
-	// loop:
-		instruction < AN::test    , is_zero      , n     >,
-		instruction < AN::branch  , done                 >,
-		instruction < AN::binary  , multiply , p , n , p >,
-		instruction < AN::unary   , dec      , n , n     >,
-		instruction < AN::go_to   , loop                 >,
-	// done:
-		instruction < AN::re_turn , p                    >
-	>;
-
-/***********************************************************************************************************************/
-
-// factorial:
-
-	template<typename T>
-	nik_ce auto factorial(T n)
-	{
-		return T_assembly_start::template result
-		<
-			U_pack_Vs
-			<
-				_is_equal_<0>,
-				_multiply_,
-				_increment_<-1>
-			>,
-
-			pair_factorial_contr<>, T
-
-		>(n, 1, 0, 0);
-	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
