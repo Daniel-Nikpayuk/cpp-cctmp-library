@@ -31,7 +31,7 @@ namespace cctmp {
 
 // params (syntactic sugar):
 
-	nik_ce auto _dpar_at_		= U_custom_T<T_machine_params< MT::copy   , _car_           >>;
+	nik_ce auto _dpar_at_		= U_custom_T<T_machine_params< MT::back   , _car_           >>;
 	nik_ce auto _dpar_left_		= U_custom_T<T_machine_params< MT::front  , _list_<>        >>;
 	nik_ce auto _dpar_replace_	= U_custom_T<T_machine_params< MT::mutate , _list_<> , _one >>;
 
@@ -56,7 +56,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first , left , at , map , apply ,
+			first , select , front , right , map , apply ,
 			dimension
 		};
 	};
@@ -131,15 +131,37 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// left:
+// select:
 
 	template<auto... filler>
-	struct T_chain<CN::left, filler...>
+	struct T_chain<CN::select, filler...>
 	{
 		template<NIK_CHAIN_PARAMS(c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto ins = instr(c, i);
+			nik_ce auto ins = CD::instr(c, i);
+			nik_ce auto n   = ins[CI::pos];
+			nik_ce auto p   = unpack_<l, _par_at_, n>;
+
+			return NIK_CHAIN_TEMPLATE(c, i),
+
+				p
+
+			NIK_CHAIN_RESULT(c, i, l, Vs)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// front:
+
+	template<auto... filler>
+	struct T_chain<CN::front, filler...>
+	{
+		template<NIK_CHAIN_PARAMS(c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			nik_ce auto ins = CD::instr(c, i);
 			nik_ce auto n   = ins[CI::pos];
 			nik_ce auto p   = eval<_par_left_, n, U_store_T<Ts>...>;
 
@@ -153,15 +175,15 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// at:
+// right:
 
 	template<template<auto...> typename B, auto... LUs, nik_vp(p)(B<LUs...>*)>
-	struct T_chain<CN::at, p>
+	struct T_chain<CN::right, p>
 	{
-		template<NIK_CHAIN_PARAMS(c, i, l, Vs), typename TN, typename... Ts>
-		nik_ces auto result(T_store_U<LUs>... lvs, TN vn, Ts... vs)
+		template<NIK_CHAIN_PARAMS(c, i, l, Vs), typename... Ts>
+		nik_ces auto result(T_store_U<LUs>... lvs, Ts... vs)
 		{
-			return NIK_CHAIN(c, i, l, Vs)(vn);
+			return NIK_CHAIN(c, i, l, Vs)(vs...);
 		}
 	};
 
@@ -172,8 +194,9 @@ namespace cctmp {
 		{
 			nik_ce auto c = controller
 			<
-				instruction< CN::left , n >,
-				instruction< CN::at       >
+				instruction< CN::front , n >,
+				instruction< CN::right     >,
+				instruction< CN::first     >
 			>;
 
 			return T_chain_start::template result<c, U_null_Vs, Vs...>(vs...);
@@ -189,7 +212,7 @@ namespace cctmp {
 		template<NIK_CHAIN_PARAMS(c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto ins = instr(c, i);
+			nik_ce auto ins = CD::instr(c, i);
 			nik_ce auto n   = ins[CI::pos];
 			nik_ce auto Op  = unpack_<l, _par_at_, n>;
 
@@ -238,7 +261,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			jump , left , at , replace , select , call , loop ,
+			jump , left , select , at , replace , call , loop ,
 			dimension
 		};
 	};
@@ -254,7 +277,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			go_to , branch ,
+			go_to , branch , front ,
 			dimension
 		};
 	};
@@ -362,14 +385,36 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// left:
+// select:
 
 /***********************************************************************************************************************/
 
 // id:
 
 	template<auto... filler>
-	struct T_assembly<AN::left, AT::id, filler...>
+	struct T_assembly<AN::select, AT::id, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto ins	= AD::instr(c, i);
+			nik_ce auto n   = ins[AI::pos];
+			nik_ce auto p   = unpack_<l, _par_at_, n>;
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i),
+
+			       p
+
+			NIK_ASSEMBLY_RESULT(s, c, i, l, Vs)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// front:
+
+	template<auto... filler>
+	struct T_assembly<AN::select, AT::front, filler...>
 	{
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
@@ -418,33 +463,6 @@ namespace cctmp {
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename T, typename TN, typename... Ts>
 		nik_ces auto result(T v, T_store_U<LUs>... lvs, TN vn, Ts... vs) -> T_store_U<s>
 			{ return NIK_ASSEMBLY(s, c, i, l, Vs)(lvs..., v, vs...); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// select:
-
-/***********************************************************************************************************************/
-
-// id:
-
-	template<auto... filler>
-	struct T_assembly<AN::select, AT::id, filler...>
-	{
-		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto ins	= AD::instr(c, i);
-			nik_ce auto n   = ins[AI::pos];
-			nik_ce auto p   = unpack_<l, _par_at_, n>;
-
-			return NIK_ASSEMBLY_TEMPLATE(c, i),
-
-			       p
-
-			NIK_ASSEMBLY_RESULT(s, c, i, l, Vs)(vs...);
-		}
 	};
 
 /***********************************************************************************************************************/

@@ -257,7 +257,7 @@ namespace cctmp {
 		template<auto d, auto n, auto... Vs>
 		nik_ces auto result = T_machine_start::template result<d, contr<n>, Vs...>(H0);
 
-	}; using T_machine_at = T_machine_params<MT::copy, _car_>;
+	}; using T_machine_at = T_machine_params<MT::back, _car_>;
 
 /***********************************************************************************************************************/
 
