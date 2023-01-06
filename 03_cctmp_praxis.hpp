@@ -255,10 +255,8 @@ namespace cctmp {
 
 // pack:
 
-	nik_ce auto _pack_null_			= U_pack_Vs <                    >;
-	nik_ce auto _pack_first_		= U_pack_Vs < _first_            >;
-	nik_ce auto _pack_second_		= U_pack_Vs < _second_           >;
-	nik_ce auto _pack_second_first_		= U_pack_Vs < _second_ , _first_ >;
+	nik_ce auto _pack_null_			= U_pack_Vs <       >;
+	nik_ce auto _pack_car_			= U_pack_Vs < _car_ >;
 
 	template<auto Ops>
 	struct T_pack_filter
@@ -266,7 +264,7 @@ namespace cctmp {
 		template<auto... Vs>
 		nik_ces auto result = if_then_else_
 		<
-			eval<_and_wise_, Ops, Vs...>, _pack_first_, _pack_null_
+			eval<_and_wise_, Ops, Vs...>, _pack_car_, _pack_null_
 		>;
 
 	}; template<auto Ops>
@@ -486,7 +484,7 @@ namespace cctmp {
 	template<gindex_type _2_N>
 	struct T_praxis<PN::subset, PT::make, _2_N>
 	{
-		nik_ces auto p0 = _pack_first_;
+		nik_ces auto p0 = _pack_car_;
 		nik_ces auto p1 = _pack_null_;
 
 		template<NIK_PRAXIS_PARAMS(d, c, i, n, Vs), typename Heap0, typename... Heaps>

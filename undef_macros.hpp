@@ -278,6 +278,26 @@
 
 #undef NIK_MACHINE
 
+#undef NIK_CHAIN_CONTROLS
+
+#undef NIK_CHAIN_PARAMS
+
+#undef NIK_CHAIN_L
+
+#undef NIK_CHAIN_M
+
+#undef NIK_CHAIN_R
+
+#undef NIK_CHAIN_BEGIN
+
+#undef NIK_CHAIN_END
+
+#undef NIK_CHAIN_TEMPLATE
+
+#undef NIK_CHAIN_RESULT
+
+#undef NIK_CHAIN
+
 #undef NIK_ASSEMBLY_CONTROLS
 
 #undef NIK_ASSEMBLY_PARAMS

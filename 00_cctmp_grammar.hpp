@@ -277,11 +277,11 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			overload = 0,
-			higher_order , continuation , iterator ,
-			abstract     , access       , list     ,
-			boolean      , number       ,
-			pointer      , reference    , array    ,
-			function     , sequence     , tuple    ,
+			higher_order , iterator  ,
+			abstract     , access    , list  ,
+			boolean      , number    ,
+			pointer      , reference , array ,
+			function     , sequence  , tuple ,
 			identity
 		};
 	};
@@ -347,31 +347,6 @@ namespace cctmp {
 
 		template<auto... Vs> using T_par_higher_order		= T_parameter<Pattern::higher_order, Vs...>;
 		template<auto... Vs> nik_ce auto U_par_higher_order	= U_parameter<Pattern::higher_order, Vs...>;
-
-/***********************************************************************************************************************/
-
-// continuation:
-
-	struct Continuation
-	{
-		enum : gkey_type
-		{
-			// passers:
-
-				first = 0,
-				second , map , apply
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_continuation		= T_argument<Pattern::continuation, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_continuation	= U_argument<Pattern::continuation, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_continuation		= T_parameter<Pattern::continuation, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_continuation	= U_parameter<Pattern::continuation, Vs...>;
 
 /***********************************************************************************************************************/
 
