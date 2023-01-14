@@ -211,7 +211,7 @@ namespace cctmp {
 		template<NIK_CHAIN_PARAMS(c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			return NIK_CHAIN(c, i, l, Vs)(T_store_U<fs>::template result<>(vs)...);
+			return NIK_CHAIN(c, i, l, Vs)(T_store_U<fs>::template result<>(vs...)...);
 		}
 	};
 
@@ -329,60 +329,18 @@ namespace cctmp {
 
 // at:
 
-	template<auto f, auto n>
-	struct T_arg_at
+	template<auto n, typename... Ts>
+	nik_ce auto arg_at(Ts... vs)
 	{
-		nik_ces auto is_optimizable   = eval<_same_, f, _id_>;
-		nik_ces auto lookup           = stem_<is_optimizable, U_null_Vs, _list_<>, f>;
-
-		nik_ces auto _i_first_        = U_pack_Vs<instruction<CN::first>>;
-		nik_ces auto _i_select_apply_ = U_pack_Vs<instruction<CN::select, _zero>, instruction<CN::apply>>;
-		nik_ces auto _i_rest_         = if_then_else_<is_optimizable, _i_first_, _i_select_apply_>;
-		nik_ces auto contr            = unpack_
+		nik_ce auto c = controller
 		<
-			_i_rest_, _contr_,
 			instruction< CN::front , n >,
-			instruction< CN::at        >
+			instruction< CN::at        >,
+			instruction< CN::first     >
 		>;
 
-		template<typename... Ts>
-		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr, lookup>(vs...); }
-
-	}; template<auto f, auto n>
-		nik_ce auto _arg_at_ = U_store_T<T_arg_at<f, n>>;
-
-	// syntactic sugar:
-
-		template<auto f, auto n, typename... Ts>
-		nik_ce auto arg_at(Ts... vs) { return T_arg_at<f, n>::template result<>(vs...); }
-
-/***********************************************************************************************************************/
-
-// compose:
-
-	template<auto f, auto gs_p>
-	struct T_arg_compose
-	{
-		nik_ces auto lookup = U_pack_Vs<f, gs_p>;
-
-		template<auto m = _zero, auto n = _one>
-		nik_ces auto contr = controller
-		<
-			instruction< CN::select    , n >,
-			instruction< CN::applywise     >,
-			instruction< CN::select    , m >,
-			instruction< CN::apply         >,
-			instruction< CN::first         >
-		>;
-
-		template<typename... Ts>
-		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr<>, lookup>(vs...); }
-
-	}; template<auto f, auto gs_p>
-		nik_ce auto _arg_compose_ = U_store_T<T_arg_compose<f, gs_p>>;
-
-	template<auto f, auto... gs>
-	nik_ce auto arg_compose = _arg_compose_<f, U_pack_Vs<gs...>>;
+		return T_chain_start::template result<c, U_null_Vs>(vs...);
+	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -445,6 +403,28 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // select:
+
+/***********************************************************************************************************************/
+
+// id:
+
+	template<auto... filler>
+	struct T_assembly<AN::select, AT::id, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto ins	= AD::instr(c, i);
+			nik_ce auto n   = ins[AI::pos];
+			nik_ce auto p   = unpack_<l, _par_at_, n>;
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i),
+
+			       p
+
+			NIK_ASSEMBLY_RESULT(s, c, i, l, Vs)(vs...);
+		}
+	};
 
 /***********************************************************************************************************************/
 
@@ -535,19 +515,13 @@ namespace cctmp {
 
 // id:
 
-	template
-	<
-		template<auto...> typename B0, auto f, auto... gs, nik_vp(p0)(B0<f, gs...>*),
-		template<auto...> typename B1, auto... ns, nik_vp(p1)(B1<ns...>*)
-	>
-	struct T_assembly<AN::call, AT::id, p0, p1>
+	template<template<auto...> typename B, auto f, auto... ns, nik_vp(p)(B<f, ns...>*)>
+	struct T_assembly<AN::call, AT::id, p>
 	{
-		nik_ces auto F = arg_compose<f, _arg_at_<gs, ns>...>;
-
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			auto val = T_store_U<F>::template result<>(vs...);
+			auto val = T_store_U<f>::template result<>(arg_at<ns>(vs...)...);
 
 			return NIK_ASSEMBLY(s, c, i, l, Vs)(val, vs...);
 		}
@@ -557,19 +531,13 @@ namespace cctmp {
 
 // side:
 
-	template
-	<
-		template<auto...> typename B0, auto f, auto... gs, nik_vp(p0)(B0<f, gs...>*),
-		template<auto...> typename B1, auto... ns, nik_vp(p1)(B1<ns...>*)
-	>
-	struct T_assembly<AN::call, AT::side, p0, p1>
+	template<template<auto...> typename B, auto f, auto... ns, nik_vp(p)(B<f, ns...>*)>
+	struct T_assembly<AN::call, AT::side, p>
 	{
-		nik_ces auto F = arg_compose<f, _arg_at_<gs, ns>...>;
-
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			T_store_U<F>::template result<>(vs...);
+			T_store_U<f>::template result<>(arg_at<ns>(vs...)...);
 
 			return NIK_ASSEMBLY(s, c, i, l, Vs)(vs...);
 		}
@@ -584,19 +552,13 @@ namespace cctmp {
 
 // id:
 
-	template
-	<
-		template<auto...> typename B0, auto f, auto... gs, nik_vp(p0)(B0<f, gs...>*),
-		template<auto...> typename B1, auto... ns, nik_vp(p1)(B1<ns...>*)
-	>
-	struct T_assembly<AN::recall, AT::id, p0, p1>
+	template<template<auto...> typename B, auto f, auto... ns, nik_vp(p)(B<f, ns...>*)>
+	struct T_assembly<AN::recall, AT::id, p>
 	{
-		nik_ces auto F = arg_compose<f, _arg_at_<gs, ns>...>;
-
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			auto val = T_store_U<F>::template result<>(v, vs...);
+			auto val = T_store_U<f>::template result<>(arg_at<ns>(v, vs...)...);
 
 			return NIK_ASSEMBLY(s, c, i, l, Vs)(val, vs...);
 		}
@@ -606,19 +568,13 @@ namespace cctmp {
 
 // side:
 
-	template
-	<
-		template<auto...> typename B0, auto f, auto... gs, nik_vp(p0)(B0<f, gs...>*),
-		template<auto...> typename B1, auto... ns, nik_vp(p1)(B1<ns...>*)
-	>
-	struct T_assembly<AN::recall, AT::side, p0, p1>
+	template<template<auto...> typename B, auto f, auto... ns, nik_vp(p)(B<f, ns...>*)>
+	struct T_assembly<AN::recall, AT::side, p>
 	{
-		nik_ces auto F = arg_compose<f, _arg_at_<gs, ns>...>;
-
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			T_store_U<F>::template result<>(v, vs...);
+			T_store_U<f>::template result<>(arg_at<ns>(v, vs...)...);
 
 			return NIK_ASSEMBLY(s, c, i, l, Vs)(vs...);
 		}
@@ -635,16 +591,16 @@ namespace cctmp {
 
 	template
 	<
-		template<auto...> typename B0, auto Op0, auto... Is0, nik_vp(p0)(B0<Op0, Is0...>*),
-		template<auto...> typename B1, auto Op1, auto... Is1, nik_vp(p1)(B1<Op1, Is1...>*)
+		template<auto...> typename B0, auto f0, auto... ns0, nik_vp(p0)(B0<f0, ns0...>*),
+		template<auto...> typename B1, auto f1, auto... ns1, nik_vp(p1)(B1<f1, ns1...>*)
 	>
 	struct T_assembly<AN::loop, AT::id, p0, p1>
 	{
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			while (T_store_U<Op0>::template result<>(arg_at<Is0>(vs...)...))
-				T_store_U<Op1>::template result<>(arg_at<Is1>(vs...)...);
+			while (T_store_U<f0>::template result<>(arg_at<ns0>(vs...)...))
+				T_store_U<f1>::template result<>(arg_at<ns1>(vs...)...);
 
 			return NIK_ASSEMBLY(s, c, i, l, Vs)(vs...);
 		}
@@ -655,6 +611,63 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // one cycle:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// at:
+
+/***********************************************************************************************************************/
+
+	template<auto f, auto n>
+	struct T_arg_at
+	{
+		nik_ces auto is_optimizable   = eval<_same_, f, _id_>;
+		nik_ces auto lookup           = stem_<is_optimizable, U_null_Vs, _list_<>, f>;
+
+		nik_ces auto _i_first_        = U_pack_Vs<instruction<CN::first>>;
+		nik_ces auto _i_select_apply_ = U_pack_Vs<instruction<CN::select, _zero>, instruction<CN::apply>>;
+		nik_ces auto _i_rest_         = if_then_else_<is_optimizable, _i_first_, _i_select_apply_>;
+		nik_ces auto contr            = unpack_
+		<
+			_i_rest_, _contr_,
+			instruction< CN::front , n >,
+			instruction< CN::at        >
+		>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr, lookup>(vs...); }
+
+	}; template<auto f, auto n>
+		nik_ce auto _arg_at_ = U_store_T<T_arg_at<f, n>>;
+
+/***********************************************************************************************************************/
+
+// compose:
+
+	template<auto f, auto gs_p>
+	struct T_arg_compose
+	{
+		nik_ces auto lookup = U_pack_Vs<f, gs_p>;
+
+		template<auto m = _zero, auto n = _one>
+		nik_ces auto contr = controller
+		<
+			instruction< CN::select    , n >,
+			instruction< CN::applywise     >,
+			instruction< CN::select    , m >,
+			instruction< CN::apply         >,
+			instruction< CN::first         >
+		>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr<>, lookup>(vs...); }
+
+	}; template<auto f, auto gs_p>
+		nik_ce auto _arg_compose_ = U_store_T<T_arg_compose<f, gs_p>>;
+
+	template<auto f, auto... gs>
+	nik_ce auto arg_compose = _arg_compose_<f, U_pack_Vs<gs...>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
