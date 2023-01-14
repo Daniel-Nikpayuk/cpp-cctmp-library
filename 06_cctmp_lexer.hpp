@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// generic lexer:
+// lexer:
 
 namespace cctmp {
 
@@ -128,28 +128,26 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-	struct Name
+	struct LexerName
 	{
-		nik_ces gkey_type empty						=  0;
-		nik_ces gkey_type initial					=  1;
+		enum : gkey_type
+		{
+			empty = 0,
+			initial ,
+			dimension
+		};
 	};
 
-	struct Token
+	struct LexerToken
 	{
-		nik_ces gkey_type invalid					=  0;
+		enum : gkey_type
+		{
+			invalid = 0,
 
-		nik_ces gkey_type statement					=  1;
-		nik_ces gkey_type period					=  2;
-		nik_ces gkey_type underscore					=  3;
-		nik_ces gkey_type equal						=  4;
-
-		nik_ces gkey_type test						=  5;
-		nik_ces gkey_type go_to						=  6;
-		nik_ces gkey_type branch					=  7;
-		nik_ces gkey_type re_turn					=  8;
-
-		nik_ces gkey_type label						=  9;
-		nik_ces gkey_type identifier					= 10;
+			statement , period     , underscore , equal   ,
+			test      , go_to      , branch     , re_turn ,
+			label     , identifier ,
+		};
 	};
 
 /***********************************************************************************************************************/
@@ -165,7 +163,7 @@ namespace cctmp {
 		gkey_type token;
 
 		nik_ce state() :
-			name{Name::empty}, token{Token::invalid} { }
+			name{LexerName::empty}, token{LexerToken::invalid} { }
 
 		nik_ce state(gckey_type _v, gckey_type _t) :
 			name{_v}, token{_t} { }
@@ -187,9 +185,9 @@ namespace cctmp {
 
 		nik_ce lexeme() :
 
-			start  {                },
-			finish {                },
-			token  { Token::invalid }
+			start  {                     },
+			finish {                     },
+			token  { LexerToken::invalid }
 
 			{ }
 
@@ -308,7 +306,7 @@ namespace cctmp {
 					gkey_type col_pos   = col[row_pos - 1];
 					gkey_type next_name = row_pos + 1;
 
-					table[row_pos][col_pos] = state{next_name, Token::invalid};
+					table[row_pos][col_pos] = state{next_name, LexerToken::invalid};
 				}
 
 				gkey_type row_pos   = row_size;
@@ -328,9 +326,9 @@ namespace cctmp {
 				b = skip_whitespace(b, e);
 				gstring_type m = b;
 
-				state s = state{Name::initial, Token::invalid};
+				state s = state{LexerName::initial, LexerToken::invalid};
 
-				while (m != e && s.name != Name::empty) s = move(s, *(m++));
+				while (m != e && s.name != LexerName::empty) s = move(s, *(m++));
 
 				return lexeme{b, m, s.token};
 			}
@@ -359,7 +357,7 @@ namespace cctmp {
 	}
 
 	nik_ce auto statement_charset	= U_pack_Vs<';'>;
-	using T_statement_dfa		= KeywordDFA<1, statement_charset, statement_charset_map, Token::statement>;
+	using T_statement_dfa		= KeywordDFA<1, statement_charset, statement_charset_map, LexerToken::statement>;
 	nik_ce auto U_statement_dfa	= U_store_T<T_statement_dfa>;
 */
 
@@ -375,7 +373,7 @@ namespace cctmp {
 	}
 
 	nik_ce auto period_charset	= U_pack_Vs<'.'>;
-	using T_period_dfa		= KeywordDFA<1, period_charset, period_charset_map, Token::period>;
+	using T_period_dfa		= KeywordDFA<1, period_charset, period_charset_map, LexerToken::period>;
 	nik_ce auto U_period_dfa	= U_store_T<T_period_dfa>;
 */
 
@@ -391,7 +389,7 @@ namespace cctmp {
 	}
 
 	nik_ce auto underscore_charset	= U_pack_Vs<'_'>;
-	using T_underscore_dfa		= KeywordDFA<1, underscore_charset, underscore_charset_map, Token::underscore>;
+	using T_underscore_dfa		= KeywordDFA<1, underscore_charset, underscore_charset_map, LexerToken::underscore>;
 	nik_ce auto U_underscore_dfa	= U_store_T<T_underscore_dfa>;
 */
 
@@ -407,7 +405,7 @@ namespace cctmp {
 	}
 
 	nik_ce auto equal_charset	= U_pack_Vs<'='>;
-	using T_equal_dfa		= KeywordDFA<1, equal_charset, equal_charset_map, Token::equal>;
+	using T_equal_dfa		= KeywordDFA<1, equal_charset, equal_charset_map, LexerToken::equal>;
 	nik_ce auto U_equal_dfa		= U_store_T<T_equal_dfa>;
 */
 
@@ -426,7 +424,7 @@ namespace cctmp {
 
 	nik_ce auto test_charset	= U_pack_Vs<'t', 'e', 's', 't'>;
 	nik_ce auto test_charset_map0	= U_pack_Vs<'t', 'e', 's'>;
-	using T_test_dfa		= KeywordDFA<3, test_charset, test_charset_map, Token::test>;
+	using T_test_dfa		= KeywordDFA<3, test_charset, test_charset_map, LexerToken::test>;
 	nik_ce auto U_test_dfa		= U_store_T<T_test_dfa>;
 */
 
@@ -444,7 +442,7 @@ namespace cctmp {
 	}
 
 	nik_ce auto goto_charset	= U_pack_Vs<'g', 'o', 't', 'o'>;
-	using T_goto_dfa		= KeywordDFA<3, goto_charset, goto_charset_map, Token::go_to>;
+	using T_goto_dfa		= KeywordDFA<3, goto_charset, goto_charset_map, LexerToken::go_to>;
 	nik_ce auto U_goto_dfa		= U_store_T<T_goto_dfa>;
 */
 
@@ -465,7 +463,7 @@ namespace cctmp {
 	}
 
 	nik_ce auto branch_charset	= U_pack_Vs<'b', 'r', 'a', 'n', 'c', 'h'>;
-	using T_branch_dfa		= KeywordDFA<6, branch_charset, branch_charset_map, Token::branch>;
+	using T_branch_dfa		= KeywordDFA<6, branch_charset, branch_charset_map, LexerToken::branch>;
 	nik_ce auto U_branch_dfa	= U_store_T<T_branch_dfa>;
 */
 
@@ -485,7 +483,7 @@ namespace cctmp {
 	}
 
 	nik_ce auto return_charset	= U_pack_Vs<'r', 'e', 't', 'u', 'r', 'n'>;
-	using T_return_dfa		= KeywordDFA<5, return_charset, return_charset_map, Token::re_turn>;
+	using T_return_dfa		= KeywordDFA<5, return_charset, return_charset_map, LexerToken::re_turn>;
 	nik_ce auto U_return_dfa	= U_store_T<T_return_dfa>;
 */
 
@@ -509,11 +507,11 @@ namespace cctmp {
 
 		// state:
 
-			nik_ces state state_empty     { name_empty   , Token::invalid    };
-			nik_ces state state_initial   { name_initial , Token::invalid    };
+			nik_ces state state_empty     { name_empty   , LexerToken::invalid    };
+			nik_ces state state_initial   { name_initial , LexerToken::invalid    };
 
-			nik_ces state state_ulan      { name_ulan    , Token::identifier };
-			nik_ces state state_colon     { name_colon   , Token::label      };
+			nik_ces state state_ulan      { name_ulan    , LexerToken::identifier };
+			nik_ces state state_colon     { name_colon   , LexerToken::label      };
 
 		// charset:
 
@@ -554,7 +552,7 @@ namespace cctmp {
 
 			nik_ce auto lex(gstring_type b, gstring_type e) const
 			{
-				lexeme current{b, e, Token::invalid};
+				lexeme current{b, e, LexerToken::invalid};
 
 				if      (recognized_by< U_statement_dfa  >(current)) statement_action  (current);
 				else if (recognized_by< U_period_dfa     >(current)) period_action     (current);
@@ -575,7 +573,7 @@ namespace cctmp {
 			{
 			//	auto statement_lexeme = statement_dfa.lex(c.start, c.finish);
 
-			//	if (_lexeme.token == Token::) ;
+			//	if (_lexeme.token == LexerToken::) ;
 			}
 
 			nik_ce void period_action(lexeme & c) const
@@ -617,9 +615,9 @@ namespace cctmp {
 			{
 			//	gstring_type m = b;
 
-			//	state s = state{Name::initial, Token::invalid};
+			//	state s = state{LexerName::initial, LexerToken::invalid};
 
-			//	while (m != e && s.name != Name::empty) s = move(s, *(m++));
+			//	while (m != e && s.name != LexerName::empty) s = move(s, *(m++));
 			}
 	};
 

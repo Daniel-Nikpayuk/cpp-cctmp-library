@@ -29,6 +29,44 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+	// find:
+
+		nik_ce auto _find_ = U_par_abstract<Abstract::find>;
+
+		template<gcbool_type *arr, gindex_type size>
+		nik_ce auto eval_find()
+		{
+			nik_ce auto U_find = _multifind_<_dereference_>;
+			nik_ce auto cur    = T_store_U<U_find>::result(arr, arr + size);
+
+			return cur - arr;
+		}
+
+		template<auto Op, auto... Vs>
+		nik_ce auto eval<_find_, Op, Vs...> = eval_find
+		<
+			array<gcbool_type, eval<Op, Vs>...>, sizeof...(Vs)
+		>();
+
+	// match:
+
+		nik_ce auto _match_ = U_par_abstract<Abstract::match>;
+
+		template<auto Op, auto V, auto... Vs>
+		nik_ce auto eval<_match_, Op, V, Vs...> = eval_find
+		<
+			array<gcbool_type, eval<Op, V, Vs>...>, sizeof...(Vs)
+		>();
+
+/***********************************************************************************************************************/
+
+// syntactic sugar:
+
+	template<auto Op, auto... Vs> nik_ce auto find_  = eval<_find_, Op, Vs...>;
+	template<auto Op, auto... Vs> nik_ce auto match_ = eval<_match_, Op, Vs...>;
+
+/***********************************************************************************************************************/
+
 // params (syntactic sugar):
 
 	nik_ce auto _dpar_erase_	= U_custom_T<T_machine_params< MT::cut    , _list_<>        >>;

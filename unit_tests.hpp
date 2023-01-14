@@ -1997,5 +1997,162 @@ namespace cctmp_program
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+	constexpr auto list0 = U_pack_Vs<0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11>;
+	constexpr auto list1 = U_pack_Vs<3, 10, 4, 0, 7, 8, 5, 6, 9, 1, 2, 11>;
+	constexpr auto list2 = U_pack_Vs
+	<
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,	0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,	0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,	0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,	0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,	0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		0, 1, 2, 3, 44
+	>;
+
+//	constexpr auto val = unpack_<list0, _par_fold_, _add_, 0>;
+//	constexpr auto val = unpack_<list1, _par_fold_, _add_, 0>;
+
+	constexpr auto ops = U_pack_Vs<_is_less_than_<5>, _constant_<true>>;
+//	constexpr auto val = unpack_<list0, _par_sift_, ops>;
+//	constexpr auto val = unpack_<list1, _par_sift_, ops>;
+//	constexpr auto val = unpack_<list2, _par_sift_, ops>;
+
+//	constexpr auto val = unpack_<list0, _par_at_, 4>;
+//	constexpr auto val = unpack_<list1, _par_at_, 4>;
+//	constexpr auto val = unpack_<list2, _dpar_at_, 15, 164>;
+
+//	constexpr auto val = unpack_<list0, _par_replace_, 4, 4>;
+//	constexpr auto val = unpack_<list1, _par_replace_, 4, 4>;
+//	constexpr auto val = unpack_<list2, _par_replace_, 4, 4>;
+
+//	constexpr auto val = unpack_<list0, _par_insert_, 0, 4>;
+//	constexpr auto val = unpack_<list1, _par_insert_, 0, 4>;
+//	constexpr auto val = unpack_<list2, _par_insert_, 0, 4>;
+
+//	constexpr auto val = unpack_<list0, _par_erase_, 4>;
+//	constexpr auto val = unpack_<list1, _par_erase_, 4>;
+//	constexpr auto val = unpack_<list2, _par_erase_, 4>;
+
+//	constexpr auto val = eval<_par_insert_sort_<_less_than_>, list0, 5>;
+//	constexpr auto val = eval<_par_insert_sort_<_less_than_>, list1, 5>;
+//	constexpr auto val = eval<_par_insert_sort_<_less_than_>, list2, 5>;
+
+//	constexpr auto val = unpack_<list0, _par_sort_<_less_than_>>;
+//	constexpr auto val = unpack_<list1, _par_sort_<_less_than_>>;
+//	constexpr auto val = unpack_<list2, _par_sort_<_less_than_>>;
+
+//	constexpr auto val = unpack_<list0, _part_sort_<_less_than_>>;
+//	constexpr auto val = unpack_<list1, _part_sort_<_less_than_>>;
+//	constexpr auto val = unpack_<list2, _part_sort_<_less_than_>>;
+
+/***********************************************************************************************************************/
+
+//	constexpr auto f   = _pose_<_increment_<1>, _times_<2>>;
+//	constexpr auto val = eval<f, 2>;
+
+//	constexpr auto val = eval<_par_segment_, 10>;
+//	constexpr auto val = eval<_binary_apply_, _prax_add_, 2, 3>;
+//	constexpr auto val = eval<_binary_apply_, _prax_multiply_, 2, 3>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// case studies:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// factorial:
+
+/***********************************************************************************************************************/
+
+// baseline:
+
+	template<typename T>
+	constexpr auto pair_factorial_baseline(T p, T n)
+	{
+		if (n == 0) return p;
+		else        return pair_factorial_baseline(p*n, n-1);
+	}
+
+	template<typename T>
+	constexpr auto factorial_baseline(T n)
+	{
+		return pair_factorial_baseline(T(1), n);
+	}
+
+/***********************************************************************************************************************/
+
+// source:
+
+	template
+	<
+		auto p       = 0 , auto n        = 1  ,
+		auto is_zero = 0 , auto multiply = 1  , auto decrement = 2 ,
+		auto Loop    = 0 , auto Done     = 12
+	>
+	nik_ce auto pair_factorial_contr = controller
+	<
+	// Loop:
+		instruction < AN::select  , AT::id     , is_zero   >, // get is_zero pack containing arg positions.
+		instruction < AN::call    , AT::id                 >, // unpack and apply is_zero to args.
+		instruction < AN::jump    , AT::branch , Done      >, // branch to Done label, continue otherwise.
+
+		instruction < AN::select  , AT::id     , multiply  >, // get multiply [...].
+		instruction < AN::call    , AT::id                 >, // unpack [...].
+		instruction < AN::select  , AT::front  , p         >, // get left arg types before position p.
+		instruction < AN::replace , AT::id                 >, // arg expand and replace at position p.
+
+		instruction < AN::select  , AT::id     , decrement >, // get decrement [...].
+		instruction < AN::call    , AT::id                 >, // unpack [...].
+		instruction < AN::select  , AT::front  , n         >, // get left arg types [...].
+		instruction < AN::replace , AT::id                 >, // arg expand [...].
+
+		instruction < AN::jump    , AT::go_to  , Loop      >, // goto Loop.
+	// Done:
+		instruction < AN::select  , AT::front  , p         >, // get left arg types [...].
+		instruction < AN::right   , AT::id                 >, // arg expand and drop the left args before p.
+		instruction < AN::first   , AT::id                 >  // return the first element.
+	>;
+
+/***********************************************************************************************************************/
+
+// lookup:
+
+	template<auto p = 0, auto n = 1>
+	nik_ce auto pair_factorial_lookup = U_pack_Vs
+	<
+		U_pack_Vs< _is_zero_      , n     >, // position: 0
+		U_pack_Vs< _multiply_     , p , n >, // position: 1
+		U_pack_Vs< _decrement_<1> , n     >  // position: 2
+	>;
+
+/***********************************************************************************************************************/
+
+// compilation:
+
+	template<typename T>
+	nik_ce auto factorial(T v)
+	{
+		nik_ce auto s = U_store_T<T>;
+		nik_ce auto c = pair_factorial_contr<>;
+		nik_ce auto l = pair_factorial_lookup<>;
+
+		return T_assembly_start::template result<s, c, l>(T(1), v);
+	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 } // case studies
 

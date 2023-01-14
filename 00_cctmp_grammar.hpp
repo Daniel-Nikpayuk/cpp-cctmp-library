@@ -248,8 +248,8 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
-			argument = 0,
-			parameter
+			id = 0, identity = id, // convenience for default params.
+			argument , parameter
 		};
 	};
 
@@ -276,13 +276,12 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
-			overload = 0,
-			higher_order , iterator  ,
-			abstract     , access    , list  ,
-			boolean      , number    ,
-			pointer      , reference , array ,
-			function     , sequence  , tuple ,
-			identity
+			id = 0, identity = id, // convenience for default params.
+			overload , higher_order ,
+			abstract , access       , list     ,
+			boolean  , number       , pointer  , reference ,
+			array    , function     , sequence , tuple     ,
+			dimension
 		};
 	};
 
@@ -301,7 +300,7 @@ namespace cctmp {
 		{
 			// basis:
 
-				id = 0,
+				id = 0, identity = id, // convenience for default params.
 
 			// bitwise:
 
@@ -309,7 +308,9 @@ namespace cctmp {
 
 			// mutation:
 
-				assign , dereference
+				assign , dereference ,
+
+			dimension
 		};
 	};
 
@@ -331,10 +332,13 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// basis:
 
-				cast = 0,
-				constant , wrap , bind , curry
+				cast , constant , wrap , bind , curry ,
+
+			dimension
 		};
 	};
 
@@ -350,40 +354,17 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// iterator:
-
-	struct Iterator
-	{
-		enum : gkey_type
-		{
-			// near linear:
-
-				multimap = 0,
-				multifold , multifind , multisift
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_iterator		= T_argument<Pattern::iterator, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_iterator		= U_argument<Pattern::iterator, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_iterator		= T_parameter<Pattern::iterator, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_iterator		= U_parameter<Pattern::iterator, Vs...>;
-
-/***********************************************************************************************************************/
-
 // abstract:
 
 	struct Abstract
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// basis:
 
-				nop = 0,
+				nop ,
 
 			// comparison:
 
@@ -391,7 +372,9 @@ namespace cctmp {
 
 			// variadic:
 
-				is_null , length , car , cadr , find , match
+				is_null , length , car , cadr ,
+
+			dimension
 		};
 	};
 
@@ -413,14 +396,18 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// basis:
 
-				is_const = 0,
+				is_const  ,
 				add_const , remove_const , to_const , from_const ,
 
 			// comparison:
 
-				csame
+				csame ,
+
+			dimension
 		};
 	};
 
@@ -442,9 +429,11 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// basis:
 
-				name = 0,
+				name ,
 
 			// comparison:
 
@@ -456,7 +445,9 @@ namespace cctmp {
 
 			// functional:
 
-				pad , cdr , map , zip , unite , cons , push
+				pad , cdr , map , zip , unite , cons , push ,
+
+			dimension
 		};
 	};
 
@@ -478,9 +469,11 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// basis:
 
-				if_then_else = 0,
+				if_then_else ,
 
 			// lazy:
 
@@ -492,7 +485,9 @@ namespace cctmp {
 
 			// propositional:
 
-				and_wise
+				and_wise ,
+
+			dimension
 		};
 	};
 
@@ -514,10 +509,13 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// basis:
 
-				is_unsigned = 0,
-				not_unsigned , is_signed , not_signed , is_integer , not_integer ,
+				is_unsigned , not_unsigned ,
+				is_signed   , not_signed   ,
+				is_integer  , not_integer  ,
 
 			// comparison:
 
@@ -527,7 +525,9 @@ namespace cctmp {
 
 			// arithmetic:
 
-				add , subtract , multiply , divide , modulo
+				add , subtract , multiply , divide , modulo ,
+
+			dimension
 		};
 	};
 
@@ -549,10 +549,14 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// basis:
 
-				is = 0,
-				add , remove , to , from
+				is  ,
+				add , remove , to , from ,
+
+			dimension
 		};
 	};
 
@@ -574,10 +578,14 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// basis:
 
-				is = 0,
-				add , remove , to , from
+				is  ,
+				add , remove , to , from ,
+
+			dimension
 		};
 	};
 
@@ -599,9 +607,11 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// meta:
 
-				is = 0,
+				is   ,
 				type , size ,
 
 			// basis:
@@ -610,7 +620,9 @@ namespace cctmp {
 
 			// 2^N:
 
-				log_floor
+				log_floor ,
+
+			dimension
 		};
 	};
 
@@ -632,14 +644,18 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// meta:
 
-				type = 0,
+				type  ,
 				arity , out_type , in_types ,
 
 			// call:
 
-				eval , procedure , method , tailor , alias , custom
+				eval , procedure , method , tailor , alias , custom ,
+
+			dimension
 		};
 	};
 
@@ -661,14 +677,18 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// meta:
 
-				is = 0,
+				is   ,
 				type , size ,
 
 			// basis:
 
-				to_sequence , begin , last , end , apply
+				to_sequence , begin , last , end , apply ,
+
+			dimension
 		};
 	};
 
@@ -690,14 +710,18 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// meta:
 
-				is = 0,
+				is   ,
 				type , size ,
 
 			// basis:
 
-				to_tuple
+				to_tuple ,
+
+			dimension
 		};
 	};
 
@@ -719,13 +743,17 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// list to:
 
-				list_to_array = 0,
+				list_to_array ,
 
 			// array to:
 
-				array_to_list
+				array_to_list ,
+
+			dimension
 		};
 	};
 

@@ -37,6 +37,13 @@ namespace cctmp {
 	template<auto... Vs>
 	nik_ce instr_type instruction = array<gcindex_type, sizeof...(Vs), Vs...>;
 
+	struct T_instr
+	{
+		template<auto... Vs>
+		nik_ces auto result = instruction<Vs...>;
+
+	}; nik_ce auto _instr_ = U_custom_T<T_instr>;
+
 /***********************************************************************************************************************/
 
 // controllers:
@@ -46,6 +53,13 @@ namespace cctmp {
 
 	template<auto... Vs>
 	nik_ce contr_type controller = array<cinstr_type, array<gcindex_type, sizeof...(Vs)>, Vs...>;
+
+	struct T_contr
+	{
+		template<auto... Vs>
+		nik_ces auto result = controller<Vs...>;
+
+	}; nik_ce auto _contr_ = U_custom_T<T_contr>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
