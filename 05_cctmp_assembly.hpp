@@ -56,7 +56,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first , select , front , at , apply , applywise ,
+			first , select , front , at , map , mapwise , apply , applywise ,
 			dimension
 		};
 	};
@@ -184,6 +184,34 @@ namespace cctmp {
 		nik_ces auto result(T_store_U<LUs>... lvs, TN vn, Ts... vs)
 		{
 			return NIK_CHAIN(c, i, l, Vs)(vn);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// map:
+
+	template<auto f>
+	struct T_chain<CN::map, f>
+	{
+		template<NIK_CHAIN_PARAMS(c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			return NIK_CHAIN(c, i, l, Vs)(T_store_U<f>::template result<>(vs)...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// mapwise:
+
+	template<template<auto...> typename B, auto... fs, nik_vp(p)(B<fs...>*)>
+	struct T_chain<CN::mapwise, p>
+	{
+		template<NIK_CHAIN_PARAMS(c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			return NIK_CHAIN(c, i, l, Vs)(T_store_U<fs>::template result<>(vs)...);
 		}
 	};
 
@@ -511,6 +539,9 @@ namespace cctmp {
 
 // call:
 
+	// Although it is tempting to narratively define internal calls using chains, one of the advantages
+	// of these machines is that each has a clarity of purpose---chains would obscure this design.
+
 /***********************************************************************************************************************/
 
 // id:
@@ -613,61 +644,73 @@ namespace cctmp {
 // one cycle:
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
-// at:
-
-/***********************************************************************************************************************/
+// apply at:
 
 	template<auto f, auto n>
-	struct T_arg_at
+	struct T_apply_at
 	{
-		nik_ces auto is_optimizable   = eval<_same_, f, _id_>;
-		nik_ces auto lookup           = stem_<is_optimizable, U_null_Vs, _list_<>, f>;
+		nik_ces auto is_optimizable     = eval<_same_, f, _id_>;
+		nik_ces auto lookup             = stem_<is_optimizable, U_null_Vs, _list_<>, f>;
 
-		nik_ces auto _i_first_        = U_pack_Vs<instruction<CN::first>>;
-		nik_ces auto _i_select_apply_ = U_pack_Vs<instruction<CN::select, _zero>, instruction<CN::apply>>;
-		nik_ces auto _i_rest_         = if_then_else_<is_optimizable, _i_first_, _i_select_apply_>;
-		nik_ces auto contr            = unpack_
-		<
-			_i_rest_, _contr_,
-			instruction< CN::front , n >,
-			instruction< CN::at        >
-		>;
+		nik_ces auto _opt_instr_pack_   = U_pack_Vs<instruction<CN::first>>;
+		nik_ces auto _unopt_instr_pack_ = U_pack_Vs
+						<
+							instruction< CN::select , _zero >,
+							instruction< CN::apply          >,
+							instruction< CN::first          >
+						>;
+		nik_ces auto _instr_pack_       = if_then_else_<is_optimizable, _opt_instr_pack_, _unopt_instr_pack_>;
+		nik_ces auto contr              = unpack_
+						<
+							_instr_pack_, _contr_,
+							instruction< CN::front , n >,
+							instruction< CN::at        >
+						>;
 
 		template<typename... Ts>
 		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr, lookup>(vs...); }
 
 	}; template<auto f, auto n>
-		nik_ce auto _arg_at_ = U_store_T<T_arg_at<f, n>>;
+		nik_ce auto _apply_at_ = U_store_T<T_apply_at<f, n>>;
+
+	// syntactic sugar:
+
+		template<auto n>
+		nik_ce auto _arg_at_ = _apply_at_<_id_, n>;
 
 /***********************************************************************************************************************/
 
-// compose:
+// pose:
 
-	template<auto f, auto gs_p>
-	struct T_arg_compose
+	template<auto Name, auto f, auto gs_p>
+	struct T_arg_pose
 	{
 		nik_ces auto lookup = U_pack_Vs<f, gs_p>;
 
 		template<auto m = _zero, auto n = _one>
 		nik_ces auto contr = controller
 		<
-			instruction< CN::select    , n >,
-			instruction< CN::applywise     >,
-			instruction< CN::select    , m >,
-			instruction< CN::apply         >,
-			instruction< CN::first         >
+			instruction< CN::select  , n >,
+			instruction< Name            >,
+			instruction< CN::select  , m >,
+			instruction< CN::apply       >,
+			instruction< CN::first       >
 		>;
 
 		template<typename... Ts>
 		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr<>, lookup>(vs...); }
 
-	}; template<auto f, auto gs_p>
-		nik_ce auto _arg_compose_ = U_store_T<T_arg_compose<f, gs_p>>;
+	}; template<auto Name, auto f, auto gs_p>
+		nik_ce auto _arg_pose_ = U_store_T<T_arg_pose<Name, f, gs_p>>;
 
-	template<auto f, auto... gs>
-	nik_ce auto arg_compose = _arg_compose_<f, U_pack_Vs<gs...>>;
+	// syntactic sugar:
+
+		template<auto f, auto... gs>
+		nik_ce auto arg_subpose = _arg_pose_<CN::mapwise, f, U_pack_Vs<gs...>>;
+
+		template<auto f, auto... gs>
+		nik_ce auto arg_compose = _arg_pose_<CN::applywise, f, U_pack_Vs<gs...>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

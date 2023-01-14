@@ -41,8 +41,23 @@
 
 /***********************************************************************************************************************/
 
+	struct T_square
+	{
+		template<typename T>
+		constexpr static auto result(T x) { return x*x; }
+
+	}; constexpr auto _sq_ = U_store_T<T_square>;
+
+//	constexpr auto sum_of_sq = arg_subpose<_add_, _sq_, _sq_>;
+//	constexpr auto sum_of_sq = arg_compose<_add_, _apply_at_<_sq_, 0>, _apply_at_<_sq_, 1>>;
+
+//	constexpr auto val = T_store_U<sum_of_sq>::template result<>(3, 4);
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
+	//	printf("%d\n", T_store_U<sum_of_sq>::template result<>(argc, 4));
 	//	printf("%d\n", val);
 
 		return 0;
