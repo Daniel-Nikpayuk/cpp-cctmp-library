@@ -75,7 +75,7 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::overload, Overload::assign, filler...>
 		{
 			template<typename T1, typename T2>
-			nik_ces auto result(T1 v1, T2 v2) { return v1 = v2; }
+			nik_ces auto result(T1 v1, T2 v2) { return *v1 = v2; }
 
 		}; nik_ce auto _assign_ = U_arg_overload<Overload::assign>;
 
@@ -85,7 +85,7 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::overload, Overload::dereference, filler...>
 		{
 			template<typename T>
-			nik_ces auto & result(T v) { return *v; }
+			nik_ces auto result(T v) { return *v; }
 
 		}; nik_ce auto _dereference_ = U_arg_overload<Overload::dereference>;
 
@@ -152,6 +152,9 @@ namespace cctmp {
 
 			template<auto f>
 			nik_ce auto _apply_ = _bind_<f>;
+
+			template<auto f, typename... Ts>
+			nik_ce auto apply(Ts... vs) { return T_store_U<f>::template result<>(vs...); }
 
 	// curry:
 

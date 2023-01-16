@@ -2152,6 +2152,73 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// arg map:
+
+/***********************************************************************************************************************/
+
+	template<typename B, typename E>
+	void print_array(B b, E e)
+	{
+		while (b != e)
+		{
+			printf("%d, ", *b);
+			++b;
+		}
+	}
+
+/***********************************************************************************************************************/
+
+	template<auto f>
+	struct T_arg_map
+	{
+		constexpr static auto predicate = _not_equal_;
+		constexpr static auto mutate    = arg_subpose<_assign_, _id_, f>;
+		constexpr static auto next      = arg_subpose<_assign_, _id_, _increment_<>>;
+		constexpr static auto multimap  = _multimap_<mutate, next, next>;
+
+		template<auto out = _zero, auto in = _one, auto end = _two>
+		constexpr static auto lookup = U_pack_Vs
+		<
+			U_pack_Vs
+			<
+				U_pack_Vs< predicate , in  , end >,
+				U_pack_Vs< multimap  , out , in  >
+			>
+		>;
+
+		template<auto n = _zero>
+		constexpr static auto contr = controller
+		<
+			instruction< AN::select , AT::pair , n >,
+			instruction< AN::loop   , AT::id       >,
+			instruction< AN::first  , AT::id       >
+		>;
+
+		template<typename Out, typename In, typename End>
+		constexpr static auto result(Out out, In in, End end)
+		{
+			constexpr auto s = U_store_T<Out>;
+
+			return T_assembly_start::template result<s, contr<>, lookup<>>(out, in, end);
+		}
+
+	}; template<auto f>
+		constexpr auto _arg_map_ = U_store_T<T_arg_map<f>>;
+
+	constexpr auto range = _arg_map_<_id_>;
+
+/***********************************************************************************************************************/
+
+		int s = 10, x[s];
+
+		for (int k = 0; k != argc; ++k) x[k] = k;
+
+		print_array(x, x + argc);
+	//	print_array(x, apply<range>(x, 0, argc));
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 } // case studies

@@ -355,20 +355,42 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// at:
+// apply at:
 
-	template<auto n, typename... Ts>
-	nik_ce auto arg_at(Ts... vs)
+	template<auto f, auto n>
+	struct T_apply_at
 	{
-		nik_ce auto c = controller
-		<
-			instruction< CN::front , n >,
-			instruction< CN::at        >,
-			instruction< CN::first     >
-		>;
+		nik_ces auto is_optimizable     = eval<_same_, f, _id_>;
+		nik_ces auto lookup             = stem_<is_optimizable, U_null_Vs, _list_<>, f>;
 
-		return T_chain_start::template result<c, U_null_Vs>(vs...);
-	}
+		nik_ces auto _opt_instr_pack_   = U_pack_Vs<instruction<CN::first>>;
+		nik_ces auto _unopt_instr_pack_ = U_pack_Vs
+						<
+							instruction< CN::select , _zero >,
+							instruction< CN::apply          >,
+							instruction< CN::first          >
+						>;
+		nik_ces auto _instr_pack_       = if_then_else_<is_optimizable, _opt_instr_pack_, _unopt_instr_pack_>;
+		nik_ces auto contr              = unpack_
+						<
+							_instr_pack_, _contr_,
+							instruction< CN::front , n >,
+							instruction< CN::at        >
+						>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr, lookup>(vs...); }
+
+	}; template<auto f, auto n>
+		nik_ce auto _apply_at_ = U_store_T<T_apply_at<f, n>>;
+
+	// syntactic sugar:
+
+		template<auto n>
+		nik_ce auto _arg_at_ = _apply_at_<_id_, n>;
+
+		template<auto n, typename... Ts>
+		nik_ce auto arg_at(Ts... vs) { return T_apply_at<_id_, n>::template result<>(vs...); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -616,10 +638,6 @@ namespace cctmp {
 
 // loop:
 
-/***********************************************************************************************************************/
-
-// id:
-
 	template
 	<
 		template<auto...> typename B0, auto f0, auto... ns0, nik_vp(p0)(B0<f0, ns0...>*),
@@ -631,7 +649,7 @@ namespace cctmp {
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
 			while (T_store_U<f0>::template result<>(arg_at<ns0>(vs...)...))
-				T_store_U<f1>::template result<>(arg_at<ns1>(vs...)...);
+				T_store_U<f1>::template result<>(arg_at<ns1>((&vs)...)...); // passes by address.
 
 			return NIK_ASSEMBLY(s, c, i, l, Vs)(vs...);
 		}
@@ -645,42 +663,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// apply at:
-
-	template<auto f, auto n>
-	struct T_apply_at
-	{
-		nik_ces auto is_optimizable     = eval<_same_, f, _id_>;
-		nik_ces auto lookup             = stem_<is_optimizable, U_null_Vs, _list_<>, f>;
-
-		nik_ces auto _opt_instr_pack_   = U_pack_Vs<instruction<CN::first>>;
-		nik_ces auto _unopt_instr_pack_ = U_pack_Vs
-						<
-							instruction< CN::select , _zero >,
-							instruction< CN::apply          >,
-							instruction< CN::first          >
-						>;
-		nik_ces auto _instr_pack_       = if_then_else_<is_optimizable, _opt_instr_pack_, _unopt_instr_pack_>;
-		nik_ces auto contr              = unpack_
-						<
-							_instr_pack_, _contr_,
-							instruction< CN::front , n >,
-							instruction< CN::at        >
-						>;
-
-		template<typename... Ts>
-		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr, lookup>(vs...); }
-
-	}; template<auto f, auto n>
-		nik_ce auto _apply_at_ = U_store_T<T_apply_at<f, n>>;
-
-	// syntactic sugar:
-
-		template<auto n>
-		nik_ce auto _arg_at_ = _apply_at_<_id_, n>;
-
-/***********************************************************************************************************************/
-
 // pose:
 
 	template<auto Name, auto f, auto gs_p>
@@ -691,11 +673,11 @@ namespace cctmp {
 		template<auto m = _zero, auto n = _one>
 		nik_ces auto contr = controller
 		<
-			instruction< CN::select  , n >,
-			instruction< Name            >,
-			instruction< CN::select  , m >,
-			instruction< CN::apply       >,
-			instruction< CN::first       >
+			instruction< CN::select , n >,
+			instruction< Name           >,
+			instruction< CN::select , m >,
+			instruction< CN::apply      >,
+			instruction< CN::first      >
 		>;
 
 		template<typename... Ts>
@@ -715,241 +697,98 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// predicate:
-
-/***********************************************************************************************************************/
-
-	// peek:
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// precycle:
-
-/***********************************************************************************************************************/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // cycle:
-
-/***********************************************************************************************************************/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// postcycle:
 
 /***********************************************************************************************************************/
 
 // multimap:
 
-/*
-	template<auto f>
+	template<auto mutate, auto out_next, auto in_next, auto... ins_next>
 	struct T_multimap
 	{
-		using F = T_store_U<f>;
-
-		template<typename Out, typename In, typename End, typename... Ins>
-		nik_ces auto result(Out out, In in, End end, Ins... ins)
+		template<typename Out, typename In, typename... Ins>
+		nik_ces auto result(Out out, In in, Ins... ins)
 		{
-			while (in != end)
-			{
-				*out = F::template result<In, Ins...>(in, ins...);
-				++out; ++in; (++ins, ...);
-			}
-
-			return out;
+			T_store_U<mutate>::template result<>(*out, *in, (*ins)...);
+			T_store_U<out_next>::template result<>(out, *out);
+			T_store_U<in_next>::template result<>(in, *in);
+			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
 		}
 
-	}; template<auto f>
-		nik_ce auto _multimap_ = U_arg_iterator<Iterator::multimap, f>;
-
-		template<auto f>
-		struct T_grammar<Shape::argument, Pattern::iterator, Iterator::multimap, f>
-		{
-			using F = T_store_U<f>;
-
-			template<typename Out, typename In, typename End, typename... Ins>
-			nik_ces auto result(Out out, In in, End end, Ins... ins)
-			{
-				while (in != end)
-				{
-					*out = F::template result<In, Ins...>(in, ins...);
-					++out; ++in; (++ins, ...);
-				}
-
-				return out;
-			}
-
-		}; template<auto f>
-			nik_ce auto _multimap_ = U_arg_iterator<Iterator::multimap, f>;
-
-	// multifold:
-
-		template<auto f, auto init>
-		struct T_grammar<Shape::argument, Pattern::iterator, Iterator::multifold, f, init>
-		{
-			using F = T_store_U<f>;
-
-			template<typename Out, typename In, typename End, typename... Ins>
-			nik_ces auto result(Out out, In in, End end, Ins... ins)
-			{
-				*out = init;
-
-				while (in != end)
-				{
-					*out = F::template result<Out, In, Ins...>(out, in, ins...);
-					++in; (++ins, ...);
-				}
-
-				return out;
-			}
-
-		}; template<auto f, auto init>
-			nik_ce auto _multifold_ = U_arg_iterator<Iterator::multifold, f, init>;
-
-	// multifind:
-
-		template<auto p>
-		struct T_grammar<Shape::argument, Pattern::iterator, Iterator::multifind, p>
-		{
-			using P = T_store_U<p>;
-
-			template<typename In, typename End, typename... Ins>
-			nik_ces auto result(In in, End end, Ins... ins)
-			{
-				while (in != end)
-				{
-					if (P::template result<In, Ins...>(in, ins...)) break;
-
-					++in; (++ins, ...);
-				}
-
-				return in;
-			}
-
-		}; template<auto p>
-			nik_ce auto _multifind_ = U_arg_iterator<Iterator::multifind, p>;
-
-	// multisift:
-
-		template<auto p>
-		struct T_grammar<Shape::argument, Pattern::iterator, Iterator::multisift, p>
-		{
-			using P = T_store_U<p>;
-
-			template<typename Out, typename In, typename End, typename... Ins>
-			nik_ces auto result(Out out, In in, End end, Ins... ins)
-			{
-				while (in != end)
-				{
-					if (P::template result<In, Ins...>(in, ins...)) *(out++) = in;
-
-					++in; (++ins, ...);
-				}
-
-				return out;
-			}
-
-		}; template<auto p>
-			nik_ce auto _multisift_ = U_arg_iterator<Iterator::multisift, p>;
-*/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// array:
+	}; template<auto mutate, auto out_next, auto in_next, auto... ins_next>
+		nik_ce auto _multimap_ = U_store_T<T_multimap<mutate, out_next, in_next, ins_next...>>;
 
 /***********************************************************************************************************************/
 
-/*
-// map:
+// multifold:
 
-	template<auto f, auto a, auto l, auto Op, auto s, auto U, auto S>
-	nik_ce auto array_map_ = eval<_array_apply_, Op, U, S, s, _multimap_<_arg_deref_<f>>, a, l>;
-
-// fold:
-
-	template<auto f, auto init, auto a, auto l, auto Op, auto U, auto S>
-	nik_ce auto array_fold_ = eval<_array_apply_, Op, U, S, U_pack_Vs<0>, _multifold_<_arg_deref_<f>, init>, a, l>;
-
-// find:
-
-//	template<auto p, auto a, auto l, auto Op, auto U, auto S>
-//	nik_ce auto array_find_ = eval<_array_apply_, Op, U, S, _multifind<_arg_deref_<p>>, a, l>;
-*/
-
-// sift:
-
-/*
-// -> V:
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-	nik_ce auto V_sift(nik_vp(indices)(T_pack_Vs<Is...>*))
+	template<auto mutate, auto in_next, auto... ins_next>
+	struct T_multifold
 	{
-		nik_ce auto Size	= Leng + 1;
-		nik_ce auto arr		= ArrayModule::template apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
-		nik_ce auto leng	= arr.value[Leng];
+		template<typename Out, typename In, typename... Ins>
+		nik_ces auto result(Out out, In in, Ins... ins)
+		{
+			T_store_U<mutate>::template result<>(*out, *out, *in, (*ins)...);
+			T_store_U<in_next>::template result<>(in, *in);
+			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
+		}
 
-		if nik_ce (leng != sizeof...(Is)) return arr;
-		else return array<Type, arr.value[Is]...>;
-	}
+	}; template<auto mutate, auto in_next, auto... ins_next>
+		nik_ce auto _multifold_ = U_store_T<T_multifold<mutate, in_next, ins_next...>>;
 
-	template<typename Type, auto p, auto Arr, auto Leng, auto I0, auto... Is>
-	nik_ce auto V_sift(nik_vp(indices)(T_pack_Vs<I0, Is...>*))
-	{
-		nik_ce auto Size	= sizeof...(Is) + 1;
-		nik_ce auto arr		= apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
+/***********************************************************************************************************************/
 
-		return array<Type, arr.value[Is]...>;
-	}
-
-// -> U:
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto I0, auto... Is>
-	nik_ce auto U_sift(nik_vp(indices)(T_pack_Vs<I0, Is...>*))
-	{
-		nik_ce auto Size	= sizeof...(Is) + 1;
-		nik_ce auto arr		= apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
-
-		return U_pack_Vs<arr.value[Is]...>;
-	}
-*/
-
-	// subsequence:
+// multifind:
 
 /*
-// -> V:
+	template<auto predicate, auto in_next, auto... ins_next>
+	struct T_multifind
+	{
+			while (in != end)
+			{
+				if (P::template result<In, Ins...>(in, ins...)) break;
 
-	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-	nik_ce auto V_subsequence(nik_vp(indices)(T_pack_Vs<Is...>*))
-		{ return V_apply<Type, IteratorModule::Sift, Arr>(U_pack_Vs<Leng, sizeof...(Is), p>, indices); }
+				++in; (++ins, ...);
+			}
 
-// -> U:
+		template<typename In, typename... Ins>
+		nik_ces auto result(In in, Ins... ins)
+		{
+			T_store_U<mutate>::template result<>(*in, (*ins)...);
+			T_store_U<in_next>::template result<>(in, *in);
+			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
+		}
 
-	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-	nik_ce auto U_subsequence(nik_vp(indices)(T_pack_Vs<Is...>*))
-		{ return U_apply<Type, IteratorModule::Sift, Arr>(U_pack_Vs<Leng, sizeof...(Is), p>, indices); }
+	}; template<auto predicate, auto in_next, auto... ins_next>
+		nik_ce auto _multifind_ = U_store_T<T_multifind<predicate, in_next, ins_next...>>;
 */
 
-// zip:
+/***********************************************************************************************************************/
+
+// multisift:
 
 /*
-// generic:
+	template<auto predicate, auto out_next, auto in_next, auto... ins_next>
+	struct T_multisift
+	{
+			while (in != end)
+			{
+				if (P::template result<In, Ins...>(in, ins...)) *(out++) = in;
 
-// -> V:
+				++in; (++ins, ...);
+			}
 
-	template<typename Type, auto f, auto Arr1, auto Leng1, auto Arr2, typename Indices>
-	nik_ce auto V_zip(Indices indices)
-		{ return V_apply<Type, IteratorModule::Zip, Arr1, Arr2>(U_pack_Vs<Leng1, f>, indices); }
+		template<typename Out, typename In, typename... Ins>
+		nik_ces auto result(Out out, In in, Ins... ins)
+		{
+			T_store_U<mutate>::template result<>(*in, (*ins)...);
+			T_store_U<out_next>::template result<>(out, *out);
+			T_store_U<in_next>::template result<>(in, *in);
+			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
+		}
 
-// -> U:
-
-	template<typename Type, auto f, auto Arr1, auto Leng1, auto Arr2, typename Indices>
-	nik_ce auto U_zip(Indices indices)
-		{ return U_apply<Type, IteratorModule::Zip, Arr1, Arr2>(U_pack_Vs<Leng1, f>, indices); }
+	}; template<auto predicate, auto out_next, auto in_next, auto... ins_next>
+		nik_ce auto _multisift_ = U_store_T<T_multisift<predicate, out_next, in_next, ins_next...>>;
 */
 
 /***********************************************************************************************************************/
