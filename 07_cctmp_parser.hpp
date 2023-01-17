@@ -117,7 +117,7 @@ namespace cctmp {
 			entry *current		= syntax;
 			gindex_type line	= _zero;
 			gindex_type block	= _zero;
-			gkey_type token		= Token::invalid;
+			gkey_type token		= LexerToken::invalid;
 		}
 	};
 

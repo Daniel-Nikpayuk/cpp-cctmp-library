@@ -25,102 +25,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// array:
-
-/***********************************************************************************************************************/
-
-/*
-// map:
-
-	template<auto f, auto a, auto l, auto Op, auto s, auto U, auto S>
-	nik_ce auto array_map_ = eval<_array_apply_, Op, U, S, s, _multimap_<_arg_deref_<f>>, a, l>;
-
-// fold:
-
-	template<auto f, auto init, auto a, auto l, auto Op, auto U, auto S>
-	nik_ce auto array_fold_ = eval<_array_apply_, Op, U, S, U_pack_Vs<0>, _multifold_<_arg_deref_<f>, init>, a, l>;
-
-// find:
-
-//	template<auto p, auto a, auto l, auto Op, auto U, auto S>
-//	nik_ce auto array_find_ = eval<_array_apply_, Op, U, S, _multifind<_arg_deref_<p>>, a, l>;
-*/
-
-// sift:
-
-/*
-// -> V:
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-	nik_ce auto V_sift(nik_vp(indices)(T_pack_Vs<Is...>*))
-	{
-		nik_ce auto Size	= Leng + 1;
-		nik_ce auto arr		= ArrayModule::template apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
-		nik_ce auto leng	= arr.value[Leng];
-
-		if nik_ce (leng != sizeof...(Is)) return arr;
-		else return array<Type, arr.value[Is]...>;
-	}
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto I0, auto... Is>
-	nik_ce auto V_sift(nik_vp(indices)(T_pack_Vs<I0, Is...>*))
-	{
-		nik_ce auto Size	= sizeof...(Is) + 1;
-		nik_ce auto arr		= apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
-
-		return array<Type, arr.value[Is]...>;
-	}
-
-// -> U:
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto I0, auto... Is>
-	nik_ce auto U_sift(nik_vp(indices)(T_pack_Vs<I0, Is...>*))
-	{
-		nik_ce auto Size	= sizeof...(Is) + 1;
-		nik_ce auto arr		= apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
-
-		return U_pack_Vs<arr.value[Is]...>;
-	}
-*/
-
-	// subsequence:
-
-/*
-// -> V:
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-	nik_ce auto V_subsequence(nik_vp(indices)(T_pack_Vs<Is...>*))
-		{ return V_apply<Type, IteratorModule::Sift, Arr>(U_pack_Vs<Leng, sizeof...(Is), p>, indices); }
-
-// -> U:
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-	nik_ce auto U_subsequence(nik_vp(indices)(T_pack_Vs<Is...>*))
-		{ return U_apply<Type, IteratorModule::Sift, Arr>(U_pack_Vs<Leng, sizeof...(Is), p>, indices); }
-*/
-
-// zip:
-
-/*
-// generic:
-
-// -> V:
-
-	template<typename Type, auto f, auto Arr1, auto Leng1, auto Arr2, typename Indices>
-	nik_ce auto V_zip(Indices indices)
-		{ return V_apply<Type, IteratorModule::Zip, Arr1, Arr2>(U_pack_Vs<Leng1, f>, indices); }
-
-// -> U:
-
-	template<typename Type, auto f, auto Arr1, auto Leng1, auto Arr2, typename Indices>
-	nik_ce auto U_zip(Indices indices)
-		{ return U_apply<Type, IteratorModule::Zip, Arr1, Arr2>(U_pack_Vs<Leng1, f>, indices); }
-*/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // character sets:
 
 	using global_char_type		= char;
@@ -129,7 +33,7 @@ namespace cctmp {
 
 	using global_string_type	= gcchar_type*;
 	using gstring_type		= global_string_type;
-	using cgstring_type		= global_string_type const;
+	using gcstring_type		= global_string_type const;
 
 /***********************************************************************************************************************/
 
@@ -161,15 +65,20 @@ namespace cctmp {
 
 // generic charset:
 
-	template<auto Size>
-	nik_ce bool matches_charset(gcchar_type c, gcchar_type (&charset)[Size])
+	nik_ce auto charset_find(gcchar_type c, gstring_type k, gcstring_type e)
 	{
-		bool no_match = true;
+		while (k != e) if (*k == c) break; else ++k;
 
-		for (gstring_type i = charset; no_match && i != charset + Size; ++i)
-			no_match = (*i != c);
+		return k;
+	}
 
-		return !no_match;
+	template<auto Size>
+	nik_ce auto matches_charset(gcchar_type c, gcchar_type (&charset)[Size])
+	{
+		gcstring_type e = charset + Size;
+		gcstring_type k = charset_find(c, charset, e);
+
+		return (k != e);
 	}
 
 /***********************************************************************************************************************/
@@ -303,93 +212,64 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// charset:
+// dfa charset:
 
-/*
-	template<typename CharType, auto String, auto Size>
-	nik_ce auto dfa_equiv_classes()
+	template<typename CharType, auto Size>
+	struct dfa_charset
 	{
-		Array<CharType, Size> arr{};
+		using char_type			= CharType;
+		using string_type		= char_type const *;
+		using size_type			= decltype(Size);
 
-		return tuple(arr, size);
-	}
+		nik_ces size_type length	= Size - 1;
 
-	template<typename CharType, auto String, auto Size>
-	nik_ce auto dfa_charset()
-	{
-		nik_ce auto tup		= dfa_equiv_classes<CharType, String, Size>();
-		nik_ce auto charset	= tuple_value<0>(tup).value; // fix design.
-		nik_ce auto seg		= segment<tuple_value<1>(tup)>;
+		string_type string;
+		char_type unique[length];
+		char_type column[length];
+		size_type size;
 
-		return unpack_<seg, _array_to_list_, H_id, charset>;
-	}
-
-	template<typename CharType, CharType... Chars>
-	nik_ce auto make_dfa_charset = dfa_charset<CharType, array<CharType, Chars...>, sizeof...(Chars)>();
-*/
-
-/***********************************************************************************************************************/
-
-// charset map:
-
-/*
-	template<typename KeyType, auto... Keys>
-	nik_ce gkey_type charset_map(KeyType k)
-	{
-		nik_ce auto key0	= array<KeyType, Keys...>;
-		nik_ce auto key_size	= sizeof...(Keys);
-		KeyType const *key	= key0;
-
-		while (key != key0 + key_size)
+		nik_ce dfa_charset(const CharType (&s)[Size]) : string{s}, unique{}, column{}, size{}
 		{
-			if (k == *key) break;
+			string_type end = string + length;
 
-			++key;
+			for (string_type j = string; j != end; ++j)
+			{
+				gcstring_type e = unique + size;
+				gcstring_type k = charset_find(*j, unique, e);
+
+				if (k == e) unique[size++] = *j;
+			}
+
+			char_type *k = column;
+
+			for (string_type j = string; j != end; ++j, ++k) *k = map(*j);
 		}
 
-		return (key - key0) + 1;
-	}
+			// Assumes map will return a non-zero index for each
+			// character (equivalence) class, and will otherwise return
+			// zero (for any other character).
 
-	template<typename KeyType, auto... Keys>
-	nik_ce gkey_type make_charset_map(nik_avp(*)(Maps...))
-	{
-		nik_ce auto key0	= array<KeyType, Keys...>;
-		nik_ce auto key_size	= sizeof...(Keys);
-		KeyType const *key	= key0;
-
-		while (key != key0 + key_size)
+		nik_ce gkey_type map(gcchar_type c) const
 		{
-			if (k == *key) break;
+			gcstring_type e = unique + size;
+			gcstring_type k = charset_find(c, unique, e);
 
-			++key;
+			if (k != e) return (k - unique) + 1;
+			else        return _zero;
 		}
-
-		return (key - key0) + 1;
-	}
-*/
+	};
 
 /***********************************************************************************************************************/
 
 // (generic) keyword:
 
-/*
-	template<auto...> struct KeywordDFA;
-
-		// Assumes CharsetMap will return a non-zero index for each
-		// character (equivalence) class, and will otherwise return
-		// zero (for any other character).
-
-	template<typename CharType, CharType... Chars, nik_vp(Pack)(T_pack_Vs<Chars...>*), gkey_type Token>
-	struct KeywordDFA<Pack, Token>
+	template<auto CharsetFunction, gkey_type Token>
+	struct KeywordDFA
 	{
-		nik_ces auto      charset				= make_dfa_charset<CharType, Chars...>;
-		nik_ces gkey_type charset_size				= eval<_length_, charset> + 1;
-		nik_ces gkey_type (*charset_map)(gcchar_type c)		= make_charset_map(charset);
-
-		nik_ces gkey_type row_size				= sizeof...(Chars);
-		nik_ces gkey_type name_size				= row_size + 2;
-
-		nik_ces auto col					= array<gkey_type, charset_map(Chars)...>;
+		nik_ces auto      charset		= CharsetFunction();
+		nik_ces gkey_type keyword_size		= charset.length;
+		nik_ces gkey_type name_size		= keyword_size + 2;
+		nik_ces gkey_type charset_size		= charset.size + 1;
 
 		// table:
 
@@ -397,24 +277,25 @@ namespace cctmp {
 
 			nik_ce KeywordDFA() : table{} // initializes the empty state.
 			{
-				for (gkey_type row_pos = 1; row_pos != row_size; ++row_pos)
-				{
-					gkey_type col_pos   = col[row_pos - 1];
-					gkey_type next_name = row_pos + 1;
+				gkey_type name_pos = 1;
 
-					table[row_pos][col_pos] = state{next_name, LexerToken::invalid};
+				while (name_pos != keyword_size)
+				{
+					gkey_type char_pos  = charset.column[name_pos - 1];
+					gkey_type next_name = name_pos + 1;
+
+					table[name_pos++][char_pos] = state{next_name, LexerToken::invalid};
 				}
 
-				gkey_type row_pos   = row_size;
-				gkey_type col_pos   = col[row_pos - 1];
-				gkey_type next_name = row_pos + 1;
+				gkey_type char_pos  = charset.column[name_pos - 1];
+				gkey_type next_name = name_pos + 1;
 
-				table[row_pos][col_pos] = state{next_name, Token};
+				table[name_pos][char_pos] = state{next_name, Token};
 			}
 
 			nik_ce const state & move(const state & s, gcchar_type c) const
 			{
-				return table[s.name][charset_map(c)];
+				return table[s.name][charset.map(c)];
 			}
 
 			nik_ce lexeme lex(gstring_type b, gstring_type e) const
@@ -439,155 +320,83 @@ namespace cctmp {
 
 		return true;
 	}
-*/
 
 /***********************************************************************************************************************/
 
 // statement:
 
-/*
-	nik_ce gkey_type statement_charset_map(gcchar_type c)
-	{
-		if      (c == ';') return 1;
-		else               return 0;
-	}
+	nik_ce auto statement_dfa() { return dfa_charset(";"); }
 
-	nik_ce auto statement_charset	= U_pack_Vs<';'>;
-	using T_statement_dfa		= KeywordDFA<1, statement_charset, statement_charset_map, LexerToken::statement>;
-	nik_ce auto U_statement_dfa	= U_store_T<T_statement_dfa>;
-*/
+	using T_statement_dfa       = KeywordDFA<statement_dfa, LexerToken::statement>;
+	nik_ce auto U_statement_dfa = U_store_T<T_statement_dfa>;
 
 /***********************************************************************************************************************/
 
 // period:
 
-/*
-	nik_ce gkey_type period_charset_map(gcchar_type c)
-	{
-		if      (c == '.') return 1;
-		else               return 0;
-	}
+	nik_ce auto period_dfa() { return dfa_charset("."); }
 
-	nik_ce auto period_charset	= U_pack_Vs<'.'>;
-	using T_period_dfa		= KeywordDFA<1, period_charset, period_charset_map, LexerToken::period>;
-	nik_ce auto U_period_dfa	= U_store_T<T_period_dfa>;
-*/
+	using T_period_dfa       = KeywordDFA<period_dfa, LexerToken::period>;
+	nik_ce auto U_period_dfa = U_store_T<T_period_dfa>;
 
 /***********************************************************************************************************************/
 
 // underscore:
 
-/*
-	nik_ce gkey_type underscore_charset_map(gcchar_type c)
-	{
-		if      (c == '_') return 1;
-		else               return 0;
-	}
+	nik_ce auto underscore_dfa() { return dfa_charset("_"); }
 
-	nik_ce auto underscore_charset	= U_pack_Vs<'_'>;
-	using T_underscore_dfa		= KeywordDFA<1, underscore_charset, underscore_charset_map, LexerToken::underscore>;
-	nik_ce auto U_underscore_dfa	= U_store_T<T_underscore_dfa>;
-*/
+	using T_underscore_dfa       = KeywordDFA<underscore_dfa, LexerToken::underscore>;
+	nik_ce auto U_underscore_dfa = U_store_T<T_underscore_dfa>;
 
 /***********************************************************************************************************************/
 
 // equal:
 
-/*
-	nik_ce gkey_type equal_charset_map(gcchar_type c)
-	{
-		if      (c == '=') return 1;
-		else               return 0;
-	}
+	nik_ce auto equal_dfa() { return dfa_charset("="); }
 
-	nik_ce auto equal_charset	= U_pack_Vs<'='>;
-	using T_equal_dfa		= KeywordDFA<1, equal_charset, equal_charset_map, LexerToken::equal>;
-	nik_ce auto U_equal_dfa		= U_store_T<T_equal_dfa>;
-*/
+	using T_equal_dfa       = KeywordDFA<equal_dfa, LexerToken::equal>;
+	nik_ce auto U_equal_dfa = U_store_T<T_equal_dfa>;
 
 /***********************************************************************************************************************/
 
 // test:
 
-/*
-	nik_ce gkey_type test_charset_map(gcchar_type c)
-	{
-		if      (c == 't') return 1;
-		else if (c == 'e') return 2;
-		else if (c == 's') return 3;
-		else               return 0;
-	}
+	nik_ce auto test_dfa() { return dfa_charset("test"); }
 
-	nik_ce auto test_charset	= U_pack_Vs<'t', 'e', 's', 't'>;
-	nik_ce auto test_charset_map0	= U_pack_Vs<'t', 'e', 's'>;
-	using T_test_dfa		= KeywordDFA<3, test_charset, test_charset_map, LexerToken::test>;
-	nik_ce auto U_test_dfa		= U_store_T<T_test_dfa>;
-*/
+	using T_test_dfa       = KeywordDFA<test_dfa, LexerToken::test>;
+	nik_ce auto U_test_dfa = U_store_T<T_test_dfa>;
 
 /***********************************************************************************************************************/
 
 // goto:
 
-/*
-	nik_ce gkey_type goto_charset_map(gcchar_type c)
-	{
-		if      (c == 'g') return 1;
-		else if (c == 'o') return 2;
-		else if (c == 't') return 3;
-		else               return 0;
-	}
+	nik_ce auto goto_dfa() { return dfa_charset("goto"); }
 
-	nik_ce auto goto_charset	= U_pack_Vs<'g', 'o', 't', 'o'>;
-	using T_goto_dfa		= KeywordDFA<3, goto_charset, goto_charset_map, LexerToken::go_to>;
-	nik_ce auto U_goto_dfa		= U_store_T<T_goto_dfa>;
-*/
+	using T_goto_dfa       = KeywordDFA<goto_dfa, LexerToken::go_to>;
+	nik_ce auto U_goto_dfa = U_store_T<T_goto_dfa>;
 
 /***********************************************************************************************************************/
 
 // branch:
 
-/*
-	nik_ce gkey_type branch_charset_map(gcchar_type c)
-	{
-		if      (c == 'b') return 1;
-		else if (c == 'r') return 2;
-		else if (c == 'a') return 3;
-		else if (c == 'n') return 4;
-		else if (c == 'c') return 5;
-		else if (c == 'h') return 6;
-		else               return 0;
-	}
+	nik_ce auto branch_dfa() { return dfa_charset("branch"); }
 
-	nik_ce auto branch_charset	= U_pack_Vs<'b', 'r', 'a', 'n', 'c', 'h'>;
-	using T_branch_dfa		= KeywordDFA<6, branch_charset, branch_charset_map, LexerToken::branch>;
-	nik_ce auto U_branch_dfa	= U_store_T<T_branch_dfa>;
-*/
+	using T_branch_dfa       = KeywordDFA<branch_dfa, LexerToken::branch>;
+	nik_ce auto U_branch_dfa = U_store_T<T_branch_dfa>;
 
 /***********************************************************************************************************************/
 
 // return:
 
-/*
-	nik_ce gkey_type return_charset_map(gcchar_type c)
-	{
-		if      (c == 'r') return 1;
-		else if (c == 'e') return 2;
-		else if (c == 't') return 3;
-		else if (c == 'u') return 4;
-		else if (c == 'n') return 5;
-		else               return 0;
-	}
+	nik_ce auto return_dfa() { return dfa_charset("return"); }
 
-	nik_ce auto return_charset	= U_pack_Vs<'r', 'e', 't', 'u', 'r', 'n'>;
-	using T_return_dfa		= KeywordDFA<5, return_charset, return_charset_map, LexerToken::re_turn>;
-	nik_ce auto U_return_dfa	= U_store_T<T_return_dfa>;
-*/
+	using T_return_dfa       = KeywordDFA<return_dfa, LexerToken::re_turn>;
+	nik_ce auto U_return_dfa = U_store_T<T_return_dfa>;
 
 /***********************************************************************************************************************/
 
 // generic assembly:
 
-/*
 	struct GenericAssemblyDFA
 	{
 		// name:
@@ -718,7 +527,6 @@ namespace cctmp {
 	};
 
 	nik_ce auto generic_assembly_dfa = GenericAssemblyDFA{};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

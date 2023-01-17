@@ -638,6 +638,10 @@ namespace cctmp {
 
 // loop:
 
+/***********************************************************************************************************************/
+
+// id:
+
 	template
 	<
 		template<auto...> typename B0, auto f0, auto... ns0, nik_vp(p0)(B0<f0, ns0...>*),
@@ -650,6 +654,29 @@ namespace cctmp {
 		{
 			while (T_store_U<f0>::template result<>(arg_at<ns0>(vs...)...))
 				T_store_U<f1>::template result<>(arg_at<ns1>((&vs)...)...); // passes by address.
+
+			return NIK_ASSEMBLY(s, c, i, l, Vs)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// side:
+
+	template
+	<
+		template<auto...> typename B0, auto f0, auto... ns0, nik_vp(p0)(B0<f0, ns0...>*),
+		template<auto...> typename B1, auto f1, auto... ns1, nik_vp(p1)(B1<f1, ns1...>*)
+	>
+	struct T_assembly<AN::loop, AT::side, p0, p1>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			bool side = true;
+
+			while (side && T_store_U<f0>::template result<>(arg_at<ns0>(vs...)...))
+				side = T_store_U<f1>::template result<>(arg_at<ns1>((&vs)...)...); // passes by address.
 
 			return NIK_ASSEMBLY(s, c, i, l, Vs)(vs...);
 		}
@@ -709,7 +736,7 @@ namespace cctmp {
 		template<typename Out, typename In, typename... Ins>
 		nik_ces auto result(Out out, In in, Ins... ins)
 		{
-			T_store_U<mutate>::template result<>(*out, *in, (*ins)...);
+			T_store_U<mutate>::template result<>(out, *in, (*ins)...);
 			T_store_U<out_next>::template result<>(out, *out);
 			T_store_U<in_next>::template result<>(in, *in);
 			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
@@ -728,7 +755,7 @@ namespace cctmp {
 		template<typename Out, typename In, typename... Ins>
 		nik_ces auto result(Out out, In in, Ins... ins)
 		{
-			T_store_U<mutate>::template result<>(*out, *out, *in, (*ins)...);
+			T_store_U<mutate>::template result<>(out, *out, *in, (*ins)...);
 			T_store_U<in_next>::template result<>(in, *in);
 			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
 		}
@@ -740,56 +767,158 @@ namespace cctmp {
 
 // multifind:
 
-/*
 	template<auto predicate, auto in_next, auto... ins_next>
 	struct T_multifind
 	{
-			while (in != end)
-			{
-				if (P::template result<In, Ins...>(in, ins...)) break;
-
-				++in; (++ins, ...);
-			}
-
 		template<typename In, typename... Ins>
 		nik_ces auto result(In in, Ins... ins)
 		{
-			T_store_U<mutate>::template result<>(*in, (*ins)...);
+			if (T_store_U<predicate>::template result<>(in, (*ins)...)) return false;
+
 			T_store_U<in_next>::template result<>(in, *in);
 			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
+
+			return true;
 		}
 
 	}; template<auto predicate, auto in_next, auto... ins_next>
 		nik_ce auto _multifind_ = U_store_T<T_multifind<predicate, in_next, ins_next...>>;
-*/
 
 /***********************************************************************************************************************/
 
 // multisift:
 
-/*
-	template<auto predicate, auto out_next, auto in_next, auto... ins_next>
+	template<auto predicate, auto mutate, auto out_next, auto in_next, auto... ins_next>
 	struct T_multisift
 	{
-			while (in != end)
-			{
-				if (P::template result<In, Ins...>(in, ins...)) *(out++) = in;
-
-				++in; (++ins, ...);
-			}
-
 		template<typename Out, typename In, typename... Ins>
 		nik_ces auto result(Out out, In in, Ins... ins)
 		{
-			T_store_U<mutate>::template result<>(*in, (*ins)...);
-			T_store_U<out_next>::template result<>(out, *out);
+			if (T_store_U<predicate>::template result<>(in, (*ins)...))
+			{
+				T_store_U<mutate>::template result<>(out, *out, *in, (*ins)...);
+				T_store_U<out_next>::template result<>(out, *out);
+			}
+
 			T_store_U<in_next>::template result<>(in, *in);
 			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
 		}
 
-	}; template<auto predicate, auto out_next, auto in_next, auto... ins_next>
+	}; template<auto predicate, auto mutate, auto out_next, auto in_next, auto... ins_next>
 		nik_ce auto _multisift_ = U_store_T<T_multisift<predicate, out_next, in_next, ins_next...>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// array:
+
+/***********************************************************************************************************************/
+
+/*
+// map:
+
+	template<auto f, auto a, auto l, auto Op, auto s, auto U, auto S>
+	nik_ce auto array_map_ = eval<_array_apply_, Op, U, S, s, _multimap_<_arg_deref_<f>>, a, l>;
+
+// fold:
+
+	template<auto f, auto init, auto a, auto l, auto Op, auto U, auto S>
+	nik_ce auto array_fold_ = eval<_array_apply_, Op, U, S, U_pack_Vs<0>, _multifold_<_arg_deref_<f>, init>, a, l>;
+
+// find:
+
+//	template<auto p, auto a, auto l, auto Op, auto U, auto S>
+//	nik_ce auto array_find_ = eval<_array_apply_, Op, U, S, _multifind<_arg_deref_<p>>, a, l>;
+
+// sift:
+
+// -> V:
+
+	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
+	nik_ce auto V_sift(nik_vp(indices)(T_pack_Vs<Is...>*))
+	{
+		nik_ce auto Size	= Leng + 1;
+		nik_ce auto arr		= ArrayModule::template apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
+		nik_ce auto leng	= arr.value[Leng];
+
+		if nik_ce (leng != sizeof...(Is)) return arr;
+		else return array<Type, arr.value[Is]...>;
+	}
+
+	template<typename Type, auto p, auto Arr, auto Leng, auto I0, auto... Is>
+	nik_ce auto V_sift(nik_vp(indices)(T_pack_Vs<I0, Is...>*))
+	{
+		nik_ce auto Size	= sizeof...(Is) + 1;
+		nik_ce auto arr		= apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
+
+		return array<Type, arr.value[Is]...>;
+	}
+
+// -> U:
+
+	template<typename Type, auto p, auto Arr, auto Leng, auto I0, auto... Is>
+	nik_ce auto U_sift(nik_vp(indices)(T_pack_Vs<I0, Is...>*))
+	{
+		nik_ce auto Size	= sizeof...(Is) + 1;
+		nik_ce auto arr		= apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
+
+		return U_pack_Vs<arr.value[Is]...>;
+	}
+
+	// subsequence:
+
+// -> V:
+
+	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
+	nik_ce auto V_subsequence(nik_vp(indices)(T_pack_Vs<Is...>*))
+		{ return V_apply<Type, IteratorModule::Sift, Arr>(U_pack_Vs<Leng, sizeof...(Is), p>, indices); }
+
+// -> U:
+
+	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
+	nik_ce auto U_subsequence(nik_vp(indices)(T_pack_Vs<Is...>*))
+		{ return U_apply<Type, IteratorModule::Sift, Arr>(U_pack_Vs<Leng, sizeof...(Is), p>, indices); }
+
+// zip:
+
+// generic:
+
+// -> V:
+
+	template<typename Type, auto f, auto Arr1, auto Leng1, auto Arr2, typename Indices>
+	nik_ce auto V_zip(Indices indices)
+		{ return V_apply<Type, IteratorModule::Zip, Arr1, Arr2>(U_pack_Vs<Leng1, f>, indices); }
+
+// -> U:
+
+	template<typename Type, auto f, auto Arr1, auto Leng1, auto Arr2, typename Indices>
+	nik_ce auto U_zip(Indices indices)
+		{ return U_apply<Type, IteratorModule::Zip, Arr1, Arr2>(U_pack_Vs<Leng1, f>, indices); }
 */
+
+/***********************************************************************************************************************/
+
+// segment:
+
+	struct T_machine_segment
+	{
+		nik_ces auto sH0 = U_pack_Vs<H_id>;
+		nik_ces auto  H0 = U_pack_Vs<_car_, sH0>;
+
+		template<auto n>
+		nik_ces auto contr = controller
+		<
+			instruction < MN::call , MT::praxis , PN::segment , n >,
+			instruction < MN::halt , MT::eval                     >
+		>;
+
+		template<auto d, auto n>
+		nik_ces auto result = T_machine_start::template result<d, contr<n>, _zero>(H0);
+	};
+
+	nik_ce auto _dpar_segment_ = U_custom_T<T_machine_segment>;
+	nik_ce auto  _par_segment_ = MD::template with_initial_depth<_dpar_segment_>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

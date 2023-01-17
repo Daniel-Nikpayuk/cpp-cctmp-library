@@ -143,7 +143,7 @@ namespace cctmp {
 			using F = T_store_U<f>;
 
 			template<typename... Ts>
-			nik_ces auto result(Ts... vs) { return F::template result<ps..., Ts...>(vs...); }
+			nik_ces auto result(Ts... vs) { return F::template result<ps...>(vs...); }
 
 		}; template<auto f, auto... ps>
 			nik_ce auto _bind_ = U_arg_higher_order<HigherOrder::bind, f, ps...>;
@@ -164,8 +164,7 @@ namespace cctmp {
 			using F = T_store_U<f>;
 
 			template<typename... Ts>
-			nik_ces auto result(Ts... vs)
-				{ return F::template result<decltype(Vs)..., Ts...>(Vs..., vs...); }
+			nik_ces auto result(Ts... vs) { return F::template result<>(Vs..., vs...); }
 
 		}; template<auto f, auto... Vs>
 			nik_ce auto _curry_ = U_arg_higher_order<HigherOrder::curry, f, Vs...>;
@@ -675,7 +674,7 @@ namespace cctmp {
 			{
 				sequence<T, S> s{};
 
-				F::template result<T*, In, End, Ins...>(s.value, in, end, ins...);
+				F::template result<>(s.value, in, end, ins...);
 
 				return s;
 			}

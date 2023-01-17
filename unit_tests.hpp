@@ -2173,7 +2173,7 @@ namespace cctmp_program
 	struct T_arg_map
 	{
 		constexpr static auto predicate = _not_equal_;
-		constexpr static auto mutate    = arg_subpose<_assign_, _id_, f>;
+		constexpr static auto mutate    = arg_subpose<_assign_, _dereference_, f>;
 		constexpr static auto next      = arg_subpose<_assign_, _id_, _increment_<>>;
 		constexpr static auto multimap  = _multimap_<mutate, next, next>;
 

@@ -30,7 +30,7 @@
 #include"04_cctmp_machine.hpp"
 #include"05_cctmp_assembly.hpp"
 #include"06_cctmp_lexer.hpp"
-//#include"07_cctmp_parser.hpp"
+#include"07_cctmp_parser.hpp"
 //#include"08_cctmp_algorithm.hpp"
 
 #include"undef_macros.hpp"
@@ -51,8 +51,17 @@
 
 /***********************************************************************************************************************/
 
+	constexpr T_goto_dfa dfa;
+
+	constexpr char str[] = "goto";
+	constexpr auto val = dfa.lex(str, str + 4);
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
+		printf("%d\n", val.token);
+
 	//	printf("%d\n", val0); // prints: 25
 	//	printf("%d\n", val1); // prints: 25
 

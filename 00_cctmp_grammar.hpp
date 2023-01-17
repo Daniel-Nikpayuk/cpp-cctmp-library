@@ -201,8 +201,9 @@ namespace cctmp {
 	struct sequence
 	{
 		Type value[Size];
+		decltype(Size) length;
 
-		nik_ce sequence() : value{} { }
+		nik_ce sequence() : value{}, length{} { }
 	//	nik_ce sequence(const Type (&s)[Size]) : value{s} { }
 	};
 
