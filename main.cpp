@@ -51,19 +51,15 @@
 
 /***********************************************************************************************************************/
 
-	constexpr T_goto_dfa dfa;
-
-	constexpr char str[] = "goto";
-	constexpr auto val = dfa.lex(str, str + 4);
+	constexpr auto src  = source("  goto;");
+	constexpr auto size = src.size;
+	constexpr auto tok  = src.syntax[0].token;
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", val.token);
-
-	//	printf("%d\n", val0); // prints: 25
-	//	printf("%d\n", val1); // prints: 25
+		printf("%s\n", (tok == TokenName::go_to) ? "true" : "false");
 
 		return 0;
 	}

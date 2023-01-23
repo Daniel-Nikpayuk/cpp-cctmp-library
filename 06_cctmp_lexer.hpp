@@ -59,24 +59,34 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// numeric:
+
+/***********************************************************************************************************************/
+
+// find:
+
+	template<typename T, typename In, typename End>
+	nik_ce auto numeric_find(T n, In k, End e)
+	{
+		while (k != e) if (*k == n) break; else ++k;
+
+		return k;
+	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // recognizers:
 
 /***********************************************************************************************************************/
 
-// generic charset:
-
-	nik_ce auto charset_find(gcchar_type c, gstring_type k, gcstring_type e)
-	{
-		while (k != e) if (*k == c) break; else ++k;
-
-		return k;
-	}
+// matches:
 
 	template<auto Size>
 	nik_ce auto matches_charset(gcchar_type c, gcchar_type (&charset)[Size])
 	{
 		gcstring_type e = charset + Size;
-		gcstring_type k = charset_find(c, charset, e);
+		gcstring_type k = numeric_find(c, charset, e);
 
 		return (k != e);
 	}
@@ -119,7 +129,7 @@ namespace cctmp {
 
 // skip whitespace:
 
-	nik_ce gstring_type skip_whitespace(gstring_type b, gstring_type e)
+	nik_ce gstring_type skip_whitespace(gstring_type b, gcstring_type e)
 	{
 		while (b != e && matches_whitespace(*b)) ++b;
 
@@ -133,45 +143,57 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-	struct LexerName
+// state:
+
+	using state_type  = gindex_type;
+	using cstate_type = state_type const;
+
+	struct StateName
 	{
-		enum : gkey_type
+		using cstate_array = cstate_type*;
+
+		enum : state_type
 		{
 			empty = 0,
 			initial ,
 			dimension
 		};
+
+		template<auto Size>
+		nik_ces auto find(cstate_type s, cstate_type (&accept)[Size])
+		{
+			auto k = numeric_find(s, accept, accept + Size);
+
+			return k - accept;
+		}
+
+		template<auto Size>
+		nik_ces auto is_final(cstate_type s, cstate_type (&accept)[Size])
+		{
+			return (s != Size);
+		}
 	};
 
-	struct LexerToken
+/***********************************************************************************************************************/
+
+// token:
+
+	using token_type  = gindex_type;
+	using ctoken_type = token_type const;
+
+	struct TokenName
 	{
-		enum : gkey_type
+		enum : token_type
 		{
 			invalid = 0,
+
+			keyword_label_error,
 
 			statement , period     , underscore , equal   ,
 			test      , go_to      , branch     , re_turn ,
 			label     , identifier ,
+			dimension
 		};
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// state:
-
-/***********************************************************************************************************************/
-
-	struct state
-	{
-		gkey_type name;
-		gkey_type token;
-
-		nik_ce state() :
-			name{LexerName::empty}, token{LexerToken::invalid} { }
-
-		nik_ce state(gckey_type _v, gckey_type _t) :
-			name{_v}, token{_t} { }
 	};
 
 /***********************************************************************************************************************/
@@ -183,32 +205,75 @@ namespace cctmp {
 
 	struct lexeme
 	{
-		gstring_type start;
+		gstring_type  start;
 		gstring_type finish;
-
-		gkey_type token;
+		gindex_type   value;
 
 		nik_ce lexeme() :
 
-			start  {                     },
-			finish {                     },
-			token  { LexerToken::invalid }
+			start  { },
+			finish { },
+			value  { }
 
 			{ }
 
-		nik_ce lexeme(gstring_type _s, gstring_type _f, gckey_type _t) :
+		nik_ce lexeme(gcstring_type _s, gcstring_type _f, gcindex_type _v) :
 
 			start  { _s },
 			finish { _f },
-			token  { _t }
+			value  { _v }
 
 			{ }
 	};
+
+	using clexeme = lexeme const;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // deterministic finite automata:
+
+/***********************************************************************************************************************/
+
+// recognize:
+
+	template<typename DFA>
+	nik_ce lexeme recognize(gstring_type b, gstring_type e)
+	{
+		nik_ce DFA dfa;
+
+		gstring_type k = skip_whitespace(b, e);
+		b = k;
+
+		state_type s = StateName::initial;
+
+		while (k != e)
+		{
+			auto ns = dfa.move(s, *k);
+
+			if (ns == StateName::empty) break;
+			else
+			{
+				s = ns;
+				++k;
+			}
+		}
+
+		return lexeme{b, k, s};
+	}
+
+/***********************************************************************************************************************/
+
+// recognizes:
+
+	template<typename DFA>
+	nik_ce gcbool_type recognizes(gstring_type b, gstring_type e)
+	{
+		nik_ce DFA dfa;
+
+		auto l = dfa.lex(b, e);
+		return (l.value != TokenName::invalid);
+	}
 
 /***********************************************************************************************************************/
 
@@ -235,7 +300,7 @@ namespace cctmp {
 			for (string_type j = string; j != end; ++j)
 			{
 				gcstring_type e = unique + size;
-				gcstring_type k = charset_find(*j, unique, e);
+				gcstring_type k = numeric_find(*j, unique, e);
 
 				if (k == e) unique[size++] = *j;
 			}
@@ -252,7 +317,7 @@ namespace cctmp {
 		nik_ce gkey_type map(gcchar_type c) const
 		{
 			gcstring_type e = unique + size;
-			gcstring_type k = charset_find(c, unique, e);
+			gcstring_type k = numeric_find(c, unique, e);
 
 			if (k != e) return (k - unique) + 1;
 			else        return _zero;
@@ -263,63 +328,36 @@ namespace cctmp {
 
 // (generic) keyword:
 
-	template<auto CharsetFunction, gkey_type Token>
+	template<auto CharsetCallable, auto Token>
 	struct KeywordDFA
 	{
-		nik_ces auto      charset		= CharsetFunction();
-		nik_ces gkey_type keyword_size		= charset.length;
-		nik_ces gkey_type name_size		= keyword_size + 2;
+		nik_ces auto charset			= CharsetCallable();
+		nik_ces gkey_type state_size		= charset.length + 2;
 		nik_ces gkey_type charset_size		= charset.size + 1;
 
 		// table:
 
-			state table[name_size][charset_size];
+			state_type table[state_size][charset_size];
 
 			nik_ce KeywordDFA() : table{} // initializes the empty state.
 			{
-				gkey_type name_pos = 1;
-
-				while (name_pos != keyword_size)
-				{
-					gkey_type char_pos  = charset.column[name_pos - 1];
-					gkey_type next_name = name_pos + 1;
-
-					table[name_pos++][char_pos] = state{next_name, LexerToken::invalid};
-				}
-
-				gkey_type char_pos  = charset.column[name_pos - 1];
-				gkey_type next_name = name_pos + 1;
-
-				table[name_pos][char_pos] = state{next_name, Token};
+				for (gkey_type pos = StateName::initial; pos != charset.length + 1; ++pos)
+					table[pos][charset.column[pos - 1]] = pos + 1;
 			}
 
-			nik_ce const state & move(const state & s, gcchar_type c) const
+			nik_ce cstate_type & move(cstate_type s, gcchar_type c) const
 			{
-				return table[s.name][charset.map(c)];
+				return table[s][charset.map(c)];
 			}
 
 			nik_ce lexeme lex(gstring_type b, gstring_type e) const
 			{
-				b = skip_whitespace(b, e);
-				gstring_type m = b;
+				auto l       = recognize<KeywordDFA>(b, e);
+				token_type t = (l.value == charset.length + 1) ? Token : TokenName::invalid;
 
-				state s = state{LexerName::initial, LexerToken::invalid};
-
-				while (m != e && s.name != LexerName::empty) s = move(s, *(m++));
-
-				return lexeme{b, m, s.token};
+				return lexeme{l.start, l.finish, t};
 			}
 	};
-
-	template<auto U_dfa>
-	nik_ce bool recognized_by(lexeme & c)
-	{
-		using DFA = T_store_U<U_dfa>;
-
-		DFA dfa{};
-
-		return true;
-	}
 
 /***********************************************************************************************************************/
 
@@ -327,8 +365,7 @@ namespace cctmp {
 
 	nik_ce auto statement_dfa() { return dfa_charset(";"); }
 
-	using T_statement_dfa       = KeywordDFA<statement_dfa, LexerToken::statement>;
-	nik_ce auto U_statement_dfa = U_store_T<T_statement_dfa>;
+	using T_statement_dfa = KeywordDFA<statement_dfa, TokenName::statement>;
 
 /***********************************************************************************************************************/
 
@@ -336,8 +373,7 @@ namespace cctmp {
 
 	nik_ce auto period_dfa() { return dfa_charset("."); }
 
-	using T_period_dfa       = KeywordDFA<period_dfa, LexerToken::period>;
-	nik_ce auto U_period_dfa = U_store_T<T_period_dfa>;
+	using T_period_dfa = KeywordDFA<period_dfa, TokenName::period>;
 
 /***********************************************************************************************************************/
 
@@ -345,8 +381,7 @@ namespace cctmp {
 
 	nik_ce auto underscore_dfa() { return dfa_charset("_"); }
 
-	using T_underscore_dfa       = KeywordDFA<underscore_dfa, LexerToken::underscore>;
-	nik_ce auto U_underscore_dfa = U_store_T<T_underscore_dfa>;
+	using T_underscore_dfa = KeywordDFA<underscore_dfa, TokenName::underscore>;
 
 /***********************************************************************************************************************/
 
@@ -354,8 +389,7 @@ namespace cctmp {
 
 	nik_ce auto equal_dfa() { return dfa_charset("="); }
 
-	using T_equal_dfa       = KeywordDFA<equal_dfa, LexerToken::equal>;
-	nik_ce auto U_equal_dfa = U_store_T<T_equal_dfa>;
+	using T_equal_dfa = KeywordDFA<equal_dfa, TokenName::equal>;
 
 /***********************************************************************************************************************/
 
@@ -363,8 +397,7 @@ namespace cctmp {
 
 	nik_ce auto test_dfa() { return dfa_charset("test"); }
 
-	using T_test_dfa       = KeywordDFA<test_dfa, LexerToken::test>;
-	nik_ce auto U_test_dfa = U_store_T<T_test_dfa>;
+	using T_test_dfa = KeywordDFA<test_dfa, TokenName::test>;
 
 /***********************************************************************************************************************/
 
@@ -372,8 +405,7 @@ namespace cctmp {
 
 	nik_ce auto goto_dfa() { return dfa_charset("goto"); }
 
-	using T_goto_dfa       = KeywordDFA<goto_dfa, LexerToken::go_to>;
-	nik_ce auto U_goto_dfa = U_store_T<T_goto_dfa>;
+	using T_goto_dfa = KeywordDFA<goto_dfa, TokenName::go_to>;
 
 /***********************************************************************************************************************/
 
@@ -381,8 +413,7 @@ namespace cctmp {
 
 	nik_ce auto branch_dfa() { return dfa_charset("branch"); }
 
-	using T_branch_dfa       = KeywordDFA<branch_dfa, LexerToken::branch>;
-	nik_ce auto U_branch_dfa = U_store_T<T_branch_dfa>;
+	using T_branch_dfa = KeywordDFA<branch_dfa, TokenName::branch>;
 
 /***********************************************************************************************************************/
 
@@ -390,8 +421,7 @@ namespace cctmp {
 
 	nik_ce auto return_dfa() { return dfa_charset("return"); }
 
-	using T_return_dfa       = KeywordDFA<return_dfa, LexerToken::re_turn>;
-	nik_ce auto U_return_dfa = U_store_T<T_return_dfa>;
+	using T_return_dfa = KeywordDFA<return_dfa, TokenName::re_turn>;
 
 /***********************************************************************************************************************/
 
@@ -399,134 +429,154 @@ namespace cctmp {
 
 	struct GenericAssemblyDFA
 	{
-		// name:
-
-			nik_ces gkey_type name_empty				= 0;
-			nik_ces gkey_type name_initial				= 1;
-
-			nik_ces gkey_type name_underscore_latin_alphanumeric	= 2;
-			nik_ces gkey_type name_ulan 				= name_underscore_latin_alphanumeric;
-			nik_ces gkey_type name_colon				= 3;
-
-			nik_ces gkey_type name_size				= 4;
-
-		// state:
-
-			nik_ces state state_empty     { name_empty   , LexerToken::invalid    };
-			nik_ces state state_initial   { name_initial , LexerToken::invalid    };
-
-			nik_ces state state_ulan      { name_ulan    , LexerToken::identifier };
-			nik_ces state state_colon     { name_colon   , LexerToken::label      };
-
-		// charset:
-
-			nik_ces gkey_type charset_any				= 0;
-
-			nik_ces gkey_type charset_underscore_latin_alphabet	= 1;
-			nik_ces gkey_type charset_ula				= charset_underscore_latin_alphabet;
-			nik_ces gkey_type charset_digit				= 2;
-			nik_ces gkey_type charset_colon				= 3;
-
-			nik_ces gkey_type charset_size				= 4;
-
-			nik_ces gkey_type charset(gcchar_type c)
+		struct State
+		{
+			enum : state_type
 			{
-				if      (matches_digit(c)                    ) return charset_digit;
-				else if (matches_underscore_latin_alphabet(c)) return charset_ula;
-				else if (c == ':'                            ) return charset_colon;
-				else                                           return charset_any;
+				empty   = StateName::empty,
+				initial = StateName::initial,
+				underscore_latin_alphanumeric,
+				ulan    = underscore_latin_alphanumeric,
+				semicolon,
+				equal,
+				period,
+				colon,
+				dimension
+			};
+
+			nik_ces state_type accept[] =
+			{
+				ulan      ,
+				semicolon ,
+				equal     ,
+				period    ,
+				colon
+			};
+
+			nik_ces token_type token[] =
+			{
+				TokenName::identifier ,
+				TokenName::statement  ,
+				TokenName::equal      ,
+				TokenName::period     ,
+				TokenName::label
+			};
+		};
+
+		struct Charset
+		{
+			enum : gkey_type
+			{
+				any = 0,
+				underscore_latin_alphabet,
+				ula = underscore_latin_alphabet,
+				digit,
+				semicolon,
+				equal,
+				period,
+				colon,
+				dimension
+			};
+
+			nik_ces gkey_type map(gcchar_type c)
+			{
+				if      (matches_underscore_latin_alphabet(c)) return Charset::ula;
+				else if (matches_digit(c)                    ) return Charset::digit;
+				else if (c == ';'                            ) return Charset::semicolon;
+				else if (c == '='                            ) return Charset::equal;
+				else if (c == '.'                            ) return Charset::period;
+				else if (c == ':'                            ) return Charset::colon;
+				else                                           return Charset::any;
 			}
+		};
 
 		// table:
 
-			state table[name_size][charset_size];
+			state_type table[State::dimension][Charset::dimension];
 
 			nik_ce GenericAssemblyDFA() : table{}
 			{
-				table [ name_initial ][ charset_ula   ] = state_ulan;
+				table [ State::initial ][ Charset::ula       ] = State::ulan;
+				table [ State::initial ][ Charset::semicolon ] = State::semicolon;
+				table [ State::initial ][ Charset::equal     ] = State::equal;
+				table [ State::initial ][ Charset::period    ] = State::period;
 
-				table [ name_ulan    ][ charset_ula   ] = state_ulan;
-				table [ name_ulan    ][ charset_digit ] = state_ulan;
-				table [ name_ulan    ][ charset_colon ] = state_colon;
+				table [ State::ulan    ][ Charset::ula       ] = State::ulan;
+				table [ State::ulan    ][ Charset::digit     ] = State::ulan;
+				table [ State::ulan    ][ Charset::colon     ] = State::colon;
 			}
 
-			nik_ce auto move(const state & s, gcchar_type c) const
+			nik_ce cstate_type move(cstate_type s, gcchar_type c) const
 			{
-				return table[s.name][charset(c)];
+				return table[s][Charset::map(c)];
 			}
 
-			nik_ce auto lex(gstring_type b, gstring_type e) const
+			nik_ce lexeme lex(gstring_type b, gstring_type e) const
 			{
-				lexeme current{b, e, LexerToken::invalid};
+				auto l = recognize<GenericAssemblyDFA>(b, e);
+				auto n = StateName::find(l.value, State::accept);
 
-				if      (recognized_by< U_statement_dfa  >(current)) statement_action  (current);
-				else if (recognized_by< U_period_dfa     >(current)) period_action     (current);
-				else if (recognized_by< U_underscore_dfa >(current)) underscore_action (current);
-				else if (recognized_by< U_equal_dfa      >(current)) equal_action      (current);
+				token_type t = TokenName::invalid;
+				if (StateName::is_final(n, State::accept)) t = State::token[n];
 
-				else if (recognized_by< U_test_dfa       >(current)) test_action       (current);
-				else if (recognized_by< U_goto_dfa       >(current)) goto_action       (current);
-				else if (recognized_by< U_branch_dfa     >(current)) branch_action     (current);
-				else if (recognized_by< U_return_dfa     >(current)) return_action     (current);
-
-				else                                                 lex_action        (current);
-
-				return current;
+				return keyword_check(l.start, l.finish, t);
 			}
 
-			nik_ce void statement_action(lexeme & c) const
+			nik_ce lexeme keyword_check(gstring_type b, gstring_type e, ctoken_type t) const
 			{
-			//	auto statement_lexeme = statement_dfa.lex(c.start, c.finish);
+				switch (t)
+				{
+					case TokenName::identifier:
+					{
+						ctoken_type t0 = keyword(b, e);
+						ctoken_type rt = (t0 == TokenName::invalid) ? t : t0;
 
-			//	if (_lexeme.token == LexerToken::) ;
+						return lexeme{b, e, rt};
+					}
+					case TokenName::label:
+					{
+						ctoken_type t0 = keyword(b, e-1);
+						ctoken_type t1 = TokenName::keyword_label_error;
+						ctoken_type rt = (t0 == TokenName::invalid) ? t : t1;
+
+						return lexeme{b, e, rt};
+					}
+					default:
+						return lexeme{b, e, t};
+				}
 			}
 
-			nik_ce void period_action(lexeme & c) const
+			nik_ce token_type keyword(gstring_type b, gstring_type e) const
 			{
-			//	auto period_lexeme = period_dfa.lex(c.start, c.finish);
+				switch (e - b)
+				{
+					case  1: return keyword_1(b, e);
+					case  4: return keyword_4(b, e);
+					case  6: return keyword_6(b, e);
+					default: return TokenName::invalid;
+				}
 			}
 
-			nik_ce void underscore_action(lexeme & c) const
+			nik_ce token_type keyword_1(gstring_type b, gstring_type e) const
 			{
-			//	auto underscore_lexeme = underscore_dfa.lex(c.start, c.finish);
+				if   (recognizes< T_underscore_dfa >(b, e)) return TokenName::underscore;
+				else                                        return TokenName::invalid;
 			}
 
-			nik_ce void equal_action(lexeme & c) const
+			nik_ce token_type keyword_4(gstring_type b, gstring_type e) const
 			{
-			//	auto equal_lexeme = equal_dfa.lex(c.start, c.finish);
+				if      (recognizes< T_test_dfa >(b, e)) return TokenName::test;
+				else if (recognizes< T_goto_dfa >(b, e)) return TokenName::go_to;
+				else                                     return TokenName::invalid;
 			}
 
-			nik_ce void test_action(lexeme & c) const
+			nik_ce token_type keyword_6(gstring_type b, gstring_type e) const
 			{
-			//	auto test_lexeme = test_dfa.lex(c.start, c.finish);
-			}
-
-			nik_ce void goto_action(lexeme & c) const
-			{
-			//	auto goto_lexeme = goto_dfa.lex(c.start, c.finish);
-			}
-
-			nik_ce void branch_action(lexeme & c) const
-			{
-			//	auto branch_lexeme = branch_dfa.lex(c.start, c.finish);
-			}
-
-			nik_ce void return_action(lexeme & c) const
-			{
-			//	auto return_lexeme = return_dfa.lex(c.start, c.finish);
-			}
-
-			nik_ce void lex_action(lexeme & c) const
-			{
-			//	gstring_type m = b;
-
-			//	state s = state{LexerName::initial, LexerToken::invalid};
-
-			//	while (m != e && s.name != LexerName::empty) s = move(s, *(m++));
+				if      (recognizes< T_branch_dfa >(b, e)) return TokenName::branch;
+				else if (recognizes< T_return_dfa >(b, e)) return TokenName::re_turn;
+				else                                       return TokenName::invalid;
 			}
 	};
-
-	nik_ce auto generic_assembly_dfa = GenericAssemblyDFA{};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

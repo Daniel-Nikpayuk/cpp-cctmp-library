@@ -45,17 +45,18 @@ namespace cctmp {
 	template<typename CharType>
 	struct node
 	{
-		using char_type	= CharType;
+		using char_type		= CharType;
+		using cchar_type	= char_type const;
 
-		const char_type *begin;
-		const char_type *end;
+		cchar_type *begin;
+		cchar_type *end;
 
 		gindex_type line;  // bool line_inc indicating the number of statements matched ?
 		gindex_type block; // bool block_inc indicating if a new block was entered ?
 
 	//	The parser doesn't need to know the returned policy, it can determine it from the token.
 	//	gkey_type error;
-		gkey_type token;
+		token_type token;
 
 		nik_ce node() :
 
@@ -67,7 +68,7 @@ namespace cctmp {
 
 			{ }
 
-		nik_ce node(const char_type *b, const char_type *e, gindex_type _l, gindex_type _b, gkey_type _t) :
+		nik_ce node(cchar_type *b, cchar_type *e, gcindex_type _l, gcindex_type _b, ctoken_type _t) :
 
 			begin {  b },
 			end   {  e },
@@ -89,26 +90,28 @@ namespace cctmp {
 	struct source
 	{
 		using char_type			= CharType;
-		using string_type		= char_type const *;
+		using cchar_type		= char_type const;
+		using string_type		= cchar_type*;
 		using cstring_type		= string_type const;
 		using size_type			= decltype(Size);
 		using entry			= node<CharType>;
 
-		nik_ces size_type size		= Size;
+		nik_ces size_type length	= Size;
+		nik_ces auto dfa		= GenericAssemblyDFA{};
 
 		cstring_type string;
 		cstring_type finish;
 
-		entry syntax[size];
-		size_type syntax_size; // current size
+		entry syntax[length];
+		size_type size; // current size
 
 		nik_ce source(const CharType (&s)[Size]) :
 
-			string      { s        },
-			finish      { s + size },
+			string { s          },
+			finish { s + length },
 
-			syntax      {          },
-			syntax_size { _zero    }
+			syntax {            },
+			size   { _zero      }
 
 			{ parse(); }
 
@@ -117,7 +120,10 @@ namespace cctmp {
 			entry *current		= syntax;
 			gindex_type line	= _zero;
 			gindex_type block	= _zero;
-			gkey_type token		= LexerToken::invalid;
+
+			auto l   = dfa.lex(string, finish);
+			*current = entry{l.start, l.finish, line, block, l.value};
+			++size;
 		}
 	};
 
