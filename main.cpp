@@ -53,11 +53,7 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	printf("%d\n", (int) parsed_factorial_src.length);
-	//	printf("%d\n", (int) src.size);
-	//	printf("%s\n", (src.syntax[0].token == TokenName::go_to) ? "true" : "false");
-	//	printf("%s\n", (src.syntax[1].token == TokenName::statement) ? "true" : "false");
-	//	printf("%s\n", (tok == TokenName::go_to) ? "true" : "false");
+	//	printf("%d\n", (int) parsed_factorial_src.toc.length);
 
 		return 0;
 	}

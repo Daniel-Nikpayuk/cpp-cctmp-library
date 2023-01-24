@@ -237,10 +237,10 @@ namespace cctmp {
 
 // recognize:
 
-	template<typename DFA>
+	template<typename T_dftt>
 	nik_ce lexeme recognize(gstring_type b, gstring_type e)
 	{
-		nik_ce DFA dfa;
+		nik_ce auto transition_table = T_dftt::result;
 
 		gstring_type k = skip_whitespace(b, e);
 		b = k;
@@ -249,7 +249,7 @@ namespace cctmp {
 
 		while (k != e)
 		{
-			auto ns = dfa.move(s, *k);
+			auto ns = transition_table.move(s, *k);
 
 			if (ns == StateName::empty) break;
 			else
@@ -266,14 +266,17 @@ namespace cctmp {
 
 // recognizes:
 
-	template<typename DFA>
+	template<typename T_dfa>
 	nik_ce gcbool_type recognizes(gstring_type b, gstring_type e)
 	{
-		nik_ce DFA dfa;
-
-		auto l = dfa.lex(b, e);
+		auto l = T_dfa::lex(b, e);
 		return (l.value != TokenName::invalid);
 	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// (generic) keyword:
 
 /***********************************************************************************************************************/
 
@@ -326,10 +329,10 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// (generic) keyword:
+// transition table:
 
-	template<auto CharsetCallable, auto Token>
-	struct KeywordDFA
+	template<auto CharsetCallable>
+	struct KeywordDFTT
 	{
 		nik_ces auto charset			= CharsetCallable();
 		nik_ces gkey_type state_size		= charset.length + 2;
@@ -339,7 +342,7 @@ namespace cctmp {
 
 			state_type table[state_size][charset_size];
 
-			nik_ce KeywordDFA() : table{} // initializes the empty state.
+			nik_ce KeywordDFTT() : table{} // initializes the empty state.
 			{
 				for (gkey_type pos = StateName::initial; pos != charset.length + 1; ++pos)
 					table[pos][charset.column[pos - 1]] = pos + 1;
@@ -349,85 +352,107 @@ namespace cctmp {
 			{
 				return table[s][charset.map(c)];
 			}
+	};
 
-			nik_ce lexeme lex(gstring_type b, gstring_type e) const
-			{
-				auto l       = recognize<KeywordDFA>(b, e);
-				token_type t = (l.value == charset.length + 1) ? Token : TokenName::invalid;
+	template<auto CharsetCallable>
+	struct T_keyword_dftt
+	{
+		nik_ces auto result = KeywordDFTT<CharsetCallable>{};
+		nik_ces auto accept = result.charset.length + 1;
+	};
 
-				return lexeme{l.start, l.finish, t};
-			}
+/***********************************************************************************************************************/
+
+// automaton:
+
+	template<auto CharsetCallable, auto Token>
+	struct T_keyword_dfa
+	{
+		using transition_table = T_keyword_dftt<CharsetCallable>;
+
+		nik_ces lexeme lex(gstring_type b, gstring_type e)
+		{
+			auto l       = recognize<transition_table>(b, e);
+			token_type t = (l.value == transition_table::accept) ? Token : TokenName::invalid;
+
+			return lexeme{l.start, l.finish, t};
+		}
 	};
 
 /***********************************************************************************************************************/
 
 // statement:
 
-	nik_ce auto statement_dfa() { return dfa_charset(";"); }
+	nik_ce auto statement_charset() { return dfa_charset(";"); }
 
-	using T_statement_dfa = KeywordDFA<statement_dfa, TokenName::statement>;
+	using T_statement_dfa = T_keyword_dfa<statement_charset, TokenName::statement>;
 
 /***********************************************************************************************************************/
 
 // period:
 
-	nik_ce auto period_dfa() { return dfa_charset("."); }
+	nik_ce auto period_charset() { return dfa_charset("."); }
 
-	using T_period_dfa = KeywordDFA<period_dfa, TokenName::period>;
+	using T_period_dfa = T_keyword_dfa<period_charset, TokenName::period>;
 
 /***********************************************************************************************************************/
 
 // underscore:
 
-	nik_ce auto underscore_dfa() { return dfa_charset("_"); }
+	nik_ce auto underscore_charset() { return dfa_charset("_"); }
 
-	using T_underscore_dfa = KeywordDFA<underscore_dfa, TokenName::underscore>;
+	using T_underscore_dfa = T_keyword_dfa<underscore_charset, TokenName::underscore>;
 
 /***********************************************************************************************************************/
 
 // equal:
 
-	nik_ce auto equal_dfa() { return dfa_charset("="); }
+	nik_ce auto equal_charset() { return dfa_charset("="); }
 
-	using T_equal_dfa = KeywordDFA<equal_dfa, TokenName::equal>;
+	using T_equal_dfa = T_keyword_dfa<equal_charset, TokenName::equal>;
 
 /***********************************************************************************************************************/
 
 // test:
 
-	nik_ce auto test_dfa() { return dfa_charset("test"); }
+	nik_ce auto test_charset() { return dfa_charset("test"); }
 
-	using T_test_dfa = KeywordDFA<test_dfa, TokenName::test>;
+	using T_test_dfa = T_keyword_dfa<test_charset, TokenName::test>;
 
 /***********************************************************************************************************************/
 
 // goto:
 
-	nik_ce auto goto_dfa() { return dfa_charset("goto"); }
+	nik_ce auto goto_charset() { return dfa_charset("goto"); }
 
-	using T_goto_dfa = KeywordDFA<goto_dfa, TokenName::go_to>;
+	using T_goto_dfa = T_keyword_dfa<goto_charset, TokenName::go_to>;
 
 /***********************************************************************************************************************/
 
 // branch:
 
-	nik_ce auto branch_dfa() { return dfa_charset("branch"); }
+	nik_ce auto branch_charset() { return dfa_charset("branch"); }
 
-	using T_branch_dfa = KeywordDFA<branch_dfa, TokenName::branch>;
+	using T_branch_dfa = T_keyword_dfa<branch_charset, TokenName::branch>;
 
 /***********************************************************************************************************************/
 
 // return:
 
-	nik_ce auto return_dfa() { return dfa_charset("return"); }
+	nik_ce auto return_charset() { return dfa_charset("return"); }
 
-	using T_return_dfa = KeywordDFA<return_dfa, TokenName::re_turn>;
+	using T_return_dfa = T_keyword_dfa<return_charset, TokenName::re_turn>;
 
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // generic assembly:
 
-	struct GenericAssemblyDFA
+/***********************************************************************************************************************/
+
+// transition table:
+
+	struct GenericAssemblyDFTT
 	{
 		struct State
 		{
@@ -494,7 +519,7 @@ namespace cctmp {
 
 			state_type table[State::dimension][Charset::dimension];
 
-			nik_ce GenericAssemblyDFA() : table{}
+			nik_ce GenericAssemblyDFTT() : table{}
 			{
 				table [ State::initial ][ Charset::ula       ] = State::ulan;
 				table [ State::initial ][ Charset::semicolon ] = State::semicolon;
@@ -510,72 +535,88 @@ namespace cctmp {
 			{
 				return table[s][Charset::map(c)];
 			}
+	};
 
-			nik_ce lexeme lex(gstring_type b, gstring_type e) const
+	struct T_generic_assembly_dftt
+	{
+		using state		= typename GenericAssemblyDFTT::State;
+		nik_ces auto result	= GenericAssemblyDFTT{};
+	};
+
+/***********************************************************************************************************************/
+
+// automaton:
+
+	struct T_generic_assembly_dfa
+	{
+		using transition_table = T_generic_assembly_dftt;
+		using transition_state = typename transition_table::state;
+
+		nik_ces lexeme lex(gstring_type b, gstring_type e)
+		{
+			auto l = recognize<transition_table>(b, e);
+			auto n = StateName::find(l.value, transition_state::accept);
+
+			token_type t = TokenName::invalid;
+			if (StateName::is_final(n, transition_state::accept)) t = transition_state::token[n];
+
+			return keyword_check(l.start, l.finish, t);
+		}
+
+		nik_ces lexeme keyword_check(gstring_type b, gstring_type e, ctoken_type t)
+		{
+			switch (t)
 			{
-				auto l = recognize<GenericAssemblyDFA>(b, e);
-				auto n = StateName::find(l.value, State::accept);
-
-				token_type t = TokenName::invalid;
-				if (StateName::is_final(n, State::accept)) t = State::token[n];
-
-				return keyword_check(l.start, l.finish, t);
-			}
-
-			nik_ce lexeme keyword_check(gstring_type b, gstring_type e, ctoken_type t) const
-			{
-				switch (t)
+				case TokenName::identifier:
 				{
-					case TokenName::identifier:
-					{
-						ctoken_type t0 = keyword(b, e);
-						ctoken_type rt = (t0 == TokenName::invalid) ? t : t0;
+					ctoken_type t0 = keyword(b, e);
+					ctoken_type rt = (t0 == TokenName::invalid) ? t : t0;
 
-						return lexeme{b, e, rt};
-					}
-					case TokenName::label:
-					{
-						ctoken_type t0 = keyword(b, e-1);
-						ctoken_type t1 = TokenName::keyword_label_error;
-						ctoken_type rt = (t0 == TokenName::invalid) ? t : t1;
-
-						return lexeme{b, e, rt};
-					}
-					default:
-						return lexeme{b, e, t};
+					return lexeme{b, e, rt};
 				}
-			}
-
-			nik_ce token_type keyword(gstring_type b, gstring_type e) const
-			{
-				switch (e - b)
+				case TokenName::label:
 				{
-					case  1: return keyword_1(b, e);
-					case  4: return keyword_4(b, e);
-					case  6: return keyword_6(b, e);
-					default: return TokenName::invalid;
+					ctoken_type t0 = keyword(b, e-1);
+					ctoken_type t1 = TokenName::keyword_label_error;
+					ctoken_type rt = (t0 == TokenName::invalid) ? t : t1;
+
+					return lexeme{b, e, rt};
 				}
+				default:
+					return lexeme{b, e, t};
 			}
+		}
 
-			nik_ce token_type keyword_1(gstring_type b, gstring_type e) const
+		nik_ces token_type keyword(gstring_type b, gstring_type e)
+		{
+			switch (e - b)
 			{
-				if   (recognizes< T_underscore_dfa >(b, e)) return TokenName::underscore;
-				else                                        return TokenName::invalid;
+				case  1: return keyword_1(b, e);
+				case  4: return keyword_4(b, e);
+				case  6: return keyword_6(b, e);
+				default: return TokenName::invalid;
 			}
+		}
 
-			nik_ce token_type keyword_4(gstring_type b, gstring_type e) const
-			{
-				if      (recognizes< T_test_dfa >(b, e)) return TokenName::test;
-				else if (recognizes< T_goto_dfa >(b, e)) return TokenName::go_to;
-				else                                     return TokenName::invalid;
-			}
+		nik_ces token_type keyword_1(gstring_type b, gstring_type e)
+		{
+			if   (recognizes< T_underscore_dfa >(b, e)) return TokenName::underscore;
+			else                                        return TokenName::invalid;
+		}
 
-			nik_ce token_type keyword_6(gstring_type b, gstring_type e) const
-			{
-				if      (recognizes< T_branch_dfa >(b, e)) return TokenName::branch;
-				else if (recognizes< T_return_dfa >(b, e)) return TokenName::re_turn;
-				else                                       return TokenName::invalid;
-			}
+		nik_ces token_type keyword_4(gstring_type b, gstring_type e)
+		{
+			if      (recognizes< T_test_dfa >(b, e)) return TokenName::test;
+			else if (recognizes< T_goto_dfa >(b, e)) return TokenName::go_to;
+			else                                     return TokenName::invalid;
+		}
+
+		nik_ces token_type keyword_6(gstring_type b, gstring_type e)
+		{
+			if      (recognizes< T_branch_dfa >(b, e)) return TokenName::branch;
+			else if (recognizes< T_return_dfa >(b, e)) return TokenName::re_turn;
+			else                                       return TokenName::invalid;
+		}
 	};
 
 /***********************************************************************************************************************/
