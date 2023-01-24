@@ -2221,5 +2221,64 @@ namespace cctmp_program
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+	struct a_struct
+	{
+		gindex_type v;
+
+		nik_ce a_struct(gcindex_type _v) : v{_v} { }
+
+		template<auto V>
+		nik_ces auto result() { return a_struct{V}; };
+	};
+
+	template<auto Size>
+	struct b_struct
+	{
+		nik_ces auto size = Size; 
+
+		const a_struct *v;
+
+		nik_ce b_struct(const a_struct (&_v)[Size]) : v{_v} { }
+		nik_ce b_struct(const a_struct *_v) : v{_v} { }
+	};
+
+	nik_ce auto unit_source()
+	{
+		return source
+		(
+		 	"add x y   ;"
+			"goto done ;"
+		);
+	}
+
+	template<typename Type, auto Op, auto... Vs>
+	nik_ce Type to_array[] = { T_store_U<Op>::template result<Vs>()... };
+
+//	template<typename Type, Type... Vs>
+//	nik_ce Type array[] = { Vs... };
+
+//	nik_ce a_struct a_struct_array[]
+
+	template<auto arr>
+	nik_ce auto first_val = arr[0];
+
+	template<auto Callable>
+	nik_ce auto make_array()
+	{
+		nik_ce auto src = Callable();
+		nik_ce auto arr = to_array<a_struct, U_store_T<a_struct>, 1, 2>;
+		nik_ce auto _a  = first_val<arr>;
+
+		auto val = b_struct<2>(arr);
+
+		return src.syntax[6].token;//_a.v;
+	}
+
+	nik_ce auto toc = make_array<unit_source>();
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 } // case studies
 

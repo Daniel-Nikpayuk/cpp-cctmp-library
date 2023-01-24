@@ -94,59 +94,244 @@ namespace cctmp {
 		using string_type		= cchar_type*;
 		using cstring_type		= string_type const;
 		using size_type			= decltype(Size);
-		using entry			= node<CharType>;
 
-		nik_ces size_type length	= Size;
+		nik_ces size_type length	= Size - 1;
 		nik_ces auto dfa		= GenericAssemblyDFA{};
 
 		cstring_type string;
 		cstring_type finish;
 
-		entry syntax[length];
-		size_type size; // current size
+		gindex_type max_entry_size;
+		gindex_type max_ident_size;
+		gindex_type max_line_size;
+		gindex_type block_size;
 
 		nik_ce source(const CharType (&s)[Size]) :
 
-			string { s          },
-			finish { s + length },
+			string         { s          },
+			finish         { s + length },
 
-			syntax {            },
-			size   { _zero      }
+			max_entry_size { _zero      },
+			max_ident_size { _zero      },
+			max_line_size  { _zero      },
+			block_size     { _one       }
 
-			{ parse(); }
-
-		nik_ce void parse()
 		{
-			entry *current		= syntax;
-			gindex_type line	= _zero;
-			gindex_type block	= _zero;
+			auto k = string;
 
-			auto l   = dfa.lex(string, finish);
-			*current = entry{l.start, l.finish, line, block, l.value};
-			++size;
+			gindex_type entry_size = _zero;
+			gindex_type line_size  = _zero;
+
+			while (k != finish)
+			{
+				auto l = dfa.lex(k, finish);
+
+				if (l.value == TokenName::identifier)
+				{
+					++entry_size;
+					++max_ident_size;
+				}
+				else if (l.value == TokenName::statement)
+				{
+					if (entry_size > max_entry_size) max_entry_size = entry_size;
+					entry_size = _zero;
+					++line_size;
+				}
+				else if (l.value == TokenName::label)
+				{
+					if (line_size > max_line_size) max_line_size = line_size;
+					++entry_size;
+					line_size = _zero;
+					++block_size;
+				}
+
+				k = l.finish;
+			}
 		}
 	};
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// count statements:
+// preamble:
 
-		// skips whitespace as a side effect.
+/***********************************************************************************************************************/
 
-/*
-	nik_ce gstring_type count_statements(gindex_type & count, gstring_type b, gstring_type e)
+// entry:
+
+	template<typename CharType>
+	struct Entry
 	{
-		b = skip_whitespace(b, e);
+		using char_type		= CharType;
+		using cchar_type	= char_type const;
 
-		while (*b == ';')
+		cchar_type *begin;
+		cchar_type *end;
+
+		token_type token;
+
+		nik_ce Entry() :
+
+			begin {    },
+			end   {    },
+			token {    }
+
+			{ }
+
+		nik_ce Entry(cchar_type *b, cchar_type *e, ctoken_type _t) :
+
+			begin {  b },
+			end   {  e },
+			token { _t }
+
+			{ }
+	};
+
+/***********************************************************************************************************************/
+
+// line:
+
+	template<typename CharType, auto Size>
+	struct Line
+	{
+		using char_type			= CharType;
+		using cchar_type		= char_type const;
+		using size_type			= decltype(Size);
+		using entry_type		= Entry<char_type>;
+
+		nik_ces size_type length	= Size;
+
+		entry_type entry[length];
+		size_type size; // current size
+
+		nik_ce Line() : entry{}, size{} { }
+	};
+
+/***********************************************************************************************************************/
+
+// block:
+
+	template<typename CharType, auto LineSize, auto EntrySize>
+	struct Block
+	{
+		using char_type			= CharType;
+		using cchar_type		= char_type const;
+		using size_type			= decltype(LineSize);
+		using line_type			= Line<char_type, EntrySize>;
+
+		nik_ces size_type length	= LineSize;
+
+		line_type line[length];
+		size_type size; // current size
+
+		nik_ce Block() : line{}, size{} { }
+	};
+
+/***********************************************************************************************************************/
+
+// table of contents:
+
+	// parsing the string should be done in two rounds:
+
+		// The first to collect memory allocation optimizers
+		// such as block, max line, max entry, and distinct identifiers.
+		// (if we're going to commit an extra parse cycle, we might as well
+		//  collect as much relevant optimizing info as possible here)
+
+		// the second round then builds the table of contents.
+
+		// a line is an array of two arrays: begin entries, and end entries.
+		// a block is an array of lines.
+		// a table of contents is an array of blocks.
+
+		// we can get the toc size (number of blocks) right away from the source.
+		// if we want variable size blocks (numbers of lines) we have to statically build them first,
+		// then cast those arrays as pointers.
+
+	template<typename CharType, auto BlockSize, auto LineSize, auto EntrySize>
+	struct table_of_contents
+	{
+		using char_type			= CharType;
+		using cchar_type		= char_type const;
+		using string_type		= cchar_type*;
+		using cstring_type		= string_type const;
+		using block_type		= Block<char_type, LineSize, EntrySize>;
+		using size_type			= decltype(BlockSize);
+
+		nik_ces size_type length	= BlockSize;
+		nik_ces auto dfa		= GenericAssemblyDFA{};
+
+		cstring_type string;
+		cstring_type finish;
+
+		block_type syntax[length];
+		size_type size; // current size
+
+		nik_ce table_of_contents(const CharType *s, const CharType *f) :
+
+			string { s     },
+			finish { f     },
+
+			syntax {       },
+			size   { _zero }
+
 		{
-			++count;
-			b = skip_whitespace(++b, e);
-		}
+		//	entry *current		= syntax;
+		//	gindex_type line	= _zero;
+		//	gindex_type block	= _zero;
 
-		return b;
+		//	for (auto k = string; k != finish; ++current, ++size)
+		//	{
+		//		auto l   = dfa.lex(k, finish);
+		//		*current = entry{l.start, l.finish, line, block, l.value};
+
+		//		k = l.finish;
+		//	}
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// parse:
+
+/***********************************************************************************************************************/
+
+	template<auto callable>
+	nik_ce auto _parse()
+	{
+		nik_ce auto src = callable();
+
+		using char_type = typename decltype(src)::char_type;
+		using TOC = table_of_contents<char_type, src.block_size, src.max_line_size, src.max_entry_size>;
+
+		return TOC(src.string, src.finish);
 	}
-*/
+
+	template<auto callable>
+	nik_ce auto parse = _parse<callable>();
+
+/***********************************************************************************************************************/
+
+	nik_ce auto factorial_source()
+	{
+		return source
+		(
+		 	"factorial p n    ;"
+
+			"loop:            ;"
+		 	"test is_zero n   ;"
+			"branch done      ;"
+			"p = multiply p n ;"
+			"n = decrement n  ;"
+			"goto loop        ;"
+
+			"done:            ;"
+			"return p         ;"
+		);
+	}
+
+	nik_ce auto parsed_factorial_src = parse<factorial_source>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
