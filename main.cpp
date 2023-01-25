@@ -53,7 +53,7 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	printf("%d\n", (int) parsed_factorial_src.toc.length);
+		printf("%d\n", (int) parsed_factorial_src.stack.length);
 
 		return 0;
 	}

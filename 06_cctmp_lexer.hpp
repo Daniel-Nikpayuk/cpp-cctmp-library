@@ -338,20 +338,18 @@ namespace cctmp {
 		nik_ces gkey_type state_size		= charset.length + 2;
 		nik_ces gkey_type charset_size		= charset.size + 1;
 
-		// table:
+		state_type table[state_size][charset_size];
 
-			state_type table[state_size][charset_size];
+		nik_ce KeywordDFTT() : table{} // initializes the empty state.
+		{
+			for (gkey_type pos = StateName::initial; pos != charset.length + 1; ++pos)
+				table[pos][charset.column[pos - 1]] = pos + 1;
+		}
 
-			nik_ce KeywordDFTT() : table{} // initializes the empty state.
-			{
-				for (gkey_type pos = StateName::initial; pos != charset.length + 1; ++pos)
-					table[pos][charset.column[pos - 1]] = pos + 1;
-			}
-
-			nik_ce cstate_type & move(cstate_type s, gcchar_type c) const
-			{
-				return table[s][charset.map(c)];
-			}
+		nik_ce cstate_type & move(cstate_type s, gcchar_type c) const
+		{
+			return table[s][charset.map(c)];
+		}
 	};
 
 	template<auto CharsetCallable>
@@ -515,26 +513,24 @@ namespace cctmp {
 			}
 		};
 
-		// table:
+		state_type table[State::dimension][Charset::dimension];
 
-			state_type table[State::dimension][Charset::dimension];
+		nik_ce GenericAssemblyDFTT() : table{}
+		{
+			table [ State::initial ][ Charset::ula       ] = State::ulan;
+			table [ State::initial ][ Charset::semicolon ] = State::semicolon;
+			table [ State::initial ][ Charset::equal     ] = State::equal;
+			table [ State::initial ][ Charset::period    ] = State::period;
 
-			nik_ce GenericAssemblyDFTT() : table{}
-			{
-				table [ State::initial ][ Charset::ula       ] = State::ulan;
-				table [ State::initial ][ Charset::semicolon ] = State::semicolon;
-				table [ State::initial ][ Charset::equal     ] = State::equal;
-				table [ State::initial ][ Charset::period    ] = State::period;
+			table [ State::ulan    ][ Charset::ula       ] = State::ulan;
+			table [ State::ulan    ][ Charset::digit     ] = State::ulan;
+			table [ State::ulan    ][ Charset::colon     ] = State::colon;
+		}
 
-				table [ State::ulan    ][ Charset::ula       ] = State::ulan;
-				table [ State::ulan    ][ Charset::digit     ] = State::ulan;
-				table [ State::ulan    ][ Charset::colon     ] = State::colon;
-			}
-
-			nik_ce cstate_type move(cstate_type s, gcchar_type c) const
-			{
-				return table[s][Charset::map(c)];
-			}
+		nik_ce cstate_type move(cstate_type s, gcchar_type c) const
+		{
+			return table[s][Charset::map(c)];
+		}
 	};
 
 	struct T_generic_assembly_dftt
@@ -565,26 +561,26 @@ namespace cctmp {
 
 		nik_ces lexeme keyword_check(gstring_type b, gstring_type e, ctoken_type t)
 		{
+			token_type rt = t;
+
 			switch (t)
 			{
 				case TokenName::identifier:
 				{
 					ctoken_type t0 = keyword(b, e);
-					ctoken_type rt = (t0 == TokenName::invalid) ? t : t0;
-
-					return lexeme{b, e, rt};
+					rt = (t0 == TokenName::invalid) ? t : t0;
+					break;
 				}
 				case TokenName::label:
 				{
 					ctoken_type t0 = keyword(b, e-1);
 					ctoken_type t1 = TokenName::keyword_label_error;
-					ctoken_type rt = (t0 == TokenName::invalid) ? t : t1;
-
-					return lexeme{b, e, rt};
+					rt = (t0 == TokenName::invalid) ? t : t1;
+					break;
 				}
-				default:
-					return lexeme{b, e, t};
 			}
+
+			return lexeme{b, e, rt};
 		}
 
 		nik_ces token_type keyword(gstring_type b, gstring_type e)

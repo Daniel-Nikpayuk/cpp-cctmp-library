@@ -32,9 +32,12 @@ namespace cctmp {
 	using symbol_type  = gindex_type;
 	using csymbol_type = symbol_type const;
 
+	using action_type  = gindex_type;
+	using caction_type = action_type const;
+
 /***********************************************************************************************************************/
 
-// body
+// body:
 
 	struct Body
 	{
@@ -60,6 +63,31 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
+
+// transition:
+
+	struct Transition
+	{
+		Body body;
+		action_type action;
+
+		nik_ce Transition() :
+
+			body   {    },
+			action {    }
+
+			{ }
+
+		template<auto Size>
+		nik_ce Transition(const token_type (&_b)[Size], caction_type _a = _zero) :
+
+			body   { _b , Size },
+			action { _a        }
+
+			{ }
+	};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // generic assembly:
@@ -70,69 +98,73 @@ namespace cctmp {
 
 	struct GenericAssemblyPDTT
 	{
+		using ArraySize = T_store_U<_array_size_>;
+
 		struct Nonterminal
 		{
-			enum : symbol_type
-			{
-				start      ,
-				preamble   ,
-				name       ,
-				o_block    ,
-				r_block    ,
-				block      ,
-				extended   ,
-				o_instr    ,
-				r_instr    ,
-				instr      ,
-				identifier ,
-				variable   ,
-				tag        ,
-				mark       ,
-				dimension
-			};
+			nik_ces gchar_type symbol[] = "SPNRCBELJIFVTM$";
 
-			nik_ces auto size = dimension;
+			nik_ces auto size = ArraySize::template result<>(symbol) - 1;
 		};
 
 		struct Terminal
 		{
-			enum : symbol_type
-			{
-				label = Nonterminal::size,
-				test       ,
-				branch     ,
-				go_to      ,
-				re_turn    ,
-				identifier ,
-				period     ,
-				underscore ,
-				equal      ,
-				statement  ,
-				end        ,
-				dimension
-			};
+			nik_ces gchar_type symbol[] = "ltbgri._=;e";
 
-			nik_ces auto size = dimension - Nonterminal::size;
+			nik_ces auto size = ArraySize::template result<>(symbol) - 1;
 		};
 
-		using NT = Nonterminal;
-		using T  = Terminal;
+		Transition table[Nonterminal::size][Terminal::size];
 
-		// table:
+	//	nik_ce Transition & table_entry(gcstring_type str)
+	//	{
+	//		auto n   = str[0];
+	//		auto row = Nonterminal::map(n);
 
-			Body table[NT::size][T::size];
+	//		auto t   = str[3];
+	//		auto col = Terminal::map(t);
 
-			nik_ce GenericAssemblyPDTT() : table{}
-			{
-			//	table [ NT::initial ][ T::ula       ] = prod{ State::ulan      };
-			//	table [ NT::initial ][ T::semicolon ] = prod{ State::semicolon };
-			//	table [ NT::initial ][ T::equal     ] = prod{ State::equal     };
-			//	table [ NT::initial ][ T::period    ] = prod{ State::period    };
+	//		return table[row][col];
+	//	}
 
-			//	table [ NT::ulan    ][ T::ula       ] = prod{ State::ulan      };
-			//	table [ NT::ulan    ][ T::digit     ] = prod{ State::ulan      };
-			//	table [ NT::ulan    ][ T::colon     ] = prod{ State::colon     };
-			}
+	//	template<auto Size>
+	//	nik_ce Transition transition(gcchar_type (&str)[Size])
+	//	{
+	//		return Transition{str};
+	//	}
+
+		nik_ce GenericAssemblyPDTT() //: table{}
+		{
+		//	table_entry("S, i") = transition("P;R"   );
+		//	table_entry("P, i") = transition("iN"    );
+		//	table_entry("N, i") = transition("iN"    );
+		//	table_entry("N, ;") = transition("e"     );
+		//	table_entry("R, l") = transition("BC"    );
+		//	table_entry("C, l") = transition("BC"    );
+		//	table_entry("C, $") = transition("e"     );
+		//	table_entry("B, l") = transition("l;LE"  );
+		//	table_entry("E, g") = transition("gi"    );
+		//	table_entry("E, r") = transition("rM"    );
+		//	table_entry("L, t") = transition("IJ"    );
+		//	table_entry("L, i") = transition("IJ"    );
+		//	table_entry("L, .") = transition("IJ"    );
+		//	table_entry("J, t") = transition("IJ"    );
+		//	table_entry("J, g") = transition("e"     );
+		//	table_entry("J, r") = transition("e"     );
+		//	table_entry("J, i") = transition("IJ"    );
+		//	table_entry("J, .") = transition("IJ"    );
+		//	table_entry("I, t") = transition("tF;bi;");
+		//	table_entry("I, i") = transition("T=F;"  );
+		//	table_entry("I, .") = transition("T=F;"  );
+		//	table_entry("F, i") = transition("iV"    );
+		//	table_entry("V, i") = transition("MV"    );
+		//	table_entry("V, _") = transition("MV"    );
+		//	table_entry("V, ;") = transition("e"     );
+		//	table_entry("T, i") = transition("i"     );
+		//	table_entry("T, .") = transition("."     );
+		//	table_entry("M, i") = transition("i"     );
+		//	table_entry("M, _") = transition("_"     );
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -170,7 +202,9 @@ namespace cctmp {
 		gindex_type max_entry_size;
 		gindex_type max_ident_size;
 		gindex_type max_line_size;
+
 		gindex_type block_size;
+		gindex_type stack_size;
 
 		nik_ce source(const CharType (&s)[Size]) :
 
@@ -180,37 +214,46 @@ namespace cctmp {
 			max_entry_size { _zero      },
 			max_ident_size { _zero      },
 			max_line_size  { _zero      },
-			block_size     { _one       }
+
+			block_size     { _one       },
+			stack_size     { _zero      }
 
 		{
 			auto k = string;
 
-			gindex_type entry_size = _zero;
-			gindex_type line_size  = _zero;
+			gindex_type cur_entry_size = _zero;
+			gindex_type cur_line_size  = _zero;
 
 			while (k != finish)
 			{
 				auto l = T_dfa::lex(k, finish);
 
-				if (l.value == TokenName::identifier)
+				switch (l.value)
 				{
-					++entry_size;
-					++max_ident_size;
-				}
-				else if (l.value == TokenName::statement)
-				{
-					if (entry_size > max_entry_size) max_entry_size = entry_size;
-					entry_size = _zero;
-					++line_size;
-				}
-				else if (l.value == TokenName::label)
-				{
-					if (line_size > max_line_size) max_line_size = line_size;
-					++entry_size;
-					line_size = _zero;
-					++block_size;
+					case TokenName::identifier:
+					{
+						++cur_entry_size;
+						++max_ident_size;
+						break;
+					}
+					case TokenName::statement:
+					{
+						if (cur_entry_size > max_entry_size) max_entry_size = cur_entry_size;
+						cur_entry_size = _zero;
+						++cur_line_size;
+						break;
+					}
+					case TokenName::label:
+					{
+						if (cur_line_size > max_line_size) max_line_size = cur_line_size;
+						++cur_entry_size;
+						cur_line_size = _zero;
+						++block_size;
+						break;
+					}
 				}
 
+				++stack_size;
 				k = l.finish;
 			}
 		}
@@ -315,6 +358,23 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// stack:
+
+	template<auto Size>
+	struct Stack
+	{
+		using size_type			= decltype(Size);
+
+		nik_ces size_type length	= Size;
+
+		token_type token[length];
+		size_type size; // current size
+
+		nik_ce Stack() : token{}, size{} { }
+	};
+
+/***********************************************************************************************************************/
+
 // automaton:
 
 	// parsing the string should be done in two rounds:
@@ -345,7 +405,7 @@ namespace cctmp {
 	// 5) parse according to the tokens (and thus the context free grammar) to validate the source code.
 	// 6) Hold symbolic type info to determine dependencies/errors.
 
-	template<typename CharType, auto BlockSize, auto LineSize, auto EntrySize>
+	template<typename CharType, auto StackSize, auto BlockSize, auto LineSize, auto EntrySize>
 	struct T_generic_assembly_pda
 	{
 		using T_dfa			= T_generic_assembly_dfa;
@@ -355,16 +415,19 @@ namespace cctmp {
 		using string_type		= cchar_type*;
 		using cstring_type		= string_type const;
 		using toc_type			= TableOfContents<char_type, BlockSize, LineSize, EntrySize>;
+		using stack_type		= Stack<StackSize>;
 
 		cstring_type string;
 		cstring_type finish;
 		toc_type toc;
+		stack_type stack;
 
 		nik_ce T_generic_assembly_pda(const CharType *s, const CharType *f) :
 
 			string { s     },
 			finish { f     },
-			toc    {       }
+			toc    {       },
+			stack  {       }
 
 		{
 		//	entry *current		= syntax;
@@ -394,7 +457,10 @@ namespace cctmp {
 		nik_ce auto src = callable();
 
 		using char_type = typename decltype(src)::char_type;
-		using PDA = T_generic_assembly_pda<char_type, src.block_size, src.max_line_size, src.max_entry_size>;
+		using PDA = T_generic_assembly_pda
+		<
+			char_type, src.stack_size, src.block_size, src.max_line_size, src.max_entry_size
+		>;
 
 		return PDA(src.string, src.finish);
 	}
