@@ -29,7 +29,7 @@ namespace cctmp {
 
 // pushdown automata:
 
-	using symbol_type  = gindex_type;
+	using symbol_type  = gchar_type;
 	using csymbol_type = symbol_type const;
 
 	using action_type  = gindex_type;
@@ -78,11 +78,10 @@ namespace cctmp {
 
 			{ }
 
-		template<auto Size>
-		nik_ce Transition(const token_type (&_b)[Size], caction_type _a = _zero) :
+		nik_ce Transition(const Body & _b, caction_type _a) :
 
-			body   { _b , Size },
-			action { _a        }
+			body   { _b },
+			action { _a }
 
 			{ }
 	};
@@ -102,68 +101,69 @@ namespace cctmp {
 
 		struct Nonterminal
 		{
-			nik_ces gchar_type symbol[] = "SPNRCBELJIFVTM$";
+			nik_ces gchar_type symbol[] = "SPNRCBELJIFVTM";
 
 			nik_ces auto size = ArraySize::template result<>(symbol) - 1;
+			nik_ces auto end  = symbol + size;
 		};
 
 		struct Terminal
 		{
-			nik_ces gchar_type symbol[] = "ltbgri._=;e";
+			nik_ces gchar_type symbol[] = "ltbgri._=;e$";
 
 			nik_ces auto size = ArraySize::template result<>(symbol) - 1;
+			nik_ces auto end  = symbol + size;
 		};
 
 		Transition table[Nonterminal::size][Terminal::size];
 
-	//	nik_ce Transition & table_entry(gcstring_type str)
-	//	{
-	//		auto n   = str[0];
-	//		auto row = Nonterminal::map(n);
-
-	//		auto t   = str[3];
-	//		auto col = Terminal::map(t);
-
-	//		return table[row][col];
-	//	}
-
-	//	template<auto Size>
-	//	nik_ce Transition transition(gcchar_type (&str)[Size])
-	//	{
-	//		return Transition{str};
-	//	}
-
-		nik_ce GenericAssemblyPDTT() //: table{}
+		nik_ce Transition & table_entry(gcchar_type row_c, gcchar_type col_c)
 		{
-		//	table_entry("S, i") = transition("P;R"   );
-		//	table_entry("P, i") = transition("iN"    );
-		//	table_entry("N, i") = transition("iN"    );
-		//	table_entry("N, ;") = transition("e"     );
-		//	table_entry("R, l") = transition("BC"    );
-		//	table_entry("C, l") = transition("BC"    );
-		//	table_entry("C, $") = transition("e"     );
-		//	table_entry("B, l") = transition("l;LE"  );
-		//	table_entry("E, g") = transition("gi"    );
-		//	table_entry("E, r") = transition("rM"    );
-		//	table_entry("L, t") = transition("IJ"    );
-		//	table_entry("L, i") = transition("IJ"    );
-		//	table_entry("L, .") = transition("IJ"    );
-		//	table_entry("J, t") = transition("IJ"    );
-		//	table_entry("J, g") = transition("e"     );
-		//	table_entry("J, r") = transition("e"     );
-		//	table_entry("J, i") = transition("IJ"    );
-		//	table_entry("J, .") = transition("IJ"    );
-		//	table_entry("I, t") = transition("tF;bi;");
-		//	table_entry("I, i") = transition("T=F;"  );
-		//	table_entry("I, .") = transition("T=F;"  );
-		//	table_entry("F, i") = transition("iV"    );
-		//	table_entry("V, i") = transition("MV"    );
-		//	table_entry("V, _") = transition("MV"    );
-		//	table_entry("V, ;") = transition("e"     );
-		//	table_entry("T, i") = transition("i"     );
-		//	table_entry("T, .") = transition("."     );
-		//	table_entry("M, i") = transition("i"     );
-		//	table_entry("M, _") = transition("_"     );
+			auto row = numeric_find_pos(row_c, Nonterminal::symbol, Nonterminal::end);
+			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::end);
+
+			return table[row][col];
+		}
+
+		template<auto Size>
+		nik_ce Transition transition(gcchar_type (&str)[Size], caction_type action = _zero)
+		{
+			auto body = Body(str, Size - 1);
+
+			return Transition{ body , action };
+		}
+
+		nik_ce GenericAssemblyPDTT() : table{}
+		{
+			table_entry('S', 'i') = transition("P;R"   );
+			table_entry('P', 'i') = transition("iN"    );
+			table_entry('N', 'i') = transition("iN"    );
+			table_entry('N', ';') = transition("e"     );
+			table_entry('R', 'l') = transition("BC"    );
+			table_entry('C', 'l') = transition("BC"    );
+			table_entry('C', '$') = transition("e"     );
+			table_entry('B', 'l') = transition("l;LE"  );
+			table_entry('E', 'g') = transition("gi"    );
+			table_entry('E', 'r') = transition("rM"    );
+			table_entry('L', 't') = transition("IJ"    );
+			table_entry('L', 'i') = transition("IJ"    );
+			table_entry('L', '.') = transition("IJ"    );
+			table_entry('J', 't') = transition("IJ"    );
+			table_entry('J', 'g') = transition("e"     );
+			table_entry('J', 'r') = transition("e"     );
+			table_entry('J', 'i') = transition("IJ"    );
+			table_entry('J', '.') = transition("IJ"    );
+			table_entry('I', 't') = transition("tF;bi;");
+			table_entry('I', 'i') = transition("T=F;"  );
+			table_entry('I', '.') = transition("T=F;"  );
+			table_entry('F', 'i') = transition("iV"    );
+			table_entry('V', 'i') = transition("MV"    );
+			table_entry('V', '_') = transition("MV"    );
+			table_entry('V', ';') = transition("e"     );
+			table_entry('T', 'i') = transition("i"     );
+			table_entry('T', '.') = transition("."     );
+			table_entry('M', 'i') = transition("i"     );
+			table_entry('M', '_') = transition("_"     );
 		}
 	};
 

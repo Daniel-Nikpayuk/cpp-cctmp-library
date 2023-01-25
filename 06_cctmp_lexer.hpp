@@ -74,6 +74,18 @@ namespace cctmp {
 	}
 
 /***********************************************************************************************************************/
+
+// find pos:
+
+	template<typename T, typename In, typename End>
+	nik_ce auto numeric_find_pos(T n, In b, End e)
+	{
+		auto k = numeric_find(n, b, e);
+
+		return k - b;
+	}
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // recognizers:
@@ -158,20 +170,6 @@ namespace cctmp {
 			initial ,
 			dimension
 		};
-
-		template<auto Size>
-		nik_ces auto find(cstate_type s, cstate_type (&accept)[Size])
-		{
-			auto k = numeric_find(s, accept, accept + Size);
-
-			return k - accept;
-		}
-
-		template<auto Size>
-		nik_ces auto is_final(cstate_type s, cstate_type (&accept)[Size])
-		{
-			return (s != Size);
-		}
 	};
 
 /***********************************************************************************************************************/
@@ -319,11 +317,10 @@ namespace cctmp {
 
 		nik_ce gkey_type map(gcchar_type c) const
 		{
-			gcstring_type e = unique + size;
-			gcstring_type k = numeric_find(c, unique, e);
+			auto k = numeric_find_pos(c, unique, unique + size);
 
-			if (k != e) return (k - unique) + 1;
-			else        return _zero;
+			if (k != size) return k + 1;
+			else           return _zero;
 		}
 	};
 
@@ -535,8 +532,17 @@ namespace cctmp {
 
 	struct T_generic_assembly_dftt
 	{
-		using state		= typename GenericAssemblyDFTT::State;
+		using ArrayEnd		= T_store_U< _array_end_  >;
+		using ArraySize		= T_store_U< _array_size_ >;
+
 		nik_ces auto result	= GenericAssemblyDFTT{};
+		nik_ces auto accept	= GenericAssemblyDFTT::State::accept;
+		nik_ces auto end	= ArrayEnd::template result<>(GenericAssemblyDFTT::State::accept);
+		nik_ces auto size	= ArraySize::template result<>(GenericAssemblyDFTT::State::accept);
+		nik_ces auto token	= GenericAssemblyDFTT::State::token;
+
+		nik_ces auto find_pos(cstate_type n) { return numeric_find_pos(n, accept, end); }
+		nik_ces auto is_final(cstate_type n) { return (n != size); }
 	};
 
 /***********************************************************************************************************************/
@@ -546,15 +552,14 @@ namespace cctmp {
 	struct T_generic_assembly_dfa
 	{
 		using transition_table = T_generic_assembly_dftt;
-		using transition_state = typename transition_table::state;
 
 		nik_ces lexeme lex(gstring_type b, gstring_type e)
 		{
 			auto l = recognize<transition_table>(b, e);
-			auto n = StateName::find(l.value, transition_state::accept);
+			auto n = transition_table::find_pos(l.value);
 
 			token_type t = TokenName::invalid;
-			if (StateName::is_final(n, transition_state::accept)) t = transition_state::token[n];
+			if (transition_table::is_final(n)) t = transition_table::token[n];
 
 			return keyword_check(l.start, l.finish, t);
 		}
