@@ -176,20 +176,15 @@ namespace cctmp {
 
 // token:
 
-	using token_type  = gindex_type;
+	using token_type  = gchar_type;
 	using ctoken_type = token_type const;
 
 	struct TokenName
 	{
 		enum : token_type
 		{
-			invalid = 0,
-
+			invalid = '\0',
 			keyword_label_error,
-
-			statement , period     , underscore , equal   ,
-			test      , go_to      , branch     , re_turn ,
-			label     , identifier ,
 			dimension
 		};
 	};
@@ -370,73 +365,9 @@ namespace cctmp {
 			auto l       = recognize<transition_table>(b, e);
 			token_type t = (l.value == transition_table::accept) ? Token : TokenName::invalid;
 
-			return lexeme{l.start, l.finish, t};
+			return lexeme{l.start, l.finish, (gindex_type) t};
 		}
 	};
-
-/***********************************************************************************************************************/
-
-// statement:
-
-	nik_ce auto statement_charset() { return dfa_charset(";"); }
-
-	using T_statement_dfa = T_keyword_dfa<statement_charset, TokenName::statement>;
-
-/***********************************************************************************************************************/
-
-// period:
-
-	nik_ce auto period_charset() { return dfa_charset("."); }
-
-	using T_period_dfa = T_keyword_dfa<period_charset, TokenName::period>;
-
-/***********************************************************************************************************************/
-
-// underscore:
-
-	nik_ce auto underscore_charset() { return dfa_charset("_"); }
-
-	using T_underscore_dfa = T_keyword_dfa<underscore_charset, TokenName::underscore>;
-
-/***********************************************************************************************************************/
-
-// equal:
-
-	nik_ce auto equal_charset() { return dfa_charset("="); }
-
-	using T_equal_dfa = T_keyword_dfa<equal_charset, TokenName::equal>;
-
-/***********************************************************************************************************************/
-
-// test:
-
-	nik_ce auto test_charset() { return dfa_charset("test"); }
-
-	using T_test_dfa = T_keyword_dfa<test_charset, TokenName::test>;
-
-/***********************************************************************************************************************/
-
-// goto:
-
-	nik_ce auto goto_charset() { return dfa_charset("goto"); }
-
-	using T_goto_dfa = T_keyword_dfa<goto_charset, TokenName::go_to>;
-
-/***********************************************************************************************************************/
-
-// branch:
-
-	nik_ce auto branch_charset() { return dfa_charset("branch"); }
-
-	using T_branch_dfa = T_keyword_dfa<branch_charset, TokenName::branch>;
-
-/***********************************************************************************************************************/
-
-// return:
-
-	nik_ce auto return_charset() { return dfa_charset("return"); }
-
-	using T_return_dfa = T_keyword_dfa<return_charset, TokenName::re_turn>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -475,11 +406,11 @@ namespace cctmp {
 
 			nik_ces token_type token[] =
 			{
-				TokenName::identifier ,
-				TokenName::statement  ,
-				TokenName::equal      ,
-				TokenName::period     ,
-				TokenName::label
+				'i' ,
+				';' ,
+				'=' ,
+				'.' ,
+				'l'
 			};
 		};
 
@@ -543,6 +474,12 @@ namespace cctmp {
 
 		nik_ces auto find_pos(cstate_type n) { return numeric_find_pos(n, accept, end); }
 		nik_ces auto is_final(cstate_type n) { return (n != size); }
+
+		nik_ces auto underscore_charset () { return dfa_charset("_");      }
+		nik_ces auto test_charset       () { return dfa_charset("test");   }
+		nik_ces auto goto_charset       () { return dfa_charset("goto");   }
+		nik_ces auto branch_charset     () { return dfa_charset("branch"); }
+		nik_ces auto return_charset     () { return dfa_charset("return"); }
 	};
 
 /***********************************************************************************************************************/
@@ -552,6 +489,12 @@ namespace cctmp {
 	struct T_generic_assembly_dfa
 	{
 		using transition_table = T_generic_assembly_dftt;
+
+		using T_underscore_dfa = T_keyword_dfa< transition_table::underscore_charset , '_' >;
+		using T_test_dfa       = T_keyword_dfa< transition_table::test_charset       , 't' >;
+		using T_goto_dfa       = T_keyword_dfa< transition_table::goto_charset       , 'g' >;
+		using T_branch_dfa     = T_keyword_dfa< transition_table::branch_charset     , 'b' >;
+		using T_return_dfa     = T_keyword_dfa< transition_table::return_charset     , 'r' >;
 
 		nik_ces lexeme lex(gstring_type b, gstring_type e)
 		{
@@ -570,22 +513,22 @@ namespace cctmp {
 
 			switch (t)
 			{
-				case TokenName::identifier:
+				case 'i':
 				{
 					ctoken_type t0 = keyword(b, e);
 					rt = (t0 == TokenName::invalid) ? t : t0;
 					break;
 				}
-				case TokenName::label:
+				case 'l':
 				{
-					ctoken_type t0 = keyword(b, e-1);
+					ctoken_type t0 = keyword(b, e - 1);
 					ctoken_type t1 = TokenName::keyword_label_error;
 					rt = (t0 == TokenName::invalid) ? t : t1;
 					break;
 				}
 			}
 
-			return lexeme{b, e, rt};
+			return lexeme{b, e, (gindex_type) rt};
 		}
 
 		nik_ces token_type keyword(gstring_type b, gstring_type e)
@@ -601,21 +544,21 @@ namespace cctmp {
 
 		nik_ces token_type keyword_1(gstring_type b, gstring_type e)
 		{
-			if   (recognizes< T_underscore_dfa >(b, e)) return TokenName::underscore;
+			if   (recognizes< T_underscore_dfa >(b, e)) return '_';
 			else                                        return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_4(gstring_type b, gstring_type e)
 		{
-			if      (recognizes< T_test_dfa >(b, e)) return TokenName::test;
-			else if (recognizes< T_goto_dfa >(b, e)) return TokenName::go_to;
+			if      (recognizes< T_test_dfa >(b, e)) return 't';
+			else if (recognizes< T_goto_dfa >(b, e)) return 'g';
 			else                                     return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_6(gstring_type b, gstring_type e)
 		{
-			if      (recognizes< T_branch_dfa >(b, e)) return TokenName::branch;
-			else if (recognizes< T_return_dfa >(b, e)) return TokenName::re_turn;
+			if      (recognizes< T_branch_dfa >(b, e)) return 'b';
+			else if (recognizes< T_return_dfa >(b, e)) return 'r';
 			else                                       return TokenName::invalid;
 		}
 	};
@@ -624,5 +567,5 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // cctmp_generics
+} // namespace cctmp
 

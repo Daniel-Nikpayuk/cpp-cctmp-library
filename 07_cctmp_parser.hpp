@@ -230,20 +230,20 @@ namespace cctmp {
 
 				switch (l.value)
 				{
-					case TokenName::identifier:
+					case 'i':
 					{
 						++cur_entry_size;
 						++max_ident_size;
 						break;
 					}
-					case TokenName::statement:
+					case ';':
 					{
 						if (cur_entry_size > max_entry_size) max_entry_size = cur_entry_size;
 						cur_entry_size = _zero;
 						++cur_line_size;
 						break;
 					}
-					case TokenName::label:
+					case 'l':
 					{
 						if (cur_line_size > max_line_size) max_line_size = cur_line_size;
 						++cur_entry_size;
@@ -360,6 +360,39 @@ namespace cctmp {
 
 // stack:
 
+/*
+	template<auto Size>
+	struct Stack
+	{
+		using size_type			= decltype(Size);
+
+		nik_ces size_type length	= Size;
+
+		token_type value[length];
+		token_type *current;
+	//	size_type current;
+
+		nik_ce Stack() : value{}, current{} { current = (token_type*) value; }
+
+		nik_ce void pop() { --current; }
+
+		nik_ce void push(gcstring_type b, gcstring_type e)
+		{
+			auto size = (e - b);
+			auto last = current + size;
+
+		//	if (last <= length)
+			if (size <= length - (current - value))
+			{
+				auto k = e;
+
+				while (current != last) *(current++) = *--k;
+			//	while (current != last) token[current++] = *--k;
+			}
+		}
+	};
+*/
+
 	template<auto Size>
 	struct Stack
 	{
@@ -368,10 +401,32 @@ namespace cctmp {
 		nik_ces size_type length	= Size;
 
 		token_type token[length];
-		size_type size; // current size
+		token_type *current;
+		ctoken_type *end;
 
-		nik_ce Stack() : token{}, size{} { }
+		nik_ce Stack() : token{}, current{token}, end{token + length} { }
+
+		nik_ce void pop() { --current; }
+
+		nik_ce void push(gcstring_type b, gstring_type k)
+		{
+			auto size = (k - b);
+			auto rest = (end - current);
+
+			if (size <= rest) while (k != b) *(current++) = *--k;
+		}
 	};
+
+	// recurse over the stack:
+
+		// If the front token is terminal, confirm it's also the first lexed string token.
+		// If it's not it's an error, otherwise drop it from the stack, iterate to the next lexed string token.
+
+		// If the front token is nonterminal, reference the transition table using it and the first lexed
+		// string token. Replace-push the token on the stack with the production body (updating the current
+		// stack position), and perform the semantic action (translation). Iterate to the next lexed string token.
+
+		// Continue.
 
 /***********************************************************************************************************************/
 
@@ -405,29 +460,28 @@ namespace cctmp {
 	// 5) parse according to the tokens (and thus the context free grammar) to validate the source code.
 	// 6) Hold symbolic type info to determine dependencies/errors.
 
-	template<typename CharType, auto StackSize, auto BlockSize, auto LineSize, auto EntrySize>
+	template<auto SourceCallable>
 	struct T_generic_assembly_pda
 	{
-		using T_dfa			= T_generic_assembly_dfa;
+		nik_ces auto src	= SourceCallable();
 
-		using char_type			= CharType;
-		using cchar_type		= char_type const;
-		using string_type		= cchar_type*;
-		using cstring_type		= string_type const;
-		using toc_type			= TableOfContents<char_type, BlockSize, LineSize, EntrySize>;
-		using stack_type		= Stack<StackSize>;
+		using T_dfa		= T_generic_assembly_dfa;
+		using src_type		= decltype(src);
+		using char_type		= typename src_type::char_type;
+		using stack_type	= Stack<src.stack_size>;
+		using toc_type		= TableOfContents
+					<
+						char_type,
+						src.block_size, src.max_line_size, src.max_entry_size
+					>;
 
-		cstring_type string;
-		cstring_type finish;
-		toc_type toc;
 		stack_type stack;
+		toc_type toc;
 
-		nik_ce T_generic_assembly_pda(const CharType *s, const CharType *f) :
+		nik_ce T_generic_assembly_pda() :
 
-			string { s     },
-			finish { f     },
-			toc    {       },
-			stack  {       }
+			toc   {       },
+			stack {       }
 
 		{
 		//	entry *current		= syntax;
@@ -452,21 +506,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 	template<auto callable>
-	nik_ce auto _parse()
-	{
-		nik_ce auto src = callable();
-
-		using char_type = typename decltype(src)::char_type;
-		using PDA = T_generic_assembly_pda
-		<
-			char_type, src.stack_size, src.block_size, src.max_line_size, src.max_entry_size
-		>;
-
-		return PDA(src.string, src.finish);
-	}
-
-	template<auto callable>
-	nik_ce auto parse = _parse<callable>();
+	nik_ce auto parse = T_generic_assembly_pda<callable>{};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -499,5 +539,5 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // cctmp_generics
+} // namespace cctmp
 

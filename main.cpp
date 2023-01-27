@@ -53,8 +53,9 @@
 
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", (int) GenericAssemblyPDTT::Terminal::size);
-	//	printf("%d\n", (int) parsed_factorial_src.stack.length);
+	//	printf("%d\n", (int) TokenName::invalid);
+	//	printf("%d\n", (int) GenericAssemblyPDTT::Terminal::size);
+		printf("%d\n", (int) parsed_factorial_src.stack.length);
 
 		return 0;
 	}
