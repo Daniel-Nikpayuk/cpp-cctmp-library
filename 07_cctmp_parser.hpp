@@ -21,8 +21,6 @@
 
 namespace cctmp {
 
-// cctmp:
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -173,7 +171,7 @@ namespace cctmp {
 
 	struct T_generic_assembly_pdtt
 	{
-		nik_ces auto result = GenericAssemblyPDTT{};
+		nik_ces auto value = GenericAssemblyPDTT{};
 	};
 
 /***********************************************************************************************************************/
@@ -360,39 +358,6 @@ namespace cctmp {
 
 // stack:
 
-/*
-	template<auto Size>
-	struct Stack
-	{
-		using size_type			= decltype(Size);
-
-		nik_ces size_type length	= Size;
-
-		token_type value[length];
-		token_type *current;
-	//	size_type current;
-
-		nik_ce Stack() : value{}, current{} { current = (token_type*) value; }
-
-		nik_ce void pop() { --current; }
-
-		nik_ce void push(gcstring_type b, gcstring_type e)
-		{
-			auto size = (e - b);
-			auto last = current + size;
-
-		//	if (last <= length)
-			if (size <= length - (current - value))
-			{
-				auto k = e;
-
-				while (current != last) *(current++) = *--k;
-			//	while (current != last) token[current++] = *--k;
-			}
-		}
-	};
-*/
-
 	template<auto Size>
 	struct Stack
 	{
@@ -461,9 +426,10 @@ namespace cctmp {
 	// 6) Hold symbolic type info to determine dependencies/errors.
 
 	template<auto SourceCallable>
-	struct T_generic_assembly_pda
+	struct GenericAssemblyPDA
 	{
-		nik_ces auto src	= SourceCallable();
+		nik_ces auto static_src	= _static_object_<SourceCallable>;
+		nik_ces auto src	= T_store_U<static_src>::value;
 
 		using T_dfa		= T_generic_assembly_dfa;
 		using src_type		= decltype(src);
@@ -478,7 +444,7 @@ namespace cctmp {
 		stack_type stack;
 		toc_type toc;
 
-		nik_ce T_generic_assembly_pda() :
+		nik_ce GenericAssemblyPDA() :
 
 			toc   {       },
 			stack {       }
@@ -498,6 +464,12 @@ namespace cctmp {
 		}
 	};
 
+	template<auto SourceCallable>
+	struct T_generic_assembly_pda
+	{
+		nik_ces auto value = GenericAssemblyPDA<SourceCallable>{};
+	};
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -505,8 +477,16 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-	template<auto callable>
-	nik_ce auto parse = T_generic_assembly_pda<callable>{};
+	template<auto SourceCallable>
+	nik_ce auto _parse()
+	{
+		nik_ce auto pda = T_generic_assembly_pda<SourceCallable>::value;
+
+		return pda;
+	}
+
+	template<auto SourceCallable>
+	nik_ce auto parse = _parse<SourceCallable>();
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

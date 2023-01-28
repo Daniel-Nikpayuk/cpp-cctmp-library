@@ -151,6 +151,23 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// static:
+
+/***********************************************************************************************************************/
+
+// object:
+
+	template<auto Callable>
+	struct T_static_object
+	{
+		nik_ces auto value = Callable();
+
+	}; template<auto Callable>
+		nik_ce auto _static_object_ = U_store_T<T_static_object<Callable>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // attributes:
 
 /***********************************************************************************************************************/
@@ -233,7 +250,7 @@ namespace cctmp {
 	template<typename T_dftt>
 	nik_ce lexeme recognize(gstring_type b, gstring_type e)
 	{
-		nik_ce auto transition_table = T_dftt::result;
+		nik_ce auto transition_table = T_dftt::value;
 
 		gstring_type k = skip_whitespace(b, e);
 		b = k;
@@ -326,7 +343,8 @@ namespace cctmp {
 	template<auto CharsetCallable>
 	struct KeywordDFTT
 	{
-		nik_ces auto charset			= CharsetCallable();
+		nik_ces auto static_charset		= _static_object_<CharsetCallable>;
+		nik_ces auto charset			= T_store_U<static_charset>::value;
 		nik_ces gkey_type state_size		= charset.length + 2;
 		nik_ces gkey_type charset_size		= charset.size + 1;
 
@@ -347,8 +365,8 @@ namespace cctmp {
 	template<auto CharsetCallable>
 	struct T_keyword_dftt
 	{
-		nik_ces auto result = KeywordDFTT<CharsetCallable>{};
-		nik_ces auto accept = result.charset.length + 1;
+		nik_ces auto value  = KeywordDFTT<CharsetCallable>{};
+		nik_ces auto accept = value.charset.length + 1;
 	};
 
 /***********************************************************************************************************************/
@@ -461,25 +479,25 @@ namespace cctmp {
 		}
 	};
 
-	struct T_generic_assembly_dftt
+	struct T_generic_assembly_dftt // interface ?
 	{
 		using ArrayEnd		= T_store_U< _array_end_  >;
 		using ArraySize		= T_store_U< _array_size_ >;
 
-		nik_ces auto result	= GenericAssemblyDFTT{};
+		nik_ces auto value	= GenericAssemblyDFTT{};
 		nik_ces auto accept	= GenericAssemblyDFTT::State::accept;
 		nik_ces auto end	= ArrayEnd::template result<>(GenericAssemblyDFTT::State::accept);
 		nik_ces auto size	= ArraySize::template result<>(GenericAssemblyDFTT::State::accept);
 		nik_ces auto token	= GenericAssemblyDFTT::State::token;
-
-		nik_ces auto find_pos(cstate_type n) { return numeric_find_pos(n, accept, end); }
-		nik_ces auto is_final(cstate_type n) { return (n != size); }
 
 		nik_ces auto underscore_charset () { return dfa_charset("_");      }
 		nik_ces auto test_charset       () { return dfa_charset("test");   }
 		nik_ces auto goto_charset       () { return dfa_charset("goto");   }
 		nik_ces auto branch_charset     () { return dfa_charset("branch"); }
 		nik_ces auto return_charset     () { return dfa_charset("return"); }
+
+		nik_ces auto find_pos(cstate_type n) { return numeric_find_pos(n, accept, end); }
+		nik_ces auto is_final(cstate_type n) { return (n != size); }
 	};
 
 /***********************************************************************************************************************/
@@ -490,11 +508,11 @@ namespace cctmp {
 	{
 		using transition_table = T_generic_assembly_dftt;
 
-		using T_underscore_dfa = T_keyword_dfa< transition_table::underscore_charset , '_' >;
-		using T_test_dfa       = T_keyword_dfa< transition_table::test_charset       , 't' >;
-		using T_goto_dfa       = T_keyword_dfa< transition_table::goto_charset       , 'g' >;
-		using T_branch_dfa     = T_keyword_dfa< transition_table::branch_charset     , 'b' >;
-		using T_return_dfa     = T_keyword_dfa< transition_table::return_charset     , 'r' >;
+		using T_underscore_dfa	= T_keyword_dfa< transition_table::underscore_charset , '_' >;
+		using T_test_dfa	= T_keyword_dfa< transition_table::test_charset       , 't' >;
+		using T_goto_dfa	= T_keyword_dfa< transition_table::goto_charset       , 'g' >;
+		using T_branch_dfa	= T_keyword_dfa< transition_table::branch_charset     , 'b' >;
+		using T_return_dfa	= T_keyword_dfa< transition_table::return_charset     , 'r' >;
 
 		nik_ces lexeme lex(gstring_type b, gstring_type e)
 		{
