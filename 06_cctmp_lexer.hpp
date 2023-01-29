@@ -240,6 +240,7 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // deterministic finite automata:
 
@@ -376,7 +377,8 @@ namespace cctmp {
 	template<auto CharsetCallable, auto Token>
 	struct T_keyword_dfa
 	{
-		using transition_table = T_keyword_dftt<CharsetCallable>;
+		using transition_table	= T_keyword_dftt<CharsetCallable>;
+		nik_ces auto token	= Token;
 
 		nik_ces lexeme lex(gstring_type b, gstring_type e)
 		{
@@ -479,26 +481,28 @@ namespace cctmp {
 		}
 	};
 
-	struct T_generic_assembly_dftt // interface ?
-	{
-		using ArrayEnd		= T_store_U< _array_end_  >;
-		using ArraySize		= T_store_U< _array_size_ >;
+	// interface:
 
-		nik_ces auto value	= GenericAssemblyDFTT{};
-		nik_ces auto accept	= GenericAssemblyDFTT::State::accept;
-		nik_ces auto end	= ArrayEnd::template result<>(GenericAssemblyDFTT::State::accept);
-		nik_ces auto size	= ArraySize::template result<>(GenericAssemblyDFTT::State::accept);
-		nik_ces auto token	= GenericAssemblyDFTT::State::token;
+		struct T_generic_assembly_dftt
+		{
+			using ArrayEnd		= T_store_U< _array_end_  >;
+			using ArraySize		= T_store_U< _array_size_ >;
 
-		nik_ces auto underscore_charset () { return dfa_charset("_");      }
-		nik_ces auto test_charset       () { return dfa_charset("test");   }
-		nik_ces auto goto_charset       () { return dfa_charset("goto");   }
-		nik_ces auto branch_charset     () { return dfa_charset("branch"); }
-		nik_ces auto return_charset     () { return dfa_charset("return"); }
+			nik_ces auto value	= GenericAssemblyDFTT{};
+			nik_ces auto accept	= GenericAssemblyDFTT::State::accept;
+			nik_ces auto end	= ArrayEnd::template result<>(GenericAssemblyDFTT::State::accept);
+			nik_ces auto size	= ArraySize::template result<>(GenericAssemblyDFTT::State::accept);
+			nik_ces auto token	= GenericAssemblyDFTT::State::token;
 
-		nik_ces auto find_pos(cstate_type n) { return numeric_find_pos(n, accept, end); }
-		nik_ces auto is_final(cstate_type n) { return (n != size); }
-	};
+			nik_ces auto underscore_charset () { return dfa_charset("_");      }
+			nik_ces auto test_charset       () { return dfa_charset("test");   }
+			nik_ces auto goto_charset       () { return dfa_charset("goto");   }
+			nik_ces auto branch_charset     () { return dfa_charset("branch"); }
+			nik_ces auto return_charset     () { return dfa_charset("return"); }
+
+			nik_ces auto find_pos(cstate_type n) { return numeric_find_pos(n, accept, end); }
+			nik_ces auto is_final(cstate_type n) { return (n != size); }
+		};
 
 /***********************************************************************************************************************/
 
@@ -562,21 +566,21 @@ namespace cctmp {
 
 		nik_ces token_type keyword_1(gstring_type b, gstring_type e)
 		{
-			if   (recognizes< T_underscore_dfa >(b, e)) return '_';
+			if   (recognizes< T_underscore_dfa >(b, e)) return T_underscore_dfa::token;
 			else                                        return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_4(gstring_type b, gstring_type e)
 		{
-			if      (recognizes< T_test_dfa >(b, e)) return 't';
-			else if (recognizes< T_goto_dfa >(b, e)) return 'g';
+			if      (recognizes< T_test_dfa >(b, e)) return T_test_dfa::token;
+			else if (recognizes< T_goto_dfa >(b, e)) return T_goto_dfa::token;
 			else                                     return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_6(gstring_type b, gstring_type e)
 		{
-			if      (recognizes< T_branch_dfa >(b, e)) return 'b';
-			else if (recognizes< T_return_dfa >(b, e)) return 'r';
+			if      (recognizes< T_branch_dfa >(b, e)) return T_branch_dfa::token;
+			else if (recognizes< T_return_dfa >(b, e)) return T_return_dfa::token;
 			else                                       return TokenName::invalid;
 		}
 	};
