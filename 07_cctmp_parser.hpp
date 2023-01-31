@@ -118,7 +118,7 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// token:
+// token kind:
 
 	struct TokenKind
 	{
@@ -130,6 +130,21 @@ namespace cctmp {
 			dimension
 		};
 	};
+
+/***********************************************************************************************************************/
+
+// parser read:
+
+	struct ParserRead
+	{
+		enum : gkey_type
+		{
+			next,
+			peek
+		};
+	};
+
+	using PRead = ParserRead;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -176,18 +191,21 @@ namespace cctmp {
 	struct Transition
 	{
 		Body body;
+		gkey_type read;
 		action_type action;
 
 		nik_ce Transition() :
 
 			body   {    },
+			read   {    },
 			action {    }
 
 			{ }
 
-		nik_ce Transition(const Body & _b, caction_type _a) :
+		nik_ce Transition(const Body & _b, gckey_type _r, caction_type _a) :
 
 			body   { _b },
+			read   { _r },
 			action { _a }
 
 			{ }
@@ -237,44 +255,46 @@ namespace cctmp {
 		}
 
 		template<auto Size>
-		nik_ce Transition transition(gcchar_type (&str)[Size], caction_type action = _zero)
+		nik_ce Transition transition(gcchar_type (&str)[Size], gckey_type read, caction_type action = _zero)
 		{
 			auto body = Body(str, Size - 1);
 
-			return Transition{ body , action };
+			return Transition{ body , read , action };
 		}
 
 		nik_ce GenericAssemblyPDTT() : table{}
 		{
-			set_entry('S', 'i') = transition("P;R"   );
-			set_entry('P', 'i') = transition("iN"    );
-			set_entry('N', 'i') = transition("iN"    );
-			set_entry('N', ';') = transition("e"     );
-			set_entry('R', 'l') = transition("BC"    );
-			set_entry('C', 'l') = transition("BC"    );
-			set_entry('C', '$') = transition("e"     );
-			set_entry('B', 'l') = transition("l;LE"  );
-			set_entry('E', 'g') = transition("gi"    );
-			set_entry('E', 'r') = transition("rM"    );
-			set_entry('L', 't') = transition("IJ"    );
-			set_entry('L', 'i') = transition("IJ"    );
-			set_entry('L', '.') = transition("IJ"    );
-			set_entry('J', 't') = transition("IJ"    );
-			set_entry('J', 'g') = transition("e"     );
-			set_entry('J', 'r') = transition("e"     );
-			set_entry('J', 'i') = transition("IJ"    );
-			set_entry('J', '.') = transition("IJ"    );
-			set_entry('I', 't') = transition("tF;bi;");
-			set_entry('I', 'i') = transition("T=F;"  );
-			set_entry('I', '.') = transition("T=F;"  );
-			set_entry('F', 'i') = transition("iV"    );
-			set_entry('V', 'i') = transition("MV"    );
-			set_entry('V', '_') = transition("MV"    );
-			set_entry('V', ';') = transition("e"     );
-			set_entry('T', 'i') = transition("i"     );
-			set_entry('T', '.') = transition("."     );
-			set_entry('M', 'i') = transition("i"     );
-			set_entry('M', '_') = transition("_"     );
+			set_entry('S', 'i') = transition("P;R"   , PRead::next);
+			set_entry('P', 'i') = transition("iN"    , PRead::peek);
+			set_entry('N', 'i') = transition("iN"    , PRead::peek);
+			set_entry('N', ';') = transition("e"     , PRead::peek);
+			set_entry('R', 'l') = transition("BC"    , PRead::peek);
+			set_entry('B', 'l') = transition("l;E"   , PRead::peek);
+			set_entry('L', 't') = transition("IJ"    , PRead::peek);
+			set_entry('L', 'i') = transition("IJ"    , PRead::next);
+			set_entry('L', '.') = transition("IJ"    , PRead::next);
+			set_entry('E', 't') = transition("Lgi;"  , PRead::peek);
+			set_entry('E', 'i') = transition("Lgi;"  , PRead::peek);
+			set_entry('E', '.') = transition("Lgi;"  , PRead::peek);
+			set_entry('E', 'r') = transition("JrM;"  , PRead::peek);
+			set_entry('C', 'l') = transition("BC"    , PRead::peek);
+			set_entry('C', ';') = transition("e"     , PRead::peek);
+			set_entry('I', 't') = transition("tF;bi;", PRead::peek);
+			set_entry('I', 'i') = transition("T=F;"  , PRead::peek);
+			set_entry('I', '.') = transition("T=F;"  , PRead::peek);
+			set_entry('J', 't') = transition("IJ"    , PRead::peek);
+			set_entry('J', 'g') = transition("e"     , PRead::peek);
+			set_entry('J', 'r') = transition("e"     , PRead::peek);
+			set_entry('J', 'i') = transition("IJ"    , PRead::peek);
+			set_entry('J', '.') = transition("IJ"    , PRead::peek);
+			set_entry('M', 'i') = transition("i"     , PRead::peek);
+			set_entry('M', '_') = transition("_"     , PRead::next);
+			set_entry('F', 'i') = transition("iV"    , PRead::next);
+			set_entry('T', 'i') = transition("i"     , PRead::peek);
+			set_entry('T', '.') = transition("."     , PRead::next);
+			set_entry('V', 'i') = transition("MV"    , PRead::peek);
+			set_entry('V', '_') = transition("MV"    , PRead::peek);
+			set_entry('V', ';') = transition("e"     , PRead::peek);
 		}
 	};
 
@@ -406,7 +426,8 @@ namespace cctmp {
 
 		nik_ce Stack(ctoken_type s) : token{}, current{token}, end{token + length}
 		{
-			*current = s;
+			*   current = '$';
+			* ++current = s;
 		}
 
 		nik_ce ctoken_type & front() const { return *current; }
@@ -429,6 +450,21 @@ namespace cctmp {
 
 // automaton:
 
+	// debugging:
+
+		nik_ces gindex_type debug_end[] = // 32
+		{
+			  9,  11,  13, 18,		// factorial p n ;
+			 23,  36,			// loop: ;
+			 40,  48,  50, 54,		// test is_zero n ;
+			 60,  65,  72,			// branch done ;
+			 73,  75,  84,  86,  88, 90,	// p = multiply p n ;
+			 91,  93, 103, 105, 108,	// n = decrement n ;
+			112, 117, 126,			// goto loop ;
+			131, 144,			// done: ;
+			150, 152, 162			// return p ;
+		};
+
 	template<auto SourceCallable>
 	struct GenericAssemblyPDA
 	{
@@ -450,39 +486,69 @@ namespace cctmp {
 		stack_type stack;
 		toc_type toc;
 
+		lexeme word;
+		bool lex_word;
+
+		char_type derivation[10'000]; // for debugging.
+		char_type *dcur; // for debugging.
+
 		nik_ce GenericAssemblyPDA() :
 
-			stack { transition_table::nt_start },
-			toc   {                            }
+			stack    { transition_table::nt_start },
+			toc      {                            },
+			word     {                            },
+			lex_word { true                       },
 
+			derivation {            }, // for debugging.
+			dcur       { derivation }  // for debugging.
 		{
 			auto current = src.string;
 
-			//  9, 11, 13, 18
+			debug_before();
 
-			// 23, 36,
-			// 40, 48, 50, 54
-			// 60, 65, 72, 73, 75, 84, 86, 88, 90
-
-		//	while (current != src.finish)
-			while (current != src.string + 36) // src.finish)
+			while (*stack.current != '$')
 			{
-				auto sf = stack.front();
-				auto k  = transition_table::token_kind(sf);
-				auto l  = T_dfa::lex(current, src.finish);
+				lex_word = lex_word && (current != src.finish);
+				auto sf  = stack.front();
+				auto k   = transition_table::token_kind(sf);
 
 				switch (k)
 				{
 					case TokenKind::nonterminal:
 					{
-						auto tr = tt.get_entry(sf, l.value);
+						debug_stack();
+
+						if (lex_word) word = T_dfa::lex(current, src.finish);
+						auto tr = tt.get_entry(sf, word.value);
+
+						debug_tokens(current);
+						debug_production(word.value, tr.body);
+
 						stack.push(tr.body.symbol, tr.body.size);
+
+						lex_word = (tr.read == PRead::next);
+						if (lex_word) current = word.finish;
+
+						debug_read();
+
 						// tr.action();
 						break;
 					}
 					case TokenKind::terminal:
 					{
-						// confirm (sf == l.value).
+						if (sf != 'e')
+						{
+							if (lex_word) word = T_dfa::lex(current, src.finish);
+							lex_word = true;
+						}
+
+						debug_stack();
+						debug_tokens(current);
+						debug_pad(17);
+						debug_read();
+
+						// confirm (sf == l.value) ?
+						if (sf != 'e') current = word.finish;
 						stack.pop();
 						break;
 					}
@@ -492,9 +558,80 @@ namespace cctmp {
 						break;
 					}
 				}
-
-				current = l.finish;
 			}
+
+			debug_after();
+		}
+
+		nik_ce auto debug_pad(int s)
+		{
+			for (int k = 0; k < s; ++k) *(dcur++) = ' ';
+		}
+
+		nik_ce auto debug_before()
+		{
+			*(dcur++) = '\n';
+		}
+
+		nik_ce auto debug_stack()
+		{
+			auto k = stack.current + 1;
+			debug_pad(14 - (k - stack.token));
+			while (k != stack.token) *(dcur++) = *--k;
+		}
+
+		nik_ce auto debug_tokens(char_type const* b)
+		{
+			debug_pad(4);
+			auto b0 = b;
+			auto count = 32;
+			while (b != src.finish)
+			{
+				auto w = T_dfa::lex(b, src.finish);
+				b = w.finish;
+				--count;
+			}
+
+			b = b0;
+			debug_pad(count);
+			while (b != src.finish)
+			{
+				auto w = T_dfa::lex(b, src.finish);
+				*(dcur++) = w.value;
+				b = w.finish;
+			}
+		}
+
+		nik_ce auto debug_production(ctoken_type t, const Body & b)
+		{
+			debug_pad(4);
+			auto sf = stack.front();
+			*(dcur++) = sf; *(dcur++) = ' '; *(dcur++) = t;
+			*(dcur++) = ' '; *(dcur++) = '-'; *(dcur++) = '>'; *(dcur++) = ' ';
+			auto s = 6 - b.size;
+			for (auto k = b.symbol; k != b.symbol + b.size; ++dcur, ++k) *dcur = *k;
+			debug_pad(s);
+		}
+
+		nik_ce auto debug_read()//char_type const* const b)
+		{
+			debug_pad(4);
+			if (lex_word)
+			{
+				*(dcur++) = 'n'; *(dcur++) = 'e';
+				*(dcur++) = 'x'; *(dcur++) = 't';
+			}
+			else
+			{
+				*(dcur++) = 'p'; *(dcur++) = 'e';
+				*(dcur++) = 'e'; *(dcur++) = 'k';
+			}
+			*(dcur++) = '\n';
+		}
+
+		nik_ce auto debug_after()
+		{
+			*(dcur++) = '\n'; *dcur = '\0';
 		}
 	};
 

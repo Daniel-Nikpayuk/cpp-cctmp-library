@@ -1,0 +1,17 @@
+
+            S$    iii;l;tii;bi;i=iii;i=ii;gi;l;ri;    S i -> P;R       next
+          P;R$     ii;l;tii;bi;i=iii;i=ii;gi;l;ri;    P i -> iN        peek
+         iN;R$     ii;l;tii;bi;i=iii;i=ii;gi;l;ri;                     next
+          N;R$      i;l;tii;bi;i=iii;i=ii;gi;l;ri;    N i -> iN        peek
+         iN;R$      i;l;tii;bi;i=iii;i=ii;gi;l;ri;                     next
+          N;R$       ;l;tii;bi;i=iii;i=ii;gi;l;ri;    N ; -> e         peek
+          e;R$       ;l;tii;bi;i=iii;i=ii;gi;l;ri;                     peek
+           ;R$       ;l;tii;bi;i=iii;i=ii;gi;l;ri;                     next
+            R$        l;tii;bi;i=iii;i=ii;gi;l;ri;    R l -> BC        peek
+           BC$        l;tii;bi;i=iii;i=ii;gi;l;ri;    B l -> l;LE      peek
+        l;LEC$        l;tii;bi;i=iii;i=ii;gi;l;ri;                     next
+         ;LEC$         ;tii;bi;i=iii;i=ii;gi;l;ri;                     next
+          LEC$          tii;bi;i=iii;i=ii;gi;l;ri;    L t -> IJ        peek
+         IJEC$          tii;bi;i=iii;i=ii;gi;l;ri;    I t -> tF;bi;    next
+    tF;bi;JEC$           ii;bi;i=iii;i=ii;gi;l;ri;                     next
+
