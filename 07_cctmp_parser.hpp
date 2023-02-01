@@ -116,6 +116,12 @@ namespace cctmp {
 
 // attributes:
 
+	using symbol_type  = gchar_type;
+	using csymbol_type = symbol_type const;
+
+	using action_type  = gindex_type;
+	using caction_type = action_type const;
+
 /***********************************************************************************************************************/
 
 // token kind:
@@ -133,29 +139,268 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// parser read:
+// body:
 
-	struct ParserRead
+	struct Body
 	{
-		enum : gkey_type
-		{
-			next,
-			peek
-		};
+		using size_type  = gindex_type;
+		using csize_type = size_type const;
+
+		csymbol_type *symbol;
+		size_type size;
+
+		nik_ce Body() :
+
+			symbol {    },
+			size   {    }
+
+			{ }
+
+		nik_ce Body(csymbol_type *_b, csize_type _s) :
+
+			symbol { _b },
+			size   { _s }
+
+			{ }
 	};
 
-	using PRead = ParserRead;
+/***********************************************************************************************************************/
+
+// production:
+
+	struct Production
+	{
+		Body body;
+		action_type action;
+
+		nik_ce Production() :
+
+			body   {    },
+			action {    }
+
+			{ }
+
+		nik_ce Production(const Body & _b, caction_type _a) :
+
+			body   { _b },
+			action { _a }
+
+			{ }
+	};
+
+/***********************************************************************************************************************/
+
+// stack:
+
+	template<auto Size>
+	struct Stack
+	{
+		using size_type			= decltype(Size);
+
+		nik_ces size_type length	= Size;
+
+		token_type token[length];
+		token_type *current;
+		ctoken_type *end;
+
+		nik_ce Stack(ctoken_type s) : token{}, current{token}, end{token + length}
+		{
+			*   current = '\0';
+			* ++current = s;
+		}
+
+		nik_ce ctoken_type & front() const { return *current; }
+		nik_ce  token_type & front()       { return *current; }
+
+		nik_ce void pop() { if (current != token) --current; }
+
+		nik_ce void push(gcstring_type b, size_type size)
+		{
+			auto k = b + size;
+
+			while (k != b) *++current = *--k;
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// automaton:
+
+/***********************************************************************************************************************/
+
+// derivation:
+
+	template<typename T_pdtt, typename T_syntax, auto StaticSource, auto Size>
+	struct GenericDPDA
+	{
+		nik_ces auto src	= T_store_U<StaticSource>::value;
+		nik_ces auto tt		= T_pdtt::value;
+		nik_ces auto length     = Size;
+
+		using stack_type	= Stack<src.stack_size>;
+		using src_type		= decltype(src);
+		using char_type		= typename src_type::char_type;
+		using string_type	= typename src_type::string_type;
+		using T_dfa		= typename src_type::T_dfa;
+
+		stack_type stack;
+		token_type front;
+		string_type letter;
+		lexeme word;
+		Production production;
+
+		T_syntax syntax;
+
+		char_type derivation[length];
+		char_type *current;
+
+		nik_ce GenericDPDA() :
+
+			stack      { T_pdtt::nt_start               },
+			front      { stack.front()                  },
+			letter     { src.string                     },
+			word       { T_dfa::lex(letter, src.finish) },
+			production {                                },
+
+			syntax     {                                },
+
+			derivation {            },
+			current    { derivation }
+
+		{
+			parse();
+			derive_end();
+		}
+
+		nik_ce void parse()
+		{
+			while (*stack.current != '\0')
+			{
+				switch (T_pdtt::token_kind(front))
+				{
+					case TokenKind::nonterminal: nonterminal(); break;
+					case TokenKind::terminal:       terminal(); break;
+					default:                           error(); break;
+				}
+
+				front = stack.front();
+			}
+		}
+
+		nik_ce void nonterminal()
+		{
+			update_production();
+
+			derive_stack();
+			derive_tokens();
+			derive_production();
+
+			stack.pop();
+			stack.push(production.body.symbol, production.body.size);
+
+			// production.action();
+		}
+
+		nik_ce void terminal()
+		{
+			derive_stack();
+			derive_tokens();
+			derive_newline();
+
+			if (front != word.value) ; // error.
+			else
+			{
+				letter = word.finish;
+				word   = T_dfa::lex(letter, src.finish);
+
+				stack.pop();
+			}
+		}
+
+		nik_ce void error()
+		{
+			// nothing yet.
+		}
+
+		nik_ce void update_production()
+		{
+			production = tt.production(front, word.value);
+			// if (production == empty) error;
+		}
+
+		nik_ce void derive_newline() { *(current++) = '\n'; }
+		nik_ce void derive_symline() { *(current++) =  '$'; } // A visual substitute for '\0'.
+		nik_ce void derive_endline() { *(current++) = '\0'; }
+
+		nik_ce void derive_pad(int s)
+		{
+			for (int k = 0; k < s; ++k) *(current++) = ' ';
+		}
+
+		nik_ce void derive_stack()
+		{
+			auto k = stack.current;
+			derive_pad(14 - (k - stack.token));
+			while (k != stack.token) *(current++) = *(k--);
+			derive_symline();
+		}
+
+		nik_ce void derive_tokens()
+		{
+			derive_pad(4);
+			auto k = word.finish;
+			auto count = 32;
+			while (k != src.finish)
+			{
+				auto w = T_dfa::lex(k, src.finish);
+				k = w.finish;
+				--count;
+			}
+
+			k = word.finish;
+			derive_pad(count);
+
+			if (word.value != '\0') *(current++) = word.value;
+			else derive_pad(1);
+			while (k != src.finish)
+			{
+				auto w = T_dfa::lex(k, src.finish);
+				*(current++) = w.value;
+				k = w.finish;
+			}
+			derive_symline();
+		}
+
+		nik_ce void derive_production()
+		{
+			const Body & b = production.body;
+			derive_pad(4);
+			*(current++) = front;
+			*(current++) = ' ';
+			*(current++) = (word.value == '\0') ? '$' : word.value;
+			*(current++) = ' ';
+			*(current++) = '-';
+			*(current++) = '>';
+			*(current++) = ' ';
+			auto s = 6 - b.size;
+			if (b.size == 0) *(current++) = 'e';
+			else for (auto k = b.symbol; k != b.symbol + b.size; ++current, ++k) *current = *k;
+			derive_pad(s);
+			*(current++) = '\n';
+		}
+
+		nik_ce void derive_end()
+		{
+			derive_stack();
+			derive_tokens();
+			derive_endline();
+		}
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // generic assembly:
-
-	using symbol_type  = gchar_type;
-	using csymbol_type = symbol_type const;
-
-	using action_type  = gindex_type;
-	using caction_type = action_type const;
 
 /***********************************************************************************************************************/
 
@@ -233,71 +478,22 @@ namespace cctmp {
 
 // table of contents:
 
-	template<typename CharType, auto BlockSize, auto LineSize, auto EntrySize>
+	template<auto StaticSource>
 	struct TableOfContents
 	{
-		using char_type			= CharType;
-		using cchar_type		= char_type const;
-		using block_type		= Block<char_type, LineSize, EntrySize>;
-		using size_type			= decltype(BlockSize);
+		nik_ces auto src		= T_store_U<StaticSource>::value;
+		nik_ces auto length		= src.block_size;
 
-		nik_ces size_type length	= BlockSize;
+		using src_type			= decltype(src);
+		using char_type			= typename src_type::char_type;
+		using cchar_type		= typename src_type::cchar_type;
+		using block_type		= Block<char_type, src.max_line_size, src.max_entry_size>;
+		using size_type			= decltype(length);
 
 		block_type block[length];
 		size_type size; // current size
 
 		nik_ce TableOfContents() : block{}, size{} { }
-	};
-
-/***********************************************************************************************************************/
-
-// body:
-
-	struct Body
-	{
-		using size_type  = gindex_type;
-		using csize_type = size_type const;
-
-		csymbol_type *symbol;
-		size_type size;
-
-		nik_ce Body() :
-
-			symbol {    },
-			size   {    }
-
-			{ }
-
-		nik_ce Body(csymbol_type *_b, csize_type _s) :
-
-			symbol { _b },
-			size   { _s }
-
-			{ }
-	};
-
-/***********************************************************************************************************************/
-
-// transition:
-
-	struct Transition
-	{
-		Body body;
-		action_type action;
-
-		nik_ce Transition() :
-
-			body   {    },
-			action {    }
-
-			{ }
-
-		nik_ce Transition(const Body & _b, caction_type _a) :
-
-			body   { _b },
-			action { _a }
-
-			{ }
 	};
 
 /***********************************************************************************************************************/
@@ -310,24 +506,24 @@ namespace cctmp {
 
 		struct Nonterminal
 		{
-			nik_ces gchar_type symbol[] = "SPNRCBELJIFVTM";
+			nik_ces gchar_type symbol[] = "VMJIFNTECBLRPS";
 
 			nik_ces auto size  = ArraySize::template result<>(symbol) - 1;
 			nik_ces auto end   = symbol + size;
-			nik_ces auto start = *symbol;
+			nik_ces auto start = 'S';
 		};
 
 		struct Terminal
 		{
-			nik_ces gchar_type symbol[] = "ltbgri._=;e";
+			nik_ces gchar_type symbol[] = ";i=._lgtbr";
 
 			nik_ces auto size = ArraySize::template result<>(symbol); // recognizes '\0'.
 			nik_ces auto end  = symbol + size;
 		};
 
-		Transition table[Nonterminal::size][Terminal::size];
+		Production table[Nonterminal::size][Terminal::size];
 
-		nik_ce Transition & set_entry(gcchar_type row_c, gcchar_type col_c)
+		nik_ce Production & table_entry(gcchar_type row_c, gcchar_type col_c)
 		{
 			auto row = numeric_find_pos(row_c, Nonterminal::symbol, Nonterminal::end);
 			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::end);
@@ -335,7 +531,7 @@ namespace cctmp {
 			return table[row][col];
 		}
 
-		nik_ce const Transition & get_entry(gcchar_type row_c, gcchar_type col_c) const
+		nik_ce const Production & production(gcchar_type row_c, gcchar_type col_c) const
 		{
 			auto row = numeric_find_pos(row_c, Nonterminal::symbol, Nonterminal::end);
 			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::end);
@@ -344,46 +540,46 @@ namespace cctmp {
 		}
 
 		template<auto Size>
-		nik_ce Transition transition(gcchar_type (&str)[Size], caction_type action = _zero)
+		nik_ce Production transition(gcchar_type (&str)[Size], caction_type action = _zero)
 		{
 			auto body = Body(str, Size - 1);
 
-			return Transition{ body , action };
+			return Production{ body , action };
 		}
 
 		nik_ce GenericAssemblyPDTT() : table{}
 		{
-			set_entry('S',  'i') = transition("P;R"   );
-			set_entry('P',  'i') = transition("iN"    );
-			set_entry('N',  'i') = transition("iN"    );
-			set_entry('N',  ';') = transition(""      );
-			set_entry('R',  'l') = transition("BC"    );
-			set_entry('B',  'l') = transition("l;E"   );
-			set_entry('L',  't') = transition("IJ"    );
-			set_entry('L',  'i') = transition("IJ"    );
-			set_entry('L',  '.') = transition("IJ"    );
-			set_entry('E',  't') = transition("Lgi;"  );
-			set_entry('E',  'i') = transition("Lgi;"  );
-			set_entry('E',  '.') = transition("Lgi;"  );
-			set_entry('E',  'r') = transition("JrM;"  );
-			set_entry('C',  'l') = transition("BC"    );
-			set_entry('C', '\0') = transition(""      );
-			set_entry('I',  't') = transition("tF;bi;");
-			set_entry('I',  'i') = transition("T=F;"  );
-			set_entry('I',  '.') = transition("T=F;"  );
-			set_entry('J',  't') = transition("IJ"    );
-			set_entry('J',  'g') = transition(""      );
-			set_entry('J',  'r') = transition(""      );
-			set_entry('J',  'i') = transition("IJ"    );
-			set_entry('J',  '.') = transition("IJ"    );
-			set_entry('M',  'i') = transition("i"     );
-			set_entry('M',  '_') = transition("_"     );
-			set_entry('F',  'i') = transition("iV"    );
-			set_entry('T',  'i') = transition("i"     );
-			set_entry('T',  '.') = transition("."     );
-			set_entry('V',  'i') = transition("MV"    );
-			set_entry('V',  '_') = transition("MV"    );
-			set_entry('V',  ';') = transition(""      );
+			table_entry('S',  'i') = transition("P;R"   );
+			table_entry('P',  'i') = transition("iN"    );
+			table_entry('N',  'i') = transition("iN"    );
+			table_entry('N',  ';') = transition(""      );
+			table_entry('R',  'l') = transition("BC"    );
+			table_entry('B',  'l') = transition("l;E"   );
+			table_entry('L',  't') = transition("IJ"    );
+			table_entry('L',  'i') = transition("IJ"    );
+			table_entry('L',  '.') = transition("IJ"    );
+			table_entry('E',  't') = transition("Lgi;"  );
+			table_entry('E',  'i') = transition("Lgi;"  );
+			table_entry('E',  '.') = transition("Lgi;"  );
+			table_entry('E',  'r') = transition("JrM;"  );
+			table_entry('C',  'l') = transition("BC"    );
+			table_entry('C', '\0') = transition(""      );
+			table_entry('I',  't') = transition("tF;bi;");
+			table_entry('I',  'i') = transition("T=F;"  );
+			table_entry('I',  '.') = transition("T=F;"  );
+			table_entry('J',  't') = transition("IJ"    );
+			table_entry('J',  'g') = transition(""      );
+			table_entry('J',  'r') = transition(""      );
+			table_entry('J',  'i') = transition("IJ"    );
+			table_entry('J',  '.') = transition("IJ"    );
+			table_entry('M',  'i') = transition("i"     );
+			table_entry('M',  '_') = transition("_"     );
+			table_entry('F',  'i') = transition("iV"    );
+			table_entry('T',  'i') = transition("i"     );
+			table_entry('T',  '.') = transition("."     );
+			table_entry('V',  'i') = transition("MV"    );
+			table_entry('V',  '_') = transition("MV"    );
+			table_entry('V',  ';') = transition(""      );
 		}
 	};
 
@@ -408,226 +604,21 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// stack:
-
-	template<auto Size>
-	struct Stack
-	{
-		using size_type			= decltype(Size);
-
-		nik_ces size_type length	= Size;
-
-		token_type token[length];
-		token_type *current;
-		ctoken_type *end;
-
-		nik_ce Stack(ctoken_type s) : token{}, current{token}, end{token + length}
-		{
-			*   current = '\0';
-			* ++current = s;
-		}
-
-		nik_ce ctoken_type & front() const { return *current; }
-		nik_ce  token_type & front()       { return *current; }
-
-		nik_ce void pop() { if (current != token) --current; }
-
-		nik_ce void push(gcstring_type b, size_type size)
-		{
-			auto k = b + size;
-
-			while (k != b) *++current = *--k;
-		}
-	};
-
-/***********************************************************************************************************************/
-
 // automaton:
 
 /***********************************************************************************************************************/
 
-// debug:
+// derivation:
 
 	template<auto SourceCallable, auto Size = 5'000>
-	struct DebugGenericAssemblyPDA
+	struct T_generic_assembly_dpda
 	{
 		nik_ces auto static_src	= _static_object_<SourceCallable>;
-		nik_ces auto src	= T_store_U<static_src>::value;
-		nik_ces auto tt		= T_generic_assembly_pdtt::value;
-		nik_ces auto length     = Size;
+		using src_type		= decltype(T_store_U<static_src>::value);
+		using T_syntax		= TableOfContents<static_src>;
 
-		using transition_table	= T_generic_assembly_pdtt;
-		using src_type		= decltype(src);
-		using T_dfa		= typename src_type::T_dfa;
-		using char_type		= typename src_type::char_type;
-		using cchar_type	= typename src_type::cchar_type;
-		using string_type	= typename src_type::string_type;
-		using cstring_type	= typename src_type::cstring_type;
-		using stack_type	= Stack<src.stack_size>;
-		using toc_type		= TableOfContents
-					<
-						char_type,
-						src.block_size, src.max_line_size, src.max_entry_size
-					>;
-
-		stack_type stack;
-		token_type front;
-		string_type letter;
-		lexeme word;
-		Transition entry;
-
-		toc_type toc;
-
-		char_type derivation[length];
-		char_type *debug;
-
-		nik_ce DebugGenericAssemblyPDA() :
-
-			stack    { transition_table::nt_start      },
-			front    {                                 },
-			letter   { src.string                      },
-			word     { T_dfa::lex(letter, src.finish)  },
-			entry    {                                 },
-
-			toc      {                                 },
-
-			derivation {            },
-			debug      { derivation }
-
-		{
-			debug_newline();
-			parse();
-			debug_end();
-		}
-
-		nik_ce void parse()
-		{
-			while (*stack.current != '\0')
-			{
-				front = stack.front();
-
-				switch (transition_table::token_kind(front))
-				{
-					case TokenKind::nonterminal: nonterminal(); break;
-					case TokenKind::terminal:       terminal(); break;
-					default:                           error(); break;
-				}
-			}
-		}
-
-		nik_ce void nonterminal()
-		{
-			entry = tt.get_entry(front, word.value);
-			// if (entry == empty) error;
-
-			debug_stack();
-			debug_tokens();
-			debug_production();
-
-			stack.pop();
-			stack.push(entry.body.symbol, entry.body.size);
-
-			// entry.action();
-		}
-
-		nik_ce void terminal()
-		{
-			debug_stack();
-			debug_tokens();
-			debug_newline();
-
-			if (front != word.value) ; // error.
-			else
-			{
-				letter = word.finish;
-				word    = T_dfa::lex(letter, src.finish);
-
-				stack.pop();
-			}
-		}
-
-		nik_ce void error()
-		{
-			// nothing yet.
-		}
-
-		nik_ce void debug_newline() { *(debug++) = '\n'; }
-		nik_ce void debug_symline() { *(debug++) =  '$'; } // A visual substitute for '\0'.
-		nik_ce void debug_endline() { *(debug++) = '\0'; }
-
-		nik_ce void debug_pad(int s)
-		{
-			for (int k = 0; k < s; ++k) *(debug++) = ' ';
-		}
-
-		nik_ce void debug_stack()
-		{
-			auto k = stack.current;
-			debug_pad(14 - (k - stack.token));
-			while (k != stack.token) *(debug++) = *(k--);
-			debug_symline();
-		}
-
-		nik_ce void debug_tokens()
-		{
-			debug_pad(4);
-			auto k = word.finish;
-			auto count = 32;
-			while (k != src.finish)
-			{
-				auto w = T_dfa::lex(k, src.finish);
-				k = w.finish;
-				--count;
-			}
-
-			k = word.finish;
-			debug_pad(count);
-
-			if (word.value != '\0') *(debug++) = word.value;
-			else debug_pad(1);
-			while (k != src.finish)
-			{
-				auto w = T_dfa::lex(k, src.finish);
-				*(debug++) = w.value;
-				k = w.finish;
-			}
-			debug_symline();
-		}
-
-		nik_ce void debug_production()
-		{
-			const Body & b = entry.body;
-			debug_pad(4);
-			*(debug++) = front;
-			*(debug++) = ' ';
-			*(debug++) = (word.value == '\0') ? '$' : word.value;
-			*(debug++) = ' ';
-			*(debug++) = '-';
-			*(debug++) = '>';
-			*(debug++) = ' ';
-			auto s = 6 - b.size;
-			if (b.size == 0) *(debug++) = 'e';
-			else for (auto k = b.symbol; k != b.symbol + b.size; ++debug, ++k) *debug = *k;
-			debug_pad(s);
-			*(debug++) = '\n';
-		}
-
-		nik_ce void debug_end()
-		{
-			debug_stack();
-			debug_tokens();
-			debug_newline();
-			debug_endline();
-		}
+		nik_ces auto value      = GenericDPDA<T_generic_assembly_pdtt, T_syntax, static_src, Size>{};
 	};
-
-	// interface:
-
-		template<auto SourceCallable>
-		struct T_generic_assembly_pda
-		{
-			nik_ces auto value = DebugGenericAssemblyPDA<SourceCallable>{};
-		};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -639,7 +630,7 @@ namespace cctmp {
 	template<auto SourceCallable>
 	nik_ce auto _compile()
 	{
-		nik_ce auto pda = T_generic_assembly_pda<SourceCallable>::value;
+		nik_ce auto pda = T_generic_assembly_dpda<SourceCallable>::value;
 
 		return pda;
 	}
