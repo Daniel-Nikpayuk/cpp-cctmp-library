@@ -2278,6 +2278,200 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// parser:
+
+/***********************************************************************************************************************/
+
+// automaton:
+
+	// debugging:
+
+		nik_ces gindex_type debug_end[] = // 32
+		{
+			  9,  11,  13, 18,		// factorial p n ;
+			 23,  36,			// loop: ;
+			 40,  48,  50, 54,		// test is_zero n ;
+			 60,  65,  72,			// branch done ;
+			 73,  75,  84,  86,  88, 90,	// p = multiply p n ;
+			 91,  93, 103, 105, 108,	// n = decrement n ;
+			112, 117, 126,			// goto loop ;
+			131, 144,			// done: ;
+			150, 152, 162			// return p ;
+		};
+
+	template<auto SourceCallable>
+	struct GenericAssemblyPDA
+	{
+		nik_ces auto static_src	= _static_object_<SourceCallable>;
+		nik_ces auto src	= T_store_U<static_src>::value;
+		nik_ces auto tt		= T_generic_assembly_pdtt::value;
+
+		using transition_table	= T_generic_assembly_pdtt;
+		using src_type		= decltype(src);
+		using T_dfa		= typename src_type::T_dfa;
+		using char_type		= typename src_type::char_type;
+		using stack_type	= Stack<src.stack_size>;
+		using toc_type		= TableOfContents
+					<
+						char_type,
+						src.block_size, src.max_line_size, src.max_entry_size
+					>;
+
+		stack_type stack;
+		toc_type toc;
+
+		lexeme word;
+		bool lex_word;
+
+		char_type derivation[10'000]; // for debugging.
+		char_type *dcur; // for debugging.
+
+		nik_ce GenericAssemblyPDA() :
+
+			stack    { transition_table::nt_start },
+			toc      {                            },
+			word     {                            },
+			lex_word { true                       },
+
+			derivation {            }, // for debugging.
+			dcur       { derivation }  // for debugging.
+		{
+			auto current = src.string;
+
+			debug_before();
+
+			while (*stack.current != '$')
+			{
+				lex_word = lex_word && (current != src.finish);
+				auto sf  = stack.front();
+				auto k   = transition_table::token_kind(sf);
+
+				switch (k)
+				{
+					case TokenKind::nonterminal:
+					{
+						debug_stack();
+
+						if (lex_word) word = T_dfa::lex(current, src.finish);
+						auto tr = tt.get_entry(sf, word.value);
+
+						debug_tokens(current);
+						debug_production(word.value, tr.body);
+
+						stack.push(tr.body.symbol, tr.body.size);
+
+						lex_word = (tr.read == PRead::next);
+						if (lex_word) current = word.finish;
+
+						debug_read();
+
+						// tr.action();
+						break;
+					}
+					case TokenKind::terminal:
+					{
+						if (sf != 'e')
+						{
+							if (lex_word) word = T_dfa::lex(current, src.finish);
+							lex_word = true;
+						}
+
+						debug_stack();
+						debug_tokens(current);
+						debug_pad(17);
+						debug_read();
+
+						// confirm (sf == l.value) ?
+						if (sf != 'e') current = word.finish;
+						stack.pop();
+						break;
+					}
+					default:
+					{
+						// error.
+						break;
+					}
+				}
+			}
+
+			debug_after();
+		}
+
+		nik_ce auto debug_pad(int s)
+		{
+			for (int k = 0; k < s; ++k) *(dcur++) = ' ';
+		}
+
+		nik_ce auto debug_before()
+		{
+			*(dcur++) = '\n';
+		}
+
+		nik_ce auto debug_stack()
+		{
+			auto k = stack.current + 1;
+			debug_pad(14 - (k - stack.token));
+			while (k != stack.token) *(dcur++) = *--k;
+		}
+
+		nik_ce auto debug_tokens(char_type const* b)
+		{
+			debug_pad(4);
+			auto b0 = b;
+			auto count = 32;
+			while (b != src.finish)
+			{
+				auto w = T_dfa::lex(b, src.finish);
+				b = w.finish;
+				--count;
+			}
+
+			b = b0;
+			debug_pad(count);
+			while (b != src.finish)
+			{
+				auto w = T_dfa::lex(b, src.finish);
+				*(dcur++) = w.value;
+				b = w.finish;
+			}
+		}
+
+		nik_ce auto debug_production(ctoken_type t, const Body & b)
+		{
+			debug_pad(4);
+			auto sf = stack.front();
+			*(dcur++) = sf; *(dcur++) = ' '; *(dcur++) = t;
+			*(dcur++) = ' '; *(dcur++) = '-'; *(dcur++) = '>'; *(dcur++) = ' ';
+			auto s = 6 - b.size;
+			for (auto k = b.symbol; k != b.symbol + b.size; ++dcur, ++k) *dcur = *k;
+			debug_pad(s);
+		}
+
+		nik_ce auto debug_read()//char_type const* const b)
+		{
+			debug_pad(4);
+			if (lex_word)
+			{
+				*(dcur++) = 'n'; *(dcur++) = 'e';
+				*(dcur++) = 'x'; *(dcur++) = 't';
+			}
+			else
+			{
+				*(dcur++) = 'p'; *(dcur++) = 'e';
+				*(dcur++) = 'e'; *(dcur++) = 'k';
+			}
+			*(dcur++) = '\n';
+		}
+
+		nik_ce auto debug_after()
+		{
+			*(dcur++) = '\n'; *dcur = '\0';
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 } // case studies

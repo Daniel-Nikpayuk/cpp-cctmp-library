@@ -159,166 +159,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// body:
-
-	struct Body
-	{
-		using size_type  = gindex_type;
-		using csize_type = size_type const;
-
-		csymbol_type *symbol;
-		size_type size;
-
-		nik_ce Body() :
-
-			symbol {    },
-			size   {    }
-
-			{ }
-
-		nik_ce Body(csymbol_type *_b, csize_type _s) :
-
-			symbol { _b },
-			size   { _s }
-
-			{ }
-	};
-
-/***********************************************************************************************************************/
-
-// transition:
-
-	struct Transition
-	{
-		Body body;
-		gkey_type read;
-		action_type action;
-
-		nik_ce Transition() :
-
-			body   {    },
-			read   {    },
-			action {    }
-
-			{ }
-
-		nik_ce Transition(const Body & _b, gckey_type _r, caction_type _a) :
-
-			body   { _b },
-			read   { _r },
-			action { _a }
-
-			{ }
-	};
-
-/***********************************************************************************************************************/
-
-// transition table:
-
-	struct GenericAssemblyPDTT
-	{
-		using ArraySize = T_store_U<_array_size_>;
-
-		struct Nonterminal
-		{
-			nik_ces gchar_type symbol[] = "SPNRCBELJIFVTM";
-
-			nik_ces auto size  = ArraySize::template result<>(symbol) - 1;
-			nik_ces auto end   = symbol + size;
-			nik_ces auto start = *symbol;
-		};
-
-		struct Terminal
-		{
-			nik_ces gchar_type symbol[] = "ltbgri._=;e$";
-
-			nik_ces auto size = ArraySize::template result<>(symbol) - 1;
-			nik_ces auto end  = symbol + size;
-		};
-
-		Transition table[Nonterminal::size][Terminal::size];
-
-		nik_ce Transition & set_entry(gcchar_type row_c, gcchar_type col_c)
-		{
-			auto row = numeric_find_pos(row_c, Nonterminal::symbol, Nonterminal::end);
-			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::end);
-
-			return table[row][col];
-		}
-
-		nik_ce const Transition & get_entry(gcchar_type row_c, gcchar_type col_c) const
-		{
-			auto row = numeric_find_pos(row_c, Nonterminal::symbol, Nonterminal::end);
-			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::end);
-
-			return table[row][col];
-		}
-
-		template<auto Size>
-		nik_ce Transition transition(gcchar_type (&str)[Size], gckey_type read, caction_type action = _zero)
-		{
-			auto body = Body(str, Size - 1);
-
-			return Transition{ body , read , action };
-		}
-
-		nik_ce GenericAssemblyPDTT() : table{}
-		{
-			set_entry('S', 'i') = transition("P;R"   , PRead::next);
-			set_entry('P', 'i') = transition("iN"    , PRead::peek);
-			set_entry('N', 'i') = transition("iN"    , PRead::peek);
-			set_entry('N', ';') = transition("e"     , PRead::peek);
-			set_entry('R', 'l') = transition("BC"    , PRead::peek);
-			set_entry('B', 'l') = transition("l;E"   , PRead::peek);
-			set_entry('L', 't') = transition("IJ"    , PRead::peek);
-			set_entry('L', 'i') = transition("IJ"    , PRead::next);
-			set_entry('L', '.') = transition("IJ"    , PRead::next);
-			set_entry('E', 't') = transition("Lgi;"  , PRead::peek);
-			set_entry('E', 'i') = transition("Lgi;"  , PRead::peek);
-			set_entry('E', '.') = transition("Lgi;"  , PRead::peek);
-			set_entry('E', 'r') = transition("JrM;"  , PRead::peek);
-			set_entry('C', 'l') = transition("BC"    , PRead::peek);
-			set_entry('C', ';') = transition("e"     , PRead::peek);
-			set_entry('I', 't') = transition("tF;bi;", PRead::peek);
-			set_entry('I', 'i') = transition("T=F;"  , PRead::peek);
-			set_entry('I', '.') = transition("T=F;"  , PRead::peek);
-			set_entry('J', 't') = transition("IJ"    , PRead::peek);
-			set_entry('J', 'g') = transition("e"     , PRead::peek);
-			set_entry('J', 'r') = transition("e"     , PRead::peek);
-			set_entry('J', 'i') = transition("IJ"    , PRead::peek);
-			set_entry('J', '.') = transition("IJ"    , PRead::peek);
-			set_entry('M', 'i') = transition("i"     , PRead::peek);
-			set_entry('M', '_') = transition("_"     , PRead::next);
-			set_entry('F', 'i') = transition("iV"    , PRead::next);
-			set_entry('T', 'i') = transition("i"     , PRead::peek);
-			set_entry('T', '.') = transition("."     , PRead::next);
-			set_entry('V', 'i') = transition("MV"    , PRead::peek);
-			set_entry('V', '_') = transition("MV"    , PRead::peek);
-			set_entry('V', ';') = transition("e"     , PRead::peek);
-		}
-	};
-
-	// interface:
-
-		struct T_generic_assembly_pdtt
-		{
-			nik_ces auto value		= GenericAssemblyPDTT{};
-			nik_ces auto nt_symbol		= GenericAssemblyPDTT::Nonterminal::symbol;
-			nik_ces auto nt_end		= GenericAssemblyPDTT::Nonterminal::end;
-			nik_ces auto nt_start		= GenericAssemblyPDTT::Nonterminal::start;
-			nik_ces auto t_symbol		= GenericAssemblyPDTT::Terminal::symbol;
-			nik_ces auto t_end		= GenericAssemblyPDTT::Terminal::end;
-
-			nik_ces auto token_kind(ctoken_type t)
-			{
-				if      (numeric_find(t, nt_symbol, nt_end) != nt_end) return TokenKind::nonterminal;
-				else if (numeric_find(t,  t_symbol,  t_end) !=  t_end) return TokenKind::terminal;
-				else                                                   return TokenKind::nontoken;
-			}
-		};
-
-/***********************************************************************************************************************/
-
 // entry:
 
 	template<typename CharType>
@@ -411,6 +251,163 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// body:
+
+	struct Body
+	{
+		using size_type  = gindex_type;
+		using csize_type = size_type const;
+
+		csymbol_type *symbol;
+		size_type size;
+
+		nik_ce Body() :
+
+			symbol {    },
+			size   {    }
+
+			{ }
+
+		nik_ce Body(csymbol_type *_b, csize_type _s) :
+
+			symbol { _b },
+			size   { _s }
+
+			{ }
+	};
+
+/***********************************************************************************************************************/
+
+// transition:
+
+	struct Transition
+	{
+		Body body;
+		action_type action;
+
+		nik_ce Transition() :
+
+			body   {    },
+			action {    }
+
+			{ }
+
+		nik_ce Transition(const Body & _b, caction_type _a) :
+
+			body   { _b },
+			action { _a }
+
+			{ }
+	};
+
+/***********************************************************************************************************************/
+
+// transition table:
+
+	struct GenericAssemblyPDTT
+	{
+		using ArraySize = T_store_U<_array_size_>;
+
+		struct Nonterminal
+		{
+			nik_ces gchar_type symbol[] = "SPNRCBELJIFVTM";
+
+			nik_ces auto size  = ArraySize::template result<>(symbol) - 1;
+			nik_ces auto end   = symbol + size;
+			nik_ces auto start = *symbol;
+		};
+
+		struct Terminal
+		{
+			nik_ces gchar_type symbol[] = "ltbgri._=;e";
+
+			nik_ces auto size = ArraySize::template result<>(symbol); // recognizes '\0'.
+			nik_ces auto end  = symbol + size;
+		};
+
+		Transition table[Nonterminal::size][Terminal::size];
+
+		nik_ce Transition & set_entry(gcchar_type row_c, gcchar_type col_c)
+		{
+			auto row = numeric_find_pos(row_c, Nonterminal::symbol, Nonterminal::end);
+			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::end);
+
+			return table[row][col];
+		}
+
+		nik_ce const Transition & get_entry(gcchar_type row_c, gcchar_type col_c) const
+		{
+			auto row = numeric_find_pos(row_c, Nonterminal::symbol, Nonterminal::end);
+			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::end);
+
+			return table[row][col];
+		}
+
+		template<auto Size>
+		nik_ce Transition transition(gcchar_type (&str)[Size], caction_type action = _zero)
+		{
+			auto body = Body(str, Size - 1);
+
+			return Transition{ body , action };
+		}
+
+		nik_ce GenericAssemblyPDTT() : table{}
+		{
+			set_entry('S',  'i') = transition("P;R"   );
+			set_entry('P',  'i') = transition("iN"    );
+			set_entry('N',  'i') = transition("iN"    );
+			set_entry('N',  ';') = transition(""      );
+			set_entry('R',  'l') = transition("BC"    );
+			set_entry('B',  'l') = transition("l;E"   );
+			set_entry('L',  't') = transition("IJ"    );
+			set_entry('L',  'i') = transition("IJ"    );
+			set_entry('L',  '.') = transition("IJ"    );
+			set_entry('E',  't') = transition("Lgi;"  );
+			set_entry('E',  'i') = transition("Lgi;"  );
+			set_entry('E',  '.') = transition("Lgi;"  );
+			set_entry('E',  'r') = transition("JrM;"  );
+			set_entry('C',  'l') = transition("BC"    );
+			set_entry('C', '\0') = transition(""      );
+			set_entry('I',  't') = transition("tF;bi;");
+			set_entry('I',  'i') = transition("T=F;"  );
+			set_entry('I',  '.') = transition("T=F;"  );
+			set_entry('J',  't') = transition("IJ"    );
+			set_entry('J',  'g') = transition(""      );
+			set_entry('J',  'r') = transition(""      );
+			set_entry('J',  'i') = transition("IJ"    );
+			set_entry('J',  '.') = transition("IJ"    );
+			set_entry('M',  'i') = transition("i"     );
+			set_entry('M',  '_') = transition("_"     );
+			set_entry('F',  'i') = transition("iV"    );
+			set_entry('T',  'i') = transition("i"     );
+			set_entry('T',  '.') = transition("."     );
+			set_entry('V',  'i') = transition("MV"    );
+			set_entry('V',  '_') = transition("MV"    );
+			set_entry('V',  ';') = transition(""      );
+		}
+	};
+
+	// interface:
+
+		struct T_generic_assembly_pdtt
+		{
+			nik_ces auto value		= GenericAssemblyPDTT{};
+			nik_ces auto nt_symbol		= GenericAssemblyPDTT::Nonterminal::symbol;
+			nik_ces auto nt_end		= GenericAssemblyPDTT::Nonterminal::end;
+			nik_ces auto nt_start		= GenericAssemblyPDTT::Nonterminal::start;
+			nik_ces auto t_symbol		= GenericAssemblyPDTT::Terminal::symbol;
+			nik_ces auto t_end		= GenericAssemblyPDTT::Terminal::end;
+
+			nik_ces auto token_kind(ctoken_type t)
+			{
+				if      (numeric_find(t, nt_symbol, nt_end) != nt_end) return TokenKind::nonterminal;
+				else if (numeric_find(t,  t_symbol,  t_end) !=  t_end) return TokenKind::terminal;
+				else                                                   return TokenKind::nontoken;
+			}
+		};
+
+/***********************************************************************************************************************/
+
 // stack:
 
 	template<auto Size>
@@ -426,23 +423,20 @@ namespace cctmp {
 
 		nik_ce Stack(ctoken_type s) : token{}, current{token}, end{token + length}
 		{
-			*   current = '$';
+			*   current = '\0';
 			* ++current = s;
 		}
 
 		nik_ce ctoken_type & front() const { return *current; }
-		nik_ce token_type & front() { return *current; }
+		nik_ce  token_type & front()       { return *current; }
 
 		nik_ce void pop() { if (current != token) --current; }
 
 		nik_ce void push(gcstring_type b, size_type size)
 		{
-			auto k    = b + size;
-			auto rest = (end - current);
+			auto k = b + size;
 
-			if (size <= rest) while (k != b) *(current++) = *--k;
-
-			pop();
+			while (k != b) *++current = *--k;
 		}
 	};
 
@@ -450,32 +444,25 @@ namespace cctmp {
 
 // automaton:
 
-	// debugging:
+/***********************************************************************************************************************/
 
-		nik_ces gindex_type debug_end[] = // 32
-		{
-			  9,  11,  13, 18,		// factorial p n ;
-			 23,  36,			// loop: ;
-			 40,  48,  50, 54,		// test is_zero n ;
-			 60,  65,  72,			// branch done ;
-			 73,  75,  84,  86,  88, 90,	// p = multiply p n ;
-			 91,  93, 103, 105, 108,	// n = decrement n ;
-			112, 117, 126,			// goto loop ;
-			131, 144,			// done: ;
-			150, 152, 162			// return p ;
-		};
+// debug:
 
-	template<auto SourceCallable>
-	struct GenericAssemblyPDA
+	template<auto SourceCallable, auto Size = 5'000>
+	struct DebugGenericAssemblyPDA
 	{
 		nik_ces auto static_src	= _static_object_<SourceCallable>;
 		nik_ces auto src	= T_store_U<static_src>::value;
 		nik_ces auto tt		= T_generic_assembly_pdtt::value;
+		nik_ces auto length     = Size;
 
 		using transition_table	= T_generic_assembly_pdtt;
 		using src_type		= decltype(src);
 		using T_dfa		= typename src_type::T_dfa;
 		using char_type		= typename src_type::char_type;
+		using cchar_type	= typename src_type::cchar_type;
+		using string_type	= typename src_type::string_type;
+		using cstring_type	= typename src_type::cstring_type;
 		using stack_type	= Stack<src.stack_size>;
 		using toc_type		= TableOfContents
 					<
@@ -484,154 +471,153 @@ namespace cctmp {
 					>;
 
 		stack_type stack;
+		token_type front;
+		string_type letter;
+		lexeme word;
+		Transition entry;
+
 		toc_type toc;
 
-		lexeme word;
-		bool lex_word;
+		char_type derivation[length];
+		char_type *debug;
 
-		char_type derivation[10'000]; // for debugging.
-		char_type *dcur; // for debugging.
+		nik_ce DebugGenericAssemblyPDA() :
 
-		nik_ce GenericAssemblyPDA() :
+			stack    { transition_table::nt_start      },
+			front    {                                 },
+			letter   { src.string                      },
+			word     { T_dfa::lex(letter, src.finish)  },
+			entry    {                                 },
 
-			stack    { transition_table::nt_start },
-			toc      {                            },
-			word     {                            },
-			lex_word { true                       },
+			toc      {                                 },
 
-			derivation {            }, // for debugging.
-			dcur       { derivation }  // for debugging.
+			derivation {            },
+			debug      { derivation }
+
 		{
-			auto current = src.string;
+			debug_newline();
+			parse();
+			debug_end();
+		}
 
-			debug_before();
-
-			while (*stack.current != '$')
+		nik_ce void parse()
+		{
+			while (*stack.current != '\0')
 			{
-				lex_word = lex_word && (current != src.finish);
-				auto sf  = stack.front();
-				auto k   = transition_table::token_kind(sf);
+				front = stack.front();
 
-				switch (k)
+				switch (transition_table::token_kind(front))
 				{
-					case TokenKind::nonterminal:
-					{
-						debug_stack();
-
-						if (lex_word) word = T_dfa::lex(current, src.finish);
-						auto tr = tt.get_entry(sf, word.value);
-
-						debug_tokens(current);
-						debug_production(word.value, tr.body);
-
-						stack.push(tr.body.symbol, tr.body.size);
-
-						lex_word = (tr.read == PRead::next);
-						if (lex_word) current = word.finish;
-
-						debug_read();
-
-						// tr.action();
-						break;
-					}
-					case TokenKind::terminal:
-					{
-						if (sf != 'e')
-						{
-							if (lex_word) word = T_dfa::lex(current, src.finish);
-							lex_word = true;
-						}
-
-						debug_stack();
-						debug_tokens(current);
-						debug_pad(17);
-						debug_read();
-
-						// confirm (sf == l.value) ?
-						if (sf != 'e') current = word.finish;
-						stack.pop();
-						break;
-					}
-					default:
-					{
-						// error.
-						break;
-					}
+					case TokenKind::nonterminal: nonterminal(); break;
+					case TokenKind::terminal:       terminal(); break;
+					default:                           error(); break;
 				}
 			}
-
-			debug_after();
 		}
 
-		nik_ce auto debug_pad(int s)
+		nik_ce void nonterminal()
 		{
-			for (int k = 0; k < s; ++k) *(dcur++) = ' ';
+			entry = tt.get_entry(front, word.value);
+			// if (entry == empty) error;
+
+			debug_stack();
+			debug_tokens();
+			debug_production();
+
+			stack.pop();
+			stack.push(entry.body.symbol, entry.body.size);
+
+			// entry.action();
 		}
 
-		nik_ce auto debug_before()
+		nik_ce void terminal()
 		{
-			*(dcur++) = '\n';
+			debug_stack();
+			debug_tokens();
+			debug_newline();
+
+			if (front != word.value) ; // error.
+			else
+			{
+				letter = word.finish;
+				word    = T_dfa::lex(letter, src.finish);
+
+				stack.pop();
+			}
 		}
 
-		nik_ce auto debug_stack()
+		nik_ce void error()
 		{
-			auto k = stack.current + 1;
+			// nothing yet.
+		}
+
+		nik_ce void debug_newline() { *(debug++) = '\n'; }
+		nik_ce void debug_symline() { *(debug++) =  '$'; } // A visual substitute for '\0'.
+		nik_ce void debug_endline() { *(debug++) = '\0'; }
+
+		nik_ce void debug_pad(int s)
+		{
+			for (int k = 0; k < s; ++k) *(debug++) = ' ';
+		}
+
+		nik_ce void debug_stack()
+		{
+			auto k = stack.current;
 			debug_pad(14 - (k - stack.token));
-			while (k != stack.token) *(dcur++) = *--k;
+			while (k != stack.token) *(debug++) = *(k--);
+			debug_symline();
 		}
 
-		nik_ce auto debug_tokens(char_type const* b)
+		nik_ce void debug_tokens()
 		{
 			debug_pad(4);
-			auto b0 = b;
+			auto k = word.finish;
 			auto count = 32;
-			while (b != src.finish)
+			while (k != src.finish)
 			{
-				auto w = T_dfa::lex(b, src.finish);
-				b = w.finish;
+				auto w = T_dfa::lex(k, src.finish);
+				k = w.finish;
 				--count;
 			}
 
-			b = b0;
+			k = word.finish;
 			debug_pad(count);
-			while (b != src.finish)
+
+			if (word.value != '\0') *(debug++) = word.value;
+			else debug_pad(1);
+			while (k != src.finish)
 			{
-				auto w = T_dfa::lex(b, src.finish);
-				*(dcur++) = w.value;
-				b = w.finish;
+				auto w = T_dfa::lex(k, src.finish);
+				*(debug++) = w.value;
+				k = w.finish;
 			}
+			debug_symline();
 		}
 
-		nik_ce auto debug_production(ctoken_type t, const Body & b)
+		nik_ce void debug_production()
 		{
+			const Body & b = entry.body;
 			debug_pad(4);
-			auto sf = stack.front();
-			*(dcur++) = sf; *(dcur++) = ' '; *(dcur++) = t;
-			*(dcur++) = ' '; *(dcur++) = '-'; *(dcur++) = '>'; *(dcur++) = ' ';
+			*(debug++) = front;
+			*(debug++) = ' ';
+			*(debug++) = (word.value == '\0') ? '$' : word.value;
+			*(debug++) = ' ';
+			*(debug++) = '-';
+			*(debug++) = '>';
+			*(debug++) = ' ';
 			auto s = 6 - b.size;
-			for (auto k = b.symbol; k != b.symbol + b.size; ++dcur, ++k) *dcur = *k;
+			if (b.size == 0) *(debug++) = 'e';
+			else for (auto k = b.symbol; k != b.symbol + b.size; ++debug, ++k) *debug = *k;
 			debug_pad(s);
+			*(debug++) = '\n';
 		}
 
-		nik_ce auto debug_read()//char_type const* const b)
+		nik_ce void debug_end()
 		{
-			debug_pad(4);
-			if (lex_word)
-			{
-				*(dcur++) = 'n'; *(dcur++) = 'e';
-				*(dcur++) = 'x'; *(dcur++) = 't';
-			}
-			else
-			{
-				*(dcur++) = 'p'; *(dcur++) = 'e';
-				*(dcur++) = 'e'; *(dcur++) = 'k';
-			}
-			*(dcur++) = '\n';
-		}
-
-		nik_ce auto debug_after()
-		{
-			*(dcur++) = '\n'; *dcur = '\0';
+			debug_stack();
+			debug_tokens();
+			debug_newline();
+			debug_endline();
 		}
 	};
 
@@ -640,18 +626,18 @@ namespace cctmp {
 		template<auto SourceCallable>
 		struct T_generic_assembly_pda
 		{
-			nik_ces auto value = GenericAssemblyPDA<SourceCallable>{};
+			nik_ces auto value = DebugGenericAssemblyPDA<SourceCallable>{};
 		};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// parse:
+// compile:
 
 /***********************************************************************************************************************/
 
 	template<auto SourceCallable>
-	nik_ce auto _parse()
+	nik_ce auto _compile()
 	{
 		nik_ce auto pda = T_generic_assembly_pda<SourceCallable>::value;
 
@@ -659,7 +645,7 @@ namespace cctmp {
 	}
 
 	template<auto SourceCallable>
-	nik_ce auto parse = _parse<SourceCallable>();
+	nik_ce auto compile = _compile<SourceCallable>();
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -686,39 +672,7 @@ namespace cctmp {
 		);
 	}
 
-	nik_ce auto parsed_factorial_src = parse<factorial_source>;
-
-/***********************************************************************************************************************/
-
-/***********************************************************************************************************************/
-
-	// parsing the string should be done in two rounds:
-
-		// The first to collect memory allocation optimizers
-		// such as block, max line, max entry, and distinct identifiers.
-		// (if we're going to commit an extra parse cycle, we might as well
-		//  collect as much relevant optimizing info as possible here)
-
-		// the second round then builds the table of contents.
-
-		// a line is an array of two arrays: begin entries, and end entries.
-		// a block is an array of lines.
-		// a table of contents is an array of blocks.
-
-		// we can get the toc size (number of blocks) right away from the source.
-		// if we want variable size blocks (numbers of lines) we have to statically build them first,
-		// then cast those arrays as pointers.
-
-	// lexemes should hold enough info for the parser to:
-
-	// 1) build an error report.
-	// 2) build a table of contents (syntax tree), referencing the given lexemes;
-	//    referencing lines and blocks. Specific lexemes will want to reference
-	//    variable and label assigned values.
-	// 3) build a variable lookup table.
-	// 4) build a label lookup table.
-	// 5) parse according to the tokens (and thus the context free grammar) to validate the source code.
-	// 6) Hold symbolic type info to determine dependencies/errors.
+	nik_ce auto factorial = compile<factorial_source>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
