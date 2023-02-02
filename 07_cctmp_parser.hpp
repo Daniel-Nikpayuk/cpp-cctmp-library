@@ -64,45 +64,47 @@ namespace cctmp {
 			block_size     { _one       },
 			stack_size     { _zero      }
 
-		{
-			auto k = string;
-
-			gindex_type cur_entry_size = _zero;
-			gindex_type cur_line_size  = _zero;
-
-			while (k != finish)
 			{
-				auto l = T_dfa::lex(k, finish);
+				auto k = string;
 
-				switch (l.value)
+				gindex_type cur_entry_size = _zero;
+				gindex_type cur_line_size  = _zero;
+
+				while (k != finish)
 				{
-					case 'i':
-					{
-						++cur_entry_size;
-						++max_ident_size;
-						break;
-					}
-					case ';':
-					{
-						if (cur_entry_size > max_entry_size) max_entry_size = cur_entry_size;
-						cur_entry_size = _zero;
-						++cur_line_size;
-						break;
-					}
-					case 'l':
-					{
-						if (cur_line_size > max_line_size) max_line_size = cur_line_size;
-						++cur_entry_size;
-						cur_line_size = _zero;
-						++block_size;
-						break;
-					}
-				}
+					auto l = T_dfa::lex(k, finish);
 
-				++stack_size;
-				k = l.finish;
+					switch (l.value)
+					{
+						case 'i':
+						{
+							++cur_entry_size;
+							++max_ident_size;
+							break;
+						}
+						case ';':
+						{
+							if (cur_entry_size > max_entry_size)
+								max_entry_size = cur_entry_size;
+							cur_entry_size = _zero;
+							++cur_line_size;
+							break;
+						}
+						case 'l':
+						{
+							if (cur_line_size > max_line_size)
+								max_line_size = cur_line_size;
+							++cur_entry_size;
+							cur_line_size = _zero;
+							++block_size;
+							break;
+						}
+					}
+
+					++stack_size;
+					k = l.finish;
+				}
 			}
-		}
 	};
 
 /***********************************************************************************************************************/
@@ -226,16 +228,11 @@ namespace cctmp {
 
 // automaton:
 
-/***********************************************************************************************************************/
-
-// derivation:
-
-	template<typename T_pdtt, typename T_syntax, auto StaticSource, auto Size>
-	struct GenericDPDA
+	template<typename T_pdtt, typename T_syntax, auto StaticSource>
+	struct GenericPDA
 	{
 		nik_ces auto src	= T_store_U<StaticSource>::value;
 		nik_ces auto tt		= T_pdtt::value;
-		nik_ces auto length     = Size;
 
 		using stack_type	= Stack<src.stack_size>;
 		using src_type		= decltype(src);
@@ -251,10 +248,7 @@ namespace cctmp {
 
 		T_syntax syntax;
 
-		char_type derivation[length];
-		char_type *current;
-
-		nik_ce GenericDPDA() :
+		nik_ce GenericPDA(bool p = true) :
 
 			stack      { T_pdtt::nt_start               },
 			front      { stack.front()                  },
@@ -262,15 +256,9 @@ namespace cctmp {
 			word       { T_dfa::lex(letter, src.finish) },
 			production {                                },
 
-			syntax     {                                },
+			syntax     {                                }
 
-			derivation {            },
-			current    { derivation }
-
-		{
-			parse();
-			derive_end();
-		}
+			{ if (p) parse(); }
 
 		nik_ce void parse()
 		{
@@ -290,23 +278,12 @@ namespace cctmp {
 		nik_ce void nonterminal()
 		{
 			update_production();
-
-			derive_stack();
-			derive_tokens();
-			derive_production();
-
-			stack.pop();
-			stack.push(production.body.symbol, production.body.size);
-
-			// production.action();
+			update_stack();
+			update_action();
 		}
 
 		nik_ce void terminal()
 		{
-			derive_stack();
-			derive_tokens();
-			derive_newline();
-
 			if (front != word.value) ; // error.
 			else
 			{
@@ -328,72 +305,152 @@ namespace cctmp {
 			// if (production == empty) error;
 		}
 
-		nik_ce void derive_newline() { *(current++) = '\n'; }
-		nik_ce void derive_symline() { *(current++) =  '$'; } // A visual substitute for '\0'.
-		nik_ce void derive_endline() { *(current++) = '\0'; }
+		nik_ce void update_stack()
+		{
+			stack.pop();
+			stack.push(production.body.symbol, production.body.size);
+		}
 
-		nik_ce void derive_pad(int s)
+		nik_ce void update_action()
+		{
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// derivation:
+
+	template<typename T_pdtt, typename T_syntax, auto StaticSource, auto Size>
+	struct GenericDPDA : public GenericPDA<T_pdtt, T_syntax, StaticSource>
+	{
+		using Base		= GenericPDA<T_pdtt, T_syntax, StaticSource>;
+		nik_ces auto length     = Size;
+
+		using char_type		= typename Base::char_type;
+		using string_type	= typename Base::string_type;
+		using T_dfa		= typename Base::T_dfa;
+
+		char_type derivation[length];
+		char_type *current;
+
+		nik_ce GenericDPDA() :
+
+			Base       { false      },
+			derivation {            },
+			current    { derivation }
+
+			{ parse(); }
+
+		nik_ce void parse()
+		{
+			while (*Base::stack.current != '\0')
+			{
+				switch (T_pdtt::token_kind(Base::front))
+				{
+					case TokenKind::nonterminal: nonterminal(); break;
+					case TokenKind::terminal:       terminal(); break;
+					default:                           error(); break;
+				}
+
+				Base::front = Base::stack.front();
+			}
+
+			update_end();
+		}
+
+		nik_ce void nonterminal()
+		{
+			Base::update_production();
+
+			update_stack();
+			update_tokens();
+			update_production();
+
+			Base::update_stack();
+			Base::update_action();
+		}
+
+		nik_ce void terminal()
+		{
+			update_stack();
+			update_tokens();
+			update_newline();
+
+			Base::terminal();
+		}
+
+		nik_ce void error()
+		{
+			// nothing yet.
+		}
+
+		nik_ce void update_newline() { *(current++) = '\n'; }
+		nik_ce void update_symline() { *(current++) =  '$'; } // A visual substitute for '\0'.
+		nik_ce void update_endline() { *(current++) = '\0'; }
+		nik_ce void update_space  () { *(current++) =  ' '; }
+		nik_ce void update_dash   () { *(current++) =  '-'; }
+		nik_ce void update_gt     () { *(current++) =  '>'; }
+		nik_ce void update_arrow  () { update_space(); update_dash(); update_gt(); update_space(); }
+
+		nik_ce void update_pad(int s)
 		{
 			for (int k = 0; k < s; ++k) *(current++) = ' ';
 		}
 
-		nik_ce void derive_stack()
+		nik_ce void update_stack()
 		{
-			auto k = stack.current;
-			derive_pad(14 - (k - stack.token));
-			while (k != stack.token) *(current++) = *(k--);
-			derive_symline();
+			auto k = Base::stack.current;
+			update_pad(14 - (k - Base::stack.token));
+			while (k != Base::stack.token) *(current++) = *(k--);
+			update_symline();
 		}
 
-		nik_ce void derive_tokens()
+		nik_ce void update_tokens()
 		{
-			derive_pad(4);
-			auto k = word.finish;
+			update_pad(4);
+			auto k = Base::word.finish;
 			auto count = 32;
-			while (k != src.finish)
+			while (k != Base::src.finish)
 			{
-				auto w = T_dfa::lex(k, src.finish);
-				k = w.finish;
+				auto w = T_dfa::lex(k, Base::src.finish);
 				--count;
+				k = w.finish;
 			}
 
-			k = word.finish;
-			derive_pad(count);
+			k = Base::word.finish;
+			update_pad(count);
 
-			if (word.value != '\0') *(current++) = word.value;
-			else derive_pad(1);
-			while (k != src.finish)
+			if (Base::word.value != '\0') *(current++) = Base::word.value;
+			else update_pad(1);
+			while (k != Base::src.finish)
 			{
-				auto w = T_dfa::lex(k, src.finish);
+				auto w = T_dfa::lex(k, Base::src.finish);
 				*(current++) = w.value;
 				k = w.finish;
 			}
-			derive_symline();
+			update_symline();
 		}
 
-		nik_ce void derive_production()
+		nik_ce void update_production()
 		{
-			const Body & b = production.body;
-			derive_pad(4);
-			*(current++) = front;
-			*(current++) = ' ';
-			*(current++) = (word.value == '\0') ? '$' : word.value;
-			*(current++) = ' ';
-			*(current++) = '-';
-			*(current++) = '>';
-			*(current++) = ' ';
+			const Body & b = Base::production.body;
+			update_pad(4);
+			*(current++) = Base::front;
+			update_space();
+			*(current++) = (Base::word.value == '\0') ? '$' : Base::word.value;
+			update_arrow();
 			auto s = 6 - b.size;
 			if (b.size == 0) *(current++) = 'e';
 			else for (auto k = b.symbol; k != b.symbol + b.size; ++current, ++k) *current = *k;
-			derive_pad(s);
-			*(current++) = '\n';
+			update_pad(s);
+			update_newline();
 		}
 
-		nik_ce void derive_end()
+		nik_ce void update_end()
 		{
-			derive_stack();
-			derive_tokens();
-			derive_endline();
+			update_stack();
+			update_tokens();
+			update_endline();
 		}
 	};
 
@@ -605,6 +662,16 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // automaton:
+
+	template<auto SourceCallable>
+	struct T_generic_assembly_pda
+	{
+		nik_ces auto static_src	= _static_object_<SourceCallable>;
+		using src_type		= decltype(T_store_U<static_src>::value);
+		using T_syntax		= TableOfContents<static_src>;
+
+		nik_ces auto value      = GenericPDA<T_generic_assembly_pdtt, T_syntax, static_src>{};
+	};
 
 /***********************************************************************************************************************/
 
