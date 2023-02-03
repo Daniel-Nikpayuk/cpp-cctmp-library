@@ -228,17 +228,19 @@ namespace cctmp {
 
 // automaton:
 
-	template<typename T_pdtt, typename T_syntax, auto StaticSource>
+	template<typename T_pdtt, typename T_ast, typename T_syntax, auto StaticSource>
 	struct GenericPDA
 	{
 		nik_ces auto src	= T_store_U<StaticSource>::value;
 		nik_ces auto tt		= T_pdtt::value;
+		nik_ces auto action	= T_ast::template action<T_syntax>;
 
 		using stack_type	= Stack<src.stack_size>;
 		using src_type		= decltype(src);
 		using char_type		= typename src_type::char_type;
 		using string_type	= typename src_type::string_type;
 		using T_dfa		= typename src_type::T_dfa;
+		using Action    	= typename T_ast::Action;
 
 		stack_type stack;
 		token_type front;
@@ -313,6 +315,9 @@ namespace cctmp {
 
 		nik_ce void update_action()
 		{
+			auto n = production.action;
+
+			if (n != Action::nop) action[n](syntax);
 		}
 	};
 
@@ -320,10 +325,10 @@ namespace cctmp {
 
 // derivation:
 
-	template<typename T_pdtt, typename T_syntax, auto StaticSource, auto Size>
-	struct GenericDPDA : public GenericPDA<T_pdtt, T_syntax, StaticSource>
+	template<typename T_pdtt, typename T_ast, typename T_syntax, auto StaticSource, auto Size>
+	struct GenericDPDA : public GenericPDA<T_pdtt, T_ast, T_syntax, StaticSource>
 	{
-		using Base		= GenericPDA<T_pdtt, T_syntax, StaticSource>;
+		using Base		= GenericPDA<T_pdtt, T_ast, T_syntax, StaticSource>;
 		nik_ces auto length     = Size;
 
 		using char_type		= typename Base::char_type;
@@ -560,33 +565,61 @@ namespace cctmp {
 
 	struct GenericAssemblyAST
 	{
-		struct Action
+		template<typename TOC> nik_ces void nop           (TOC & toc) { }
+		template<typename TOC> nik_ces void function_name (TOC & toc) { }
+		template<typename TOC> nik_ces void function_arg  (TOC & toc) { }
+		template<typename TOC> nik_ces void function_end  (TOC & toc) { }
+		template<typename TOC> nik_ces void label_name    (TOC & toc) { }
+		template<typename TOC> nik_ces void test_copy     (TOC & toc) { }
+		template<typename TOC> nik_ces void goto_name     (TOC & toc) { }
+		template<typename TOC> nik_ces void return_name   (TOC & toc) { }
+		template<typename TOC> nik_ces void apply_paste   (TOC & toc) { }
+		template<typename TOC> nik_ces void apply_name    (TOC & toc) { }
+		template<typename TOC> nik_ces void apply_assign  (TOC & toc) { }
+		template<typename TOC> nik_ces void apply_copy    (TOC & toc) { }
+		template<typename TOC> nik_ces void apply_end     (TOC & toc) { }
+		template<typename TOC> nik_ces void assign_name   (TOC & toc) { }
+	};
+
+	// interface:
+
+		struct T_generic_assembly_ast
 		{
-			enum : action_type
+			struct Action
 			{
-				nop = 0,
-				function_name , function_arg , function_end ,
-			        label_name    , test_copy    , goto_name    , return_name ,
-			        apply_paste   , apply_name   , apply_assign , apply_copy  , apply_end ,
-			        assign_name   ,
-				dimension
+				enum : action_type
+				{
+					nop = 0,
+					function_name , function_arg , function_end ,
+				        label_name    , test_copy    , goto_name    , return_name ,
+				        apply_paste   , apply_name   , apply_assign , apply_copy  , apply_end ,
+				        assign_name   ,
+					dimension
+				};
+			};
+
+			template<typename TOC>
+			using toc_type = void(*)(TOC &);
+
+			template<typename TOC>
+			nik_ces toc_type<TOC> action[] =
+			{
+				GenericAssemblyAST::template nop           <TOC>,
+				GenericAssemblyAST::template function_name <TOC>,
+				GenericAssemblyAST::template function_arg  <TOC>,
+				GenericAssemblyAST::template function_end  <TOC>,
+				GenericAssemblyAST::template label_name    <TOC>,
+				GenericAssemblyAST::template test_copy     <TOC>,
+				GenericAssemblyAST::template goto_name     <TOC>,
+				GenericAssemblyAST::template return_name   <TOC>,
+				GenericAssemblyAST::template apply_paste   <TOC>,
+				GenericAssemblyAST::template apply_name    <TOC>,
+				GenericAssemblyAST::template apply_assign  <TOC>,
+				GenericAssemblyAST::template apply_copy    <TOC>,
+				GenericAssemblyAST::template apply_end     <TOC>,
+				GenericAssemblyAST::template assign_name   <TOC>
 			};
 		};
-
-		nik_ces auto function_name () { return 0; }
-		nik_ces auto function_arg  () { return 0; }
-		nik_ces auto function_end  () { return 0; }
-		nik_ces auto label_name    () { return 0; }
-		nik_ces auto test_copy     () { return 0; }
-		nik_ces auto goto_name     () { return 0; }
-		nik_ces auto return_name   () { return 0; }
-		nik_ces auto apply_paste   () { return 0; }
-		nik_ces auto apply_name    () { return 0; }
-		nik_ces auto apply_assign  () { return 0; }
-		nik_ces auto apply_copy    () { return 0; }
-		nik_ces auto apply_end     () { return 0; }
-		nik_ces auto assign_name   () { return 0; }
-	};
 
 /***********************************************************************************************************************/
 
@@ -595,7 +628,7 @@ namespace cctmp {
 	struct GenericAssemblyPDTT
 	{
 		using ArraySize = T_store_U<_array_size_>;
-		using Action    = typename GenericAssemblyAST::Action;
+		using Action    = typename T_generic_assembly_ast::Action;
 
 		struct Nonterminal
 		{
@@ -702,12 +735,13 @@ namespace cctmp {
 	struct T_generic_assembly_pda
 	{
 		using T_pdtt = T_generic_assembly_pdtt;
+		using T_ast  = T_generic_assembly_ast;
 
 		template<auto static_src>
 		struct parser
 		{
 			using T_syntax		= TableOfContents<static_src>;
-			nik_ces auto value      = GenericPDA<T_pdtt, T_syntax, static_src>{};
+			nik_ces auto value     	= GenericPDA<T_pdtt, T_ast, T_syntax, static_src>{};
 		};
 
 		template<auto SourceCallable>
@@ -721,12 +755,13 @@ namespace cctmp {
 	struct T_generic_assembly_dpda
 	{
 		using T_pdtt = T_generic_assembly_pdtt;
+		using T_ast  = T_generic_assembly_ast;
 
 		template<auto static_src, auto Size>
 		struct parser
 		{
 			using T_syntax		= TableOfContents<static_src>;
-			nik_ces auto value      = GenericDPDA<T_pdtt, T_syntax, static_src, Size>{};
+			nik_ces auto value      = GenericDPDA<T_pdtt, T_ast, T_syntax, static_src, Size>{};
 		};
 
 		template<auto SourceCallable, auto Size = 5'000>
