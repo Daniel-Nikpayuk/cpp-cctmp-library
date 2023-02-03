@@ -55,9 +55,9 @@
 	{
 	//	printf("%d\n", (int) TokenName::invalid);
 	//	printf("%d\n", (int) GenericAssemblyPDTT::Terminal::size);
-	//	printf("%d\n", (int) factorial.stack.length);
 	//	printf("%c\n", factorial.stack.front());
-		printf("%s\n", factorial.derivation);
+	//	printf("%s\n", factorial.derivation);
+		printf("%d\n", (int) factorial.stack.length);
 
 		return 0;
 	}

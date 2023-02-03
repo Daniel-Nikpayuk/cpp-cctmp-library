@@ -551,6 +551,41 @@ namespace cctmp {
 		size_type size; // current size
 
 		nik_ce TableOfContents() : block{}, size{} { }
+
+	};
+
+/***********************************************************************************************************************/
+
+// abstract syntax tree:
+
+	struct GenericAssemblyAST
+	{
+		struct Action
+		{
+			enum : action_type
+			{
+				nop = 0,
+				function_name , function_arg , function_end ,
+			        label_name    , test_copy    , goto_name    , return_name ,
+			        apply_paste   , apply_name   , apply_assign , apply_copy  , apply_end ,
+			        assign_name   ,
+				dimension
+			};
+		};
+
+		nik_ces auto function_name () { return 0; }
+		nik_ces auto function_arg  () { return 0; }
+		nik_ces auto function_end  () { return 0; }
+		nik_ces auto label_name    () { return 0; }
+		nik_ces auto test_copy     () { return 0; }
+		nik_ces auto goto_name     () { return 0; }
+		nik_ces auto return_name   () { return 0; }
+		nik_ces auto apply_paste   () { return 0; }
+		nik_ces auto apply_name    () { return 0; }
+		nik_ces auto apply_assign  () { return 0; }
+		nik_ces auto apply_copy    () { return 0; }
+		nik_ces auto apply_end     () { return 0; }
+		nik_ces auto assign_name   () { return 0; }
 	};
 
 /***********************************************************************************************************************/
@@ -560,6 +595,7 @@ namespace cctmp {
 	struct GenericAssemblyPDTT
 	{
 		using ArraySize = T_store_U<_array_size_>;
+		using Action    = typename GenericAssemblyAST::Action;
 
 		struct Nonterminal
 		{
@@ -578,7 +614,50 @@ namespace cctmp {
 			nik_ces auto end  = symbol + size;
 		};
 
+		template<auto Size>
+		nik_ces Production transition(gcchar_type (&str)[Size], caction_type action = Action::nop)
+		{
+			auto body = Body(str, Size - 1);
+
+			return Production{ body , action };
+		}
+
 		Production table[Nonterminal::size][Terminal::size];
+
+		nik_ce GenericAssemblyPDTT() : table{}
+		{
+			table_entry('S',  'i') = transition( "P;R"                            );
+			table_entry('P',  'i') = transition( "iN"     , Action::function_name );
+			table_entry('N',  'i') = transition( "iN"     , Action::function_arg  );
+			table_entry('N',  ';') = transition( ""       , Action::function_end  );
+			table_entry('R',  'l') = transition( "BC"                             );
+			table_entry('B',  'l') = transition( "l;E"    , Action::label_name    );
+			table_entry('L',  't') = transition( "IJ"                             );
+			table_entry('L',  'i') = transition( "IJ"                             );
+			table_entry('L',  '.') = transition( "IJ"                             );
+			table_entry('E',  't') = transition( "Lgi;"                           );
+			table_entry('E',  'i') = transition( "Lgi;"                           );
+			table_entry('E',  '.') = transition( "Lgi;"                           );
+			table_entry('E',  'r') = transition( "JrM;"                           );
+			table_entry('C',  'l') = transition( "BC"                             );
+			table_entry('C', '\0') = transition( ""                               );
+			table_entry('I',  't') = transition( "tF;bi;" , Action::test_copy     );
+			table_entry('I',  'i') = transition( "T=F;"                           );
+			table_entry('I',  '.') = transition( "T=F;"                           );
+			table_entry('J',  't') = transition( "IJ"                             );
+			table_entry('J',  'g') = transition( ""       , Action::goto_name     );
+			table_entry('J',  'r') = transition( ""       , Action::return_name   );
+			table_entry('J',  'i') = transition( "IJ"                             );
+			table_entry('J',  '.') = transition( "IJ"                             );
+			table_entry('M',  'i') = transition( "i"      , Action::assign_name   );
+			table_entry('M',  '_') = transition( "_"      , Action::apply_paste   );
+			table_entry('F',  'i') = transition( "iV"     , Action::apply_name    );
+			table_entry('T',  'i') = transition( "i"      , Action::apply_assign  );
+			table_entry('T',  '.') = transition( "."      , Action::apply_copy    );
+			table_entry('V',  'i') = transition( "MV"                             );
+			table_entry('V',  '_') = transition( "MV"                             );
+			table_entry('V',  ';') = transition( ""       , Action::apply_end     ); // if test,
+		}										 // branch action.
 
 		nik_ce Production & table_entry(gcchar_type row_c, gcchar_type col_c)
 		{
@@ -594,49 +673,6 @@ namespace cctmp {
 			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::end);
 
 			return table[row][col];
-		}
-
-		template<auto Size>
-		nik_ce Production transition(gcchar_type (&str)[Size], caction_type action = _zero)
-		{
-			auto body = Body(str, Size - 1);
-
-			return Production{ body , action };
-		}
-
-		nik_ce GenericAssemblyPDTT() : table{}
-		{
-			table_entry('S',  'i') = transition("P;R"   );
-			table_entry('P',  'i') = transition("iN"    );
-			table_entry('N',  'i') = transition("iN"    );
-			table_entry('N',  ';') = transition(""      );
-			table_entry('R',  'l') = transition("BC"    );
-			table_entry('B',  'l') = transition("l;E"   );
-			table_entry('L',  't') = transition("IJ"    );
-			table_entry('L',  'i') = transition("IJ"    );
-			table_entry('L',  '.') = transition("IJ"    );
-			table_entry('E',  't') = transition("Lgi;"  );
-			table_entry('E',  'i') = transition("Lgi;"  );
-			table_entry('E',  '.') = transition("Lgi;"  );
-			table_entry('E',  'r') = transition("JrM;"  );
-			table_entry('C',  'l') = transition("BC"    );
-			table_entry('C', '\0') = transition(""      );
-			table_entry('I',  't') = transition("tF;bi;");
-			table_entry('I',  'i') = transition("T=F;"  );
-			table_entry('I',  '.') = transition("T=F;"  );
-			table_entry('J',  't') = transition("IJ"    );
-			table_entry('J',  'g') = transition(""      );
-			table_entry('J',  'r') = transition(""      );
-			table_entry('J',  'i') = transition("IJ"    );
-			table_entry('J',  '.') = transition("IJ"    );
-			table_entry('M',  'i') = transition("i"     );
-			table_entry('M',  '_') = transition("_"     );
-			table_entry('F',  'i') = transition("iV"    );
-			table_entry('T',  'i') = transition("i"     );
-			table_entry('T',  '.') = transition("."     );
-			table_entry('V',  'i') = transition("MV"    );
-			table_entry('V',  '_') = transition("MV"    );
-			table_entry('V',  ';') = transition(""      );
 		}
 	};
 
@@ -663,28 +699,38 @@ namespace cctmp {
 
 // automaton:
 
-	template<auto SourceCallable>
 	struct T_generic_assembly_pda
 	{
-		nik_ces auto static_src	= _static_object_<SourceCallable>;
-		using src_type		= decltype(T_store_U<static_src>::value);
-		using T_syntax		= TableOfContents<static_src>;
+		using T_pdtt = T_generic_assembly_pdtt;
 
-		nik_ces auto value      = GenericPDA<T_generic_assembly_pdtt, T_syntax, static_src>{};
+		template<auto static_src>
+		struct parser
+		{
+			using T_syntax		= TableOfContents<static_src>;
+			nik_ces auto value      = GenericPDA<T_pdtt, T_syntax, static_src>{};
+		};
+
+		template<auto SourceCallable>
+		nik_ces auto parse = parser<_static_object_<SourceCallable>>::value;
 	};
 
 /***********************************************************************************************************************/
 
 // derivation:
 
-	template<auto SourceCallable, auto Size = 5'000>
 	struct T_generic_assembly_dpda
 	{
-		nik_ces auto static_src	= _static_object_<SourceCallable>;
-		using src_type		= decltype(T_store_U<static_src>::value);
-		using T_syntax		= TableOfContents<static_src>;
+		using T_pdtt = T_generic_assembly_pdtt;
 
-		nik_ces auto value      = GenericDPDA<T_generic_assembly_pdtt, T_syntax, static_src, Size>{};
+		template<auto static_src, auto Size>
+		struct parser
+		{
+			using T_syntax		= TableOfContents<static_src>;
+			nik_ces auto value      = GenericDPDA<T_pdtt, T_syntax, static_src, Size>{};
+		};
+
+		template<auto SourceCallable, auto Size = 5'000>
+		nik_ces auto parse = parser<_static_object_<SourceCallable>, Size>::value;
 	};
 
 /***********************************************************************************************************************/
@@ -697,7 +743,7 @@ namespace cctmp {
 	template<auto SourceCallable>
 	nik_ce auto _compile()
 	{
-		nik_ce auto pda = T_generic_assembly_dpda<SourceCallable>::value;
+		nik_ce auto pda = T_generic_assembly_pda::parse<SourceCallable>;
 
 		return pda;
 	}

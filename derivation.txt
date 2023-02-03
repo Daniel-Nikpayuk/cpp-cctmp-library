@@ -1,0 +1,72 @@
+
+             S$     iii;l;tii;bi;i=iii;i=ii;gi;l;ri;$    S i -> P;R   
+           P;R$     iii;l;tii;bi;i=iii;i=ii;gi;l;ri;$    P i -> iN    
+          iN;R$     iii;l;tii;bi;i=iii;i=ii;gi;l;ri;$
+           N;R$      ii;l;tii;bi;i=iii;i=ii;gi;l;ri;$    N i -> iN    
+          iN;R$      ii;l;tii;bi;i=iii;i=ii;gi;l;ri;$
+           N;R$       i;l;tii;bi;i=iii;i=ii;gi;l;ri;$    N i -> iN    
+          iN;R$       i;l;tii;bi;i=iii;i=ii;gi;l;ri;$
+           N;R$        ;l;tii;bi;i=iii;i=ii;gi;l;ri;$    N ; -> e      
+            ;R$        ;l;tii;bi;i=iii;i=ii;gi;l;ri;$
+             R$         l;tii;bi;i=iii;i=ii;gi;l;ri;$    R l -> BC    
+            BC$         l;tii;bi;i=iii;i=ii;gi;l;ri;$    B l -> l;E   
+          l;EC$         l;tii;bi;i=iii;i=ii;gi;l;ri;$
+           ;EC$          ;tii;bi;i=iii;i=ii;gi;l;ri;$
+            EC$           tii;bi;i=iii;i=ii;gi;l;ri;$    E t -> Lgi;  
+         Lgi;C$           tii;bi;i=iii;i=ii;gi;l;ri;$    L t -> IJ    
+        IJgi;C$           tii;bi;i=iii;i=ii;gi;l;ri;$    I t -> tF;bi;
+   tF;bi;Jgi;C$           tii;bi;i=iii;i=ii;gi;l;ri;$
+    F;bi;Jgi;C$            ii;bi;i=iii;i=ii;gi;l;ri;$    F i -> iV    
+   iV;bi;Jgi;C$            ii;bi;i=iii;i=ii;gi;l;ri;$
+    V;bi;Jgi;C$             i;bi;i=iii;i=ii;gi;l;ri;$    V i -> MV    
+   MV;bi;Jgi;C$             i;bi;i=iii;i=ii;gi;l;ri;$    M i -> i     
+   iV;bi;Jgi;C$             i;bi;i=iii;i=ii;gi;l;ri;$
+    V;bi;Jgi;C$              ;bi;i=iii;i=ii;gi;l;ri;$    V ; -> e      
+     ;bi;Jgi;C$              ;bi;i=iii;i=ii;gi;l;ri;$
+      bi;Jgi;C$               bi;i=iii;i=ii;gi;l;ri;$
+       i;Jgi;C$                i;i=iii;i=ii;gi;l;ri;$
+        ;Jgi;C$                 ;i=iii;i=ii;gi;l;ri;$
+         Jgi;C$                  i=iii;i=ii;gi;l;ri;$    J i -> IJ    
+        IJgi;C$                  i=iii;i=ii;gi;l;ri;$    I i -> T=F;  
+     T=F;Jgi;C$                  i=iii;i=ii;gi;l;ri;$    T i -> i     
+     i=F;Jgi;C$                  i=iii;i=ii;gi;l;ri;$
+      =F;Jgi;C$                   =iii;i=ii;gi;l;ri;$
+       F;Jgi;C$                    iii;i=ii;gi;l;ri;$    F i -> iV    
+      iV;Jgi;C$                    iii;i=ii;gi;l;ri;$
+       V;Jgi;C$                     ii;i=ii;gi;l;ri;$    V i -> MV    
+      MV;Jgi;C$                     ii;i=ii;gi;l;ri;$    M i -> i     
+      iV;Jgi;C$                     ii;i=ii;gi;l;ri;$
+       V;Jgi;C$                      i;i=ii;gi;l;ri;$    V i -> MV    
+      MV;Jgi;C$                      i;i=ii;gi;l;ri;$    M i -> i     
+      iV;Jgi;C$                      i;i=ii;gi;l;ri;$
+       V;Jgi;C$                       ;i=ii;gi;l;ri;$    V ; -> e      
+        ;Jgi;C$                       ;i=ii;gi;l;ri;$
+         Jgi;C$                        i=ii;gi;l;ri;$    J i -> IJ    
+        IJgi;C$                        i=ii;gi;l;ri;$    I i -> T=F;  
+     T=F;Jgi;C$                        i=ii;gi;l;ri;$    T i -> i     
+     i=F;Jgi;C$                        i=ii;gi;l;ri;$
+      =F;Jgi;C$                         =ii;gi;l;ri;$
+       F;Jgi;C$                          ii;gi;l;ri;$    F i -> iV    
+      iV;Jgi;C$                          ii;gi;l;ri;$
+       V;Jgi;C$                           i;gi;l;ri;$    V i -> MV    
+      MV;Jgi;C$                           i;gi;l;ri;$    M i -> i     
+      iV;Jgi;C$                           i;gi;l;ri;$
+       V;Jgi;C$                            ;gi;l;ri;$    V ; -> e      
+        ;Jgi;C$                            ;gi;l;ri;$
+         Jgi;C$                             gi;l;ri;$    J g -> e      
+          gi;C$                             gi;l;ri;$
+           i;C$                              i;l;ri;$
+            ;C$                               ;l;ri;$
+             C$                                l;ri;$    C l -> BC    
+            BC$                                l;ri;$    B l -> l;E   
+          l;EC$                                l;ri;$
+           ;EC$                                 ;ri;$
+            EC$                                  ri;$    E r -> JrM;  
+         JrM;C$                                  ri;$    J r -> e      
+          rM;C$                                  ri;$
+           M;C$                                   i;$    M i -> i     
+           i;C$                                   i;$
+            ;C$                                    ;$
+             C$                                     $    C $ -> e      
+              $                                     $
+
