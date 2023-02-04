@@ -50,14 +50,37 @@
 //	constexpr auto val1       = T_store_U<sum_of_sq1>::template result<>(3, 4);
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// factorial:
+
+/***********************************************************************************************************************/
+
+	constexpr auto factorial_source()
+	{
+		return source
+		(
+		 	"factorial p n    ;"
+
+			"loop:            ;"
+		 	"test is_zero n   ;"
+			"branch done      ;"
+			"p = multiply p n ;"
+			"n = decrement n  ;"
+			"goto loop        ;"
+
+			"done:            ;"
+			"return p         ;"
+		);
+	}
+
+	constexpr auto factorial = compile<factorial_source>;
+
+/***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-	//	printf("%d\n", (int) TokenName::invalid);
-	//	printf("%d\n", (int) GenericAssemblyPDTT::Terminal::size);
-	//	printf("%c\n", factorial.stack.front());
-	//	printf("%s\n", factorial.derivation);
-		printf("%d\n", (int) factorial.stack.length);
+		printf("%d\n", (int) factorial.syntax.size());
 
 		return 0;
 	}

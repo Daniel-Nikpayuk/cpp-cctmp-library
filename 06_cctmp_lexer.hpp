@@ -589,5 +589,91 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// source:
+
+/***********************************************************************************************************************/
+
+	template<typename CharType, auto Size>
+	struct source
+	{
+		using T_dfa			= T_generic_assembly_dfa;
+
+		using char_type			= CharType;
+		using cchar_type		= char_type const;
+		using string_type		= cchar_type*;
+		using cstring_type		= string_type const;
+		using size_type			= decltype(Size);
+
+		nik_ces size_type length	= Size - 1;
+
+		cstring_type string;
+		cstring_type finish;
+
+		gindex_type max_entry_size;
+		gindex_type max_ident_size;
+		gindex_type max_line_size;
+
+		gindex_type block_size;
+		gindex_type stack_size;
+
+		nik_ce source(const CharType (&s)[Size]) :
+
+			string         { s          },
+			finish         { s + length },
+
+			max_entry_size { _zero      },
+			max_ident_size { _zero      },
+			max_line_size  { _zero      },
+
+			block_size     { _one       },
+			stack_size     { _zero      }
+
+			{
+				auto k = string;
+
+				gindex_type cur_entry_size = _zero;
+				gindex_type cur_line_size  = _zero;
+
+				while (k != finish)
+				{
+					auto l = T_dfa::lex(k, finish);
+
+					switch (l.value)
+					{
+						case 'i':
+						{
+							++cur_entry_size;
+							++max_ident_size;
+							break;
+						}
+						case ';':
+						{
+							if (cur_entry_size > max_entry_size)
+								max_entry_size = cur_entry_size;
+							cur_entry_size = _zero;
+							++cur_line_size;
+							break;
+						}
+						case 'l':
+						{
+							if (cur_line_size > max_line_size)
+								max_line_size = cur_line_size;
+							++cur_entry_size;
+							cur_line_size = _zero;
+							++block_size;
+							break;
+						}
+					}
+
+					++stack_size;
+					k = l.finish;
+				}
+			}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 } // namespace cctmp
 

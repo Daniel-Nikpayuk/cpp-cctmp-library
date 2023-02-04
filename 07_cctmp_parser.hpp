@@ -25,92 +25,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// source:
-
-/***********************************************************************************************************************/
-
-	template<typename CharType, auto Size>
-	struct source
-	{
-		using T_dfa			= T_generic_assembly_dfa;
-
-		using char_type			= CharType;
-		using cchar_type		= char_type const;
-		using string_type		= cchar_type*;
-		using cstring_type		= string_type const;
-		using size_type			= decltype(Size);
-
-		nik_ces size_type length	= Size - 1;
-
-		cstring_type string;
-		cstring_type finish;
-
-		gindex_type max_entry_size;
-		gindex_type max_ident_size;
-		gindex_type max_line_size;
-
-		gindex_type block_size;
-		gindex_type stack_size;
-
-		nik_ce source(const CharType (&s)[Size]) :
-
-			string         { s          },
-			finish         { s + length },
-
-			max_entry_size { _zero      },
-			max_ident_size { _zero      },
-			max_line_size  { _zero      },
-
-			block_size     { _one       },
-			stack_size     { _zero      }
-
-			{
-				auto k = string;
-
-				gindex_type cur_entry_size = _zero;
-				gindex_type cur_line_size  = _zero;
-
-				while (k != finish)
-				{
-					auto l = T_dfa::lex(k, finish);
-
-					switch (l.value)
-					{
-						case 'i':
-						{
-							++cur_entry_size;
-							++max_ident_size;
-							break;
-						}
-						case ';':
-						{
-							if (cur_entry_size > max_entry_size)
-								max_entry_size = cur_entry_size;
-							cur_entry_size = _zero;
-							++cur_line_size;
-							break;
-						}
-						case 'l':
-						{
-							if (cur_line_size > max_line_size)
-								max_line_size = cur_line_size;
-							++cur_entry_size;
-							cur_line_size = _zero;
-							++block_size;
-							break;
-						}
-					}
-
-					++stack_size;
-					k = l.finish;
-				}
-			}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // pushdown automata:
 
 /***********************************************************************************************************************/
@@ -133,8 +47,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			nontoken = 0,
-			nonterminal,
-			terminal,
+			nonterminal, terminal,
 			dimension
 		};
 	};
@@ -151,19 +64,8 @@ namespace cctmp {
 		csymbol_type *symbol;
 		size_type size;
 
-		nik_ce Body() :
-
-			symbol {    },
-			size   {    }
-
-			{ }
-
-		nik_ce Body(csymbol_type *_b, csize_type _s) :
-
-			symbol { _b },
-			size   { _s }
-
-			{ }
+		nik_ce Body()                                : symbol{    }, size{    } { }
+		nik_ce Body(csymbol_type *_b, csize_type _s) : symbol{ _b }, size{ _s } { }
 	};
 
 /***********************************************************************************************************************/
@@ -175,19 +77,8 @@ namespace cctmp {
 		Body body;
 		action_type action;
 
-		nik_ce Production() :
-
-			body   {    },
-			action {    }
-
-			{ }
-
-		nik_ce Production(const Body & _b, caction_type _a) :
-
-			body   { _b },
-			action { _a }
-
-			{ }
+		nik_ce Production()                                 : body{    }, action{    } { }
+		nik_ce Production(const Body & _b, caction_type _a) : body{ _b }, action{ _a } { }
 	};
 
 /***********************************************************************************************************************/
@@ -197,9 +88,8 @@ namespace cctmp {
 	template<auto Size>
 	struct Stack
 	{
+		nik_ces auto length		= Size;
 		using size_type			= decltype(Size);
-
-		nik_ces size_type length	= Size;
 
 		token_type token[length];
 		token_type *current;
@@ -219,7 +109,6 @@ namespace cctmp {
 		nik_ce void push(gcstring_type b, size_type size)
 		{
 			auto k = b + size;
-
 			while (k != b) *++current = *--k;
 		}
 	};
@@ -280,8 +169,8 @@ namespace cctmp {
 		nik_ce void nonterminal()
 		{
 			update_production();
-			update_stack();
-			update_action();
+			nonterminal_update_stack();
+			nonterminal_update_action();
 		}
 
 		nik_ce void terminal()
@@ -289,10 +178,9 @@ namespace cctmp {
 			if (front != word.value) ; // error.
 			else
 			{
-				letter = word.finish;
-				word   = T_dfa::lex(letter, src.finish);
-
-				stack.pop();
+				terminal_update_action();
+				update_word();
+				terminal_update_stack();
 			}
 		}
 
@@ -307,17 +195,33 @@ namespace cctmp {
 			// if (production == empty) error;
 		}
 
-		nik_ce void update_stack()
+		nik_ce void nonterminal_update_stack()
 		{
 			stack.pop();
 			stack.push(production.body.symbol, production.body.size);
 		}
 
-		nik_ce void update_action()
+		nik_ce void update_word()
+		{
+			letter = word.finish;
+			word   = T_dfa::lex(letter, src.finish);
+		}
+
+		nik_ce void terminal_update_stack()
+		{
+			stack.pop();
+		}
+
+		nik_ce void nonterminal_update_action()
 		{
 			auto n = production.action;
 
-			if (n != Action::nop) action[n](syntax);
+			if (n != Action::nop) action[n](syntax, word);
+		}
+
+		nik_ce void terminal_update_action()
+		{
+			// terminal action referencing toc.line.begin.
 		}
 	};
 
@@ -505,15 +409,18 @@ namespace cctmp {
 	{
 		using char_type			= CharType;
 		using cchar_type		= char_type const;
-		using size_type			= decltype(Size);
 		using entry_type		= Entry<char_type>;
+		using centry_type		= entry_type const;
 
-		nik_ces size_type length	= Size;
+		nik_ces auto length		= Size;
 
 		entry_type entry[length];
-		size_type size; // current size
+		centry_type *begin;
+		entry_type *current;
 
-		nik_ce Line() : entry{}, size{} { }
+		nik_ce Line() : entry{}, begin{entry}, current{entry} { }
+
+		nik_ce auto size() const { return (current - begin); }
 	};
 
 /***********************************************************************************************************************/
@@ -525,15 +432,18 @@ namespace cctmp {
 	{
 		using char_type			= CharType;
 		using cchar_type		= char_type const;
-		using size_type			= decltype(LineSize);
 		using line_type			= Line<char_type, EntrySize>;
+		using cline_type		= line_type const;
 
-		nik_ces size_type length	= LineSize;
+		nik_ces auto length		= LineSize;
 
 		line_type line[length];
-		size_type size; // current size
+		cline_type *begin;
+		line_type *current;
 
-		nik_ce Block() : line{}, size{} { }
+		nik_ce Block() : line{}, begin{line}, current{line} { }
+
+		nik_ce auto size() const { return (current - begin); }
 	};
 
 /***********************************************************************************************************************/
@@ -550,13 +460,21 @@ namespace cctmp {
 		using char_type			= typename src_type::char_type;
 		using cchar_type		= typename src_type::cchar_type;
 		using block_type		= Block<char_type, src.max_line_size, src.max_entry_size>;
-		using size_type			= decltype(length);
+		using cblock_type		= block_type const;
 
 		block_type block[length];
-		size_type size; // current size
+		cblock_type *begin;
+		block_type *current;
 
-		nik_ce TableOfContents() : block{}, size{} { }
+		nik_ce TableOfContents() : block{}, begin{block}, current{block} { }
 
+		nik_ce auto size() const { return (current - begin); }
+
+		nik_ce void increment_block () { ++(current                  ); }
+		nik_ce void increment_line  () { ++(current->current         ); }
+		nik_ce void increment_entry () { ++(current->current->current); }
+
+		nik_ce auto & entry() { return *(current->current->current); }
 	};
 
 /***********************************************************************************************************************/
@@ -565,20 +483,83 @@ namespace cctmp {
 
 	struct GenericAssemblyAST
 	{
-		template<typename TOC> nik_ces void nop           (TOC & toc) { }
-		template<typename TOC> nik_ces void function_name (TOC & toc) { }
-		template<typename TOC> nik_ces void function_arg  (TOC & toc) { }
-		template<typename TOC> nik_ces void function_end  (TOC & toc) { }
-		template<typename TOC> nik_ces void label_name    (TOC & toc) { }
-		template<typename TOC> nik_ces void test_copy     (TOC & toc) { }
-		template<typename TOC> nik_ces void goto_name     (TOC & toc) { }
-		template<typename TOC> nik_ces void return_name   (TOC & toc) { }
-		template<typename TOC> nik_ces void apply_paste   (TOC & toc) { }
-		template<typename TOC> nik_ces void apply_name    (TOC & toc) { }
-		template<typename TOC> nik_ces void apply_assign  (TOC & toc) { }
-		template<typename TOC> nik_ces void apply_copy    (TOC & toc) { }
-		template<typename TOC> nik_ces void apply_end     (TOC & toc) { }
-		template<typename TOC> nik_ces void assign_name   (TOC & toc) { }
+		template<typename TOC> nik_ces void nop            (TOC & toc, clexeme & l) { }
+
+		template<typename TOC>
+		nik_ces void function_begin(TOC & toc, clexeme & l)
+		{
+			toc.entry().begin = l.start;
+			toc.entry().end   = l.finish;
+			toc.entry().token = l.value;
+
+			toc.increment_entry();
+		}
+
+		template<typename TOC>
+		nik_ces void function_arg(TOC & toc, clexeme & l)
+		{
+			toc.entry().begin = l.start;
+			toc.entry().end   = l.finish;
+			toc.entry().token = l.value;
+
+			toc.increment_entry();
+		}
+
+		template<typename TOC>
+		nik_ces void function_end(TOC & toc, clexeme & l)
+		{
+			toc.increment_line();
+		}
+
+		template<typename TOC>
+		nik_ces void label_begin(TOC & toc, clexeme & l)
+		{
+		}
+
+		template<typename TOC>
+		nik_ces void test_copy(TOC & toc, clexeme & l)
+		{
+		}
+
+		template<typename TOC>
+		nik_ces void goto_begin(TOC & toc, clexeme & l)
+		{
+		}
+
+		template<typename TOC>
+		nik_ces void return_begin(TOC & toc, clexeme & l)
+		{
+		}
+
+		template<typename TOC>
+		nik_ces void apply_paste(TOC & toc, clexeme & l)
+		{
+		}
+
+		template<typename TOC>
+		nik_ces void apply_begin(TOC & toc, clexeme & l)
+		{
+		}
+
+		template<typename TOC>
+		nik_ces void apply_assign(TOC & toc, clexeme & l)
+		{
+		}
+
+		template<typename TOC>
+		nik_ces void apply_copy(TOC & toc, clexeme & l)
+		{
+		}
+
+		template<typename TOC>
+		nik_ces void apply_end(TOC & toc, clexeme & l)
+		{
+		}
+
+		template<typename TOC>
+		nik_ces void assign_name(TOC & toc, clexeme & l)
+		{
+		}
 	};
 
 	// interface:
@@ -590,34 +571,34 @@ namespace cctmp {
 				enum : action_type
 				{
 					nop = 0,
-					function_name , function_arg , function_end ,
-				        label_name    , test_copy    , goto_name    , return_name ,
-				        apply_paste   , apply_name   , apply_assign , apply_copy  , apply_end ,
-				        assign_name   ,
+					function_begin , function_arg , function_end ,
+				        label_begin    , test_copy    , goto_begin   , return_begin ,
+				        apply_paste    , apply_begin  , apply_assign , apply_copy   , apply_end ,
+				        assign_name    ,
 					dimension
 				};
 			};
 
 			template<typename TOC>
-			using toc_type = void(*)(TOC &);
+			using toc_type = void(*)(TOC &, clexeme &);
 
 			template<typename TOC>
 			nik_ces toc_type<TOC> action[] =
 			{
-				GenericAssemblyAST::template nop           <TOC>,
-				GenericAssemblyAST::template function_name <TOC>,
-				GenericAssemblyAST::template function_arg  <TOC>,
-				GenericAssemblyAST::template function_end  <TOC>,
-				GenericAssemblyAST::template label_name    <TOC>,
-				GenericAssemblyAST::template test_copy     <TOC>,
-				GenericAssemblyAST::template goto_name     <TOC>,
-				GenericAssemblyAST::template return_name   <TOC>,
-				GenericAssemblyAST::template apply_paste   <TOC>,
-				GenericAssemblyAST::template apply_name    <TOC>,
-				GenericAssemblyAST::template apply_assign  <TOC>,
-				GenericAssemblyAST::template apply_copy    <TOC>,
-				GenericAssemblyAST::template apply_end     <TOC>,
-				GenericAssemblyAST::template assign_name   <TOC>
+				GenericAssemblyAST::template nop            <TOC>,
+				GenericAssemblyAST::template function_begin <TOC>,
+				GenericAssemblyAST::template function_arg   <TOC>,
+				GenericAssemblyAST::template function_end   <TOC>,
+				GenericAssemblyAST::template label_begin    <TOC>,
+				GenericAssemblyAST::template test_copy      <TOC>,
+				GenericAssemblyAST::template goto_begin     <TOC>,
+				GenericAssemblyAST::template return_begin   <TOC>,
+				GenericAssemblyAST::template apply_paste    <TOC>,
+				GenericAssemblyAST::template apply_begin    <TOC>,
+				GenericAssemblyAST::template apply_assign   <TOC>,
+				GenericAssemblyAST::template apply_copy     <TOC>,
+				GenericAssemblyAST::template apply_end      <TOC>,
+				GenericAssemblyAST::template assign_name    <TOC>
 			};
 		};
 
@@ -659,37 +640,37 @@ namespace cctmp {
 
 		nik_ce GenericAssemblyPDTT() : table{}
 		{
-			table_entry('S',  'i') = transition( "P;R"                            );
-			table_entry('P',  'i') = transition( "iN"     , Action::function_name );
-			table_entry('N',  'i') = transition( "iN"     , Action::function_arg  );
-			table_entry('N',  ';') = transition( ""       , Action::function_end  );
-			table_entry('R',  'l') = transition( "BC"                             );
-			table_entry('B',  'l') = transition( "l;E"    , Action::label_name    );
-			table_entry('L',  't') = transition( "IJ"                             );
-			table_entry('L',  'i') = transition( "IJ"                             );
-			table_entry('L',  '.') = transition( "IJ"                             );
-			table_entry('E',  't') = transition( "Lgi;"                           );
-			table_entry('E',  'i') = transition( "Lgi;"                           );
-			table_entry('E',  '.') = transition( "Lgi;"                           );
-			table_entry('E',  'r') = transition( "JrM;"                           );
-			table_entry('C',  'l') = transition( "BC"                             );
-			table_entry('C', '\0') = transition( ""                               );
-			table_entry('I',  't') = transition( "tF;bi;" , Action::test_copy     );
-			table_entry('I',  'i') = transition( "T=F;"                           );
-			table_entry('I',  '.') = transition( "T=F;"                           );
-			table_entry('J',  't') = transition( "IJ"                             );
-			table_entry('J',  'g') = transition( ""       , Action::goto_name     );
-			table_entry('J',  'r') = transition( ""       , Action::return_name   );
-			table_entry('J',  'i') = transition( "IJ"                             );
-			table_entry('J',  '.') = transition( "IJ"                             );
-			table_entry('M',  'i') = transition( "i"      , Action::assign_name   );
-			table_entry('M',  '_') = transition( "_"      , Action::apply_paste   );
-			table_entry('F',  'i') = transition( "iV"     , Action::apply_name    );
-			table_entry('T',  'i') = transition( "i"      , Action::apply_assign  );
-			table_entry('T',  '.') = transition( "."      , Action::apply_copy    );
-			table_entry('V',  'i') = transition( "MV"                             );
-			table_entry('V',  '_') = transition( "MV"                             );
-			table_entry('V',  ';') = transition( ""       , Action::apply_end     ); // if test,
+			table_entry('S',  'i') = transition( "P;R"                             );
+			table_entry('P',  'i') = transition( "iN"     , Action::function_begin );
+			table_entry('N',  'i') = transition( "iN"     , Action::function_arg   );
+			table_entry('N',  ';') = transition( ""       , Action::function_end   );
+			table_entry('R',  'l') = transition( "BC"                              );
+			table_entry('B',  'l') = transition( "l;E"    , Action::label_begin    );
+			table_entry('L',  't') = transition( "IJ"                              );
+			table_entry('L',  'i') = transition( "IJ"                              );
+			table_entry('L',  '.') = transition( "IJ"                              );
+			table_entry('E',  't') = transition( "Lgi;"                            );
+			table_entry('E',  'i') = transition( "Lgi;"                            );
+			table_entry('E',  '.') = transition( "Lgi;"                            );
+			table_entry('E',  'r') = transition( "JrM;"                            );
+			table_entry('C',  'l') = transition( "BC"                              );
+			table_entry('C', '\0') = transition( ""                                );
+			table_entry('I',  't') = transition( "tF;bi;" , Action::test_copy      );
+			table_entry('I',  'i') = transition( "T=F;"                            );
+			table_entry('I',  '.') = transition( "T=F;"                            );
+			table_entry('J',  't') = transition( "IJ"                              );
+			table_entry('J',  'g') = transition( ""       , Action::goto_begin     );
+			table_entry('J',  'r') = transition( ""       , Action::return_begin   );
+			table_entry('J',  'i') = transition( "IJ"                              );
+			table_entry('J',  '.') = transition( "IJ"                              );
+			table_entry('M',  'i') = transition( "i"      , Action::assign_name    );
+			table_entry('M',  '_') = transition( "_"      , Action::apply_paste    );
+			table_entry('F',  'i') = transition( "iV"     , Action::apply_begin    );
+			table_entry('T',  'i') = transition( "i"      , Action::apply_assign   );
+			table_entry('T',  '.') = transition( "."      , Action::apply_copy     );
+			table_entry('V',  'i') = transition( "MV"                              );
+			table_entry('V',  '_') = transition( "MV"                              );
+			table_entry('V',  ';') = transition( ""       , Action::apply_end      ); // if test,
 		}										 // branch action.
 
 		nik_ce Production & table_entry(gcchar_type row_c, gcchar_type col_c)
@@ -785,33 +766,6 @@ namespace cctmp {
 
 	template<auto SourceCallable>
 	nik_ce auto compile = _compile<SourceCallable>();
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// factorial:
-
-/***********************************************************************************************************************/
-
-	nik_ce auto factorial_source()
-	{
-		return source
-		(
-		 	"factorial p n    ;"
-
-			"loop:            ;"
-		 	"test is_zero n   ;"
-			"branch done      ;"
-			"p = multiply p n ;"
-			"n = decrement n  ;"
-			"goto loop        ;"
-
-			"done:            ;"
-			"return p         ;"
-		);
-	}
-
-	nik_ce auto factorial = compile<factorial_source>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
