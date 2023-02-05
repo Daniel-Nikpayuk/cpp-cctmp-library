@@ -320,6 +320,29 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// lookup:
+
+	template<typename CharType, auto Size>
+	struct Lookup
+	{
+		using char_type			= CharType;
+		using cchar_type		= char_type const;
+		using locus_type		= Entry<char_type> const*;
+		using clocus_type		= locus_type const;
+
+		nik_ces auto length = Size;
+
+		locus_type locus[length];
+		clocus_type *begin;
+		locus_type *current;
+
+		nik_ce Lookup() : locus{}, begin{locus}, current{locus} { }
+
+		nik_ce auto size() const { return (current - begin); }
+	};
+
+/***********************************************************************************************************************/
+
 // table of contents:
 
 	template<auto StaticSource>
@@ -335,11 +358,14 @@ namespace cctmp {
 		using cpage_type		= page_type const;
 		using block_type		= Block<src.block_size>;
 		using cblock_type		= block_type const;
+		using lookup_type		= Lookup<char_type, src.max_ident_size>;
+		using clookup_type		= lookup_type const;
 
 		page_type page;
 		block_type block;
+		lookup_type lookup;
 
-		nik_ce TableOfContents() : page{}, block{} { }
+		nik_ce TableOfContents() : page{}, block{}, lookup{} { }
 
 	//	nik_ce void increment_block () { ++(current                  ); }
 	//	nik_ce void increment_line  () { ++(current->current         ); }
