@@ -56,22 +56,49 @@
 
 /***********************************************************************************************************************/
 
-	constexpr auto factorial_source()
+	constexpr auto factorial_source() // copy by ref all the lines to a single array for variadic unpacking?
+					  // or make it the main toc structure, then have a small array just for labels?
+
+				// the major arrays should coincide with the ability to variadically unpack them.
+				// you can have minor arrays as conveniences (such as label locations).
+				// this is what makes it a table of contents.
 	{
-		return source
+		// how much can be shifted to source? how much should be shifted to source?
+		// make an array just for lookup identifier locations?
+
+		return source // count: the number of main args.
 		(
-		 	"factorial p n    ;"
+		 	"factorial p n    ;" // na:index{0} lookup:index{1} copy:index{2} paste:index{3}
+					     //	factorial:index{4} p:index{5} n:index{6} ;:index{}
+					     // indices are offset to include "na", "lookup", "copy", "paste".
 
-			"loop:            ;"
-		 	"test is_zero n   ;"
-			"branch done      ;"
-			"p = multiply p n ;"
-			"n = decrement n  ;"
-			"goto loop        ;"
+			"loop:            ;" // loop::index{1} ;:index{}
+		 	"test is_zero n   ;" // test:index{2} is_zero:index{1} n:index{6} ;:index{}
+			"branch done      ;" // branch:index{} done:index{2} ;:index{}
+			"p = multiply p n ;" // p:index{5} =:index{} multiply:index{1} p:index{5} n:index{6} ;:index{}
+					     // count: the number of args for unpacking.
+			"n = decrement n  ;" // n:index{6} =:index{} decrement:index{1} n:index{6} ;:index{}
+					     // count: the number of args for unpacking.
+			"goto loop        ;" // goto:index{} loop:index{1} ;:index{}
 
-			"done:            ;"
-			"return p         ;"
+			"done:            ;" // done::index{2} ;:index{}
+			"return p         ;" // return:index{} p:index{5} ;:index{}
 		);
+
+	//	return source
+	//	(
+	//	 	"factorial p n    ;"
+
+	//		"loop:            ;"
+	//	 	"test is_zero n   ;"
+	//		"branch done      ;"
+	//		"p = multiply p n ;"
+	//		"n = decrement n  ;"
+	//		"goto loop        ;"
+
+	//		"done:            ;"
+	//		"return p         ;"
+	//	);
 	}
 
 	constexpr auto factorial = compile<factorial_source>;
@@ -80,7 +107,7 @@
 
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", (int) factorial.syntax.size());
+		printf("%d\n", (int) factorial.syntax.page.size());
 
 		return 0;
 	}

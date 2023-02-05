@@ -226,144 +226,6 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
-
-// derivation:
-
-	template<typename T_pdtt, typename T_ast, typename T_syntax, auto StaticSource, auto Size>
-	struct GenericDPDA : public GenericPDA<T_pdtt, T_ast, T_syntax, StaticSource>
-	{
-		using Base		= GenericPDA<T_pdtt, T_ast, T_syntax, StaticSource>;
-		nik_ces auto length     = Size;
-
-		using char_type		= typename Base::char_type;
-		using string_type	= typename Base::string_type;
-		using T_dfa		= typename Base::T_dfa;
-
-		char_type derivation[length];
-		char_type *current;
-
-		nik_ce GenericDPDA() :
-
-			Base       { false      },
-			derivation {            },
-			current    { derivation }
-
-			{ parse(); }
-
-		nik_ce void parse()
-		{
-			while (*Base::stack.current != '\0')
-			{
-				switch (T_pdtt::token_kind(Base::front))
-				{
-					case TokenKind::nonterminal: nonterminal(); break;
-					case TokenKind::terminal:       terminal(); break;
-					default:                           error(); break;
-				}
-
-				Base::front = Base::stack.front();
-			}
-
-			update_end();
-		}
-
-		nik_ce void nonterminal()
-		{
-			Base::update_production();
-
-			update_stack();
-			update_tokens();
-			update_production();
-
-			Base::update_stack();
-			Base::update_action();
-		}
-
-		nik_ce void terminal()
-		{
-			update_stack();
-			update_tokens();
-			update_newline();
-
-			Base::terminal();
-		}
-
-		nik_ce void error()
-		{
-			// nothing yet.
-		}
-
-		nik_ce void update_newline() { *(current++) = '\n'; }
-		nik_ce void update_symline() { *(current++) =  '$'; } // A visual substitute for '\0'.
-		nik_ce void update_endline() { *(current++) = '\0'; }
-		nik_ce void update_space  () { *(current++) =  ' '; }
-		nik_ce void update_dash   () { *(current++) =  '-'; }
-		nik_ce void update_gt     () { *(current++) =  '>'; }
-		nik_ce void update_arrow  () { update_space(); update_dash(); update_gt(); update_space(); }
-
-		nik_ce void update_pad(int s)
-		{
-			for (int k = 0; k < s; ++k) *(current++) = ' ';
-		}
-
-		nik_ce void update_stack()
-		{
-			auto k = Base::stack.current;
-			update_pad(14 - (k - Base::stack.token));
-			while (k != Base::stack.token) *(current++) = *(k--);
-			update_symline();
-		}
-
-		nik_ce void update_tokens()
-		{
-			update_pad(4);
-			auto k = Base::word.finish;
-			auto count = 32;
-			while (k != Base::src.finish)
-			{
-				auto w = T_dfa::lex(k, Base::src.finish);
-				--count;
-				k = w.finish;
-			}
-
-			k = Base::word.finish;
-			update_pad(count);
-
-			if (Base::word.value != '\0') *(current++) = Base::word.value;
-			else update_pad(1);
-			while (k != Base::src.finish)
-			{
-				auto w = T_dfa::lex(k, Base::src.finish);
-				*(current++) = w.value;
-				k = w.finish;
-			}
-			update_symline();
-		}
-
-		nik_ce void update_production()
-		{
-			const Body & b = Base::production.body;
-			update_pad(4);
-			*(current++) = Base::front;
-			update_space();
-			*(current++) = (Base::word.value == '\0') ? '$' : Base::word.value;
-			update_arrow();
-			auto s = 6 - b.size;
-			if (b.size == 0) *(current++) = 'e';
-			else for (auto k = b.symbol; k != b.symbol + b.size; ++current, ++k) *current = *k;
-			update_pad(s);
-			update_newline();
-		}
-
-		nik_ce void update_end()
-		{
-			update_stack();
-			update_tokens();
-			update_endline();
-		}
-	};
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // generic assembly:
@@ -382,23 +244,14 @@ namespace cctmp {
 		cchar_type *end;
 
 		token_type token;
+		gindex_type index;
 
-		nik_ce Entry() :
-
-			begin {    },
-			end   {    },
-			token {    }
-
-			{ }
-
-		nik_ce Entry(cchar_type *b, cchar_type *e, ctoken_type _t) :
-
-			begin {  b },
-			end   {  e },
-			token { _t }
-
-			{ }
+		nik_ce Entry() : begin{}, end{}, token{}, index{} { }
 	};
+
+	// source is made up of lines, each line made up of entries.
+	// lines can also be grouped as blocks which make up the source.
+	// could call a grouping of lines a page. <-- relevant content between "...".
 
 /***********************************************************************************************************************/
 
@@ -414,9 +267,10 @@ namespace cctmp {
 
 		nik_ces auto length		= Size;
 
+	//	gindex_type kind;
 		entry_type entry[length];
 		centry_type *begin;
-		entry_type *current;
+		 entry_type *current;
 
 		nik_ce Line() : entry{}, begin{entry}, current{entry} { }
 
@@ -425,10 +279,10 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// block:
+// page:
 
 	template<typename CharType, auto LineSize, auto EntrySize>
-	struct Block
+	struct Page
 	{
 		using char_type			= CharType;
 		using cchar_type		= char_type const;
@@ -441,7 +295,25 @@ namespace cctmp {
 		cline_type *begin;
 		line_type *current;
 
-		nik_ce Block() : line{}, begin{line}, current{line} { }
+		nik_ce Page() : line{}, begin{line}, current{line} { }
+
+		nik_ce auto size() const { return (current - begin); }
+	};
+
+/***********************************************************************************************************************/
+
+// block:
+
+	template<auto Size>
+	struct Block
+	{
+		nik_ces auto length = Size;
+
+		gindex_type label[length];
+		gcindex_type *begin;
+		gindex_type *current;
+
+		nik_ce Block() : label{}, begin{label}, current{label} { }
 
 		nik_ce auto size() const { return (current - begin); }
 	};
@@ -454,27 +326,33 @@ namespace cctmp {
 	struct TableOfContents
 	{
 		nik_ces auto src		= T_store_U<StaticSource>::value;
-		nik_ces auto length		= src.block_size;
 
 		using src_type			= decltype(src);
 		using char_type			= typename src_type::char_type;
 		using cchar_type		= typename src_type::cchar_type;
-		using block_type		= Block<char_type, src.max_line_size, src.max_entry_size>;
+
+		using page_type			= Page<char_type, src.max_line_size, src.max_entry_size>;
+		using cpage_type		= page_type const;
+		using block_type		= Block<src.block_size>;
 		using cblock_type		= block_type const;
 
-		block_type block[length];
-		cblock_type *begin;
-		block_type *current;
+		page_type page;
+		block_type block;
 
-		nik_ce TableOfContents() : block{}, begin{block}, current{block} { }
+		nik_ce TableOfContents() : page{}, block{} { }
 
-		nik_ce auto size() const { return (current - begin); }
+	//	nik_ce void increment_block () { ++(current                  ); }
+	//	nik_ce void increment_line  () { ++(current->current         ); }
+	//	nik_ce void increment_entry () { ++(current->current->current); }
 
-		nik_ce void increment_block () { ++(current                  ); }
-		nik_ce void increment_line  () { ++(current->current         ); }
-		nik_ce void increment_entry () { ++(current->current->current); }
+	//	nik_ce auto & entry() { return *(current->current->current); }
 
-		nik_ce auto & entry() { return *(current->current->current); }
+	//	nik_ce void copy(clexeme & l)
+	//	{
+	//		current->current->current->begin = l.start;
+	//		current->current->current->end   = l.finish;
+	//		current->current->current->token = l.value;
+	//	}
 	};
 
 /***********************************************************************************************************************/
@@ -483,32 +361,26 @@ namespace cctmp {
 
 	struct GenericAssemblyAST
 	{
-		template<typename TOC> nik_ces void nop            (TOC & toc, clexeme & l) { }
+		template<typename TOC> nik_ces void nop(TOC & toc, clexeme & l) { }
 
 		template<typename TOC>
 		nik_ces void function_begin(TOC & toc, clexeme & l)
 		{
-			toc.entry().begin = l.start;
-			toc.entry().end   = l.finish;
-			toc.entry().token = l.value;
-
-			toc.increment_entry();
+		//	toc.copy(l);
+		//	toc.increment_entry();
 		}
 
 		template<typename TOC>
 		nik_ces void function_arg(TOC & toc, clexeme & l)
 		{
-			toc.entry().begin = l.start;
-			toc.entry().end   = l.finish;
-			toc.entry().token = l.value;
-
-			toc.increment_entry();
+		//	toc.copy(l);
+		//	toc.increment_entry();
 		}
 
 		template<typename TOC>
 		nik_ces void function_end(TOC & toc, clexeme & l)
 		{
-			toc.increment_line();
+		//	toc.increment_line();
 		}
 
 		template<typename TOC>
@@ -727,26 +599,6 @@ namespace cctmp {
 
 		template<auto SourceCallable>
 		nik_ces auto parse = parser<_static_object_<SourceCallable>>::value;
-	};
-
-/***********************************************************************************************************************/
-
-// derivation:
-
-	struct T_generic_assembly_dpda
-	{
-		using T_pdtt = T_generic_assembly_pdtt;
-		using T_ast  = T_generic_assembly_ast;
-
-		template<auto static_src, auto Size>
-		struct parser
-		{
-			using T_syntax		= TableOfContents<static_src>;
-			nik_ces auto value      = GenericDPDA<T_pdtt, T_ast, T_syntax, static_src, Size>{};
-		};
-
-		template<auto SourceCallable, auto Size = 5'000>
-		nik_ces auto parse = parser<_static_object_<SourceCallable>, Size>::value;
 	};
 
 /***********************************************************************************************************************/
