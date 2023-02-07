@@ -593,6 +593,8 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+		// should also count the number of function (definition) args.
+
 	template<typename CharType, auto Size>
 	struct source
 	{
