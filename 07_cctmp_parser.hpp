@@ -117,21 +117,22 @@ namespace cctmp {
 
 // automaton:
 
-	template<typename T_pdtt, typename T_ast, typename T_syntax, auto StaticSource>
+	template<typename T_ast, typename T_pdtt, typename T_syntax, auto StaticSource>
 	struct GenericPDA
 	{
 		nik_ces auto src		= T_store_U<StaticSource>::value;
+		nik_ces auto ast		= T_ast::value;
 		nik_ces auto tt			= T_pdtt::value;
-		nik_ces auto nta		= T_ast::Nonterminal::template action<T_syntax>;
-		nik_ces auto ta			= T_ast::Terminal::template action<T_syntax>;
 
 		using stack_type		= Stack<src.stack_size>;
 		using src_type			= decltype(src);
 		using char_type			= typename src_type::char_type;
 		using string_type		= typename src_type::string_type;
 		using T_dfa			= typename src_type::T_dfa;
-		using NTA		    	= typename T_ast::Nonterminal;
-		using TA		    	= typename T_ast::Terminal;
+
+		using ast_type			= decltype(ast);
+		using NAction			= typename ast_type::NAction;
+		using TAction			= typename ast_type::TAction;
 
 		stack_type stack;
 		token_type front;
@@ -219,14 +220,24 @@ namespace cctmp {
 		{
 			auto n = production.action;
 
-			if (n != NTA::nop) nta[n](syntax, word);
+			if (n != NAction::nop)
+			{
+				auto update = ast.nonterminal[n];
+
+				update(syntax, word);
+			}
 		}
 
 		nik_ce void terminal_update_action()
 		{
-			auto n = TA::find_pos(word.value);
+			auto n = tt.action(word.value);
 
-			if (n != TA::nop) ta[n](syntax, word);
+			if (n != TAction::nop)
+			{
+				auto update = ast.terminal[n];
+
+				update(syntax, word);
+			}
 		}
 	};
 
@@ -366,21 +377,23 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// abstract syntax tree:
+// translation action:
 
-	struct GenericAssemblyAST
+	struct GenericAssemblyTA
 	{
-		using ArraySize = T_store_U<_array_size_>;
+		template<typename TOC> nik_ces void nop(TOC & toc, clexeme & l) { }
 
 		struct Nonterminal
 		{
-			nik_ces gchar_type symbol[] = "VMJIFNTECBLRPS";
-
-			nik_ces auto size  = ArraySize::template result<>(symbol) - 1;
-			nik_ces auto end   = symbol + size;
-			nik_ces auto start = 'S';
-
-			template<typename TOC> nik_ces void nop(TOC & toc, clexeme & l) { }
+			struct Name
+			{
+				enum : action_type
+				{
+					nop = 0,
+					new_function , new_block , new_conditional , new_instruction ,
+					dimension
+				};
+			};
 
 			template<typename TOC>
 			nik_ces void new_function(TOC & toc, clexeme & l)
@@ -405,14 +418,28 @@ namespace cctmp {
 			}
 		};
 
+		//	list_entry( ' ') = TAction::begin_line_definition ;
+		//	list_entry( ' ') = TAction::begin_line_apply      ;
+		//	list_entry( ' ') = TAction::new_entry_variable    ;
+		//	list_entry( ' ') = TAction::new_entry_label       ;
+
 		struct Terminal
 		{
-			nik_ces gchar_type symbol[] = ";i=._lgtbr";
-
-			nik_ces auto size = ArraySize::template result<>(symbol); // recognizes '\0'.
-			nik_ces auto end  = symbol + size;
-
-			template<typename TOC> nik_ces void nop(TOC & toc, clexeme & l) { }
+			struct Name
+			{
+				enum : action_type
+				{
+					nop = 0,
+					begin_line_definition , begin_line_label  ,
+					begin_line_test       , begin_line_branch ,
+					begin_line_apply      , begin_line_goto   , begin_line_return ,
+					end_line              ,
+					new_entry_variable    , new_entry_label   ,
+					new_entry_identifier  , new_entry_copier  , new_entry_paster  ,
+					accept                ,
+					dimension
+				};
+			};
 
 			template<typename TOC>
 			nik_ces void begin_line_definition(TOC & toc, clexeme & l)
@@ -486,81 +513,54 @@ namespace cctmp {
 		};
 	};
 
+/***********************************************************************************************************************/
+
+// abstract syntax tree:
+
+	template<typename TOC>
+	struct GenericAssemblyAST
+	{
+		using toc_type		= void(*)(TOC &, clexeme &);
+		using Nonterminal	= typename GenericAssemblyTA::Nonterminal;
+		using NAction		= typename Nonterminal::Name;
+		using Terminal		= typename GenericAssemblyTA::Terminal;
+		using TAction		= typename Terminal::Name;
+
+		toc_type nonterminal[NAction::dimension];
+		toc_type    terminal[TAction::dimension];
+
+		nik_ce GenericAssemblyAST() : nonterminal{}, terminal{}
+		{
+			nonterminal[ NAction::new_function    ] = GenericAssemblyTA::template nop       <TOC>;
+			nonterminal[ NAction::new_function    ] = Nonterminal::template new_function    <TOC>;
+			nonterminal[ NAction::new_block       ] = Nonterminal::template new_block       <TOC>;
+			nonterminal[ NAction::new_conditional ] = Nonterminal::template new_conditional <TOC>;
+			nonterminal[ NAction::new_instruction ] = Nonterminal::template new_instruction <TOC>;
+
+			terminal[ TAction::nop                   ] = GenericAssemblyTA::template nop          <TOC>;
+			terminal[ TAction::begin_line_definition ] = Terminal::template begin_line_definition <TOC>;
+			terminal[ TAction::begin_line_label      ] = Terminal::template begin_line_label      <TOC>;
+			terminal[ TAction::begin_line_test       ] = Terminal::template begin_line_test       <TOC>;
+			terminal[ TAction::begin_line_branch     ] = Terminal::template begin_line_branch     <TOC>;
+			terminal[ TAction::begin_line_apply      ] = Terminal::template begin_line_apply      <TOC>;
+			terminal[ TAction::begin_line_goto       ] = Terminal::template begin_line_goto       <TOC>;
+			terminal[ TAction::begin_line_return     ] = Terminal::template begin_line_return     <TOC>;
+			terminal[ TAction::end_line              ] = Terminal::template end_line              <TOC>;
+			terminal[ TAction::new_entry_variable    ] = Terminal::template new_entry_variable    <TOC>;
+			terminal[ TAction::new_entry_label       ] = Terminal::template new_entry_label       <TOC>;
+			terminal[ TAction::new_entry_identifier  ] = Terminal::template new_entry_identifier  <TOC>;
+			terminal[ TAction::new_entry_copier      ] = Terminal::template new_entry_copier      <TOC>;
+			terminal[ TAction::new_entry_paster      ] = Terminal::template new_entry_paster      <TOC>;
+			terminal[ TAction::accept                ] = Terminal::template accept                <TOC>;
+		}
+	};
+
 	// interface:
 
+		template<typename TOC>
 		struct T_generic_assembly_ast
 		{
-			template<typename TOC>
-			using toc_type = void(*)(TOC &, clexeme &);
-
-			struct Nonterminal
-			{
-				using AST_NT = typename GenericAssemblyAST::Nonterminal;
-
-				enum : action_type
-				{
-					nop = 0,
-					new_function , new_block , new_conditional , new_instruction ,
-					dimension
-				};
-
-				template<typename TOC>
-				nik_ces toc_type<TOC> action[] =
-				{
-					AST_NT::template nop             <TOC>,
-					AST_NT::template new_function    <TOC>,
-					AST_NT::template new_block       <TOC>,
-					AST_NT::template new_conditional <TOC>,
-					AST_NT::template new_instruction <TOC>
-				};
-			};
-
-			struct Terminal
-			{
-				using AST_T    = typename GenericAssemblyAST::Terminal;
-				using ArrayEnd = T_store_U<_array_end_>;
-
-				enum : action_type
-				{
-					nop = 0,
-					begin_line_definition , begin_line_label , begin_line_test  ,
-					begin_line_branch     , begin_line_apply , begin_line_goto  , begin_line_return ,
-					end_line              ,
-					new_entry_variable    , new_entry_label  ,
-					new_entry_identifier  , new_entry_copier , new_entry_paster ,
-					accept                ,
-					dimension
-				};
-
-				template<typename TOC>
-				nik_ces toc_type<TOC> action[] =
-				{
-					AST_T::template nop                   <TOC>,
-
-					AST_T::template begin_line_definition <TOC>,
-					AST_T::template begin_line_label      <TOC>,
-					AST_T::template begin_line_test       <TOC>,
-					AST_T::template begin_line_branch     <TOC>,
-					AST_T::template begin_line_apply      <TOC>,
-					AST_T::template begin_line_goto       <TOC>,
-					AST_T::template begin_line_return     <TOC>,
-
-					AST_T::template end_line              <TOC>,
-
-					AST_T::template new_entry_variable    <TOC>,
-					AST_T::template new_entry_label       <TOC>,
-					AST_T::template new_entry_identifier  <TOC>,
-					AST_T::template new_entry_copier      <TOC>,
-					AST_T::template new_entry_paster      <TOC>,
-
-					AST_T::template accept                <TOC>
-				};
-
-				nik_ces auto symbol	= AST_T::symbol;
-				nik_ces auto end	= ArrayEnd::template result<>(AST_T::symbol);
-
-				nik_ces auto find_pos(gcchar_type n) { return numeric_find_pos(n, symbol, end); }
-			};
+			nik_ces auto value = GenericAssemblyAST<TOC>{};
 		};
 
 /***********************************************************************************************************************/
@@ -569,12 +569,29 @@ namespace cctmp {
 
 	struct GenericAssemblyPDTT
 	{
-		using Nonterminal	= typename GenericAssemblyAST::Nonterminal;
-		using Terminal		= typename GenericAssemblyAST::Terminal;
-		using Action		= typename T_generic_assembly_ast::Nonterminal;
+		using ArraySize = T_store_U<_array_size_>;
+		using NAction   = typename GenericAssemblyTA::Nonterminal::Name;
+		using TAction   = typename GenericAssemblyTA::Terminal::Name;
+
+		struct Nonterminal
+		{
+			nik_ces gchar_type symbol[] = "VMJIFNTECBLRPS";
+
+			nik_ces auto size  = ArraySize::template result<>(symbol) - 1;
+			nik_ces auto end   = symbol + size;
+			nik_ces auto start = 'S';
+		};
+
+		struct Terminal
+		{
+			nik_ces gchar_type symbol[] = ";i=._lgtbr";
+
+			nik_ces auto size = ArraySize::template result<>(symbol); // recognizes '\0'.
+			nik_ces auto end  = symbol + size;
+		};
 
 		template<auto Size>
-		nik_ces Production transition(gcchar_type (&str)[Size], caction_type action = Action::nop)
+		nik_ces Production transition(gcchar_type (&str)[Size], caction_type action = NAction::nop)
 		{
 			auto body = Body(str, Size - 1);
 
@@ -582,40 +599,52 @@ namespace cctmp {
 		}
 
 		Production table[Nonterminal::size][Terminal::size];
+		action_type list[Terminal::size];
 
-		nik_ce GenericAssemblyPDTT() : table{}
+		nik_ce GenericAssemblyPDTT() : table{}, list{}
 		{
-			table_entry('S',  'i') = transition( "P;R"                              );
-			table_entry('P',  'i') = transition( "iN"     , Action::new_function    );
-			table_entry('N',  'i') = transition( "iN"                               );
-			table_entry('N',  ';') = transition( ""                                 );
-			table_entry('R',  'l') = transition( "BC"                               );
-			table_entry('B',  'l') = transition( "l;E"    , Action::new_block       );
-			table_entry('L',  't') = transition( "IJ"                               );
-			table_entry('L',  'i') = transition( "IJ"                               );
-			table_entry('L',  '.') = transition( "IJ"                               );
-			table_entry('E',  't') = transition( "Lgi;"                             );
-			table_entry('E',  'i') = transition( "Lgi;"                             );
-			table_entry('E',  '.') = transition( "Lgi;"                             );
-			table_entry('E',  'r') = transition( "JrM;"                             );
-			table_entry('C',  'l') = transition( "BC"                               );
-			table_entry('C', '\0') = transition( ""                                 );
-			table_entry('I',  't') = transition( "tF;bi;" , Action::new_conditional );
-			table_entry('I',  'i') = transition( "T=F;"   , Action::new_instruction );
-			table_entry('I',  '.') = transition( "T=F;"                             );
-			table_entry('J',  't') = transition( "IJ"                               );
-			table_entry('J',  'g') = transition( ""                                 );
-			table_entry('J',  'r') = transition( ""                                 );
-			table_entry('J',  'i') = transition( "IJ"                               );
-			table_entry('J',  '.') = transition( "IJ"                               );
-			table_entry('M',  'i') = transition( "i"                                );
-			table_entry('M',  '_') = transition( "_"                                );
-			table_entry('F',  'i') = transition( "iV"                               );
-			table_entry('T',  'i') = transition( "i"                                );
-			table_entry('T',  '.') = transition( "."                                );
-			table_entry('V',  'i') = transition( "MV"                               );
-			table_entry('V',  '_') = transition( "MV"                               );
-			table_entry('V',  ';') = transition( ""                                 );
+			table_entry('S',  'i') = transition( "P;R"                               );
+			table_entry('P',  'i') = transition( "iN"     , NAction::new_function    );
+			table_entry('N',  'i') = transition( "iN"                                );
+			table_entry('N',  ';') = transition( ""                                  );
+			table_entry('R',  'l') = transition( "BC"                                );
+			table_entry('B',  'l') = transition( "l;E"    , NAction::new_block       );
+			table_entry('L',  't') = transition( "IJ"                                );
+			table_entry('L',  'i') = transition( "IJ"                                );
+			table_entry('L',  '.') = transition( "IJ"                                );
+			table_entry('E',  't') = transition( "Lgi;"                              );
+			table_entry('E',  'i') = transition( "Lgi;"                              );
+			table_entry('E',  '.') = transition( "Lgi;"                              );
+			table_entry('E',  'r') = transition( "JrM;"                              );
+			table_entry('C',  'l') = transition( "BC"                                );
+			table_entry('C', '\0') = transition( ""                                  );
+			table_entry('I',  't') = transition( "tF;bi;" , NAction::new_conditional );
+			table_entry('I',  'i') = transition( "T=F;"   , NAction::new_instruction );
+			table_entry('I',  '.') = transition( "T=F;"                              );
+			table_entry('J',  't') = transition( "IJ"                                );
+			table_entry('J',  'g') = transition( ""                                  );
+			table_entry('J',  'r') = transition( ""                                  );
+			table_entry('J',  'i') = transition( "IJ"                                );
+			table_entry('J',  '.') = transition( "IJ"                                );
+			table_entry('M',  'i') = transition( "i"                                 );
+			table_entry('M',  '_') = transition( "_"                                 );
+			table_entry('F',  'i') = transition( "iV"                                );
+			table_entry('T',  'i') = transition( "i"                                 );
+			table_entry('T',  '.') = transition( "."                                 );
+			table_entry('V',  'i') = transition( "MV"                                );
+			table_entry('V',  '_') = transition( "MV"                                );
+			table_entry('V',  ';') = transition( ""                                  );
+
+			list_entry( 'l') = TAction::begin_line_label     ;
+			list_entry( 't') = TAction::begin_line_test      ;
+			list_entry( 'b') = TAction::begin_line_branch    ;
+			list_entry( 'g') = TAction::begin_line_goto      ;
+			list_entry( 'r') = TAction::begin_line_return    ;
+			list_entry( ';') = TAction::end_line             ;
+			list_entry( 'i') = TAction::new_entry_identifier ;
+			list_entry( '.') = TAction::new_entry_copier     ;
+			list_entry( '_') = TAction::new_entry_paster     ;
+			list_entry('\0') = TAction::accept               ;
 		}
 
 		nik_ce Production & table_entry(gcchar_type row_c, gcchar_type col_c)
@@ -632,6 +661,20 @@ namespace cctmp {
 			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::end);
 
 			return table[row][col];
+		}
+
+		nik_ce action_type & list_entry(gcchar_type loc_c)
+		{
+			auto loc = numeric_find_pos(loc_c, Terminal::symbol, Terminal::end);
+
+			return list[loc];
+		}
+
+		nik_ce caction_type & action(gcchar_type loc_c) const
+		{
+			auto loc = numeric_find_pos(loc_c, Terminal::symbol, Terminal::end);
+
+			return list[loc];
 		}
 	};
 
@@ -661,13 +704,13 @@ namespace cctmp {
 	struct T_generic_assembly_pda
 	{
 		using T_pdtt = T_generic_assembly_pdtt;
-		using T_ast  = T_generic_assembly_ast;
 
 		template<auto static_src>
 		struct parser
 		{
 			using T_syntax		= TableOfContents<static_src>;
-			nik_ces auto value     	= GenericPDA<T_pdtt, T_ast, T_syntax, static_src>{};
+			using T_ast		= T_generic_assembly_ast<T_syntax>;
+			nik_ces auto value     	= GenericPDA<T_ast, T_pdtt, T_syntax, static_src>{};
 		};
 
 		template<auto SourceCallable>
