@@ -593,8 +593,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-		// should also count the number of function (definition) args.
-
 	template<typename CharType, auto Size>
 	struct source
 	{
@@ -613,8 +611,8 @@ namespace cctmp {
 
 		gindex_type max_entry_size;
 		gindex_type max_ident_size;
-		gindex_type max_line_size;
 
+		gindex_type line_size;
 		gindex_type block_size;
 		gindex_type stack_size;
 
@@ -625,8 +623,8 @@ namespace cctmp {
 
 			max_entry_size { _zero      },
 			max_ident_size { _zero      },
-			max_line_size  { _zero      },
 
+			line_size      { _zero      },
 			block_size     { _one       },
 			stack_size     { _zero      }
 
@@ -634,7 +632,6 @@ namespace cctmp {
 				auto k = string;
 
 				gindex_type cur_entry_size = _zero;
-				gindex_type cur_line_size  = _zero;
 
 				while (k != finish)
 				{
@@ -653,15 +650,12 @@ namespace cctmp {
 							if (cur_entry_size > max_entry_size)
 								max_entry_size = cur_entry_size;
 							cur_entry_size = _zero;
-							++cur_line_size;
+							++line_size;
 							break;
 						}
 						case 'l':
 						{
-							if (cur_line_size > max_line_size)
-								max_line_size = cur_line_size;
 							++cur_entry_size;
-							cur_line_size = _zero;
 							++block_size;
 							break;
 						}

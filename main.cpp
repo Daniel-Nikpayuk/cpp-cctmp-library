@@ -85,7 +85,7 @@
 
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", (int) factorial.syntax.page.size());
+		printf("%d\n", (int) factorial.syntax.page.length);
 
 		return 0;
 	}

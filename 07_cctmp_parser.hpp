@@ -141,7 +141,6 @@ namespace cctmp {
 		Production production;
 
 		T_syntax syntax;
-		// context_type context; // ? Context::open, Context::closed.
 
 		nik_ce GenericPDA(bool p = true) :
 
@@ -248,6 +247,27 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// attributes:
+
+	using context_type  = gkey_type;
+	using ccontext_type = context_type const;
+
+/***********************************************************************************************************************/
+
+// context:
+
+	struct Context
+	{
+		enum : context_type
+		{
+			none = 0,
+			function, label, test, branch, instruction, apply, go_to, re_turn,
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
 // entry:
 
 	template<typename CharType>
@@ -279,14 +299,14 @@ namespace cctmp {
 
 		nik_ces auto length		= Size;
 
-	//	context_type kind;
-		entry_type entry[length];
+		context_type kind;
+		entry_type array[length];
 		centry_type *begin;
-		 entry_type *current;
+		entry_type *entry;
 
-		nik_ce Line() : entry{}, begin{entry}, current{entry} { }
+		nik_ce Line() : kind{}, array{}, begin{array}, entry{array} { }
 
-		nik_ce auto size() const { return (current - begin); }
+		nik_ce auto size() const { return (entry - begin); }
 	};
 
 /***********************************************************************************************************************/
@@ -303,13 +323,13 @@ namespace cctmp {
 
 		nik_ces auto length		= LineSize;
 
-		line_type line[length];
+		line_type array[length];
 		cline_type *begin;
-		line_type *current;
+		line_type *line;
 
-		nik_ce Page() : line{}, begin{line}, current{line} { }
+		nik_ce Page() : array{}, begin{array}, line{array} { }
 
-		nik_ce auto size() const { return (current - begin); }
+		nik_ce auto size() const { return (line - begin); }
 	};
 
 /***********************************************************************************************************************/
@@ -326,13 +346,13 @@ namespace cctmp {
 
 		nik_ces auto length		= Size;
 
-		locus_type locus[length];
+		locus_type array[length];
 		clocus_type *begin;
-		locus_type *current;
+		locus_type *locus;
 
-		nik_ce Note() : locus{}, begin{locus}, current{locus} { }
+		nik_ce Note() : array{}, begin{array}, locus{array} { }
 
-		nik_ce auto size() const { return (current - begin); }
+		nik_ce auto size() const { return (locus - begin); }
 	};
 
 /***********************************************************************************************************************/
@@ -348,7 +368,7 @@ namespace cctmp {
 		using char_type			= typename src_type::char_type;
 		using cchar_type		= typename src_type::cchar_type;
 
-		using page_type			= Page<char_type, src.max_line_size, src.max_entry_size>;
+		using page_type			= Page<char_type, src.line_size, src.max_entry_size>;
 		using cpage_type		= page_type const;
 		using block_type		= Note<char_type, src.block_size>;
 		using cblock_type		= block_type const;
@@ -361,18 +381,19 @@ namespace cctmp {
 
 		nik_ce TableOfContents() : page{}, block{}, lookup{} { }
 
-	//	nik_ce void increment_block () { ++(current                  ); }
-	//	nik_ce void increment_line  () { ++(current->current         ); }
-	//	nik_ce void increment_entry () { ++(current->current->current); }
+		nik_ce void increment_block  () { ++(block.locus     ); }
+		nik_ce void increment_lookup () { ++(lookup.locus    ); }
+		nik_ce void increment_line   () { ++(page.line       ); }
+		nik_ce void increment_entry  () { ++(page.line->entry); }
 
-	//	nik_ce auto & entry() { return *(current->current->current); }
+		nik_ce auto & entry() { return *(page.line->entry); }
 
-	//	nik_ce void copy(clexeme & l)
-	//	{
-	//		current->current->current->begin = l.start;
-	//		current->current->current->end   = l.finish;
-	//		current->current->current->token = l.value;
-	//	}
+		nik_ce void copy(clexeme & l)
+		{
+			page.line->entry->begin = l.start;
+			page.line->entry->end   = l.finish;
+			page.line->entry->token = l.value;
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -398,23 +419,25 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void new_function(TOC & toc, clexeme & l)
 			{
-			//	toc.copy(l);
-			//	toc.increment_entry();
+				toc.page.line->kind = Context::function;
 			}
 
 			template<typename TOC>
 			nik_ces void new_block(TOC & toc, clexeme & l)
 			{
+				toc.page.line->kind = Context::label;
 			}
 
 			template<typename TOC>
 			nik_ces void new_conditional(TOC & toc, clexeme & l)
 			{
+				toc.page.line->kind = Context::test;
 			}
 
 			template<typename TOC>
 			nik_ces void new_instruction(TOC & toc, clexeme & l)
 			{
+				toc.page.line->kind = Context::instruction;
 			}
 		};
 
@@ -479,6 +502,7 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void end_line(TOC & toc, clexeme & l)
 			{
+				toc.increment_line();
 			}
 
 			template<typename TOC>
@@ -489,11 +513,44 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void new_entry_label(TOC & toc, clexeme & l)
 			{
+				toc.copy(l);
+			//	toc.index();
 			}
 
 			template<typename TOC>
 			nik_ces void new_entry_identifier(TOC & toc, clexeme & l)
 			{
+				switch (toc.page.line->kind)
+				{
+					case Context::function: new_entry_variable (toc, l); break;
+					case Context::label:    new_entry_label    (toc, l); break;
+					case Context::test:
+					{
+						break;
+					}
+					case Context::branch:
+					{
+						break;
+					}
+					case Context::instruction:
+					{
+						break;
+					}
+					case Context::apply:
+					{
+						break;
+					}
+					case Context::go_to:
+					{
+						break;
+					}
+					case Context::re_turn:
+					{
+						break;
+					}
+				}
+
+				toc.increment_entry();
 			}
 
 			template<typename TOC>
