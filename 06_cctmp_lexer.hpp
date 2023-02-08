@@ -88,6 +88,28 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// pointer:
+
+/***********************************************************************************************************************/
+
+	template<typename SizeType, typename Type1, typename Type2>
+	nik_ce auto ptr_diff_equal(const Type1 *b1, const Type1 *e1, const Type2 *b2, const Type2 *e2)
+	{
+		using size_type = SizeType;
+
+		const size_type size1 = e1 - b1;
+		const size_type size2 = e2 - b2;
+
+		bool equal = (size1 == size2);
+
+		while (equal && b1 != e1) equal = (*(b1++) == *(b2++));
+
+		return equal;
+	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // recognizers:
 
 /***********************************************************************************************************************/
@@ -639,12 +661,6 @@ namespace cctmp {
 
 					switch (l.value)
 					{
-						case 'i':
-						{
-							++cur_entry_size;
-							++max_ident_size;
-							break;
-						}
 						case ';':
 						{
 							if (cur_entry_size > max_entry_size)
@@ -653,10 +669,21 @@ namespace cctmp {
 							++line_size;
 							break;
 						}
+						case 'i':
+						{
+							++cur_entry_size;
+							++max_ident_size;
+							break;
+						}
 						case 'l':
 						{
 							++cur_entry_size;
 							++block_size;
+							break;
+						}
+						case 't':
+						{
+							++cur_entry_size;
 							break;
 						}
 					}

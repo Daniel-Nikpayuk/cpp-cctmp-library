@@ -47,7 +47,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			nontoken = 0,
-			nonterminal, terminal,
+			nonterminal , terminal ,
 			dimension
 		};
 	};
@@ -261,7 +261,7 @@ namespace cctmp {
 		enum : context_type
 		{
 			none = 0,
-			function, label, test, branch, instruction, apply, go_to, re_turn,
+			function , label , test , branch , instruction , apply , go_to , re_turn ,
 			dimension
 		};
 	};
@@ -367,6 +367,8 @@ namespace cctmp {
 		using src_type			= decltype(src);
 		using char_type			= typename src_type::char_type;
 		using cchar_type		= typename src_type::cchar_type;
+		using string_type		= typename src_type::string_type;
+		using cstring_type		= typename src_type::cstring_type;
 
 		using page_type			= Page<char_type, src.line_size, src.max_entry_size>;
 		using cpage_type		= page_type const;
@@ -379,7 +381,10 @@ namespace cctmp {
 		block_type block;
 		lookup_type lookup;
 
-		nik_ce TableOfContents() : page{}, block{}, lookup{} { }
+		gindex_type counter;
+		gindex_type label;
+
+		nik_ce TableOfContents() : page{}, block{}, lookup{}, counter{}, label{_one} { }
 
 		nik_ce void increment_block  () { ++(block.locus     ); }
 		nik_ce void increment_lookup () { ++(lookup.locus    ); }
@@ -393,6 +398,28 @@ namespace cctmp {
 			page.line->entry->begin = l.start;
 			page.line->entry->end   = l.finish;
 			page.line->entry->token = l.value;
+		}
+
+		nik_ce auto identifier_index(string_type b, cstring_type e) // doesn't yet account for "._"
+		{
+			using size_type	= gindex_type; // temporary policy.
+			auto k		= page.begin->begin;
+
+			while (k != page.begin->entry)
+			{
+				if (ptr_diff_equal<size_type>(k->begin, k->end, b, e)) break;
+
+				++k;
+			}
+
+			return k;
+
+		//	size_type n = k - page.begin->begin;
+		//	size_type s = page.begin->size();
+
+		//	return n;
+		//	if (n == s) return _one;
+		//	else        return n;
 		}
 	};
 
@@ -420,6 +447,7 @@ namespace cctmp {
 			nik_ces void new_function(TOC & toc, clexeme & l)
 			{
 				toc.page.line->kind = Context::function;
+				toc.counter = _four; // offset to include: na, lookup, copy, paste.
 			}
 
 			template<typename TOC>
@@ -441,11 +469,6 @@ namespace cctmp {
 			}
 		};
 
-		//	list_entry( ' ') = TAction::begin_line_definition ;
-		//	list_entry( ' ') = TAction::begin_line_apply      ;
-		//	list_entry( ' ') = TAction::new_entry_variable    ;
-		//	list_entry( ' ') = TAction::new_entry_label       ;
-
 		struct Terminal
 		{
 			struct Name
@@ -453,119 +476,141 @@ namespace cctmp {
 				enum : action_type
 				{
 					nop = 0,
-					begin_line_definition , begin_line_label  ,
-					begin_line_test       , begin_line_branch ,
-					begin_line_apply      , begin_line_goto   , begin_line_return ,
-					end_line              ,
-					new_entry_variable    , new_entry_label   ,
-					new_entry_identifier  , new_entry_copier  , new_entry_paster  ,
-					accept                ,
+					resolve_label      ,
+					resolve_test       ,
+					resolve_branch     ,
+					resolve_goto       ,
+					resolve_return     ,
+					resolve_statement  ,
+					resolve_identifier ,
+					resolve_period     ,
+					resolve_underscore ,
+					resolve_accept     ,
 					dimension
 				};
 			};
 
+		// resolve:
+
 			template<typename TOC>
-			nik_ces void begin_line_definition(TOC & toc, clexeme & l)
+			nik_ces void resolve_label(TOC & toc, clexeme & l)
+			{
+				toc.copy(l);
+				toc.entry().index = toc.label++;
+				toc.increment_entry();
+
+				*toc.block.locus = toc.page.line->entry;
+				toc.increment_block();
+			}
+
+			template<typename TOC>
+			nik_ces void resolve_test(TOC & toc, clexeme & l)
+			{
+				toc.copy(l);
+				toc.entry().index = _two; // signifies a copy.
+				toc.increment_entry();
+			}
+
+			template<typename TOC>
+			nik_ces void resolve_branch(TOC & toc, clexeme & l)
 			{
 			}
 
 			template<typename TOC>
-			nik_ces void begin_line_label(TOC & toc, clexeme & l)
+			nik_ces void resolve_goto(TOC & toc, clexeme & l)
 			{
 			}
 
 			template<typename TOC>
-			nik_ces void begin_line_test(TOC & toc, clexeme & l)
+			nik_ces void resolve_return(TOC & toc, clexeme & l)
 			{
 			}
 
 			template<typename TOC>
-			nik_ces void begin_line_branch(TOC & toc, clexeme & l)
-			{
-			}
-
-			template<typename TOC>
-			nik_ces void begin_line_apply(TOC & toc, clexeme & l)
-			{
-			}
-
-			template<typename TOC>
-			nik_ces void begin_line_goto(TOC & toc, clexeme & l)
-			{
-			}
-
-			template<typename TOC>
-			nik_ces void begin_line_return(TOC & toc, clexeme & l)
-			{
-			}
-
-			template<typename TOC>
-			nik_ces void end_line(TOC & toc, clexeme & l)
+			nik_ces void resolve_statement(TOC & toc, clexeme & l)
 			{
 				toc.increment_line();
 			}
 
 			template<typename TOC>
-			nik_ces void new_entry_variable(TOC & toc, clexeme & l)
-			{
-			}
-
-			template<typename TOC>
-			nik_ces void new_entry_label(TOC & toc, clexeme & l)
-			{
-				toc.copy(l);
-			//	toc.index();
-			}
-
-			template<typename TOC>
-			nik_ces void new_entry_identifier(TOC & toc, clexeme & l)
+			nik_ces void resolve_identifier(TOC & toc, clexeme & l)
 			{
 				switch (toc.page.line->kind)
 				{
-					case Context::function: new_entry_variable (toc, l); break;
-					case Context::label:    new_entry_label    (toc, l); break;
-					case Context::test:
-					{
-						break;
-					}
-					case Context::branch:
-					{
-						break;
-					}
-					case Context::instruction:
-					{
-						break;
-					}
-					case Context::apply:
-					{
-						break;
-					}
-					case Context::go_to:
-					{
-						break;
-					}
-					case Context::re_turn:
-					{
-						break;
-					}
+					case Context::function:    argument_entry    (toc, l); break;
+					case Context::label:       label_entry       (toc, l); break;
+					case Context::test:        test_entry        (toc, l); break;
+				//	case Context::branch:      branch_entry      (toc, l); break;
+				//	case Context::instruction: instruction_entry (toc, l); break;
+				//	case Context::apply:       apply_entry       (toc, l); break;
+				//	case Context::go_to:       go_to_entry       (toc, l); break;
+				//	case Context::re_turn:     re_turn_entry     (toc, l); break;
 				}
 
 				toc.increment_entry();
 			}
 
 			template<typename TOC>
-			nik_ces void new_entry_copier(TOC & toc, clexeme & l)
+			nik_ces void resolve_period(TOC & toc, clexeme & l)
 			{
 			}
 
 			template<typename TOC>
-			nik_ces void new_entry_paster(TOC & toc, clexeme & l)
+			nik_ces void resolve_underscore(TOC & toc, clexeme & l)
 			{
 			}
 
 			template<typename TOC>
-			nik_ces void accept(TOC & toc, clexeme & l)
+			nik_ces void resolve_accept(TOC & toc, clexeme & l)
 			{
+			}
+
+		// entries:
+
+			template<typename TOC>
+			nik_ces void argument_entry(TOC & toc, clexeme & l)
+			{
+				toc.copy(l);
+				toc.entry().index = toc.counter++;
+			}
+
+			template<typename TOC>
+			nik_ces void label_entry(TOC & toc, clexeme & l)
+			{
+				toc.copy(l);
+				toc.entry().index = toc.label++;
+			}
+
+			template<typename TOC>
+			nik_ces void test_entry(TOC & toc, clexeme & l)
+			{
+				auto e = toc.page.begin->entry;
+
+				toc.copy(l);
+
+				auto k = toc.identifier_index(l.start, l.finish);
+				if (k == e) toc.entry().index = _one;
+				else toc.entry().index = k->index;
+			}
+
+		// :
+
+			template<typename TOC>
+			nik_ces void begin_branch(TOC & toc, clexeme & l)
+			{
+				toc.page.line->kind = Context::branch;
+			}
+
+			template<typename TOC>
+			nik_ces void begin_goto(TOC & toc, clexeme & l)
+			{
+				toc.page.line->kind = Context::go_to;
+			}
+
+			template<typename TOC>
+			nik_ces void begin_return(TOC & toc, clexeme & l)
+			{
+				toc.page.line->kind = Context::re_turn;
 			}
 		};
 	};
@@ -594,21 +639,17 @@ namespace cctmp {
 			nonterminal[ NAction::new_conditional ] = Nonterminal::template new_conditional <TOC>;
 			nonterminal[ NAction::new_instruction ] = Nonterminal::template new_instruction <TOC>;
 
-			terminal[ TAction::nop                   ] = GenericAssemblyTA::template nop          <TOC>;
-			terminal[ TAction::begin_line_definition ] = Terminal::template begin_line_definition <TOC>;
-			terminal[ TAction::begin_line_label      ] = Terminal::template begin_line_label      <TOC>;
-			terminal[ TAction::begin_line_test       ] = Terminal::template begin_line_test       <TOC>;
-			terminal[ TAction::begin_line_branch     ] = Terminal::template begin_line_branch     <TOC>;
-			terminal[ TAction::begin_line_apply      ] = Terminal::template begin_line_apply      <TOC>;
-			terminal[ TAction::begin_line_goto       ] = Terminal::template begin_line_goto       <TOC>;
-			terminal[ TAction::begin_line_return     ] = Terminal::template begin_line_return     <TOC>;
-			terminal[ TAction::end_line              ] = Terminal::template end_line              <TOC>;
-			terminal[ TAction::new_entry_variable    ] = Terminal::template new_entry_variable    <TOC>;
-			terminal[ TAction::new_entry_label       ] = Terminal::template new_entry_label       <TOC>;
-			terminal[ TAction::new_entry_identifier  ] = Terminal::template new_entry_identifier  <TOC>;
-			terminal[ TAction::new_entry_copier      ] = Terminal::template new_entry_copier      <TOC>;
-			terminal[ TAction::new_entry_paster      ] = Terminal::template new_entry_paster      <TOC>;
-			terminal[ TAction::accept                ] = Terminal::template accept                <TOC>;
+			terminal[ TAction::nop                ] = GenericAssemblyTA::template nop       <TOC>;
+			terminal[ TAction::resolve_label      ] = Terminal::template resolve_label      <TOC>;
+			terminal[ TAction::resolve_test       ] = Terminal::template resolve_test       <TOC>;
+			terminal[ TAction::resolve_branch     ] = Terminal::template resolve_branch     <TOC>;
+			terminal[ TAction::resolve_goto       ] = Terminal::template resolve_goto       <TOC>;
+			terminal[ TAction::resolve_return     ] = Terminal::template resolve_return     <TOC>;
+			terminal[ TAction::resolve_statement  ] = Terminal::template resolve_statement  <TOC>;
+			terminal[ TAction::resolve_identifier ] = Terminal::template resolve_identifier <TOC>;
+			terminal[ TAction::resolve_period     ] = Terminal::template resolve_period     <TOC>;
+			terminal[ TAction::resolve_underscore ] = Terminal::template resolve_underscore <TOC>;
+			terminal[ TAction::resolve_accept     ] = Terminal::template resolve_accept     <TOC>;
 		}
 	};
 
@@ -626,9 +667,9 @@ namespace cctmp {
 
 	struct GenericAssemblyPDTT
 	{
-		using ArraySize = T_store_U<_array_size_>;
-		using NAction   = typename GenericAssemblyTA::Nonterminal::Name;
-		using TAction   = typename GenericAssemblyTA::Terminal::Name;
+		using ArraySize	= T_store_U<_array_size_>;
+		using NAction	= typename GenericAssemblyTA::Nonterminal::Name;
+		using TAction	= typename GenericAssemblyTA::Terminal::Name;
 
 		struct Nonterminal
 		{
@@ -692,16 +733,16 @@ namespace cctmp {
 			table_entry('V',  '_') = transition( "MV"                                );
 			table_entry('V',  ';') = transition( ""                                  );
 
-			list_entry( 'l') = TAction::begin_line_label     ;
-			list_entry( 't') = TAction::begin_line_test      ;
-			list_entry( 'b') = TAction::begin_line_branch    ;
-			list_entry( 'g') = TAction::begin_line_goto      ;
-			list_entry( 'r') = TAction::begin_line_return    ;
-			list_entry( ';') = TAction::end_line             ;
-			list_entry( 'i') = TAction::new_entry_identifier ;
-			list_entry( '.') = TAction::new_entry_copier     ;
-			list_entry( '_') = TAction::new_entry_paster     ;
-			list_entry('\0') = TAction::accept               ;
+			list_entry( 'l') = TAction::resolve_label      ;
+			list_entry( 't') = TAction::resolve_test       ;
+			list_entry( 'b') = TAction::resolve_branch     ;
+			list_entry( 'g') = TAction::resolve_goto       ;
+			list_entry( 'r') = TAction::resolve_return     ;
+			list_entry( ';') = TAction::resolve_statement  ;
+			list_entry( 'i') = TAction::resolve_identifier ;
+			list_entry( '.') = TAction::resolve_period     ;
+			list_entry( '_') = TAction::resolve_underscore ;
+			list_entry('\0') = TAction::resolve_accept     ;
 		}
 
 		nik_ce Production & table_entry(gcchar_type row_c, gcchar_type col_c)

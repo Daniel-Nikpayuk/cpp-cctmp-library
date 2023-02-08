@@ -83,9 +83,33 @@
 
 /***********************************************************************************************************************/
 
+	template<typename Entry>
+	void print_entry(const Entry & entry)
+	{
+		for (auto k = entry.begin; k != entry.end; ++k) printf("%c", *k);
+
+		printf("{%d} ", (int) entry.index);
+	}
+
+	template<typename Line>
+	void print_line(const Line & line)
+	{
+		for (auto k = line.begin; k != line.entry; ++k) print_entry(*k);
+
+		printf("\n");
+	}
+
+	template<typename Page>
+	void print_page(const Page & page)
+	{
+		for (auto k = page.begin; k != page.line; ++k) print_line(*k);
+	}
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", (int) factorial.syntax.page.length);
+		print_page(factorial.syntax.page);
 
 		return 0;
 	}
