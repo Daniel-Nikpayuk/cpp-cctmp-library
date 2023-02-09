@@ -635,7 +635,10 @@ namespace cctmp {
 		gindex_type max_ident_size;
 
 		gindex_type line_size;
-		gindex_type block_size;
+		gindex_type label_size;
+		gindex_type goto_size;
+		gindex_type branch_size;
+		gindex_type graph_size;
 		gindex_type stack_size;
 
 		nik_ce source(const CharType (&s)[Size]) :
@@ -647,7 +650,10 @@ namespace cctmp {
 			max_ident_size { _zero      },
 
 			line_size      { _zero      },
-			block_size     { _one       },
+			label_size     { _zero      },
+			goto_size      { _zero      },
+			branch_size    { _zero      },
+			graph_size     { _zero      },
 			stack_size     { _zero      }
 
 			{
@@ -678,7 +684,19 @@ namespace cctmp {
 						case 'l':
 						{
 							++cur_entry_size;
-							++block_size;
+							++label_size;
+							break;
+						}
+						case 'g':
+						{
+							++cur_entry_size;
+							++goto_size;
+							break;
+						}
+						case 'b':
+						{
+							++cur_entry_size;
+							++branch_size;
 							break;
 						}
 						case 't':
@@ -691,6 +709,8 @@ namespace cctmp {
 					++stack_size;
 					k = l.finish;
 				}
+
+				graph_size = label_size + goto_size + branch_size;
 			}
 	};
 

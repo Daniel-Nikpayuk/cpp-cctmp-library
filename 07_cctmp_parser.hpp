@@ -371,22 +371,22 @@ namespace cctmp {
 		using cstring_type		= typename src_type::cstring_type;
 
 		using page_type			= Page<char_type, src.line_size, src.max_entry_size>;
-		using cpage_type		= page_type const;
-		using block_type		= Note<char_type, src.block_size>;
-		using cblock_type		= block_type const;
+		using label_type		= Note<char_type, src.label_size>;
+		using goto_type			= Note<char_type, src.goto_size>;
+		using branch_type		= Note<char_type, src.branch_size>;
+		using graph_type		= Note<char_type, src.graph_size>;
 		using lookup_type		= Note<char_type, src.max_ident_size>;
-		using clookup_type		= lookup_type const;
 
 		page_type page;
-		block_type block;
+		label_type label;
 		lookup_type lookup;
 
-		gindex_type counter;
-		gindex_type label;
+		gindex_type arg_index;
+		gindex_type label_index;
 
-		nik_ce TableOfContents() : page{}, block{}, lookup{}, counter{}, label{_one} { }
+		nik_ce TableOfContents() : page{}, label{}, lookup{}, arg_index{}, label_index{_one} { }
 
-		nik_ce void increment_block  () { ++(block.locus     ); }
+		nik_ce void increment_label  () { ++(label.locus     ); }
 		nik_ce void increment_lookup () { ++(lookup.locus    ); }
 		nik_ce void increment_line   () { ++(page.line       ); }
 		nik_ce void increment_entry  () { ++(page.line->entry); }
@@ -413,13 +413,6 @@ namespace cctmp {
 			}
 
 			return k;
-
-		//	size_type n = k - page.begin->begin;
-		//	size_type s = page.begin->size();
-
-		//	return n;
-		//	if (n == s) return _one;
-		//	else        return n;
 		}
 	};
 
@@ -447,7 +440,7 @@ namespace cctmp {
 			nik_ces void new_function(TOC & toc, clexeme & l)
 			{
 				toc.page.line->kind = Context::function;
-				toc.counter = _four; // offset to include: na, lookup, copy, paste.
+				toc.arg_index = _four; // offset to include: na, lookup, copy, paste.
 			}
 
 			template<typename TOC>
@@ -496,11 +489,11 @@ namespace cctmp {
 			nik_ces void resolve_label(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
-				toc.entry().index = toc.label++;
+				toc.entry().index = toc.label_index++;
 				toc.increment_entry();
 
-				*toc.block.locus = toc.page.line->entry;
-				toc.increment_block();
+				*toc.label.locus = toc.page.line->entry;
+				toc.increment_label();
 			}
 
 			template<typename TOC>
@@ -571,25 +564,23 @@ namespace cctmp {
 			nik_ces void argument_entry(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
-				toc.entry().index = toc.counter++;
+				toc.entry().index = toc.arg_index++;
 			}
 
 			template<typename TOC>
 			nik_ces void label_entry(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
-				toc.entry().index = toc.label++;
+				toc.entry().index = toc.label_index++;
 			}
 
 			template<typename TOC>
 			nik_ces void test_entry(TOC & toc, clexeme & l)
 			{
-				auto e = toc.page.begin->entry;
-
 				toc.copy(l);
 
 				auto k = toc.identifier_index(l.start, l.finish);
-				if (k == e) toc.entry().index = _one;
+				if (k == toc.page.begin->entry) toc.entry().index = _one;
 				else toc.entry().index = k->index;
 			}
 
