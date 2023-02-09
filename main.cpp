@@ -107,8 +107,21 @@
 
 /***********************************************************************************************************************/
 
+	template<typename Note>
+	void print_note(const Note & note)
+	{
+		for (auto k = note.begin; k != note.locus; ++k) print_entry(**k);
+
+		printf("\n");
+	}
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
+	//	print_note(factorial.syntax.label);
+	//	print_note(factorial.syntax.go_to);
+	//	print_note(factorial.syntax.branch);
 		print_page(factorial.syntax.page);
 
 		return 0;
