@@ -2472,6 +2472,51 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// print table of contents:
+
+/***********************************************************************************************************************/
+
+	template<typename Entry>
+	void print_entry(const Entry & entry)
+	{
+		for (auto k = entry.begin; k != entry.end; ++k) printf("%c", *k);
+
+		printf("{%d} ", (int) entry.index);
+	}
+
+	template<typename Line>
+	void print_line(const Line & line)
+	{
+		for (auto k = line.begin; k != line.entry; ++k) print_entry(*k);
+
+		printf("\n");
+	}
+
+	template<typename Page>
+	void print_page(const Page & page)
+	{
+		for (auto k = page.begin; k != page.line; ++k) print_line(*k);
+	}
+
+/***********************************************************************************************************************/
+
+	template<typename Note>
+	void print_note(const Note & note)
+	{
+		for (auto k = note.begin; k != note.locus; ++k) print_entry(**k);
+
+		printf("\n");
+	}
+
+	//	print_note(factorial.pda.syntax.label);
+	//	print_note(factorial.pda.syntax.go_to);
+	//	print_note(factorial.pda.syntax.branch);
+	//	print_note(factorial.pda.syntax.lookup);
+	//	print_page(factorial.pda.syntax.page);
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 } // case studies

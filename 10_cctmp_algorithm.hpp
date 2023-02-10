@@ -29,6 +29,17 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+//	template<auto Size>
+//	nik_ce bool equals_charset(gstring_type b, gstring_type e, gcchar_type (&charset)[Size])
+//	{
+//		bool match = ((e-b) == Size);
+
+//		for (gstring_type i = charset; match && i != charset + Size; ++b, ++i)
+//			match = (*b == *i);
+
+//		return match;
+//	}
+
 	// find:
 
 		nik_ce auto _find_ = U_par_abstract<Abstract::find>;
@@ -320,6 +331,94 @@ namespace cctmp {
 			return eval<_to_tuple_, a0, X0>;
 		}
 	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// machine:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// default:
+
+	nik_ce auto default_machine_lookup()
+	{
+		return table
+		(
+		 	U_char,
+
+			binding( "same"              , _praxis_< _same_              >),
+			binding( "is_null"           , _praxis_< _is_null_           >),
+			binding( "length"            , _praxis_< _length_            >),
+			binding( "car"               , _praxis_< _car_               >),
+			binding( "nop"               , _praxis_< _nop_               >),
+			binding( "cadr"              , _praxis_< _cadr_              >),
+
+			binding( "is_const"          , _praxis_< _is_const_          >),
+			binding( "add_const"         , _praxis_< _add_const_         >),
+			binding( "remove_const"      , _praxis_< _remove_const_      >),
+			binding( "to_const"          , _praxis_< _to_const_          >),
+			binding( "from_const"        , _praxis_< _from_const_        >),
+
+			binding( "csame"             , _praxis_< _csame_             >),
+			binding( "name"              , _praxis_< _name_              >),
+			binding( "similar"           , _praxis_< _similar_           >),
+			binding( "to_list"           , _praxis_< _to_list_           >),
+			binding( "b0_unpack"         , _praxis_< _b0_unpack_         >),
+			binding( "rename"            , _praxis_< _rename_            >),
+			binding( "pad"               , _praxis_< _pad_               >),
+			binding( "cdr"               , _praxis_< _cdr_               >),
+			binding( "map"               , _praxis_< _map_               >),
+			binding( "zip"               , _praxis_< _zip_               >),
+			binding( "unite"             , _praxis_< _unite_             >),
+			binding( "cons"              , _praxis_< _cons_              >),
+			binding( "push"              , _praxis_< _push_              >),
+
+			binding( "if_then_else"      , _praxis_< _if_then_else_      >),
+			binding( "stem"              , _praxis_< _stem_              >),
+			binding( "costem"            , _praxis_< _costem_            >),
+			binding( "distem"            , _praxis_< _distem_            >),
+
+			binding( "is_unsigned"       , _praxis_< _is_unsigned_       >),
+			binding( "not_unsigned"      , _praxis_< _not_unsigned_      >),
+			binding( "is_signed"         , _praxis_< _is_signed_         >),
+			binding( "not_signed"        , _praxis_< _not_signed_        >),
+			binding( "is_integer"        , _praxis_< _is_integer_        >),
+			binding( "not_integer"       , _praxis_< _not_integer_       >),
+
+			binding( "is_pointer"        , _praxis_< _is_pointer_        >),
+			binding( "add_pointer"       , _praxis_< _add_pointer_       >),
+			binding( "remove_pointer"    , _praxis_< _remove_pointer_    >),
+			binding( "to_pointer"        , _praxis_< _to_pointer_        >),
+			binding( "from_pointer"      , _praxis_< _from_pointer_      >),
+
+			binding( "is_reference"      , _praxis_< _is_reference_      >),
+			binding( "add_reference"     , _praxis_< _add_reference_     >),
+			binding( "remove_reference"  , _praxis_< _remove_reference_  >),
+			binding( "to_reference"      , _praxis_< _to_reference_      >),
+			binding( "from_reference"    , _praxis_< _from_reference_    >),
+
+			binding( "to_array"          , _praxis_< _to_array_          >),
+			binding( "array_apply"       , _praxis_< _array_apply_       >),
+
+			binding( "function_type"     , _praxis_< _function_type_     >),
+			binding( "function_arity"    , _praxis_< _function_arity_    >),
+			binding( "function_out_type" , _praxis_< _function_out_type_ >),
+			binding( "function_in_types" , _praxis_< _function_in_types_ >),
+
+			binding( "eval"              , _praxis_< _eval_              >),
+			binding( "procedure"         , _praxis_< _procedure_         >),
+			binding( "method"            , _praxis_< _method_            >),
+			binding( "tailor"            , _praxis_< _tailor_            >),
+
+			binding( "list_to_array"     , _praxis_< _list_to_array_     >),
+			binding( "array_to_list"     , _praxis_< _array_to_list_     >)
+		);
+	};
+
+//	nik_ce auto default_machine_environment = make_environment<default_machine_lookup>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

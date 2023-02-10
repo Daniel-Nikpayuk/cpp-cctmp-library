@@ -25,20 +25,17 @@ mawk_prog_rest='BEGIN { line = 0; skip = 0; re_str = "^\/\*+\/$"; }
 }'
 
 mawk "$mawk_prog_first" "define_macros.hpp"          >  "cpp_cctmp_library.hpp" &&
+
 mawk "$mawk_prog_rest"  "00_cctmp_grammar.hpp"       >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "01_cctmp_argument.hpp"      >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "02_cctmp_parameter.hpp"     >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "03_cctmp_praxis.hpp"        >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "04_cctmp_machine.hpp"       >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "05_cctmp_assembly.hpp"      >> "cpp_cctmp_library.hpp" &&
-#mawk "$mawk_prog_rest"  "06_cctmp_lexer.hpp"         >> "cpp_cctmp_library.hpp" &&
-#mawk "$mawk_prog_rest"  "07_cctmp_parser.hpp"        >> "cpp_cctmp_library.hpp" &&
-#mawk "$mawk_prog_rest"  "08_cctmp_algorithm.hpp"     >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "06_cctmp_lexer.hpp"         >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "07_cctmp_parser.hpp"        >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "08_cctmp_optimizer.hpp"     >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "09_cctmp_compiler.hpp"      >> "cpp_cctmp_library.hpp" &&
 
-#mawk "$mawk_prog_rest"  "09_generic_assembly.hpp"    >> "cpp_cctmp_library.hpp" &&
-#mawk "$mawk_prog_rest"  "10_one_cycle_assembly.hpp"  >> "cpp_cctmp_library.hpp" &&
-#mawk "$mawk_prog_rest"  "11_one_cycle_specifics.hpp" >> "cpp_cctmp_library.hpp" &&
-#mawk "$mawk_prog_rest"  "12_one_cycle_accords.hpp"   >> "cpp_cctmp_library.hpp" &&
-#mawk "$mawk_prog_rest"  "13_one_cycle_generics.hpp"  >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "undef_macros.hpp"           >> "cpp_cctmp_library.hpp"
 

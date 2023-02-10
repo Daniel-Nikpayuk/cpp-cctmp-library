@@ -160,9 +160,9 @@ namespace cctmp {
 			{
 				switch (T_pdtt::token_kind(front))
 				{
-					case TokenKind::nonterminal: nonterminal(); break;
-					case TokenKind::terminal:       terminal(); break;
-					default:                           error(); break;
+					case TokenKind::nonterminal : { nonterminal(); break; }
+					case TokenKind::terminal    : {    terminal(); break; }
+					default                     : {       error(); break; }
 				}
 
 				front = stack.front();
@@ -394,7 +394,7 @@ namespace cctmp {
 		gindex_type label_index;
 
 		nik_ce TableOfContents() : page{}, label{}, go_to{}, branch{}, graph{}, lookup{},
-						arg_index{}, label_index{_one} { }
+						arg_index{}, label_index{} { }
 
 		nik_ce void increment_label  () { ++(label.locus     ); }
 		nik_ce void increment_goto   () { ++(go_to.locus     ); }
@@ -560,12 +560,12 @@ namespace cctmp {
 			{
 				switch (toc.page.line->kind)
 				{
-					case Context::function:    argument_entry    (toc, l); break;
-					case Context::apply:       apply_entry       (toc, l); break;
-					case Context::test:        test_entry        (toc, l); break;
-					case Context::branch:      branch_entry      (toc, l); break;
-					case Context::go_to:       goto_entry        (toc, l); break;
-					case Context::re_turn:     return_entry      (toc, l); break;
+					case Context::function : { argument_entry (toc, l); break; }
+					case Context::apply    : { apply_entry    (toc, l); break; }
+					case Context::test     : { test_entry     (toc, l); break; }
+					case Context::branch   : { branch_entry   (toc, l); break; }
+					case Context::go_to    : { goto_entry     (toc, l); break; }
+					case Context::re_turn  : { return_entry   (toc, l); break; }
 				}
 
 				toc.increment_entry();
@@ -614,8 +614,14 @@ namespace cctmp {
 				toc.copy(l);
 
 				auto k = toc.match_identifier(l.start, l.finish);
-				if (k == toc.page.begin->entry) toc.entry().index = _one;
-				else toc.entry().index = k->index;
+				if (k != toc.page.begin->entry) toc.entry().index = k->index;
+				else
+				{
+					toc.entry().index = _one;
+
+					*toc.lookup.locus = toc.page.line->entry;
+					toc.increment_lookup();
+				}
 			}
 
 			template<typename TOC>
@@ -624,8 +630,14 @@ namespace cctmp {
 				toc.copy(l);
 
 				auto k = toc.match_identifier(l.start, l.finish);
-				if (k == toc.page.begin->entry) toc.entry().index = _one;
-				else toc.entry().index = k->index;
+				if (k != toc.page.begin->entry) toc.entry().index = k->index;
+				else
+				{
+					toc.entry().index = _one;
+
+					*toc.lookup.locus = toc.page.line->entry;
+					toc.increment_lookup();
+				}
 			}
 
 			template<typename TOC>

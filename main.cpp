@@ -31,8 +31,8 @@
 #include"05_cctmp_assembly.hpp"
 #include"06_cctmp_lexer.hpp"
 #include"07_cctmp_parser.hpp"
-#include"08_cctmp_compiler.hpp"
-//#include"09_cctmp_algorithm.hpp"
+#include"08_cctmp_optimizer.hpp"
+#include"09_cctmp_compiler.hpp"
 
 #include"undef_macros.hpp"
 
@@ -83,46 +83,45 @@
 
 /***********************************************************************************************************************/
 
-	template<typename Entry>
-	void print_entry(const Entry & entry)
+	template<typename Instr>
+	void print_target_instr(const Instr *instr)
 	{
-		for (auto k = entry.begin; k != entry.end; ++k) printf("%c", *k);
+		auto size = instr[0];
 
-		printf("{%d} ", (int) entry.index);
-	}
-
-	template<typename Line>
-	void print_line(const Line & line)
-	{
-		for (auto k = line.begin; k != line.entry; ++k) print_entry(*k);
+		for (auto k = instr + 1; k != instr + size + 1; ++k) printf("%d ", (int) *k);
 
 		printf("\n");
 	}
 
-	template<typename Page>
-	void print_page(const Page & page)
+	template<auto contr>
+	void print_target_contr()
 	{
-		for (auto k = page.begin; k != page.line; ++k) print_line(*k);
+		auto size = contr[0][0];
+
+		for (auto k = contr + 1; k != contr + size; ++k) print_target_instr(*k);
 	}
 
-/***********************************************************************************************************************/
+//	template<typename Contr>
+//	void print_target_contr(const Contr *contr)
+//	{
+//		auto size = 10;//contr[0][0];
 
-	template<typename Note>
-	void print_note(const Note & note)
-	{
-		for (auto k = note.begin; k != note.locus; ++k) print_entry(**k);
+//		for (auto k = contr + 1; k != contr + size; ++k) print_target_instr(*k);
+//	}
 
-		printf("\n");
-	}
+//	template<typename Target>
+//	void print_target_contr(const Target & target)
+//	{
+//		for (auto k = target.begin; k != target.current; ++k) print_target_instr(*k);
+//	}
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-	//	print_note(factorial.syntax.label);
-	//	print_note(factorial.syntax.go_to);
-	//	print_note(factorial.syntax.branch);
-		print_page(factorial.syntax.page);
+	//	printf("%d\n", factorial);
+	//	print_target_contr(factorial);
+		print_target_contr<factorial>();
 
 		return 0;
 	}

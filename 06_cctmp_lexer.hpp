@@ -579,10 +579,10 @@ namespace cctmp {
 		{
 			switch (e - b)
 			{
-				case  1: return keyword_1(b, e);
-				case  4: return keyword_4(b, e);
-				case  6: return keyword_6(b, e);
-				default: return TokenName::invalid;
+				case 1  : { return keyword_1(b, e)    ; }
+				case 4  : { return keyword_4(b, e)    ; }
+				case 6  : { return keyword_6(b, e)    ; }
+				default : { return TokenName::invalid ; }
 			}
 		}
 
@@ -638,6 +638,9 @@ namespace cctmp {
 		gindex_type label_size;
 		gindex_type goto_size;
 		gindex_type branch_size;
+		gindex_type copy_size;
+		gindex_type replace_size;
+		gindex_type return_size;
 		gindex_type graph_size;
 		gindex_type stack_size;
 
@@ -653,6 +656,9 @@ namespace cctmp {
 			label_size     { _zero      },
 			goto_size      { _zero      },
 			branch_size    { _zero      },
+			copy_size      { _zero      },
+			replace_size   { _zero      },
+			return_size    { _zero      },
 			graph_size     { _zero      },
 			stack_size     { _zero      }
 
@@ -675,35 +681,13 @@ namespace cctmp {
 							++line_size;
 							break;
 						}
-						case 'i':
-						{
-							++cur_entry_size;
-							++max_ident_size;
-							break;
-						}
-						case 'l':
-						{
-							++cur_entry_size;
-							++label_size;
-							break;
-						}
-						case 'g':
-						{
-							++cur_entry_size;
-							++goto_size;
-							break;
-						}
-						case 'b':
-						{
-							++cur_entry_size;
-							++branch_size;
-							break;
-						}
-						case 't':
-						{
-							++cur_entry_size;
-							break;
-						}
+						case 'i': { ++cur_entry_size ; ++max_ident_size ; break; }
+						case 'l': { ++cur_entry_size ; ++label_size     ; break; }
+						case 'g': { ++cur_entry_size ; ++goto_size      ; break; }
+						case 'b': { ++cur_entry_size ; ++branch_size    ; break; }
+						case 't': { ++cur_entry_size ; ++copy_size      ; break; }
+						case '=': {                    ++replace_size   ; break; }
+						case 'r': {                    ++return_size    ; break; }
 					}
 
 					++stack_size;
