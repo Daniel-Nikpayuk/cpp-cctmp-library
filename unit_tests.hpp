@@ -2477,40 +2477,32 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 
-	template<typename Entry>
-	void print_entry(const Entry & entry)
+	template<typename EntryType>
+	void print_entry(const EntryType & entry)
 	{
 		for (auto k = entry.begin; k != entry.end; ++k) printf("%c", *k);
 
 		printf("{%d} ", (int) entry.index);
 	}
 
-	template<typename Line>
-	void print_line(const Line & line)
+	template<typename LineType>
+	void print_line(const LineType & line)
 	{
 		for (auto k = line.begin; k != line.entry; ++k) print_entry(*k);
 
 		printf("\n");
 	}
 
-	template<typename Page>
-	void print_page(const Page & page)
+	template<typename PageType>
+	void print_page(const PageType & page)
 	{
 		for (auto k = page.begin; k != page.line; ++k) print_line(*k);
 	}
 
 /***********************************************************************************************************************/
 
-	template<typename Note>
-	void print_note(const Note & note)
-	{
-		for (auto k = note.begin; k != note.locus; ++k) print_entry(**k);
-
-		printf("\n");
-	}
-
-	template<typename Param>
-	void print_param(const Param & param)
+	template<typename ParamType>
+	void print_param(const ParamType & param)
 	{
 		for (auto k = param.begin; k != param.locus; ++k) print_line(**k);
 	}

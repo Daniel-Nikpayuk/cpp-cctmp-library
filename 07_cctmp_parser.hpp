@@ -282,13 +282,13 @@ namespace cctmp {
 		using char_type		= CharType;
 		using cchar_type	= char_type const;
 
-		cchar_type *begin;
-		cchar_type *end;
+		cchar_type *start;
+		cchar_type *finish;
 
 		token_type token;
 		gindex_type index;
 
-		nik_ce Entry() : begin{}, end{}, token{}, index{} { }
+		nik_ce Entry() : start{}, finish{}, token{}, index{} { }
 	};
 
 /***********************************************************************************************************************/
@@ -298,21 +298,21 @@ namespace cctmp {
 	template<typename CharType, auto Size>
 	struct Line
 	{
-		using char_type			= CharType;
-		using cchar_type		= char_type const;
-		using entry_type		= Entry<char_type>;
+		using entry_type		= Entry<CharType>;
 		using centry_type		= entry_type const;
 
 		nik_ces auto length		= Size;
 
 		context_type kind;
 		entry_type array[length];
-		centry_type *begin;
+		centry_type *start;
 		entry_type *entry;
 
-		nik_ce Line() : kind{}, array{}, begin{array}, entry{array} { }
+		nik_ce Line() : kind{}, array{}, start{array}, entry{array} { }
 
-		nik_ce auto size() const { return (entry - begin); }
+		nik_ce auto begin () const { return start; }
+		nik_ce auto end   () const { return entry; }
+		nik_ce auto size  () const { return (entry - start); }
 	};
 
 /***********************************************************************************************************************/
@@ -322,20 +322,20 @@ namespace cctmp {
 	template<typename CharType, auto LineSize, auto EntrySize>
 	struct Page
 	{
-		using char_type			= CharType;
-		using cchar_type		= char_type const;
-		using line_type			= Line<char_type, EntrySize>;
+		using line_type			= Line<CharType, EntrySize>;
 		using cline_type		= line_type const;
 
 		nik_ces auto length		= LineSize;
 
 		line_type array[length];
-		cline_type *begin;
+		cline_type *start;
 		line_type *line;
 
-		nik_ce Page() : array{}, begin{array}, line{array} { }
+		nik_ce Page() : array{}, start{array}, line{array} { }
 
-		nik_ce auto size() const { return (line - begin); }
+		nik_ce auto begin () const { return start; }
+		nik_ce auto end   () const { return line; }
+		nik_ce auto size  () const { return (line - start); }
 	};
 
 /***********************************************************************************************************************/
@@ -345,43 +345,20 @@ namespace cctmp {
 	template<typename CharType, auto LineSize, auto EntrySize>
 	struct Subpage
 	{
-		using char_type			= CharType;
-		using cchar_type		= char_type const;
-		using locus_type		= Line<char_type, EntrySize>*; // mutable intention.
+		using locus_type		= Line<CharType, EntrySize>*; // mutable intention.
 		using clocus_type		= locus_type const;
 
 		nik_ces auto length		= LineSize;
 
 		locus_type array[length];
-		clocus_type *begin;
+		clocus_type *start;
 		locus_type *locus;
 
-		nik_ce Subpage() : array{}, begin{array}, locus{array} { }
+		nik_ce Subpage() : array{}, start{array}, locus{array} { }
 
-		nik_ce auto size() const { return (locus - begin); }
-	};
-
-/***********************************************************************************************************************/
-
-// param:
-
-	template<typename CharType, auto LineSize, auto EntrySize>
-	struct Param
-	{
-		using char_type			= CharType;
-		using cchar_type		= char_type const;
-		using locus_type		= Line<char_type, EntrySize>*; // mutable intention.
-		using clocus_type		= locus_type const;
-
-		nik_ces auto length		= LineSize;
-
-		locus_type array[length];
-		clocus_type *begin;
-		locus_type *locus;
-
-		nik_ce Param() : array{}, begin{array}, locus{array} { }
-
-		nik_ce auto size() const { return (locus - begin); }
+		nik_ce auto begin () const { return start; }
+		nik_ce auto end   () const { return locus; }
+		nik_ce auto size  () const { return (locus - start); }
 	};
 
 /***********************************************************************************************************************/
@@ -395,7 +372,6 @@ namespace cctmp {
 
 		using src_type			= decltype(src);
 		using char_type			= typename src_type::char_type;
-		using cchar_type		= typename src_type::cchar_type;
 		using string_type		= typename src_type::string_type;
 		using cstring_type		= typename src_type::cstring_type;
 
@@ -432,19 +408,19 @@ namespace cctmp {
 
 		nik_ce void copy(clexeme & l)
 		{
-			page.line->entry->begin = l.start;
-			page.line->entry->end   = l.finish;
-			page.line->entry->token = l.value;
+			page.line->entry->start  = l.start;
+			page.line->entry->finish = l.finish;
+			page.line->entry->token  = l.value;
 		}
 
 		nik_ce auto match_identifier(string_type b, cstring_type e) // doesn't yet account for "._"
 		{
 			using size_type	= gindex_type; // temporary policy.
-			auto k		= page.begin->begin;
+			auto k		= page.begin()->begin();
 
-			while (k != page.begin->entry)
+			while (k != page.begin()->entry)
 			{
-				if (ptr_diff_equal<size_type>(k->begin, k->end, b, e)) break;
+				if (ptr_diff_equal<size_type>(k->start, k->finish, b, e)) break;
 
 				++k;
 			}
@@ -455,12 +431,12 @@ namespace cctmp {
 		nik_ce auto match_label(string_type b, cstring_type e) // doesn't yet account for "._"
 		{
 			using size_type	= gindex_type; // temporary policy.
-			auto k		= label.begin;
+			auto k		= label.begin();
 
-			while (k != label.locus)
+			while (k != label.end())
 			{
-				auto j = (*k)->begin;
-				if (ptr_diff_equal<size_type>(j->begin, j->end - 1, b, e)) break;
+				auto j = (*k)->begin();
+				if (ptr_diff_equal<size_type>(j->start, j->finish - 1, b, e)) break;
 
 				++k;
 			}
@@ -611,24 +587,23 @@ namespace cctmp {
 			{
 			}
 
+			template<typename TOC, typename SubpageType>
+			nik_ces void resolve_subpage(TOC & toc, SubpageType & subpage)
+			{
+				for (auto k = subpage.begin(); k != subpage.end(); ++k)
+				{
+					auto j = (*k)->begin();
+					auto l = toc.match_label(j->start, j->finish);
+					if (l == toc.label.end()) ; // error
+					else (*k)->array->index = (*l)->begin()->index;
+				}
+			}
+
 			template<typename TOC>
 			nik_ces void resolve_accept(TOC & toc, clexeme & l)
 			{
-				for (auto k = toc.go_to.begin; k != toc.go_to.locus; ++k)
-				{
-					auto j = (*k)->begin;
-					auto l = toc.match_label(j->begin, j->end);
-					if (l == toc.label.locus) ; // error
-					else (*k)->array->index = (*l)->begin->index;
-				}
-
-				for (auto k = toc.branch.begin; k != toc.branch.locus; ++k)
-				{
-					auto j = (*k)->begin;
-					auto l = toc.match_label(j->begin, j->end);
-					if (l == toc.label.locus) ; // error
-					else (*k)->array->index = (*l)->begin->index;
-				}
+				resolve_subpage(toc, toc.go_to);
+				resolve_subpage(toc, toc.branch);
 			}
 
 		// entries:
@@ -646,7 +621,7 @@ namespace cctmp {
 				toc.copy(l);
 
 				auto k = toc.match_identifier(l.start, l.finish);
-				if (k != toc.page.begin->entry) toc.entry().index = k->index;
+				if (k != toc.page.begin()->entry) toc.entry().index = k->index;
 				else toc.entry().index = _one;
 			}
 
@@ -656,7 +631,7 @@ namespace cctmp {
 				toc.copy(l);
 
 				auto k = toc.match_identifier(l.start, l.finish);
-				if (k != toc.page.begin->entry) toc.entry().index = k->index;
+				if (k != toc.page.begin()->entry) toc.entry().index = k->index;
 				else toc.entry().index = _one;
 			}
 
@@ -684,7 +659,7 @@ namespace cctmp {
 				toc.copy(l);
 
 				auto k = toc.match_identifier(l.start, l.finish);
-				if (k == toc.page.begin->entry) ; // error
+				if (k == toc.page.begin()->entry) ; // error
 				else toc.entry().index = k->index;
 			}
 		};
@@ -750,17 +725,17 @@ namespace cctmp {
 		{
 			nik_ces gchar_type symbol[] = "VMJIFNTECBLRPS";
 
-			nik_ces auto size  = ArraySize::template result<>(symbol) - 1;
-			nik_ces auto end   = symbol + size;
-			nik_ces auto start = 'S';
+			nik_ces auto size   = ArraySize::template result<>(symbol) - 1;
+			nik_ces auto finish = symbol + size;
+			nik_ces auto start  = 'S';
 		};
 
 		struct Terminal
 		{
 			nik_ces gchar_type symbol[] = ";i=._lgtbr";
 
-			nik_ces auto size = ArraySize::template result<>(symbol); // recognizes '\0'.
-			nik_ces auto end  = symbol + size;
+			nik_ces auto size   = ArraySize::template result<>(symbol); // recognizes '\0'.
+			nik_ces auto finish = symbol + size;
 		};
 
 		template<auto Size>
@@ -822,30 +797,30 @@ namespace cctmp {
 
 		nik_ce Production & table_entry(gcchar_type row_c, gcchar_type col_c)
 		{
-			auto row = numeric_find_pos(row_c, Nonterminal::symbol, Nonterminal::end);
-			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::end);
+			auto row = numeric_find_pos(row_c, Nonterminal::symbol, Nonterminal::finish);
+			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::finish);
 
 			return table[row][col];
 		}
 
 		nik_ce const Production & production(gcchar_type row_c, gcchar_type col_c) const
 		{
-			auto row = numeric_find_pos(row_c, Nonterminal::symbol, Nonterminal::end);
-			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::end);
+			auto row = numeric_find_pos(row_c, Nonterminal::symbol, Nonterminal::finish);
+			auto col = numeric_find_pos(col_c,    Terminal::symbol,    Terminal::finish);
 
 			return table[row][col];
 		}
 
 		nik_ce action_type & list_entry(gcchar_type loc_c)
 		{
-			auto loc = numeric_find_pos(loc_c, Terminal::symbol, Terminal::end);
+			auto loc = numeric_find_pos(loc_c, Terminal::symbol, Terminal::finish);
 
 			return list[loc];
 		}
 
 		nik_ce caction_type & action(gcchar_type loc_c) const
 		{
-			auto loc = numeric_find_pos(loc_c, Terminal::symbol, Terminal::end);
+			auto loc = numeric_find_pos(loc_c, Terminal::symbol, Terminal::finish);
 
 			return list[loc];
 		}
@@ -857,16 +832,16 @@ namespace cctmp {
 		{
 			nik_ces auto value		= GenericAssemblyPDTT{};
 			nik_ces auto nt_symbol		= GenericAssemblyPDTT::Nonterminal::symbol;
-			nik_ces auto nt_end		= GenericAssemblyPDTT::Nonterminal::end;
+			nik_ces auto nt_finish		= GenericAssemblyPDTT::Nonterminal::finish;
 			nik_ces auto nt_start		= GenericAssemblyPDTT::Nonterminal::start;
 			nik_ces auto t_symbol		= GenericAssemblyPDTT::Terminal::symbol;
-			nik_ces auto t_end		= GenericAssemblyPDTT::Terminal::end;
+			nik_ces auto t_finish		= GenericAssemblyPDTT::Terminal::finish;
 
 			nik_ces auto token_kind(ctoken_type t)
 			{
-				if      (numeric_find(t, nt_symbol, nt_end) != nt_end) return TokenKind::nonterminal;
-				else if (numeric_find(t,  t_symbol,  t_end) !=  t_end) return TokenKind::terminal;
-				else                                                   return TokenKind::nontoken;
+				if      (numeric_find(t, nt_symbol, nt_finish) != nt_finish) return TokenKind::nonterminal;
+				else if (numeric_find(t,  t_symbol,  t_finish) !=  t_finish) return TokenKind::terminal;
+				else                                                         return TokenKind::nontoken;
 			}
 		};
 

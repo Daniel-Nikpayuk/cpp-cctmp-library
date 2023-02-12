@@ -81,14 +81,14 @@ namespace cctmp {
 	//	template<auto n, auto... Vs, template<auto...> typename B, auto... Is>
 	//	nik_ces auto to_instruction(nik_avp(B<Is...>*))
 	//	{
-	//		nik_ce auto k = page.begin + n;
+	//		nik_ce auto k = page.begin() + n;
 	//		nik_ce auto l = *k;
 
 	//		return instruction<Vs..., l.array[Is]...>;
 	//	}
 
 		instr_type contr[length];
-		cinstr_type *begin;
+		cinstr_type *start;
 		instr_type *line;
 
 		gindex_type locs[length];
@@ -97,10 +97,10 @@ namespace cctmp {
 
 		nik_ce GenericAssemblyTarget() :
 
-			contr{}, begin{contr}, line{contr}, locs{}, locs_iter{locs}, position{}
+			contr{}, start{contr}, line{contr}, locs{}, locs_iter{locs}, position{}
 
 		{
-			for (auto k = page.begin; k != page.line; ++k)
+			for (auto k = page.begin(); k != page.end(); ++k)
 			{
 				switch (k->kind)
 				{
