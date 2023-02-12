@@ -340,23 +340,46 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// note:
+// subpage:
 
-	template<typename CharType, auto Size>
-	struct Note
+	template<typename CharType, auto LineSize, auto EntrySize>
+	struct Subpage
 	{
 		using char_type			= CharType;
 		using cchar_type		= char_type const;
-		using locus_type		= Entry<char_type>*; // mutable intention.
+		using locus_type		= Line<char_type, EntrySize>*; // mutable intention.
 		using clocus_type		= locus_type const;
 
-		nik_ces auto length		= Size;
+		nik_ces auto length		= LineSize;
 
 		locus_type array[length];
 		clocus_type *begin;
 		locus_type *locus;
 
-		nik_ce Note() : array{}, begin{array}, locus{array} { }
+		nik_ce Subpage() : array{}, begin{array}, locus{array} { }
+
+		nik_ce auto size() const { return (locus - begin); }
+	};
+
+/***********************************************************************************************************************/
+
+// param:
+
+	template<typename CharType, auto LineSize, auto EntrySize>
+	struct Param
+	{
+		using char_type			= CharType;
+		using cchar_type		= char_type const;
+		using locus_type		= Line<char_type, EntrySize>*; // mutable intention.
+		using clocus_type		= locus_type const;
+
+		nik_ces auto length		= LineSize;
+
+		locus_type array[length];
+		clocus_type *begin;
+		locus_type *locus;
+
+		nik_ce Param() : array{}, begin{array}, locus{array} { }
 
 		nik_ce auto size() const { return (locus - begin); }
 	};
@@ -376,32 +399,34 @@ namespace cctmp {
 		using string_type		= typename src_type::string_type;
 		using cstring_type		= typename src_type::cstring_type;
 
-		using page_type			= Page<char_type, src.line_size, src.max_entry_size>;
-		using label_type		= Note<char_type, src.label_size>;
-		using goto_type			= Note<char_type, src.goto_size>;
-		using branch_type		= Note<char_type, src.branch_size>;
-		using graph_type		= Note<char_type, src.graph_size>;
-		using lookup_type		= Note<char_type, src.max_ident_size>;
+		using page_type			= Page    < char_type , src.line_size   , src.max_entry_size >;
+		using label_type		= Subpage < char_type , src.label_size  , src.max_entry_size >;
+		using goto_type			= Subpage < char_type , src.goto_size   , src.max_entry_size >;
+		using branch_type		= Subpage < char_type , src.branch_size , src.max_entry_size >;
+		using graph_type		= Subpage < char_type , src.graph_size  , src.max_entry_size >;
+		using param_type		= Subpage < char_type , src.param_size  , src.max_entry_size >;
 
 		page_type page;
 		label_type label;
 		goto_type go_to;
 		branch_type branch;
 		graph_type graph;
-		lookup_type lookup;
+		param_type param;
 
 		gindex_type arg_index;
 		gindex_type label_index;
 
-		nik_ce TableOfContents() : page{}, label{}, go_to{}, branch{}, graph{}, lookup{},
-						arg_index{}, label_index{} { }
+		nik_ce TableOfContents() :
 
+			page{}, label{}, go_to{}, branch{}, graph{}, param{}, arg_index{}, label_index{} { }
+
+		nik_ce void increment_entry  () { ++(page.line->entry); }
+		nik_ce void increment_line   () { ++(page.line       ); }
 		nik_ce void increment_label  () { ++(label.locus     ); }
 		nik_ce void increment_goto   () { ++(go_to.locus     ); }
 		nik_ce void increment_branch () { ++(branch.locus    ); }
-		nik_ce void increment_lookup () { ++(lookup.locus    ); }
-		nik_ce void increment_line   () { ++(page.line       ); }
-		nik_ce void increment_entry  () { ++(page.line->entry); }
+		nik_ce void increment_graph  () { ++(graph.locus     ); }
+		nik_ce void increment_param  () { ++(param.locus     ); }
 
 		nik_ce auto & entry() { return *(page.line->entry); }
 
@@ -434,7 +459,8 @@ namespace cctmp {
 
 			while (k != label.locus)
 			{
-				if (ptr_diff_equal<size_type>((*k)->begin, (*k)->end - 1, b, e)) break;
+				auto j = (*k)->begin;
+				if (ptr_diff_equal<size_type>(j->begin, j->end - 1, b, e)) break;
 
 				++k;
 			}
@@ -458,7 +484,7 @@ namespace cctmp {
 				enum : action_type
 				{
 					nop = 0,
-					new_function , new_block , new_conditional , new_instruction ,
+					new_function , new_block , new_conditional , new_application ,
 					dimension
 				};
 			};
@@ -480,12 +506,16 @@ namespace cctmp {
 			nik_ces void new_conditional(TOC & toc, clexeme & l)
 			{
 				toc.page.line->kind = Context::test;
+				*toc.param.locus = toc.page.line;
+				toc.increment_param();
 			}
 
 			template<typename TOC>
-			nik_ces void new_instruction(TOC & toc, clexeme & l)
+			nik_ces void new_application(TOC & toc, clexeme & l)
 			{
 				toc.page.line->kind = Context::apply;
+				*toc.param.locus = toc.page.line;
+				toc.increment_param();
 			}
 		};
 
@@ -517,7 +547,7 @@ namespace cctmp {
 			{
 				toc.copy(l);
 				toc.entry().index = toc.label_index++;
-				*toc.label.locus = toc.page.line->entry;
+				*toc.label.locus = toc.page.line;
 
 				toc.increment_entry();
 				toc.increment_label();
@@ -584,18 +614,20 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void resolve_accept(TOC & toc, clexeme & l)
 			{
-				for (auto j = toc.go_to.begin; j != toc.go_to.locus; ++j)
+				for (auto k = toc.go_to.begin; k != toc.go_to.locus; ++k)
 				{
-					auto k = toc.match_label((*j)->begin, (*j)->end);
-					if (k == toc.label.locus) ; // error
-					else (*j)->index = (*k)->index;
+					auto j = (*k)->begin;
+					auto l = toc.match_label(j->begin, j->end);
+					if (l == toc.label.locus) ; // error
+					else (*k)->array->index = (*l)->begin->index;
 				}
 
-				for (auto j = toc.branch.begin; j != toc.branch.locus; ++j)
+				for (auto k = toc.branch.begin; k != toc.branch.locus; ++k)
 				{
-					auto k = toc.match_label((*j)->begin, (*j)->end);
-					if (k == toc.label.locus) ; // error
-					else (*j)->index = (*k)->index;
+					auto j = (*k)->begin;
+					auto l = toc.match_label(j->begin, j->end);
+					if (l == toc.label.locus) ; // error
+					else (*k)->array->index = (*l)->begin->index;
 				}
 			}
 
@@ -615,13 +647,7 @@ namespace cctmp {
 
 				auto k = toc.match_identifier(l.start, l.finish);
 				if (k != toc.page.begin->entry) toc.entry().index = k->index;
-				else
-				{
-					toc.entry().index = _one;
-
-					*toc.lookup.locus = toc.page.line->entry;
-					toc.increment_lookup();
-				}
+				else toc.entry().index = _one;
 			}
 
 			template<typename TOC>
@@ -631,13 +657,7 @@ namespace cctmp {
 
 				auto k = toc.match_identifier(l.start, l.finish);
 				if (k != toc.page.begin->entry) toc.entry().index = k->index;
-				else
-				{
-					toc.entry().index = _one;
-
-					*toc.lookup.locus = toc.page.line->entry;
-					toc.increment_lookup();
-				}
+				else toc.entry().index = _one;
 			}
 
 			template<typename TOC>
@@ -645,7 +665,7 @@ namespace cctmp {
 			{
 				toc.copy(l);
 
-				*toc.branch.locus = toc.page.line->entry;
+				*toc.branch.locus = toc.page.line;
 				toc.increment_branch();
 			}
 
@@ -654,7 +674,7 @@ namespace cctmp {
 			{
 				toc.copy(l);
 
-				*toc.go_to.locus = toc.page.line->entry;
+				*toc.go_to.locus = toc.page.line;
 				toc.increment_goto();
 			}
 
@@ -692,7 +712,7 @@ namespace cctmp {
 			nonterminal[ NAction::new_function    ] = Nonterminal::template new_function    <TOC>;
 			nonterminal[ NAction::new_block       ] = Nonterminal::template new_block       <TOC>;
 			nonterminal[ NAction::new_conditional ] = Nonterminal::template new_conditional <TOC>;
-			nonterminal[ NAction::new_instruction ] = Nonterminal::template new_instruction <TOC>;
+			nonterminal[ NAction::new_application ] = Nonterminal::template new_application <TOC>;
 
 			terminal[ TAction::nop                ] = GenericAssemblyTA::template nop       <TOC>;
 			terminal[ TAction::resolve_label      ] = Terminal::template resolve_label      <TOC>;
@@ -772,7 +792,7 @@ namespace cctmp {
 			table_entry('C',  'l') = transition( "BC"                                );
 			table_entry('C', '\0') = transition( ""                                  );
 			table_entry('I',  't') = transition( "tF;bi;" , NAction::new_conditional );
-			table_entry('I',  'i') = transition( "T=F;"   , NAction::new_instruction );
+			table_entry('I',  'i') = transition( "T=F;"   , NAction::new_application );
 			table_entry('I',  '.') = transition( "T=F;"                              );
 			table_entry('J',  't') = transition( "IJ"                                );
 			table_entry('J',  'g') = transition( ""                                  );

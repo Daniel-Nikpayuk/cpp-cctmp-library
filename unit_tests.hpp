@@ -2509,6 +2509,12 @@ namespace cctmp_program
 		printf("\n");
 	}
 
+	template<typename Param>
+	void print_param(const Param & param)
+	{
+		for (auto k = param.begin; k != param.locus; ++k) print_line(**k);
+	}
+
 	//	print_note(factorial.pda.syntax.label);
 	//	print_note(factorial.pda.syntax.go_to);
 	//	print_note(factorial.pda.syntax.branch);

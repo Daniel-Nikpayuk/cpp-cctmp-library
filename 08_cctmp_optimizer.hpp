@@ -38,7 +38,7 @@ namespace cctmp {
 		nik_ces auto src	= pda.src;
 		nik_ces auto toc	= pda.syntax;
 		nik_ces auto page	= toc.page;
-		nik_ces auto lookup	= toc.lookup;
+		nik_ces auto param	= toc.param;
 
 		nik_ces auto length	= (page.length - toc.label.size() - 1) // decrement definition and label lines.
 
@@ -46,6 +46,37 @@ namespace cctmp {
 	    		 		+ ( (2 - 1) * src.copy_size    )
 					+ ( (4 - 1) * src.replace_size )
 					+ ( (3 - 1) * src.return_size  );
+
+		template<auto n, template<auto...> typename B, auto... Is>
+		nik_ces auto inner_pack(nik_avp(B<Is...>*))
+		{
+			return U_pack_Vs
+			<
+				param.array[n]->array[Is].index...
+			>;
+		}
+
+		template<template<auto...> typename B, auto... Is>
+		nik_ces auto size_pack(nik_avp(B<Is...>*))
+		{
+			return U_pack_Vs
+			<
+				eval<_par_segment_, param.array[Is]->size()>...
+			>;
+		}
+
+		template<auto... Is, auto... Js>
+		nik_ces auto to_pack(nik_avp(T_pack_Vs<Is...>*), nik_avp(T_pack_Vs<Js...>*))
+		{
+			return U_pack_Vs
+			<
+				inner_pack<Is>(Js)...
+			>;
+		}
+
+		nik_ces auto param_seg = eval<_par_segment_, param.size()>;
+		nik_ces auto size_seg  = size_pack(param_seg);
+		nik_ces auto lookup    = to_pack(param_seg, size_seg);
 
 	//	template<auto n, auto... Vs, template<auto...> typename B, auto... Is>
 	//	nik_ces auto to_instruction(nik_avp(B<Is...>*))
@@ -152,6 +183,12 @@ namespace cctmp {
 				done:{1}
 		return line -	p{5}
 
+	// param:
+
+				test{2} is_zero{1} n{6}
+				p{5} multiply{1} p{5} n{6}
+				n{6} decrement{1} n{6}
+
 	// source:
 
 		template
@@ -185,15 +222,6 @@ namespace cctmp {
 		>;
 
 #endif
-
-	template<typename T_target, auto... Is>
-	nik_ce auto to_static(nik_avp(T_pack_Vs<Is...>*))
-	{
-		nik_ce auto val = T_target::value;
-
-		return array<cinstr_type, array<gcindex_type, sizeof...(Is)>, val.contr[Is]...>;
-	//	return U_pack_Vs<val.contr[Is]...>;
-	}
 
 /***********************************************************************************************************************/
 

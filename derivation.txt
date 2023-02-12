@@ -27,7 +27,7 @@
        i;Jgi;C$                i;i=iii;i=ii;gi;l;ri;$
         ;Jgi;C$                 ;i=iii;i=ii;gi;l;ri;$                  // end branch line
          Jgi;C$                  i=iii;i=ii;gi;l;ri;$    J i -> IJ    
-        IJgi;C$                  i=iii;i=ii;gi;l;ri;$    I i -> T=F;   // new instruction (begin apply line)
+        IJgi;C$                  i=iii;i=ii;gi;l;ri;$    I i -> T=F;   // new application (begin apply line)
      T=F;Jgi;C$                  i=iii;i=ii;gi;l;ri;$    T i -> i     
      i=F;Jgi;C$                  i=iii;i=ii;gi;l;ri;$
       =F;Jgi;C$                   =iii;i=ii;gi;l;ri;$
@@ -42,7 +42,7 @@
        V;Jgi;C$                       ;i=ii;gi;l;ri;$    V ; -> e      
         ;Jgi;C$                       ;i=ii;gi;l;ri;$                  // end apply line
          Jgi;C$                        i=ii;gi;l;ri;$    J i -> IJ    
-        IJgi;C$                        i=ii;gi;l;ri;$    I i -> T=F;   // new instruction (begin apply line)
+        IJgi;C$                        i=ii;gi;l;ri;$    I i -> T=F;   // new application (begin apply line)
      T=F;Jgi;C$                        i=ii;gi;l;ri;$    T i -> i     
      i=F;Jgi;C$                        i=ii;gi;l;ri;$
       =F;Jgi;C$                         =ii;gi;l;ri;$

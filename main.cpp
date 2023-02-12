@@ -117,11 +117,26 @@
 
 /***********************************************************************************************************************/
 
+#ifdef NIK_COMMENT
+
+	test{2} is_zero{1} n{6}
+	p{5} multiply{1} p{5} n{6}
+	n{6} decrement{1} n{6}
+
+#endif
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
+		printf("%d\n", factorial.lookup);
+	//	printf("%d\n", unpack_<factorial.param_ptr, _par_at_, 0>);
+	//	printf("%d\n", (int) factorial.toc.param.size());
+	//	print_param(factorial.toc.param);
+
 	//	printf("%d\n", factorial);
 	//	print_target_contr(factorial);
-		print_target_contr<factorial>();
+	//	print_target_contr<factorial>();
 
 		return 0;
 	}

@@ -642,6 +642,7 @@ namespace cctmp {
 		gindex_type replace_size;
 		gindex_type return_size;
 		gindex_type graph_size;
+		gindex_type param_size;
 		gindex_type stack_size;
 
 		nik_ce source(const CharType (&s)[Size]) :
@@ -660,6 +661,7 @@ namespace cctmp {
 			replace_size   { _zero      },
 			return_size    { _zero      },
 			graph_size     { _zero      },
+			param_size     { _zero      },
 			stack_size     { _zero      }
 
 			{
@@ -695,6 +697,7 @@ namespace cctmp {
 				}
 
 				graph_size = label_size + goto_size + branch_size;
+				param_size = copy_size + replace_size;
 			}
 	};
 

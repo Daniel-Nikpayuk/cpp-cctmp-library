@@ -230,8 +230,7 @@ namespace cctmp {
 	{
 		nik_ce auto target = T_generic_assembly_target<SourceCallable>::value;
 
-		return to_static<T_generic_assembly_target<SourceCallable>>(eval<_par_segment_, 15>);
-	//	return target;
+		return target;
 	}
 
 	template<auto SourceCallable>
