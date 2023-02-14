@@ -279,7 +279,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			front , go_to , branch , pair , side ,
+			front , go_to , branch , pair , side , value , value17 ,
 			dimension
 		};
 	};
@@ -597,6 +597,36 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
+
+// value:
+
+	template<auto val>
+	struct T_assembly<AN::call, AT::value, val>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			return NIK_ASSEMBLY(s, c, i, l, Vs)(val, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// value (C++17):
+
+	template<auto f>
+	struct T_assembly<AN::call, AT::value17, f>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			auto val = f();
+
+			return NIK_ASSEMBLY(s, c, i, l, Vs)(val, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // recall:
@@ -811,95 +841,9 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// array:
-
-/***********************************************************************************************************************/
-
-/*
-// map:
-
-	template<auto f, auto a, auto l, auto Op, auto s, auto U, auto S>
-	nik_ce auto array_map_ = eval<_array_apply_, Op, U, S, s, _multimap_<_arg_deref_<f>>, a, l>;
-
-// fold:
-
-	template<auto f, auto init, auto a, auto l, auto Op, auto U, auto S>
-	nik_ce auto array_fold_ = eval<_array_apply_, Op, U, S, U_pack_Vs<0>, _multifold_<_arg_deref_<f>, init>, a, l>;
-
-// find:
-
-//	template<auto p, auto a, auto l, auto Op, auto U, auto S>
-//	nik_ce auto array_find_ = eval<_array_apply_, Op, U, S, _multifind<_arg_deref_<p>>, a, l>;
-
-// sift:
-
-// -> V:
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-	nik_ce auto V_sift(nik_vp(indices)(T_pack_Vs<Is...>*))
-	{
-		nik_ce auto Size	= Leng + 1;
-		nik_ce auto arr		= ArrayModule::template apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
-		nik_ce auto leng	= arr.value[Leng];
-
-		if nik_ce (leng != sizeof...(Is)) return arr;
-		else return array<Type, arr.value[Is]...>;
-	}
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto I0, auto... Is>
-	nik_ce auto V_sift(nik_vp(indices)(T_pack_Vs<I0, Is...>*))
-	{
-		nik_ce auto Size	= sizeof...(Is) + 1;
-		nik_ce auto arr		= apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
-
-		return array<Type, arr.value[Is]...>;
-	}
-
-// -> U:
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto I0, auto... Is>
-	nik_ce auto U_sift(nik_vp(indices)(T_pack_Vs<I0, Is...>*))
-	{
-		nik_ce auto Size	= sizeof...(Is) + 1;
-		nik_ce auto arr		= apply<Type, Size, IteratorModule::Sift, Leng, p>(Arr);
-
-		return U_pack_Vs<arr.value[Is]...>;
-	}
-
-	// subsequence:
-
-// -> V:
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-	nik_ce auto V_subsequence(nik_vp(indices)(T_pack_Vs<Is...>*))
-		{ return V_apply<Type, IteratorModule::Sift, Arr>(U_pack_Vs<Leng, sizeof...(Is), p>, indices); }
-
-// -> U:
-
-	template<typename Type, auto p, auto Arr, auto Leng, auto... Is>
-	nik_ce auto U_subsequence(nik_vp(indices)(T_pack_Vs<Is...>*))
-		{ return U_apply<Type, IteratorModule::Sift, Arr>(U_pack_Vs<Leng, sizeof...(Is), p>, indices); }
-
-// zip:
-
-// generic:
-
-// -> V:
-
-	template<typename Type, auto f, auto Arr1, auto Leng1, auto Arr2, typename Indices>
-	nik_ce auto V_zip(Indices indices)
-		{ return V_apply<Type, IteratorModule::Zip, Arr1, Arr2>(U_pack_Vs<Leng1, f>, indices); }
-
-// -> U:
-
-	template<typename Type, auto f, auto Arr1, auto Leng1, auto Arr2, typename Indices>
-	nik_ce auto U_zip(Indices indices)
-		{ return U_apply<Type, IteratorModule::Zip, Arr1, Arr2>(U_pack_Vs<Leng1, f>, indices); }
-*/
-
-/***********************************************************************************************************************/
-
 // segment:
+
+/***********************************************************************************************************************/
 
 	struct T_machine_segment
 	{

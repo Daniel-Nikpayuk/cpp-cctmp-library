@@ -41,10 +41,12 @@ namespace cctmp {
 		nik_ces auto depend	= toc.depend;
 		nik_ces auto param	= toc.param;
 
+		nik_ces auto offset	= _five;
 		nik_ces auto length	= ( 1 * src.goto_size    )
 					+ ( 1 * src.branch_size  )
-					+ ( 2 * src.copy_size    )
-					+ ( 3 * src.return_size  )
+					+ ( 2 * src.test_size    )
+					+ ( 2 * src.period_size  )
+					+ ( 3 * src.return_size  ) // currently only partially accurate: (times 1 or 3)
 					+ ( 4 * src.replace_size );
 
 		using instr_type	= sequence    < gcindex_type* , length          >;
@@ -53,12 +55,27 @@ namespace cctmp {
 		using lookpos_type	= subsequence < gindex_type   , src.param_size  >;
 		using labpos_type	= subsequence < gindex_type   , src.depend_size >;
 
-		template<auto n, template<auto...> typename B, auto... Is>
-		nik_ces auto inner_pack(nik_avp(B<Is...>*))
-			{ return U_pack_Vs<toc.param_at(n, Is).index...>; }
+		nik_ces void _lookup_() { }
 
-		template<template<auto...> typename B, auto... Is>
-		nik_ces auto size_pack(nik_avp(B<Is...>*))
+		nik_ces auto _is_lookup_ = _alias_<_same_, _lookup_>;
+
+		template<auto index, bool has_paste>
+		nik_ces auto adjust_index()
+		{
+			nik_ce auto adjset = offset + has_paste;
+
+			if constexpr      (index == _one  ) return _lookup_;
+			else if constexpr (index == _three) return _zero;
+			else                                return index - adjset;
+		}
+
+		template<auto n, auto I0, auto... Is>
+		nik_ces auto inner_pack(nik_avp(T_pack_Vs<I0, Is...>*)) // { first, rest... } <-- improve implementation design.
+									// improve _segment_ maybe ?
+			{ return U_pack_Vs<adjust_index<toc.param_at(n, Is).index, false>()...>; } // currently incomplete.
+
+		template<auto... Is>
+		nik_ces auto size_pack(nik_avp(T_pack_Vs<Is...>*))
 			{ return U_pack_Vs<eval<_par_segment_, toc.param_size(Is)>...>; }
 
 		template<auto... Is, auto... Js>
@@ -87,6 +104,9 @@ namespace cctmp {
 
 		nik_ce void translate()
 		{
+			// can check if function calls are redundant and refactor,
+			// but it also might not be necessary if the compiler optimizes.
+
 			for (auto k = page.begin(); k != page.end(); ++k)
 			{
 				switch (k->kind)
@@ -109,15 +129,22 @@ namespace cctmp {
 					}
 					case Context::apply:
 					{
-						*(instr.value++) = instruction< AN::select  , AT::id    >;
-						*(instr.value++) = instruction< AN::call    , AT::id    >;
-						*(instr.value++) = instruction< AN::select  , AT::front >;
-						*(instr.value++) = instruction< AN::replace , AT::id    >;
+						*(instr.value++) = instruction< AN::select , AT::id >;
+						*(instr.value++) = instruction< AN::call   , AT::id >;
 
 						*(lookpos.locus++)  = position.value;
 						position.value     += 2;
-						*position.value     = k->begin()->index;
-						position.value     += 2;
+
+						auto index = k->begin()->index;
+
+						if (index != _two) // replace:
+						{
+							*(instr.value++) = instruction< AN::select  , AT::front >;
+							*(instr.value++) = instruction< AN::replace , AT::id    >;
+
+							*position.value     = (index - offset);
+							position.value     += 2;
+						}
 
 						break;
 					}
@@ -141,14 +168,28 @@ namespace cctmp {
 					}
 					case Context::re_turn:
 					{
-						*(instr.value++) = instruction< AN::select , AT::front >;
-						*(instr.value++) = instruction< AN::right  , AT::id    >;
-						*(instr.value++) = instruction< AN::first  , AT::id    >;
+						auto index = k->begin()->index;
 
-						if (k->begin()->index == _one) *(lookpos.locus++) = position.value;
-						else *position.value = k->begin()->index;
+						if (index == _one) // lookup:
+						{
+							*(instr.value++) = instruction< AN::select , AT::id    >;
+							*(instr.value++) = instruction< AN::call   , AT::value >;
 
-						position.value += 3;
+							*(lookpos.locus++) = position.value;
+						}
+						else if (index != _three) // replace:
+						{
+							*(instr.value++) = instruction< AN::select , AT::front >;
+							*(instr.value++) = instruction< AN::right  , AT::id    >;
+
+							*position.value = (index - offset);
+						}
+
+						position.value += 2;
+
+						*(instr.value++) = instruction< AN::first , AT::id >;
+
+						position.value += 1;
 
 						break;
 					}
@@ -189,8 +230,9 @@ namespace cctmp {
 
 	// source:
 
-		//	is_zero 0  Done  multiply 0 p 0  decrement 0 n 0  Loop  p 0 0 
-		//	0       0  12    1        0 5 0  2         0 6 0  0     5 0 0
+		//		is_zero 0  Done  multiply 0 p 0  decrement 0 n 0  Loop  p 0 0 
+		//		0       0  12    1        0 5 0  2         0 6 0  0     5 0 0
+		// adjusted:	0       0  12    1        0 0 0  2         0 1 0  0     0 0 0
 
 		template
 		<

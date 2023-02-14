@@ -61,21 +61,17 @@
 	{
 		return source
 		(
-		 	"factorial p n    ;"		// na:index{0} lookup:index{1} copy:index{2} paste:index{3}
-					    		//	factorial:index{4} p:index{5} n:index{6} ;:index{}
-					    		// indices are offset to include "na", "lookup", "copy", "paste".
+		 	"factorial p n    ;"
 
-			"loop:            ;"		// loop::index{1} ;:index{}
-		 	"test is_zero n   ;"		// test:index{2} is_zero:index{1} n:index{6} ;:index{}
-			"branch done      ;"		// branch:index{} done:index{2} ;:index{}
-			"p = multiply p n ;"		// p:index{5} =:index{} multiply:index{1} p:index{5} n:index{6} ;:index{}
-					    		// count: the number of args for unpacking.
-			"n = decrement n  ;"		// n:index{6} =:index{} decrement:index{1} n:index{6} ;:index{}
-					    		// count: the number of args for unpacking.
-			"goto loop        ;"		// goto:index{} loop:index{1} ;:index{}
+			"loop:            ;"
+		 	"test is_zero n   ;"
+			"branch done      ;"
+			"p = multiply p n ;"
+			"n = decrement n  ;"
+			"goto loop        ;"
 
-			"done:            ;"		// done::index{2} ;:index{}
-			"return p         ;"		// return:index{} p:index{5} ;:index{}
+			"done:            ;"
+			"return p         ;"
 		);
 	}
 
@@ -93,27 +89,11 @@
 		printf("\n");
 	}
 
-	template<auto contr>
-	void print_target_contr()
+	template<typename Contr>
+	void print_target_contr(const Contr & contr)
 	{
-		auto size = contr[0][0];
-
-		for (auto k = contr + 1; k != contr + size; ++k) print_target_instr(*k);
+		for (auto k = contr.begin(); k != contr.end(); ++k) print_target_instr(*k);
 	}
-
-//	template<typename Contr>
-//	void print_target_contr(const Contr *contr)
-//	{
-//		auto size = 10;//contr[0][0];
-
-//		for (auto k = contr + 1; k != contr + size; ++k) print_target_instr(*k);
-//	}
-
-//	template<typename Target>
-//	void print_target_contr(const Target & target)
-//	{
-//		for (auto k = target.begin; k != target.current; ++k) print_target_instr(*k);
-//	}
 
 	template<typename Position>
 	void print_target_position(const Position & pos)
@@ -125,26 +105,11 @@
 
 /***********************************************************************************************************************/
 
-#ifdef NIK_COMMENT
-
-	test{2} is_zero{1} n{6}
-	p{5} multiply{1} p{5} n{6}
-	n{6} decrement{1} n{6}
-
-#endif
-
-/***********************************************************************************************************************/
-
 	int main(int argc, char *argv[])
 	{
-		print_target_position(factorial.position);
-
-	//	printf("%d\n", factorial.label.array[0]);
-	//	printf("%d\n", factorial.label.array[1]);
-
-	//	printf("%d\n", factorial);
-	//	print_target_contr(factorial);
-	//	print_target_contr<factorial>();
+		printf("%d\n", factorial.lookup);
+	//	print_target_contr(factorial.instr);
+	//	print_target_position(factorial.position);
 
 		return 0;
 	}

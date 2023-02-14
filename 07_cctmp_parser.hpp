@@ -378,7 +378,7 @@ namespace cctmp {
 		using string_type		= typename src_type::string_type;
 		using cstring_type		= typename src_type::cstring_type;
 
-		using page_type			= Page<char_type, src.line_size, src.max_entry_size>;
+		using page_type			= Page<char_type, src.line_size, src.entry_size>;
 
 		using label_type		= Subpage < page_type , src.label_size  >;
 		using goto_type			= Subpage < page_type , src.goto_size   >;
@@ -599,12 +599,12 @@ namespace cctmp {
 			{
 				switch (toc.page.line->kind)
 				{
-					case Context::function : { argument_entry (toc, l); break; }
-					case Context::apply    : { apply_entry    (toc, l); break; }
-					case Context::test     : { test_entry     (toc, l); break; }
-					case Context::branch   : { branch_entry   (toc, l); break; }
-					case Context::go_to    : { goto_entry     (toc, l); break; }
-					case Context::re_turn  : { return_entry   (toc, l); break; }
+					case Context::function : { identifier_argument_entry (toc, l); break; }
+					case Context::apply    : { identifier_apply_entry    (toc, l); break; }
+					case Context::test     : { identifier_test_entry     (toc, l); break; }
+					case Context::branch   : { identifier_branch_entry   (toc, l); break; }
+					case Context::go_to    : { identifier_goto_entry     (toc, l); break; }
+					case Context::re_turn  : { identifier_return_entry   (toc, l); break; }
 				}
 
 				toc.increment_entry();
@@ -613,11 +613,24 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void resolve_period(TOC & toc, clexeme & l)
 			{
+				switch (toc.page.line->kind)
+				{
+					case Context::apply : { period_apply_entry (toc, l); break; }
+				}
+
+				toc.increment_entry();
 			}
 
 			template<typename TOC>
 			nik_ces void resolve_underscore(TOC & toc, clexeme & l)
 			{
+				switch (toc.page.line->kind)
+				{
+					case Context::apply : { underscore_apply_entry (toc, l); break; }
+					case Context::test  : { underscore_test_entry  (toc, l); break; }
+				}
+
+				toc.increment_entry();
 			}
 
 			template<typename TOC, typename SubpageType>
@@ -639,17 +652,17 @@ namespace cctmp {
 				resolve_subpage(toc, toc.branch);
 			}
 
-		// entries:
+		// identifier:
 
 			template<typename TOC>
-			nik_ces void argument_entry(TOC & toc, clexeme & l)
+			nik_ces void identifier_argument_entry(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
 				toc.entry().index = toc.arg_index++;
 			}
 
 			template<typename TOC>
-			nik_ces void apply_entry(TOC & toc, clexeme & l)
+			nik_ces void identifier_apply_entry(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
 
@@ -659,7 +672,7 @@ namespace cctmp {
 			}
 
 			template<typename TOC>
-			nik_ces void test_entry(TOC & toc, clexeme & l)
+			nik_ces void identifier_test_entry(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
 
@@ -669,25 +682,50 @@ namespace cctmp {
 			}
 
 			template<typename TOC>
-			nik_ces void branch_entry(TOC & toc, clexeme & l)
+			nik_ces void identifier_branch_entry(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
 			}
 
 			template<typename TOC>
-			nik_ces void goto_entry(TOC & toc, clexeme & l)
+			nik_ces void identifier_goto_entry(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
 			}
 
 			template<typename TOC>
-			nik_ces void return_entry(TOC & toc, clexeme & l)
+			nik_ces void identifier_return_entry(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
 
 				auto k = toc.match_identifier(l.start, l.finish);
 				if (k == toc.page.begin()->entry) ; // error
 				else toc.entry().index = k->index;
+			}
+
+		// period:
+
+			template<typename TOC>
+			nik_ces void period_apply_entry(TOC & toc, clexeme & l)
+			{
+				toc.copy(l);
+				toc.entry().index = _two; // signifies a copy.
+			}
+
+		// underscore:
+
+			template<typename TOC>
+			nik_ces void underscore_apply_entry(TOC & toc, clexeme & l)
+			{
+				toc.copy(l);
+				toc.entry().index = _three; // signifies a paste.
+			}
+
+			template<typename TOC>
+			nik_ces void underscore_test_entry(TOC & toc, clexeme & l)
+			{
+				toc.copy(l);
+				toc.entry().index = _three; // signifies a paste.
 			}
 		};
 	};

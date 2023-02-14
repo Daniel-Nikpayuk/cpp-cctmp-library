@@ -235,9 +235,33 @@ namespace cctmp {
 	//	}
 
 	template<auto SourceCallable>
+	struct T_compile
+	{
+		nik_ces auto target = T_generic_assembly_target<SourceCallable>::value;
+		nik_ces auto lookup = default_assembly_environment;
+
+		// controller:
+
+		// lookup:
+
+	//	template<auto index>
+	//	nik_ces auto resolve_index()
+	//	{
+	//		if constexpr (eval<_same_, index, target::_lookup_>) return lookup(begin, end);
+	//		else                                                 return index;
+	//	}
+
+	//	template<auto... Vs>
+	//	nik_ces auto inner_repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<resolve_index<Vs>()...>; }
+
+	//	template<auto... Vs>
+	//	nik_ces auto repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<inner_repack(Vs)...>; }
+	};
+
+	template<auto SourceCallable>
 	nik_ce auto _compile()
 	{
-		nik_ce auto target = T_generic_assembly_target<SourceCallable>::value;
+		nik_ce auto target = T_compile<SourceCallable>::target;
 
 		return target;
 	}
