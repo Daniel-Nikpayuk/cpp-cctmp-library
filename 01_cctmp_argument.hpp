@@ -628,10 +628,10 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::sequence, Sequence::begin, filler...>
 		{
 			template<typename T, auto S>
-			nik_ces auto result(sequence<T, S> & s) { return s.value; }
+			nik_ces auto result(sequence<T, S> & s) { return s.array; }
 
 			template<typename T, auto S>
-			nik_ces auto result(const sequence<T, S> & s) { return s.value; }
+			nik_ces auto result(const sequence<T, S> & s) { return s.array; }
 
 		}; nik_ce auto _sequence_begin_ = U_arg_sequence<Sequence::begin>;
 
@@ -641,10 +641,10 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::sequence, Sequence::last, filler...>
 		{
 			template<typename T, auto S>
-			nik_ces auto result(sequence<T, S> & s) { return s.value + (S - 1); }
+			nik_ces auto result(sequence<T, S> & s) { return s.array + (S - 1); }
 
 			template<typename T, auto S>
-			nik_ces auto result(const sequence<T, S> & s) { return s.value + (S - 1); }
+			nik_ces auto result(const sequence<T, S> & s) { return s.array + (S - 1); }
 
 		}; nik_ce auto _sequence_last_ = U_arg_sequence<Sequence::last>;
 
@@ -654,10 +654,10 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::sequence, Sequence::end, filler...>
 		{
 			template<typename T, auto S>
-			nik_ces auto result(sequence<T, S> & s) { return s + S; }
+			nik_ces auto result(sequence<T, S> & s) { return s.array + S; }
 
 			template<typename T, auto S>
-			nik_ces auto result(const sequence<T, S> & s) { return s + S; }
+			nik_ces auto result(const sequence<T, S> & s) { return s.array + S; }
 
 		}; nik_ce auto _sequence_end_ = U_arg_sequence<Sequence::end>;
 

@@ -225,6 +225,15 @@ namespace cctmp {
 
 #endif
 
+	//	template<auto n, auto... Vs, template<auto...> typename B, auto... Is>
+	//	nik_ces auto to_instruction(nik_avp(B<Is...>*))
+	//	{
+	//		nik_ce auto k = page.begin() + n;
+	//		nik_ce auto l = *k;
+
+	//		return instruction<Vs..., l.array[Is]...>;
+	//	}
+
 	template<auto SourceCallable>
 	nik_ce auto _compile()
 	{

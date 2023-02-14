@@ -38,120 +38,117 @@ namespace cctmp {
 		nik_ces auto src	= pda.src;
 		nik_ces auto toc	= pda.syntax;
 		nik_ces auto page	= toc.page;
+		nik_ces auto depend	= toc.depend;
 		nik_ces auto param	= toc.param;
 
-		nik_ces auto length	= (page.length - toc.label.size() - 1) // decrement definition and label lines.
+		nik_ces auto length	= ( 1 * src.goto_size    )
+					+ ( 1 * src.branch_size  )
+					+ ( 2 * src.copy_size    )
+					+ ( 3 * src.return_size  )
+					+ ( 4 * src.replace_size );
 
-					// decrement to prevent double counting:
-	    		 		+ ( (2 - 1) * src.copy_size    )
-					+ ( (4 - 1) * src.replace_size )
-					+ ( (3 - 1) * src.return_size  );
+		using instr_type	= sequence    < gcindex_type* , length          >;
+		using label_type	= sequence    < gindex_type   , src.label_size  >;
+		using position_type	= sequence    < gindex_type   , length          >;
+		using lookpos_type	= subsequence < gindex_type   , src.param_size  >;
+		using labpos_type	= subsequence < gindex_type   , src.depend_size >;
 
 		template<auto n, template<auto...> typename B, auto... Is>
 		nik_ces auto inner_pack(nik_avp(B<Is...>*))
-		{
-			return U_pack_Vs
-			<
-				param.array[n]->array[Is].index...
-			>;
-		}
+			{ return U_pack_Vs<toc.param_at(n, Is).index...>; }
 
 		template<template<auto...> typename B, auto... Is>
 		nik_ces auto size_pack(nik_avp(B<Is...>*))
-		{
-			return U_pack_Vs
-			<
-				eval<_par_segment_, param.array[Is]->size()>...
-			>;
-		}
+			{ return U_pack_Vs<eval<_par_segment_, toc.param_size(Is)>...>; }
 
 		template<auto... Is, auto... Js>
 		nik_ces auto to_pack(nik_avp(T_pack_Vs<Is...>*), nik_avp(T_pack_Vs<Js...>*))
+			{ return U_pack_Vs<inner_pack<Is>(Js)...>; }
+
+		nik_ces auto param_to_pack()
 		{
-			return U_pack_Vs
-			<
-				inner_pack<Is>(Js)...
-			>;
+			nik_ce auto param_seg = eval<_par_segment_, param.size()>;
+			nik_ce auto size_seg  = size_pack(param_seg);
+
+			return to_pack(param_seg, size_seg);
 		}
 
-		nik_ces auto param_seg = eval<_par_segment_, param.size()>;
-		nik_ces auto size_seg  = size_pack(param_seg);
-		nik_ces auto lookup    = to_pack(param_seg, size_seg);
+		nik_ces auto lookup = param_to_pack();
 
-	//	template<auto n, auto... Vs, template<auto...> typename B, auto... Is>
-	//	nik_ces auto to_instruction(nik_avp(B<Is...>*))
-	//	{
-	//		nik_ce auto k = page.begin() + n;
-	//		nik_ce auto l = *k;
+		instr_type instr;
+		label_type label;
+		position_type position;
+		lookpos_type lookpos;
+		labpos_type labpos;
 
-	//		return instruction<Vs..., l.array[Is]...>;
-	//	}
+		nik_ce GenericAssemblyTarget() : instr{}, label{}, position{}, lookpos{}, labpos{}
 
-		instr_type contr[length];
-		cinstr_type *start;
-		instr_type *line;
+			{ translate(); resolve(); }
 
-		gindex_type locs[length];
-		gindex_type *locs_iter;
-		gindex_type position;
-
-		nik_ce GenericAssemblyTarget() :
-
-			contr{}, start{contr}, line{contr}, locs{}, locs_iter{locs}, position{}
-
+		nik_ce void translate()
 		{
 			for (auto k = page.begin(); k != page.end(); ++k)
 			{
 				switch (k->kind)
 				{
+					case Context::label:
+					{
+						label.array[k->begin()->index] = instr.size();
+
+						break;
+					}
 					case Context::test:
 					{
-						*(line++) = instruction< AN::select , AT::id >; // op
-						*(line++) = instruction< AN::call   , AT::id >;
+						*(instr.value++) = instruction< AN::select , AT::id >;
+						*(instr.value++) = instruction< AN::call   , AT::id >;
 
-						*locs_iter  = get_pos(k, 1); // op
-						 locs_iter += 2;
+						*(lookpos.locus++)  = position.value;
+						position.value     += 2;
 
 						break;
 					}
 					case Context::apply:
 					{
-						*(line++) = instruction< AN::select  , AT::id    >; // op 
-						*(line++) = instruction< AN::call    , AT::id    >;
-						*(line++) = instruction< AN::select  , AT::front >; // rep
-						*(line++) = instruction< AN::replace , AT::id    >;
+						*(instr.value++) = instruction< AN::select  , AT::id    >;
+						*(instr.value++) = instruction< AN::call    , AT::id    >;
+						*(instr.value++) = instruction< AN::select  , AT::front >;
+						*(instr.value++) = instruction< AN::replace , AT::id    >;
 
-						*locs_iter  = get_pos(k, 1); // op
-						 locs_iter += 2;
-						*locs_iter  = get_pos(k, 0); // rep
-						 locs_iter += 2;
+						*(lookpos.locus++)  = position.value;
+						position.value     += 2;
+						*position.value     = k->begin()->index;
+						position.value     += 2;
 
 						break;
 					}
-					case Context::branch: // have to keep track of the implicit label locations:
+					case Context::branch:
 					{
-						*(line++) = instruction< AN::jump , AT::branch >; // Done = 3
+						*(instr.value++) = instruction< AN::jump , AT::branch >;
 
-						++locs_iter;
+						*(labpos.locus++)  = position.value;
+						position.value    += 1;
 
 						break;
 					}
 					case Context::go_to:
 					{
-						*(line++) = instruction< AN::jump , AT::go_to >; // Loop = 0
+						*(instr.value++) = instruction< AN::jump , AT::go_to >;
 
-						++locs_iter;
+						*(labpos.locus++)  = position.value;
+						position.value    += 1;
 
 						break;
 					}
 					case Context::re_turn:
 					{
-						*(line++) = instruction< AN::select , AT::front >; // rep
-						*(line++) = instruction< AN::right  , AT::id    >;
-						*(line++) = instruction< AN::first  , AT::id    >;
+						*(instr.value++) = instruction< AN::select , AT::front >;
+						*(instr.value++) = instruction< AN::right  , AT::id    >;
+						*(instr.value++) = instruction< AN::first  , AT::id    >;
 
-						*locs_iter  = get_pos(k, 0); // rep
-						 locs_iter += 3;
+						if (k->begin()->index == _one) *(lookpos.locus++) = position.value;
+						else *position.value = k->begin()->index;
+
+						position.value += 3;
 
 						break;
 					}
@@ -159,13 +156,14 @@ namespace cctmp {
 			}
 		}
 
-		template<typename PageIter>
-		nik_ce gindex_type get_pos(PageIter k, gindex_type n)
+		nik_ce void resolve()
 		{
-			auto val = k->array[n].index;
-			if (val == _one) val = position++;
+			auto num = 0;
+			for (auto k = lookpos.begin(); k != lookpos.end(); ++k, ++num) **k = num;
 
-			return val;
+			auto line = depend.begin();
+			for (auto k = labpos.begin(); k != labpos.end(); ++k, ++line)
+				**k = label.array[(*line)->begin()->index];
 		}
 	};
 
@@ -191,6 +189,9 @@ namespace cctmp {
 
 	// source:
 
+		//	is_zero 0  Done  multiply 0 p 0  decrement 0 n 0  Loop  p 0 0 
+		//	0       0  12    1        0 5 0  2         0 6 0  0     5 0 0
+
 		template
 		<
 			auto p       = 0 , auto n        = 1  ,
@@ -202,6 +203,7 @@ namespace cctmp {
 		// Loop:
 			instruction < AN::select  , AT::id     , is_zero   >, // get is_zero pack containing arg positions.
 			instruction < AN::call    , AT::id                 >, // unpack and apply is_zero to args.
+
 			instruction < AN::jump    , AT::branch , Done      >, // branch to Done label, continue otherwise.
 
 			instruction < AN::select  , AT::id     , multiply  >, // get multiply [...].

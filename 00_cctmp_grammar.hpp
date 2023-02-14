@@ -200,11 +200,45 @@ namespace cctmp {
 	template<typename Type, auto Size>
 	struct sequence
 	{
-		Type value[Size];
-		decltype(Size) length;
+		using type			= Type; // mutable intention.
+		using ctype			= type const;
 
-		nik_ce sequence() : value{}, length{} { }
-	//	nik_ce sequence(const Type (&s)[Size]) : value{s} { }
+		nik_ces auto length		= Size;
+
+		type array[length];
+		ctype *start;
+		type *value;
+
+		nik_ce sequence() : array{}, start{array}, value{array} { }
+
+		nik_ce auto begin () const { return start; }
+		nik_ce auto end   () const { return value; }
+		nik_ce auto size  () const { return (value - start); }
+	};
+
+/***********************************************************************************************************************/
+
+// subsequence:
+
+	template<typename Type, auto Size>
+	struct subsequence
+	{
+		using type			= Type; // mutable intention.
+		using ctype			= type const;
+		using locus_type		= type*; // mutable intention.
+		using clocus_type		= locus_type const;
+
+		nik_ces auto length		= Size;
+
+		locus_type array[length];
+		clocus_type *start;
+		locus_type *locus;
+
+		nik_ce subsequence() : array{}, start{array}, locus{array} { }
+
+		nik_ce auto begin () const { return start; }
+		nik_ce auto end   () const { return locus; }
+		nik_ce auto size  () const { return (locus - start); }
 	};
 
 /***********************************************************************************************************************/

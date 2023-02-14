@@ -641,6 +641,7 @@ namespace cctmp {
 		gindex_type copy_size;
 		gindex_type replace_size;
 		gindex_type return_size;
+		gindex_type depend_size;
 		gindex_type graph_size;
 		gindex_type param_size;
 		gindex_type stack_size;
@@ -660,6 +661,7 @@ namespace cctmp {
 			copy_size      { _zero      },
 			replace_size   { _zero      },
 			return_size    { _zero      },
+			depend_size    { _zero      },
 			graph_size     { _zero      },
 			param_size     { _zero      },
 			stack_size     { _zero      }
@@ -696,8 +698,9 @@ namespace cctmp {
 					k = l.finish;
 				}
 
-				graph_size = label_size + goto_size + branch_size;
-				param_size = copy_size + replace_size;
+				depend_size = goto_size   + branch_size;
+				graph_size  = depend_size + label_size;
+				param_size  = copy_size   + replace_size;
 			}
 	};
 

@@ -322,9 +322,11 @@ namespace cctmp {
 	template<typename CharType, auto LineSize, auto EntrySize>
 	struct Page
 	{
-		using line_type			= Line<CharType, EntrySize>;
+		using char_type			= CharType;
+		using line_type			= Line<char_type, EntrySize>;
 		using cline_type		= line_type const;
 
+		nik_ces auto entry_size		= EntrySize;
 		nik_ces auto length		= LineSize;
 
 		line_type array[length];
@@ -342,10 +344,11 @@ namespace cctmp {
 
 // subpage:
 
-	template<typename CharType, auto LineSize, auto EntrySize>
+	template<typename PageType, auto LineSize>
 	struct Subpage
 	{
-		using locus_type		= Line<CharType, EntrySize>*; // mutable intention.
+		using char_type			= typename PageType::char_type;
+		using locus_type		= Line<char_type, PageType::entry_size>*; // mutable intention.
 		using clocus_type		= locus_type const;
 
 		nik_ces auto length		= LineSize;
@@ -375,17 +378,20 @@ namespace cctmp {
 		using string_type		= typename src_type::string_type;
 		using cstring_type		= typename src_type::cstring_type;
 
-		using page_type			= Page    < char_type , src.line_size   , src.max_entry_size >;
-		using label_type		= Subpage < char_type , src.label_size  , src.max_entry_size >;
-		using goto_type			= Subpage < char_type , src.goto_size   , src.max_entry_size >;
-		using branch_type		= Subpage < char_type , src.branch_size , src.max_entry_size >;
-		using graph_type		= Subpage < char_type , src.graph_size  , src.max_entry_size >;
-		using param_type		= Subpage < char_type , src.param_size  , src.max_entry_size >;
+		using page_type			= Page<char_type, src.line_size, src.max_entry_size>;
+
+		using label_type		= Subpage < page_type , src.label_size  >;
+		using goto_type			= Subpage < page_type , src.goto_size   >;
+		using branch_type		= Subpage < page_type , src.branch_size >;
+		using depend_type		= Subpage < page_type , src.depend_size >;
+		using graph_type		= Subpage < page_type , src.graph_size  >;
+		using param_type		= Subpage < page_type , src.param_size  >;
 
 		page_type page;
 		label_type label;
 		goto_type go_to;
 		branch_type branch;
+		depend_type depend;
 		graph_type graph;
 		param_type param;
 
@@ -401,6 +407,7 @@ namespace cctmp {
 		nik_ce void increment_label  () { ++(label.locus     ); }
 		nik_ce void increment_goto   () { ++(go_to.locus     ); }
 		nik_ce void increment_branch () { ++(branch.locus    ); }
+		nik_ce void increment_depend () { ++(depend.locus    ); }
 		nik_ce void increment_graph  () { ++(graph.locus     ); }
 		nik_ce void increment_param  () { ++(param.locus     ); }
 
@@ -443,6 +450,9 @@ namespace cctmp {
 
 			return k;
 		}
+
+		nik_ce auto param_at(gindex_type m, gindex_type n) const { return param.array[m]->array[n]; }
+		nik_ce auto param_size(gindex_type m) const { return param.array[m]->size(); }
 	};
 
 /***********************************************************************************************************************/
@@ -476,13 +486,21 @@ namespace cctmp {
 			nik_ces void new_block(TOC & toc, clexeme & l)
 			{
 				toc.page.line->kind = Context::label;
+
+				*toc.graph.locus    = toc.page.line;
+				*toc.label.locus    = toc.page.line;
+
+				toc.increment_graph();
+				toc.increment_label();
 			}
 
 			template<typename TOC>
 			nik_ces void new_conditional(TOC & toc, clexeme & l)
 			{
 				toc.page.line->kind = Context::test;
-				*toc.param.locus = toc.page.line;
+
+				*toc.param.locus    = toc.page.line;
+
 				toc.increment_param();
 			}
 
@@ -490,7 +508,9 @@ namespace cctmp {
 			nik_ces void new_application(TOC & toc, clexeme & l)
 			{
 				toc.page.line->kind = Context::apply;
-				*toc.param.locus = toc.page.line;
+
+				*toc.param.locus    = toc.page.line;
+
 				toc.increment_param();
 			}
 		};
@@ -523,10 +543,7 @@ namespace cctmp {
 			{
 				toc.copy(l);
 				toc.entry().index = toc.label_index++;
-				*toc.label.locus = toc.page.line;
-
 				toc.increment_entry();
-				toc.increment_label();
 			}
 
 			template<typename TOC>
@@ -541,12 +558,28 @@ namespace cctmp {
 			nik_ces void resolve_branch(TOC & toc, clexeme & l)
 			{
 				toc.page.line->kind = Context::branch;
+
+				*toc.graph.locus    = toc.page.line;
+				*toc.depend.locus   = toc.page.line;
+				*toc.branch.locus   = toc.page.line;
+
+				toc.increment_graph();
+				toc.increment_depend();
+				toc.increment_branch();
 			}
 
 			template<typename TOC>
 			nik_ces void resolve_goto(TOC & toc, clexeme & l)
 			{
 				toc.page.line->kind = Context::go_to;
+
+				*toc.graph.locus    = toc.page.line;
+				*toc.depend.locus   = toc.page.line;
+				*toc.go_to.locus    = toc.page.line;
+
+				toc.increment_graph();
+				toc.increment_depend();
+				toc.increment_goto();
 			}
 
 			template<typename TOC>
@@ -639,18 +672,12 @@ namespace cctmp {
 			nik_ces void branch_entry(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
-
-				*toc.branch.locus = toc.page.line;
-				toc.increment_branch();
 			}
 
 			template<typename TOC>
 			nik_ces void goto_entry(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
-
-				*toc.go_to.locus = toc.page.line;
-				toc.increment_goto();
 			}
 
 			template<typename TOC>

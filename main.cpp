@@ -115,6 +115,14 @@
 //		for (auto k = target.begin; k != target.current; ++k) print_target_instr(*k);
 //	}
 
+	template<typename Position>
+	void print_target_position(const Position & pos)
+	{
+		for (auto k = pos.begin(); k != pos.end(); ++k) printf("%d ", (int) *k);
+
+		printf("\n");
+	}
+
 /***********************************************************************************************************************/
 
 #ifdef NIK_COMMENT
@@ -129,10 +137,10 @@
 
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", factorial.lookup);
-	//	printf("%d\n", unpack_<factorial.param_ptr, _par_at_, 0>);
-	//	printf("%d\n", (int) factorial.toc.param.size());
-	//	print_param(factorial.toc.param);
+		print_target_position(factorial.position);
+
+	//	printf("%d\n", factorial.label.array[0]);
+	//	printf("%d\n", factorial.label.array[1]);
 
 	//	printf("%d\n", factorial);
 	//	print_target_contr(factorial);
