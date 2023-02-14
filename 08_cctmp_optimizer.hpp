@@ -46,7 +46,7 @@ namespace cctmp {
 					+ ( 1 * src.branch_size  )
 					+ ( 2 * src.test_size    )
 					+ ( 2 * src.period_size  )
-					+ ( 3 * src.return_size  ) // currently only partially accurate: (times 1 or 3)
+					+ ( 3 * src.return_size  ) // upper bound: (1 * size <= 3 * size)
 					+ ( 4 * src.replace_size );
 
 		using instr_type	= sequence    < gcindex_type* , length          >;
@@ -55,28 +55,25 @@ namespace cctmp {
 		using lookpos_type	= subsequence < gindex_type   , src.param_size  >;
 		using labpos_type	= subsequence < gindex_type   , src.depend_size >;
 
-		nik_ces void _lookup_() { }
-
-		nik_ces auto _is_lookup_ = _alias_<_same_, _lookup_>;
-
-		template<auto index, bool has_paste>
+		template<auto row, auto col>
 		nik_ces auto adjust_index()
 		{
-			nik_ce auto adjset = offset + has_paste;
+			nik_ce auto index       = toc.param_at(row, col).index;
+			nik_ce auto line_offset = toc.offset_at(row);
+			nik_ce auto adjset      = offset - line_offset;
 
-			if constexpr      (index == _one  ) return _lookup_;
+			if constexpr      (index == _one  ) return U_pack_Vs<row, col>;
 			else if constexpr (index == _three) return _zero;
 			else                                return index - adjset;
 		}
 
-		template<auto n, auto I0, auto... Is>
-		nik_ces auto inner_pack(nik_avp(T_pack_Vs<I0, Is...>*)) // { first, rest... } <-- improve implementation design.
-									// improve _segment_ maybe ?
-			{ return U_pack_Vs<adjust_index<toc.param_at(n, Is).index, false>()...>; } // currently incomplete.
+		template<auto n, auto... Is>
+		nik_ces auto inner_pack(nik_avp(T_pack_Vs<Is...>*))
+			{ return U_pack_Vs<adjust_index<n, Is>()...>; }
 
 		template<auto... Is>
 		nik_ces auto size_pack(nik_avp(T_pack_Vs<Is...>*))
-			{ return U_pack_Vs<eval<_par_segment_, toc.param_size(Is)>...>; }
+			{ return U_pack_Vs<eval<_par_segment_, toc.param_size(Is) - 1, _one>...>; }
 
 		template<auto... Is, auto... Js>
 		nik_ces auto to_pack(nik_avp(T_pack_Vs<Is...>*), nik_avp(T_pack_Vs<Js...>*))

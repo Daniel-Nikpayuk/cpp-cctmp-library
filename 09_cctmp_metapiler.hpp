@@ -36,7 +36,7 @@ namespace cctmp {
 		using string_type		= char_type const *;
 		using size_type			= decltype(Size);
 
-		nik_ces size_type size		= Size;
+		nik_ces size_type size		= Size - 1; // best policy?
 		nik_ces auto value		= U_restore_T<ValueType>;
 		using value_type		= decltype(value);
 
@@ -112,7 +112,8 @@ namespace cctmp {
 		nik_ce auto values	= table_type::values;
 		nik_ce auto lookup_f	= lookup_function<f, string_type>;
 
-		return eval<_cons_, H_id, values, lookup_f>;
+	//	return eval<_cons_, H_id, values, lookup_f>;
+		return U_pack_Vs<lookup_f, values>;
 	}
 
 	template<auto f>
@@ -225,49 +226,66 @@ namespace cctmp {
 
 #endif
 
-	//	template<auto n, auto... Vs, template<auto...> typename B, auto... Is>
-	//	nik_ces auto to_instruction(nik_avp(B<Is...>*))
-	//	{
-	//		nik_ce auto k = page.begin() + n;
-	//		nik_ce auto l = *k;
-
-	//		return instruction<Vs..., l.array[Is]...>;
-	//	}
-
 	template<auto SourceCallable>
-	struct T_compile
+	struct GenericAssemblyMetapiler
 	{
 		nik_ces auto target = T_generic_assembly_target<SourceCallable>::value;
-		nik_ces auto lookup = default_assembly_environment;
+		nik_ces auto toc    = target.toc;
+		nik_ces auto env    = default_assembly_environment;
 
 		// controller:
 
+			template<auto i, auto pos>
+			nik_ces auto inner_zip()
+			{
+				if constexpr (pos == 0) return instruction<i[PI::name], i[PI::note]>;
+				else                    return instruction<i[PI::name], i[PI::note], pos>;
+			}
+
+			template<auto... Is>
+			nik_ces auto zip(nik_avp(T_pack_Vs<Is...>*))
+			{
+				return controller
+				<
+					inner_zip<target.instr.array[Is], target.position.array[Is]>()...
+				>;
+			}
+
 		// lookup:
 
-	//	template<auto index>
-	//	nik_ces auto resolve_index()
-	//	{
-	//		if constexpr (eval<_same_, index, target::_lookup_>) return lookup(begin, end);
-	//		else                                                 return index;
-	//	}
+			nik_ces auto resolve_index(gcindex_type index) { return index; }
 
-	//	template<auto... Vs>
-	//	nik_ces auto inner_repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<resolve_index<Vs>()...>; }
+			template<auto row, auto col>
+			nik_ces auto resolve_index(nik_avp(T_pack_Vs<row, col>*))
+			{
+				nik_ce auto start  = toc.param_at(row, col).start;
+				nik_ce auto finish = toc.param_at(row, col).finish;
+				nik_ce auto lookup = unpack_<env, _car_>;
+				nik_ce auto values = unpack_<env, _cadr_>;
 
-	//	template<auto... Vs>
-	//	nik_ces auto repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<inner_repack(Vs)...>; }
+				return unpack_<values, _par_at_, lookup(start, finish)>;
+			}
+
+			template<auto... Vs>
+			nik_ces auto inner_repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<resolve_index(Vs)...>; }
+
+			template<auto... Vs>
+			nik_ces auto repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<inner_repack(Vs)...>; }
+
+		// function:
+
+			nik_ces auto contr    = zip(eval<_par_segment_, target.instr.size()>);
+			nik_ces auto lookup   = repack(target.lookup);
+
+			nik_ces auto function = contr;
+
+			template<typename S, typename... Ts>
+			nik_ces auto result(Ts... vs)
+				{ return T_assembly_start::template result<U_store_T<S>, contr, lookup>(vs...); }
 	};
 
-	template<auto SourceCallable>
-	nik_ce auto _compile()
-	{
-		nik_ce auto target = T_compile<SourceCallable>::target;
-
-		return target;
-	}
-
-	template<auto SourceCallable>
-	nik_ce auto compile = _compile<SourceCallable>();
+	template<auto SourceCallable, typename S, typename... Ts>
+	nik_ce auto metapile = GenericAssemblyMetapiler<SourceCallable>::template result<S, Ts...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

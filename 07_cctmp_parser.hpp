@@ -307,8 +307,9 @@ namespace cctmp {
 		entry_type array[length];
 		centry_type *start;
 		entry_type *entry;
+		gindex_type offset;
 
-		nik_ce Line() : kind{}, array{}, start{array}, entry{array} { }
+		nik_ce Line() : kind{}, array{}, start{array}, entry{array}, offset{} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return entry; }
@@ -329,11 +330,12 @@ namespace cctmp {
 		nik_ces auto entry_size		= EntrySize;
 		nik_ces auto length		= LineSize;
 
+		bool is_offset;
 		line_type array[length];
 		cline_type *start;
 		line_type *line;
 
-		nik_ce Page() : array{}, start{array}, line{array} { }
+		nik_ce Page() : is_offset{false}, array{}, start{array}, line{array} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return line; }
@@ -453,6 +455,7 @@ namespace cctmp {
 
 		nik_ce auto param_at(gindex_type m, gindex_type n) const { return param.array[m]->array[n]; }
 		nik_ce auto param_size(gindex_type m) const { return param.array[m]->size(); }
+		nik_ce auto offset_at(gindex_type n) const { return page.array[n].offset; }
 	};
 
 /***********************************************************************************************************************/
@@ -592,6 +595,11 @@ namespace cctmp {
 			nik_ces void resolve_statement(TOC & toc, clexeme & l)
 			{
 				toc.increment_line();
+				if (toc.page.is_offset)
+				{
+					toc.page.line->offset = 1;
+					toc.page.is_offset = false;
+				}
 			}
 
 			template<typename TOC>
@@ -710,6 +718,7 @@ namespace cctmp {
 			{
 				toc.copy(l);
 				toc.entry().index = _two; // signifies a copy.
+				toc.page.is_offset = true;
 			}
 
 		// underscore:

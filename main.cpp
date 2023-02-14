@@ -32,7 +32,7 @@
 #include"06_cctmp_lexer.hpp"
 #include"07_cctmp_parser.hpp"
 #include"08_cctmp_optimizer.hpp"
-#include"09_cctmp_compiler.hpp"
+#include"09_cctmp_metapiler.hpp"
 
 #include"undef_macros.hpp"
 
@@ -75,7 +75,13 @@
 		);
 	}
 
-	constexpr auto factorial = compile<factorial_source>;
+	template<typename T>
+	constexpr auto factorial(T v)
+	{
+		using T_factorial = GenericAssemblyMetapiler<factorial_source>;
+
+		return T_factorial::template result<T>(T(1), v);
+	}
 
 /***********************************************************************************************************************/
 
@@ -105,11 +111,32 @@
 
 /***********************************************************************************************************************/
 
+	template<typename Instr>
+	void print_metapiler_instr(const Instr *instr)
+	{
+		auto size = instr[0];
+
+		for (auto k = instr + 1; k != instr + size + 1; ++k) printf("%d ", (int) *k);
+
+		printf("\n");
+	}
+
+	template<typename Contr>
+	void print_metapiler_contr(const Contr *contr)
+	{
+		auto size = contr[0][0];
+
+		for (auto k = contr + 1; k != contr + size + 1; ++k) print_metapiler_instr(*k);
+	}
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", factorial.lookup);
+		printf("%d\n", factorial(5));
 	//	print_target_contr(factorial.instr);
 	//	print_target_position(factorial.position);
+	//	print_metapiler_contr(factorial);
 
 		return 0;
 	}

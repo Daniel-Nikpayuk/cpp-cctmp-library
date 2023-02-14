@@ -123,29 +123,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// segment:
-
-	struct T_machine_segment
-	{
-		nik_ces auto sH0 = U_pack_Vs<H_id>;
-		nik_ces auto  H0 = U_pack_Vs<_car_, sH0>;
-
-		template<auto n>
-		nik_ces auto contr = controller
-		<
-			instruction < MN::call , MT::praxis , PN::segment , n >,
-			instruction < MN::halt , MT::eval                     >
-		>;
-
-		template<auto d, auto n>
-		nik_ces auto result = T_machine_start::template result<d, contr<n>, _zero>(H0);
-	};
-
-	nik_ce auto _dpar_segment_ = U_custom_T<T_machine_segment>;
-	nik_ce auto  _par_segment_ = MD::template with_initial_depth<_dpar_segment_>;
-
-/***********************************************************************************************************************/
-
 // sift:
 
 	struct T_machine_sift

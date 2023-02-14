@@ -857,8 +857,8 @@ namespace cctmp {
 			instruction < MN::halt , MT::eval                     >
 		>;
 
-		template<auto d, auto n>
-		nik_ces auto result = T_machine_start::template result<d, contr<n>, _zero>(H0);
+		template<auto d, auto n, auto m = _zero>
+		nik_ces auto result = T_machine_start::template result<d, contr<n>, m>(H0);
 	};
 
 	nik_ce auto _dpar_segment_ = U_custom_T<T_machine_segment>;
