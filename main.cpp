@@ -34,7 +34,7 @@
 #include"08_cctmp_optimizer.hpp"
 #include"09_cctmp_metapiler.hpp"
 
-#include"parser_diagnostics.hpp"
+//#include"parser_diagnostics.hpp"
 
 #include"undef_macros.hpp"
 
@@ -89,7 +89,6 @@
 			"goto done        ;"
 
 			"done:            ;"
-		//	"x = increment x  ;"
 			"return x         ;"
 		);
 	}
