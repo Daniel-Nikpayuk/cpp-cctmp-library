@@ -57,34 +57,6 @@
 
 /***********************************************************************************************************************/
 
-	constexpr auto factorial_source()
-	{
-		return source
-		(
-		 	"factorial p n    ;"
-
-			"loop:            ;"
-		 	"test is_zero n   ;"
-			"branch done      ;"
-			"p = multiply p n ;"
-			"n = decrement n  ;"
-			"goto loop        ;"
-
-			"done:            ;"
-			"return p         ;"
-		);
-	}
-
-	template<typename T>
-	constexpr auto factorial(T v)
-	{
-		using T_factorial = GenericAssemblyMetapiler<factorial_source>;
-
-		return T_factorial::template result<T>(T(1), v);
-	}
-
-/***********************************************************************************************************************/
-
 	template<typename Instr>
 	void print_target_instr(const Instr *instr)
 	{
@@ -131,9 +103,39 @@
 
 /***********************************************************************************************************************/
 
+	constexpr auto factorial_source()
+	{
+		return source
+		(
+		 	"factorial p n    ;"
+
+			"loop:            ;"
+		 	"test is_zero n   ;"
+			"branch done      ;"
+			"p = multiply p n ;"
+			"n = decrement n  ;"
+			"goto loop        ;"
+
+			"done:            ;"
+			"return p         ;"
+		);
+	}
+
+	template<typename T>
+	constexpr auto factorial(T v)
+	{
+		using T_factorial = T_generic_assembly_metapiler<factorial_source>;
+
+		return T_factorial::template result<T>(T(1), v);
+	}
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", factorial(5));
+		static_assert(factorial(5) == 120);
+
+	//	printf("%d\n", factorial(5));
 	//	print_target_contr(factorial.instr);
 	//	print_target_position(factorial.position);
 	//	print_metapiler_contr(factorial);

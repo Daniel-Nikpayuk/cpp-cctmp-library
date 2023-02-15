@@ -227,7 +227,7 @@ namespace cctmp {
 #endif
 
 	template<auto SourceCallable>
-	struct GenericAssemblyMetapiler
+	struct T_generic_assembly_metapiler
 	{
 		nik_ces auto target = T_generic_assembly_target<SourceCallable>::value;
 		nik_ces auto toc    = target.toc;
@@ -238,8 +238,9 @@ namespace cctmp {
 			template<auto i, auto pos>
 			nik_ces auto inner_zip()
 			{
-				if constexpr (pos == 0) return instruction<i[PI::name], i[PI::note]>;
-				else                    return instruction<i[PI::name], i[PI::note], pos>;
+				return instruction<i[PI::name], i[PI::note], pos>;
+			//	if constexpr (pos == 0) return instruction<i[PI::name], i[PI::note]>;
+			//	else                    return instruction<i[PI::name], i[PI::note], pos>;
 			}
 
 			template<auto... Is>
@@ -274,18 +275,13 @@ namespace cctmp {
 
 		// function:
 
-			nik_ces auto contr    = zip(eval<_par_segment_, target.instr.size()>);
-			nik_ces auto lookup   = repack(target.lookup);
-
-			nik_ces auto function = contr;
+			nik_ces auto contr  = zip(eval<_par_segment_, target.instr.size()>);
+			nik_ces auto lookup = repack(target.lookup);
 
 			template<typename S, typename... Ts>
 			nik_ces auto result(Ts... vs)
 				{ return T_assembly_start::template result<U_store_T<S>, contr, lookup>(vs...); }
 	};
-
-	template<auto SourceCallable, typename S, typename... Ts>
-	nik_ce auto metapile = GenericAssemblyMetapiler<SourceCallable>::template result<S, Ts...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
