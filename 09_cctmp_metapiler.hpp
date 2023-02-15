@@ -112,7 +112,6 @@ namespace cctmp {
 		nik_ce auto values	= table_type::values;
 		nik_ce auto lookup_f	= lookup_function<f, string_type>;
 
-	//	return eval<_cons_, H_id, values, lookup_f>;
 		return U_pack_Vs<lookup_f, values>;
 	}
 
@@ -199,32 +198,6 @@ namespace cctmp {
 // compile:
 
 /***********************************************************************************************************************/
-
-#ifdef NIK_COMMENT
-
-	// lookup:
-
-		template<auto p = 0, auto n = 1>
-		nik_ce auto pair_factorial_lookup = U_pack_Vs
-		<
-			U_pack_Vs< _is_zero_      , n     >, // position: 0
-			U_pack_Vs< _multiply_     , p , n >, // position: 1
-			U_pack_Vs< _decrement_<1> , n     >  // position: 2
-		>;
-
-	// compilation:
-
-		template<typename T>
-		nik_ce auto factorial(T v)
-		{
-			nik_ce auto s = U_store_T<T>;
-			nik_ce auto c = pair_factorial_contr<>;
-			nik_ce auto l = pair_factorial_lookup<>;
-
-			return T_assembly_start::template result<s, c, l>(T(1), v);
-		}
-
-#endif
 
 	template<auto SourceCallable>
 	struct T_generic_assembly_metapiler

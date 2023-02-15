@@ -231,65 +231,6 @@ namespace cctmp {
 		}
 	};
 
-#ifdef NIK_COMMENT
-
-	// page:
-
-				factorial{4} p{5} n{6}
-				loop:{0}
-		test   line -	test{2} is_zero{1} n{6}
-		branch line -	done{1}
-		apply  line -	p{5} multiply{1} p{5} n{6}
-		apply  line -	n{6} decrement{1} n{6}
-		goto   line -	loop{0}
-				done:{1}
-		return line -	p{5}
-
-	// param:
-
-				test{2} is_zero{1} n{6}
-				p{5} multiply{1} p{5} n{6}
-				n{6} decrement{1} n{6}
-
-	// source:
-
-		//		is_zero 0  Done  multiply 0 p 0  decrement 0 n 0  Loop  p 0 0 
-		//		0       0  12    1        0 5 0  2         0 6 0  0     5 0 0
-		// adjusted:	0       0  12    1        0 0 0  2         0 1 0  0     0 0 0
-
-		template
-		<
-			auto p       = 0 , auto n        = 1  ,
-			auto is_zero = 0 , auto multiply = 1  , auto decrement = 2 ,
-			auto Loop    = 0 , auto Done     = 12
-		>
-		nik_ce auto pair_factorial_contr = controller
-		<
-		// Loop:
-			instruction < AN::select  , AT::id     , is_zero   >, // get is_zero pack containing arg positions.
-			instruction < AN::call    , AT::id                 >, // unpack and apply is_zero to args.
-
-			instruction < AN::jump    , AT::branch , Done      >, // branch to Done label, continue otherwise.
-
-			instruction < AN::select  , AT::id     , multiply  >, // get multiply [...].
-			instruction < AN::call    , AT::id                 >, // unpack [...].
-			instruction < AN::select  , AT::front  , p         >, // get left arg types before position p.
-			instruction < AN::replace , AT::id                 >, // arg expand and replace at position p.
-
-			instruction < AN::select  , AT::id     , decrement >, // get decrement [...].
-			instruction < AN::call    , AT::id                 >, // unpack [...].
-			instruction < AN::select  , AT::front  , n         >, // get left arg types [...].
-			instruction < AN::replace , AT::id                 >, // arg expand [...].
-
-			instruction < AN::jump    , AT::go_to  , Loop      >, // goto Loop.
-		// Done:
-			instruction < AN::select  , AT::front  , p         >, // get left arg types [...].
-			instruction < AN::right   , AT::id                 >, // arg expand and drop the left args before p.
-			instruction < AN::first   , AT::id                 >  // return the first element.
-		>;
-
-#endif
-
 /***********************************************************************************************************************/
 
 // automaton:

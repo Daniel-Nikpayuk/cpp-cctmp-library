@@ -2605,6 +2605,155 @@ namespace cctmp_program
 	//	print_page(factorial.pda.syntax.page);
 
 /***********************************************************************************************************************/
+
+#ifdef NIK_COMMENT
+
+	// page:
+
+				factorial{4} p{5} n{6}
+				loop:{0}
+		test   line -	test{2} is_zero{1} n{6}
+		branch line -	done{1}
+		apply  line -	p{5} multiply{1} p{5} n{6}
+		apply  line -	n{6} decrement{1} n{6}
+		goto   line -	loop{0}
+				done:{1}
+		return line -	p{5}
+
+	// param:
+
+				test{2} is_zero{1} n{6}
+				p{5} multiply{1} p{5} n{6}
+				n{6} decrement{1} n{6}
+
+	// source:
+
+		//		is_zero 0  Done  multiply 0 p 0  decrement 0 n 0  Loop  p 0 0 
+		//		0       0  12    1        0 5 0  2         0 6 0  0     5 0 0
+		// adjusted:	0       0  12    1        0 0 0  2         0 1 0  0     0 0 0
+
+		template
+		<
+			auto p       = 0 , auto n        = 1  ,
+			auto is_zero = 0 , auto multiply = 1  , auto decrement = 2 ,
+			auto Loop    = 0 , auto Done     = 12
+		>
+		nik_ce auto pair_factorial_contr = controller
+		<
+		// Loop:
+			instruction < AN::select  , AT::id     , is_zero   >, // get is_zero pack containing arg positions.
+			instruction < AN::call    , AT::id                 >, // unpack and apply is_zero to args.
+
+			instruction < AN::jump    , AT::branch , Done      >, // branch to Done label, continue otherwise.
+
+			instruction < AN::select  , AT::id     , multiply  >, // get multiply [...].
+			instruction < AN::call    , AT::id                 >, // unpack [...].
+			instruction < AN::select  , AT::front  , p         >, // get left arg types before position p.
+			instruction < AN::replace , AT::id                 >, // arg expand and replace at position p.
+
+			instruction < AN::select  , AT::id     , decrement >, // get decrement [...].
+			instruction < AN::call    , AT::id                 >, // unpack [...].
+			instruction < AN::select  , AT::front  , n         >, // get left arg types [...].
+			instruction < AN::replace , AT::id                 >, // arg expand [...].
+
+			instruction < AN::jump    , AT::go_to  , Loop      >, // goto Loop.
+		// Done:
+			instruction < AN::select  , AT::front  , p         >, // get left arg types [...].
+			instruction < AN::right   , AT::id                 >, // arg expand and drop the left args before p.
+			instruction < AN::first   , AT::id                 >  // return the first element.
+		>;
+
+#endif
+
+/***********************************************************************************************************************/
+
+#ifdef NIK_COMMENT
+
+	// lookup:
+
+		template<auto p = 0, auto n = 1>
+		nik_ce auto pair_factorial_lookup = U_pack_Vs
+		<
+			U_pack_Vs< _is_zero_      , n     >, // position: 0
+			U_pack_Vs< _multiply_     , p , n >, // position: 1
+			U_pack_Vs< _decrement_<1> , n     >  // position: 2
+		>;
+
+	// compilation:
+
+		template<typename T>
+		nik_ce auto factorial(T v)
+		{
+			nik_ce auto s = U_store_T<T>;
+			nik_ce auto c = pair_factorial_contr<>;
+			nik_ce auto l = pair_factorial_lookup<>;
+
+			return T_assembly_start::template result<s, c, l>(T(1), v);
+		}
+
+#endif
+
+/***********************************************************************************************************************/
+
+	template<typename Instr>
+	void print_target_instr(const Instr *instr)
+	{
+		auto size = instr[0];
+
+		for (auto k = instr + 1; k != instr + size + 1; ++k) printf("%d ", (int) *k);
+
+		printf("\n");
+	}
+
+	template<typename Contr>
+	void print_target_contr(const Contr & contr)
+	{
+		for (auto k = contr.begin(); k != contr.end(); ++k) print_target_instr(*k);
+	}
+
+	template<typename Position>
+	void print_target_position(const Position & pos)
+	{
+		for (auto k = pos.begin(); k != pos.end(); ++k) printf("%d ", (int) *k);
+
+		printf("\n");
+	}
+
+/***********************************************************************************************************************/
+
+	template<typename Instr>
+	void print_metapiler_instr(const Instr *instr)
+	{
+		auto size = instr[0];
+
+		for (auto k = instr + 1; k != instr + size + 1; ++k) printf("%d ", (int) *k);
+
+		printf("\n");
+	}
+
+	template<typename Contr>
+	void print_metapiler_contr(const Contr *contr)
+	{
+		auto size = contr[0][0];
+
+		for (auto k = contr + 1; k != contr + size + 1; ++k) print_metapiler_instr(*k);
+	}
+
+/***********************************************************************************************************************/
+
+//	constexpr auto dpda = T_generic_assembly_dpda::template parse<square_source, 10'000>;
+		printf("%s\n", dpda.record);
+
+	//	print_complex(complex_number(1, 2) * complex_number(1, 2)); // prints: (-3.000000, 4.000000)
+	//	printf("%d\n", square(5));
+	//	printf("%d\n", factorial(argc));
+	//	print_target_contr(factorial.instr);
+	//	print_target_position(factorial.position);
+	//	print_metapiler_contr(factorial);
+	//	printf("%s\n", dpda.record);
+	//	print_page(factorial(5).page);
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 

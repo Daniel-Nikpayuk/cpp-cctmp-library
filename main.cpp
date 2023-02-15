@@ -34,7 +34,7 @@
 #include"08_cctmp_optimizer.hpp"
 #include"09_cctmp_metapiler.hpp"
 
-//#include"parser_diagnostics.hpp"
+#include"parser_diagnostics.hpp"
 
 #include"undef_macros.hpp"
 
@@ -43,103 +43,82 @@
 	using namespace cctmp;
 
 /***********************************************************************************************************************/
-
-//	constexpr auto _sq_       = arg_compose<_multiply_, _arg_at_<0>, _arg_at_<0>>;
-
-//	constexpr auto sum_of_sq0 = arg_subpose<_add_, _sq_, _sq_>;
-//	constexpr auto sum_of_sq1 = arg_compose<_add_, _apply_at_<_sq_, 0>, _apply_at_<_sq_, 1>>;
-
-//	constexpr auto val0       = T_store_U<sum_of_sq0>::template result<>(3, 4);
-//	constexpr auto val1       = T_store_U<sum_of_sq1>::template result<>(3, 4);
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // factorial:
 
 /***********************************************************************************************************************/
 
-	template<typename Instr>
-	void print_target_instr(const Instr *instr)
+	struct complex_number
 	{
-		auto size = instr[0];
+		float x;
+		float y;
 
-		for (auto k = instr + 1; k != instr + size + 1; ++k) printf("%d ", (int) *k);
+		complex_number() : x{}, y{} { }
+		complex_number(const float _x, const float _y) : x{_x}, y{_y} { }
 
-		printf("\n");
-	}
+		const complex_number operator + (const complex_number & c) const
+		{
+			return complex_number(x + c.x, y + c.y);
+		}
 
-	template<typename Contr>
-	void print_target_contr(const Contr & contr)
-	{
-		for (auto k = contr.begin(); k != contr.end(); ++k) print_target_instr(*k);
-	}
+		const complex_number operator * (const complex_number & c) const
+		{
+			auto x0 = x * c.x;
+			auto x1 = y * c.y;
 
-	template<typename Position>
-	void print_target_position(const Position & pos)
-	{
-		for (auto k = pos.begin(); k != pos.end(); ++k) printf("%d ", (int) *k);
+			auto y0 = x * c.y;
+			auto y1 = y * c.x;
 
-		printf("\n");
-	}
+			return complex_number(x0 - x1, y0 + y1);
+		}
+	};
+
+	void print_complex(const complex_number & c) { printf("(%f, %f)\n", c.x, c.y); }
 
 /***********************************************************************************************************************/
 
-	template<typename Instr>
-	void print_metapiler_instr(const Instr *instr)
+	constexpr auto square_source()
 	{
-		auto size = instr[0];
+		return source
+		(
+		 	"square x         ;"
 
-		for (auto k = instr + 1; k != instr + size + 1; ++k) printf("%d ", (int) *k);
+			"body:            ;"
+			"x = multiply x x ;"
+			"goto done        ;"
 
-		printf("\n");
+			"done:            ;"
+		//	"x = increment x  ;"
+			"return x         ;"
+		);
 	}
 
-	template<typename Contr>
-	void print_metapiler_contr(const Contr *contr)
+	template<typename T>
+	constexpr auto square(T v)
 	{
-		auto size = contr[0][0];
+		using T_square = T_generic_assembly_metapiler<square_source>;
 
-		for (auto k = contr + 1; k != contr + size + 1; ++k) print_metapiler_instr(*k);
+		return T_square::template result<T>(v);
 	}
 
 /***********************************************************************************************************************/
-
-	//	return source
-	//	(
-	//	 	"factorial p n    ;"
-
-	//		"loop:            ;"
-	//	 	"test is_zero n   ;"
-	//		"branch done      ;"
-	//		"p = multiply p n ;"
-	//		"n = decrement n  ;"
-	//		"goto loop        ;"
-
-	//		"done:            ;"
-	//		"return p         ;"
-	//	);
 
 	constexpr auto factorial_source()
 	{
 		return source
 		(
-		 	"factorial p n     ;"
+		 	"factorial p n    ;"
 
-			"loop:             ;"
-		 	"test is_zero n    ;"
-			"branch off_by_two ;"
-			"p = multiply p n  ;"
-			"n = decrement n   ;"
-			"goto loop         ;"
+			"loop:            ;"
+		 	"test is_zero n   ;"
+			"branch done      ;"
+			"p = multiply p n ;"
+			"n = decrement n  ;"
+			"goto loop        ;"
 
-			"off_by_two:       ;"
-			". = increment p   ;"
-			"p = increment _   ;"
-			"goto done         ;"
-
-			"done:             ;"
-			"return p          ;"
+			"done:            ;"
+			"return p         ;"
 		);
 	}
 
@@ -153,19 +132,11 @@
 
 /***********************************************************************************************************************/
 
-//	constexpr auto dpda = T_generic_assembly_dpda::template parse<factorial_source, 10'000>;
-
 	int main(int argc, char *argv[])
 	{
-	//	static_assert(factorial(5) == 120);
+		print_complex(square(complex_number(1, 2))); // prints: (-3.000000, 4.000000)
 
-		printf("%d\n", factorial(5));
-	//	printf("%d\n", factorial(argc));
-	//	print_target_contr(factorial.instr);
-	//	print_target_position(factorial.position);
-	//	print_metapiler_contr(factorial);
-	//	printf("%s\n", dpda.record);
-	//	print_page(factorial(5).page);
+		static_assert(factorial(5) == 120);
 
 		return 0;
 	}
