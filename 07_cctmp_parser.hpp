@@ -335,7 +335,7 @@ namespace cctmp {
 		cline_type *start;
 		line_type *line;
 
-		nik_ce Page() : is_offset{false}, array{}, start{array}, line{array} { }
+		nik_ce Page() : is_offset{}, array{}, start{array}, line{array} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return line; }
@@ -598,7 +598,7 @@ namespace cctmp {
 				if (toc.page.is_offset)
 				{
 					toc.page.line->offset = 1;
-					toc.page.is_offset = false;
+					toc.page.is_offset    = false;
 				}
 			}
 
@@ -717,7 +717,7 @@ namespace cctmp {
 			nik_ces void period_apply_entry(TOC & toc, clexeme & l)
 			{
 				toc.copy(l);
-				toc.entry().index = _two; // signifies a copy.
+				toc.entry().index  = _two; // signifies a copy.
 				toc.page.is_offset = true;
 			}
 
@@ -842,7 +842,7 @@ namespace cctmp {
 			table_entry('C', '\0') = transition( ""                                  );
 			table_entry('I',  't') = transition( "tF;bi;" , NAction::new_conditional );
 			table_entry('I',  'i') = transition( "T=F;"   , NAction::new_application );
-			table_entry('I',  '.') = transition( "T=F;"                              );
+			table_entry('I',  '.') = transition( "T=F;"   , NAction::new_application );
 			table_entry('J',  't') = transition( "IJ"                                );
 			table_entry('J',  'g') = transition( ""                                  );
 			table_entry('J',  'r') = transition( ""                                  );

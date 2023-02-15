@@ -51,6 +51,7 @@ namespace cctmp {
 
 		using instr_type	= sequence    < gcindex_type* , length          >;
 		using label_type	= sequence    < gindex_type   , src.label_size  >;
+		using extension_type	= sequence    < bool          , length          >;
 		using position_type	= sequence    < gindex_type   , length          >;
 		using lookpos_type	= subsequence < gindex_type   , src.param_size  >;
 		using labpos_type	= subsequence < gindex_type   , src.depend_size >;
@@ -91,11 +92,12 @@ namespace cctmp {
 
 		instr_type instr;
 		label_type label;
+		extension_type extension;
 		position_type position;
 		lookpos_type lookpos;
 		labpos_type labpos;
 
-		nik_ce GenericAssemblyTarget() : instr{}, label{}, position{}, lookpos{}, labpos{}
+		nik_ce GenericAssemblyTarget() : instr{}, label{}, extension{}, position{}, lookpos{}, labpos{}
 
 			{ translate(); resolve(); }
 
@@ -116,8 +118,11 @@ namespace cctmp {
 					}
 					case Context::test:
 					{
-						*(instr.value++) = instruction< AN::select , AT::id >;
-						*(instr.value++) = instruction< AN::call   , AT::id >;
+						*(instr.value++)    = instruction< AN::select , AT::id >;
+						*(instr.value++)    = instruction< AN::call   , AT::id >;
+
+						*extension.value    = true;
+						extension.value    += 2;
 
 						*(lookpos.locus++)  = position.value;
 						position.value     += 2;
@@ -127,27 +132,38 @@ namespace cctmp {
 					case Context::apply:
 					{
 						*(instr.value++) = instruction< AN::select , AT::id >;
-						*(instr.value++) = instruction< AN::call   , AT::id >;
+
+						if (k->offset == 1) *(instr.value++) = instruction< AN::recall , AT::id >;
+						else                *(instr.value++) = instruction< AN::call   , AT::id >;
+
+						*extension.value    = true;
+						extension.value    += 2;
 
 						*(lookpos.locus++)  = position.value;
 						position.value     += 2;
 
 						auto index = k->begin()->index;
 
-						if (index != _two) // replace:
+						if (index >= offset) // replace:
 						{
-							*(instr.value++) = instruction< AN::select  , AT::front >;
-							*(instr.value++) = instruction< AN::replace , AT::id    >;
+							*(instr.value++)  = instruction< AN::select  , AT::front >;
+							*(instr.value++)  = instruction< AN::replace , AT::id    >;
 
-							*position.value     = (index - offset);
-							position.value     += 2;
+							*extension.value  = true;
+							extension.value  += 2;
+
+							*position.value   = (index - offset);
+							position.value   += 2;
 						}
 
 						break;
 					}
 					case Context::branch:
 					{
-						*(instr.value++) = instruction< AN::jump , AT::branch >;
+						*(instr.value++)   = instruction< AN::jump , AT::branch >;
+
+						*extension.value   = true;
+						extension.value   += 1;
 
 						*(labpos.locus++)  = position.value;
 						position.value    += 1;
@@ -156,7 +172,10 @@ namespace cctmp {
 					}
 					case Context::go_to:
 					{
-						*(instr.value++) = instruction< AN::jump , AT::go_to >;
+						*(instr.value++)   = instruction< AN::jump , AT::go_to >;
+
+						*extension.value   = true;
+						extension.value   += 1;
 
 						*(labpos.locus++)  = position.value;
 						position.value    += 1;
@@ -169,24 +188,31 @@ namespace cctmp {
 
 						if (index == _one) // lookup:
 						{
-							*(instr.value++) = instruction< AN::select , AT::id    >;
-							*(instr.value++) = instruction< AN::call   , AT::value >;
+							*(instr.value++)    = instruction< AN::select , AT::id    >;
+							*(instr.value++)    = instruction< AN::call   , AT::value >;
 
-							*(lookpos.locus++) = position.value;
+							*extension.value    = true;
+							extension.value    += 2;
+
+							*(lookpos.locus++)  = position.value;
+							position.value     += 2;
 						}
-						else if (index != _three) // replace:
+						else if (index >= offset) // replace:
 						{
-							*(instr.value++) = instruction< AN::select , AT::front >;
-							*(instr.value++) = instruction< AN::right  , AT::id    >;
+							*(instr.value++)  = instruction< AN::select , AT::front >;
+							*(instr.value++)  = instruction< AN::right  , AT::id    >;
 
-							*position.value = (index - offset);
+							*extension.value  = true;
+							extension.value  += 2;
+
+							*position.value   = (index - offset);
+							position.value   += 2;
 						}
-
-						position.value += 2;
 
 						*(instr.value++) = instruction< AN::first , AT::id >;
 
-						position.value += 1;
+						extension.value += 1;
+						position.value  += 1;
 
 						break;
 					}

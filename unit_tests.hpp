@@ -2571,7 +2571,7 @@ namespace cctmp_program
 	template<typename EntryType>
 	void print_entry(const EntryType & entry)
 	{
-		for (auto k = entry.begin; k != entry.end; ++k) printf("%c", *k);
+		for (auto k = entry.start; k != entry.finish; ++k) printf("%c", *k);
 
 		printf("{%d} ", (int) entry.index);
 	}
@@ -2579,7 +2579,7 @@ namespace cctmp_program
 	template<typename LineType>
 	void print_line(const LineType & line)
 	{
-		for (auto k = line.begin; k != line.entry; ++k) print_entry(*k);
+		for (auto k = line.begin(); k != line.end(); ++k) print_entry(*k);
 
 		printf("\n");
 	}
@@ -2587,7 +2587,7 @@ namespace cctmp_program
 	template<typename PageType>
 	void print_page(const PageType & page)
 	{
-		for (auto k = page.begin; k != page.line; ++k) print_line(*k);
+		for (auto k = page.begin(); k != page.end(); ++k) print_line(*k);
 	}
 
 /***********************************************************************************************************************/

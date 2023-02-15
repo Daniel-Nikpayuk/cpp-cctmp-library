@@ -29,10 +29,10 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-	template<typename T_pdtt, typename T_ast, typename T_syntax, auto StaticSource, auto Size>
-	struct DerivationPDA : public GenericPDA<T_pdtt, T_ast, T_syntax, StaticSource>
+	template<typename T_ast, typename T_pdtt, typename T_syntax, auto StaticSource, auto Size>
+	struct DerivationPDA : public GenericPDA<T_ast, T_pdtt, T_syntax, StaticSource>
 	{
-		using Base		= GenericPDA<T_pdtt, T_ast, T_syntax, StaticSource>;
+		using Base		= GenericPDA<T_ast, T_pdtt, T_syntax, StaticSource>;
 		nik_ces auto length     = Size;
 
 		using char_type		= typename Base::char_type;
@@ -75,8 +75,8 @@ namespace cctmp {
 			update_tokens();
 			update_production();
 
-			Base::update_stack();
-			Base::update_action();
+			Base::nonterminal_update_stack();
+			Base::nonterminal_update_action();
 		}
 
 		nik_ce void terminal()
@@ -175,13 +175,13 @@ namespace cctmp {
 	struct T_generic_assembly_dpda
 	{
 		using T_pdtt = T_generic_assembly_pdtt;
-		using T_ast  = T_generic_assembly_ast;
 
 		template<auto static_src, auto Size>
 		struct parser
 		{
 			using T_syntax		= TableOfContents<static_src>;
-			nik_ces auto value      = GenericDPDA<T_pdtt, T_ast, T_syntax, static_src, Size>{};
+			using T_ast  		= T_generic_assembly_ast<T_syntax>;
+			nik_ces auto value      = DerivationPDA<T_ast, T_pdtt, T_syntax, static_src, Size>{};
 		};
 
 		template<auto SourceCallable, auto Size = 5'000>

@@ -34,6 +34,8 @@
 #include"08_cctmp_optimizer.hpp"
 #include"09_cctmp_metapiler.hpp"
 
+//#include"parser_diagnostics.hpp"
+
 #include"undef_macros.hpp"
 
 /***********************************************************************************************************************/
@@ -103,21 +105,41 @@
 
 /***********************************************************************************************************************/
 
+	//	return source
+	//	(
+	//	 	"factorial p n    ;"
+
+	//		"loop:            ;"
+	//	 	"test is_zero n   ;"
+	//		"branch done      ;"
+	//		"p = multiply p n ;"
+	//		"n = decrement n  ;"
+	//		"goto loop        ;"
+
+	//		"done:            ;"
+	//		"return p         ;"
+	//	);
+
 	constexpr auto factorial_source()
 	{
 		return source
 		(
-		 	"factorial p n    ;"
+		 	"factorial p n     ;"
 
-			"loop:            ;"
-		 	"test is_zero n   ;"
-			"branch done      ;"
-			"p = multiply p n ;"
-			"n = decrement n  ;"
-			"goto loop        ;"
+			"loop:             ;"
+		 	"test is_zero n    ;"
+			"branch off_by_two ;"
+			"p = multiply p n  ;"
+			"n = decrement n   ;"
+			"goto loop         ;"
 
-			"done:            ;"
-			"return p         ;"
+			"off_by_two:       ;"
+			". = increment p   ;"
+			"p = increment _   ;"
+			"goto done         ;"
+
+			"done:             ;"
+			"return p          ;"
 		);
 	}
 
@@ -131,14 +153,19 @@
 
 /***********************************************************************************************************************/
 
+//	constexpr auto dpda = T_generic_assembly_dpda::template parse<factorial_source, 10'000>;
+
 	int main(int argc, char *argv[])
 	{
-		static_assert(factorial(5) == 120);
+	//	static_assert(factorial(5) == 120);
 
-	//	printf("%d\n", factorial(5));
+		printf("%d\n", factorial(5));
+	//	printf("%d\n", factorial(argc));
 	//	print_target_contr(factorial.instr);
 	//	print_target_position(factorial.position);
 	//	print_metapiler_contr(factorial);
+	//	printf("%s\n", dpda.record);
+	//	print_page(factorial(5).page);
 
 		return 0;
 	}

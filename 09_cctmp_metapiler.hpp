@@ -235,12 +235,11 @@ namespace cctmp {
 
 		// controller:
 
-			template<auto i, auto pos>
+			template<auto ins, auto b, auto pos>
 			nik_ces auto inner_zip()
 			{
-				return instruction<i[PI::name], i[PI::note], pos>;
-			//	if constexpr (pos == 0) return instruction<i[PI::name], i[PI::note]>;
-			//	else                    return instruction<i[PI::name], i[PI::note], pos>;
+				if constexpr (b) return instruction<ins[PI::name], ins[PI::note], pos>;
+				else             return ins;
 			}
 
 			template<auto... Is>
@@ -248,7 +247,12 @@ namespace cctmp {
 			{
 				return controller
 				<
-					inner_zip<target.instr.array[Is], target.position.array[Is]>()...
+					inner_zip
+					<
+						target.instr.array[Is],
+						target.extension.array[Is],
+						target.position.array[Is]
+					>()...
 				>;
 			}
 
