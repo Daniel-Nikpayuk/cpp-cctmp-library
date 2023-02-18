@@ -23,7 +23,7 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// generic parser:
+// generic assembly parser:
 
 /***********************************************************************************************************************/
 
@@ -35,7 +35,7 @@
   /* label:                        ; */  /* b - branch                      */  /* N -> iN     | e                 */
   /* var = operation vars...       ; */  /* g - goto                        */  /* R -> BC                         */
   /* test operation vars...        ; */  /* r - return                      */  /* C -> BC     | e                 */
-  /* branch label                  ; */  /* i - identifier                  */  /* B -> l;Lgi; | l;JrM;            */
+  /* branch label                  ; */  /* i - identifier                  */  /* B -> l;Lgi; | l;rM;             */
   /* var = operation vars...       ; */  /* . - anonymous *lvalue*          */  /* L -> IJ                         */
   /* ...                           ; */  /* _ - anonymous *rvalue*          */  /* J -> IJ     | e                 */
   /* goto label                    ; */  /* = - assignment                  */  /* I -> tF;bi; | T=F;              */
@@ -44,97 +44,43 @@
   /* test operation vars...        ; */  /*---------------------------------*/  /* T -> i      | .                 */
   /* branch label                  ; */  /* nonterminals:                   */  /* M -> i      | _                 */
   /* var = operation vars...       ; */  /*                                 */  /*---------------------------------*/
-  /* ...                           ; */  /* S - start                       */  /* left factored CFG:              */
+  /* ...                           ; */  /* S - start                       */  /* minimized CFG:                  */
   /*                                 */  /* P - preamble (signature)        */  /*                                 */
-  /* label:                        ; */  /* N - name (denies anonymity)     */  /* S -> P;R                        */
-  /* var = operation vars...       ; */  /* R - block (at least one)        */  /* P -> iN                         */
-  /* ...                           ; */  /* C - block (recursive)           */  /* N -> iN     | e                 */
-  /* return var                    ; */  /* B - block                       */  /* R -> BC                         */
-  /*---------------------------------*/  /* L - instruction (at least one)  */  /* C -> BC     | e                 */
-                                         /* J - instruction (recursive)     */  /* B -> l;E                        */
-                                         /* I - instruction                 */  /* E -> Lgi;   | JrM;              */
-                                         /* F - identifier (at least one)   */  /* L -> IJ                         */
-                                         /* V - variable (allows anonymity) */  /* J -> IJ     | e                 */
-                                         /* T - tag (lvalue variable)       */  /* I -> tF;bi; | T=F;              */
-                                         /* M - mark (rvalue variable)      */  /* F -> iV                         */
-                                         /*---------------------------------*/  /* V -> MV     | e                 */
-                                                                                /* T -> i      | .                 */
-                                                                                /* M -> i      | _                 */
-                                                                                /*---------------------------------*/
+  /* label:                        ; */  /* N - name (denies anonymity)     */  /* S -> iN;BC                      */
+  /* var = operation vars...       ; */  /* R - block (at least one)        */  /* N -> iN      | e                */
+  /* ...                           ; */  /* C - block (recursive)           */  /* C -> BC      | e                */
+  /* return var                    ; */  /* B - block                       */  /* B -> l;IJgi; | l;rM;            */
+  /*---------------------------------*/  /* L - instruction (at least one)  */  /* J -> IJ      | e                */
+  /* left factored CFG:              */  /* J - instruction (recursive)     */  /* I -> tiV;bi; | T=iV;            */
+  /*                                 */  /* I - instruction                 */  /* V -> MV      | e                */
+  /* S -> iN;BC                      */  /* F - identifier (at least one)   */  /* T -> i       | .                */
+  /* N -> iN      | e                */  /* V - variable (allows anonymity) */  /* M -> i       | _                */
+  /* C -> BC      | e                */  /* T - tag (lvalue variable)       */  /*---------------------------------*/
+  /* B -> l;E                        */  /* M - mark (rvalue variable)      */
+  /* E -> IJgi;   | rM;              */  /*---------------------------------*/
+  /* J -> IJ      | e                */
+  /* I -> tiV;bi; | T=iV;            */
+  /* V -> MV      | e                */
+  /* T -> i       | .                */
+  /* M -> i       | _                */
+  /*---------------------------------*/
 
-      /*--------------------------------------------------------------------------------------------------------*/
-      /* parse table:                                                                                           */
-      /*                                                                                                        */
-      /* n\t | l         | t           | g      | r         | i         | .         | _       | ;      | $      */
-      /*--------------------------------------------------------------------------------------------------------*/
-      /*   S |           |             |        |           | S -> P;R  |           |         |        |        */
-      /*   P |           |             |        |           | P -> iN   |           |         |        |        */
-      /*   N |           |             |        |           | N -> iN   |           |         | N -> e |        */
-      /*   R | R -> BC   |             |        |           |           |           |         |        |        */
-      /*   C | C -> BC   |             |        |           |           |           |         |        | C -> e */
-      /*   B | B -> l;E  |             |        |           |           |           |         |        |        */
-      /*   E |           | E -> Lgi    |        | E -> JrM; | E -> Lgi  | E -> Lgi  |         |        |        */
-      /*   L |           | L -> IJ     |        |           | L -> IJ   | L -> IJ   |         |        |        */
-      /*   J |           | J -> IJ     | J -> e | J -> e    | J -> IJ   | J -> IJ   |         |        |        */
-      /*   I |           | I -> tF;bi; |        |           | I -> T=F; | I -> T=F; |         |        |        */
-      /*   F |           |             |        |           | F -> iV   |           |         |        |        */
-      /*   V |           |             |        |           | V -> MV   |           | V -> MV | V -> e |        */
-      /*   T |           |             |        |           | T -> i    | T -> .    |         |        |        */
-      /*   M |           |             |        |           | M -> i    |           | M -> _  |        |        */
-      /*--------------------------------------------------------------------------------------------------------*/
-
-/***********************************************************************************************************************/
-
-      /*--------------------------------------------------------------------------------------------------------*/
-      /* parse table:                                                                                           */
-      /*                                                                                                        */
-      /* n\t | l         | t           | g      | r         | i         | .         | _       | ;      | $      */
-      /*--------------------------------------------------------------------------------------------------------*/
-      /*   S |           |             |        |           | S -> P;R  |           |         |        |        */
-      /*   P |           |             |        |           | P -> iN   |           |         |        |        */
-      /*   N |           |             |        |           | N -> iN   |           |         | N -> e |        */
-      /*   R | R -> BC   |             |        |           |           |           |         |        |        */
-      /*   C | C -> BC   |             |        |           |           |           |         |        | C -> e */
-      /*   B | B -> l;E  |             |        |           |           |           |         |        |        */
-      /*   E |           | E -> Lgi    |        | E -> JrM; | E -> Lgi  | E -> Lgi  |         |        |        */
-      /*   L |           | L -> IJ     |        |           | L -> IJ   | L -> IJ   |         |        |        */
-      /*   J |           | J -> IJ     | J -> e | J -> e    | J -> IJ   | J -> IJ   |         |        |        */
-      /*   I |           | I -> tF;bi; |        |           | I -> T=F; | I -> T=F; |         |        |        */
-      /*   F |           |             |        |           | F -> iV   |           |         |        |        */
-      /*   V |           |             |        |           | V -> MV   |           | V -> MV | V -> e |        */
-      /*   T |           |             |        |           | T -> i    | T -> .    |         |        |        */
-      /*   M |           |             |        |           | M -> i    |           | M -> _  |        |        */
-      /*--------------------------------------------------------------------------------------------------------*/
-
-/***********************************************************************************************************************/
-
-	// parsing the string should be done in two rounds:
-
-		// The first to collect memory allocation optimizers
-		// such as block, max line, max entry, and distinct identifiers.
-		// (if we're going to commit an extra parse cycle, we might as well
-		//  collect as much relevant optimizing info as possible here)
-
-		// the second round then builds the table of contents.
-
-		// a line is an array of two arrays: begin entries, and end entries.
-		// a block is an array of lines.
-		// a table of contents is an array of blocks.
-
-		// we can get the toc size (number of blocks) right away from the source.
-		// if we want variable size blocks (numbers of lines) we have to statically build them first,
-		// then cast those arrays as pointers.
-
-	// lexemes should hold enough info for the parser to:
-
-	// 1) build an error report.
-	// 2) build a table of contents (syntax tree), referencing the given lexemes;
-	//    referencing lines and blocks. Specific lexemes will want to reference
-	//    variable and label assigned values.
-	// 3) build a variable lookup table.
-	// 4) build a label lookup table.
-	// 5) parse according to the tokens (and thus the context free grammar) to validate the source code.
-	// 6) Hold symbolic type info to determine dependencies/errors.
+  /*---------------------------------------------------------------------------------------------------------*/
+  /* parse table:                                                                                            */
+  /*                                                                                                         */
+  /* n\t | i          | .          | t            | l        | _       | ;      | r        | g      | $      */
+  /*---------------------------------------------------------------------------------------------------------*/
+  /*   S | S -> iN;BC |            |              |          |         |        |          |        |        */
+  /*   N | N -> iN    |            |              |          |         | N -> e |          |        |        */
+  /*   C |            |            |              | C -> BC  |         |        |          |        | C -> e */
+  /*   B |            |            |              | B -> l;E |         |        |          |        |        */
+  /*   E | E -> IJgi; | E -> IJgi; | E -> IJgi;   |          |         |        | E -> rM; |        |        */
+  /*   J | J -> IJ    | J -> IJ    | J -> IJ      |          |         |        |          | J -> e |        */
+  /*   I | I -> T=iV; | I -> T=iV; | I -> tiV;bi; |          |         |        |          |        |        */
+  /*   V | V -> MV    |            |              |          | V -> MV | V -> e |          |        |        */
+  /*   T | T -> i     | T -> .     |              |          |         |        |          |        |        */
+  /*   M | M -> i     |            |              |          | M -> _  |        |          |        |        */
+  /*---------------------------------------------------------------------------------------------------------*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -525,15 +525,15 @@ namespace cctmp {
 				enum : action_type
 				{
 					nop = 0,
-					resolve_label      ,
+					resolve_identifier ,
+					resolve_underscore ,
+					resolve_period     ,
 					resolve_test       ,
 					resolve_branch     ,
 					resolve_goto       ,
 					resolve_return     ,
+					resolve_label      ,
 					resolve_statement  ,
-					resolve_identifier ,
-					resolve_period     ,
-					resolve_underscore ,
 					resolve_accept     ,
 					dimension
 				};
@@ -542,10 +542,41 @@ namespace cctmp {
 		// resolve:
 
 			template<typename TOC>
-			nik_ces void resolve_label(TOC & toc, clexeme & l)
+			nik_ces void resolve_identifier(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
-				toc.entry().index = toc.label_index++;
+				switch (toc.page.line->kind)
+				{
+					case Context::function : { identifier_argument_entry (toc, l); break; }
+					case Context::apply    : { identifier_apply_entry    (toc, l); break; }
+					case Context::test     : { identifier_test_entry     (toc, l); break; }
+					case Context::branch   : { identifier_branch_entry   (toc, l); break; }
+					case Context::go_to    : { identifier_goto_entry     (toc, l); break; }
+					case Context::re_turn  : { identifier_return_entry   (toc, l); break; }
+				}
+
+				toc.increment_entry();
+			}
+
+			template<typename TOC>
+			nik_ces void resolve_underscore(TOC & toc, clexeme & l)
+			{
+				switch (toc.page.line->kind)
+				{
+					case Context::apply : { underscore_apply_entry (toc, l); break; }
+					case Context::test  : { underscore_test_entry  (toc, l); break; }
+				}
+
+				toc.increment_entry();
+			}
+
+			template<typename TOC>
+			nik_ces void resolve_period(TOC & toc, clexeme & l)
+			{
+				switch (toc.page.line->kind)
+				{
+					case Context::apply : { period_apply_entry (toc, l); break; }
+				}
+
 				toc.increment_entry();
 			}
 
@@ -592,6 +623,14 @@ namespace cctmp {
 			}
 
 			template<typename TOC>
+			nik_ces void resolve_label(TOC & toc, clexeme & l)
+			{
+				toc.copy(l);
+				toc.entry().index = toc.label_index++;
+				toc.increment_entry();
+			}
+
+			template<typename TOC>
 			nik_ces void resolve_statement(TOC & toc, clexeme & l)
 			{
 				toc.increment_line();
@@ -600,45 +639,6 @@ namespace cctmp {
 					toc.page.line->offset = 1;
 					toc.page.is_offset    = false;
 				}
-			}
-
-			template<typename TOC>
-			nik_ces void resolve_identifier(TOC & toc, clexeme & l)
-			{
-				switch (toc.page.line->kind)
-				{
-					case Context::function : { identifier_argument_entry (toc, l); break; }
-					case Context::apply    : { identifier_apply_entry    (toc, l); break; }
-					case Context::test     : { identifier_test_entry     (toc, l); break; }
-					case Context::branch   : { identifier_branch_entry   (toc, l); break; }
-					case Context::go_to    : { identifier_goto_entry     (toc, l); break; }
-					case Context::re_turn  : { identifier_return_entry   (toc, l); break; }
-				}
-
-				toc.increment_entry();
-			}
-
-			template<typename TOC>
-			nik_ces void resolve_period(TOC & toc, clexeme & l)
-			{
-				switch (toc.page.line->kind)
-				{
-					case Context::apply : { period_apply_entry (toc, l); break; }
-				}
-
-				toc.increment_entry();
-			}
-
-			template<typename TOC>
-			nik_ces void resolve_underscore(TOC & toc, clexeme & l)
-			{
-				switch (toc.page.line->kind)
-				{
-					case Context::apply : { underscore_apply_entry (toc, l); break; }
-					case Context::test  : { underscore_test_entry  (toc, l); break; }
-				}
-
-				toc.increment_entry();
 			}
 
 			template<typename TOC, typename SubpageType>
@@ -711,16 +711,6 @@ namespace cctmp {
 				else toc.entry().index = k->index;
 			}
 
-		// period:
-
-			template<typename TOC>
-			nik_ces void period_apply_entry(TOC & toc, clexeme & l)
-			{
-				toc.copy(l);
-				toc.entry().index  = _two; // signifies a copy.
-				toc.page.is_offset = true;
-			}
-
 		// underscore:
 
 			template<typename TOC>
@@ -735,6 +725,16 @@ namespace cctmp {
 			{
 				toc.copy(l);
 				toc.entry().index = _three; // signifies a paste.
+			}
+
+		// period:
+
+			template<typename TOC>
+			nik_ces void period_apply_entry(TOC & toc, clexeme & l)
+			{
+				toc.copy(l);
+				toc.entry().index  = _two; // signifies a copy.
+				toc.page.is_offset = true;
 			}
 		};
 	};
@@ -764,15 +764,15 @@ namespace cctmp {
 			nonterminal[ NAction::new_application ] = Nonterminal::template new_application <TOC>;
 
 			terminal[ TAction::nop                ] = GenericAssemblyTA::template nop       <TOC>;
-			terminal[ TAction::resolve_label      ] = Terminal::template resolve_label      <TOC>;
+			terminal[ TAction::resolve_identifier ] = Terminal::template resolve_identifier <TOC>;
+			terminal[ TAction::resolve_underscore ] = Terminal::template resolve_underscore <TOC>;
+			terminal[ TAction::resolve_period     ] = Terminal::template resolve_period     <TOC>;
 			terminal[ TAction::resolve_test       ] = Terminal::template resolve_test       <TOC>;
 			terminal[ TAction::resolve_branch     ] = Terminal::template resolve_branch     <TOC>;
 			terminal[ TAction::resolve_goto       ] = Terminal::template resolve_goto       <TOC>;
 			terminal[ TAction::resolve_return     ] = Terminal::template resolve_return     <TOC>;
+			terminal[ TAction::resolve_label      ] = Terminal::template resolve_label      <TOC>;
 			terminal[ TAction::resolve_statement  ] = Terminal::template resolve_statement  <TOC>;
-			terminal[ TAction::resolve_identifier ] = Terminal::template resolve_identifier <TOC>;
-			terminal[ TAction::resolve_period     ] = Terminal::template resolve_period     <TOC>;
-			terminal[ TAction::resolve_underscore ] = Terminal::template resolve_underscore <TOC>;
 			terminal[ TAction::resolve_accept     ] = Terminal::template resolve_accept     <TOC>;
 		}
 	};
@@ -797,7 +797,7 @@ namespace cctmp {
 
 		struct Nonterminal
 		{
-			nik_ces gchar_type symbol[] = "VMJIFNTECBLRPS";
+			nik_ces gchar_type symbol[] = "VMJINTECBS";
 
 			nik_ces auto size   = ArraySize::template result<>(symbol) - 1;
 			nik_ces auto finish = symbol + size;
@@ -825,47 +825,40 @@ namespace cctmp {
 
 		nik_ce GenericAssemblyPDTT() : table{}, list{}
 		{
-			table_entry('S',  'i') = transition( "P;R"                               );
-			table_entry('P',  'i') = transition( "iN"     , NAction::new_function    );
-			table_entry('N',  'i') = transition( "iN"                                );
-			table_entry('N',  ';') = transition( ""                                  );
-			table_entry('R',  'l') = transition( "BC"                                );
-			table_entry('B',  'l') = transition( "l;E"    , NAction::new_block       );
-			table_entry('L',  't') = transition( "IJ"                                );
-			table_entry('L',  'i') = transition( "IJ"                                );
-			table_entry('L',  '.') = transition( "IJ"                                );
-			table_entry('E',  't') = transition( "Lgi;"                              );
-			table_entry('E',  'i') = transition( "Lgi;"                              );
-			table_entry('E',  '.') = transition( "Lgi;"                              );
-			table_entry('E',  'r') = transition( "JrM;"                              );
-			table_entry('C',  'l') = transition( "BC"                                );
-			table_entry('C', '\0') = transition( ""                                  );
-			table_entry('I',  't') = transition( "tF;bi;" , NAction::new_conditional );
-			table_entry('I',  'i') = transition( "T=F;"   , NAction::new_application );
-			table_entry('I',  '.') = transition( "T=F;"   , NAction::new_application );
-			table_entry('J',  't') = transition( "IJ"                                );
-			table_entry('J',  'g') = transition( ""                                  );
-			table_entry('J',  'r') = transition( ""                                  );
-			table_entry('J',  'i') = transition( "IJ"                                );
-			table_entry('J',  '.') = transition( "IJ"                                );
-			table_entry('M',  'i') = transition( "i"                                 );
-			table_entry('M',  '_') = transition( "_"                                 );
-			table_entry('F',  'i') = transition( "iV"                                );
-			table_entry('T',  'i') = transition( "i"                                 );
-			table_entry('T',  '.') = transition( "."                                 );
-			table_entry('V',  'i') = transition( "MV"                                );
-			table_entry('V',  '_') = transition( "MV"                                );
-			table_entry('V',  ';') = transition( ""                                  );
+			table_entry('S',  'i') = transition( "iN;BC"   , NAction::new_function    );
+			table_entry('N',  'i') = transition( "iN"                                 );
+			table_entry('N',  ';') = transition( ""                                   );
+			table_entry('C',  'l') = transition( "BC"                                 );
+			table_entry('C', '\0') = transition( ""                                   );
+			table_entry('B',  'l') = transition( "l;E"     , NAction::new_block       );
+			table_entry('E',  'i') = transition( "IJgi;"                              );
+			table_entry('E',  '.') = transition( "IJgi;"                              );
+			table_entry('E',  't') = transition( "IJgi;"                              );
+			table_entry('E',  'r') = transition( "rM;"                                );
+			table_entry('J',  'i') = transition( "IJ"                                 );
+			table_entry('J',  '.') = transition( "IJ"                                 );
+			table_entry('J',  't') = transition( "IJ"                                 );
+			table_entry('J',  'g') = transition( ""                                   );
+			table_entry('I',  'i') = transition( "T=iV;"   , NAction::new_application );
+			table_entry('I',  '.') = transition( "T=iV;"   , NAction::new_application );
+			table_entry('I',  't') = transition( "tiV;bi;" , NAction::new_conditional );
+			table_entry('V',  'i') = transition( "MV"                                 );
+			table_entry('V',  '_') = transition( "MV"                                 );
+			table_entry('V',  ';') = transition( ""                                   );
+			table_entry('T',  'i') = transition( "i"                                  );
+			table_entry('T',  '.') = transition( "."                                  );
+			table_entry('M',  'i') = transition( "i"                                  );
+			table_entry('M',  '_') = transition( "_"                                  );
 
-			list_entry( 'l') = TAction::resolve_label      ;
+			list_entry( 'i') = TAction::resolve_identifier ;
+			list_entry( '_') = TAction::resolve_underscore ;
+			list_entry( '.') = TAction::resolve_period     ;
 			list_entry( 't') = TAction::resolve_test       ;
 			list_entry( 'b') = TAction::resolve_branch     ;
 			list_entry( 'g') = TAction::resolve_goto       ;
 			list_entry( 'r') = TAction::resolve_return     ;
+			list_entry( 'l') = TAction::resolve_label      ;
 			list_entry( ';') = TAction::resolve_statement  ;
-			list_entry( 'i') = TAction::resolve_identifier ;
-			list_entry( '.') = TAction::resolve_period     ;
-			list_entry( '_') = TAction::resolve_underscore ;
 			list_entry('\0') = TAction::resolve_accept     ;
 		}
 
