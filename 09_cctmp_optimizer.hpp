@@ -118,8 +118,8 @@ namespace cctmp {
 					}
 					case Context::test:
 					{
-						*(instr.value++)    = instruction< AN::select , AT::id >;
-						*(instr.value++)    = instruction< AN::call   , AT::id >;
+						*(instr.value++)    = instruction< MN::select , MT::id >;
+						*(instr.value++)    = instruction< MN::call   , MT::id >;
 
 						*extension.value    = true;
 						extension.value    += 2;
@@ -131,10 +131,10 @@ namespace cctmp {
 					}
 					case Context::apply:
 					{
-						*(instr.value++) = instruction< AN::select , AT::id >;
+						*(instr.value++) = instruction< MN::select , MT::id >;
 
-						if (k->offset == 1) *(instr.value++) = instruction< AN::recall , AT::id >;
-						else                *(instr.value++) = instruction< AN::call   , AT::id >;
+						if (k->offset == 1) *(instr.value++) = instruction< MN::recall , MT::id >;
+						else                *(instr.value++) = instruction< MN::call   , MT::id >;
 
 						*extension.value    = true;
 						extension.value    += 2;
@@ -146,8 +146,8 @@ namespace cctmp {
 
 						if (index >= offset) // replace:
 						{
-							*(instr.value++)  = instruction< AN::select  , AT::front >;
-							*(instr.value++)  = instruction< AN::replace , AT::id    >;
+							*(instr.value++)  = instruction< MN::select  , MT::front >;
+							*(instr.value++)  = instruction< MN::replace , MT::id    >;
 
 							*extension.value  = true;
 							extension.value  += 2;
@@ -160,7 +160,7 @@ namespace cctmp {
 					}
 					case Context::branch:
 					{
-						*(instr.value++)   = instruction< AN::jump , AT::branch >;
+						*(instr.value++)   = instruction< MN::jump , MT::branch >;
 
 						*extension.value   = true;
 						extension.value   += 1;
@@ -172,7 +172,7 @@ namespace cctmp {
 					}
 					case Context::go_to:
 					{
-						*(instr.value++)   = instruction< AN::jump , AT::go_to >;
+						*(instr.value++)   = instruction< MN::jump , MT::go_to >;
 
 						*extension.value   = true;
 						extension.value   += 1;
@@ -188,8 +188,8 @@ namespace cctmp {
 
 						if (index == _one) // lookup:
 						{
-							*(instr.value++)    = instruction< AN::select , AT::id    >;
-							*(instr.value++)    = instruction< AN::call   , AT::value >;
+							*(instr.value++)    = instruction< MN::select , MT::id    >;
+							*(instr.value++)    = instruction< MN::call   , MT::value >;
 
 							*extension.value    = true;
 							extension.value    += 2;
@@ -199,8 +199,8 @@ namespace cctmp {
 						}
 						else if (index >= offset) // replace:
 						{
-							*(instr.value++)  = instruction< AN::select , AT::front >;
-							*(instr.value++)  = instruction< AN::right  , AT::id    >;
+							*(instr.value++)  = instruction< MN::select , MT::front >;
+							*(instr.value++)  = instruction< MN::right  , MT::id    >;
 
 							*extension.value  = true;
 							extension.value  += 2;
@@ -209,7 +209,7 @@ namespace cctmp {
 							position.value   += 2;
 						}
 
-						*(instr.value++) = instruction< AN::first , AT::id >;
+						*(instr.value++) = instruction< MN::first , MT::id >;
 
 						extension.value += 1;
 						position.value  += 1;

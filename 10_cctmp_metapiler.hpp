@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// compiler:
+// metapiler:
 
 namespace cctmp {
 
@@ -122,14 +122,14 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// assembly:
+// machine:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // default:
 
-	nik_ce auto default_assembly_lookup()
+	nik_ce auto default_machine_lookup()
 	{
 		return table
 		(
@@ -189,7 +189,7 @@ namespace cctmp {
 		);
 	};
 
-	nik_ce auto default_assembly_environment = make_environment<default_assembly_lookup>;
+	nik_ce auto default_machine_environment = make_environment<default_machine_lookup>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -204,7 +204,7 @@ namespace cctmp {
 	{
 		nik_ces auto target = T_generic_assembly_target<SourceCallable>::value;
 		nik_ces auto toc    = target.toc;
-		nik_ces auto env    = default_assembly_environment;
+		nik_ces auto env    = default_machine_environment;
 
 		// controller:
 
@@ -257,7 +257,7 @@ namespace cctmp {
 
 			template<typename S, typename... Ts>
 			nik_ces auto result(Ts... vs)
-				{ return T_assembly_start::template result<U_store_T<S>, contr, lookup>(vs...); }
+				{ return T_machine_start::template result<U_store_T<S>, contr, lookup>(vs...); }
 	};
 
 /***********************************************************************************************************************/

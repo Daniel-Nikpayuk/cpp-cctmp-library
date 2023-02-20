@@ -1,72 +1,34 @@
 # cpp-cctmp-library
 -------------------
 
-A C++20 general purpose library starting with a meta-circular compiler which
-lexes, parses, then translates constexpr cstrings into continuation passing
-template metaprogramming (TMP) grammar as its intermediate representation (IR).
-The actual compiler finishes translating the C++ typesafe IR
-(which is just regular C++ grammar) into actual architecture assembly.
+A C++17 general purpose library oriented around and built on top of a *metapiler*
+paradigm: It offers the ability to translate embedded sublanguages (represented as
+constexpr string literals) into constexpr functions. This paradigm allows for
+the creation of domain specific languages to ease the creation of domain specific
+modules and sublibraries.
 
-A C++17 "calculus of constructions" compile time register machine library.
+This metapiler paradigm is achieved using a combination of constexpr and TMP magic.
+Emphasis is on constexpr for reliability and performance, but even when TMP is used,
+its design adheres as closely as possible to Type Theory with the intent of keeping
+it reasonably type safe. The frontend (lexer/parser) components are constexpr oriented,
+referencing The Dragon Book on compiler theory for their implementation. The backend
+achieves its translation by making use of a theoretical correspondence between assembly
+language and an extension of continuation passing style.
 
-This repository includes two file generators (bash scripts):
+This project is ongoing.
 
-i) generate undef macros
-ii) generate single source
+As of February 20th, 2023 the general roadmap is to clean up what is currently
+*proof of concept* code for a version 1.0 release of the metapiler in the Spring.
+As of yet, the documentation and single source folders are empty. The testing folder
+is currently an ad-hoc collection of otherwise disorganized tests (and older obsolete
+code I intend to bring in and translate at a later date). It is part of the roadmap
+to clean this up as proper source test files.
 
-which allows for the regeneration of their respective files:
+Versioning will be established as single source files supplied with version release details.
+Otherwise, the modularized multisource files in the root directory of this repository should
+always be considered ongoing (experimental snapshots).
 
-i) undef\_macros.hpp
-ii) cpp\_cctmp\_library.hpp
+As this project grows and stabilizes, I hope you find it to be of interest, and even maybe some use.
 
-The single source file is ideal for use in compiler explorer.
-
-Otherwise the library is broken up into three parts:
-
-a) The backend, which can be thought of the "hardware" simulating these register machines.
-b) The fronend, which (will) allow for the translation of cstrings into register machine controllers.
-c) Programs to be read as case studies.
-
-Consider the backend to be stable in its overall design, but otherwise experimental as it has not been
-rigorously tested.
-
-As for the frontend, it has yet to be implemented. Although the frontend is not strictly necessary,
-it is intended to be a user-friendly and concise alternative to manually writing register machine
-controllers by hand. I hope to have this portion of the library complete by the end of 2022.
-
-Finally, as for the case study programs, they notably include:
-
-i) The factorial function (two versions).
-ii) The Fibonacci function (two versions).
-iii) Generic Sorting.
-
-Notably the sort algorithm is defined to be generic as it allows for arbitrary comparison operators.
-
-As for performance: The library was designed with performance in mind, though as of yet I have not
-done any thorough benchmarking. Simple programs such as factorial and fibonacci run under a second
-for small values, but as these machines reach their nesting depth limits they do start to slow
-down considerably. The second version of Fibonacci makes use of memoization, which speeds it up considerably.
-
-As an example of performance: Sorting a list of length 200 is benchmarked at:
-
-gcc v11 - 1.344s
-
-clang v13 - 3.568s
-
-on my humble laptop.
-
-Keep in mind, as with many things, this library is to be contextually applied per use case: For example if
-you need to sort numbers at compile time it's better to use constexpr arrays, but if you need to sort a small
-number of types or mixed objects this implementation might then be preferred.
-
-Furthermore, traditional algorithmic analytics (asymptotics) don't necessarily apply to template metaprogramming.
-For example implementing *mergesort* (in the functional style of "Structure and interpretation of Computer Programs")
-which relies heavily on general recursion ends up being orders of magnitude slower for the same list of length 200:
-
-gcc v11 - 20.12s
-
-clang v13 - 2m4.21s
-
-In any case, that's it for now. I'll update this library on occassion in terms of bug fixes and the frontend,
-but you can otherwise consider it to be complete. Thanks.
+Thank you.
 

@@ -27,12 +27,13 @@
 #include"01_cctmp_argument.hpp"
 #include"02_cctmp_parameter.hpp"
 #include"03_cctmp_praxis.hpp"
-#include"04_cctmp_machine.hpp"
-#include"05_cctmp_assembly.hpp"
+#include"04_cctmp_interpreter.hpp"
+#include"05_cctmp_machine.hpp"
 #include"06_cctmp_lexer.hpp"
 #include"07_cctmp_parser.hpp"
-#include"08_cctmp_optimizer.hpp"
-#include"09_cctmp_metapiler.hpp"
+#include"08_cctmp_assembler.hpp"
+#include"09_cctmp_optimizer.hpp"
+#include"10_cctmp_metapiler.hpp"
 
 //#include"parser_diagnostics.hpp"
 

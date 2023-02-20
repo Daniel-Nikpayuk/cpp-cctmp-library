@@ -243,9 +243,9 @@ namespace cctmp_program
 	}; nik_ce auto UP_united_insert = U_store_T<TP_united_insert>;
 
 	template<auto HEq, auto HCmp, auto V, auto... Vs>
-	nik_ce auto pack_united_insert = TP_united_insert::template result<MD::initial_depth, HEq, HCmp, V, Vs...>;
+	nik_ce auto pack_united_insert = TP_united_insert::template result<ID::initial_depth, HEq, HCmp, V, Vs...>;
 
-	template<auto p, auto V, auto HEq = H_curry_equal, auto HCmp = H_curry_less_than, auto d = MD::initial_depth>
+	template<auto p, auto V, auto HEq = H_curry_equal, auto HCmp = H_curry_less_than, auto d = ID::initial_depth>
 	nik_ce auto list_united_insert = unpack_<p, U_custom, UP_united_insert, d, HEq, HCmp, V>;
 */
 
@@ -277,13 +277,13 @@ namespace cctmp_program
 	}; nik_ce auto UP_united_fold = U_store_T<TP_united_fold>;
 
 	template<auto HEq, auto HCmp, auto V, auto... Vs>
-	nik_ce auto pack_united_fold = TP_united_fold::template result<MD::initial_depth, HEq, HCmp, V, Vs...>;
+	nik_ce auto pack_united_fold = TP_united_fold::template result<ID::initial_depth, HEq, HCmp, V, Vs...>;
 
 	template
 	<
 		auto p,
 		auto HEq = H_curry_equal, auto HCmp = H_curry_less_than,
-		auto V = U_null_Vs, auto d = MD::initial_depth
+		auto V = U_null_Vs, auto d = ID::initial_depth
 	>
 	nik_ce auto list_united_fold = unpack_<p, U_custom, UP_united_fold, d, HEq, HCmp, V>;
 */
@@ -331,9 +331,9 @@ namespace cctmp_program
 	}; nik_ce auto UP_compare = U_store_T<TP_compare>;
 
 	template<auto Op, auto H, auto V0, auto V1, auto... Vs>
-	nik_ce auto pack_compare = TP_compare::template result<MD::initial_depth, Op, H, V0, V1, Vs...>;
+	nik_ce auto pack_compare = TP_compare::template result<ID::initial_depth, Op, H, V0, V1, Vs...>;
 
-	template<auto p, auto Op, auto V0, auto V1, auto H = H_partial_same, auto d = MD::initial_depth>
+	template<auto p, auto Op, auto V0, auto V1, auto H = H_partial_same, auto d = ID::initial_depth>
 	nik_ce auto list_compare = unpack_<p, U_custom, UP_compare, d, Op, H, V0, V1>;
 */
 
@@ -621,7 +621,7 @@ namespace cctmp_program
 			product    <                   _value >
 		>;
 
-		nik_ces auto m = MT::id;
+		nik_ces auto m = IT::id;
 		nik_ces auto c = program<>;
 		nik_ces auto i = MachineDispatch::initial_index;
 		nik_ces auto f = U_store_T<MemFib_v0>;
@@ -634,11 +634,11 @@ namespace cctmp_program
 		>;
 
 		template<auto d, auto n, auto mem_table = t<decltype(n)>>
-		nik_ces auto result = NIK_BEGIN_MACHINE(d, m, c, i),
+		nik_ces auto result = NIK_BEGIN_INTERPRETER(d, m, c, i),
 
 			n, n-1, n-2
 
-		NIK_END_MACHINE
+		NIK_END_INTERPRETER
 		(
 			U_pack_Vs<n>, U_null_Vs,
 			U_pack_Vs<f>, mem_table
@@ -991,7 +991,7 @@ namespace cctmp_program
 
 	}; nik_ce auto U_tag_compare = U_store_T<T_tag_compare>;
 
-	template<auto Op, auto V0, auto V1, auto d = MD::initial_depth>
+	template<auto Op, auto V0, auto V1, auto d = ID::initial_depth>
 	nik_ce auto tag_compare = T_tag_compare::template result<d, Op, V0, V1>;
 
 /***********************************************************************************************************************/
@@ -1087,7 +1087,7 @@ namespace cctmp_program
 	//	printf("%llu\n", cctmp_functional::list_fill<def_specs, specs0>);
 
 	//	constexpr auto p0  = cctmp_one_cycle_generics::direct_repeat_defaults;
-	//	constexpr auto cmp = H_partial<U_custom, cctmp_one_cycle_generics::U_tag_compare, MD::initial_depth, _less_than_>;
+	//	constexpr auto cmp = H_partial<U_custom, cctmp_one_cycle_generics::U_tag_compare, ID::initial_depth, _less_than_>;
 	//	constexpr auto p  = cctmp_functional::list_sort<p0, cmp>;
 	//	printf("%llu\n", p);
 
@@ -1643,9 +1643,9 @@ namespace cctmp_program
 	nik_ce auto UL_ordered_insert	= UP_unpack<UP_ordered_insert>;
 
 	template<auto Pred, auto V, auto... Vs>
-	nik_ce auto pack_ordered_insert = TP_ordered_insert::template result<MD::initial_depth, H_id, Pred, V, Vs...>;
+	nik_ce auto pack_ordered_insert = TP_ordered_insert::template result<ID::initial_depth, H_id, Pred, V, Vs...>;
 
-	template<auto p, auto V, auto Pred = _less_than_, auto b = H_id, auto d = MD::initial_depth>
+	template<auto p, auto V, auto Pred = _less_than_, auto b = H_id, auto d = ID::initial_depth>
 	nik_ce auto list_ordered_insert = TL_ordered_insert::template result<d, p, b, Pred, V>;
 */
 
@@ -1661,9 +1661,9 @@ namespace cctmp_program
 	nik_ce auto UL_ordered_replace	= UP_unpack<UP_ordered_replace>;
 
 	template<auto Pred, auto V, auto... Vs>
-	nik_ce auto pack_ordered_replace = TP_ordered_replace::template result<MD::initial_depth, H_id, Pred, V, Vs...>;
+	nik_ce auto pack_ordered_replace = TP_ordered_replace::template result<ID::initial_depth, H_id, Pred, V, Vs...>;
 
-	template<auto p, auto V, auto Pred = _less_than_, auto b = H_id, auto d = MD::initial_depth>
+	template<auto p, auto V, auto Pred = _less_than_, auto b = H_id, auto d = ID::initial_depth>
 	nik_ce auto list_ordered_replace = TL_ordered_replace::template result<d, p, b, Pred, V>;
 */
 
@@ -1709,9 +1709,9 @@ namespace cctmp_program
 	nik_ce auto UL_sort	= UP_unpack<UP_sort>;
 
 	template<auto Pred, auto V, auto... Vs>
-	nik_ce auto pack_sort = TP_sort::template result<MD::initial_depth, H_id, Pred, V, Vs...>;
+	nik_ce auto pack_sort = TP_sort::template result<ID::initial_depth, H_id, Pred, V, Vs...>;
 
-	template<auto p, auto Pred = _less_than_, auto V = U_null_Vs, auto b = H_id, auto d = MD::initial_depth>
+	template<auto p, auto Pred = _less_than_, auto V = U_null_Vs, auto b = H_id, auto d = ID::initial_depth>
 	nik_ce auto list_sort = TL_sort::template result<d, p, b, Pred, V>;
 */
 
@@ -1727,9 +1727,9 @@ namespace cctmp_program
 	nik_ce auto UL_write	= UP_unpack<UP_write>;
 
 	template<auto Pred, auto V, auto... Vs>
-	nik_ce auto pack_write = TP_write::template result<MD::initial_depth, H_id, Pred, V, Vs...>;
+	nik_ce auto pack_write = TP_write::template result<ID::initial_depth, H_id, Pred, V, Vs...>;
 
-	template<auto p, auto Pred = _less_than_, auto V = U_null_Vs, auto b = H_id, auto d = MD::initial_depth>
+	template<auto p, auto Pred = _less_than_, auto V = U_null_Vs, auto b = H_id, auto d = ID::initial_depth>
 	nik_ce auto list_write = TL_write::template result<d, p, b, Pred, V>;
 */
 
@@ -1813,9 +1813,9 @@ namespace cctmp_program
 	nik_ce auto UL_merge	= UP_unpack<UP_merge>;
 
 	template<auto Pred, auto Op, auto V, auto... Vs>
-	nik_ce auto pack_merge = TP_merge::template result<MD::initial_depth, H_id, Pred, Op, V, Vs...>;
+	nik_ce auto pack_merge = TP_merge::template result<ID::initial_depth, H_id, Pred, Op, V, Vs...>;
 
-	template<auto p, auto Op, auto Pred = _same_, auto V = U_null_Vs, auto b = H_id, auto d = MD::initial_depth>
+	template<auto p, auto Op, auto Pred = _same_, auto V = U_null_Vs, auto b = H_id, auto d = ID::initial_depth>
 	nik_ce auto list_merge = TL_merge::template result<d, p, b, Pred, Op, V>;
 */
 
@@ -1922,11 +1922,11 @@ namespace cctmp_program
 
 /*
 	template<gindex_type _2_N, template<auto...> typename B, auto... LUs, nik_vp(p)(B<LUs...>*)>
-	struct T_machine<MN::halt, MT::value, _2_N, p>
+	struct T_interpreter<IN::halt, IT::value, _2_N, p>
 	{
 		template
 		<
-			NIK_MACHINE_CONTROLS(d, m, c, i),
+			NIK_INTERPRETER_CONTROLS(d, m, c, i),
 			T_store_U<LUs>... LVs, auto VN, auto... Vs,
 			typename... Heaps
 		>
@@ -1941,7 +1941,7 @@ namespace cctmp_program
 
 // apply:
 
-	struct T_machine_nary_apply
+	struct T_interpreter_nary_apply
 	{
 		template<auto Inds, auto Op>
 		constexpr static auto H0 = U_pack_Vs<_car_, Inds, Op>;
@@ -1949,27 +1949,27 @@ namespace cctmp_program
 		template<auto l = _one, auto n = _one>
 		constexpr static auto contr = controller
 		<
-			instruction < MN::call , MT::compel , l , n >,
-			instruction < MN::halt , MT::eval           >
+			instruction < IN::call , IT::compel , l , n >,
+			instruction < IN::halt , IT::eval           >
 		>;
 
 		template<auto d, auto Op, auto Inds, auto... Vs>
-		constexpr static auto result = T_machine_start::template result<d, contr<>, Vs...>(H0<Inds, Op>);
+		constexpr static auto result = T_interpreter_start::template result<d, contr<>, Vs...>(H0<Inds, Op>);
 	};
 
-	struct T_machine_binary_apply
+	struct T_interpreter_binary_apply
 	{
-		constexpr static auto d    = MD::initial_depth;
-		constexpr static auto regs = T_machine_get::regs;
-		constexpr static auto heap = T_machine_get::heap;
+		constexpr static auto d    = ID::initial_depth;
+		constexpr static auto regs = T_interpreter_get::regs;
+		constexpr static auto heap = T_interpreter_get::heap;
 		constexpr static auto bs   = U_pack_Vs < heap , regs  , regs >;
 		constexpr static auto ns   = U_pack_Vs < _two , _zero , _one >;
 		constexpr static auto Inds = U_pack_Vs<bs, ns>;
 
 		template<auto Op, auto V0, auto V1>
-		constexpr static auto result = T_machine_nary_apply::template result<d-1, Op, Inds, V0, V1>;
+		constexpr static auto result = T_interpreter_nary_apply::template result<d-1, Op, Inds, V0, V1>;
 
-	}; constexpr auto _binary_apply_ = U_custom_T<T_machine_binary_apply>;
+	}; constexpr auto _binary_apply_ = U_custom_T<T_interpreter_binary_apply>;
 
 	constexpr auto _prax_add_      = _praxis_< _add_      >;
 	constexpr auto _prax_multiply_ = _praxis_< _multiply_ >;
@@ -2193,26 +2193,26 @@ namespace cctmp_program
 	nik_ce auto pair_factorial_contr = controller
 	<
 	// Loop:
-		instruction < AN::select  , AT::id     , is_zero   >, // get is_zero pack containing arg positions.
-		instruction < AN::call    , AT::id                 >, // unpack and apply is_zero to args.
+		instruction < MN::select  , MT::id     , is_zero   >, // get is_zero pack containing arg positions.
+		instruction < MN::call    , MT::id                 >, // unpack and apply is_zero to args.
 
-		instruction < AN::jump    , AT::branch , Done      >, // branch to Done label, continue otherwise.
+		instruction < MN::jump    , MT::branch , Done      >, // branch to Done label, continue otherwise.
 
-		instruction < AN::select  , AT::id     , multiply  >, // get multiply [...].
-		instruction < AN::call    , AT::id                 >, // unpack [...].
-		instruction < AN::select  , AT::front  , p         >, // get left arg types before position p.
-		instruction < AN::replace , AT::id                 >, // arg expand and replace at position p.
+		instruction < MN::select  , MT::id     , multiply  >, // get multiply [...].
+		instruction < MN::call    , MT::id                 >, // unpack [...].
+		instruction < MN::select  , MT::front  , p         >, // get left arg types before position p.
+		instruction < MN::replace , MT::id                 >, // arg expand and replace at position p.
 
-		instruction < AN::select  , AT::id     , decrement >, // get decrement [...].
-		instruction < AN::call    , AT::id                 >, // unpack [...].
-		instruction < AN::select  , AT::front  , n         >, // get left arg types [...].
-		instruction < AN::replace , AT::id                 >, // arg expand [...].
+		instruction < MN::select  , MT::id     , decrement >, // get decrement [...].
+		instruction < MN::call    , MT::id                 >, // unpack [...].
+		instruction < MN::select  , MT::front  , n         >, // get left arg types [...].
+		instruction < MN::replace , MT::id                 >, // arg expand [...].
 
-		instruction < AN::jump    , AT::go_to  , Loop      >, // goto Loop.
+		instruction < MN::jump    , MT::go_to  , Loop      >, // goto Loop.
 	// Done:
-		instruction < AN::select  , AT::front  , p         >, // get left arg types [...].
-		instruction < AN::right   , AT::id                 >, // arg expand and drop the left args before p.
-		instruction < AN::first   , AT::id                 >  // return the first element.
+		instruction < MN::select  , MT::front  , p         >, // get left arg types [...].
+		instruction < MN::right   , MT::id                 >, // arg expand and drop the left args before p.
+		instruction < MN::first   , MT::id                 >  // return the first element.
 	>;
 
 /***********************************************************************************************************************/
@@ -2238,7 +2238,7 @@ namespace cctmp_program
 		nik_ce auto c = pair_factorial_contr<>;
 		nik_ce auto l = pair_factorial_lookup<>;
 
-		return T_assembly_start::template result<s, c, l>(T(1), v);
+		return T_machine_start::template result<s, c, l>(T(1), v);
 	}
 
 /***********************************************************************************************************************/
@@ -2281,9 +2281,9 @@ namespace cctmp_program
 		template<auto n = _zero>
 		constexpr static auto contr = controller
 		<
-			instruction< AN::select , AT::pair , n >,
-			instruction< AN::loop   , AT::id       >,
-			instruction< AN::first  , AT::id       >
+			instruction< MN::select , MT::pair , n >,
+			instruction< MN::loop   , MT::id       >,
+			instruction< MN::first  , MT::id       >
 		>;
 
 		template<typename Out, typename In, typename End>
@@ -2291,7 +2291,7 @@ namespace cctmp_program
 		{
 			constexpr auto s = U_store_T<Out>;
 
-			return T_assembly_start::template result<s, contr<>, lookup<>>(out, in, end);
+			return T_machine_start::template result<s, contr<>, lookup<>>(out, in, end);
 		}
 
 	}; template<auto f>
@@ -2641,26 +2641,26 @@ namespace cctmp_program
 		nik_ce auto pair_factorial_contr = controller
 		<
 		// Loop:
-			instruction < AN::select  , AT::id     , is_zero   >, // get is_zero pack containing arg positions.
-			instruction < AN::call    , AT::id                 >, // unpack and apply is_zero to args.
+			instruction < MN::select  , MT::id     , is_zero   >, // get is_zero pack containing arg positions.
+			instruction < MN::call    , MT::id                 >, // unpack and apply is_zero to args.
 
-			instruction < AN::jump    , AT::branch , Done      >, // branch to Done label, continue otherwise.
+			instruction < MN::jump    , MT::branch , Done      >, // branch to Done label, continue otherwise.
 
-			instruction < AN::select  , AT::id     , multiply  >, // get multiply [...].
-			instruction < AN::call    , AT::id                 >, // unpack [...].
-			instruction < AN::select  , AT::front  , p         >, // get left arg types before position p.
-			instruction < AN::replace , AT::id                 >, // arg expand and replace at position p.
+			instruction < MN::select  , MT::id     , multiply  >, // get multiply [...].
+			instruction < MN::call    , MT::id                 >, // unpack [...].
+			instruction < MN::select  , MT::front  , p         >, // get left arg types before position p.
+			instruction < MN::replace , MT::id                 >, // arg expand and replace at position p.
 
-			instruction < AN::select  , AT::id     , decrement >, // get decrement [...].
-			instruction < AN::call    , AT::id                 >, // unpack [...].
-			instruction < AN::select  , AT::front  , n         >, // get left arg types [...].
-			instruction < AN::replace , AT::id                 >, // arg expand [...].
+			instruction < MN::select  , MT::id     , decrement >, // get decrement [...].
+			instruction < MN::call    , MT::id                 >, // unpack [...].
+			instruction < MN::select  , MT::front  , n         >, // get left arg types [...].
+			instruction < MN::replace , MT::id                 >, // arg expand [...].
 
-			instruction < AN::jump    , AT::go_to  , Loop      >, // goto Loop.
+			instruction < MN::jump    , MT::go_to  , Loop      >, // goto Loop.
 		// Done:
-			instruction < AN::select  , AT::front  , p         >, // get left arg types [...].
-			instruction < AN::right   , AT::id                 >, // arg expand and drop the left args before p.
-			instruction < AN::first   , AT::id                 >  // return the first element.
+			instruction < MN::select  , MT::front  , p         >, // get left arg types [...].
+			instruction < MN::right   , MT::id                 >, // arg expand and drop the left args before p.
+			instruction < MN::first   , MT::id                 >  // return the first element.
 		>;
 
 #endif
@@ -2688,7 +2688,7 @@ namespace cctmp_program
 			nik_ce auto c = pair_factorial_contr<>;
 			nik_ce auto l = pair_factorial_lookup<>;
 
-			return T_assembly_start::template result<s, c, l>(T(1), v);
+			return T_machine_start::template result<s, c, l>(T(1), v);
 		}
 
 #endif

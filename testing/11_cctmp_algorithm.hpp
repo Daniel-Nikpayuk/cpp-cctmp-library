@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// lookup:
+// algorithm:
 
 namespace cctmp {
 
@@ -80,17 +80,17 @@ namespace cctmp {
 
 // params (syntactic sugar):
 
-	nik_ce auto _dpar_erase_	= U_custom_T<T_machine_params< MT::cut    , _list_<>        >>;
-	nik_ce auto _dpar_insert_	= U_custom_T<T_machine_params< MT::paste  , _list_<> , _one >>;
+	nik_ce auto _dpar_erase_	= U_custom_T<T_interpreter_params< IT::cut   , _list_<>        >>;
+	nik_ce auto _dpar_insert_	= U_custom_T<T_interpreter_params< IT::paste , _list_<> , _one >>;
 
-	nik_ce auto _par_erase_		= _alias_< _dpar_erase_   , MD::initial_depth >;
-	nik_ce auto _par_insert_	= _alias_< _dpar_insert_  , MD::initial_depth >;
+	nik_ce auto _par_erase_		= _alias_< _dpar_erase_   , ID::initial_depth >;
+	nik_ce auto _par_insert_	= _alias_< _dpar_insert_  , ID::initial_depth >;
 
 /***********************************************************************************************************************/
 
 // fold:
 
-	struct T_machine_fold
+	struct T_interpreter_fold
 	{
 		template<auto Op>
 		struct T_last
@@ -110,22 +110,22 @@ namespace cctmp {
 		template<auto n>
 		nik_ces auto contr = controller
 		<
-			instruction < MN::call , MT::praxis , PN::fold , n >,
-			instruction < MN::halt , MT::eval                  >
+			instruction < IN::call , IT::praxis , PN::fold , n >,
+			instruction < IN::halt , IT::eval                  >
 		>;
 
 		template<auto d, auto Op, auto V, auto... Vs>
-		nik_ces auto result = T_machine_start::template result<d, contr<sizeof...(Vs)>, V, Vs...>(H0<Op>);
+		nik_ces auto result = T_interpreter_start::template result<d, contr<sizeof...(Vs)>, V, Vs...>(H0<Op>);
 	};
 
-	nik_ce auto _dpar_fold_ = U_custom_T<T_machine_fold>;
-	nik_ce auto  _par_fold_ = MD::template with_initial_depth<_dpar_fold_>;
+	nik_ce auto _dpar_fold_ = U_custom_T<T_interpreter_fold>;
+	nik_ce auto  _par_fold_ = ID::template with_initial_depth<_dpar_fold_>;
 
 /***********************************************************************************************************************/
 
 // sift:
 
-	struct T_machine_sift
+	struct T_interpreter_sift
 	{
 		template<auto Ops>
 		struct T_last
@@ -145,23 +145,23 @@ namespace cctmp {
 		template<auto n>
 		nik_ces auto contr = controller
 		<
-			instruction < MN::call , MT::praxis , PN::sift , n >,
-			instruction < MN::halt , MT::eval                  >
+			instruction < IN::call , IT::praxis , PN::sift , n >,
+			instruction < IN::halt , IT::eval                  >
 		>;
 
 		template<auto d, auto Ops, auto... Vs>
-		nik_ces auto result = T_machine_start::template result<d, contr<sizeof...(Vs)>, _zero, Vs...>(H0<Ops>);
+		nik_ces auto result = T_interpreter_start::template result<d, contr<sizeof...(Vs)>, _zero, Vs...>(H0<Ops>);
 	};
 
-	nik_ce auto _dpar_sift_ = U_custom_T<T_machine_sift>;
-	nik_ce auto  _par_sift_ = MD::template with_initial_depth<_dpar_sift_>;
+	nik_ce auto _dpar_sift_ = U_custom_T<T_interpreter_sift>;
+	nik_ce auto  _par_sift_ = ID::template with_initial_depth<_dpar_sift_>;
 
 /***********************************************************************************************************************/
 
 // insert sort:
 
 	template<auto Op>
-	struct T_machine_insert_sort
+	struct T_interpreter_insert_sort
 	{
 		nik_ces auto match = _alias_<_match_, Op>;
 		nik_ces auto H0    = U_pack_Vs<_car_, _praxis_<match, _one>, _dpar_insert_>;
@@ -169,71 +169,71 @@ namespace cctmp {
 		template<auto f = _one, auto n0 = _one, auto i = _two, auto n1 = _one>
 		nik_ces auto contr = controller
 		<
-			instruction < MN::call , MT::propel , f  >,
-			instruction < MN::call , MT::eval   , n0 >,
-			instruction < MN::call , MT::propel , i  >,
-			instruction < MN::call , MT::eval   , n1 >,
-			instruction < MN::halt , MT::eval        >
+			instruction < IN::call , IT::propel , f  >,
+			instruction < IN::call , IT::eval   , n0 >,
+			instruction < IN::call , IT::propel , i  >,
+			instruction < IN::call , IT::eval   , n1 >,
+			instruction < IN::halt , IT::eval        >
 		>;
 
 		template<auto d, auto V, template<auto...> typename B, auto... Vs>
 		nik_ces auto _result(nik_avp(B<Vs...>*))
-			{ return T_machine_start::template result<MD::next_depth(d), contr<>, V, Vs...>(H0); }
+			{ return T_interpreter_start::template result<ID::next_depth(d), contr<>, V, Vs...>(H0); }
 
 		template<auto d, auto List, auto V>
-		nik_ces auto result = _result<MD::next_depth(d), V>(List);
+		nik_ces auto result = _result<ID::next_depth(d), V>(List);
 	};
 
-	template<auto Op> nik_ce auto _dpar_insert_sort_ = U_custom_T<T_machine_insert_sort<Op>>;
-	template<auto Op> nik_ce auto  _par_insert_sort_ = MD::template with_initial_depth<_dpar_insert_sort_<Op>>;
+	template<auto Op> nik_ce auto _dpar_insert_sort_ = U_custom_T<T_interpreter_insert_sort<Op>>;
+	template<auto Op> nik_ce auto  _par_insert_sort_ = ID::template with_initial_depth<_dpar_insert_sort_<Op>>;
 
 /***********************************************************************************************************************/
 
 // sort:
 
 	template<auto Op>
-	struct T_machine_sort
+	struct T_interpreter_sort
 	{
 		nik_ces auto H0 = U_pack_Vs<_car_, _dpar_insert_sort_<Op>>;
 
 		template<auto n = _one, auto Loop = _zero, auto Done = _three>
 		nik_ces auto contr = controller
 		<
-			instruction < MN::jump , MT::cascade , Done >,
-			instruction < MN::call , MT::cascade , n    >,
-			instruction < MN::jump , MT::go_to   , Loop >,
-			instruction < MN::halt , MT::eval           >
+			instruction < IN::jump , IT::cascade , Done >,
+			instruction < IN::call , IT::cascade , n    >,
+			instruction < IN::jump , IT::go_to   , Loop >,
+			instruction < IN::halt , IT::eval           >
 		>;
 
 		template<auto d, auto... Vs>
-		nik_ces auto result = T_machine_start::template result<d, contr<>, U_null_Vs, Vs...>(H0);
+		nik_ces auto result = T_interpreter_start::template result<d, contr<>, U_null_Vs, Vs...>(H0);
 	};
 
-	template<auto Op> nik_ce auto _dpar_sort_ = U_custom_T<T_machine_sort<Op>>;
-	template<auto Op> nik_ce auto  _par_sort_ = MD::template with_initial_depth<_dpar_sort_<Op>>;
+	template<auto Op> nik_ce auto _dpar_sort_ = U_custom_T<T_interpreter_sort<Op>>;
+	template<auto Op> nik_ce auto  _par_sort_ = ID::template with_initial_depth<_dpar_sort_<Op>>;
 
 /***********************************************************************************************************************/
 
 // trampoline:
 
 	template<auto Op>
-	struct T_machine_trampoline
+	struct T_interpreter_trampoline
 	{
 		nik_ces auto H0 = U_pack_Vs<_car_>;
 
 		template<auto n = _one>
 		nik_ces auto contr = controller
 		<
-			instruction < MN::call , MT::eval , n >,
-			instruction < MN::halt , MT::eval     >
+			instruction < IN::call , IT::eval , n >,
+			instruction < IN::halt , IT::eval     >
 		>;
 
 		template<auto d, auto... Vs>
-		nik_ces auto result = T_machine_start::template result<MD::next_depth(d), contr<>, Op, Vs...>(H0);
+		nik_ces auto result = T_interpreter_start::template result<ID::next_depth(d), contr<>, Op, Vs...>(H0);
 	};
 
-	template<auto Op> nik_ce auto _dpar_trampoline_ = U_custom_T<T_machine_trampoline<Op>>;
-	template<auto Op> nik_ce auto  _par_trampoline_ = MD::template with_initial_depth<_dpar_trampoline_<Op>>;
+	template<auto Op> nik_ce auto _dpar_trampoline_ = U_custom_T<T_interpreter_trampoline<Op>>;
+	template<auto Op> nik_ce auto  _par_trampoline_ = ID::template with_initial_depth<_dpar_trampoline_<Op>>;
 
 	// syntactic sugar:
 
@@ -250,7 +250,7 @@ namespace cctmp {
 // lookup:
 
 	template<gindex_type _2_N>
-	struct T_machine<MN::memoize, MT::lookup, _2_N>
+	struct T_interpreter<IN::memoize, IT::lookup, _2_N>
 	{
 		struct T_same_car
 		{
@@ -261,7 +261,7 @@ namespace cctmp {
 
 		template
 		<
-			NIK_MACHINE_PARAMS(d, m, c, i, Vs),
+			NIK_INTERPRETER_PARAMS(d, m, c, i, Vs),
 			template<auto...> typename B0, auto W0,
 			template<auto...> typename B1, auto... Xs, typename Heap2,
 			template<auto...> typename B3, auto... Zs, typename... Args
@@ -273,13 +273,13 @@ namespace cctmp {
 
 			if nik_ce (pos == size)
 
-				return NIK_MACHINE(_2_N, d, MT::id, c, i, Vs)(U_null_Vs, H1, H2, A0, As...);
+				return NIK_INTERPRETER(_2_N, d, IT::id, c, i, Vs)(U_null_Vs, H1, H2, A0, As...);
 			else
 			{
-				nik_ce auto ins = MD::instr(c, i);
-				nik_ce auto ni  = ins[MI::pos];
+				nik_ce auto ins = ID::instr(c, i);
+				nik_ce auto ni  = ins[II::pos];
 
-				return NIK_MACHINE(_2_N, d, MT::id, c, ni, Vs)(A0, U_pack_Vs<pos, Xs...>, H2, A0, As...);
+				return NIK_INTERPRETER(_2_N, d, IT::id, c, ni, Vs)(A0, U_pack_Vs<pos, Xs...>, H2, A0, As...);
 			}
 		}
 	};
@@ -289,11 +289,11 @@ namespace cctmp {
 // insert:
 
 	template<gindex_type _2_N>
-	struct T_machine<MN::memoize, MT::insert, _2_N>
+	struct T_interpreter<IN::memoize, IT::insert, _2_N>
 	{
 		template
 		<
-			NIK_MACHINE_PARAMS(d, m, c, i, Vs), template<auto...> typename B0, auto W0,
+			NIK_INTERPRETER_PARAMS(d, m, c, i, Vs), template<auto...> typename B0, auto W0,
 			template<auto...> typename B1, auto X0, auto... Xs, typename Heap2,
 			template<auto...> typename B3, auto... Zs, typename... Args
 		>
@@ -313,14 +313,14 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// machine:
+// interpreter:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // default:
 
-	nik_ce auto default_machine_lookup()
+	nik_ce auto default_interpreter_lookup()
 	{
 		return table
 		(
@@ -395,7 +395,7 @@ namespace cctmp {
 		);
 	};
 
-//	nik_ce auto default_machine_environment = make_environment<default_machine_lookup>;
+//	nik_ce auto default_interpreter_environment = make_environment<default_interpreter_lookup>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
