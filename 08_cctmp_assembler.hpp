@@ -240,8 +240,6 @@ namespace cctmp {
 
 	struct GenericAssemblyTA
 	{
-		template<typename TOC> nik_ces void nop(TOC & toc, clexeme & l) { }
-
 		struct Nonterminal
 		{
 			struct Name
@@ -255,15 +253,18 @@ namespace cctmp {
 				};
 			};
 
-			template<typename TOC>
-			nik_ces void new_function(TOC & toc, clexeme & l)
+			template<typename TOC, typename S>
+			nik_ces void nop(TOC & toc, clexeme & l, S & s) { }
+
+			template<typename TOC, typename S>
+			nik_ces void new_function(TOC & toc, clexeme & l, S & s)
 			{
 				toc.page.line->kind = Context::function;
 				toc.arg_index = _four; // offset to include: na, lookup, copy, paste.
 			}
 
-			template<typename TOC>
-			nik_ces void new_block(TOC & toc, clexeme & l)
+			template<typename TOC, typename S>
+			nik_ces void new_block(TOC & toc, clexeme & l, S & s)
 			{
 				toc.page.line->kind = Context::label;
 
@@ -274,8 +275,8 @@ namespace cctmp {
 				toc.increment_label();
 			}
 
-			template<typename TOC>
-			nik_ces void new_conditional(TOC & toc, clexeme & l)
+			template<typename TOC, typename S>
+			nik_ces void new_conditional(TOC & toc, clexeme & l, S & s)
 			{
 				toc.page.line->kind = Context::test;
 
@@ -284,8 +285,8 @@ namespace cctmp {
 				toc.increment_param();
 			}
 
-			template<typename TOC>
-			nik_ces void new_application(TOC & toc, clexeme & l)
+			template<typename TOC, typename S>
+			nik_ces void new_application(TOC & toc, clexeme & l, S & s)
 			{
 				toc.page.line->kind = Context::apply;
 
@@ -294,14 +295,22 @@ namespace cctmp {
 				toc.increment_param();
 			}
 
-			template<typename TOC>
-			nik_ces void sub_instr_label(TOC & toc, clexeme & l)
+			template<typename TOC, typename S> // can assume "gi;" is the current stack front.
+			nik_ces void sub_instr_label(TOC & toc, clexeme & l, S & s)
 			{
+				*(s.current    ) = 'l';
+				*(s.current - 1) = ';';
+				*(s.current - 2) = 'E';
+
+				new_block(toc, l, s);
 			}
 
-			template<typename TOC>
-			nik_ces void sub_instr_return(TOC & toc, clexeme & l)
+			template<typename TOC, typename S> // can assume "gi;" is the current stack front.
+			nik_ces void sub_instr_return(TOC & toc, clexeme & l, S & s)
 			{
+				*(s.current    ) = 'r';
+				*(s.current - 1) = 'M';
+				*(s.current - 2) = ';';
 			}
 		};
 
@@ -325,6 +334,9 @@ namespace cctmp {
 					dimension
 				};
 			};
+
+			template<typename TOC>
+			nik_ces void nop(TOC & toc, clexeme & l) { }
 
 		// resolve:
 
@@ -530,29 +542,30 @@ namespace cctmp {
 
 // abstract syntax tree:
 
-	template<typename TOC>
+	template<typename TOC, typename S>
 	struct GenericAssemblyAST
 	{
-		using toc_type		= void(*)(TOC &, clexeme &);
-		using Nonterminal	= typename GenericAssemblyTA::Nonterminal;
-		using NAction		= typename Nonterminal::Name;
-		using Terminal		= typename GenericAssemblyTA::Terminal;
-		using TAction		= typename Terminal::Name;
+		using nonterminal_type		= void(*)(TOC &, clexeme &, S &);
+		using terminal_type		= void(*)(TOC &, clexeme &);
+		using Nonterminal		= typename GenericAssemblyTA::Nonterminal;
+		using NAction			= typename Nonterminal::Name;
+		using Terminal			= typename GenericAssemblyTA::Terminal;
+		using TAction			= typename Terminal::Name;
 
-		toc_type nonterminal[NAction::dimension];
-		toc_type    terminal[TAction::dimension];
+		nonterminal_type nonterminal[NAction::dimension];
+		   terminal_type    terminal[TAction::dimension];
 
 		nik_ce GenericAssemblyAST() : nonterminal{}, terminal{}
 		{
-			nonterminal[ NAction::nop              ] = GenericAssemblyTA::template nop        <TOC>;
-			nonterminal[ NAction::new_function     ] = Nonterminal::template new_function     <TOC>;
-			nonterminal[ NAction::new_block        ] = Nonterminal::template new_block        <TOC>;
-			nonterminal[ NAction::new_conditional  ] = Nonterminal::template new_conditional  <TOC>;
-			nonterminal[ NAction::new_application  ] = Nonterminal::template new_application  <TOC>;
-			nonterminal[ NAction::sub_instr_label  ] = Nonterminal::template sub_instr_label  <TOC>;
-			nonterminal[ NAction::sub_instr_return ] = Nonterminal::template sub_instr_return <TOC>;
+			nonterminal[ NAction::nop              ] = Nonterminal::template nop              <TOC, S>;
+			nonterminal[ NAction::new_function     ] = Nonterminal::template new_function     <TOC, S>;
+			nonterminal[ NAction::new_block        ] = Nonterminal::template new_block        <TOC, S>;
+			nonterminal[ NAction::new_conditional  ] = Nonterminal::template new_conditional  <TOC, S>;
+			nonterminal[ NAction::new_application  ] = Nonterminal::template new_application  <TOC, S>;
+			nonterminal[ NAction::sub_instr_label  ] = Nonterminal::template sub_instr_label  <TOC, S>;
+			nonterminal[ NAction::sub_instr_return ] = Nonterminal::template sub_instr_return <TOC, S>;
 
-			terminal[ TAction::nop                 ] = GenericAssemblyTA::template nop        <TOC>;
+			terminal[ TAction::nop                 ] = Terminal::template nop                 <TOC>;
 			terminal[ TAction::resolve_identifier  ] = Terminal::template resolve_identifier  <TOC>;
 			terminal[ TAction::resolve_underscore  ] = Terminal::template resolve_underscore  <TOC>;
 			terminal[ TAction::resolve_period      ] = Terminal::template resolve_period      <TOC>;
@@ -568,10 +581,10 @@ namespace cctmp {
 
 	// interface:
 
-		template<typename TOC>
+		template<typename TOC, typename S>
 		struct T_generic_assembly_ast
 		{
-			nik_ces auto value = GenericAssemblyAST<TOC>{};
+			nik_ces auto value = GenericAssemblyAST<TOC, S>{};
 		};
 
 /***********************************************************************************************************************/
@@ -714,8 +727,10 @@ namespace cctmp {
 		template<auto static_src>
 		struct parser
 		{
+			nik_ces auto src	= T_store_U<static_src>::value;
 			using T_syntax		= TableOfContents<static_src>;
-			using T_ast		= T_generic_assembly_ast<T_syntax>;
+			using T_stack		= Stack<src.stack_size>;
+			using T_ast		= T_generic_assembly_ast<T_syntax, T_stack>;
 			nik_ces auto value     	= GenericPDA<T_ast, T_pdtt, T_syntax, static_src>{};
 		};
 

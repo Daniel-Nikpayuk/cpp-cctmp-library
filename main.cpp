@@ -83,14 +83,11 @@
 	{
 		return source
 		(
-		 	"square x         ;"
+			"square x         ;"
 
 			"body:            ;"
-			"x = multiply x x ;"
-			"goto done        ;"
-
-			"done:            ;"
-			"return x         ;"
+			". = multiply x x ;"
+			"return _         ;"
 		);
 	}
 
@@ -100,6 +97,30 @@
 		using T_square = T_generic_assembly_metapiler<square_source>;
 
 		return T_square::template result<T>(v);
+	}
+
+/***********************************************************************************************************************/
+
+	constexpr auto sum_of_squares_source()
+	{
+		return source
+                (
+			"sum_of_squares x y ;"
+
+			"body:              ;"
+			"x = multiply x x   ;"
+			"y = multiply y y   ;"
+			". = add      x y   ;"
+			"return _           ;"
+		);
+	}
+
+	template<typename T>
+	constexpr auto sum_of_squares(T x, T y)
+	{
+		using T_sum_of_squares = T_generic_assembly_metapiler<sum_of_squares_source>;
+
+		return T_sum_of_squares::template result<T>(x, y);
 	}
 
 /***********************************************************************************************************************/
@@ -140,6 +161,8 @@
 	int main(int argc, char *argv[])
 	{
 		print_complex(square(complex_number(1, 2))); // prints: (-3.000000, 4.000000)
+		print_complex(sum_of_squares(complex_number(1, 2), complex_number(0, 1))); // prints: (-4.000000, 4.000000)
+		printf("%d\n", sum_of_squares(3, 4)); // prints: 25
 
 		static_assert(factorial(5) == 120);
 

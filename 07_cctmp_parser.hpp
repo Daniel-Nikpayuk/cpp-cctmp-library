@@ -229,7 +229,7 @@ namespace cctmp {
 			{
 				auto update = ast.nonterminal[n];
 
-				update(syntax, word);
+				update(syntax, word, stack);
 			}
 		}
 
@@ -300,7 +300,7 @@ namespace cctmp {
 			finish         { s + length },
 
 			entry_size     { _one       },
-			line_size      {            },
+			line_size      { _one       },
 			stack_size     {            },
 
 			ident_size     {            },
@@ -351,11 +351,11 @@ namespace cctmp {
 					k = l.finish;
 				}
 
-				copy_size    = test_size   + period_size;
-				replace_size = assign_size - period_size;
-				depend_size  = goto_size   + branch_size;
-				graph_size   = depend_size + label_size;
-				param_size   = copy_size   + replace_size;
+				copy_size     = test_size   + period_size;
+				replace_size  = assign_size - period_size;
+				depend_size   = goto_size   + branch_size;
+				graph_size    = depend_size + label_size;
+				param_size    = copy_size   + replace_size;
 			}
 	};
 
