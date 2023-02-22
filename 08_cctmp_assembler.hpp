@@ -330,6 +330,7 @@ namespace cctmp {
 					resolve_return     ,
 					resolve_label      ,
 					resolve_statement  ,
+					resolve_quote      ,
 					resolve_accept     ,
 					dimension
 				};
@@ -438,6 +439,12 @@ namespace cctmp {
 					toc.page.line->offset = 1;
 					toc.page.is_offset    = false;
 				}
+			}
+
+			template<typename TOC>
+			nik_ces void resolve_quote(TOC & toc, clexeme & l)
+			{
+				// nothing yet.
 			}
 
 			template<typename TOC, typename SubpageType>
@@ -575,6 +582,7 @@ namespace cctmp {
 			terminal[ TAction::resolve_return      ] = Terminal::template resolve_return      <TOC>;
 			terminal[ TAction::resolve_label       ] = Terminal::template resolve_label       <TOC>;
 			terminal[ TAction::resolve_statement   ] = Terminal::template resolve_statement   <TOC>;
+			terminal[ TAction::resolve_quote       ] = Terminal::template resolve_quote       <TOC>;
 			terminal[ TAction::resolve_accept      ] = Terminal::template resolve_accept      <TOC>;
 		}
 	};
@@ -599,7 +607,7 @@ namespace cctmp {
 
 		struct Nonterminal
 		{
-			nik_ces gchar_type symbol[] = "VMJINTECBS";
+			nik_ces gchar_type symbol[] = "VMOJINTECBS";
 
 			nik_ces auto size   = ArraySize::template result<>(symbol) - 1;
 			nik_ces auto finish = symbol + size;
@@ -608,7 +616,7 @@ namespace cctmp {
 
 		struct Terminal
 		{
-			nik_ces gchar_type symbol[] = ";i=._lgtbr";
+			nik_ces gchar_type symbol[] = ";iq=._lgtbr";
 
 			nik_ces auto size   = ArraySize::template result<>(symbol); // recognizes '\0'.
 			nik_ces auto finish = symbol + size;
@@ -643,15 +651,19 @@ namespace cctmp {
 			table_entry('J',  'g') = transition( ""                                    );
 			table_entry('J',  'l') = transition( ""        , NAction::sub_instr_label  );
 			table_entry('J',  'r') = transition( ""        , NAction::sub_instr_return );
-			table_entry('I',  'i') = transition( "T=iV;"   , NAction::new_application  );
-			table_entry('I',  '.') = transition( "T=iV;"   , NAction::new_application  );
-			table_entry('I',  't') = transition( "tiV;bi;" , NAction::new_conditional  );
+			table_entry('I',  'i') = transition( "T=OV;"   , NAction::new_application  );
+			table_entry('I',  '.') = transition( "T=OV;"   , NAction::new_application  );
+			table_entry('I',  't') = transition( "tOV;bi;" , NAction::new_conditional  );
 			table_entry('V',  'i') = transition( "MV"                                  );
+			table_entry('V',  'q') = transition( "MV"                                  );
 			table_entry('V',  '_') = transition( "MV"                                  );
 			table_entry('V',  ';') = transition( ""                                    );
 			table_entry('T',  'i') = transition( "i"                                   );
 			table_entry('T',  '.') = transition( "."                                   );
+			table_entry('O',  'i') = transition( "i"                                   );
+			table_entry('O',  'q') = transition( "q"                                   );
 			table_entry('M',  'i') = transition( "i"                                   );
+			table_entry('M',  'q') = transition( "q"                                   );
 			table_entry('M',  '_') = transition( "_"                                   );
 
 			list_entry( 'i') = TAction::resolve_identifier ;
@@ -663,6 +675,7 @@ namespace cctmp {
 			list_entry( 'r') = TAction::resolve_return     ;
 			list_entry( 'l') = TAction::resolve_label      ;
 			list_entry( ';') = TAction::resolve_statement  ;
+			list_entry( 'q') = TAction::resolve_quote      ;
 			list_entry('\0') = TAction::resolve_accept     ;
 		}
 
