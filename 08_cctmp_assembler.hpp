@@ -189,21 +189,25 @@ namespace cctmp {
 		nik_ce void increment_graph  () { ++(graph.locus     ); }
 		nik_ce void increment_param  () { ++(param.locus     ); }
 
-		nik_ce auto & entry() { return *(page.line->entry); }
+		nik_ce auto kind() const { return page.line->kind; }
+		nik_ce auto fline_end() const { return page.begin()->end(); }
 
-		nik_ce void copy(clexeme & l)
+		nik_ce void set_kind(ccontext_type k) { page.line->kind = k; }
+		nik_ce void set_entry(clexeme & l, gcindex_type i)
 		{
 			page.line->entry->start  = l.start;
 			page.line->entry->finish = l.finish;
 			page.line->entry->token  = l.value;
+			page.line->entry->index  = i;
 		}
 
 		nik_ce auto match_identifier(string_type b, cstring_type e) // doesn't yet account for "._"
 		{
 			using size_type	= gindex_type; // temporary policy.
-			auto k		= page.begin()->begin();
+			auto l          = page.begin();
+			auto k		= l->begin();
 
-			while (k != page.begin()->entry)
+			while (k != l->end())
 			{
 				if (ptr_diff_equal<size_type>(k->start, k->finish, b, e)) break;
 
@@ -240,6 +244,22 @@ namespace cctmp {
 
 	struct GenericAssemblyTA
 	{
+		struct Sign
+		{
+			enum : gindex_type
+			{
+				na = 0,
+				lookup , copy , paste , recurse ,
+				dimension
+			};
+
+			nik_ces bool is_lookup  (gcindex_type i) { return (i == lookup   ); }
+			nik_ces bool is_copy    (gcindex_type i) { return (i == copy     ); }
+			nik_ces bool is_paste   (gcindex_type i) { return (i == paste    ); }
+			nik_ces bool is_recurse (gcindex_type i) { return (i == recurse  ); }
+			nik_ces bool is_replace (gcindex_type i) { return (i >= dimension); }
+		};
+
 		struct Nonterminal
 		{
 			struct Name
@@ -259,14 +279,14 @@ namespace cctmp {
 			template<typename TOC, typename S>
 			nik_ces void new_function(TOC & toc, clexeme & l, S & s)
 			{
-				toc.page.line->kind = Context::function;
-				toc.arg_index = _four; // offset to include: na, lookup, copy, paste.
+				toc.set_kind(Context::function);
+				toc.arg_index = Sign::recurse;
 			}
 
 			template<typename TOC, typename S>
 			nik_ces void new_block(TOC & toc, clexeme & l, S & s)
 			{
-				toc.page.line->kind = Context::label;
+				toc.set_kind(Context::label);
 
 				*toc.graph.locus    = toc.page.line;
 				*toc.label.locus    = toc.page.line;
@@ -278,7 +298,7 @@ namespace cctmp {
 			template<typename TOC, typename S>
 			nik_ces void new_conditional(TOC & toc, clexeme & l, S & s)
 			{
-				toc.page.line->kind = Context::test;
+				toc.set_kind(Context::test);
 
 				*toc.param.locus    = toc.page.line;
 
@@ -288,7 +308,7 @@ namespace cctmp {
 			template<typename TOC, typename S>
 			nik_ces void new_application(TOC & toc, clexeme & l, S & s)
 			{
-				toc.page.line->kind = Context::apply;
+				toc.set_kind(Context::apply);
 
 				*toc.param.locus    = toc.page.line;
 
@@ -344,7 +364,7 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void resolve_identifier(TOC & toc, clexeme & l)
 			{
-				switch (toc.page.line->kind)
+				switch (toc.kind())
 				{
 					case Context::function : { identifier_argument_entry (toc, l); break; }
 					case Context::apply    : { identifier_apply_entry    (toc, l); break; }
@@ -360,10 +380,11 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void resolve_underscore(TOC & toc, clexeme & l)
 			{
-				switch (toc.page.line->kind)
+				switch (toc.kind())
 				{
-					case Context::apply : { underscore_apply_entry (toc, l); break; }
-					case Context::test  : { underscore_test_entry  (toc, l); break; }
+					case Context::apply   : { underscore_apply_entry  (toc, l); break; }
+					case Context::test    : { underscore_test_entry   (toc, l); break; }
+					case Context::re_turn : { underscore_return_entry (toc, l); break; }
 				}
 
 				toc.increment_entry();
@@ -372,7 +393,7 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void resolve_period(TOC & toc, clexeme & l)
 			{
-				switch (toc.page.line->kind)
+				switch (toc.kind())
 				{
 					case Context::apply : { period_apply_entry (toc, l); break; }
 				}
@@ -383,15 +404,14 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void resolve_test(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
-				toc.entry().index = _two; // signifies a copy.
+				toc.set_entry(l, Sign::copy);
 				toc.increment_entry();
 			}
 
 			template<typename TOC>
 			nik_ces void resolve_branch(TOC & toc, clexeme & l)
 			{
-				toc.page.line->kind = Context::branch;
+				toc.set_kind(Context::branch);
 
 				*toc.graph.locus    = toc.page.line;
 				*toc.depend.locus   = toc.page.line;
@@ -405,7 +425,7 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void resolve_goto(TOC & toc, clexeme & l)
 			{
-				toc.page.line->kind = Context::go_to;
+				toc.set_kind(Context::go_to);
 
 				*toc.graph.locus    = toc.page.line;
 				*toc.depend.locus   = toc.page.line;
@@ -419,14 +439,13 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void resolve_return(TOC & toc, clexeme & l)
 			{
-				toc.page.line->kind = Context::re_turn;
+				toc.set_kind(Context::re_turn);
 			}
 
 			template<typename TOC>
 			nik_ces void resolve_label(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
-				toc.entry().index = toc.label_index++;
+				toc.set_entry(l, toc.label_index++);
 				toc.increment_entry();
 			}
 
@@ -471,50 +490,43 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void identifier_argument_entry(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
-				toc.entry().index = toc.arg_index++;
+				toc.set_entry(l, toc.arg_index++);
 			}
 
 			template<typename TOC>
 			nik_ces void identifier_apply_entry(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
-
 				auto k = toc.match_identifier(l.start, l.finish);
-				if (k != toc.page.begin()->entry) toc.entry().index = k->index;
-				else toc.entry().index = _one;
+				if (k != toc.fline_end()) toc.set_entry(l, k->index);
+				else toc.set_entry(l, Sign::lookup);
 			}
 
 			template<typename TOC>
 			nik_ces void identifier_test_entry(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
-
 				auto k = toc.match_identifier(l.start, l.finish);
-				if (k != toc.page.begin()->entry) toc.entry().index = k->index;
-				else toc.entry().index = _one;
+				if (k != toc.fline_end()) toc.set_entry(l, k->index);
+				else toc.set_entry(l, Sign::lookup);
 			}
 
 			template<typename TOC>
 			nik_ces void identifier_branch_entry(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
+				toc.set_entry(l, Sign::na);
 			}
 
 			template<typename TOC>
 			nik_ces void identifier_goto_entry(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
+				toc.set_entry(l, Sign::na);
 			}
 
 			template<typename TOC>
 			nik_ces void identifier_return_entry(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
-
 				auto k = toc.match_identifier(l.start, l.finish);
-				if (k == toc.page.begin()->entry) ; // error
-				else toc.entry().index = k->index;
+				if (k == toc.fline_end()) ; // error
+				else toc.set_entry(l, k->index);
 			}
 
 		// underscore:
@@ -522,15 +534,19 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void underscore_apply_entry(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
-				toc.entry().index = _three; // signifies a paste.
+				toc.set_entry(l, Sign::paste);
 			}
 
 			template<typename TOC>
 			nik_ces void underscore_test_entry(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
-				toc.entry().index = _three; // signifies a paste.
+				toc.set_entry(l, Sign::paste);
+			}
+
+			template<typename TOC>
+			nik_ces void underscore_return_entry(TOC & toc, clexeme & l)
+			{
+				toc.set_entry(l, Sign::paste);
 			}
 
 		// period:
@@ -538,8 +554,7 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void period_apply_entry(TOC & toc, clexeme & l)
 			{
-				toc.copy(l);
-				toc.entry().index  = _two; // signifies a copy.
+				toc.set_entry(l, Sign::copy);
 				toc.page.is_offset = true;
 			}
 		};
@@ -714,18 +729,32 @@ namespace cctmp {
 
 		struct T_generic_assembly_pdtt
 		{
-			nik_ces auto value		= GenericAssemblyPDTT{};
-			nik_ces auto nt_symbol		= GenericAssemblyPDTT::Nonterminal::symbol;
-			nik_ces auto nt_finish		= GenericAssemblyPDTT::Nonterminal::finish;
-			nik_ces auto nt_start		= GenericAssemblyPDTT::Nonterminal::start;
-			nik_ces auto t_symbol		= GenericAssemblyPDTT::Terminal::symbol;
-			nik_ces auto t_finish		= GenericAssemblyPDTT::Terminal::finish;
+			nik_ces auto value			= GenericAssemblyPDTT{};
+			nik_ces auto nonterminal_symbol		= GenericAssemblyPDTT::Nonterminal::symbol;
+			nik_ces auto nonterminal_finish		= GenericAssemblyPDTT::Nonterminal::finish;
+			nik_ces auto nonterminal_start		= GenericAssemblyPDTT::Nonterminal::start;
+			nik_ces auto terminal_symbol		= GenericAssemblyPDTT::Terminal::symbol;
+			nik_ces auto terminal_finish		= GenericAssemblyPDTT::Terminal::finish;
+
+			nik_ces bool is_nonterminal(ctoken_type t)
+			{
+				auto loc = numeric_find(t, nonterminal_symbol, nonterminal_finish);
+
+				return (loc != nonterminal_finish);
+			}
+
+			nik_ces bool is_terminal(ctoken_type t)
+			{
+				auto loc = numeric_find(t, terminal_symbol, terminal_finish);
+
+				return (loc != terminal_finish);
+			}
 
 			nik_ces auto token_kind(ctoken_type t)
 			{
-				if      (numeric_find(t, nt_symbol, nt_finish) != nt_finish) return TokenKind::nonterminal;
-				else if (numeric_find(t,  t_symbol,  t_finish) !=  t_finish) return TokenKind::terminal;
-				else                                                         return TokenKind::nontoken;
+				if      (is_nonterminal(t)) return TokenKind::nonterminal;
+				else if (is_terminal(t)   ) return TokenKind::terminal;
+				else                        return TokenKind::nontoken;
 			}
 		};
 

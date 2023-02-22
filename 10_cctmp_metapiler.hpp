@@ -202,9 +202,11 @@ namespace cctmp {
 	template<auto SourceCallable>
 	struct T_generic_assembly_metapiler
 	{
-		nik_ces auto target = T_generic_assembly_target<SourceCallable>::value;
-		nik_ces auto toc    = target.toc;
-		nik_ces auto env    = default_machine_environment;
+		using Sign		= typename GenericAssemblyTA::Sign;
+
+		nik_ces auto target	= T_generic_assembly_target<SourceCallable>::value;
+		nik_ces auto toc	= target.toc;
+		nik_ces auto env	= default_machine_environment;
 
 		// controller:
 
@@ -231,33 +233,44 @@ namespace cctmp {
 
 		// lookup:
 
+			template<auto f>
 			nik_ces auto resolve_index(gcindex_type index) { return index; }
 
-			template<auto row, auto col>
+			template<auto f, auto row, auto col>
 			nik_ces auto resolve_index(nik_avp(T_pack_Vs<row, col>*))
 			{
-				nik_ce auto start  = toc.param_at(row, col).start;
-				nik_ce auto finish = toc.param_at(row, col).finish;
-				nik_ce auto lookup = unpack_<env, _car_>;
-				nik_ce auto values = unpack_<env, _cadr_>;
+				nik_ce auto index = toc.param_at(row, col).index;
 
-				return unpack_<values, _par_at_, lookup(start, finish)>;
+				if constexpr (Sign::is_recurse(index)) return f;
+				else
+				{
+					nik_ce auto start  = toc.param_at(row, col).start;
+					nik_ce auto finish = toc.param_at(row, col).finish;
+					nik_ce auto lookup = unpack_<env, _car_>;
+					nik_ce auto values = unpack_<env, _cadr_>;
+
+					return unpack_<values, _par_at_, lookup(start, finish)>;
+				}
 			}
 
-			template<auto... Vs>
-			nik_ces auto inner_repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<resolve_index(Vs)...>; }
+			template<auto f, auto... Vs>
+			nik_ces auto inner_repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<resolve_index<f>(Vs)...>; }
 
-			template<auto... Vs>
-			nik_ces auto repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<inner_repack(Vs)...>; }
+			template<auto f, auto... Vs>
+			nik_ces auto repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<inner_repack<f>(Vs)...>; }
 
 		// function:
 
-			nik_ces auto contr  = zip(eval<_par_segment_, target.instr.size()>);
-			nik_ces auto lookup = repack(target.lookup);
+			nik_ces auto contr = zip(eval<_par_segment_, target.instr.size()>);
 
 			template<typename S, typename... Ts>
-			nik_ces auto result(Ts... vs)
-				{ return T_machine_start::template result<U_store_T<S>, contr, lookup>(vs...); }
+			nik_ces S result(Ts... vs)
+			{
+				nik_ce auto f      = _wrap_<result<S, Ts...>>;
+				nik_ce auto lookup = repack<f>(target.lookup);
+
+				return T_machine_start::template result<U_store_T<S>, contr, lookup>(vs...);
+			}
 	};
 
 /***********************************************************************************************************************/

@@ -41,7 +41,8 @@ namespace cctmp {
 		nik_ces auto depend	= toc.depend;
 		nik_ces auto param	= toc.param;
 
-		nik_ces auto offset	= _five;
+		using Sign		= typename GenericAssemblyTA::Sign;
+
 		nik_ces auto length	= ( 1 * src.goto_size    )
 					+ ( 1 * src.branch_size  )
 					+ ( 2 * src.test_size    )
@@ -61,11 +62,11 @@ namespace cctmp {
 		{
 			nik_ce auto index       = toc.param_at(row, col).index;
 			nik_ce auto line_offset = toc.offset_at(row);
-			nik_ce auto adjset      = offset - line_offset;
+			nik_ce auto adjset      = Sign::dimension - line_offset;
 
-			if constexpr      (index == _one  ) return U_pack_Vs<row, col>;
-			else if constexpr (index == _three) return _zero;
-			else                                return index - adjset;
+			if constexpr      (Sign::is_replace(index)) return index - adjset;
+			else if constexpr (Sign::is_paste(index)  ) return _zero;
+			else                                        return U_pack_Vs<row, col>;
 		}
 
 		template<auto n, auto... Is>
@@ -144,7 +145,7 @@ namespace cctmp {
 
 						auto index = k->begin()->index;
 
-						if (index >= offset) // replace:
+						if (Sign::is_replace(index))
 						{
 							*(instr.value++)  = instruction< MN::select  , MT::front >;
 							*(instr.value++)  = instruction< MN::replace , MT::id    >;
@@ -152,7 +153,7 @@ namespace cctmp {
 							*extension.value  = true;
 							extension.value  += 2;
 
-							*position.value   = (index - offset);
+							*position.value   = (index - Sign::dimension);
 							position.value   += 2;
 						}
 
@@ -186,7 +187,7 @@ namespace cctmp {
 					{
 						auto index = k->begin()->index;
 
-						if (index == _one) // lookup:
+						if (Sign::is_lookup(index))
 						{
 							*(instr.value++)    = instruction< MN::select , MT::id    >;
 							*(instr.value++)    = instruction< MN::call   , MT::value >;
@@ -197,7 +198,7 @@ namespace cctmp {
 							*(lookpos.locus++)  = position.value;
 							position.value     += 2;
 						}
-						else if (index >= offset) // replace:
+						else if (Sign::is_replace(index))
 						{
 							*(instr.value++)  = instruction< MN::select , MT::front >;
 							*(instr.value++)  = instruction< MN::right  , MT::id    >;
@@ -205,7 +206,7 @@ namespace cctmp {
 							*extension.value  = true;
 							extension.value  += 2;
 
-							*position.value   = (index - offset);
+							*position.value   = (index - Sign::dimension);
 							position.value   += 2;
 						}
 

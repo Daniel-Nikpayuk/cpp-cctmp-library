@@ -92,10 +92,11 @@ namespace cctmp {
 		using size_type			= decltype(Size);
 
 		token_type token[length];
+		ctoken_type *start;
 		token_type *current;
-		ctoken_type *end;
+		ctoken_type *finish;
 
-		nik_ce Stack(ctoken_type s) : token{}, current{token}, end{token + length}
+		nik_ce Stack(ctoken_type s) : token{}, start{token}, current{token}, finish{token + length}
 		{
 			*   current = '\0';
 			* ++current = s;
@@ -104,13 +105,17 @@ namespace cctmp {
 		nik_ce ctoken_type & front() const { return *current; }
 		nik_ce  token_type & front()       { return *current; }
 
-		nik_ce void pop() { if (current != token) --current; }
+		nik_ce void pop() { if (current != start) --current; }
 
 		nik_ce void push(gcstring_type b, size_type size)
 		{
 			auto k = b + size;
 			while (k != b) *++current = *--k;
 		}
+
+		nik_ce auto begin () const { return start;  }
+		nik_ce auto end   () const { return finish; }
+		nik_ce auto size  () const { return length; }
 	};
 
 /***********************************************************************************************************************/
@@ -144,7 +149,7 @@ namespace cctmp {
 
 		nik_ce GenericPDA(bool p = true) :
 
-			stack      { T_pdtt::nt_start               },
+			stack      { T_pdtt::nonterminal_start      },
 			front      { stack.front()                  },
 			letter     { src.string                     },
 			word       { T_dfa::lex(letter, src.finish) },
@@ -275,48 +280,36 @@ namespace cctmp {
 		cstring_type string;
 		cstring_type finish;
 
-		gindex_type entry_size;
-		gindex_type line_size;
-		gindex_type stack_size;
-
-		gindex_type ident_size;
-		gindex_type assign_size;
-		gindex_type label_size;
-		gindex_type goto_size;
-		gindex_type test_size;
-		gindex_type branch_size;
-		gindex_type period_size;
-		gindex_type return_size;
-
-		gindex_type copy_size;
-		gindex_type replace_size;
-		gindex_type depend_size;
-		gindex_type graph_size;
-		gindex_type param_size;
+		gindex_type entry_size  , line_size    , stack_size                                 ;
+		gindex_type ident_size  , assign_size  , label_size      , goto_size  , test_size   ;
+		gindex_type branch_size , period_size  , underscore_size , quote_size , return_size ;
+		gindex_type copy_size   , replace_size , depend_size     , graph_size , param_size  ;
 
 		nik_ce source(const CharType (&s)[Size]) :
 
-			string         { s          },
-			finish         { s + length },
+			string          { s          },
+			finish          { s + length },
 
-			entry_size     { _one       },
-			line_size      { _one       },
-			stack_size     {            },
+			entry_size      { _one       },
+			line_size       { _one       },
+			stack_size      {            },
 
-			ident_size     {            },
-			assign_size    {            },
-			label_size     {            },
-			goto_size      {            },
-			test_size      {            },
-			branch_size    {            },
-			period_size    {            },
-			return_size    {            },
+			ident_size      {            },
+			assign_size     {            },
+			label_size      {            },
+			goto_size       {            },
+			test_size       {            },
+			branch_size     {            },
+			period_size     {            },
+			underscore_size {            },
+			quote_size      {            },
+			return_size     {            },
 
-			copy_size      {            },
-			replace_size   {            },
-			depend_size    {            },
-			graph_size     {            },
-			param_size     {            }
+			copy_size       {            },
+			replace_size    {            },
+			depend_size     {            },
+			graph_size      {            },
+			param_size      {            }
 
 			{
 				auto k = string;
@@ -337,14 +330,16 @@ namespace cctmp {
 							++line_size;
 							break;
 						}
-						case 'i': { ++cur_entry_size ; ++ident_size  ; break; }
-						case '=': {                    ++assign_size ; break; }
-						case 'l': {                    ++label_size  ; break; }
-						case 'g': {                    ++goto_size   ; break; }
-						case 't': { ++cur_entry_size ; ++test_size   ; break; }
-						case 'b': {                    ++branch_size ; break; }
-						case '.': { ++cur_entry_size ; ++period_size ; break; }
-						case 'r': {                    ++return_size ; break; }
+						case 'i': { ++cur_entry_size ; ++ident_size      ; break; }
+						case '=': {                    ++assign_size     ; break; }
+						case 'l': {                    ++label_size      ; break; }
+						case 'g': {                    ++goto_size       ; break; }
+						case 't': { ++cur_entry_size ; ++test_size       ; break; }
+						case 'b': {                    ++branch_size     ; break; }
+						case '.': { ++cur_entry_size ; ++period_size     ; break; }
+						case '_': { ++cur_entry_size ; ++underscore_size ; break; }
+						case 'q': { ++cur_entry_size ; ++quote_size      ; break; }
+						case 'r': {                    ++return_size     ; break; }
 					}
 
 					++stack_size;

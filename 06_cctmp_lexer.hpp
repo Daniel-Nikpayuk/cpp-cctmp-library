@@ -243,19 +243,11 @@ namespace cctmp {
 
 		nik_ce lexeme() :
 
-			start  { },
-			finish { },
-			value  { }
-
-			{ }
+			start{}, finish{}, value{} { }
 
 		nik_ce lexeme(gcstring_type _s, gcstring_type _f, gcindex_type _v) :
 
-			start  { _s },
-			finish { _f },
-			value  { _v }
-
-			{ }
+			start{_s}, finish{_f}, value{_v} { }
 	};
 
 	using clexeme = lexeme const;
@@ -538,9 +530,7 @@ namespace cctmp {
 		}
 
 		nik_ce cstate_type move(cstate_type s, gcchar_type c) const
-		{
-			return table[s][Charset::map(c)];
-		}
+			{ return table[s][Charset::map(c)]; }
 	};
 
 	// interface:
@@ -617,13 +607,16 @@ namespace cctmp {
 
 		nik_ces token_type keyword(gstring_type b, gstring_type e)
 		{
+			token_type val = TokenName::invalid;
+
 			switch (e - b)
 			{
-				case 1  : { return keyword_1(b, e)    ; }
-				case 4  : { return keyword_4(b, e)    ; }
-				case 6  : { return keyword_6(b, e)    ; }
-				default : { return TokenName::invalid ; }
+				case 1  : { val = keyword_1(b, e); break; }
+				case 4  : { val = keyword_4(b, e); break; }
+				case 6  : { val = keyword_6(b, e); break; }
 			}
+
+			return val;
 		}
 
 		nik_ces token_type keyword_1(gstring_type b, gstring_type e)
