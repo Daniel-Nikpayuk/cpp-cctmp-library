@@ -61,7 +61,7 @@ namespace cctmp {
 		nik_ces auto adjust_index()
 		{
 			nik_ce auto index       = toc.param_at(row, col).index;
-			nik_ce auto line_offset = toc.offset_at(row);
+			nik_ce auto line_offset = toc.param_offset(row);
 			nik_ce auto adjset      = Sign::dimension - line_offset;
 
 			if constexpr      (Sign::is_replace(index)) return index - adjset;

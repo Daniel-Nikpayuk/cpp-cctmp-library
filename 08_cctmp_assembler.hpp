@@ -235,7 +235,7 @@ namespace cctmp {
 
 		nik_ce auto param_at(gindex_type m, gindex_type n) const { return param.array[m]->array[n]; }
 		nik_ce auto param_size(gindex_type m) const { return param.array[m]->size(); }
-		nik_ce auto offset_at(gindex_type n) const { return page.array[n].offset; }
+		nik_ce auto param_offset(gindex_type n) const { return param.array[n]->offset; }
 	};
 
 /***********************************************************************************************************************/

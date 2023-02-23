@@ -2562,49 +2562,6 @@ namespace cctmp_program
 	};
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// print table of contents:
-
-/***********************************************************************************************************************/
-
-	template<typename EntryType>
-	void print_entry(const EntryType & entry)
-	{
-		for (auto k = entry.start; k != entry.finish; ++k) printf("%c", *k);
-
-		printf("{%d} ", (int) entry.index);
-	}
-
-	template<typename LineType>
-	void print_line(const LineType & line)
-	{
-		for (auto k = line.begin(); k != line.end(); ++k) print_entry(*k);
-
-		printf("\n");
-	}
-
-	template<typename PageType>
-	void print_page(const PageType & page)
-	{
-		for (auto k = page.begin(); k != page.end(); ++k) print_line(*k);
-	}
-
-/***********************************************************************************************************************/
-
-	template<typename ParamType>
-	void print_param(const ParamType & param)
-	{
-		for (auto k = param.begin; k != param.locus; ++k) print_line(**k);
-	}
-
-	//	print_note(factorial.pda.syntax.label);
-	//	print_note(factorial.pda.syntax.go_to);
-	//	print_note(factorial.pda.syntax.branch);
-	//	print_note(factorial.pda.syntax.lookup);
-	//	print_page(factorial.pda.syntax.page);
-
-/***********************************************************************************************************************/
 
 #ifdef NIK_COMMENT
 
@@ -2695,63 +2652,35 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 
-	template<typename Instr>
-	void print_target_instr(const Instr *instr)
+// version 0:
+
+/*
+	constexpr auto factorial_source()
 	{
-		auto size = instr[0];
+		return source
+		(
+		 	"factorial p n    ;"
 
-		for (auto k = instr + 1; k != instr + size + 1; ++k) printf("%d ", (int) *k);
+			"loop:            ;"
+		 	"test is_zero n   ;"
+			"branch done      ;"
+			"p = multiply p n ;"
+			"n = decrement n  ;"
+			"goto loop        ;"
 
-		printf("\n");
+			"done:            ;"
+			"return p         ;"
+		);
 	}
 
-	template<typename Contr>
-	void print_target_contr(const Contr & contr)
+	template<typename T>
+	constexpr auto factorial(T v)
 	{
-		for (auto k = contr.begin(); k != contr.end(); ++k) print_target_instr(*k);
+		using T_factorial = T_generic_assembly_metapiler<factorial_source>;
+
+		return T_factorial::template result<T>(T(1), v);
 	}
-
-	template<typename Position>
-	void print_target_position(const Position & pos)
-	{
-		for (auto k = pos.begin(); k != pos.end(); ++k) printf("%d ", (int) *k);
-
-		printf("\n");
-	}
-
-/***********************************************************************************************************************/
-
-	template<typename Instr>
-	void print_metapiler_instr(const Instr *instr)
-	{
-		auto size = instr[0];
-
-		for (auto k = instr + 1; k != instr + size + 1; ++k) printf("%d ", (int) *k);
-
-		printf("\n");
-	}
-
-	template<typename Contr>
-	void print_metapiler_contr(const Contr *contr)
-	{
-		auto size = contr[0][0];
-
-		for (auto k = contr + 1; k != contr + size + 1; ++k) print_metapiler_instr(*k);
-	}
-
-/***********************************************************************************************************************/
-
-//	constexpr auto dpda = T_generic_assembly_dpda::template parse<square_source, 10'000>;
-		printf("%s\n", dpda.record);
-
-	//	print_complex(complex_number(1, 2) * complex_number(1, 2)); // prints: (-3.000000, 4.000000)
-	//	printf("%d\n", square(5));
-	//	printf("%d\n", factorial(argc));
-	//	print_target_contr(factorial.instr);
-	//	print_target_position(factorial.position);
-	//	print_metapiler_contr(factorial);
-	//	printf("%s\n", dpda.record);
-	//	print_page(factorial(5).page);
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

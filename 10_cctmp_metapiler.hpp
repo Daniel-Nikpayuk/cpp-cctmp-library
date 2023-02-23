@@ -135,57 +135,57 @@ namespace cctmp {
 		(
 		 	U_char,
 
-			binding( "id"                    , _id_                       ),
-			binding( "upshift"               , _upshift_                  ),
-			binding( "downshift"             , _downshift_                ),
+			binding( "id"                    , _id_                    ),
+			binding( "upshift"               , _upshift_               ),
+			binding( "downshift"             , _downshift_             ),
 
-			binding( "assign"                , _assign_                   ),
-			binding( "dereference"           , _dereference_              ),
-			binding( "to_bool"               , _to_bool_                  ),
+			binding( "assign"                , _assign_                ),
+			binding( "dereference"           , _dereference_           ),
+			binding( "to_bool"               , _to_bool_               ),
 
-			binding( "not"                   , _not_                      ),
-			binding( "and"                   , _and_                      ),
-			binding( "or"                    , _or_                       ),
-			binding( "implies"               , _implies_                  ),
-			binding( "equivalent"            , _equivalent_               ),
+			binding( "not"                   , _not_                   ),
+			binding( "and"                   , _and_                   ),
+			binding( "or"                    , _or_                    ),
+			binding( "implies"               , _implies_               ),
+			binding( "equivalent"            , _equivalent_            ),
 
-			binding( "equal"                 , _equal_                    ),
-			binding( "is_zero"               , _is_zero_                  ),
-			binding( "not_equal"             , _not_equal_                ),
-			binding( "less_than"             , _less_than_                ),
-			binding( "less_than_or_equal"    , _less_than_or_equal_       ),
-			binding( "greater_than"          , _greater_than_             ),
-			binding( "greater_than_or_equal" , _greater_than_or_equal_    ),
+			binding( "equal"                 , _equal_                 ),
+			binding( "is_zero"               , _is_zero_               ),
+			binding( "not_equal"             , _not_equal_             ),
+			binding( "less_than"             , _less_than_             ),
+			binding( "less_than_or_equal"    , _less_than_or_equal_    ),
+			binding( "greater_than"          , _greater_than_          ),
+			binding( "greater_than_or_equal" , _greater_than_or_equal_ ),
 
-			binding( "add"                   , _add_                      ),
-			binding( "subtract"              , _subtract_                 ),
-			binding( "multiply"              , _multiply_                 ),
-			binding( "divide"                , _divide_                   ),
-			binding( "modulo"                , _modulo_                   ),
+			binding( "add"                   , _add_                   ),
+			binding( "subtract"              , _subtract_              ),
+			binding( "multiply"              , _multiply_              ),
+			binding( "divide"                , _divide_                ),
+			binding( "modulo"                , _modulo_                ),
 
-			binding( "increment"             , _increment_<1>             ),
-			binding( "decrement"             , _increment_<-1>            ),
+			binding( "increment"             , _increment_<1>          ),
+			binding( "decrement"             , _increment_<-1>         ),
 
-			binding( "is_array"              , _is_array_                 ),
-			binding( "array_type"            , _array_type_               ),
-			binding( "array_size"            , _array_size_               ),
-			binding( "array_begin"           , _array_begin_              ),
-			binding( "array_last"            , _array_last_               ),
-			binding( "array_end"             , _array_end_                ),
-			binding( "log_floor"             , _log_floor_                ),
+			binding( "is_array"              , _is_array_              ),
+			binding( "array_type"            , _array_type_            ),
+			binding( "array_size"            , _array_size_            ),
+			binding( "array_begin"           , _array_begin_           ),
+			binding( "array_last"            , _array_last_            ),
+			binding( "array_end"             , _array_end_             ),
+			binding( "log_floor"             , _log_floor_             ),
 
-			binding( "is_sequence"           , _is_sequence_              ),
-			binding( "sequence_type"         , _sequence_type_            ),
-			binding( "sequence_size"         , _sequence_size_            ),
-			binding( "to_sequence"           , _to_sequence_              ),
-			binding( "sequence_begin"        , _sequence_begin_           ),
-			binding( "sequence_last"         , _sequence_last_            ),
-			binding( "sequence_end"          , _sequence_end_             ),
+			binding( "is_sequence"           , _is_sequence_           ),
+			binding( "sequence_type"         , _sequence_type_         ),
+			binding( "sequence_size"         , _sequence_size_         ),
+			binding( "to_sequence"           , _to_sequence_           ),
+			binding( "sequence_begin"        , _sequence_begin_        ),
+			binding( "sequence_last"         , _sequence_last_         ),
+			binding( "sequence_end"          , _sequence_end_          ),
 
-			binding( "is_tuple"              , _is_tuple_                 ),
-			binding( "tuple_type"            , _tuple_type_               ),
-			binding( "tuple_size"            , _tuple_size_               ),
-			binding( "to_tuple"              , _to_tuple_                 )
+			binding( "is_tuple"              , _is_tuple_              ),
+			binding( "tuple_type"            , _tuple_type_            ),
+			binding( "tuple_size"            , _tuple_size_            ),
+			binding( "to_tuple"              , _to_tuple_              )
 		);
 	};
 
@@ -263,13 +263,15 @@ namespace cctmp {
 
 			nik_ces auto contr = zip(eval<_par_segment_, target.instr.size()>);
 
+			template<auto f>
+			nik_ces auto lookup = repack<f>(target.lookup);
+
 			template<typename S, typename... Ts>
 			nik_ces S result(Ts... vs)
 			{
-				nik_ce auto f      = _wrap_<result<S, Ts...>>;
-				nik_ce auto lookup = repack<f>(target.lookup);
+				nik_ce auto f = _wrap_<result<S, Ts...>>;
 
-				return T_machine_start::template result<U_store_T<S>, contr, lookup>(vs...);
+				return T_machine_start::template result<U_store_T<S>, contr, lookup<f>>(vs...);
 			}
 	};
 

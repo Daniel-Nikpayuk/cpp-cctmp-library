@@ -35,7 +35,7 @@
 #include"09_cctmp_optimizer.hpp"
 #include"10_cctmp_metapiler.hpp"
 
-//#include"parser_diagnostics.hpp"
+//#include"testing/metapiler_printer.hpp"
 
 #include"undef_macros.hpp"
 
@@ -134,17 +134,18 @@
 	{
 		return source
 		(
-		 	"factorial p n    ;"
+		 	"factorial n one     ;"
 
-			"loop:            ;"
-		 	"test is_zero n   ;"
-			"branch done      ;"
-			"p = multiply p n ;"
-			"n = decrement n  ;"
-			"goto loop        ;"
+			"body:               ;"
+		 	"test is_zero n      ;"
+			"branch done         ;"
+			". = decrement n     ;"
+			". = factorial _ one ;"
+			". = multiply n _    ;"
+			"return _            ;"
 
-			"done:            ;"
-			"return p         ;"
+			"done:               ;"
+			"return one          ;"
 		);
 	}
 
@@ -153,7 +154,7 @@
 	{
 		using T_factorial = T_generic_assembly_metapiler<factorial_source>;
 
-		return T_factorial::template result<T>(T(1), v);
+		return T_factorial::template result<T>(v, T(1));
 	}
 
 /***********************************************************************************************************************/
