@@ -139,8 +139,6 @@ namespace cctmp {
 				case MT::branch    : { str = "MT::branch   " ; break; }
 				case MT::pair      : { str = "MT::pair     " ; break; }
 				case MT::side      : { str = "MT::side     " ; break; }
-				case MT::value     : { str = "MT::value    " ; break; }
-				case MT::value17   : { str = "MT::value17  " ; break; }
 				case MT::dimension : { str = "MT::dimension" ; break; }
 			}
 
@@ -163,7 +161,7 @@ namespace cctmp {
 			nik_ces auto src    = T_generic_assembly_pda::template parse<SourceCallable>;
 			nik_ces auto syntax = src.syntax;
 			nik_ces auto page   = syntax.page;
-			nik_ces auto param  = syntax.param;
+			nik_ces auto lookup = syntax.lookup;
 
 			template<typename EntryType>
 			void print_entry(const EntryType & entry)
@@ -176,7 +174,7 @@ namespace cctmp {
 			template<typename LineType>
 			void print_line(const LineType & line)
 			{
-				printf("| %hu | ", line.offset);
+				printf("| %hu | ", (gindex_type) line.has_offset);
 
 				for (auto k = line.begin(); k != line.end(); ++k) print_entry(*k);
 
@@ -187,8 +185,8 @@ namespace cctmp {
 
 			syntax_printer() { }
 
-			void print_page  () { for (auto k = page.begin(); k != page.end(); ++k) print_line(*k); }
-			void print_param () { for (auto k = param.begin(); k != param.end(); ++k) print_line(**k); }
+			void print_page   () { for (auto k = page.begin(); k != page.end(); ++k) print_line(*k); }
+			void print_lookup () { for (auto k = lookup.begin(); k != lookup.end(); ++k) print_line(**k); }
 	};
 
 /***********************************************************************************************************************/
@@ -229,9 +227,11 @@ namespace cctmp {
 			template<auto row, auto col>
 			void print_row_col(nik_avp(T_pack_Vs<row, col>*))
 			{
-				nik_ce auto offset = toc.param_offset(row);
+				nik_ce auto offset = toc.lookup_line_offset(row);
+				nik_ce auto lookup = toc.lookup.array[row]->has_lookup;
+				nik_ce auto status = lookup ? "has" : "hasn't";
 
-				printf("| %hu | <%hu, %hu> ", offset, (gindex_type) row, (gindex_type) col);
+				printf("| %s | %hu | <%d, %d> ", status, offset, row, col);
 			}
 
 			template<auto f, auto... Vs>
@@ -268,7 +268,7 @@ namespace cctmp {
 
 			nik_ces auto metapiler = T_generic_assembly_metapiler<SourceCallable>{};
 			nik_ces auto contr     = metapiler.contr;
-			nik_ces auto lookup    = metapiler.template lookup<false>;
+			nik_ces auto lookup    = metapiler.template make_lookup<false>;
 
 			template<typename Instr>
 			void print_instr(const Instr *instr, gcindex_type pos)
@@ -288,11 +288,16 @@ namespace cctmp {
 				printf("\n");
 			}
 
+			void print_lookup_value(gcindex_type val) { printf("%hu ", val); }
+
+			template<auto V>
+			void print_lookup_value(nik_avp(T_pack_Vs<V>*)) { printf("(%hu) ", V); }
+
 			template<auto f, auto... Vs>
 			void print_inner_lookup(nik_avp(T_pack_Vs<f, Vs...>*))
 			{
 				printf("%s ", parameter_printer::template op_name<f>());
-				(printf("%hu ", Vs), ...);
+				(print_lookup_value(Vs), ...);
 				printf("\n");
 			}
 

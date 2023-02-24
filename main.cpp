@@ -134,18 +134,18 @@
 	{
 		return source
 		(
-		 	"factorial n one     ;"
+		 	"factorial n      ;"
 
-			"body:               ;"
-		 	"test is_zero n      ;"
-			"branch done         ;"
-			". = decrement n     ;"
-			". = factorial _ one ;"
-			". = multiply n _    ;"
-			"return _            ;"
+			"body:            ;"
+		 	"test is_zero n   ;"
+			"branch done      ;"
+			". = decrement n  ;"
+			". = factorial _  ;"
+			". = multiply n _ ;"
+			"return _         ;"
 
-			"done:               ;"
-			"return one          ;"
+			"done:            ;"
+			"return one       ;"
 		);
 	}
 
@@ -154,7 +154,7 @@
 	{
 		using T_factorial = T_generic_assembly_metapiler<factorial_source>;
 
-		return T_factorial::template result<T>(v, T(1));
+		return T_factorial::template result<T>(v);
 	}
 
 /***********************************************************************************************************************/

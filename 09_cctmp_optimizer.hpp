@@ -37,9 +37,6 @@ namespace cctmp {
 		nik_ces auto pda	= T_generic_assembly_pda::template parse<SourceCallable>;
 		nik_ces auto src	= pda.src;
 		nik_ces auto toc	= pda.syntax;
-		nik_ces auto page	= toc.page;
-		nik_ces auto depend	= toc.depend;
-		nik_ces auto param	= toc.param;
 
 		using Sign		= typename GenericAssemblyTA::Sign;
 
@@ -50,22 +47,21 @@ namespace cctmp {
 					+ ( 3 * src.return_size  ) // upper bound: (1 * size <= 3 * size)
 					+ ( 4 * src.replace_size );
 
-		using instr_type	= sequence    < gcindex_type* , length          >;
-		using label_type	= sequence    < gindex_type   , src.label_size  >;
-		using extension_type	= sequence    < bool          , length          >;
-		using position_type	= sequence    < gindex_type   , length          >;
-		using lookpos_type	= subsequence < gindex_type   , src.param_size  >;
-		using labpos_type	= subsequence < gindex_type   , src.depend_size >;
+		using instr_type	= sequence    < gcindex_type* , length            >;
+		using label_type	= sequence    < gindex_type   , src.label_size    >;
+		using extension_type	= sequence    < bool          , length            >;
+		using position_type	= sequence    < gindex_type   , length            >;
+		using lookpos_type	= subsequence < gindex_type   , toc.lookup.size() >;
+		using labpos_type	= subsequence < gindex_type   , src.depend_size   >;
 
 		template<auto row, auto col>
 		nik_ces auto adjust_index()
 		{
-			nik_ce auto index       = toc.param_at(row, col).index;
-			nik_ce auto line_offset = toc.param_offset(row);
-			nik_ce auto adjset      = Sign::dimension - line_offset;
+			nik_ce auto index  = toc.lookup_entry(row, col).index;
+			nik_ce auto adjset = Sign::dimension - toc.lookup_line_offset(row);
 
-			if constexpr      (Sign::is_replace(index)) return index - adjset;
-			else if constexpr (Sign::is_paste(index)  ) return _zero;
+			if constexpr      (Sign::is_paste(index)  ) return _zero;
+			else if constexpr (Sign::is_replace(index)) return index - adjset;
 			else                                        return U_pack_Vs<row, col>;
 		}
 
@@ -75,21 +71,21 @@ namespace cctmp {
 
 		template<auto... Is>
 		nik_ces auto size_pack(nik_avp(T_pack_Vs<Is...>*))
-			{ return U_pack_Vs<eval<_par_segment_, toc.param_size(Is) - 1, _one>...>; }
+			{ return U_pack_Vs<eval<_par_segment_, toc.lookup_line_size(Is), toc.lookup_line_shift(Is)>...>; }
 
 		template<auto... Is, auto... Js>
 		nik_ces auto to_pack(nik_avp(T_pack_Vs<Is...>*), nik_avp(T_pack_Vs<Js...>*))
 			{ return U_pack_Vs<inner_pack<Is>(Js)...>; }
 
-		nik_ces auto param_to_pack()
+		nik_ces auto toc_lookup_to_pack()
 		{
-			nik_ce auto param_seg = eval<_par_segment_, param.size()>;
-			nik_ce auto size_seg  = size_pack(param_seg);
+			nik_ce auto t_lookup_seg = eval<_par_segment_, toc.lookup.size()>;
+			nik_ce auto size_seg     = size_pack(t_lookup_seg);
 
-			return to_pack(param_seg, size_seg);
+			return to_pack(t_lookup_seg, size_seg);
 		}
 
-		nik_ces auto lookup = param_to_pack();
+		nik_ces auto lookup = toc_lookup_to_pack();
 
 		instr_type instr;
 		label_type label;
@@ -107,7 +103,7 @@ namespace cctmp {
 			// can check if function calls are redundant and refactor,
 			// but it also might not be necessary if the compiler optimizes.
 
-			for (auto k = page.begin(); k != page.end(); ++k)
+			for (auto k = toc.page.begin(); k != toc.page.end(); ++k)
 			{
 				switch (k->kind)
 				{
@@ -125,7 +121,8 @@ namespace cctmp {
 						*extension.value    = true;
 						extension.value    += 2;
 
-						*(lookpos.locus++)  = position.value;
+						if (k->has_lookup) *(lookpos.locus++) = position.value;
+
 						position.value     += 2;
 
 						break;
@@ -134,13 +131,14 @@ namespace cctmp {
 					{
 						*(instr.value++) = instruction< MN::select , MT::id >;
 
-						if (k->offset == 1) *(instr.value++) = instruction< MN::recall , MT::id >;
-						else                *(instr.value++) = instruction< MN::call   , MT::id >;
+						if (k->has_offset) *(instr.value++) = instruction< MN::recall , MT::id >;
+						else               *(instr.value++) = instruction< MN::call   , MT::id >;
 
 						*extension.value    = true;
 						extension.value    += 2;
 
-						*(lookpos.locus++)  = position.value;
+						if (k->has_lookup) *(lookpos.locus++) = position.value;
+
 						position.value     += 2;
 
 						auto index = k->begin()->index;
@@ -189,13 +187,14 @@ namespace cctmp {
 
 						if (Sign::is_lookup(index))
 						{
-							*(instr.value++)    = instruction< MN::select , MT::id    >;
-							*(instr.value++)    = instruction< MN::call   , MT::value >;
+							*(instr.value++)    = instruction< MN::select , MT::id >;
+							*(instr.value++)    = instruction< MN::call   , MT::id >;
 
 							*extension.value    = true;
 							extension.value    += 2;
 
-							*(lookpos.locus++)  = position.value;
+							if (k->has_lookup) *(lookpos.locus++) = position.value;
+
 							position.value     += 2;
 						}
 						else if (Sign::is_replace(index))
@@ -226,7 +225,7 @@ namespace cctmp {
 			auto num = 0;
 			for (auto k = lookpos.begin(); k != lookpos.end(); ++k, ++num) **k = num;
 
-			auto line = depend.begin();
+			auto line = toc.depend.begin();
 			for (auto k = labpos.begin(); k != labpos.end(); ++k, ++line)
 				**k = label.array[(*line)->begin()->index];
 		}

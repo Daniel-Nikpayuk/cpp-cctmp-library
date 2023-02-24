@@ -280,18 +280,20 @@ namespace cctmp {
 		cstring_type string;
 		cstring_type finish;
 
-		gindex_type entry_size  , line_size    , stack_size                                 ;
+		// how many of these are actually needed?
+
+		gindex_type entry_size  , line_size    , stack_size      ;
 		gindex_type ident_size  , assign_size  , label_size      , goto_size  , test_size   ;
 		gindex_type branch_size , period_size  , underscore_size , quote_size , return_size ;
-		gindex_type copy_size   , replace_size , depend_size     , graph_size , param_size  ;
+		gindex_type copy_size   , replace_size , depend_size     , graph_size ;
 
 		nik_ce source(const CharType (&s)[Size]) :
 
 			string          { s          },
 			finish          { s + length },
 
-			entry_size      { _one       },
-			line_size       { _one       },
+			entry_size      {            },
+			line_size       {            },
 			stack_size      {            },
 
 			ident_size      {            },
@@ -308,8 +310,7 @@ namespace cctmp {
 			copy_size       {            },
 			replace_size    {            },
 			depend_size     {            },
-			graph_size      {            },
-			param_size      {            }
+			graph_size      {            }
 
 			{
 				auto k = string;
@@ -350,7 +351,6 @@ namespace cctmp {
 				replace_size  = assign_size - period_size;
 				depend_size   = goto_size   + branch_size;
 				graph_size    = depend_size + label_size;
-				param_size    = copy_size   + replace_size;
 			}
 	};
 

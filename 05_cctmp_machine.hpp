@@ -279,7 +279,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			front , go_to , branch , pair , side , value , value17 ,
+			front , go_to , branch , pair , side ,
 			dimension
 		};
 	};
@@ -380,11 +380,19 @@ namespace cctmp {
 
 		template<typename... Ts>
 		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr, lookup>(vs...); }
+	};
 
-	}; template<auto f, auto n>
-		nik_ce auto _apply_at_ = U_store_T<T_apply_at<f, n>>;
+	template<auto f, typename F, nik_vp(p)(F*)>
+	struct T_apply_at<f, p>
+	{
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) { return F::template result<>(vs...); }
+	};
 
 	// syntactic sugar:
+
+		template<auto f, auto n>
+		nik_ce auto _apply_at_ = U_store_T<T_apply_at<f, n>>;
 
 		template<auto n>
 		nik_ce auto _arg_at_ = _apply_at_<_id_, n>;
@@ -593,36 +601,6 @@ namespace cctmp {
 			T_store_U<f>::template result<>(arg_at<ns>(vs...)...);
 
 			return NIK_MACHINE(s, c, i, l, Vs)(vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// value:
-
-	template<auto val>
-	struct T_machine<MN::call, MT::value, val>
-	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
-		{
-			return NIK_MACHINE(s, c, i, l, Vs)(val, vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// value (C++17):
-
-	template<auto f>
-	struct T_machine<MN::call, MT::value17, f>
-	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
-		{
-			auto val = f();
-
-			return NIK_MACHINE(s, c, i, l, Vs)(val, vs...);
 		}
 	};
 

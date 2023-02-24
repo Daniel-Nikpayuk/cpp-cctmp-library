@@ -76,7 +76,7 @@ namespace cctmp {
 // function:
 
 	template<auto f, typename StringType>
-	nik_ce auto lookup_function(StringType str_begin, StringType str_end)
+	nik_ce auto key_function(StringType str_begin, StringType str_end)
 	{
 		nik_ce auto table		= f();
 
@@ -104,19 +104,19 @@ namespace cctmp {
 	}
 
 	template<auto f>
-	nik_ce auto make_lookup_function()
+	nik_ce auto make_key_function()
 	{
 		using table_type	= T_out_type<f>;
 		using string_type	= typename table_type::string_type;
 
 		nik_ce auto values	= table_type::values;
-		nik_ce auto lookup_f	= lookup_function<f, string_type>;
+		nik_ce auto key_f	= key_function<f, string_type>;
 
-		return U_pack_Vs<lookup_f, values>;
+		return U_pack_Vs<key_f, values>;
 	}
 
 	template<auto f>
-	nik_ce auto make_environment = make_lookup_function<f>();
+	nik_ce auto make_frame = make_key_function<f>();
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -129,7 +129,7 @@ namespace cctmp {
 
 // default:
 
-	nik_ce auto default_machine_lookup()
+	nik_ce auto default_machine_frame()
 	{
 		return table
 		(
@@ -182,6 +182,8 @@ namespace cctmp {
 			binding( "sequence_last"         , _sequence_last_         ),
 			binding( "sequence_end"          , _sequence_end_          ),
 
+			binding( "one"                   , _constant_<_one>        ), // temporary
+
 			binding( "is_tuple"              , _is_tuple_              ),
 			binding( "tuple_type"            , _tuple_type_            ),
 			binding( "tuple_size"            , _tuple_size_            ),
@@ -189,7 +191,7 @@ namespace cctmp {
 		);
 	};
 
-	nik_ce auto default_machine_environment = make_environment<default_machine_lookup>;
+	nik_ce auto default_machine_lookup = make_frame<default_machine_frame>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -204,9 +206,9 @@ namespace cctmp {
 	{
 		using Sign		= typename GenericAssemblyTA::Sign;
 
+		nik_ces auto def_lookup	= default_machine_lookup;
 		nik_ces auto target	= T_generic_assembly_target<SourceCallable>::value;
 		nik_ces auto toc	= target.toc;
-		nik_ces auto env	= default_machine_environment;
 
 		// controller:
 
@@ -233,45 +235,57 @@ namespace cctmp {
 
 		// lookup:
 
-			template<auto f>
-			nik_ces auto resolve_index(gcindex_type index) { return index; }
-
-			template<auto f, auto row, auto col>
+			template<auto row, auto col>
 			nik_ces auto resolve_index(nik_avp(T_pack_Vs<row, col>*))
 			{
-				nik_ce auto index = toc.param_at(row, col).index;
+				nik_ce auto start  = toc.lookup_entry(row, col).start;
+				nik_ce auto finish = toc.lookup_entry(row, col).finish;
+				nik_ce auto key_f  = unpack_<def_lookup, _car_>;
+				nik_ce auto values = unpack_<def_lookup, _cadr_>;
 
-				if constexpr (Sign::is_recurse(index)) return f;
-				else
-				{
-					nik_ce auto start  = toc.param_at(row, col).start;
-					nik_ce auto finish = toc.param_at(row, col).finish;
-					nik_ce auto lookup = unpack_<env, _car_>;
-					nik_ce auto values = unpack_<env, _cadr_>;
-
-					return unpack_<values, _par_at_, lookup(start, finish)>;
-				}
+				return unpack_<values, _par_at_, key_f(start, finish)>;
 			}
 
-			template<auto f, auto... Vs>
-			nik_ces auto inner_repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<resolve_index<f>(Vs)...>; }
+			template<auto recurse, typename T>
+			nik_ces auto resolve_first(T v) { return v; }
 
-			template<auto f, auto... Vs>
-			nik_ces auto repack(nik_avp(T_pack_Vs<Vs...>*)) { return U_pack_Vs<inner_repack<f>(Vs)...>; }
+			template<auto recurse, auto row, auto col>
+			nik_ces auto resolve_first(nik_vp(p)(T_pack_Vs<row, col>*))
+			{
+				nik_ce auto index = toc.lookup_entry(row, col).index;
+
+				if constexpr (Sign::is_recurse(index)) return recurse;
+				else                                   return resolve_index(p);
+			}
+
+			nik_ces auto resolve_rest(gcindex_type index) { return index; }
+
+			template<auto row, auto col>
+			nik_ces auto resolve_rest(nik_vp(p)(T_pack_Vs<row, col>*))
+				{ return U_pack_Vs<resolve_index(p)>; }
+
+			template<auto recurse, auto V, auto... Vs>
+			nik_ces auto inner_repack(nik_avp(T_pack_Vs<V, Vs...>*))
+				{ return U_pack_Vs<resolve_first<recurse>(V), resolve_rest(Vs)...>; }
+
+			template<auto recurse, auto... Vs>
+			nik_ces auto repack(nik_avp(T_pack_Vs<Vs...>*))
+				{ return U_pack_Vs<inner_repack<recurse>(Vs)...>; }
 
 		// function:
 
 			nik_ces auto contr = zip(eval<_par_segment_, target.instr.size()>);
 
-			template<auto f>
-			nik_ces auto lookup = repack<f>(target.lookup);
+			template<auto recurse>
+			nik_ces auto make_lookup = repack<recurse>(target.lookup);
 
 			template<typename S, typename... Ts>
 			nik_ces S result(Ts... vs)
 			{
-				nik_ce auto f = _wrap_<result<S, Ts...>>;
+				nik_ce auto recurse = _wrap_<result<S, Ts...>>;
+				nik_ce auto lookup  = make_lookup<recurse>;
 
-				return T_machine_start::template result<U_store_T<S>, contr, lookup<f>>(vs...);
+				return T_machine_start::template result<U_store_T<S>, contr, lookup>(vs...);
 			}
 	};
 

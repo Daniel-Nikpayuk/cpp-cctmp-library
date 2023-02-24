@@ -320,7 +320,7 @@ namespace cctmp {
 
 // default:
 
-	nik_ce auto default_interpreter_lookup()
+	nik_ce auto default_interpreter_frame()
 	{
 		return table
 		(
@@ -395,7 +395,7 @@ namespace cctmp {
 		);
 	};
 
-//	nik_ce auto default_interpreter_environment = make_environment<default_interpreter_lookup>;
+//	nik_ce auto default_interpreter_lookup = make_frame<default_interpreter_frame>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
