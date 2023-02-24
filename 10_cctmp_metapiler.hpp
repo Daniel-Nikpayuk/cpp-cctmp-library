@@ -202,7 +202,7 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-	template<auto SourceCallable>
+	template<auto SourceCallable, auto Env = U_null_Vs>
 	struct T_generic_assembly_metapiler
 	{
 		using Sign		= typename GenericAssemblyTA::Sign;
@@ -289,6 +289,16 @@ namespace cctmp {
 				return T_machine_start::template result<U_store_T<S>, contr, lookup>(vs...);
 			}
 	};
+
+	// syntactic sugar:
+
+		template<auto SourceCallable, typename S, typename... Ts>
+		constexpr auto generic_assembly_apply(Ts... vs)
+		{
+			using T_function = T_generic_assembly_metapiler<SourceCallable>;
+
+			return T_function::template result<S>(vs...);
+		}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

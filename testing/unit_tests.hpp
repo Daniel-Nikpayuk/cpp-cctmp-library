@@ -2651,38 +2651,6 @@ namespace cctmp_program
 #endif
 
 /***********************************************************************************************************************/
-
-// version 0:
-
-/*
-	constexpr auto factorial_source()
-	{
-		return source
-		(
-		 	"factorial p n    ;"
-
-			"loop:            ;"
-		 	"test is_zero n   ;"
-			"branch done      ;"
-			"p = multiply p n ;"
-			"n = decrement n  ;"
-			"goto loop        ;"
-
-			"done:            ;"
-			"return p         ;"
-		);
-	}
-
-	template<typename T>
-	constexpr auto factorial(T v)
-	{
-		using T_factorial = T_generic_assembly_metapiler<factorial_source>;
-
-		return T_factorial::template result<T>(T(1), v);
-	}
-*/
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
