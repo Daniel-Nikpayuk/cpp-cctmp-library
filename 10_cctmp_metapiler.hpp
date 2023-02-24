@@ -182,6 +182,7 @@ namespace cctmp {
 			binding( "sequence_last"         , _sequence_last_         ),
 			binding( "sequence_end"          , _sequence_end_          ),
 
+			binding( "zero"                  , _constant_<_zero>       ), // temporary
 			binding( "one"                   , _constant_<_one>        ), // temporary
 
 			binding( "is_tuple"              , _is_tuple_              ),
@@ -262,7 +263,7 @@ namespace cctmp {
 
 			template<auto row, auto col>
 			nik_ces auto resolve_rest(nik_vp(p)(T_pack_Vs<row, col>*))
-				{ return U_pack_Vs<resolve_index(p)>; }
+				{ return resolve_index(U_restore_T<decltype(p)>); }
 
 			template<auto recurse, auto V, auto... Vs>
 			nik_ces auto inner_repack(nik_avp(T_pack_Vs<V, Vs...>*))

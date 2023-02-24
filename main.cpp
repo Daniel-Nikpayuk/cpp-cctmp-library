@@ -134,18 +134,18 @@
 	{
 		return source
 		(
-		 	"factorial n      ;"
+		 	"factorial n       ;"
 
-			"body:            ;"
-		 	"test is_zero n   ;"
-			"branch done      ;"
-			". = decrement n  ;"
-			". = factorial _  ;"
-			". = multiply n _ ;"
-			"return _         ;"
+			"body:             ;"
+		 	"test equal n zero ;"
+			"branch done       ;"
+			". = decrement n   ;"
+			". = factorial _   ;"
+			". = multiply n _  ;"
+			"return _          ;"
 
-			"done:            ;"
-			"return one       ;"
+			"done:             ;"
+			"return one        ;"
 		);
 	}
 
