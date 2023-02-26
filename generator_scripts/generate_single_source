@@ -35,7 +35,7 @@ mawk "$mawk_prog_rest"  "05_cctmp_machine.hpp"       >> "cpp_cctmp_library.hpp" 
 mawk "$mawk_prog_rest"  "06_cctmp_lexer.hpp"         >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "07_cctmp_parser.hpp"        >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "08_cctmp_assembler.hpp"     >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "09_cctmp_optimizer.hpp"     >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "09_cctmp_targeter.hpp"      >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "10_cctmp_metapiler.hpp"     >> "cpp_cctmp_library.hpp" &&
 
 mawk "$mawk_prog_rest"  "undef_macros.hpp"           >> "cpp_cctmp_library.hpp"

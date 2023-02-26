@@ -25,6 +25,11 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// frame:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // binding:
 
 /***********************************************************************************************************************/
@@ -95,7 +100,7 @@ namespace cctmp {
 			string_type b		= *key;
 			string_type e		= b + *(size++);
 
-			if (ptr_diff_equal<size_type>(b, e, str_begin, str_end)) break;
+			if (ptr_diff_equal(b, e, str_begin, str_end)) break;
 
 			++key;
 		}
@@ -198,95 +203,149 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// compile:
+// generic assembly:
 
 /***********************************************************************************************************************/
+
+// environment:
+
+	template<auto Size>
+	struct environment
+	{
+		using key_type		= gcindex_type *;
+		using match_type	= gcbool_type  *;
+
+		nik_ces auto length	= Size;
+
+		const key_type key;
+		match_type match[length];
+
+		nik_ce environment(gcindex_type (&k)[Size]) : key{k}, match{} { }
+	};
+
+/***********************************************************************************************************************/
+
+// automaton:
 
 	template<auto SourceCallable, auto Env = U_null_Vs>
 	struct T_generic_assembly_metapiler
 	{
-		using Sign		= typename GenericAssemblyTA::Sign;
-
+		nik_ces auto env	= eval<_push_, H_id, Env, default_machine_lookup>;
 		nik_ces auto def_lookup	= default_machine_lookup;
 		nik_ces auto target	= T_generic_assembly_target<SourceCallable>::value;
 		nik_ces auto toc	= target.toc;
 
+		// toc:
+
+			struct T_entry_poses
+			{
+				template<auto n>
+				nik_ces auto result = eval
+				<
+					_par_segment_, toc.lookup_line_size(n), toc.lookup_line_shift(n)
+				>;
+
+			}; nik_ces auto _entry_poses_ = U_custom_T<T_entry_poses>;
+
+		// target:
+
+			struct T_instr_poses
+			{
+				template<auto n>
+				nik_ces auto result = eval<_par_segment_, target.instr_size(n)>;
+
+			}; nik_ces auto _instr_poses_ = U_custom_T<T_instr_poses>;
+
 		// controller:
 
-			template<auto ins, auto b, auto pos>
-			nik_ces auto inner_zip()
+			template<auto n, auto... ms>
+			nik_ces auto unpack_instr(nik_avp(T_pack_Vs<ms...>*))
 			{
-				if constexpr (b) return instruction<ins[PI::name], ins[PI::note], pos>;
-				else             return ins;
+				return eval<_instr_, target.instr_at(n, ms)...>;
 			}
 
-			template<auto... Is>
-			nik_ces auto zip(nik_avp(T_pack_Vs<Is...>*))
+			template<auto... c_ps, auto... i_ps>
+			nik_ces auto to_contr(nik_avp(T_pack_Vs<c_ps...>*), nik_avp(T_pack_Vs<i_ps...>*))
 			{
-				return controller
-				<
-					inner_zip
-					<
-						target.instr.array[Is],
-						target.extension.array[Is],
-						target.position.array[Is]
-					>()...
-				>;
+				return eval<_contr_, unpack_instr<c_ps>(i_ps)...>;
 			}
+
+			nik_ces auto static_target_contr()
+			{
+				nik_ce auto contr_poses = eval<_par_segment_, target.contr.size()>;
+				nik_ce auto instr_poses = unpack_<contr_poses, _map_, H_id, _instr_poses_>;
+
+				return to_contr(contr_poses, instr_poses);
+			}
+
+			nik_ces auto contr = static_target_contr();
 
 		// lookup:
 
-			template<auto row, auto col>
-			nik_ces auto resolve_index(nik_avp(T_pack_Vs<row, col>*))
+			template<auto n, auto m>
+			nik_ces auto resolve()
 			{
-				nik_ce auto start  = toc.lookup_entry(row, col).start;
-				nik_ce auto finish = toc.lookup_entry(row, col).finish;
+				nik_ce auto start  = toc.lookup_entry_start(n, m);
+				nik_ce auto finish = toc.lookup_entry_finish(n, m);
 				nik_ce auto key_f  = unpack_<def_lookup, _car_>;
 				nik_ce auto values = unpack_<def_lookup, _cadr_>;
 
 				return unpack_<values, _par_at_, key_f(start, finish)>;
 			}
 
-			template<auto recurse, typename T>
-			nik_ces auto resolve_first(T v) { return v; }
-
-			template<auto recurse, auto row, auto col>
-			nik_ces auto resolve_first(nik_vp(p)(T_pack_Vs<row, col>*))
+			template<auto that_f, auto n, auto m>
+			nik_ces auto resolve_value()
 			{
-				nik_ce auto index = toc.lookup_entry(row, col).index;
+				nik_ce auto sign  = toc.lookup_entry_sign(n, m);
+				nik_ce auto index = toc.lookup_entry_index(n, m);
 
-				if constexpr (Sign::is_recurse(index)) return recurse;
-				else                                   return resolve_index(p);
+				if constexpr      (Sign::is_lookup(sign) ) return resolve<n, m>();
+				else if constexpr (Sign::is_recurse(sign)) return that_f;
+				else                                       return index;
 			}
 
-			nik_ces auto resolve_rest(gcindex_type index) { return index; }
+			template<auto this_f, auto n, auto m>
+			nik_ces auto resolve_first() { return resolve_value<this_f, n, m>(); }
 
-			template<auto row, auto col>
-			nik_ces auto resolve_rest(nik_vp(p)(T_pack_Vs<row, col>*))
-				{ return resolve_index(U_restore_T<decltype(p)>); }
+			template<auto this_f, auto n, auto m>
+			nik_ces auto resolve_rest() { return resolve_value<_constant_<this_f>, n, m>(); }
 
-			template<auto recurse, auto V, auto... Vs>
-			nik_ces auto inner_repack(nik_avp(T_pack_Vs<V, Vs...>*))
-				{ return U_pack_Vs<resolve_first<recurse>(V), resolve_rest(Vs)...>; }
+			template<auto this_f, auto n, auto m0, auto... ms>
+			nik_ces auto unpack_entry(nik_avp(T_pack_Vs<m0, ms...>*))
+			{
+				nik_ce auto first = resolve_first<this_f, n, m0>();
 
-			template<auto recurse, auto... Vs>
-			nik_ces auto repack(nik_avp(T_pack_Vs<Vs...>*))
-				{ return U_pack_Vs<inner_repack<recurse>(Vs)...>; }
+				return eval<_list_<>, first, resolve_rest<this_f, n, ms>()...>;
+			}
+
+			template<auto this_f, auto... l_ps, auto... e_ps>
+			nik_ces auto to_pack(nik_avp(T_pack_Vs<l_ps...>*), nik_avp(T_pack_Vs<e_ps...>*))
+			{
+				return eval<_list_<>, unpack_entry<this_f, l_ps>(e_ps)...>;
+			}
+
+			template<auto this_f>
+			nik_ces auto to_lookup_pack()
+			{
+				nik_ce auto line_poses  = eval<_par_segment_, toc.lookup.size()>;
+				nik_ce auto entry_poses = unpack_<line_poses, _map_, H_id, _entry_poses_>;
+
+				return to_pack<this_f>(line_poses, entry_poses);
+			}
+
+			template<auto this_f>
+			nik_ces auto resolve_lookup = to_lookup_pack<this_f>();
 
 		// function:
-
-			nik_ces auto contr = zip(eval<_par_segment_, target.instr.size()>);
-
-			template<auto recurse>
-			nik_ces auto make_lookup = repack<recurse>(target.lookup);
 
 			template<typename S, typename... Ts>
 			nik_ces S result(Ts... vs)
 			{
-				nik_ce auto recurse = _wrap_<result<S, Ts...>>;
-				nik_ce auto lookup  = make_lookup<recurse>;
+				nik_ce auto s      = U_store_T<S>;
+				nik_ce auto this_f = _wrap_<result<S, Ts...>>;
+				nik_ce auto lookup = resolve_lookup<this_f>;
 
-				return T_machine_start::template result<U_store_T<S>, contr, lookup>(vs...);
+				return T_machine_start::template result<s, contr, lookup>(vs...);
 			}
 	};
 

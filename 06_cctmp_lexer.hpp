@@ -92,15 +92,10 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-	template<typename SizeType, typename Type1, typename Type2>
+	template<typename Type1, typename Type2>
 	nik_ce auto ptr_diff_equal(const Type1 *b1, const Type1 *e1, const Type2 *b2, const Type2 *e2)
 	{
-		using size_type = SizeType;
-
-		const size_type size1 = e1 - b1;
-		const size_type size2 = e2 - b2;
-
-		bool equal = (size1 == size2);
+		bool equal = ((e1 - b1) == (e2 - b2));
 
 		while (equal && b1 != e1) equal = (*(b1++) == *(b2++));
 

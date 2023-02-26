@@ -163,20 +163,54 @@ namespace cctmp {
 			nik_ces auto page   = syntax.page;
 			nik_ces auto lookup = syntax.lookup;
 
-			template<typename EntryType>
-			void print_entry(const EntryType & entry)
-			{
-				for (auto k = entry.start; k != entry.finish; ++k) printf("%c", *k);
+			void print_spacing(gckey_type size) { for (auto k = 0; k != size; ++k) printf(" "); }
 
-				printf("{%d} ", (int) entry.index);
+			template<typename StringType>
+			void print_string(const StringType *start, const StringType *finish)
+				{ for (auto k = start; k != finish; ++k) printf("%c", *k); }
+
+			template<typename EntryType>
+			void print_entry(const EntryType & entry, gckey_type spacing)
+			{
+				auto str = "";
+				auto sub = _zero;
+
+				switch (entry.sign)
+				{
+					case Sign::na        : { str = " "      ; sub = 1; break; }
+					case Sign::arg       : { str = "arg"    ; sub = 3; break; }
+					case Sign::copy      : { str = "copy"   ; sub = 4; break; }
+					case Sign::paste     : { str = "paste"  ; sub = 5; break; }
+					case Sign::recurse   : { str = "recurse"; sub = 7; break; }
+					case Sign::label     : { str = "label"  ; sub = 5; break; }
+					case Sign::jump      : { str = "jump"   ; sub = 4; break; }
+					case Sign::lookup    : { str = "lookup" ; sub = 6; break; }
+					case Sign::dimension : { str = "dim"    ; sub = 3; break; }
+				}
+
+				auto size = sub + (entry.finish - entry.start);
+				if (spacing > size) print_spacing(spacing - size);
+
+				print_string(entry.start, entry.finish);
+
+				auto print_right  = Sign::is_arg   (entry.sign)
+						 || Sign::is_paste (entry.sign)
+						 || Sign::is_label (entry.sign)
+						 || Sign::is_jump  (entry.sign);
+
+				if (print_right) printf("{%s|%d}", str, (int) entry.index);
+				else             printf("{%s| }", str);
 			}
 
 			template<typename LineType>
-			void print_line(const LineType & line)
+			void print_line(const LineType & line, gckey_type spacing)
 			{
-				printf("| %hu | ", (gindex_type) line.has_offset);
+				auto l_str = line.has_lookup ? "lookup" : "      ";
+				auto r_str = line.has_paste  ? "paste"  : "     " ;
 
-				for (auto k = line.begin(); k != line.end(); ++k) print_entry(*k);
+				printf("|%s|%s| ", l_str, r_str);
+
+				for (auto k = line.begin(); k != line.end(); ++k) print_entry(*k, spacing);
 
 				printf("\n");
 			}
@@ -185,8 +219,15 @@ namespace cctmp {
 
 			syntax_printer() { }
 
-			void print_page   () { for (auto k = page.begin(); k != page.end(); ++k) print_line(*k); }
-			void print_lookup () { for (auto k = lookup.begin(); k != lookup.end(); ++k) print_line(**k); }
+			void print_page(gckey_type spacing = _zero)
+			{
+				for (auto k = page.begin(); k != page.end(); ++k) print_line(*k, spacing);
+			}
+
+			void print_lookup(gckey_type spacing = _zero)
+			{
+				for (auto k = lookup.begin(); k != lookup.end(); ++k) print_line(**k, spacing);
+			}
 	};
 
 /***********************************************************************************************************************/
@@ -196,54 +237,31 @@ namespace cctmp {
 	{
 		private:
 
-			nik_ces auto target    = T_generic_assembly_target<SourceCallable>::value;
-			nik_ces auto toc       = target.toc;
-			nik_ces auto contr     = target.instr;
-			nik_ces auto extension = target.extension;
-			nik_ces auto position  = target.position;
-			nik_ces auto lookup    = target.lookup;
+			nik_ces auto target	= T_generic_assembly_target<SourceCallable>::value;
+			nik_ces auto contr	= target.contr;
 
-			template<typename Instr>
-			void print_instr(const Instr *instr, gcindex_type pos)
+			using Instr		= typename decltype(target)::Instr;
+
+			template<typename InstrType>
+			void print_instr(const InstrType & instr, gcindex_type line)
 			{
-				auto offset   = machine_printer::offset(pos);
+				auto offset   = machine_printer::offset(line);
 
-				auto name     = instr[MI::name];
+				auto name     = instr.array[Instr::name];
 				auto name_str = machine_printer::name(name);
 
-				auto note     = instr[MI::note];
+				auto note     = instr.array[Instr::note];
 				auto note_str = machine_printer::note(note);
 
-				auto ext      = extension.array[pos];
-				auto val      = position.array[pos];
+				auto size     = instr.size();
+				auto value    = instr.array[Instr::pos];
 
-				printf("%s%hu    %s    %s    ", offset, pos, name_str, note_str);
+				printf("%s%hu    %s    %s    ", offset, line, name_str, note_str);
 
-				if (ext) printf("%d", val);
+				if (size == target.instr_length) printf("%d", value);
 
 				printf("\n");
 			}
-
-			template<auto row, auto col>
-			void print_row_col(nik_avp(T_pack_Vs<row, col>*))
-			{
-				nik_ce auto offset = toc.lookup_line_offset(row);
-				nik_ce auto lookup = toc.lookup.array[row]->has_lookup;
-				nik_ce auto status = lookup ? "has" : "hasn't";
-
-				printf("| %s | %hu | <%d, %d> ", status, offset, row, col);
-			}
-
-			template<auto f, auto... Vs>
-			void print_inner_lookup(nik_avp(T_pack_Vs<f, Vs...>*))
-			{
-				print_row_col(f);
-				(printf("%hu ", (gindex_type) Vs), ...);
-				printf("\n");
-			}
-
-			template<auto... Vs>
-			void unpack_lookup(nik_avp(T_pack_Vs<Vs...>*)) { (print_inner_lookup(Vs), ...); }
 
 		public:
 
@@ -251,12 +269,9 @@ namespace cctmp {
 
 			void print_controller()
 			{
-				auto pos = 0;
-
-				for (auto k = contr.begin(); k != contr.end(); ++k, ++pos) print_instr(*k, pos);
+				for (auto k = contr.begin(); k != contr.end(); ++k)
+					print_instr(*k, k - contr.begin());
 			}
-
-			void print_lookup() { unpack_lookup(lookup); }
 	};
 
 /***********************************************************************************************************************/
@@ -268,7 +283,7 @@ namespace cctmp {
 
 			nik_ces auto metapiler = T_generic_assembly_metapiler<SourceCallable>{};
 			nik_ces auto contr     = metapiler.contr;
-			nik_ces auto lookup    = metapiler.template make_lookup<false>;
+			nik_ces auto lookup    = metapiler.template resolve_lookup<false>;
 
 			template<typename Instr>
 			void print_instr(const Instr *instr, gcindex_type pos)
