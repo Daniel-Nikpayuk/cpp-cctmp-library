@@ -150,7 +150,11 @@ namespace cctmp {
 
 	template<typename T>
 	constexpr auto x_to5_plus1_v0(T x)
-		{ return generic_assembly_apply<_x_to5_plus1_v0, T>(x, T(0)); }
+	{
+		constexpr auto l0 = default_constant_lookup;
+
+		return generic_assembly_apply<_x_to5_plus1_v0, T, l0>(x, T(0));
+	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -182,7 +186,11 @@ namespace cctmp {
 
 	template<typename T>
 	constexpr auto factorial_v0(T v)
-		{ return generic_assembly_apply<_factorial_v0, T>(v); }
+	{
+		constexpr auto l0 = default_constant_lookup;
+
+		return generic_assembly_apply<_factorial_v0, T, l0>(v);
+	}
 
 /***********************************************************************************************************************/
 
@@ -298,7 +306,11 @@ namespace cctmp {
 
 	template<typename T>
 	constexpr auto fibonacci_v0(T v)
-		{ return generic_assembly_apply<_fibonacci_v0, T>(v, T(0), T(0)); }
+	{
+		constexpr auto l0 = default_constant_lookup;
+
+		return generic_assembly_apply<_fibonacci_v0, T, l0>(v, T(0), T(0));
+	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

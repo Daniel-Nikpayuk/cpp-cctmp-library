@@ -306,7 +306,7 @@ namespace cctmp {
 	struct dfa_charset
 	{
 		using char_type			= CharType;
-		using string_type		= char_type const *;
+		using string_type		= char_type const*;
 		using size_type			= decltype(Size);
 
 		nik_ces size_type length	= Size - 1;

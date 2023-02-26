@@ -30,7 +30,7 @@ mawk "$mawk_prog_rest"  "00_cctmp_grammar.hpp"       >> "cpp_cctmp_library.hpp" 
 mawk "$mawk_prog_rest"  "01_cctmp_argument.hpp"      >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "02_cctmp_parameter.hpp"     >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "03_cctmp_praxis.hpp"        >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "04_cctmp_interpretr.hpp"    >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "04_cctmp_interpreter.hpp"   >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "05_cctmp_machine.hpp"       >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "06_cctmp_lexer.hpp"         >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "07_cctmp_parser.hpp"        >> "cpp_cctmp_library.hpp" &&

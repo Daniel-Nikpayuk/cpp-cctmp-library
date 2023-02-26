@@ -38,7 +38,7 @@ namespace cctmp {
 	struct binding
 	{
 		using char_type			= CharType;
-		using string_type		= char_type const *;
+		using string_type		= char_type const*;
 		using size_type			= decltype(Size);
 
 		nik_ces size_type size		= Size - 1; // best policy?
@@ -187,9 +187,6 @@ namespace cctmp {
 			binding( "sequence_last"         , _sequence_last_         ),
 			binding( "sequence_end"          , _sequence_end_          ),
 
-			binding( "zero"                  , _constant_<_zero>       ), // temporary
-			binding( "one"                   , _constant_<_one>        ), // temporary
-
 			binding( "is_tuple"              , _is_tuple_              ),
 			binding( "tuple_type"            , _tuple_type_            ),
 			binding( "tuple_size"            , _tuple_size_            ),
@@ -200,6 +197,32 @@ namespace cctmp {
 	nik_ce auto default_machine_lookup = make_frame<default_machine_frame>;
 
 /***********************************************************************************************************************/
+
+// constant:
+
+	nik_ce auto default_constant_frame()
+	{
+		return table
+		(
+		 	U_char,
+
+			binding( "zero"  , _constant_< _zero  >),
+			binding( "one"   , _constant_< _one   >),
+			binding( "two"   , _constant_< _two   >),
+			binding( "three" , _constant_< _three >),
+			binding( "four"  , _constant_< _four  >),
+			binding( "five"  , _constant_< _five  >),
+			binding( "six"   , _constant_< _six   >),
+			binding( "seven" , _constant_< _seven >),
+			binding( "eight" , _constant_< _eight >),
+			binding( "nine"  , _constant_< _nine  >),
+			binding( "ten"   , _constant_< _ten   >)
+		);
+	};
+
+	nik_ce auto default_constant_lookup = make_frame<default_constant_frame>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -207,20 +230,40 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// environment:
+// survey:
 
-	template<auto Size>
-	struct environment
+	struct survey
 	{
-		using key_type		= gcindex_type *;
-		using match_type	= gcbool_type  *;
+		template<auto frame>
+		nik_ces auto find(gstring_type start, gstring_type finish)
+		{
+			nik_ce auto key_f  = unpack_<frame, _car_>;
+			nik_ce auto values = unpack_<frame, _cadr_>;
+			nik_ce auto size   = unpack_<values, _length_>;
 
-		nik_ces auto length	= Size;
+			auto key = key_f(start, finish);
 
-		const key_type key;
-		match_type match[length];
+			return survey(key, size);
+		}
 
-		nik_ce environment(gcindex_type (&k)[Size]) : key{k}, match{} { }
+		nik_ces auto search(const survey *begin, const survey *end)
+		{
+			auto k = begin;
+
+			while (k != end)
+			{
+				if (k->match) break; 
+
+				++k;
+			}
+
+			return (k - begin);
+		}
+
+		bool match;
+		gindex_type key;
+
+		nik_ce survey(gcindex_type _k, gcindex_type size) : match{_k != size}, key{_k} { }
 	};
 
 /***********************************************************************************************************************/
@@ -231,7 +274,6 @@ namespace cctmp {
 	struct T_generic_assembly_metapiler
 	{
 		nik_ces auto env	= eval<_push_, H_id, Env, default_machine_lookup>;
-		nik_ces auto def_lookup	= default_machine_lookup;
 		nik_ces auto target	= T_generic_assembly_target<SourceCallable>::value;
 		nik_ces auto toc	= target.toc;
 
@@ -282,26 +324,29 @@ namespace cctmp {
 
 		// lookup:
 
-			template<auto n, auto m>
-			nik_ces auto resolve()
+			template<auto n, auto m, auto... frames>
+			nik_ces auto resolve(nik_avp(T_pack_Vs<frames...>*))
 			{
-				nik_ce auto start  = toc.lookup_entry_start(n, m);
-				nik_ce auto finish = toc.lookup_entry_finish(n, m);
-				nik_ce auto key_f  = unpack_<def_lookup, _car_>;
-				nik_ce auto values = unpack_<def_lookup, _cadr_>;
+				nik_ce auto   start    = toc.lookup_entry_start(n, m);
+				nik_ce auto   finish   = toc.lookup_entry_finish(n, m);
 
-				return unpack_<values, _par_at_, key_f(start, finish)>;
+				nik_ce survey record[] = { survey::find<frames>(start, finish)... };
+				nik_ce auto   pos      = survey::search(record, record + sizeof...(frames));
+
+				nik_ce auto   frame    = eval<_par_at_, pos, frames...>;
+				nik_ce auto   values   = unpack_<frame, _cadr_>;
+
+				return unpack_<values, _par_at_, record[pos].key>;
 			}
 
 			template<auto that_f, auto n, auto m>
 			nik_ces auto resolve_value()
 			{
-				nik_ce auto sign  = toc.lookup_entry_sign(n, m);
-				nik_ce auto index = toc.lookup_entry_index(n, m);
+				nik_ce auto sign = toc.lookup_entry_sign(n, m);
 
-				if constexpr      (Sign::is_lookup(sign) ) return resolve<n, m>();
-				else if constexpr (Sign::is_recurse(sign)) return that_f;
-				else                                       return index;
+				if nik_ce      (Sign::is_recurse(sign)) return that_f;
+				else if nik_ce (Sign::is_lookup (sign)) return resolve<n, m>(env);
+				else                                    return toc.lookup_entry_index(n, m);
 			}
 
 			template<auto this_f, auto n, auto m>
@@ -351,10 +396,12 @@ namespace cctmp {
 
 	// syntactic sugar:
 
-		template<auto SourceCallable, typename S, typename... Ts>
-		constexpr auto generic_assembly_apply(Ts... vs)
+		template<auto SourceCallable, typename S, auto... Lookups, typename... Ts>
+		nik_ce auto generic_assembly_apply(Ts... vs)
 		{
-			using T_function = T_generic_assembly_metapiler<SourceCallable>;
+			nik_ce auto Env = U_pack_Vs<Lookups...>;
+
+			using T_function = T_generic_assembly_metapiler<SourceCallable, Env>;
 
 			return T_function::template result<S>(vs...);
 		}
