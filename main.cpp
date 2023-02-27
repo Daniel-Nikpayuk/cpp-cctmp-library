@@ -49,12 +49,14 @@
 
 	int main(int argc, char *argv[])
 	{
-		static_assert(factorial_v0(0) ==    1);
-		static_assert(factorial_v1(3) ==    6);
-		static_assert(factorial_v2(5) ==  120);
-		static_assert(factorial_v3(7) == 5040);
+		static_assert(factorial_v0(0) ==     1);
+		static_assert(factorial_v1(3) ==     6);
+		static_assert(factorial_v2(5) ==   120);
+		static_assert(factorial_v3(7) ==  5040);
+		static_assert(factorial_v4(8) == 40320);
 
 		static_assert(fibonacci_v0(7) ==   21);
+		static_assert(fibonacci_v1(8) ==   34);
 
 		print_complex(square_v0(complex_number(1, 2))); // prints: (-3.000000, 4.000000)
 		print_complex(sum_of_squares_v0(complex_number(1, 2), complex_number(0, 1))); // prints: (-4.000000, 4.000000)

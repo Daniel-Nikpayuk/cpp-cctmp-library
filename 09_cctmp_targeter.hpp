@@ -133,6 +133,10 @@ namespace cctmp {
 					add_instr(MN::select, MT::front, Mark::value);
 					add_instr(MN::replace, MT::id);
 				}
+				else if (Sign::is_var(sign))
+				{
+					add_instr(MN::rotate, MT::id);
+				}
 			}
 
 			nik_ce void add_branch_instr(cline_type & l)

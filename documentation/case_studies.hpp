@@ -273,6 +273,38 @@ namespace cctmp {
 		{ return generic_assembly_apply<_factorial_v3, T>(T(1), v); }
 
 /***********************************************************************************************************************/
+
+// version 4:
+
+	constexpr auto _factorial_v4()
+	{
+		return source
+		(
+		 	"factorial n      ;"
+
+			"body:            ;"
+			"p = one          ;"
+		 	"test is_zero n   ;"
+			"branch done      ;"
+			". = decrement n  ;"
+			"p = factorial _  ;"
+			". = multiply n p ;"
+			"return _         ;"
+
+			"done:            ;"
+			"return p         ;"
+		);
+	}
+
+	template<typename T>
+	constexpr auto factorial_v4(T v)
+	{
+		constexpr auto l0 = default_constant_lookup;
+
+		return generic_assembly_apply<_factorial_v4, T, l0>(v);
+	}
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // fibonacci:
@@ -310,6 +342,41 @@ namespace cctmp {
 		constexpr auto l0 = default_constant_lookup;
 
 		return generic_assembly_apply<_fibonacci_v0, T, l0>(v, T(0), T(0));
+	}
+
+/***********************************************************************************************************************/
+
+// version 1:
+
+	constexpr auto _fibonacci_v1()
+	{
+		return source
+		(
+		 	"fibonacci n       ;"
+
+			"body:             ;"
+		 	"test equal n zero ;"
+			"branch done       ;"
+		 	"test equal n one  ;"
+			"branch done       ;"
+			"n1 = decrement n  ;"
+			"n2 = decrement n1 ;"
+			"n1 = fibonacci n1 ;"
+			"n2 = fibonacci n2 ;"
+			".  = add n1 n2    ;"
+			"return _          ;"
+
+			"done:             ;"
+			"return one        ;"
+		);
+	}
+
+	template<typename T>
+	constexpr auto fibonacci_v1(T v)
+	{
+		constexpr auto l0 = default_constant_lookup;
+
+		return generic_assembly_apply<_fibonacci_v1, T, l0>(v);
 	}
 
 /***********************************************************************************************************************/

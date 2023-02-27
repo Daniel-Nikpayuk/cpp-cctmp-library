@@ -118,6 +118,7 @@ namespace cctmp {
 				case MN::select    : { str = "MN::select   " ; break; }
 				case MN::right     : { str = "MN::right    " ; break; }
 				case MN::replace   : { str = "MN::replace  " ; break; }
+				case MN::rotate    : { str = "MN::rotate   " ; break; }
 				case MN::call      : { str = "MN::call     " ; break; }
 				case MN::recall    : { str = "MN::recall   " ; break; }
 				case MN::loop      : { str = "MN::loop     " ; break; }
@@ -179,6 +180,7 @@ namespace cctmp {
 				{
 					case Sign::na        : { str = " "      ; sub = 1; break; }
 					case Sign::arg       : { str = "arg"    ; sub = 3; break; }
+					case Sign::var       : { str = "var"    ; sub = 3; break; }
 					case Sign::copy      : { str = "copy"   ; sub = 4; break; }
 					case Sign::paste     : { str = "paste"  ; sub = 5; break; }
 					case Sign::recurse   : { str = "recurse"; sub = 7; break; }
@@ -194,6 +196,7 @@ namespace cctmp {
 				print_string(entry.start, entry.finish);
 
 				auto print_right  = Sign::is_arg   (entry.sign)
+						 || Sign::is_var   (entry.sign)
 						 || Sign::is_paste (entry.sign)
 						 || Sign::is_label (entry.sign)
 						 || Sign::is_jump  (entry.sign);
@@ -276,14 +279,15 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-	template<auto SourceCallable>
+	template<auto SourceCallable, auto... Lookups>
 	struct metapiler_printer
 	{
 		private:
 
-			nik_ces auto metapiler = T_generic_assembly_metapiler<SourceCallable>{};
-			nik_ces auto contr     = metapiler.contr;
-			nik_ces auto lookup    = metapiler.template resolve_lookup<false>;
+			nik_ces auto env	= U_pack_Vs<Lookups...>;
+			nik_ces auto metapiler	= T_generic_assembly_metapiler<SourceCallable, env>{};
+			nik_ces auto contr	= metapiler.contr;
+			nik_ces auto lookup	= metapiler.template resolve_lookup<false>;
 
 			template<typename Instr>
 			void print_instr(const Instr *instr, gcindex_type pos)

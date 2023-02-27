@@ -57,11 +57,12 @@ namespace cctmp {
 		enum : sign_type
 		{
 			na = 0,
-			arg , copy , paste , recurse , label , jump , lookup ,
+			arg , var , copy , paste , recurse , label , jump , lookup ,
 			dimension
 		};
 
 		nik_ces bool is_arg     (sign_type s) { return (s == arg    ); }
+		nik_ces bool is_var     (sign_type s) { return (s == var    ); }
 		nik_ces bool is_copy    (sign_type s) { return (s == copy   ); }
 		nik_ces bool is_paste   (sign_type s) { return (s == paste  ); }
 		nik_ces bool is_recurse (sign_type s) { return (s == recurse); }
@@ -134,10 +135,10 @@ namespace cctmp {
 		cline_type *start;
 		line_type *line;
 
-		bool is_name;
+		bool is_first;
 		bool has_copy;
 
-		nik_ce Page() : array{}, start{array}, line{array}, is_name{}, has_copy{} { }
+		nik_ce Page() : array{}, start{array}, line{array}, is_first{}, has_copy{} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return line; }
@@ -207,27 +208,36 @@ namespace cctmp {
 
 			page{}, label{}, go_to{}, branch{}, graph{}, lookup{}, arg_index{}, label_index{} { }
 
-		nik_ce void increment_entry  () { ++(page.line->entry); }
-		nik_ce void increment_line   () { ++(page.line       ); }
-		nik_ce void increment_label  () { ++(label.locus     ); }
-		nik_ce void increment_goto   () { ++(go_to.locus     ); }
-		nik_ce void increment_branch () { ++(branch.locus    ); }
-		nik_ce void increment_depend () { ++(depend.locus    ); }
-		nik_ce void increment_graph  () { ++(graph.locus     ); }
-		nik_ce void increment_lookup () { ++(lookup.locus    ); }
+		nik_ce void increment_arg_entry () { ++page.array[0].entry; }
+		nik_ce void increment_entry     () { ++page.line->entry   ; }
+		nik_ce void increment_line      () { ++page.line          ; }
+		nik_ce void increment_label     () { ++label.locus        ; }
+		nik_ce void increment_goto      () { ++go_to.locus        ; }
+		nik_ce void increment_branch    () { ++branch.locus       ; }
+		nik_ce void increment_depend    () { ++depend.locus       ; }
+		nik_ce void increment_graph     () { ++graph.locus        ; }
+		nik_ce void increment_lookup    () { ++lookup.locus       ; }
 
 		nik_ce auto kind() const { return page.line->kind; }
 		nik_ce auto fline_end() const { return page.begin()->end(); }
 
 		nik_ce void set_kind(ccontext_type k) { page.line->kind = k; }
-		nik_ce void set_entry(clexeme & l, csign_type s, gcindex_type i = _zero)
+
+		template<typename EntryType>
+		nik_ce void set_entry(EntryType & e, clexeme & l, csign_type s, gcindex_type i)
 		{
-			page.line->entry->start  = l.start;
-			page.line->entry->finish = l.finish;
-			page.line->entry->token  = l.value;
-			page.line->entry->sign   = s;
-			page.line->entry->index  = i;
+			e.start  = l.start;
+			e.finish = l.finish;
+			e.token  = l.value;
+			e.sign   = s;
+			e.index  = i;
 		}
+
+		nik_ce void set_arg_entry(clexeme & l, gcindex_type i)
+			{ set_entry(*page.array[0].entry, l, Sign::arg, i); }
+
+		nik_ce void set_entry(clexeme & l, csign_type s, gcindex_type i = _zero)
+			{ set_entry(*page.line->entry, l, s, i); }
 
 		nik_ce void set_lookup()
 		{
@@ -333,7 +343,7 @@ namespace cctmp {
 			nik_ces void new_definition(TOC & toc, clexeme & l, S & s)
 			{
 				toc.set_kind(Context::define);
-				toc.page.is_name = true;
+				toc.page.is_first = true;
 			}
 
 			template<typename TOC, typename S>
@@ -352,6 +362,7 @@ namespace cctmp {
 			nik_ces void new_application(TOC & toc, clexeme & l, S & s)
 			{
 				toc.set_kind(Context::apply);
+				toc.page.is_first = true;
 			}
 
 			template<typename TOC, typename S> // can assume "gi;" is the current stack front.
@@ -531,46 +542,103 @@ namespace cctmp {
 
 		// identifier:
 
-			template<typename TOC>
-			nik_ces void identifier_arg_entry(TOC & toc, clexeme & l)
-			{
-				auto i = toc.arg_index;
-				auto s = Sign::arg;
+			// arg:
 
-				if (toc.page.is_name)
+				template<typename TOC>
+				nik_ces void identifier_arg_first(TOC & toc, clexeme & l)
 				{
-					s = Sign::na;
-					toc.page.is_name = false;
+					toc.set_entry(l, Sign::na, toc.arg_index);
+					toc.page.is_first = false;
 				}
-				else ++toc.arg_index;
 
-				toc.set_entry(l, s, i);
-			}
-
-			template<typename TOC>
-			nik_ces void identifier_apply_entry(TOC & toc, clexeme & l)
-			{
-				auto k = toc.match_arguments(l.start, l.finish);
-				if (k != toc.fline_end())
+				template<typename TOC>
+				nik_ces void identifier_arg_rest(TOC & toc, clexeme & l)
 				{
-					auto shift = toc.page.line->has_paste ? _one : _zero;
-					auto index = k->index + shift;
+					toc.set_entry(l, Sign::arg, toc.arg_index++);
+				}
+
+				template<typename TOC>
+				nik_ces void identifier_arg_entry(TOC & toc, clexeme & l)
+				{
+					if (toc.page.is_first) identifier_arg_first(toc, l);
+					else identifier_arg_rest(toc, l);
+				}
+
+			// apply:
+
+				template<typename TOC>
+				nik_ces void identifier_apply_assign(TOC & toc, clexeme & l, gcindex_type index)
+				{
 					toc.set_entry(l, Sign::arg, index);
 				}
-				else
+
+				template<typename TOC>
+				nik_ces void identifier_apply_arg(TOC & toc, clexeme & l, gcindex_type index)
+				{
+					auto shift = toc.page.line->has_paste ? _one : _zero;
+					toc.set_entry(l, Sign::arg, index + shift);
+				}
+
+				template<typename TOC>
+				nik_ces void identifier_apply_lookup(TOC & toc, clexeme & l)
 				{
 					auto j = toc.match_name(l.start, l.finish);
 					auto s = j ? Sign::recurse : Sign::lookup;
 
-					toc.set_entry(l, s);
 					toc.set_lookup();
+					toc.set_entry(l, s);
 				}
-			}
+
+				template<typename TOC>
+				nik_ces void identifier_apply_variable(TOC & toc, clexeme & l)
+				{
+					auto j = toc.match_name(l.start, l.finish);
+					auto s = j ? Sign::recurse : toc.page.is_first ? Sign::var : Sign::lookup;
+
+					if (s == Sign::var) // can assume first:
+					{
+						toc.set_arg_entry(l, toc.arg_index);
+						toc.increment_arg_entry();
+
+						toc.set_entry(l, s, toc.arg_index);
+						++toc.arg_index;
+					}
+					else
+					{
+						toc.set_lookup();
+						toc.set_entry(l, s);
+					}
+				}
+
+				template<typename TOC>
+				nik_ces void identifier_apply_first(TOC & toc, clexeme & l)
+				{
+					auto k = toc.match_arguments(l.start, l.finish);
+					if (k != toc.fline_end()) identifier_apply_assign(toc, l, k->index);
+					else identifier_apply_variable(toc, l);
+
+					toc.page.is_first = false;
+				}
+
+				template<typename TOC>
+				nik_ces void identifier_apply_rest(TOC & toc, clexeme & l)
+				{
+					auto k = toc.match_arguments(l.start, l.finish);
+					if (k != toc.fline_end()) identifier_apply_arg(toc, l, k->index);
+					else identifier_apply_lookup(toc, l);
+				}
+
+				template<typename TOC>
+				nik_ces void identifier_apply_entry(TOC & toc, clexeme & l)
+				{
+					if (toc.page.is_first) identifier_apply_first(toc, l);
+					else identifier_apply_rest(toc, l);
+				}
 
 			template<typename TOC>
 			nik_ces void identifier_test_entry(TOC & toc, clexeme & l)
 			{
-				identifier_apply_entry(toc, l);
+				identifier_apply_rest(toc, l);
 			}
 
 			template<typename TOC>
@@ -592,8 +660,8 @@ namespace cctmp {
 				if (k != toc.fline_end()) toc.set_entry(l, Sign::arg, k->index);
 				else
 				{
-					toc.set_entry(l, Sign::lookup);
 					toc.set_lookup(); // can assume at most one lookup.
+					toc.set_entry(l, Sign::lookup);
 				}
 			}
 
@@ -623,6 +691,7 @@ namespace cctmp {
 			nik_ces void period_apply_entry(TOC & toc, clexeme & l)
 			{
 				toc.set_entry(l, Sign::copy);
+				toc.page.is_first = false; // can assume first.
 				toc.page.has_copy = true;
 			}
 		};
