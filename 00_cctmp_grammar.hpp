@@ -333,9 +333,11 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
+			id = 0, identity = id, // convenience for default params.
+
 			// basis:
 
-				id = 0, identity = id, // convenience for default params.
+				nop , first ,
 
 			// bitwise:
 
@@ -396,10 +398,6 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-
-			// basis:
-
-				nop ,
 
 			// comparison:
 

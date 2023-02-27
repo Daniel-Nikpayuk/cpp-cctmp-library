@@ -419,6 +419,7 @@ namespace cctmp {
 				ulan    = underscore_latin_alphanumeric,
 				semicolon,
 				equal,
+				punctuation,
 				period,
 				colon,
 				backslash,
@@ -430,11 +431,12 @@ namespace cctmp {
 
 			nik_ces state_type accept[] =
 			{
-				ulan      ,
-				semicolon ,
-				equal     ,
-				period    ,
-				colon     ,
+				ulan        ,
+				semicolon   ,
+				equal       ,
+				punctuation ,
+				period      ,
+				colon       ,
 				r_quote
 			};
 
@@ -443,6 +445,7 @@ namespace cctmp {
 				'i'  ,
 				';'  ,
 				'='  ,
+				'!'  ,
 				'.'  ,
 				'l'  ,
 				'q'
@@ -459,6 +462,7 @@ namespace cctmp {
 				digit,
 				semicolon,
 				equal,
+				punctuation,
 				period,
 				colon,
 				backslash,
@@ -472,6 +476,7 @@ namespace cctmp {
 				else if (matches_digit(c)                    ) return Charset::digit;
 				else if (c == ';'                            ) return Charset::semicolon;
 				else if (c == '='                            ) return Charset::equal;
+				else if (c == '!'                            ) return Charset::punctuation;
 				else if (c == '.'                            ) return Charset::period;
 				else if (c == ':'                            ) return Charset::colon;
 				else if (c == '\''                           ) return Charset::quote;
@@ -484,44 +489,48 @@ namespace cctmp {
 
 		nik_ce GenericAssemblyDFTT() : table{}
 		{
-			table [ State::initial   ][ Charset::ula       ] = State::ulan;
-			table [ State::initial   ][ Charset::semicolon ] = State::semicolon;
-			table [ State::initial   ][ Charset::equal     ] = State::equal;
-			table [ State::initial   ][ Charset::period    ] = State::period;
-			table [ State::initial   ][ Charset::quote     ] = State::l_quote;
+			table [ State::initial   ][ Charset::ula         ] = State::ulan;
+			table [ State::initial   ][ Charset::semicolon   ] = State::semicolon;
+			table [ State::initial   ][ Charset::equal       ] = State::equal;
+			table [ State::initial   ][ Charset::punctuation ] = State::punctuation;
+			table [ State::initial   ][ Charset::period      ] = State::period;
+			table [ State::initial   ][ Charset::quote       ] = State::l_quote;
 
-			table [ State::ulan      ][ Charset::ula       ] = State::ulan;
-			table [ State::ulan      ][ Charset::digit     ] = State::ulan;
-			table [ State::ulan      ][ Charset::colon     ] = State::colon;
+			table [ State::ulan      ][ Charset::ula         ] = State::ulan;
+			table [ State::ulan      ][ Charset::digit       ] = State::ulan;
+			table [ State::ulan      ][ Charset::colon       ] = State::colon;
 
-			table [ State::l_quote   ][ Charset::ula       ] = State::no_quote;
-			table [ State::l_quote   ][ Charset::digit     ] = State::no_quote;
-			table [ State::l_quote   ][ Charset::semicolon ] = State::no_quote;
-			table [ State::l_quote   ][ Charset::equal     ] = State::no_quote;
-			table [ State::l_quote   ][ Charset::period    ] = State::no_quote;
-			table [ State::l_quote   ][ Charset::colon     ] = State::no_quote;
-			table [ State::l_quote   ][ Charset::backslash ] = State::backslash;
-			table [ State::l_quote   ][ Charset::other     ] = State::no_quote;
+			table [ State::l_quote   ][ Charset::ula         ] = State::no_quote;
+			table [ State::l_quote   ][ Charset::digit       ] = State::no_quote;
+			table [ State::l_quote   ][ Charset::semicolon   ] = State::no_quote;
+			table [ State::l_quote   ][ Charset::equal       ] = State::no_quote;
+			table [ State::l_quote   ][ Charset::punctuation ] = State::no_quote;
+			table [ State::l_quote   ][ Charset::period      ] = State::no_quote;
+			table [ State::l_quote   ][ Charset::colon       ] = State::no_quote;
+			table [ State::l_quote   ][ Charset::backslash   ] = State::backslash;
+			table [ State::l_quote   ][ Charset::other       ] = State::no_quote;
 
-			table [ State::backslash ][ Charset::ula       ] = State::no_quote;
-			table [ State::backslash ][ Charset::digit     ] = State::no_quote;
-			table [ State::backslash ][ Charset::semicolon ] = State::no_quote;
-			table [ State::backslash ][ Charset::equal     ] = State::no_quote;
-			table [ State::backslash ][ Charset::period    ] = State::no_quote;
-			table [ State::backslash ][ Charset::colon     ] = State::no_quote;
-			table [ State::backslash ][ Charset::backslash ] = State::no_quote;
-			table [ State::backslash ][ Charset::quote     ] = State::no_quote;
-			table [ State::backslash ][ Charset::other     ] = State::no_quote;
+			table [ State::backslash ][ Charset::ula         ] = State::no_quote;
+			table [ State::backslash ][ Charset::digit       ] = State::no_quote;
+			table [ State::backslash ][ Charset::semicolon   ] = State::no_quote;
+			table [ State::backslash ][ Charset::equal       ] = State::no_quote;
+			table [ State::backslash ][ Charset::punctuation ] = State::no_quote;
+			table [ State::backslash ][ Charset::period      ] = State::no_quote;
+			table [ State::backslash ][ Charset::colon       ] = State::no_quote;
+			table [ State::backslash ][ Charset::backslash   ] = State::no_quote;
+			table [ State::backslash ][ Charset::quote       ] = State::no_quote;
+			table [ State::backslash ][ Charset::other       ] = State::no_quote;
 
-			table [ State::no_quote  ][ Charset::ula       ] = State::no_quote;
-			table [ State::no_quote  ][ Charset::digit     ] = State::no_quote;
-			table [ State::no_quote  ][ Charset::semicolon ] = State::no_quote;
-			table [ State::no_quote  ][ Charset::equal     ] = State::no_quote;
-			table [ State::no_quote  ][ Charset::period    ] = State::no_quote;
-			table [ State::no_quote  ][ Charset::colon     ] = State::no_quote;
-			table [ State::no_quote  ][ Charset::backslash ] = State::backslash;
-			table [ State::no_quote  ][ Charset::quote     ] = State::r_quote;
-			table [ State::no_quote  ][ Charset::other     ] = State::no_quote;
+			table [ State::no_quote  ][ Charset::ula         ] = State::no_quote;
+			table [ State::no_quote  ][ Charset::digit       ] = State::no_quote;
+			table [ State::no_quote  ][ Charset::semicolon   ] = State::no_quote;
+			table [ State::no_quote  ][ Charset::equal       ] = State::no_quote;
+			table [ State::no_quote  ][ Charset::punctuation ] = State::no_quote;
+			table [ State::no_quote  ][ Charset::period      ] = State::no_quote;
+			table [ State::no_quote  ][ Charset::colon       ] = State::no_quote;
+			table [ State::no_quote  ][ Charset::backslash   ] = State::backslash;
+			table [ State::no_quote  ][ Charset::quote       ] = State::r_quote;
+			table [ State::no_quote  ][ Charset::other       ] = State::no_quote;
 		}
 
 		nik_ce cstate_type move(cstate_type s, gcchar_type c) const

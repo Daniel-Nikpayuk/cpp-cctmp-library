@@ -95,7 +95,6 @@ namespace cctmp {
 	// car:
 
 		nik_ce auto _car_ = U_par_abstract<Abstract::car>;
-		nik_ce auto _nop_ = _car_; // syntactic sugar.
 
 		template<auto V0, auto... Vs>
 		nik_ce auto eval<_car_, V0, Vs...> = V0;

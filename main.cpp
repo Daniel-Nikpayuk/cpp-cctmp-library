@@ -35,7 +35,8 @@
 #include"09_cctmp_targeter.hpp"
 #include"10_cctmp_metapiler.hpp"
 
-#include"documentation/case_studies.hpp"
+#include"documentation/00_case_studies.hpp"
+#include"documentation/01_chord_machines.hpp"
 //#include"testing/metapiler_printer.hpp"
 
 #include"undef_macros.hpp"
@@ -44,6 +45,7 @@
 /***********************************************************************************************************************/
 
 	using namespace cctmp;
+	using namespace cctmp_chord;
 
 /***********************************************************************************************************************/
 
@@ -62,6 +64,10 @@
 		print_complex(sum_of_squares_v0(complex_number(1, 2), complex_number(0, 1))); // prints: (-4.000000, 4.000000)
 		printf("%d\n", sum_of_squares_v0(3, 4)); // prints: 25
 		printf("%d\n", x_to5_plus1_v0(2)); // prints: 33
+
+		constexpr auto fold = _fold_<fold_lookup<_add_>>;
+
+		static_assert(apply<fold>(0, 1, 100) == 4950);
 
 		return 0;
 	}

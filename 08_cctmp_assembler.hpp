@@ -108,10 +108,11 @@ namespace cctmp {
 		entry_type *entry;
 
 		context_type kind;
+		bool has_side;
 		bool has_paste;
 		bool has_lookup;
 
-		nik_ce Line() : kind{}, array{}, start{array}, entry{array}, has_paste{}, has_lookup{} { }
+		nik_ce Line() : kind{}, array{}, start{array}, entry{array}, has_side{}, has_paste{}, has_lookup{} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return entry; }
@@ -186,12 +187,12 @@ namespace cctmp {
 
 		using page_type			= Page<char_type, src.line_size, src.entry_size>;
 
-		using label_type		= Subpage < page_type , src.label_size  >;
-		using goto_type			= Subpage < page_type , src.goto_size   >;
-		using branch_type		= Subpage < page_type , src.branch_size >;
-		using depend_type		= Subpage < page_type , src.depend_size >;
-		using graph_type		= Subpage < page_type , src.graph_size  >;
-		using lookup_type		= Subpage < page_type , src.line_size   >;
+		using label_type		= Subpage < page_type , src.label_size      >;
+		using goto_type			= Subpage < page_type , src.goto_size       >;
+		using branch_type		= Subpage < page_type , src.branch_size     >;
+		using depend_type		= Subpage < page_type , src.dependency_size >;
+		using graph_type		= Subpage < page_type , src.graph_size      >;
+		using lookup_type		= Subpage < page_type , src.line_size       >;
 
 		page_type page;
 		label_type label;
@@ -299,6 +300,9 @@ namespace cctmp {
 		nik_ce auto lookup_entry_index(gindex_type m, gindex_type n) const
 			{ return lookup.array[m]->array[n].index; }
 
+		nik_ce auto lookup_line_side(gindex_type n) const
+			{ return lookup.array[n]->has_side; }
+
 		nik_ce auto lookup_line_shift(gindex_type n) const
 		{
 			auto kind  = lookup.array[n]->kind;
@@ -391,17 +395,18 @@ namespace cctmp {
 				enum : action_type
 				{
 					nop = 0,
-					resolve_identifier ,
-					resolve_underscore ,
-					resolve_period     ,
-					resolve_test       ,
-					resolve_branch     ,
-					resolve_goto       ,
-					resolve_return     ,
-					resolve_label      ,
-					resolve_statement  ,
-					resolve_quote      ,
-					resolve_accept     ,
+					resolve_identifier  ,
+					resolve_underscore  ,
+					resolve_period      ,
+					resolve_test        ,
+					resolve_branch      ,
+					resolve_goto        ,
+					resolve_return      ,
+					resolve_label       ,
+					resolve_statement   ,
+					resolve_punctuation ,
+					resolve_quote       ,
+					resolve_accept      ,
 					dimension
 				};
 			};
@@ -513,6 +518,12 @@ namespace cctmp {
 					toc.page.line->has_paste = true;
 					toc.page.has_copy        = false;
 				}
+			}
+
+			template<typename TOC>
+			nik_ces void resolve_punctuation(TOC & toc, clexeme & l)
+			{
+				toc.page.line->has_side = true;
 			}
 
 			template<typename TOC>
@@ -726,6 +737,7 @@ namespace cctmp {
 
 			terminal[ TAction::nop                 ] = Terminal::template nop                 <TOC>;
 			terminal[ TAction::resolve_identifier  ] = Terminal::template resolve_identifier  <TOC>;
+			terminal[ TAction::resolve_punctuation ] = Terminal::template resolve_punctuation <TOC>;
 			terminal[ TAction::resolve_underscore  ] = Terminal::template resolve_underscore  <TOC>;
 			terminal[ TAction::resolve_period      ] = Terminal::template resolve_period      <TOC>;
 			terminal[ TAction::resolve_test        ] = Terminal::template resolve_test        <TOC>;
@@ -768,7 +780,7 @@ namespace cctmp {
 
 		struct Terminal
 		{
-			nik_ces gchar_type symbol[] = ";iq=._lgtbr";
+			nik_ces gchar_type symbol[] = ";i!q=._lgtbr";
 
 			nik_ces auto size   = ArraySize::template result<>(symbol); // recognizes '\0'.
 			nik_ces auto finish = symbol + size;
@@ -795,16 +807,19 @@ namespace cctmp {
 			table_entry('B',  'l') = transition( "l;E"     , NAction::new_coordinate   );
 			table_entry('E',  'i') = transition( "IJgi;"                               );
 			table_entry('E',  '.') = transition( "IJgi;"                               );
+			table_entry('E',  '!') = transition( "IJgi;"                               );
 			table_entry('E',  't') = transition( "IJgi;"                               );
 			table_entry('E',  'r') = transition( "rM;"                                 );
 			table_entry('J',  'i') = transition( "IJ"                                  );
 			table_entry('J',  '.') = transition( "IJ"                                  );
+			table_entry('J',  '!') = transition( "IJ"                                  );
 			table_entry('J',  't') = transition( "IJ"                                  );
 			table_entry('J',  'g') = transition( ""                                    );
 			table_entry('J',  'l') = transition( ""        , NAction::sub_instr_label  );
 			table_entry('J',  'r') = transition( ""        , NAction::sub_instr_return );
 			table_entry('I',  'i') = transition( "T=OV;"   , NAction::new_application  );
 			table_entry('I',  '.') = transition( "T=OV;"   , NAction::new_application  );
+			table_entry('I',  '!') = transition( "!i=OV;"  , NAction::new_application  );
 			table_entry('I',  't') = transition( "tOV;bi;" , NAction::new_conditional  );
 			table_entry('V',  'i') = transition( "MV"                                  );
 			table_entry('V',  'q') = transition( "MV"                                  );
@@ -818,17 +833,18 @@ namespace cctmp {
 			table_entry('M',  'q') = transition( "q"                                   );
 			table_entry('M',  '_') = transition( "_"                                   );
 
-			list_entry( 'i') = TAction::resolve_identifier ;
-			list_entry( '_') = TAction::resolve_underscore ;
-			list_entry( '.') = TAction::resolve_period     ;
-			list_entry( 't') = TAction::resolve_test       ;
-			list_entry( 'b') = TAction::resolve_branch     ;
-			list_entry( 'g') = TAction::resolve_goto       ;
-			list_entry( 'r') = TAction::resolve_return     ;
-			list_entry( 'l') = TAction::resolve_label      ;
-			list_entry( ';') = TAction::resolve_statement  ;
-			list_entry( 'q') = TAction::resolve_quote      ;
-			list_entry('\0') = TAction::resolve_accept     ;
+			list_entry( 'i') = TAction::resolve_identifier  ;
+			list_entry( '!') = TAction::resolve_punctuation ;
+			list_entry( '_') = TAction::resolve_underscore  ;
+			list_entry( '.') = TAction::resolve_period      ;
+			list_entry( 't') = TAction::resolve_test        ;
+			list_entry( 'b') = TAction::resolve_branch      ;
+			list_entry( 'g') = TAction::resolve_goto        ;
+			list_entry( 'r') = TAction::resolve_return      ;
+			list_entry( 'l') = TAction::resolve_label       ;
+			list_entry( ';') = TAction::resolve_statement   ;
+			list_entry( 'q') = TAction::resolve_quote       ;
+			list_entry('\0') = TAction::resolve_accept      ;
 		}
 
 		nik_ce Production & table_entry(gcchar_type row_c, gcchar_type col_c)

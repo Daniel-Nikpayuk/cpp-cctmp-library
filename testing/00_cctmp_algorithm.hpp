@@ -330,7 +330,6 @@ namespace cctmp {
 			binding( "is_null"           , _praxis_< _is_null_           >),
 			binding( "length"            , _praxis_< _length_            >),
 			binding( "car"               , _praxis_< _car_               >),
-			binding( "nop"               , _praxis_< _nop_               >),
 			binding( "cadr"              , _praxis_< _cadr_              >),
 
 			binding( "is_const"          , _praxis_< _is_const_          >),

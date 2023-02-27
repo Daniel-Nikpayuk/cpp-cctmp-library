@@ -141,6 +141,7 @@ namespace cctmp {
 		 	U_char,
 
 			binding( "id"                    , _id_                    ),
+			binding( "nop"                   , _nop_                   ),
 			binding( "upshift"               , _upshift_               ),
 			binding( "downshift"             , _downshift_             ),
 
@@ -358,9 +359,17 @@ namespace cctmp {
 			template<auto this_f, auto n, auto m0, auto... ms>
 			nik_ces auto unpack_entry(nik_avp(T_pack_Vs<m0, ms...>*))
 			{
-				nik_ce auto first = resolve_first<this_f, n, m0>();
+				nik_ce auto first    = resolve_first<this_f, n, m0>();
+				nik_ce auto has_side = toc.lookup_line_side(n);
 
-				return eval<_list_<>, first, resolve_rest<this_f, n, ms>()...>;
+				if constexpr (has_side)
+				{
+					nik_ce auto m      = toc.lookup_entry_index(n, 0);
+					nik_ce auto second = resolve_rest<this_f, n, m>();
+
+					return eval<_list_<>, first, second, resolve_rest<this_f, n, ms>()...>;
+				}
+				else return eval<_list_<>, first, resolve_rest<this_f, n, ms>()...>;
 			}
 
 			template<auto this_f, auto... l_ps, auto... e_ps>

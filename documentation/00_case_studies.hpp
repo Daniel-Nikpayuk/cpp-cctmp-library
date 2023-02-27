@@ -169,10 +169,10 @@ namespace cctmp {
 	{
 		return source
 		(
-		 	"factorial n        ;"
+			"factorial n        ;"
 
 			"body:              ;"
-		 	"test equal n zero  ;"
+			"test equal n zero  ;"
 			"branch done        ;"
 			". = subtract n one ;"
 			". = factorial _    ;"
@@ -200,10 +200,10 @@ namespace cctmp {
 	{
 		return source
 		(
-		 	"factorial n one     ;"
+			"factorial n one     ;"
 
 			"body:               ;"
-		 	"test is_zero n      ;"
+			"test is_zero n      ;"
 			"branch done         ;"
 			". = decrement n     ;"
 			". = factorial _ one ;"
@@ -227,10 +227,10 @@ namespace cctmp {
 	{
 		return source
 		(
-		 	"factorial p n     ;"
+			"factorial p n     ;"
 
 			"body:             ;"
-		 	"test is_zero n    ;"
+			"test is_zero n    ;"
 			"branch done       ;"
 			"p = multiply p n  ;"
 			"n = decrement n   ;"
@@ -254,10 +254,10 @@ namespace cctmp {
 	{
 		return source
 		(
-		 	"factorial p n    ;"
+			"factorial p n    ;"
 
 			"loop:            ;"
-		 	"test is_zero n   ;"
+			"test is_zero n   ;"
 			"branch done      ;"
 			"p = multiply p n ;"
 			"n = decrement n  ;"
@@ -280,11 +280,11 @@ namespace cctmp {
 	{
 		return source
 		(
-		 	"factorial n      ;"
+			"factorial n      ;"
 
 			"body:            ;"
 			"p = one          ;"
-		 	"test is_zero n   ;"
+			"test is_zero n   ;"
 			"branch done      ;"
 			". = decrement n  ;"
 			"p = factorial _  ;"
@@ -317,12 +317,12 @@ namespace cctmp {
 	{
 		return source
 		(
-		 	"fibonacci n n1 n2           ;"
+			"fibonacci n n1 n2           ;"
 
 			"body:                       ;"
-		 	"test equal n zero           ;"
+			"test equal n zero           ;"
 			"branch done                 ;"
-		 	"test equal n one            ;"
+			"test equal n one            ;"
 			"branch done                 ;"
 			"n1 = decrement n            ;"
 			"n2 = decrement n1           ;"
@@ -352,12 +352,12 @@ namespace cctmp {
 	{
 		return source
 		(
-		 	"fibonacci n       ;"
+			"fibonacci n       ;"
 
 			"body:             ;"
-		 	"test equal n zero ;"
+			"test equal n zero ;"
 			"branch done       ;"
-		 	"test equal n one  ;"
+			"test equal n one  ;"
 			"branch done       ;"
 			"n1 = decrement n  ;"
 			"n2 = decrement n1 ;"

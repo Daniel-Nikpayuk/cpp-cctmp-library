@@ -282,35 +282,36 @@ namespace cctmp {
 
 		// how many of these are actually needed?
 
-		gindex_type entry_size  , line_size    , stack_size      ;
-		gindex_type ident_size  , assign_size  , label_size      , goto_size  , test_size   ;
-		gindex_type branch_size , period_size  , underscore_size , quote_size , return_size ;
-		gindex_type copy_size   , replace_size , depend_size     , graph_size ;
+		gindex_type entry_size      , line_size        , stack_size   ;
+		gindex_type identifier_size , assign_size      , label_size   , goto_size       , test_size  ;
+		gindex_type branch_size     , punctuation_size , period_size  , underscore_size , quote_size ;
+		gindex_type return_size     , copy_size        , replace_size , dependency_size , graph_size ;
 
 		nik_ce source(const CharType (&s)[Size]) :
 
-			string          { s          },
-			finish          { s + length },
+			string           { s          },
+			finish           { s + length },
 
-			entry_size      {            },
-			line_size       {            },
-			stack_size      {            },
+			entry_size       {            },
+			line_size        {            },
+			stack_size       {            },
 
-			ident_size      {            },
-			assign_size     {            },
-			label_size      {            },
-			goto_size       {            },
-			test_size       {            },
-			branch_size     {            },
-			period_size     {            },
-			underscore_size {            },
-			quote_size      {            },
-			return_size     {            },
+			identifier_size  {            },
+			punctuation_size {            },
+			assign_size      {            },
+			label_size       {            },
+			goto_size        {            },
+			test_size        {            },
+			branch_size      {            },
+			period_size      {            },
+			underscore_size  {            },
+			quote_size       {            },
+			return_size      {            },
 
-			copy_size       {            },
-			replace_size    {            },
-			depend_size     {            },
-			graph_size      {            }
+			copy_size        {            },
+			replace_size     {            },
+			dependency_size  {            },
+			graph_size       {            }
 
 			{
 				auto k = string;
@@ -331,26 +332,27 @@ namespace cctmp {
 							++line_size;
 							break;
 						}
-						case 'i': { ++cur_entry_size ; ++ident_size      ; break; }
-						case '=': {                    ++assign_size     ; break; }
-						case 'l': {                    ++label_size      ; break; }
-						case 'g': {                    ++goto_size       ; break; }
-						case 't': { ++cur_entry_size ; ++test_size       ; break; }
-						case 'b': {                    ++branch_size     ; break; }
-						case '.': { ++cur_entry_size ; ++period_size     ; break; }
-						case '_': { ++cur_entry_size ; ++underscore_size ; break; }
-						case 'q': { ++cur_entry_size ; ++quote_size      ; break; }
-						case 'r': {                    ++return_size     ; break; }
+						case 'i': { ++cur_entry_size ; ++identifier_size  ; break; }
+						case '!': {                    ++punctuation_size ; break; }
+						case '=': {                    ++assign_size      ; break; }
+						case 'l': {                    ++label_size       ; break; }
+						case 'g': {                    ++goto_size        ; break; }
+						case 't': { ++cur_entry_size ; ++test_size        ; break; }
+						case 'b': {                    ++branch_size      ; break; }
+						case '.': { ++cur_entry_size ; ++period_size      ; break; }
+						case '_': { ++cur_entry_size ; ++underscore_size  ; break; }
+						case 'q': { ++cur_entry_size ; ++quote_size       ; break; }
+						case 'r': {                    ++return_size      ; break; }
 					}
 
 					++stack_size;
 					k = l.finish;
 				}
 
-				copy_size     = test_size   + period_size;
-				replace_size  = assign_size - period_size;
-				depend_size   = goto_size   + branch_size;
-				graph_size    = depend_size + label_size;
+				copy_size       = test_size       + period_size;
+				replace_size    = assign_size     - period_size;
+				dependency_size = goto_size       + branch_size;
+				graph_size      = dependency_size + label_size;
 			}
 	};
 

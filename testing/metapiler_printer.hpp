@@ -35,6 +35,7 @@ namespace cctmp {
 		nik_ces auto op_name()
 		{
 			if      constexpr (eval<_same_, f, _id_                    >) return "_id_                   ";
+			else if constexpr (eval<_same_, f, _nop_                   >) return "_nop_                  ";
 			else if constexpr (eval<_same_, f, _upshift_               >) return "_upshift_              ";
 			else if constexpr (eval<_same_, f, _downshift_             >) return "_downshift_            ";
 
@@ -209,9 +210,10 @@ namespace cctmp {
 			void print_line(const LineType & line, gckey_type spacing)
 			{
 				auto l_str = line.has_lookup ? "lookup" : "      ";
-				auto r_str = line.has_paste  ? "paste"  : "     " ;
+				auto m_str = line.has_paste  ? "paste"  :  "     ";
+				auto r_str = line.has_side   ? "side"   :   "    ";
 
-				printf("|%s|%s| ", l_str, r_str);
+				printf("|%s|%s|%s| ", l_str, m_str, r_str);
 
 				for (auto k = line.begin(); k != line.end(); ++k) print_entry(*k, spacing);
 

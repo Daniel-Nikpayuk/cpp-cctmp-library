@@ -45,11 +45,11 @@ namespace cctmp {
 						+ ( 3 * src.return_size  ) // upper bound: (1 * size <= 3 * size)
 						+ ( 4 * src.replace_size );
 
-		using label_type		= sequence    < gindex_type , src.label_size    >;
-		using instr_type		= sequence    < gindex_type , instr_length      >;
-		using contr_type		= sequence    < instr_type  , length            >;
-		using contr_lookup_type		= subsequence < instr_type  , toc.lookup.size() >;
-		using contr_jump_type		= subsequence < instr_type  , src.depend_size   >;
+		using label_type		= sequence    < gindex_type , src.label_size      >;
+		using instr_type		= sequence    < gindex_type , instr_length        >;
+		using contr_type		= sequence    < instr_type  , length              >;
+		using contr_lookup_type		= subsequence < instr_type  , toc.lookup.size()   >;
+		using contr_jump_type		= subsequence < instr_type  , src.dependency_size >;
 		using cline_type		= typename decltype(toc.page)::cline_type;
 
 		label_type label;
@@ -83,6 +83,7 @@ namespace cctmp {
 		}
 
 		nik_ce auto call_name      (cline_type & l) const { return l.has_paste ? MN::recall : MN::call; }
+		nik_ce auto call_note      (cline_type & l) const { return l.has_side  ? MT::side   : MT::id  ; }
 		nik_ce auto first_sign     (cline_type & l) const { return l.begin()->sign; }
 		nik_ce auto first_index    (cline_type & l) const { return l.begin()->index; }
 		nik_ce auto set_label_line (cline_type & l)       { label.array[first_index(l)] = contr.size(); }
@@ -122,7 +123,7 @@ namespace cctmp {
 				if (l.has_lookup) add_lookup();
 
 				add_instr(MN::select, MT::id, Mark::value);
-				add_instr(call_name(l), MT::id);
+				add_instr(call_name(l), call_note(l));
 
 				auto sign = first_sign(l);
 

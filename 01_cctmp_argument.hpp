@@ -27,10 +27,6 @@ namespace cctmp {
 
 // overload:
 
-/***********************************************************************************************************************/
-
-// basis:
-
 	// id:
 
 		template<auto... filler>
@@ -40,6 +36,30 @@ namespace cctmp {
 			nik_ces auto result(T v) { return v; }
 
 		}; nik_ce auto _id_ = U_arg_overload<Overload::id>;
+
+/***********************************************************************************************************************/
+
+// basis:
+
+	// nop (no operation):
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::overload, Overload::nop, filler...>
+		{
+			template<typename... Ts>
+			nik_ces void result(Ts...) { }
+
+		}; nik_ce auto _nop_ = U_arg_overload<Overload::nop>;
+
+	// first:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::overload, Overload::first, filler...>
+		{
+			template<typename T, typename... Ts>
+			nik_ces auto result(T v, Ts... vs) { return v; }
+
+		}; nik_ce auto _first_ = U_arg_overload<Overload::first>;
 
 /***********************************************************************************************************************/
 
@@ -75,7 +95,7 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::overload, Overload::assign, filler...>
 		{
 			template<typename T1, typename T2>
-			nik_ces auto result(T1 v1, T2 v2) { return *v1 = v2; }
+			nik_ces void result(T1 v1, T2 v2) { *v1 = v2; }
 
 		}; nik_ce auto _assign_ = U_arg_overload<Overload::assign>;
 
