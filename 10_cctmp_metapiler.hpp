@@ -364,10 +364,11 @@ namespace cctmp {
 
 				if constexpr (has_side)
 				{
-					nik_ce auto m      = toc.lookup_entry_index(n, 0);
-					nik_ce auto second = resolve_rest<this_f, n, m>();
+					nik_ce auto m       = toc.lookup_entry_index(n, 0);
+					nik_ce auto side    = arg_subpose<first, _dereference_, _dereference_>;
+					nik_ce auto second  = resolve_rest<this_f, n, m>();
 
-					return eval<_list_<>, first, second, resolve_rest<this_f, n, ms>()...>;
+					return eval<_list_<>, side, second, resolve_rest<this_f, n, ms>()...>;
 				}
 				else return eval<_list_<>, first, resolve_rest<this_f, n, ms>()...>;
 			}

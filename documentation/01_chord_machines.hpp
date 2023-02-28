@@ -38,10 +38,7 @@ namespace cctmp_chord {
 // conveniences:
 
 	template<auto action>
-	nik_ce auto _assign_d_d_ = arg_subpose
-	<
-		_assign_, _dereference_, arg_subpose<action, _dereference_>
-	>;
+	nik_ce auto assign = arg_subpose<_assign_, _id_, action>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -161,18 +158,18 @@ namespace cctmp_chord {
 
 	template
 	<
-		auto action           = _id_                 ,
+		auto action           = _id_           ,
 
-		auto pre_end_next     = _id_                 ,
-		auto pre_out_next     = _id_                 ,
-		auto pre_in_next      = _id_                 ,
-		auto loop_pred        = _equal_              ,
-		auto mutate_func      = _assign_d_d_<action> ,
-		auto out_next         = _increment_<>        ,
-		auto in_next          = _increment_<>        ,
-		auto post_mutate_func = _nop_                ,
-		auto post_out_next    = _id_                 ,
-		auto post_in_next     = _id_                 ,
+		auto pre_end_next     = _id_           ,
+		auto pre_out_next     = _id_           ,
+		auto pre_in_next      = _id_           ,
+		auto loop_pred        = _equal_        ,
+		auto mutate_func      = assign<action> ,
+		auto out_next         = _increment_<>  ,
+		auto in_next          = _increment_<>  ,
+		auto post_mutate_func = _first_        ,
+		auto post_out_next    = _id_           ,
+		auto post_in_next     = _id_           ,
 		auto post_end_next    = _id_
 	>
 	nik_ce auto map_frame()
