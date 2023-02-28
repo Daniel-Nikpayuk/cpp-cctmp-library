@@ -95,7 +95,7 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::overload, Overload::assign, filler...>
 		{
 			template<typename T1, typename T2>
-			nik_ces void result(T1 v1, T2 v2) { *v1 = v2; }
+			nik_ces auto result(T1 v1, T2 v2) { return *v1 = v2; }
 
 		}; nik_ce auto _assign_ = U_arg_overload<Overload::assign>;
 

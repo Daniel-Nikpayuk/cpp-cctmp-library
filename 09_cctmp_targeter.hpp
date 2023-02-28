@@ -125,18 +125,21 @@ namespace cctmp {
 				add_instr(MN::select, MT::id, Mark::value);
 				add_instr(call_name(l), call_note(l));
 
-				auto sign = first_sign(l);
-
-				if (Sign::is_arg(sign))
+				if (!l.has_side)
 				{
-					set_instr_pos(first_index(l));
+					auto sign = first_sign(l);
 
-					add_instr(MN::select, MT::front, Mark::value);
-					add_instr(MN::replace, MT::id);
-				}
-				else if (Sign::is_var(sign))
-				{
-					add_instr(MN::rotate, MT::id);
+					if (Sign::is_arg(sign))
+					{
+						set_instr_pos(first_index(l));
+
+						add_instr(MN::reselect, MT::front, Mark::value);
+						add_instr(MN::replace, MT::id);
+					}
+					else if (Sign::is_var(sign))
+					{
+						add_instr(MN::rotate, MT::id);
+					}
 				}
 			}
 

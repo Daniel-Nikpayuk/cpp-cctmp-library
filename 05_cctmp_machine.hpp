@@ -260,7 +260,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first , jump    , select ,
+			first , jump    , select , reselect ,
 			right , replace , rotate ,
 			call  , recall  ,
 			loop  ,
@@ -279,7 +279,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			front , go_to , branch , pair , side ,
+			pair , front , go_to , branch , side ,
 			dimension
 		};
 	};
@@ -486,6 +486,30 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// pair:
+
+	template<auto... filler>
+	struct T_machine<MN::select, MT::pair, filler...>
+	{
+		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto ins	= MD::instr(c, i);
+			nik_ce auto n   = ins[MI::pos];
+			nik_ce auto p   = unpack_<l, _par_at_, n>;
+			nik_ce auto p0  = unpack_<p, _car_>;
+			nik_ce auto p1  = unpack_<p, _cadr_>;
+
+			return NIK_MACHINE_TEMPLATE(c, i),
+
+			       p0, p1
+
+			NIK_MACHINE_RESULT(s, c, i, l, Vs)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
 // front:
 
 	template<auto... filler>
@@ -507,26 +531,29 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// pair:
+// reselect:
+
+/***********************************************************************************************************************/
+
+// front:
 
 	template<auto... filler>
-	struct T_machine<MN::select, MT::pair, filler...>
+	struct T_machine<MN::reselect, MT::front, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n   = ins[MI::pos];
-			nik_ce auto p   = unpack_<l, _par_at_, n>;
-			nik_ce auto p0  = unpack_<p, _car_>;
-			nik_ce auto p1  = unpack_<p, _cadr_>;
+			nik_ce auto p   = eval<_par_left_, n, U_store_T<Ts>...>;
 
 			return NIK_MACHINE_TEMPLATE(c, i),
 
-			       p0, p1
+			       p
 
-			NIK_MACHINE_RESULT(s, c, i, l, Vs)(vs...);
+			NIK_MACHINE_RESULT(s, c, i, l, Vs)(v, vs...);
 		}
 	};
 
@@ -615,7 +642,7 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			T_store_U<f>::template result<>(arg_at<ns>(vs...)...);
+			T_store_U<f>::template result<>(arg_at<ns>(&vs...)...); // passes by address.
 
 			return NIK_MACHINE(s, c, i, l, Vs)(vs...);
 		}
@@ -652,7 +679,7 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			T_store_U<f>::template result<>(arg_at<ns>(v, vs...)...);
+			T_store_U<f>::template result<>(arg_at<ns>(&v, &vs...)...); // passes by address.
 
 			return NIK_MACHINE(s, c, i, l, Vs)(vs...);
 		}

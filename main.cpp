@@ -44,8 +44,9 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+	// todo: possible bug steming from copy/paste/has_side interoperability.
+
 	using namespace cctmp;
-	using namespace cctmp_chord;
 
 /***********************************************************************************************************************/
 
@@ -65,9 +66,14 @@
 		printf("%d\n", sum_of_squares_v0(3, 4)); // prints: 25
 		printf("%d\n", x_to5_plus1_v0(2)); // prints: 33
 
-		constexpr auto fold = _fold_<fold_lookup<_add_>>;
+		constexpr auto map = cctmp_chord::_map_<cctmp_chord::map_lookup<>>;
 
-		static_assert(apply<fold>(0, 1, 100) == 4950);
+		int x[10];
+
+		apply<map>(x, 0, 10);
+
+		for (int k = 0; k < 10; ++k) printf("%d, ", x[k]); // prints: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		printf("\n");
 
 		return 0;
 	}
