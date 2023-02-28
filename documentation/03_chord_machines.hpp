@@ -23,22 +23,22 @@ namespace cctmp_chord {
 
 // cctmp:
 
-	nik_ce auto _id_          				= cctmp::_id_;
-	nik_ce auto _nop_          				= cctmp::_nop_;
-	nik_ce auto _first_          				= cctmp::_first_;
-	nik_ce auto _equal_       				= cctmp::_equal_;
-	nik_ce auto _assign_      				= cctmp::_assign_;
-	nik_ce auto _dereference_      				= cctmp::_dereference_;
+	constexpr auto _id_          				= cctmp::_id_;
+	constexpr auto _nop_          				= cctmp::_nop_;
+	constexpr auto _first_          			= cctmp::_first_;
+	constexpr auto _equal_       				= cctmp::_equal_;
+	constexpr auto _assign_      				= cctmp::_assign_;
+	constexpr auto _dereference_      			= cctmp::_dereference_;
 
-	template<typename T> nik_ce auto U_store_T		= cctmp::U_store_T<T>;
-	template<auto... Vs> nik_ce auto _constant_		= cctmp::_constant_<Vs...>;
-	template<auto... Vs> nik_ce auto _increment_		= cctmp::_increment_<Vs...>;
-	template<auto... Vs> nik_ce auto arg_subpose		= cctmp::arg_subpose<Vs...>;
+	template<typename T> constexpr auto U_store_T		= cctmp::U_store_T<T>;
+	template<auto... Vs> constexpr auto _constant_		= cctmp::_constant_<Vs...>;
+	template<auto... Vs> constexpr auto _increment_		= cctmp::_increment_<Vs...>;
+	template<auto... Vs> constexpr auto arg_subpose		= cctmp::arg_subpose<Vs...>;
 
 // conveniences:
 
 	template<auto action>
-	nik_ce auto assign = arg_subpose<_assign_, _id_, action>;
+	constexpr auto assign = arg_subpose<_assign_, _id_, action>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -50,7 +50,7 @@ namespace cctmp_chord {
 
 // algo:
 
-	nik_ce auto repeat_algo()
+	constexpr auto repeat_algo()
 	{
 		return cctmp::source
 		(
@@ -84,7 +84,7 @@ namespace cctmp_chord {
 		auto out_next         = _increment_<> ,
 		auto post_mutate_func = _nop_
 	>
-	nik_ce auto repeat_frame()
+	constexpr auto repeat_frame()
 	{
 		return cctmp::table
 		(
@@ -99,7 +99,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	nik_ce auto repeat_lookup = cctmp::make_frame<repeat_frame<Vs...>>;
+	constexpr auto repeat_lookup = cctmp::make_frame<repeat_frame<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -109,11 +109,11 @@ namespace cctmp_chord {
 	struct T_repeat
 	{
 		template<typename OutType, typename EndType, typename InType>
-		nik_ces auto result(OutType b, EndType e, InType c)
+		constexpr static auto result(OutType b, EndType e, InType c)
 			{ return cctmp::generic_assembly_apply<repeat_algo, OutType, lookup>(b, e, c); }
 
 	}; template<auto lookup>
-		nik_ce auto _repeat_ = U_store_T<T_repeat<lookup>>;
+		constexpr auto _repeat_ = U_store_T<T_repeat<lookup>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -124,7 +124,7 @@ namespace cctmp_chord {
 
 // algo:
 
-	nik_ce auto map_algo()
+	constexpr auto map_algo()
 	{
 		return cctmp::source
 		(
@@ -172,7 +172,7 @@ namespace cctmp_chord {
 		auto post_in_next     = _id_           ,
 		auto post_end_next    = _id_
 	>
-	nik_ce auto map_frame()
+	constexpr auto map_frame()
 	{
 		return cctmp::table
 		(
@@ -193,7 +193,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	nik_ce auto map_lookup = cctmp::make_frame<map_frame<Vs...>>;
+	constexpr auto map_lookup = cctmp::make_frame<map_frame<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -203,11 +203,11 @@ namespace cctmp_chord {
 	struct T_map
 	{
 		template<typename OutType, typename InType, typename EndType>
-		nik_ces auto result(OutType o, InType i, EndType e)
+		constexpr static auto result(OutType o, InType i, EndType e)
 			{ return cctmp::generic_assembly_apply<map_algo, OutType, lookup>(o, i, e); }
 
 	}; template<auto lookup>
-		nik_ce auto _map_ = U_store_T<T_map<lookup>>;
+		constexpr auto _map_ = U_store_T<T_map<lookup>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -218,7 +218,7 @@ namespace cctmp_chord {
 
 // algo:
 
-	nik_ce auto fold_algo()
+	constexpr auto fold_algo()
 	{
 		return cctmp::source
 		(
@@ -253,7 +253,7 @@ namespace cctmp_chord {
 		auto in_next           = _increment_<> ,
 		auto post_combine_func = _first_
 	>
-	nik_ce auto fold_frame()
+	constexpr auto fold_frame()
 	{
 		return cctmp::table
 		(
@@ -268,7 +268,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	nik_ce auto fold_lookup = cctmp::make_frame<fold_frame<Vs...>>;
+	constexpr auto fold_lookup = cctmp::make_frame<fold_frame<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -278,11 +278,11 @@ namespace cctmp_chord {
 	struct T_fold
 	{
 		template<typename OutType, typename InType, typename EndType>
-		nik_ces auto result(OutType o, InType i, EndType e)
+		constexpr static auto result(OutType o, InType i, EndType e)
 			{ return cctmp::generic_assembly_apply<fold_algo, OutType, lookup>(o, i, e); }
 
 	}; template<auto lookup>
-		nik_ce auto _fold_ = U_store_T<T_fold<lookup>>;
+		constexpr auto _fold_ = U_store_T<T_fold<lookup>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -297,7 +297,7 @@ namespace cctmp_chord {
 		// then the out iterator is restricted to being an opening interval,
 		// so as to indicate whether or not a match was found.
 
-	nik_ce auto find_first_algo()
+	constexpr auto find_first_algo()
 	{
 		return cctmp::source
 		(
@@ -342,7 +342,7 @@ namespace cctmp_chord {
 		auto found_mutate_func = _assign_          ,
 		auto found_out_next    = _increment_<>
 	>
-	nik_ce auto find_first_frame()
+	constexpr auto find_first_frame()
 	{
 		return cctmp::table
 		(
@@ -359,7 +359,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	nik_ce auto find_first_lookup = cctmp::make_frame<find_first_frame<Vs...>>;
+	constexpr auto find_first_lookup = cctmp::make_frame<find_first_frame<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -369,11 +369,11 @@ namespace cctmp_chord {
 	struct T_find_first
 	{
 		template<typename OutType, typename InType, typename EndType>
-		nik_ces auto result(OutType o, InType i, EndType e)
+		constexpr static auto result(OutType o, InType i, EndType e)
 			{ return cctmp::generic_assembly_apply<find_first_algo, OutType, lookup>(o, i, e); }
 
 	}; template<auto lookup>
-		nik_ce auto _find_first_ = U_store_T<T_find_first<lookup>>;
+		constexpr auto _find_first_ = U_store_T<T_find_first<lookup>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -388,7 +388,7 @@ namespace cctmp_chord {
 		// then the out iterator is restricted to being an opening interval,
 		// so as to indicate whether or not a match was found.
 
-	nik_ce auto find_all_algo()
+	constexpr auto find_all_algo()
 	{
 		return cctmp::source
 		(
@@ -443,7 +443,7 @@ namespace cctmp_chord {
 		auto postfound_mutate_func = _assign_          ,
 		auto postfound_out_next    = _increment_<>
 	>
-	nik_ce auto find_all_frame()
+	constexpr auto find_all_frame()
 	{
 		return cctmp::table
 		(
@@ -463,7 +463,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	nik_ce auto find_all_lookup = cctmp::make_frame<find_all_frame<Vs...>>;
+	constexpr auto find_all_lookup = cctmp::make_frame<find_all_frame<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -473,11 +473,11 @@ namespace cctmp_chord {
 	struct T_find_all
 	{
 		template<typename OutType, typename InType, typename EndType>
-		nik_ces auto result(OutType o, InType i, EndType e)
+		constexpr static auto result(OutType o, InType i, EndType e)
 			{ return cctmp::generic_assembly_apply<find_all_algo, OutType, lookup>(o, i, e); }
 
 	}; template<auto lookup>
-		nik_ce auto _find_all_ = U_store_T<T_find_all<lookup>>;
+		constexpr auto _find_all_ = U_store_T<T_find_all<lookup>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -488,7 +488,7 @@ namespace cctmp_chord {
 
 // algo:
 
-	nik_ce auto zip_algo()
+	constexpr auto zip_algo()
 	{
 		return cctmp::source
 		(
@@ -544,7 +544,7 @@ namespace cctmp_chord {
 		auto post_in2_next    = _id_          ,
 		auto post_end2_next   = _id_
 	>
-	nik_ce auto zip_frame()
+	constexpr auto zip_frame()
 	{
 		return cctmp::table
 		(
@@ -570,7 +570,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	nik_ce auto zip_lookup = cctmp::make_frame<zip_frame<Vs...>>;
+	constexpr auto zip_lookup = cctmp::make_frame<zip_frame<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -580,11 +580,11 @@ namespace cctmp_chord {
 	struct T_zip
 	{
 		template<typename OutType, typename CarInType, typename CdrInType, typename EndType>
-		nik_ces auto result(OutType o, CarInType i1, CdrInType i2, EndType e2)
+		constexpr static auto result(OutType o, CarInType i1, CdrInType i2, EndType e2)
 			{ return cctmp::generic_assembly_apply<zip_algo, OutType, lookup>(o, i1, i2, e2); }
 
 	}; template<auto lookup>
-		nik_ce auto _zip_ = U_store_T<T_zip<lookup>>;
+		constexpr auto _zip_ = U_store_T<T_zip<lookup>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -595,7 +595,7 @@ namespace cctmp_chord {
 
 // algo:
 
-	nik_ce auto fasten_algo()
+	constexpr auto fasten_algo()
 	{
 		return cctmp::source
 		(
@@ -661,7 +661,7 @@ namespace cctmp_chord {
 		auto post_in2_next     = _id_              ,
 		auto post_end2_next    = _id_
 	>
-	nik_ce auto fasten_frame()
+	constexpr auto fasten_frame()
 	{
 		return cctmp::table
 		(
@@ -691,7 +691,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	nik_ce auto fasten_lookup = cctmp::make_frame<fasten_frame<Vs...>>;
+	constexpr auto fasten_lookup = cctmp::make_frame<fasten_frame<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -705,11 +705,11 @@ namespace cctmp_chord {
 			typename OutType, typename AuxType, typename InType,
 			typename CarInType, typename CdrInType, typename EndType
 		>
-		nik_ces auto result(OutType o, AuxType a, InType i, CarInType i1, CdrInType i2, EndType e2)
+		constexpr static auto result(OutType o, AuxType a, InType i, CarInType i1, CdrInType i2, EndType e2)
 			{ return cctmp::generic_assembly_apply<fasten_algo, OutType, lookup>(o, i, i1, i2, e2); }
 
 	}; template<auto lookup>
-		nik_ce auto _fasten_ = U_store_T<T_fasten<lookup>>;
+		constexpr auto _fasten_ = U_store_T<T_fasten<lookup>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -720,7 +720,7 @@ namespace cctmp_chord {
 
 // algo:
 
-	nik_ce auto glide_algo()
+	constexpr auto glide_algo()
 	{
 		return cctmp::source
 		(
@@ -770,7 +770,7 @@ namespace cctmp_chord {
 		auto post_in2_next     = _id_          ,
 		auto post_end2_next    = _id_
 	>
-	nik_ce auto glide_frame()
+	constexpr auto glide_frame()
 	{
 		return cctmp::table
 		(
@@ -793,7 +793,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	nik_ce auto glide_lookup = cctmp::make_frame<glide_frame<Vs...>>;
+	constexpr auto glide_lookup = cctmp::make_frame<glide_frame<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -803,11 +803,11 @@ namespace cctmp_chord {
 	struct T_glide
 	{
 		template<typename OutType, typename CarInType, typename CdrInType, typename EndType>
-		nik_ces auto result(OutType o, CarInType i1, CdrInType i2, EndType e2)
+		constexpr static auto result(OutType o, CarInType i1, CdrInType i2, EndType e2)
 			{ return cctmp::generic_assembly_apply<glide_algo, OutType, lookup>(o, i1, i2, e2); }
 
 	}; template<auto lookup>
-		nik_ce auto _glide_ = U_store_T<T_glide<lookup>>;
+		constexpr auto _glide_ = U_store_T<T_glide<lookup>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

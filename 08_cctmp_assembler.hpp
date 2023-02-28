@@ -580,7 +580,9 @@ namespace cctmp {
 				template<typename TOC>
 				nik_ces void identifier_apply_assign(TOC & toc, clexeme & l, gcindex_type index)
 				{
-					toc.set_entry(l, Sign::arg, index);
+					auto has_shift = (toc.page.line->has_side && toc.page.line->has_paste);
+					auto shift     = has_shift ? _one : _zero;
+					toc.set_entry(l, Sign::arg, index + shift);
 				}
 
 				template<typename TOC>

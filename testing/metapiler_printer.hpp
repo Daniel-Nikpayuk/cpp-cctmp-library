@@ -32,7 +32,7 @@ namespace cctmp {
 	struct parameter_printer
 	{
 		template<auto f>
-		nik_ces auto op_name()
+		constexpr static auto op_name()
 		{
 			if      constexpr (eval<_same_, f, _id_                    >) return "_id_                   ";
 			else if constexpr (eval<_same_, f, _nop_                   >) return "_nop_                  ";
@@ -87,7 +87,7 @@ namespace cctmp {
 			else if constexpr (eval<_same_, f, _tuple_size_            >) return "_tuple_size_           ";
 			else if constexpr (eval<_same_, f, _to_tuple_              >) return "_to_tuple_             ";
 
-			else                                                          return "other                  ";
+			else                                                          return "(?)                    ";
 		}
 	};
 
@@ -100,14 +100,14 @@ namespace cctmp {
 
 	struct machine_printer
 	{
-		nik_ces auto offset(gcindex_type num)
+		constexpr static auto offset(gcindex_type num)
 		{
 			if      (num <  10) return "  ";
 			else if (num < 100) return  " ";
 			else                return   "";
 		}
 
-		nik_ces auto name(gcindex_type name)
+		constexpr static auto name(gcindex_type name)
 		{
 			auto str = "unknown      ";
 
@@ -129,7 +129,7 @@ namespace cctmp {
 			return str;
 		}
 
-		nik_ces auto note(gcindex_type note)
+		constexpr static auto note(gcindex_type note)
 		{
 			auto str = "unknown      ";
 
@@ -160,10 +160,10 @@ namespace cctmp {
 	{
 		private:
 
-			nik_ces auto src    = T_generic_assembly_pda::template parse<SourceCallable>;
-			nik_ces auto syntax = src.syntax;
-			nik_ces auto page   = syntax.page;
-			nik_ces auto lookup = syntax.lookup;
+			constexpr static auto src    = T_generic_assembly_pda::template parse<SourceCallable>;
+			constexpr static auto syntax = src.syntax;
+			constexpr static auto page   = syntax.page;
+			constexpr static auto lookup = syntax.lookup;
 
 			void print_spacing(gckey_type size) { for (auto k = 0; k != size; ++k) printf(" "); }
 
@@ -242,8 +242,8 @@ namespace cctmp {
 	{
 		private:
 
-			nik_ces auto target	= T_generic_assembly_target<SourceCallable>::value;
-			nik_ces auto contr	= target.contr;
+			constexpr static auto target	= T_generic_assembly_target<SourceCallable>::value;
+			constexpr static auto contr	= target.contr;
 
 			using Instr		= typename decltype(target)::Instr;
 
@@ -286,10 +286,10 @@ namespace cctmp {
 	{
 		private:
 
-			nik_ces auto env	= U_pack_Vs<Lookups...>;
-			nik_ces auto metapiler	= T_generic_assembly_metapiler<SourceCallable, env>{};
-			nik_ces auto contr	= metapiler.contr;
-			nik_ces auto lookup	= metapiler.template resolve_lookup<false>;
+			constexpr static auto env	= U_pack_Vs<Lookups...>;
+			constexpr static auto metapiler	= T_generic_assembly_metapiler<SourceCallable, env>{};
+			constexpr static auto contr	= metapiler.contr;
+			constexpr static auto lookup	= metapiler.template resolve_lookup<false>;
 
 			template<typename Instr>
 			void print_instr(const Instr *instr, gcindex_type pos)
@@ -312,10 +312,13 @@ namespace cctmp {
 			void print_lookup_value(gcindex_type val) { printf("%hu ", val); }
 
 			template<auto V>
-			void print_lookup_value(nik_avp(T_pack_Vs<V>*)) { printf("(%hu) ", V); }
+			void print_lookup_value(void(*)(T_pack_Vs<V>*)) { printf("(%hu) ", V); }
+
+			template<typename T>
+			void print_lookup_value(T) { printf("(?) "); }
 
 			template<auto f, auto... Vs>
-			void print_inner_lookup(nik_avp(T_pack_Vs<f, Vs...>*))
+			void print_inner_lookup(void(*)(T_pack_Vs<f, Vs...>*))
 			{
 				printf("%s ", parameter_printer::template op_name<f>());
 				(print_lookup_value(Vs), ...);
@@ -323,7 +326,7 @@ namespace cctmp {
 			}
 
 			template<auto... Vs>
-			void unpack_lookup(nik_avp(T_pack_Vs<Vs...>*)) { (print_inner_lookup(Vs), ...); }
+			void unpack_lookup(void(*)(T_pack_Vs<Vs...>*)) { (print_inner_lookup(Vs), ...); }
 
 		public:
 
