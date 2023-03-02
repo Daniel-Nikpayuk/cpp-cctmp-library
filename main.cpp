@@ -48,7 +48,8 @@
 	// todo:
 
 		// 1. allow arg_subpose to compose void functions (change _assign_ to void).
-		// 2. allow (!) markers for all operands, set initial regs to const as default.
+		// 2. variable assignment, but using args instead of constants.
+		// 3. allow (!) markers for all operands, set initial regs to const as default.
 
 	using namespace cctmp;
 
@@ -56,6 +57,7 @@
 
 	int main(int argc, char *argv[])
 	{
+
 	// factorial:
 
 		static_assert(factorial_v0(0) ==     1);
@@ -75,11 +77,17 @@
 		auto comp_sum_sqs = sum_of_squares_v0(complex_number(1, 2), complex_number(0, 1));
 		auto int_sum_sqs  = sum_of_squares_v0(3, 4);
 		auto polynom_val  = x_to5_plus1_v0(2);
+		auto semidyntyp0  = semidynamic_typing_v0(complex_number(0, 1), 17);
+		auto semidyntyp1  = semidynamic_typing_v0(complex_number(1, 0), 17);
+	////	auto reassign_val = reassign_v0(2, 17);
 
-		print_complex(comp_sq);		// prints: (-3.000000, 4.000000)
-		print_complex(comp_sum_sqs);	// prints: (-4.000000, 4.000000)
-		printf("%d\n", int_sum_sqs);	// prints: 25
-		printf("%d\n", polynom_val);	// prints: 33
+
+		print_complex(comp_sq);				// prints: (-3.000000, 4.000000)
+		print_complex(comp_sum_sqs);			// prints: (-4.000000, 4.000000)
+		printf("%d\n", int_sum_sqs);			// prints: 25
+		printf("%d\n", polynom_val);			// prints: 33
+		printf("%d, %d\n", semidyntyp0, semidyntyp1);	// prints: 18, 5
+	////	printf("%d\n", reassign_val);			// prints: 17
 
 	// side effects:
 

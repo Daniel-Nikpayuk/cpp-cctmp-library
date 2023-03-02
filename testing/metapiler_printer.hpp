@@ -117,12 +117,12 @@ namespace cctmp {
 				case MN::first     : { str = "MN::first    " ; break; }
 				case MN::jump      : { str = "MN::jump     " ; break; }
 				case MN::select    : { str = "MN::select   " ; break; }
+				case MN::reselect  : { str = "MN::reselect " ; break; }
 				case MN::right     : { str = "MN::right    " ; break; }
 				case MN::replace   : { str = "MN::replace  " ; break; }
 				case MN::rotate    : { str = "MN::rotate   " ; break; }
 				case MN::call      : { str = "MN::call     " ; break; }
 				case MN::recall    : { str = "MN::recall   " ; break; }
-				case MN::loop      : { str = "MN::loop     " ; break; }
 				case MN::dimension : { str = "MN::dimension" ; break; }
 			}
 
@@ -180,7 +180,8 @@ namespace cctmp {
 				switch (entry.sign)
 				{
 					case Sign::na        : { str = " "      ; sub = 1; break; }
-					case Sign::arg       : { str = "arg"    ; sub = 3; break; }
+					case Sign::carg      : { str = "carg"   ; sub = 4; break; }
+					case Sign::marg      : { str = "marg"   ; sub = 4; break; }
 					case Sign::var       : { str = "var"    ; sub = 3; break; }
 					case Sign::copy      : { str = "copy"   ; sub = 4; break; }
 					case Sign::paste     : { str = "paste"  ; sub = 5; break; }
@@ -196,7 +197,8 @@ namespace cctmp {
 
 				print_string(entry.start, entry.finish);
 
-				auto print_right  = Sign::is_arg   (entry.sign)
+				auto print_right  = Sign::is_carg  (entry.sign)
+						 || Sign::is_marg  (entry.sign)
 						 || Sign::is_var   (entry.sign)
 						 || Sign::is_paste (entry.sign)
 						 || Sign::is_label (entry.sign)
@@ -209,11 +211,11 @@ namespace cctmp {
 			template<typename LineType>
 			void print_line(const LineType & line, gckey_type spacing)
 			{
-				auto l_str = line.has_lookup ? "lookup" : "      ";
-				auto m_str = line.has_paste  ? "paste"  :  "     ";
-				auto r_str = line.has_side   ? "side"   :   "    ";
+				auto str0 = line.has_lookup ? "lookup" : "      ";
+				auto str1 = line.has_paste  ? "paste"  :  "     ";
+				auto str2 = line.has_void   ? "void"   :   "    ";
 
-				printf("|%s|%s|%s| ", l_str, m_str, r_str);
+				printf("|%s|%s|%s| ", str0, str1, str2);
 
 				for (auto k = line.begin(); k != line.end(); ++k) print_entry(*k, spacing);
 
@@ -309,24 +311,45 @@ namespace cctmp {
 				printf("\n");
 			}
 
-			void print_lookup_value(gcindex_type val) { printf("%hu ", val); }
+			void print_f_pack_value(gcindex_type val) { printf("%hu ", val); }
 
 			template<auto V>
-			void print_lookup_value(void(*)(T_pack_Vs<V>*)) { printf("(%hu) ", V); }
+			void print_f_pack_value(void(*)(T_pack_Vs<V>*)) { printf("(%hu) ", V); }
 
 			template<typename T>
-			void print_lookup_value(T) { printf("(?) "); }
+			void print_f_pack_value(T) { printf("(?) "); }
 
 			template<auto f, auto... Vs>
-			void print_inner_lookup(void(*)(T_pack_Vs<f, Vs...>*))
+			void print_f_pack(void(*)(T_pack_Vs<f, Vs...>*))
 			{
 				printf("%s ", parameter_printer::template op_name<f>());
-				(print_lookup_value(Vs), ...);
+				(print_f_pack_value(Vs), ...);
+			}
+
+			template<auto V>
+			void print_t_pack_value()
+			{
+				if constexpr (eval<_same_, V, _read_only_>) printf("(ro) ");
+				else                                        printf("(rw) ");
+			}
+
+			template<auto... Vs>
+			void print_t_pack(void(*)(T_pack_Vs<Vs...>*))
+			{
+				(print_t_pack_value<Vs>(), ...);
+			}
+
+			template<auto f_pack, auto t_pack>
+			void print_pair_lookup(void(*)(T_pack_Vs<f_pack, t_pack>*))
+			{
+				print_f_pack(f_pack);
+				printf(" -> ");
+				print_t_pack(t_pack);
 				printf("\n");
 			}
 
 			template<auto... Vs>
-			void unpack_lookup(void(*)(T_pack_Vs<Vs...>*)) { (print_inner_lookup(Vs), ...); }
+			void unpack_lookup(void(*)(T_pack_Vs<Vs...>*)) { (print_pair_lookup(Vs), ...); }
 
 		public:
 

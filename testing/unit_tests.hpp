@@ -2666,5 +2666,141 @@ namespace cctmp_program
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// loop:
+
+/***********************************************************************************************************************/
+
+// id:
+
+	template
+	<
+		template<auto...> typename B0, auto f0, auto... ns0, nik_vp(p0)(B0<f0, ns0...>*),
+		template<auto...> typename B1, auto f1, auto... ns1, nik_vp(p1)(B1<f1, ns1...>*)
+	>
+	struct T_machine<MN::loop, MT::id, p0, p1>
+	{
+		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			while (T_store_U<f0>::template result<>(arg_at<ns0>(vs...)...))
+				T_store_U<f1>::template result<>(arg_at<ns1>((&vs)...)...); // passes by address.
+
+			return NIK_MACHINE(s, c, i, l, Vs)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// side:
+
+	template
+	<
+		template<auto...> typename B0, auto f0, auto... ns0, nik_vp(p0)(B0<f0, ns0...>*),
+		template<auto...> typename B1, auto f1, auto... ns1, nik_vp(p1)(B1<f1, ns1...>*)
+	>
+	struct T_machine<MN::loop, MT::side, p0, p1>
+	{
+		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			bool side = true;
+
+			while (side && T_store_U<f0>::template result<>(arg_at<ns0>(vs...)...))
+				side = T_store_U<f1>::template result<>(arg_at<ns1>((&vs)...)...); // passes by address.
+
+			return NIK_MACHINE(s, c, i, l, Vs)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// multi:
+
+/***********************************************************************************************************************/
+
+// multimap:
+
+	template<auto mutate, auto out_next, auto in_next, auto... ins_next>
+	struct T_multimap
+	{
+		template<typename Out, typename In, typename... Ins>
+		nik_ces auto result(Out out, In in, Ins... ins)
+		{
+			T_store_U<mutate>::template result<>(out, *in, (*ins)...);
+			T_store_U<out_next>::template result<>(out, *out);
+			T_store_U<in_next>::template result<>(in, *in);
+			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
+		}
+
+	}; template<auto mutate, auto out_next, auto in_next, auto... ins_next>
+		nik_ce auto _multimap_ = U_store_T<T_multimap<mutate, out_next, in_next, ins_next...>>;
+
+/***********************************************************************************************************************/
+
+// multifold:
+
+	template<auto mutate, auto in_next, auto... ins_next>
+	struct T_multifold
+	{
+		template<typename Out, typename In, typename... Ins>
+		nik_ces auto result(Out out, In in, Ins... ins)
+		{
+			T_store_U<mutate>::template result<>(out, *out, *in, (*ins)...);
+			T_store_U<in_next>::template result<>(in, *in);
+			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
+		}
+
+	}; template<auto mutate, auto in_next, auto... ins_next>
+		nik_ce auto _multifold_ = U_store_T<T_multifold<mutate, in_next, ins_next...>>;
+
+/***********************************************************************************************************************/
+
+// multifind:
+
+	template<auto predicate, auto in_next, auto... ins_next>
+	struct T_multifind
+	{
+		template<typename In, typename... Ins>
+		nik_ces auto result(In in, Ins... ins)
+		{
+			if (T_store_U<predicate>::template result<>(in, (*ins)...)) return false;
+
+			T_store_U<in_next>::template result<>(in, *in);
+			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
+
+			return true;
+		}
+
+	}; template<auto predicate, auto in_next, auto... ins_next>
+		nik_ce auto _multifind_ = U_store_T<T_multifind<predicate, in_next, ins_next...>>;
+
+/***********************************************************************************************************************/
+
+// multisift:
+
+	template<auto predicate, auto mutate, auto out_next, auto in_next, auto... ins_next>
+	struct T_multisift
+	{
+		template<typename Out, typename In, typename... Ins>
+		nik_ces auto result(Out out, In in, Ins... ins)
+		{
+			if (T_store_U<predicate>::template result<>(in, (*ins)...))
+			{
+				T_store_U<mutate>::template result<>(out, *out, *in, (*ins)...);
+				T_store_U<out_next>::template result<>(out, *out);
+			}
+
+			T_store_U<in_next>::template result<>(in, *in);
+			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
+		}
+
+	}; template<auto predicate, auto mutate, auto out_next, auto in_next, auto... ins_next>
+		nik_ce auto _multisift_ = U_store_T<T_multisift<predicate, out_next, in_next, ins_next...>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 } // case studies
 

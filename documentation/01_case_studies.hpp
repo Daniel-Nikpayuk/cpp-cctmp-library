@@ -41,8 +41,18 @@ namespace cctmp {
 		float x;
 		float y;
 
-		complex_number() : x{}, y{} { }
-		complex_number(const float _x, const float _y) : x{_x}, y{_y} { }
+		constexpr complex_number() : x{}, y{} { }
+		constexpr complex_number(const float _x, const float _y) : x{_x}, y{_y} { }
+
+		const bool operator == (const complex_number & c) const
+		{
+			return (x == c.x && y == c.y);
+		}
+
+		const bool operator != (const complex_number & c) const
+		{
+			return (x != c.x || y != c.y);
+		}
 
 		const complex_number operator + (const complex_number & c) const
 		{
@@ -71,7 +81,30 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// generic assembly:
+// features:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// labels                 :
+// test/branch            :
+// goto                   :
+
+// application assignment :
+// argument assignment    :
+// lookup assignment      :
+// copy/paste assignment  :
+// variable assignment    :
+
+// operator lookup        :
+// operand lookup         :
+
+// semidynamic typing     :
+
+// single recursion       :
+// general recursion      :
+
+// mutability semantics   :
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -154,6 +187,64 @@ namespace cctmp {
 		constexpr auto l0 = default_constant_lookup;
 
 		return generic_assembly_apply<_x_to5_plus1_v0, T, l0>(x, T(0));
+	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// reassign:
+
+/***********************************************************************************************************************/
+
+// version 0:
+
+	constexpr auto _reassign_v0()
+	{
+		return source
+		(
+			"f x y              ;"
+
+			"body:              ;"
+			"  x = y            ;"
+			"  return x         ;"
+		);
+	}
+
+	template<typename T1, typename T2>
+	constexpr auto reassign_v0(T1 x, T2 y)
+		{ return generic_assembly_apply<_reassign_v0, T2>(x, y); }
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// semidynamic typing:
+
+/***********************************************************************************************************************/
+
+	constexpr auto _semidynamic_typing_v0()
+	{
+		return source
+		(
+			"func c complex_one n       ;"
+
+			"body:                      ;"
+			"  test equal c complex_one ;"
+			"  branch set_c_to_five     ;"
+			"  c = increment n          ;" // { c = increment c; } would error.
+			"  return c                 ;"
+
+			"set_c_to_five:             ;"
+			"  c = five                 ;"
+			"  return c                 ;"
+		);
+	}
+
+	constexpr auto semidynamic_typing_v0(const complex_number & c, int n)
+	{
+		constexpr auto c1 = complex_number(1, 0);
+		constexpr auto l0 = default_constant_lookup;
+
+		return generic_assembly_apply<_semidynamic_typing_v0, int, l0>(c, c1, n);
 	}
 
 /***********************************************************************************************************************/

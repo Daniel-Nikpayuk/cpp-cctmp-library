@@ -263,7 +263,6 @@ namespace cctmp {
 			first , jump    , select , reselect ,
 			right , replace , rotate ,
 			call  , recall  ,
-			loop  ,
 			dimension
 		};
 	};
@@ -279,7 +278,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			pair , front , go_to , branch , side ,
+			pair , front , go_to , branch , side , void_f ,
 			dimension
 		};
 	};
@@ -355,6 +354,121 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// modify type:
+
+	template<auto Op, typename T>
+	using modify_type = T_store_U<eval<Op, U_store_T<T>>>;
+
+/***********************************************************************************************************************/
+
+// read only:
+
+	struct T_read_only
+	{
+		// default:
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T*)) { return U_store_T<T const>; }
+
+		// pointer (recursive):
+
+			template<typename T>
+			using T_add_pointer_const = T*const;
+
+			template<auto U>
+			nik_ces auto add_pointer_const = U_store_T<T_add_pointer_const<T_store_U<U>>>;
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T**)) { return add_pointer_const<_result(U_store_T<T>)>; }
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T*const*)) { return add_pointer_const<_result(U_store_T<T>)>; }
+
+		// reference (recursive):
+
+			template<typename T>
+			using T_add_reference_const = T&;
+
+			template<auto U>
+			nik_ces auto add_reference_const = U_store_T<T_add_reference_const<T_store_U<U>>>;
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T&)) { return add_reference_const<_result(U_store_T<T>)>; }
+
+		template<auto U>
+		nik_ces auto result = _result(U);
+
+	}; nik_ce auto _read_only_ = U_custom_T<T_read_only>;
+
+/***********************************************************************************************************************/
+
+// read write:
+
+	struct T_read_write
+	{
+		// default (recursive):
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T*)) { return U_store_T<T>; }
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T const*)) { return U_store_T<T>; }
+
+		// pointer (recursive):
+
+			template<typename T>
+			using T_add_pointer = T*;
+
+			template<auto U>
+			nik_ces auto add_pointer = U_store_T<T_add_pointer<T_store_U<U>>>;
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T**)) { return add_pointer<_result(U_store_T<T>)>; }
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T*const*)) { return add_pointer<_result(U_store_T<T>)>; }
+
+		// reference:
+
+			template<typename T>
+			using T_add_reference = T&;
+
+			template<auto U>
+			nik_ces auto add_reference = U_store_T<T_add_reference<T_store_U<U>>>;
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T&)) { return add_reference<_result(U_store_T<T>)>; }
+
+		template<auto U>
+		nik_ces auto result = _result(U);
+
+	}; nik_ce auto _read_write_ = U_custom_T<T_read_write>;
+
+/***********************************************************************************************************************/
+
+// cast type:
+
+	template<auto t>
+	struct T_cast_type
+	{
+		template<typename T>
+		nik_ces auto result(T v) { return v; }
+	};
+
+	template<>
+	struct T_cast_type<_read_write_>
+	{
+		template<typename T>
+		nik_ces auto result(T v) { return (modify_type<_read_write_, T>) v; }
+	};
+
+	// syntactic sugar:
+
+		template<auto t, typename T>
+		nik_ce auto cast_type(T v) { return T_cast_type<t>::template result<>(v); }
+
+/***********************************************************************************************************************/
+
 // apply at:
 
 	template<auto f, auto n>
@@ -385,8 +499,8 @@ namespace cctmp {
 	template<auto f, typename F, nik_vp(p)(F*)>
 	struct T_apply_at<f, p>
 	{
-		template<typename... Ts>
-		nik_ces auto result(Ts... vs) { return F::template result<>(vs...); }
+		template<typename... Ts> // const.
+		nik_ces const auto result(Ts... vs) { return F::template result<>(); }
 	};
 
 	// syntactic sugar:
@@ -414,7 +528,7 @@ namespace cctmp {
 	{
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename T0, typename... Ts>
 		nik_ces auto result(T0 v0, Ts... vs) -> T_store_U<s>
-			{ return v0; }
+			{ return (T_store_U<s>) v0; }
 	};
 
 /***********************************************************************************************************************/
@@ -620,13 +734,19 @@ namespace cctmp {
 
 // id:
 
-	template<template<auto...> typename B, auto f, auto... ns, nik_vp(p)(B<f, ns...>*)>
-	struct T_machine<MN::call, MT::id, p>
+	template
+	<
+		template<auto...> typename B0, auto f, auto... ns, nik_vp(p0)(B0<f, ns...>*),
+		template<auto...> typename B1, auto... ts, nik_vp(p1)(B1<ts...>*)
+	>
+	struct T_machine<MN::call, MT::id, p0, p1>
 	{
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			auto val = T_store_U<f>::template result<>(arg_at<ns>(vs...)...);
+		//	auto val = T_store_U<f>::template
+		//			result<>((modify_type_at<ts, ns, Ts...>) arg_at<ns>(vs...)...);
+			auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(vs...))...);
 
 			return NIK_MACHINE(s, c, i, l, Vs)(val, vs...);
 		}
@@ -636,13 +756,41 @@ namespace cctmp {
 
 // side:
 
-	template<template<auto...> typename B, auto f, auto... ns, nik_vp(p)(B<f, ns...>*)>
-	struct T_machine<MN::call, MT::side, p>
+	template
+	<
+		template<auto...> typename B0, auto f, auto... ns, nik_vp(p0)(B0<f, ns...>*),
+		template<auto...> typename B1, auto... ts, nik_vp(p1)(B1<ts...>*)
+	>
+	struct T_machine<MN::call, MT::side, p0, p1>
 	{
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			T_store_U<f>::template result<>(arg_at<ns>(&vs...)...); // passes by address.
+		//	auto val = T_store_U<f>::template
+		//			result<>((modify_type_at<ts, ns, Ts...>) arg_at<ns>(vs...)...);
+			auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(vs...))...);
+
+			return NIK_MACHINE(s, c, i, l, Vs)(val, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// void_f:
+
+	template
+	<
+		template<auto...> typename B0, auto f, auto... ns, nik_vp(p0)(B0<f, ns...>*),
+		template<auto...> typename B1, auto... ts, nik_vp(p1)(B1<ts...>*)
+	>
+	struct T_machine<MN::call, MT::void_f, p0, p1>
+	{
+		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+		//	T_store_U<f>::template
+		//		result<>((modify_type_at<ts, ns, Ts...>) arg_at<ns>(vs...)...);
+			T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(vs...))...);
 
 			return NIK_MACHINE(s, c, i, l, Vs)(vs...);
 		}
@@ -657,78 +805,63 @@ namespace cctmp {
 
 // id:
 
-	template<template<auto...> typename B, auto f, auto... ns, nik_vp(p)(B<f, ns...>*)>
-	struct T_machine<MN::recall, MT::id, p>
+	template
+	<
+		template<auto...> typename B0, auto f, auto... ns, nik_vp(p0)(B0<f, ns...>*),
+		template<auto...> typename B1, auto... ts, nik_vp(p1)(B1<ts...>*)
+	>
+	struct T_machine<MN::recall, MT::id, p0, p1>
 	{
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			auto val = T_store_U<f>::template result<>(arg_at<ns>(v, vs...)...);
+		//	auto val = T_store_U<f>::template
+		//			result<>((modify_type_at<ts, ns, T, Ts...>) arg_at<ns>(v, vs...)...);
+			auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(v, vs...))...);
 
 			return NIK_MACHINE(s, c, i, l, Vs)(val, vs...);
 		}
 	};
-	
+
 /***********************************************************************************************************************/
 
 // side:
 
-	template<template<auto...> typename B, auto f, auto... ns, nik_vp(p)(B<f, ns...>*)>
-	struct T_machine<MN::recall, MT::side, p>
+	template
+	<
+		template<auto...> typename B0, auto f, auto... ns, nik_vp(p0)(B0<f, ns...>*),
+		template<auto...> typename B1, auto... ts, nik_vp(p1)(B1<ts...>*)
+	>
+	struct T_machine<MN::recall, MT::side, p0, p1>
 	{
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			T_store_U<f>::template result<>(arg_at<ns>(&v, &vs...)...); // passes by address.
+		//	auto val = T_store_U<f>::template
+		//			result<>((modify_type_at<ts, ns, T, Ts...>) arg_at<ns>(v, vs...)...);
+			auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(v, vs...))...);
 
-			return NIK_MACHINE(s, c, i, l, Vs)(vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// loop:
-
-/***********************************************************************************************************************/
-
-// id:
-
-	template
-	<
-		template<auto...> typename B0, auto f0, auto... ns0, nik_vp(p0)(B0<f0, ns0...>*),
-		template<auto...> typename B1, auto f1, auto... ns1, nik_vp(p1)(B1<f1, ns1...>*)
-	>
-	struct T_machine<MN::loop, MT::id, p0, p1>
-	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
-		{
-			while (T_store_U<f0>::template result<>(arg_at<ns0>(vs...)...))
-				T_store_U<f1>::template result<>(arg_at<ns1>((&vs)...)...); // passes by address.
-
-			return NIK_MACHINE(s, c, i, l, Vs)(vs...);
+			return NIK_MACHINE(s, c, i, l, Vs)(val, vs...);
 		}
 	};
 
 /***********************************************************************************************************************/
 
-// side:
+// void_f:
 
 	template
 	<
-		template<auto...> typename B0, auto f0, auto... ns0, nik_vp(p0)(B0<f0, ns0...>*),
-		template<auto...> typename B1, auto f1, auto... ns1, nik_vp(p1)(B1<f1, ns1...>*)
+		template<auto...> typename B0, auto f, auto... ns, nik_vp(p0)(B0<f, ns...>*),
+		template<auto...> typename B1, auto... ts, nik_vp(p1)(B1<ts...>*)
 	>
-	struct T_machine<MN::loop, MT::side, p0, p1>
+	struct T_machine<MN::recall, MT::void_f, p0, p1>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			bool side = true;
-
-			while (side && T_store_U<f0>::template result<>(arg_at<ns0>(vs...)...))
-				side = T_store_U<f1>::template result<>(arg_at<ns1>((&vs)...)...); // passes by address.
+		//	T_store_U<f>::template
+		//		result<>((modify_type_at<ts, ns, T, Ts...>) arg_at<ns>(v, vs...)...);
+			T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(v, vs...))...);
 
 			return NIK_MACHINE(s, c, i, l, Vs)(vs...);
 		}
@@ -772,92 +905,6 @@ namespace cctmp {
 
 		template<auto f, auto... gs>
 		nik_ce auto arg_compose = _arg_pose_<CN::applywise, f, U_pack_Vs<gs...>>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// multi:
-
-/***********************************************************************************************************************/
-
-// multimap:
-
-	template<auto mutate, auto out_next, auto in_next, auto... ins_next>
-	struct T_multimap
-	{
-		template<typename Out, typename In, typename... Ins>
-		nik_ces auto result(Out out, In in, Ins... ins)
-		{
-			T_store_U<mutate>::template result<>(out, *in, (*ins)...);
-			T_store_U<out_next>::template result<>(out, *out);
-			T_store_U<in_next>::template result<>(in, *in);
-			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
-		}
-
-	}; template<auto mutate, auto out_next, auto in_next, auto... ins_next>
-		nik_ce auto _multimap_ = U_store_T<T_multimap<mutate, out_next, in_next, ins_next...>>;
-
-/***********************************************************************************************************************/
-
-// multifold:
-
-	template<auto mutate, auto in_next, auto... ins_next>
-	struct T_multifold
-	{
-		template<typename Out, typename In, typename... Ins>
-		nik_ces auto result(Out out, In in, Ins... ins)
-		{
-			T_store_U<mutate>::template result<>(out, *out, *in, (*ins)...);
-			T_store_U<in_next>::template result<>(in, *in);
-			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
-		}
-
-	}; template<auto mutate, auto in_next, auto... ins_next>
-		nik_ce auto _multifold_ = U_store_T<T_multifold<mutate, in_next, ins_next...>>;
-
-/***********************************************************************************************************************/
-
-// multifind:
-
-	template<auto predicate, auto in_next, auto... ins_next>
-	struct T_multifind
-	{
-		template<typename In, typename... Ins>
-		nik_ces auto result(In in, Ins... ins)
-		{
-			if (T_store_U<predicate>::template result<>(in, (*ins)...)) return false;
-
-			T_store_U<in_next>::template result<>(in, *in);
-			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
-
-			return true;
-		}
-
-	}; template<auto predicate, auto in_next, auto... ins_next>
-		nik_ce auto _multifind_ = U_store_T<T_multifind<predicate, in_next, ins_next...>>;
-
-/***********************************************************************************************************************/
-
-// multisift:
-
-	template<auto predicate, auto mutate, auto out_next, auto in_next, auto... ins_next>
-	struct T_multisift
-	{
-		template<typename Out, typename In, typename... Ins>
-		nik_ces auto result(Out out, In in, Ins... ins)
-		{
-			if (T_store_U<predicate>::template result<>(in, (*ins)...))
-			{
-				T_store_U<mutate>::template result<>(out, *out, *in, (*ins)...);
-				T_store_U<out_next>::template result<>(out, *out);
-			}
-
-			T_store_U<in_next>::template result<>(in, *in);
-			(T_store_U<ins_next>::template result<>(ins, *ins), ...);
-		}
-
-	}; template<auto predicate, auto mutate, auto out_next, auto in_next, auto... ins_next>
-		nik_ce auto _multisift_ = U_store_T<T_multisift<predicate, out_next, in_next, ins_next...>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

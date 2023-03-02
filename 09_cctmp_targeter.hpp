@@ -83,7 +83,7 @@ namespace cctmp {
 		}
 
 		nik_ce auto call_name      (cline_type & l) const { return l.has_paste ? MN::recall : MN::call; }
-		nik_ce auto call_note      (cline_type & l) const { return l.has_side  ? MT::side   : MT::id  ; }
+		nik_ce auto call_note      (cline_type & l) const { return l.has_void  ? MT::void_f : MT::id  ; }
 		nik_ce auto first_sign     (cline_type & l) const { return l.begin()->sign; }
 		nik_ce auto first_index    (cline_type & l) const { return l.begin()->index; }
 		nik_ce auto set_label_line (cline_type & l)       { label.array[first_index(l)] = contr.size(); }
@@ -114,7 +114,7 @@ namespace cctmp {
 			{
 				if (l.has_lookup) add_lookup();
 
-				add_instr(MN::select, MT::id, Mark::value);
+				add_instr(MN::select, MT::pair, Mark::value);
 				add_instr(call_name(l), MT::id);
 			}
 
@@ -122,14 +122,14 @@ namespace cctmp {
 			{
 				if (l.has_lookup) add_lookup();
 
-				add_instr(MN::select, MT::id, Mark::value);
+				add_instr(MN::select, MT::pair, Mark::value);
 				add_instr(call_name(l), call_note(l));
 
-				if (!l.has_side)
+				if (!l.has_void)
 				{
 					auto sign = first_sign(l);
 
-					if (Sign::is_arg(sign))
+					if (Sign::is_carg(sign))
 					{
 						set_instr_pos(first_index(l));
 
@@ -161,7 +161,7 @@ namespace cctmp {
 			{
 				auto sign = first_sign(l);
 
-				if (Sign::is_arg(sign))
+				if (Sign::is_carg(sign))
 				{
 					set_instr_pos(first_index(l));
 
@@ -172,7 +172,7 @@ namespace cctmp {
 				{
 					add_lookup();
 
-					add_instr(MN::select, MT::id, Mark::value);
+					add_instr(MN::select, MT::pair, Mark::value);
 					add_instr(MN::call, MT::id);
 				}
 
@@ -221,6 +221,8 @@ namespace cctmp {
 // tail call:
 
 /***********************************************************************************************************************/
+
+	// nothing yet.
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -356,20 +356,41 @@ namespace cctmp {
 			template<auto this_f, auto n, auto m>
 			nik_ces auto resolve_rest() { return resolve_value<_constant_<this_f>, n, m>(); }
 
-			template<auto this_f, auto n, auto m0, auto... ms>
-			nik_ces auto unpack_entry(nik_avp(T_pack_Vs<m0, ms...>*))
+			template<auto n, auto m>
+			nik_ces auto resolve_type()
 			{
-				nik_ce auto first    = resolve_first<this_f, n, m0>();
-				nik_ce auto has_side = toc.lookup_line_side(n);
+				nik_ce auto sign = toc.lookup_entry_sign(n, m);
 
-				if constexpr (has_side)
-				{
-					nik_ce auto side    = arg_subpose<first, _dereference_, _dereference_>;
-					nik_ce auto second  = resolve_rest<this_f, n, _zero>();
+				if constexpr (Sign::is_marg(sign)) return _read_write_;
+				else                               return _id_;
+			}
 
-					return eval<_list_<>, side, second, resolve_rest<this_f, n, ms>()...>;
-				}
-				else return eval<_list_<>, first, resolve_rest<this_f, n, ms>()...>;
+			template<auto this_f, auto n, auto m0, auto... ms>
+			nik_ces auto resolve_void_operator(nik_avp(T_pack_Vs<m0, ms...>*))
+			{
+				nik_ce auto first  = resolve_first<this_f, n, m0>();
+				nik_ce auto second = resolve_rest<this_f, n, _zero>();
+				nik_ce auto f_pack = U_pack_Vs<first, second, resolve_rest<this_f, n, ms>()...>;
+				nik_ce auto t_pack = U_pack_Vs<_read_write_, resolve_type<n, ms>()...>;
+
+				return eval<_list_<>, f_pack, t_pack>;
+			}
+
+			template<auto this_f, auto n, auto m0, auto... ms>
+			nik_ces auto resolve_def_operator(nik_avp(T_pack_Vs<m0, ms...>*))
+			{
+				nik_ce auto first  = resolve_first<this_f, n, m0>();
+				nik_ce auto f_pack = U_pack_Vs<first, resolve_rest<this_f, n, ms>()...>;
+				nik_ce auto t_pack = U_pack_Vs<resolve_type<n, ms>()...>;
+
+				return eval<_list_<>, f_pack, t_pack>;
+			}
+
+			template<auto this_f, auto n, typename Pack>
+			nik_ces auto unpack_entry(Pack p)
+			{
+				if constexpr (toc.lookup_line_void(n)) return resolve_void_operator<this_f, n>(p);
+				else                                   return resolve_def_operator<this_f, n>(p);
 			}
 
 			template<auto this_f, auto... l_ps, auto... e_ps>
@@ -395,11 +416,15 @@ namespace cctmp {
 			template<typename S, typename... Ts>
 			nik_ces S result(Ts... vs)
 			{
-				nik_ce auto s      = U_store_T<S>;
-				nik_ce auto this_f = _wrap_<result<S, Ts...>>;
-				nik_ce auto lookup = resolve_lookup<this_f>;
+				nik_ce auto out_type = U_store_T<S>;
+				nik_ce auto this_f   = _wrap_<result<S, Ts...>>;
+				nik_ce auto lookup   = resolve_lookup<this_f>;
 
-				return T_machine_start::template result<s, contr, lookup>(vs...);
+				return T_machine_start::template result
+				<
+					out_type, contr, lookup
+
+				>((modify_type<_read_only_, Ts>) vs...);
 			}
 	};
 

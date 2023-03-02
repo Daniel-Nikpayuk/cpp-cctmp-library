@@ -57,11 +57,12 @@ namespace cctmp {
 		enum : sign_type
 		{
 			na = 0,
-			arg , var , copy , paste , recurse , label , jump , lookup ,
+			carg , marg, var , copy , paste , recurse , label , jump , lookup ,
 			dimension
 		};
 
-		nik_ces bool is_arg     (sign_type s) { return (s == arg    ); }
+		nik_ces bool is_carg    (sign_type s) { return (s == carg   ); }
+		nik_ces bool is_marg    (sign_type s) { return (s == marg   ); }
 		nik_ces bool is_var     (sign_type s) { return (s == var    ); }
 		nik_ces bool is_copy    (sign_type s) { return (s == copy   ); }
 		nik_ces bool is_paste   (sign_type s) { return (s == paste  ); }
@@ -108,11 +109,12 @@ namespace cctmp {
 		entry_type *entry;
 
 		context_type kind;
-		bool has_side;
+		bool has_void; // currently allows discard.
 		bool has_paste;
 		bool has_lookup;
 
-		nik_ce Line() : kind{}, array{}, start{array}, entry{array}, has_side{}, has_paste{}, has_lookup{} { }
+		nik_ce Line() : kind{}, array{}, start{array}, entry{array},
+				has_void{}, has_paste{}, has_lookup{} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return entry; }
@@ -136,10 +138,12 @@ namespace cctmp {
 		cline_type *start;
 		line_type *line;
 
-		bool is_first;
-		bool has_copy;
+		bool is_local_first;
+		bool has_local_side;
+		bool has_local_copy;
 
-		nik_ce Page() : array{}, start{array}, line{array}, is_first{}, has_copy{} { }
+		nik_ce Page() : array{}, start{array}, line{array},
+				is_local_first{}, has_local_side{}, has_local_copy{} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return line; }
@@ -235,7 +239,7 @@ namespace cctmp {
 		}
 
 		nik_ce void set_arg_entry(clexeme & l, gcindex_type i)
-			{ set_entry(*page.array[0].entry, l, Sign::arg, i); }
+			{ set_entry(*page.array[0].entry, l, Sign::carg, i); }
 
 		nik_ce void set_entry(clexeme & l, csign_type s, gcindex_type i = _zero)
 			{ set_entry(*page.line->entry, l, s, i); }
@@ -300,8 +304,8 @@ namespace cctmp {
 		nik_ce auto lookup_entry_index(gindex_type m, gindex_type n) const
 			{ return lookup.array[m]->array[n].index; }
 
-		nik_ce auto lookup_line_side(gindex_type n) const
-			{ return lookup.array[n]->has_side; }
+		nik_ce auto lookup_line_void(gindex_type n) const
+			{ return lookup.array[n]->has_void; }
 
 		nik_ce auto lookup_line_shift(gindex_type n) const
 		{
@@ -318,6 +322,102 @@ namespace cctmp {
 
 			return size - shift;
 		}
+	};
+
+/***********************************************************************************************************************/
+
+// identifier action:
+
+	struct GenericAssemblyIA
+	{
+		// arg:
+
+			template<typename TOC>
+			nik_ces void arg_first(TOC & toc, clexeme & l)
+			{
+				toc.set_entry(l, Sign::na, toc.arg_index);
+				toc.page.is_local_first = false;
+			}
+
+			template<typename TOC>
+			nik_ces void arg_rest(TOC & toc, clexeme & l)
+				{ toc.set_entry(l, Sign::carg, toc.arg_index++); }
+
+		// apply:
+
+			template<typename TOC> // first entry:
+			nik_ces void apply_assign(TOC & toc, clexeme & l, gcindex_type index)
+			{
+				auto shift = _zero;
+				auto sign  = Sign::carg;
+
+				if (toc.page.has_local_side)
+				{
+					toc.page.line->has_void = true;
+					toc.page.has_local_side = false;
+
+					if (toc.page.line->has_paste) ++shift;
+					sign = Sign::marg;
+				}
+
+				toc.set_entry(l, sign, index + shift);
+			}
+
+			template<typename TOC>
+			nik_ces void apply_arg(TOC & toc, clexeme & l, gcindex_type index)
+			{
+				auto shift = toc.page.line->has_paste ? _one : _zero;
+				toc.set_entry(l, Sign::carg, index + shift);
+			}
+
+			template<typename TOC>
+			nik_ces void apply_lookup(TOC & toc, clexeme & l)
+			{
+				auto j = toc.match_name(l.start, l.finish);
+				auto s = j ? Sign::recurse : Sign::lookup;
+
+				toc.set_lookup();
+				toc.set_entry(l, s);
+			}
+
+			template<typename TOC>
+			nik_ces void apply_variable(TOC & toc, clexeme & l)
+			{
+				auto j = toc.match_name(l.start, l.finish);
+				auto s = j ? Sign::recurse : toc.page.is_local_first ? Sign::var : Sign::lookup;
+
+				if (s == Sign::var) // can assume first:
+				{
+					toc.set_arg_entry(l, toc.arg_index);
+					toc.increment_arg_entry();
+
+					toc.set_entry(l, s, toc.arg_index);
+					++toc.arg_index;
+				}
+				else
+				{
+					toc.set_lookup();
+					toc.set_entry(l, s);
+				}
+			}
+
+			template<typename TOC>
+			nik_ces void apply_first(TOC & toc, clexeme & l)
+			{
+				auto k = toc.match_arguments(l.start, l.finish);
+				if (k != toc.fline_end()) apply_assign(toc, l, k->index);
+				else apply_variable(toc, l);
+
+				toc.page.is_local_first = false;
+			}
+
+			template<typename TOC>
+			nik_ces void apply_rest(TOC & toc, clexeme & l)
+			{
+				auto k = toc.match_arguments(l.start, l.finish);
+				if (k != toc.fline_end()) apply_arg(toc, l, k->index);
+				else apply_lookup(toc, l);
+			}
 	};
 
 /***********************************************************************************************************************/
@@ -347,26 +447,22 @@ namespace cctmp {
 			nik_ces void new_definition(TOC & toc, clexeme & l, S & s)
 			{
 				toc.set_kind(Context::define);
-				toc.page.is_first = true;
+				toc.page.is_local_first = true;
 			}
 
 			template<typename TOC, typename S>
 			nik_ces void new_coordinate(TOC & toc, clexeme & l, S & s)
-			{
-				toc.set_kind(Context::label);
-			}
+				{ toc.set_kind(Context::label); }
 
 			template<typename TOC, typename S>
 			nik_ces void new_conditional(TOC & toc, clexeme & l, S & s)
-			{
-				toc.set_kind(Context::test);
-			}
+				{ toc.set_kind(Context::test); }
 
 			template<typename TOC, typename S>
 			nik_ces void new_application(TOC & toc, clexeme & l, S & s)
 			{
 				toc.set_kind(Context::apply);
-				toc.page.is_first = true;
+				toc.page.is_local_first = true;
 			}
 
 			template<typename TOC, typename S> // can assume "gi;" is the current stack front.
@@ -457,6 +553,10 @@ namespace cctmp {
 			}
 
 			template<typename TOC>
+			nik_ces void resolve_punctuation(TOC & toc, clexeme & l)
+				{ toc.page.has_local_side = true; }
+
+			template<typename TOC>
 			nik_ces void resolve_test(TOC & toc, clexeme & l)
 			{
 				toc.set_entry(l, Sign::copy);
@@ -493,9 +593,7 @@ namespace cctmp {
 
 			template<typename TOC>
 			nik_ces void resolve_return(TOC & toc, clexeme & l)
-			{
-				toc.set_kind(Context::re_turn);
-			}
+				{ toc.set_kind(Context::re_turn); }
 
 			template<typename TOC>
 			nik_ces void resolve_label(TOC & toc, clexeme & l)
@@ -513,17 +611,11 @@ namespace cctmp {
 			nik_ces void resolve_statement(TOC & toc, clexeme & l)
 			{
 				toc.increment_line();
-				if (toc.page.has_copy)
+				if (toc.page.has_local_copy)
 				{
 					toc.page.line->has_paste = true;
-					toc.page.has_copy        = false;
+					toc.page.has_local_copy  = false;
 				}
-			}
-
-			template<typename TOC>
-			nik_ces void resolve_punctuation(TOC & toc, clexeme & l)
-			{
-				toc.page.line->has_side = true;
 			}
 
 			template<typename TOC>
@@ -553,124 +645,39 @@ namespace cctmp {
 
 		// identifier:
 
-			// arg:
+			using Identifier = GenericAssemblyIA; // helper.
 
-				template<typename TOC>
-				nik_ces void identifier_arg_first(TOC & toc, clexeme & l)
-				{
-					toc.set_entry(l, Sign::na, toc.arg_index);
-					toc.page.is_first = false;
-				}
+			template<typename TOC>
+			nik_ces void identifier_arg_entry(TOC & toc, clexeme & l)
+			{
+				if (toc.page.is_local_first) Identifier::arg_first(toc, l);
+				else Identifier::arg_rest(toc, l);
+			}
 
-				template<typename TOC>
-				nik_ces void identifier_arg_rest(TOC & toc, clexeme & l)
-				{
-					toc.set_entry(l, Sign::arg, toc.arg_index++);
-				}
-
-				template<typename TOC>
-				nik_ces void identifier_arg_entry(TOC & toc, clexeme & l)
-				{
-					if (toc.page.is_first) identifier_arg_first(toc, l);
-					else identifier_arg_rest(toc, l);
-				}
-
-			// apply:
-
-				template<typename TOC>
-				nik_ces void identifier_apply_assign(TOC & toc, clexeme & l, gcindex_type index)
-				{
-					auto has_shift = (toc.page.line->has_side && toc.page.line->has_paste);
-					auto shift     = has_shift ? _one : _zero;
-					toc.set_entry(l, Sign::arg, index + shift);
-				}
-
-				template<typename TOC>
-				nik_ces void identifier_apply_arg(TOC & toc, clexeme & l, gcindex_type index)
-				{
-					auto shift = toc.page.line->has_paste ? _one : _zero;
-					toc.set_entry(l, Sign::arg, index + shift);
-				}
-
-				template<typename TOC>
-				nik_ces void identifier_apply_lookup(TOC & toc, clexeme & l)
-				{
-					auto j = toc.match_name(l.start, l.finish);
-					auto s = j ? Sign::recurse : Sign::lookup;
-
-					toc.set_lookup();
-					toc.set_entry(l, s);
-				}
-
-				template<typename TOC>
-				nik_ces void identifier_apply_variable(TOC & toc, clexeme & l)
-				{
-					auto j = toc.match_name(l.start, l.finish);
-					auto s = j ? Sign::recurse : toc.page.is_first ? Sign::var : Sign::lookup;
-
-					if (s == Sign::var) // can assume first:
-					{
-						toc.set_arg_entry(l, toc.arg_index);
-						toc.increment_arg_entry();
-
-						toc.set_entry(l, s, toc.arg_index);
-						++toc.arg_index;
-					}
-					else
-					{
-						toc.set_lookup();
-						toc.set_entry(l, s);
-					}
-				}
-
-				template<typename TOC>
-				nik_ces void identifier_apply_first(TOC & toc, clexeme & l)
-				{
-					auto k = toc.match_arguments(l.start, l.finish);
-					if (k != toc.fline_end()) identifier_apply_assign(toc, l, k->index);
-					else identifier_apply_variable(toc, l);
-
-					toc.page.is_first = false;
-				}
-
-				template<typename TOC>
-				nik_ces void identifier_apply_rest(TOC & toc, clexeme & l)
-				{
-					auto k = toc.match_arguments(l.start, l.finish);
-					if (k != toc.fline_end()) identifier_apply_arg(toc, l, k->index);
-					else identifier_apply_lookup(toc, l);
-				}
-
-				template<typename TOC>
-				nik_ces void identifier_apply_entry(TOC & toc, clexeme & l)
-				{
-					if (toc.page.is_first) identifier_apply_first(toc, l);
-					else identifier_apply_rest(toc, l);
-				}
+			template<typename TOC>
+			nik_ces void identifier_apply_entry(TOC & toc, clexeme & l)
+			{
+				if (toc.page.is_local_first) Identifier::apply_first(toc, l);
+				else Identifier::apply_rest(toc, l);
+			}
 
 			template<typename TOC>
 			nik_ces void identifier_test_entry(TOC & toc, clexeme & l)
-			{
-				identifier_apply_rest(toc, l);
-			}
+				{ Identifier::apply_rest(toc, l); }
 
 			template<typename TOC>
 			nik_ces void identifier_branch_entry(TOC & toc, clexeme & l)
-			{
-				toc.set_entry(l, Sign::jump);
-			}
+				{ toc.set_entry(l, Sign::jump); }
 
 			template<typename TOC>
 			nik_ces void identifier_goto_entry(TOC & toc, clexeme & l)
-			{
-				toc.set_entry(l, Sign::jump);
-			}
+				{ toc.set_entry(l, Sign::jump); }
 
 			template<typename TOC>
 			nik_ces void identifier_return_entry(TOC & toc, clexeme & l)
 			{
 				auto k = toc.match_arguments(l.start, l.finish);
-				if (k != toc.fline_end()) toc.set_entry(l, Sign::arg, k->index);
+				if (k != toc.fline_end()) toc.set_entry(l, Sign::carg, k->index);
 				else
 				{
 					toc.set_lookup(); // can assume at most one lookup.
@@ -682,21 +689,15 @@ namespace cctmp {
 
 			template<typename TOC>
 			nik_ces void underscore_apply_entry(TOC & toc, clexeme & l)
-			{
-				toc.set_entry(l, Sign::paste);
-			}
+				{ toc.set_entry(l, Sign::paste); }
 
 			template<typename TOC>
 			nik_ces void underscore_test_entry(TOC & toc, clexeme & l)
-			{
-				toc.set_entry(l, Sign::paste);
-			}
+				{ toc.set_entry(l, Sign::paste); }
 
 			template<typename TOC>
 			nik_ces void underscore_return_entry(TOC & toc, clexeme & l)
-			{
-				toc.set_entry(l, Sign::paste);
-			}
+				{ toc.set_entry(l, Sign::paste); }
 
 		// period:
 
@@ -704,8 +705,8 @@ namespace cctmp {
 			nik_ces void period_apply_entry(TOC & toc, clexeme & l)
 			{
 				toc.set_entry(l, Sign::copy);
-				toc.page.is_first = false; // can assume first.
-				toc.page.has_copy = true;
+				toc.page.is_local_first = false; // can assume first.
+				toc.page.has_local_copy = true;
 			}
 		};
 	};
@@ -756,10 +757,7 @@ namespace cctmp {
 	// interface:
 
 		template<typename TOC, typename S>
-		struct T_generic_assembly_ast
-		{
-			nik_ces auto value = GenericAssemblyAST<TOC, S>{};
-		};
+		struct T_generic_assembly_ast { nik_ces auto value = GenericAssemblyAST<TOC, S>{}; };
 
 /***********************************************************************************************************************/
 
@@ -808,30 +806,33 @@ namespace cctmp {
 			table_entry('C', '\0') = transition( ""                                    );
 			table_entry('B',  'l') = transition( "l;E"     , NAction::new_coordinate   );
 			table_entry('E',  'i') = transition( "IJgi;"                               );
-			table_entry('E',  '.') = transition( "IJgi;"                               );
 			table_entry('E',  '!') = transition( "IJgi;"                               );
+			table_entry('E',  '.') = transition( "IJgi;"                               );
 			table_entry('E',  't') = transition( "IJgi;"                               );
 			table_entry('E',  'r') = transition( "rM;"                                 );
 			table_entry('J',  'i') = transition( "IJ"                                  );
-			table_entry('J',  '.') = transition( "IJ"                                  );
 			table_entry('J',  '!') = transition( "IJ"                                  );
+			table_entry('J',  '.') = transition( "IJ"                                  );
 			table_entry('J',  't') = transition( "IJ"                                  );
 			table_entry('J',  'g') = transition( ""                                    );
 			table_entry('J',  'l') = transition( ""        , NAction::sub_instr_label  );
 			table_entry('J',  'r') = transition( ""        , NAction::sub_instr_return );
 			table_entry('I',  'i') = transition( "T=OV;"   , NAction::new_application  );
+			table_entry('I',  '!') = transition( "T=OV;"   , NAction::new_application  );
 			table_entry('I',  '.') = transition( "T=OV;"   , NAction::new_application  );
-			table_entry('I',  '!') = transition( "!i=OV;"  , NAction::new_application  );
 			table_entry('I',  't') = transition( "tOV;bi;" , NAction::new_conditional  );
 			table_entry('V',  'i') = transition( "MV"                                  );
+			table_entry('V',  '!') = transition( "MV"                                  );
 			table_entry('V',  'q') = transition( "MV"                                  );
 			table_entry('V',  '_') = transition( "MV"                                  );
 			table_entry('V',  ';') = transition( ""                                    );
 			table_entry('T',  'i') = transition( "i"                                   );
+			table_entry('T',  '!') = transition( "!i"                                  );
 			table_entry('T',  '.') = transition( "."                                   );
 			table_entry('O',  'i') = transition( "i"                                   );
 			table_entry('O',  'q') = transition( "q"                                   );
 			table_entry('M',  'i') = transition( "i"                                   );
+			table_entry('M',  '!') = transition( "!i"                                  );
 			table_entry('M',  'q') = transition( "q"                                   );
 			table_entry('M',  '_') = transition( "_"                                   );
 
