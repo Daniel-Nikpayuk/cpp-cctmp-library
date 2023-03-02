@@ -86,6 +86,7 @@ namespace cctmp {
 		nik_ce auto call_note      (cline_type & l) const { return l.has_void  ? MT::void_f : MT::id  ; }
 		nik_ce auto first_sign     (cline_type & l) const { return l.begin()->sign; }
 		nik_ce auto first_index    (cline_type & l) const { return l.begin()->index; }
+		nik_ce auto second_index   (cline_type & l) const { return l.array[1].index; }
 		nik_ce auto set_label_line (cline_type & l)       { label.array[first_index(l)] = contr.size(); }
 
 		nik_ce void increment_instr () { ++contr.value; }
@@ -105,6 +106,15 @@ namespace cctmp {
 				increment_instr();
 			}
 
+			nik_ce void add_arg_op_instr(cline_type & l)
+			{
+				increment_value(call_name(l));
+				increment_value(MT::arg);
+				increment_value(second_index(l));
+
+				increment_instr();
+			}
+
 			nik_ce void add_lookup () { *(contr_lookup.locus++) = contr.value; }
 			nik_ce void add_jump   () { *(contr_jump.locus++  ) = contr.value; }
 
@@ -118,29 +128,37 @@ namespace cctmp {
 				add_instr(call_name(l), MT::id);
 			}
 
+			nik_ce void add_get_arg_instr(cline_type & l, gcindex_type index)
+			{
+				set_instr_pos(index);
+
+				add_instr(MN::select, MT::front, Mark::value);
+				add_instr(MN::right, MT::id);
+			}
+
+			nik_ce void add_replace_instr(cline_type & l)
+			{
+				auto sign = first_sign(l);
+
+				if (Sign::is_var(sign)) add_instr(MN::rotate, MT::id);
+				else if (Sign::is_carg(sign))
+				{
+					set_instr_pos(first_index(l));
+
+					add_instr(MN::reselect, MT::front, Mark::value);
+					add_instr(MN::replace, MT::id);
+				}
+			}
+
 			nik_ce void add_apply_instr(cline_type & l)
 			{
 				if (l.has_lookup) add_lookup();
+				if (!l.has_arg_op) add_instr(MN::select, MT::pair, Mark::value);
 
-				add_instr(MN::select, MT::pair, Mark::value);
-				add_instr(call_name(l), call_note(l));
+				if (l.has_arg_op) add_arg_op_instr(l);
+				else add_instr(call_name(l), call_note(l));
 
-				if (!l.has_void)
-				{
-					auto sign = first_sign(l);
-
-					if (Sign::is_carg(sign))
-					{
-						set_instr_pos(first_index(l));
-
-						add_instr(MN::reselect, MT::front, Mark::value);
-						add_instr(MN::replace, MT::id);
-					}
-					else if (Sign::is_var(sign))
-					{
-						add_instr(MN::rotate, MT::id);
-					}
-				}
+				if (!l.has_void) add_replace_instr(l);
 			}
 
 			nik_ce void add_branch_instr(cline_type & l)
@@ -157,24 +175,20 @@ namespace cctmp {
 				add_instr(MN::jump, MT::go_to, Mark::value);
 			}
 
+			nik_ce void add_get_lookup_instr(cline_type & l)
+			{
+				add_lookup();
+
+				add_instr(MN::select, MT::pair, Mark::value);
+				add_instr(MN::call, MT::id);
+			}
+
 			nik_ce void add_return_instr(cline_type & l)
 			{
 				auto sign = first_sign(l);
 
-				if (Sign::is_carg(sign))
-				{
-					set_instr_pos(first_index(l));
-
-					add_instr(MN::select, MT::front, Mark::value);
-					add_instr(MN::right, MT::id);
-				}
-				else if (Sign::is_lookup(sign))
-				{
-					add_lookup();
-
-					add_instr(MN::select, MT::pair, Mark::value);
-					add_instr(MN::call, MT::id);
-				}
+				if (Sign::is_carg(sign)) add_get_arg_instr(l, first_index(l));
+				else if (Sign::is_lookup(sign)) add_get_lookup_instr(l);
 
 				add_instr(MN::first , MT::id);
 			}

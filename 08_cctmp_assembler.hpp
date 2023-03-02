@@ -112,9 +112,10 @@ namespace cctmp {
 		bool has_void; // currently allows discard.
 		bool has_paste;
 		bool has_lookup;
+		bool has_arg_op;
 
 		nik_ce Line() : kind{}, array{}, start{array}, entry{array},
-				has_void{}, has_paste{}, has_lookup{} { }
+				has_void{}, has_paste{}, has_lookup{}, has_arg_op{} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return entry; }
@@ -139,11 +140,12 @@ namespace cctmp {
 		line_type *line;
 
 		bool is_local_first;
+		bool is_local_second;
 		bool has_local_side;
 		bool has_local_copy;
 
 		nik_ce Page() : array{}, start{array}, line{array},
-				is_local_first{}, has_local_side{}, has_local_copy{} { }
+				is_local_first{}, is_local_second{}, has_local_side{}, has_local_copy{} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return line; }
@@ -346,7 +348,7 @@ namespace cctmp {
 		// apply:
 
 			template<typename TOC> // first entry:
-			nik_ces void apply_assign(TOC & toc, clexeme & l, gcindex_type index)
+			nik_ces void apply_maybe_void(TOC & toc, clexeme & l, gcindex_type index)
 			{
 				auto shift = _zero;
 				auto sign  = Sign::carg;
@@ -366,8 +368,18 @@ namespace cctmp {
 			template<typename TOC>
 			nik_ces void apply_arg(TOC & toc, clexeme & l, gcindex_type index)
 			{
+				auto sign  = toc.page.has_local_side ? Sign::marg : Sign::carg;
 				auto shift = toc.page.line->has_paste ? _one : _zero;
+
+				toc.page.has_local_side = false;
 				toc.set_entry(l, Sign::carg, index + shift);
+			}
+
+			template<typename TOC>
+			nik_ces void apply_arg_op(TOC & toc, clexeme & l, gcindex_type index)
+			{
+				toc.page.line->has_arg_op = true;
+				toc.set_entry(l, Sign::carg, index);
 			}
 
 			template<typename TOC>
@@ -381,7 +393,7 @@ namespace cctmp {
 			}
 
 			template<typename TOC>
-			nik_ces void apply_variable(TOC & toc, clexeme & l)
+			nik_ces void apply_maybe_variable(TOC & toc, clexeme & l)
 			{
 				auto j = toc.match_name(l.start, l.finish);
 				auto s = j ? Sign::recurse : toc.page.is_local_first ? Sign::var : Sign::lookup;
@@ -405,10 +417,21 @@ namespace cctmp {
 			nik_ces void apply_first(TOC & toc, clexeme & l)
 			{
 				auto k = toc.match_arguments(l.start, l.finish);
-				if (k != toc.fline_end()) apply_assign(toc, l, k->index);
-				else apply_variable(toc, l);
+				if (k != toc.fline_end()) apply_maybe_void(toc, l, k->index);
+				else apply_maybe_variable(toc, l);
 
 				toc.page.is_local_first = false;
+				toc.page.is_local_second = true;
+			}
+
+			template<typename TOC>
+			nik_ces void apply_second(TOC & toc, clexeme & l)
+			{
+				auto k = toc.match_arguments(l.start, l.finish);
+				if (k != toc.fline_end()) apply_arg_op(toc, l, k->index);
+				else apply_lookup(toc, l);
+
+				toc.page.is_local_second = false;
 			}
 
 			template<typename TOC>
@@ -658,6 +681,7 @@ namespace cctmp {
 			nik_ces void identifier_apply_entry(TOC & toc, clexeme & l)
 			{
 				if (toc.page.is_local_first) Identifier::apply_first(toc, l);
+				else if (toc.page.is_local_second) Identifier::apply_second(toc, l);
 				else Identifier::apply_rest(toc, l);
 			}
 
@@ -706,6 +730,7 @@ namespace cctmp {
 			{
 				toc.set_entry(l, Sign::copy);
 				toc.page.is_local_first = false; // can assume first.
+				toc.page.is_local_second = true; // can assume first.
 				toc.page.has_local_copy = true;
 			}
 		};

@@ -278,7 +278,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			pair , front , go_to , branch , side , void_f ,
+			pair , front , go_to , branch , arg , side , void_f ,
 			dimension
 		};
 	};
@@ -744,9 +744,26 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-		//	auto val = T_store_U<f>::template
-		//			result<>((modify_type_at<ts, ns, Ts...>) arg_at<ns>(vs...)...);
 			auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(vs...))...);
+
+			return NIK_MACHINE(s, c, i, l, Vs)(val, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// arg:
+
+	template<auto... filler>
+	struct T_machine<MN::call, MT::arg, filler...>
+	{
+		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto ins	= MD::instr(c, i);
+			nik_ce auto n   = ins[MI::pos];
+
+			auto val = arg_at<n>(vs...);
 
 			return NIK_MACHINE(s, c, i, l, Vs)(val, vs...);
 		}
@@ -766,8 +783,6 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-		//	auto val = T_store_U<f>::template
-		//			result<>((modify_type_at<ts, ns, Ts...>) arg_at<ns>(vs...)...);
 			auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(vs...))...);
 
 			return NIK_MACHINE(s, c, i, l, Vs)(val, vs...);
@@ -788,8 +803,6 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-		//	T_store_U<f>::template
-		//		result<>((modify_type_at<ts, ns, Ts...>) arg_at<ns>(vs...)...);
 			T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(vs...))...);
 
 			return NIK_MACHINE(s, c, i, l, Vs)(vs...);
@@ -815,8 +828,6 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-		//	auto val = T_store_U<f>::template
-		//			result<>((modify_type_at<ts, ns, T, Ts...>) arg_at<ns>(v, vs...)...);
 			auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(v, vs...))...);
 
 			return NIK_MACHINE(s, c, i, l, Vs)(val, vs...);
@@ -837,8 +848,6 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-		//	auto val = T_store_U<f>::template
-		//			result<>((modify_type_at<ts, ns, T, Ts...>) arg_at<ns>(v, vs...)...);
 			auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(v, vs...))...);
 
 			return NIK_MACHINE(s, c, i, l, Vs)(val, vs...);
@@ -859,8 +868,6 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l, Vs), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-		//	T_store_U<f>::template
-		//		result<>((modify_type_at<ts, ns, T, Ts...>) arg_at<ns>(v, vs...)...);
 			T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(v, vs...))...);
 
 			return NIK_MACHINE(s, c, i, l, Vs)(vs...);
