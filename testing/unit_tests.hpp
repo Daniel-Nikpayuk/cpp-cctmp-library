@@ -2800,6 +2800,57 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// side effect type propogation:
+
+/***********************************************************************************************************************/
+
+	template<typename T>
+	void void_set_to_five(T & x) { x = 5; }
+
+	// version 0:
+
+		template<typename T>
+		auto & identity_cast_v0(T & x) { return x; } // works!
+
+		template<typename T>
+		auto set_to_five_v0(T x)
+		{
+			void_set_to_five(identity_cast_v0(x));
+
+			return x;
+		}
+
+	// version 1:
+
+		template<typename T>
+		auto & identity_cast_v1(T x) { return x; } // works!
+
+		template<typename T>
+		auto set_to_five_v1(T x)
+		{
+			void_set_to_five(identity_cast_v1<T&>(x));
+
+			return x;
+		}
+
+	// version 2:
+
+		template<typename T>
+		auto identity_cast_v2(T x) -> T { return x; } // works!
+
+		template<typename T>
+		auto set_to_five_v2(T x)
+		{
+			void_set_to_five(identity_cast_v2<T&>(x));
+
+			return x;
+		}
+
+		printf("%d\n", set_to_five_v2(7));
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 } // case studies

@@ -162,8 +162,10 @@ namespace cctmp {
 	{
 		private:
 
-			constexpr static auto src    = T_generic_assembly_pda::template parse<SourceCallable>;
-			constexpr static auto syntax = src.syntax;
+			using T_parser = T_generic_assembly_parser<T_generic_assembly_translator>;
+
+			constexpr static auto src    = T_parser::template parse<SourceCallable>;
+			constexpr static auto syntax = src.tree;
 			constexpr static auto page   = syntax.page;
 			constexpr static auto lookup = syntax.lookup;
 
@@ -246,7 +248,7 @@ namespace cctmp {
 	{
 		private:
 
-			constexpr static auto target	= T_generic_assembly_target<SourceCallable>::value;
+			constexpr static auto target	= T_generic_assembly_targeter<SourceCallable>::value;
 			constexpr static auto contr	= target.contr;
 
 			using Instr		= typename decltype(target)::Instr;

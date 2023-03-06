@@ -73,6 +73,11 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+	constexpr auto make_complex(const float x, const float y) { return complex_number(x, y); }
+	constexpr auto _make_complex_ = _wrap_<make_complex>;
+
+/***********************************************************************************************************************/
+
 // print:
 
 	void print_complex(const complex_number & c) { printf("(%f, %f)\n", c.x, c.y); }
@@ -495,6 +500,83 @@ namespace cctmp {
 	template<typename T>
 	constexpr auto side_effects_v0(T x)
 		{ return generic_assembly_apply<_side_effects_v0, T>(x, 2); }
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// falling factorial (exponent 2):
+
+/***********************************************************************************************************************/
+
+// frame:
+
+	template<auto side_dec>
+	constexpr auto fall_fact_2_frame()
+	{
+		return cctmp::table
+		(
+		 	cctmp::U_char,
+
+			cctmp::binding( "side_dec" , side_dec )
+		);
+	};
+
+/***********************************************************************************************************************/
+
+// version 0:
+
+	struct T_ptr_side_dec
+	{
+		template<typename T>
+		constexpr static auto result(T x)
+		{
+			auto y = *x;
+
+			*x = *x - 1;
+
+			return y;
+		}
+
+	}; constexpr auto _ptr_side_dec_ = U_store_T<T_ptr_side_dec>;
+
+	constexpr auto fall_fact_2_ptr_lookup = cctmp::make_frame<fall_fact_2_frame<_ptr_side_dec_>>;
+
+	template<bool punct>
+	constexpr auto _fall_fact_2_ptr_v0()
+	{
+		if constexpr (punct)
+
+			return source
+			(
+				"fall_fact_2 x       ;"
+
+				"body:               ;"
+				"  v = side_dec !x   ;" // works!
+				"  . = dereference x ;"
+				"  . = multiply v _  ;"
+				"  return _          ;"
+			);
+		else
+			return source
+			(
+				"fall_fact_2 x       ;"
+
+				"body:               ;"
+				"  v = side_dec x    ;" // error: read only.
+				"  . = dereference x ;"
+				"  . = multiply v _  ;"
+				"  return _          ;"
+			);
+	}
+
+	template<bool punct, typename T>
+	constexpr auto fall_fact_2_ptr_v0(T x)
+	{
+		constexpr auto src = _fall_fact_2_ptr_v0<punct>;
+		constexpr auto l0  = fall_fact_2_ptr_lookup;
+
+		return generic_assembly_apply<src, T, l0>(&x);
+	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

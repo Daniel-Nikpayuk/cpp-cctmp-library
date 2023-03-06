@@ -25,14 +25,16 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// target:
+// architecture:
 
 	template<auto SourceCallable>
-	struct GenericAssemblyTarget
+	struct T_generic_assembly_architecture
 	{
-		nik_ces auto pda = T_generic_assembly_pda::template parse<SourceCallable>;
-		nik_ces auto src = pda.src;
-		nik_ces auto toc = pda.syntax;
+		using T_parser		= T_generic_assembly_parser<T_generic_assembly_translator>;
+
+		nik_ces auto parser	= T_parser::template parse<SourceCallable>;
+		nik_ces auto src	= parser.src;
+		nik_ces auto toc	= parser.tree;
 
 		struct Instr { enum : gkey_type { name = 0, note  , pos }; };
 		struct Mark  { enum : gkey_type { none = 0, value       }; };
@@ -41,7 +43,7 @@ namespace cctmp {
 		nik_ces auto length		= ( 1 * src.goto_size    )
 						+ ( 1 * src.branch_size  )
 						+ ( 2 * src.test_size    )
-						+ ( 2 * src.period_size  )
+						+ ( 2 * src.copy_size    )
 						+ ( 3 * src.return_size  ) // upper bound: (1 * size <= 3 * size)
 						+ ( 4 * src.replace_size );
 
@@ -57,7 +59,7 @@ namespace cctmp {
 		contr_lookup_type contr_lookup;
 		contr_jump_type contr_jump;
 
-		nik_ce GenericAssemblyTarget() :
+		nik_ce T_generic_assembly_architecture() :
 
 			label{}, contr{}, contr_lookup{}, contr_jump{}
 
@@ -223,9 +225,9 @@ namespace cctmp {
 // automaton:
 
 	template<auto SourceCallable>
-	struct T_generic_assembly_target
+	struct T_generic_assembly_targeter
 	{
-		nik_ces auto value = GenericAssemblyTarget<SourceCallable>{};
+		nik_ces auto value = T_generic_assembly_architecture<SourceCallable>{};
 	};
 
 /***********************************************************************************************************************/

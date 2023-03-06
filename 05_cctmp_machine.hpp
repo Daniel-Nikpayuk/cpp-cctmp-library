@@ -452,7 +452,7 @@ namespace cctmp {
 	struct T_cast_type
 	{
 		template<typename T>
-		nik_ces auto result(T v) { return v; }
+		nik_ces T result(T v) { return v; }
 	};
 
 	template<>
@@ -474,34 +474,56 @@ namespace cctmp {
 	template<auto f, auto n>
 	struct T_apply_at
 	{
-		nik_ces auto is_optimizable     = eval<_same_, f, _id_>;
-		nik_ces auto lookup             = stem_<is_optimizable, U_null_Vs, _list_<>, f>;
-
-		nik_ces auto _opt_instr_pack_   = U_pack_Vs<instruction<CN::first>>;
-		nik_ces auto _unopt_instr_pack_ = U_pack_Vs
-						<
-							instruction< CN::select , _zero >,
-							instruction< CN::apply          >,
-							instruction< CN::first          >
-						>;
-		nik_ces auto _instr_pack_       = if_then_else_<is_optimizable, _opt_instr_pack_, _unopt_instr_pack_>;
-		nik_ces auto contr              = unpack_
-						<
-							_instr_pack_, _contr_,
-							instruction< CN::front , n >,
-							instruction< CN::at        >
-						>;
+		nik_ces auto lookup     = U_pack_Vs<f>;
+		nik_ces auto contr      = controller
+					<
+						instruction< CN::front  , n     >,
+						instruction< CN::at             >,
+						instruction< CN::select , _zero >,
+						instruction< CN::apply          >,
+						instruction< CN::first          >
+					>;
 
 		template<typename... Ts>
-		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr, lookup>(vs...); }
+		nik_ces auto result(Ts... vs)
+			{ return T_chain_start::template result<contr, lookup>(vs...); }
 	};
 
-	template<auto f, typename F, nik_vp(p)(F*)>
-	struct T_apply_at<f, p>
-	{
-		template<typename... Ts> // const.
-		nik_ces const auto result(Ts... vs) { return F::template result<>(); }
-	};
+	// id (optimized):
+
+		// apply id:
+
+			template<auto n>
+			struct T_apply_id_at
+			{
+				nik_ces auto lookup     = U_null_Vs;
+				nik_ces auto contr      = controller
+							<
+								instruction< CN::front , n >,
+								instruction< CN::at        >,
+								instruction< CN::first     >
+							>;
+
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs)
+					{ return T_chain_start::template result<contr, lookup>(vs...); }
+			};
+
+		// constant:
+
+			template<typename C, nik_vp(p)(C*)>
+			struct T_apply_id_at<p>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return C::template result<>(); }
+			};
+
+		template<auto n>
+		struct T_apply_at<_id_, n>
+		{
+			template<typename... Ts>
+			nik_ces auto result(Ts... vs) { return T_apply_id_at<n>::template result<>(vs...); }
+		};
 
 	// syntactic sugar:
 

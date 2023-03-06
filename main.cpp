@@ -31,7 +31,7 @@
 #include"05_cctmp_machine.hpp"
 #include"06_cctmp_lexer.hpp"
 #include"07_cctmp_parser.hpp"
-#include"08_cctmp_assembler.hpp"
+#include"08_cctmp_translator.hpp"
 #include"09_cctmp_targeter.hpp"
 #include"10_cctmp_metapiler.hpp"
 
@@ -65,6 +65,10 @@
 		static_assert(factorial_v3(7) ==  5040);
 		static_assert(factorial_v4(8) == 40320);
 
+	// falling factorial:
+
+		printf("%d\n", fall_fact_2_ptr_v0<true>(7));	// prints: 42
+
 	// fibonacci:
 
 		static_assert(fibonacci_v0(7) ==   21);
@@ -94,7 +98,7 @@
 
 		side_effects_v0(ptr);
 
-		printf("%d\n", *ptr);		// prints: 3
+		printf("%d\n", *ptr);	// prints: 3
 
 	// map:
 

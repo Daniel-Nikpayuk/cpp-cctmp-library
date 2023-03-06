@@ -275,7 +275,7 @@ namespace cctmp {
 	struct T_generic_assembly_metapiler
 	{
 		nik_ces auto env	= eval<_push_, H_id, Env, default_machine_lookup>;
-		nik_ces auto target	= T_generic_assembly_target<SourceCallable>::value;
+		nik_ces auto target	= T_generic_assembly_targeter<SourceCallable>::value;
 		nik_ces auto toc	= target.toc;
 
 		// toc:
@@ -429,6 +429,9 @@ namespace cctmp {
 	};
 
 	// syntactic sugar:
+
+		template<typename CharType, auto Size>
+		nik_ce auto source(const CharType (&s)[Size]) { return T_generic_assembly_source(s); }
 
 		template<auto SourceCallable, typename S, auto... Lookups, typename... Ts>
 		nik_ce auto generic_assembly_apply(Ts... vs)

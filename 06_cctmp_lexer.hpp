@@ -286,10 +286,10 @@ namespace cctmp {
 
 // recognizes:
 
-	template<typename T_dfa>
+	template<typename T_lexer>
 	nik_ce gcbool_type recognizes(gstring_type b, gstring_type e)
 	{
-		auto l = T_dfa::lex(b, e);
+		auto l = T_lexer::lex(b, e);
 		return (l.value != TokenName::invalid);
 	}
 
@@ -351,7 +351,7 @@ namespace cctmp {
 // transition table:
 
 	template<auto CharsetCallable>
-	struct KeywordDFTT
+	struct T_keyword_dftt
 	{
 		nik_ces auto static_charset		= _static_object_<CharsetCallable>;
 		nik_ces auto charset			= T_store_U<static_charset>::value;
@@ -360,7 +360,7 @@ namespace cctmp {
 
 		state_type table[state_size][charset_size];
 
-		nik_ce KeywordDFTT() : table{} // initializes the empty state.
+		nik_ce T_keyword_dftt() : table{} // initializes the empty state.
 		{
 			for (gkey_type pos = StateName::initial; pos != charset.length + 1; ++pos)
 				table[pos][charset.column[pos - 1]] = pos + 1;
@@ -372,27 +372,31 @@ namespace cctmp {
 		}
 	};
 
+/***********************************************************************************************************************/
+
+// automaton:
+
 	template<auto CharsetCallable>
-	struct T_keyword_dftt
+	struct T_keyword_dfa
 	{
-		nik_ces auto value  = KeywordDFTT<CharsetCallable>{};
+		nik_ces auto value  = T_keyword_dftt<CharsetCallable>{};
 		nik_ces auto accept = value.charset.length + 1;
 	};
 
 /***********************************************************************************************************************/
 
-// automaton:
+// interface:
 
 	template<auto CharsetCallable, auto Token>
-	struct T_keyword_dfa
+	struct T_keyword_lexer
 	{
-		using transition_table	= T_keyword_dftt<CharsetCallable>;
+		using T_dfa		= T_keyword_dfa<CharsetCallable>;
 		nik_ces auto token	= Token;
 
 		nik_ces lexeme lex(gstring_type b, gstring_type e)
 		{
-			auto l       = recognize<transition_table>(b, e);
-			token_type t = (l.value == transition_table::accept) ? Token : TokenName::invalid;
+			auto l       = recognize<T_dfa>(b, e);
+			token_type t = (l.value == T_dfa::accept) ? Token : TokenName::invalid;
 
 			return lexeme{l.start, l.finish, (gindex_type) t};
 		}
@@ -407,7 +411,7 @@ namespace cctmp {
 
 // transition table:
 
-	struct GenericAssemblyDFTT
+	struct T_generic_assembly_dftt
 	{
 		struct State
 		{
@@ -487,7 +491,7 @@ namespace cctmp {
 
 		state_type table[State::dimension][Charset::dimension];
 
-		nik_ce GenericAssemblyDFTT() : table{}
+		nik_ce T_generic_assembly_dftt() : table{}
 		{
 			table [ State::initial   ][ Charset::ula         ] = State::ulan;
 			table [ State::initial   ][ Charset::semicolon   ] = State::semicolon;
@@ -537,50 +541,54 @@ namespace cctmp {
 			{ return table[s][Charset::map(c)]; }
 	};
 
-	// interface:
-
-		struct T_generic_assembly_dftt
-		{
-			using ArrayEnd		= T_store_U< _array_end_  >;
-			using ArraySize		= T_store_U< _array_size_ >;
-
-			nik_ces auto value	= GenericAssemblyDFTT{};
-			nik_ces auto accept	= GenericAssemblyDFTT::State::accept;
-			nik_ces auto end	= ArrayEnd::template result<>(GenericAssemblyDFTT::State::accept);
-			nik_ces auto size	= ArraySize::template result<>(GenericAssemblyDFTT::State::accept);
-			nik_ces auto token	= GenericAssemblyDFTT::State::token;
-
-			nik_ces auto underscore_charset () { return dfa_charset("_");      }
-			nik_ces auto test_charset       () { return dfa_charset("test");   }
-			nik_ces auto goto_charset       () { return dfa_charset("goto");   }
-			nik_ces auto branch_charset     () { return dfa_charset("branch"); }
-			nik_ces auto return_charset     () { return dfa_charset("return"); }
-
-			nik_ces auto find_pos(cstate_type n) { return numeric_find_pos(n, accept, end); }
-			nik_ces auto is_final(cstate_type n) { return (n != size); }
-		};
-
 /***********************************************************************************************************************/
 
 // automaton:
 
 	struct T_generic_assembly_dfa
 	{
-		using transition_table = T_generic_assembly_dftt;
+		using T_dftt		= T_generic_assembly_dftt;
 
-		using T_underscore_dfa	= T_keyword_dfa< transition_table::underscore_charset , '_' >;
-		using T_test_dfa	= T_keyword_dfa< transition_table::test_charset       , 't' >;
-		using T_goto_dfa	= T_keyword_dfa< transition_table::goto_charset       , 'g' >;
-		using T_branch_dfa	= T_keyword_dfa< transition_table::branch_charset     , 'b' >;
-		using T_return_dfa	= T_keyword_dfa< transition_table::return_charset     , 'r' >;
+		using ArrayEnd		= T_store_U< _array_end_  >;
+		using ArraySize		= T_store_U< _array_size_ >;
+
+		nik_ces auto value	= T_dftt{};
+		nik_ces auto accept	= T_dftt::State::accept;
+		nik_ces auto end	= ArrayEnd::template result<>(T_dftt::State::accept);
+		nik_ces auto size	= ArraySize::template result<>(T_dftt::State::accept);
+		nik_ces auto token	= T_dftt::State::token;
+
+		nik_ces auto paste_charset  () { return dfa_charset("_");      }
+		nik_ces auto test_charset   () { return dfa_charset("test");   }
+		nik_ces auto goto_charset   () { return dfa_charset("goto");   }
+		nik_ces auto branch_charset () { return dfa_charset("branch"); }
+		nik_ces auto return_charset () { return dfa_charset("return"); }
+
+		nik_ces auto find_pos(cstate_type n) { return numeric_find_pos(n, accept, end); }
+		nik_ces auto is_final(cstate_type n) { return (n != size); }
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	struct T_generic_assembly_lexer
+	{
+		using T_dfa		= T_generic_assembly_dfa;
+
+		using T_paste_lexer	= T_keyword_lexer< T_dfa::paste_charset  , '_' >;
+		using T_test_lexer	= T_keyword_lexer< T_dfa::test_charset   , 't' >;
+		using T_goto_lexer	= T_keyword_lexer< T_dfa::goto_charset   , 'g' >;
+		using T_branch_lexer	= T_keyword_lexer< T_dfa::branch_charset , 'b' >;
+		using T_return_lexer	= T_keyword_lexer< T_dfa::return_charset , 'r' >;
 
 		nik_ces lexeme lex(gstring_type b, gstring_type e)
 		{
-			auto l = recognize<transition_table>(b, e);
-			auto n = transition_table::find_pos(l.value);
+			auto l = recognize<T_dfa>(b, e);
+			auto n = T_dfa::find_pos(l.value);
 
 			token_type t = TokenName::invalid;
-			if (transition_table::is_final(n)) t = transition_table::token[n];
+			if (T_dfa::is_final(n)) t = T_dfa::token[n];
 
 			return keyword_check(l.start, l.finish, t);
 		}
@@ -625,22 +633,22 @@ namespace cctmp {
 
 		nik_ces token_type keyword_1(gstring_type b, gstring_type e)
 		{
-			if   (recognizes< T_underscore_dfa >(b, e)) return T_underscore_dfa::token;
-			else                                        return TokenName::invalid;
+			if   (recognizes< T_paste_lexer >(b, e)) return T_paste_lexer::token;
+			else                                     return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_4(gstring_type b, gstring_type e)
 		{
-			if      (recognizes< T_test_dfa >(b, e)) return T_test_dfa::token;
-			else if (recognizes< T_goto_dfa >(b, e)) return T_goto_dfa::token;
-			else                                     return TokenName::invalid;
+			if      (recognizes< T_test_lexer >(b, e)) return T_test_lexer::token;
+			else if (recognizes< T_goto_lexer >(b, e)) return T_goto_lexer::token;
+			else                                       return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_6(gstring_type b, gstring_type e)
 		{
-			if      (recognizes< T_branch_dfa >(b, e)) return T_branch_dfa::token;
-			else if (recognizes< T_return_dfa >(b, e)) return T_return_dfa::token;
-			else                                       return TokenName::invalid;
+			if      (recognizes< T_branch_lexer >(b, e)) return T_branch_lexer::token;
+			else if (recognizes< T_return_lexer >(b, e)) return T_return_lexer::token;
+			else                                         return TokenName::invalid;
 		}
 	};
 
