@@ -278,8 +278,6 @@
 
 #undef NIK_INTERPRETER
 
-#undef NIK_CHAIN_CONTROLS
-
 #undef NIK_CHAIN_PARAMS
 
 #undef NIK_CHAIN_L
@@ -288,17 +286,23 @@
 
 #undef NIK_CHAIN_R
 
-#undef NIK_CHAIN_BEGIN
-
-#undef NIK_CHAIN_END
-
 #undef NIK_CHAIN_TEMPLATE
 
 #undef NIK_CHAIN_RESULT
 
+#undef NIK_CHAIN_REF_RESULT
+
+#undef NIK_CHAIN_RESULT_TS
+
+#undef NIK_CHAIN_REF_RESULT_TS
+
 #undef NIK_CHAIN
 
-#undef NIK_MACHINE_CONTROLS
+#undef NIK_CHAIN_REF
+
+#undef NIK_CHAIN_TS
+
+#undef NIK_CHAIN_REF_TS
 
 #undef NIK_MACHINE_PARAMS
 
@@ -308,15 +312,23 @@
 
 #undef NIK_MACHINE_R
 
-#undef NIK_MACHINE_BEGIN
-
-#undef NIK_MACHINE_END
-
 #undef NIK_MACHINE_TEMPLATE
 
 #undef NIK_MACHINE_RESULT
 
+#undef NIK_MACHINE_RESULT_TS
+
+#undef NIK_MACHINE_RESULT_2TS
+
+#undef NIK_MACHINE_RESULT_3TS
+
 #undef NIK_MACHINE
+
+#undef NIK_MACHINE_TS
+
+#undef NIK_MACHINE_2TS
+
+#undef NIK_MACHINE_3TS
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

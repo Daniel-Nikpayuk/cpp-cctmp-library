@@ -65,10 +65,6 @@
 		static_assert(factorial_v3(7) ==  5040);
 		static_assert(factorial_v4(8) == 40320);
 
-	// falling factorial:
-
-		printf("%d\n", fall_fact_2_ptr_v0<true>(7));	// prints: 42
-
 	// fibonacci:
 
 		static_assert(fibonacci_v0(7) ==   21);
@@ -99,6 +95,11 @@
 		side_effects_v0(ptr);
 
 		printf("%d\n", *ptr);	// prints: 3
+
+	// falling factorial:
+
+		printf("%d\n", fall_fact_2_v0<true>(7));	// prints: 42
+	//	printf("%d\n", fall_fact_2_v1<true>(7));	// prints: 42
 
 	// map:
 

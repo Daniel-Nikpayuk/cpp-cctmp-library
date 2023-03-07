@@ -523,7 +523,7 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// version 0:
+// version 0 (pointer):
 
 	struct T_ptr_side_dec
 	{
@@ -542,7 +542,7 @@ namespace cctmp {
 	constexpr auto fall_fact_2_ptr_lookup = cctmp::make_frame<fall_fact_2_frame<_ptr_side_dec_>>;
 
 	template<bool punct>
-	constexpr auto _fall_fact_2_ptr_v0()
+	constexpr auto _fall_fact_2_v0()
 	{
 		if constexpr (punct)
 
@@ -570,12 +570,67 @@ namespace cctmp {
 	}
 
 	template<bool punct, typename T>
-	constexpr auto fall_fact_2_ptr_v0(T x)
+	constexpr auto fall_fact_2_v0(T x)
 	{
-		constexpr auto src = _fall_fact_2_ptr_v0<punct>;
+		constexpr auto src = _fall_fact_2_v0<punct>;
 		constexpr auto l0  = fall_fact_2_ptr_lookup;
 
 		return generic_assembly_apply<src, T, l0>(&x);
+	}
+
+/***********************************************************************************************************************/
+
+// version 1 (reference):
+
+	struct T_ref_side_dec
+	{
+		template<typename T>
+		constexpr static auto result(T & x)
+		{
+			auto y = x;
+
+			x = x - 1;
+
+			return y;
+		}
+
+	}; constexpr auto _ref_side_dec_ = U_store_T<T_ref_side_dec>;
+
+	constexpr auto fall_fact_2_ref_lookup = cctmp::make_frame<fall_fact_2_frame<_ref_side_dec_>>;
+
+	template<bool punct>
+	constexpr auto _fall_fact_2_v1()
+	{
+		if constexpr (punct)
+
+			return source
+			(
+				"fall_fact_2 x       ;"
+
+				"body:               ;"
+				"  v = side_dec !x   ;" // works!
+				"  . = multiply v _  ;"
+				"  return _          ;"
+			);
+		else
+			return source
+			(
+				"fall_fact_2 x       ;"
+
+				"body:               ;"
+				"  v = side_dec x    ;" // error: read only.
+				"  . = multiply v _  ;"
+				"  return _          ;"
+			);
+	}
+
+	template<bool punct, typename T>
+	constexpr auto fall_fact_2_v1(T x)
+	{
+		constexpr auto src = _fall_fact_2_v1<punct>;
+		constexpr auto l0  = fall_fact_2_ref_lookup;
+
+		return generic_assembly_apply<src, T, l0>(x);
 	}
 
 /***********************************************************************************************************************/

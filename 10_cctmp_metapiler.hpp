@@ -25,6 +25,72 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// segment:
+
+/***********************************************************************************************************************/
+
+	struct T_interpreter_segment
+	{
+		nik_ces auto sH0 = U_pack_Vs<H_id>;
+		nik_ces auto  H0 = U_pack_Vs<_car_, sH0>;
+
+		template<auto n>
+		nik_ces auto contr = controller
+		<
+			instruction < IN::call , IT::praxis , PN::segment , n >,
+			instruction < IN::halt , IT::eval                     >
+		>;
+
+		template<auto d, auto n, auto m = _zero>
+		nik_ces auto result = T_interpreter_start::template result<d, contr<n>, m>(H0);
+	};
+
+	nik_ce auto _dpar_segment_ = U_custom_T<T_interpreter_segment>;
+	nik_ce auto  _par_segment_ = ID::template with_initial_depth<_dpar_segment_>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// chord:
+
+/***********************************************************************************************************************/
+
+// pose:
+
+	template<auto Name, auto f, auto gs_p>
+	struct T_arg_pose
+	{
+		nik_ces auto lookup = U_pack_Vs<f, gs_p>;
+
+		template<auto m = _zero, auto n = _one>
+		nik_ces auto contr = controller
+		<
+			instruction< CN::select , n >,
+			instruction< Name           >,
+			instruction< CN::select , m >,
+			instruction< CN::apply      >,
+			instruction< CN::first      >
+		>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr<>, lookup>(vs...); }
+
+	}; template<auto Name, auto f, auto gs_p>
+		nik_ce auto _arg_pose_ = U_store_T<T_arg_pose<Name, f, gs_p>>;
+
+	// syntactic sugar:
+
+		template<auto f, auto... gs>
+		nik_ce auto arg_subpose = _arg_pose_<CN::mapwise, f, U_pack_Vs<gs...>>;
+
+		template<auto f, auto... gs>
+		nik_ce auto arg_compose = _arg_pose_<CN::applywise, f, U_pack_Vs<gs...>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // frame:
 
 /***********************************************************************************************************************/
