@@ -290,19 +290,11 @@
 
 #undef NIK_CHAIN_RESULT
 
-#undef NIK_CHAIN_REF_RESULT
-
 #undef NIK_CHAIN_RESULT_TS
-
-#undef NIK_CHAIN_REF_RESULT_TS
 
 #undef NIK_CHAIN
 
-#undef NIK_CHAIN_REF
-
 #undef NIK_CHAIN_TS
-
-#undef NIK_CHAIN_REF_TS
 
 #undef NIK_MACHINE_PARAMS
 

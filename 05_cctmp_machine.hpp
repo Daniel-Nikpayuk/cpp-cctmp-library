@@ -113,11 +113,6 @@ namespace cctmp {
 
 		template<auto c, auto l, typename... Ts>
 		nik_ces auto result(Ts... vs) { return NIK_CHAIN_TS(c, i, l, Ts...)(vs...); }
-
-		// ref:
-
-			template<auto c, auto l, typename... Ts>
-			nik_ces auto & ref_result(Ts... vs) { return NIK_CHAIN_REF_TS(c, i, l, Ts...)(vs...); }
 	};
 
 /***********************************************************************************************************************/
@@ -129,11 +124,6 @@ namespace cctmp {
 	{
 		template<NIK_CHAIN_PARAMS(c, i, l), typename T0, typename... Ts>
 		nik_ces auto result(T0 v0, Ts... vs) { return v0; }
-
-		// ref:
-
-			template<NIK_CHAIN_PARAMS(c, i, l), typename T0, typename... Ts>
-			nik_ces auto & ref_result(T0 v0, Ts... vs) { return v0; }
 	};
 
 /***********************************************************************************************************************/
@@ -150,11 +140,8 @@ namespace cctmp {
 			nik_ce auto n   = ins[CI::pos];
 			nik_ce auto p   = unpack_<l, _par_at_, n>;
 
-			return NIK_CHAIN_TEMPLATE(c, i),
-
-				p
-
-			NIK_CHAIN_RESULT_TS(c, i, l, Ts...)(vs...);
+			return NIK_CHAIN_TEMPLATE(c, i), p
+				NIK_CHAIN_RESULT_TS(c, i, l, Ts...)(vs...);
 		}
 	};
 
@@ -176,20 +163,6 @@ namespace cctmp {
 			return NIK_CHAIN_TEMPLATE(c, i), p0, p1
 				NIK_CHAIN_RESULT_TS(c, i, l, Ts...)(vs...);
 		}
-
-		// ref:
-
-			template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
-			nik_ces auto & ref_result(Ts... vs)
-			{
-				nik_ce auto ins = CD::instr(c, i);
-				nik_ce auto n   = ins[CI::pos];
-				nik_ce auto p0  = eval<_par_left_ , n, U_store_T<Ts>...>;
-				nik_ce auto p1  = eval<_par_right_, n, U_store_T<Ts>...>;
-
-				return NIK_CHAIN_TEMPLATE(c, i), p0, p1
-					NIK_CHAIN_REF_RESULT_TS(c, i, l, Ts...)(vs...);
-			}
 	};
 
 /***********************************************************************************************************************/
@@ -209,15 +182,6 @@ namespace cctmp {
 
 		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
 		nik_ces auto result(Ts... vs) { return at<c, i, l, T_store_U<RUs>...>(vs...); }
-
-		// ref:
-
-			template<NIK_CHAIN_PARAMS(c, i, l), typename TN, typename... Ts>
-			nik_ces auto & ref_at(T_store_U<LUs>... lvs, TN vn, Ts... vs)
-				{ return NIK_CHAIN_REF_TS(c, i, l, TN)(vn); }
-
-			template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
-			nik_ces auto & ref_result(Ts... vs) { return ref_at<c, i, l, T_store_U<RUs>...>(vs...); }
 	};
 
 /***********************************************************************************************************************/
@@ -373,123 +337,13 @@ namespace cctmp {
 	// design, but given the nature of variadics the following might be more performant?
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// modify type:
-
-	template<auto Op, typename T>
-	using modify_type = T_store_U<eval<Op, U_store_T<T>>>;
+// at:
 
 /***********************************************************************************************************************/
 
-// read only:
-
-	struct T_read_only
-	{
-		// default:
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T*)) { return U_store_T<T const>; }
-
-		// pointer (recursive):
-
-			template<typename T>
-			using T_add_pointer_const = T*const;
-
-			template<auto U>
-			nik_ces auto add_pointer_const = U_store_T<T_add_pointer_const<T_store_U<U>>>;
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T**)) { return add_pointer_const<_result(U_store_T<T>)>; }
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T*const*)) { return add_pointer_const<_result(U_store_T<T>)>; }
-
-		// reference (recursive):
-
-			template<typename T>
-			using T_add_reference_const = T&;
-
-			template<auto U>
-			nik_ces auto add_reference_const = U_store_T<T_add_reference_const<T_store_U<U>>>;
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T&)) { return add_reference_const<_result(U_store_T<T>)>; }
-
-		template<auto U>
-		nik_ces auto result = _result(U);
-
-	}; nik_ce auto _read_only_ = U_custom_T<T_read_only>;
-
-/***********************************************************************************************************************/
-
-// read write:
-
-	struct T_read_write
-	{
-		// default (recursive):
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T*)) { return U_store_T<T>; }
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T const*)) { return U_store_T<T>; }
-
-		// pointer (recursive):
-
-			template<typename T>
-			using T_add_pointer = T*;
-
-			template<auto U>
-			nik_ces auto add_pointer = U_store_T<T_add_pointer<T_store_U<U>>>;
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T**)) { return add_pointer<_result(U_store_T<T>)>; }
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T*const*)) { return add_pointer<_result(U_store_T<T>)>; }
-
-		// reference:
-
-			template<typename T>
-			using T_add_reference = T&;
-
-			template<auto U>
-			nik_ces auto add_reference = U_store_T<T_add_reference<T_store_U<U>>>;
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T&)) { return add_reference<_result(U_store_T<T>)>; }
-
-		template<auto U>
-		nik_ces auto result = _result(U);
-
-	}; nik_ce auto _read_write_ = U_custom_T<T_read_write>;
-
-/***********************************************************************************************************************/
-
-// cast type:
-
-	template<auto t>
-	struct T_cast_type
-	{
-		template<typename T>
-		nik_ces T result(T v) { return v; }
-	};
-
-	template<>
-	struct T_cast_type<_read_write_>
-	{
-		template<typename T>
-		nik_ces auto result(T v) { return (modify_type<_read_write_, T>) v; }
-	};
-
-	// syntactic sugar:
-
-		template<auto t, typename T>
-		nik_ce auto cast_type(T v) { return T_cast_type<t>::template result<>(v); }
-
-/***********************************************************************************************************************/
-
-// apply at:
+// apply:
 
 	template<auto f, auto n>
 	struct T_apply_at
@@ -511,42 +365,20 @@ namespace cctmp {
 
 	// id (optimized):
 
-		// apply id:
-
-			template<auto n>
-			struct T_apply_id_at
-			{
-				nik_ces auto lookup     = U_null_Vs;
-				nik_ces auto contr      = controller
-							<
-								instruction< CN::front , n >,
-								instruction< CN::at        >,
-								instruction< CN::first     >
-							>;
-
-				template<typename... Ts>
-				nik_ces auto result(Ts... vs)
-					{ return T_chain_start::template result<contr, lookup, Ts...>(vs...); }
-
-				template<typename... Ts>
-				nik_ces auto & ref_result(Ts... vs)
-					{ return T_chain_start::template ref_result<contr, lookup, Ts...>(vs...); }
-			};
-
-		// constant:
-
-			template<typename C, nik_vp(p)(C*)>
-			struct T_apply_id_at<p>
-			{
-				template<typename... Ts>
-				nik_ces auto result(Ts... vs) { return C::template result<>(); }
-			};
-
 		template<auto n>
 		struct T_apply_at<_id_, n>
 		{
+			nik_ces auto lookup     = U_null_Vs;
+			nik_ces auto contr      = controller
+						<
+							instruction< CN::front , n >,
+							instruction< CN::at        >,
+							instruction< CN::first     >
+						>;
+
 			template<typename... Ts>
-			nik_ces auto result(Ts... vs) { return T_apply_id_at<n>::template result<Ts...>(vs...); }
+			nik_ces auto result(Ts... vs)
+				{ return T_chain_start::template result<contr, lookup, Ts...>(vs...); }
 		};
 
 	// syntactic sugar:
@@ -560,8 +392,105 @@ namespace cctmp {
 		template<auto n, typename... Ts>
 		nik_ce auto arg_at(Ts... vs) { return T_apply_at<_id_, n>::template result<Ts...>(vs...); }
 
+/***********************************************************************************************************************/
+
+// ref:
+
+	template<auto...> struct T_ref_at;
+
+	template<auto n>
+	struct T_ref_at<n>
+	{
+		template<typename... Ts>
+		nik_ces auto & result(Ts... vs)
+		{
+			nik_ce auto p0  = eval<_par_left_ , n, U_store_T<Ts>...>;
+			nik_ce auto p1  = eval<_par_right_, n, U_store_T<Ts>...>;
+
+			return T_ref_at<p0, p1>::template result<Ts...>(vs...);
+		}
+	};
+
+	template
+	<
+		template<auto...> typename B0, auto... LUs, nik_vp(p0)(B0<LUs...>*),
+		template<auto...> typename B1, auto... RUs, nik_vp(p1)(B1<RUs...>*)
+	>
+	struct T_ref_at<p0, p1>
+	{
+		template<typename TN, typename... Ts>
+		nik_ces auto & ref_at(T_store_U<LUs>... lvs, TN vn, Ts... vs) { return vn; }
+
+		template<typename... Ts>
+		nik_ces auto & result(Ts... vs) { return ref_at<T_store_U<RUs>...>(vs...); }
+	};
+
+	// syntactic sugar:
+
+		template<auto n>
+		nik_ce auto _ref_at_ = U_store_T<T_ref_at<n>>;
+
 		template<auto n, typename... Ts>
-		nik_ce auto & ref_arg_at(Ts... vs) { return T_apply_id_at<n>::template ref_result<Ts...>(vs...); }
+		nik_ce auto & ref_at(Ts... vs) { return T_ref_at<n>::template result<Ts...>(vs...); }
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// cast:
+
+/***********************************************************************************************************************/
+
+// modify type:
+
+	template<auto Op, typename T>
+	using modify_type = T_store_U<eval<Op, U_store_T<T>>>;
+
+/***********************************************************************************************************************/
+
+// type at:
+
+	template<auto n, typename... Ts>
+	using type_at = T_store_U<eval<_par_at_, n, U_store_T<Ts>...>>;
+
+/***********************************************************************************************************************/
+
+// modify at:
+
+	template<auto t, auto n, typename T>
+	struct T_modify_at
+	{
+		using Type = modify_type<t, T>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) // -> Type
+			{ return (Type) T_apply_at<_id_, n>::template result<Ts...>(vs...); }
+	};
+
+	template<auto t, auto n, typename T>
+	struct T_modify_at<t, n, T&>
+	{
+		using Type = modify_type<t, T&>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) -> Type&
+			{ return (Type) T_ref_at<n>::template result<Ts...>(vs...); }
+	};
+
+/***********************************************************************************************************************/
+
+// cast at:
+
+	template<auto t, auto n, typename... Ts>
+	struct T_cast_at : public T_modify_at<t, n, type_at<n, Ts...>> { };
+
+	// constant:
+
+		template<auto t, typename C, nik_vp(p)(C*), typename... Types>
+		struct T_cast_at<t, p, Types...>
+		{
+			template<typename... Ts>
+			nik_ces auto result(Ts... vs) { return C::template result<>(); }
+		};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -799,10 +728,11 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			const auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(vs...))...);
-			using TVal     = decltype(val);
+			auto val   = T_store_U<f>::template result<> // does not propagate references.
+					(T_cast_at<ts, ns, Ts...>::template result<Ts...>(vs...)...);
+			using TVal = modify_type<_read_only_, decltype(val)>;
 
-			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)(val, vs...);
+			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)((TVal) val, vs...);
 		}
 	};
 
@@ -819,10 +749,11 @@ namespace cctmp {
 			nik_ce auto ins	= MD::instr(c, i);
 			nik_ce auto n   = ins[MI::pos];
 
-			const auto val = arg_at<n>(vs...);
-			using TVal     = decltype(val);
+					 // does not propagate references.
+			auto val   = T_cast_at<_id_, n, Ts...>::template result<Ts...>(vs...);
+			using TVal = decltype(val);
 
-			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)(val, vs...);
+			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)((TVal) val, vs...);
 		}
 	};
 
@@ -840,10 +771,11 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			const auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(vs...))...);
-			using TVal     = decltype(val);
+			auto val   = T_store_U<f>::template result<> // does not propagate references.
+					(T_cast_at<ts, ns, Ts...>::template result<Ts...>(vs...)...);
+			using TVal = modify_type<_read_only_, decltype(val)>;
 
-			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)(val, vs...);
+			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)((TVal) val, vs...);
 		}
 	};
 
@@ -861,7 +793,8 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(vs...))...);
+			T_store_U<f>::template result<>
+				(T_cast_at<ts, ns, Ts...>::template result<Ts...>(vs...)...);
 
 			return NIK_MACHINE_TS(s, c, i, l, Ts...)(vs...);
 		}
@@ -886,10 +819,11 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			const auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(v, vs...))...);
-			using TVal     = decltype(val);
+			auto val   = T_store_U<f>::template result<> // does not propagate references.
+					(T_cast_at<ts, ns, T, Ts...>::template result<T, Ts...>(v, vs...)...);
+			using TVal = modify_type<_read_only_, decltype(val)>;
 
-			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)(val, vs...);
+			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)((TVal) val, vs...);
 		}
 	};
 
@@ -907,8 +841,9 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			const auto val = T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(v, vs...))...);
-			using TVal     = decltype(val);
+			auto val   = T_store_U<f>::template result<> // does not propagate references.
+					(T_cast_at<ts, ns, T, Ts...>::template result<T, Ts...>(v, vs...)...);
+			using TVal = modify_type<_read_only_, decltype(val)>;
 
 			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)(val, vs...);
 		}
@@ -928,7 +863,8 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			T_store_U<f>::template result<>(cast_type<ts>(arg_at<ns>(v, vs...))...);
+			T_store_U<f>::template result<>
+				(T_cast_at<ts, ns, T, Ts...>::template result<T, Ts...>(v, vs...)...);
 
 			return NIK_MACHINE_TS(s, c, i, l, Ts...)(vs...);
 		}

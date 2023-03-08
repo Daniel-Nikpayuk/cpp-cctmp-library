@@ -45,11 +45,6 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-	// todo:
-
-		// 1. allow arg_subpose to compose void functions (change _assign_ to void).
-		// 3. allow (!) markers for all operands, set initial regs to const as default.
-
 	using namespace cctmp;
 
 /***********************************************************************************************************************/
@@ -72,21 +67,21 @@
 
 	// case studies:
 
-		auto comp_sq      = square_v0(complex_number(1, 2));
-		auto comp_sum_sqs = sum_of_squares_v0(complex_number(1, 2), complex_number(0, 1));
-		auto int_sum_sqs  = sum_of_squares_v0(3, 4);
-		auto polynom_val  = x_to5_plus1_v0(2);
-		auto semidyntyp0  = semidynamic_typing_v0(complex_number(0, 1), 17);
-		auto semidyntyp1  = semidynamic_typing_v0(complex_number(1, 0), 17);
-		auto reassign_val = reassign_v0(2, 17);
+		constexpr auto comp_sq      = square_v0(complex_number(1, 2));
+		constexpr auto comp_sum_sqs = sum_of_squares_v0(complex_number(1, 2), complex_number(0, 1));
+		constexpr auto int_sum_sqs  = sum_of_squares_v0(3, 4);
+		constexpr auto polynom_val  = x_to5_plus1_v0(2);
+		constexpr auto semidyntyp0  = semidynamic_typing_v0(complex_number(0, 1), 17);
+		constexpr auto semidyntyp1  = semidynamic_typing_v0(complex_number(1, 0), 17);
+		constexpr auto reassign_val = reassign_v0(2, 17);
 
-
-		print_complex(comp_sq);				// prints: (-3.000000, 4.000000)
-		print_complex(comp_sum_sqs);			// prints: (-4.000000, 4.000000)
-		printf("%d\n", int_sum_sqs);			// prints: 25
-		printf("%d\n", polynom_val);			// prints: 33
-		printf("%d, %d\n", semidyntyp0, semidyntyp1);	// prints: 18, 5
-		printf("%d\n", reassign_val);			// prints: 17
+		static_assert(comp_sq      == complex_number(-3.0, 4.0));
+		static_assert(comp_sum_sqs == complex_number(-4.0, 4.0));
+		static_assert(int_sum_sqs  == 25);
+		static_assert(polynom_val  == 33);
+		static_assert(semidyntyp0  == 18);
+		static_assert(semidyntyp1  == 5);
+		static_assert(reassign_val == 17);
 
 	// side effects:
 
@@ -99,12 +94,12 @@
 	// falling factorial:
 
 		printf("%d\n", fall_fact_2_v0<true>(7));	// prints: 42
-	//	printf("%d\n", fall_fact_2_v1<true>(7));	// prints: 42
+		printf("%d\n", fall_fact_2_v1<true>(7));	// prints: 42
 
 	// map:
 
 		constexpr auto _sq_ = arg_compose<_multiply_, _arg_at_<0>, _arg_at_<0>>;
-		constexpr auto map  = cctmp_chord::_map_<cctmp_chord::map_lookup<_sq_>>;
+		constexpr auto map  = cctmp_chord::_map_<env<cctmp_chord::map_lookup<_sq_>>>;
 
 		int x[10];
 

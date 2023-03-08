@@ -725,9 +725,9 @@
 		<													\
 			CD::next_name(_c_, _i_)
 
-	#define NIK_CHAIN_M(_r_, _c_, _i_, _l_)										\
+	#define NIK_CHAIN_M(_c_, _i_, _l_)										\
 															\
-		>::template _r_												\
+		>::template result											\
 		<													\
 			_c_,												\
 			CD::next_index(_c_, _i_),									\
@@ -743,35 +743,19 @@
 
 	#define NIK_CHAIN_RESULT(_c_, _i_, _l_)										\
 															\
-		NIK_CHAIN_M(result, _c_, _i_, _l_) NIK_CHAIN_R
-
-	#define NIK_CHAIN_REF_RESULT(_c_, _i_, _l_)									\
-															\
-		NIK_CHAIN_M(ref_result, _c_, _i_, _l_) NIK_CHAIN_R
+		NIK_CHAIN_M(_c_, _i_, _l_) NIK_CHAIN_R
 
 	#define NIK_CHAIN_RESULT_TS(_c_, _i_, _l_, _t_)									\
 															\
-		NIK_CHAIN_M(result, _c_, _i_, _l_), _t_ NIK_CHAIN_R
-
-	#define NIK_CHAIN_REF_RESULT_TS(_c_, _i_, _l_, _t_)								\
-															\
-		NIK_CHAIN_M(ref_result, _c_, _i_, _l_), _t_ NIK_CHAIN_R
+		NIK_CHAIN_M(_c_, _i_, _l_), _t_ NIK_CHAIN_R
 
 	#define NIK_CHAIN(_c_, _i_, _l_)										\
 															\
 		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT(_c_, _i_, _l_)
 
-	#define NIK_CHAIN_REF(_c_, _i_, _l_)										\
-															\
-		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_REF_RESULT(_c_, _i_, _l_)
-
 	#define NIK_CHAIN_TS(_c_, _i_, _l_, _t_)									\
 															\
 		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_TS(_c_, _i_, _l_, _t_)
-
-	#define NIK_CHAIN_REF_TS(_c_, _i_, _l_, _t_)									\
-															\
-		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_REF_RESULT_TS(_c_, _i_, _l_, _t_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -54,6 +54,10 @@ namespace cctmp {
 
 // chord:
 
+	// todo:
+
+		// 1. allow arg_subpose to compose void functions (change _assign_ to void).
+
 /***********************************************************************************************************************/
 
 // pose:
@@ -267,7 +271,7 @@ namespace cctmp {
 
 // constant:
 
-	nik_ce auto default_constant_frame()
+	nik_ce auto constant_machine_frame()
 	{
 		return table
 		(
@@ -287,7 +291,14 @@ namespace cctmp {
 		);
 	};
 
-	nik_ce auto default_constant_lookup = make_frame<default_constant_frame>;
+	nik_ce auto constant_machine_lookup = make_frame<constant_machine_frame>;
+
+/***********************************************************************************************************************/
+
+// environment:
+
+	template<auto... frames>
+	nik_ce auto env = U_pack_Vs<frames...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -488,7 +499,7 @@ namespace cctmp {
 
 				return T_machine_start::template result
 				<
-					out_type, contr, lookup
+					out_type, contr, lookup, modify_type<_read_only_, Ts>...
 
 				>((modify_type<_read_only_, Ts>) vs...);
 			}
@@ -499,14 +510,12 @@ namespace cctmp {
 		template<typename CharType, auto Size>
 		nik_ce auto source(const CharType (&s)[Size]) { return T_generic_assembly_source(s); }
 
-		template<auto SourceCallable, typename S, auto... Lookups, typename... Ts>
+		template<auto SourceCallable, auto Env, typename S, typename... Ts>
 		nik_ce auto generic_assembly_apply(Ts... vs)
 		{
-			nik_ce auto Env = U_pack_Vs<Lookups...>;
-
 			using T_function = T_generic_assembly_metapiler<SourceCallable, Env>;
 
-			return T_function::template result<S>(vs...);
+			return T_function::template result<S, Ts...>(vs...);
 		}
 
 /***********************************************************************************************************************/

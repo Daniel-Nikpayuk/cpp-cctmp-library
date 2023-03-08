@@ -105,15 +105,15 @@ namespace cctmp_chord {
 
 // arg:
 
-	template<auto lookup>
+	template<auto environment>
 	struct T_repeat
 	{
 		template<typename OutType, typename EndType, typename InType>
 		constexpr static auto result(OutType b, EndType e, InType c)
-			{ return cctmp::generic_assembly_apply<repeat_algo, OutType, lookup>(b, e, c); }
+			{ return cctmp::generic_assembly_apply<repeat_algo, environment, OutType>(b, e, c); }
 
-	}; template<auto lookup>
-		constexpr auto _repeat_ = U_store_T<T_repeat<lookup>>;
+	}; template<auto environment>
+		constexpr auto _repeat_ = U_store_T<T_repeat<environment>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -199,15 +199,15 @@ namespace cctmp_chord {
 
 // arg:
 
-	template<auto lookup>
+	template<auto environment>
 	struct T_map
 	{
 		template<typename OutType, typename InType, typename EndType>
 		constexpr static auto result(OutType o, InType i, EndType e)
-			{ return cctmp::generic_assembly_apply<map_algo, OutType, lookup>(o, i, e); }
+			{ return cctmp::generic_assembly_apply<map_algo, environment, OutType>(o, i, e); }
 
-	}; template<auto lookup>
-		constexpr auto _map_ = U_store_T<T_map<lookup>>;
+	}; template<auto environment>
+		constexpr auto _map_ = U_store_T<T_map<environment>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -274,15 +274,15 @@ namespace cctmp_chord {
 
 // arg:
 
-	template<auto lookup>
+	template<auto environment>
 	struct T_fold
 	{
 		template<typename OutType, typename InType, typename EndType>
 		constexpr static auto result(OutType o, InType i, EndType e)
-			{ return cctmp::generic_assembly_apply<fold_algo, OutType, lookup>(o, i, e); }
+			{ return cctmp::generic_assembly_apply<fold_algo, environment, OutType>(o, i, e); }
 
-	}; template<auto lookup>
-		constexpr auto _fold_ = U_store_T<T_fold<lookup>>;
+	}; template<auto environment>
+		constexpr auto _fold_ = U_store_T<T_fold<environment>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -365,15 +365,15 @@ namespace cctmp_chord {
 
 // arg:
 
-	template<auto lookup>
+	template<auto environment>
 	struct T_find_first
 	{
 		template<typename OutType, typename InType, typename EndType>
 		constexpr static auto result(OutType o, InType i, EndType e)
-			{ return cctmp::generic_assembly_apply<find_first_algo, OutType, lookup>(o, i, e); }
+			{ return cctmp::generic_assembly_apply<find_first_algo, environment, OutType>(o, i, e); }
 
-	}; template<auto lookup>
-		constexpr auto _find_first_ = U_store_T<T_find_first<lookup>>;
+	}; template<auto environment>
+		constexpr auto _find_first_ = U_store_T<T_find_first<environment>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -469,15 +469,15 @@ namespace cctmp_chord {
 
 // arg:
 
-	template<auto lookup>
+	template<auto environment>
 	struct T_find_all
 	{
 		template<typename OutType, typename InType, typename EndType>
 		constexpr static auto result(OutType o, InType i, EndType e)
-			{ return cctmp::generic_assembly_apply<find_all_algo, OutType, lookup>(o, i, e); }
+			{ return cctmp::generic_assembly_apply<find_all_algo, environment, OutType>(o, i, e); }
 
-	}; template<auto lookup>
-		constexpr auto _find_all_ = U_store_T<T_find_all<lookup>>;
+	}; template<auto environment>
+		constexpr auto _find_all_ = U_store_T<T_find_all<environment>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -576,15 +576,15 @@ namespace cctmp_chord {
 
 // arg:
 
-	template<auto lookup>
+	template<auto environment>
 	struct T_zip
 	{
 		template<typename OutType, typename CarInType, typename CdrInType, typename EndType>
 		constexpr static auto result(OutType o, CarInType i1, CdrInType i2, EndType e2)
-			{ return cctmp::generic_assembly_apply<zip_algo, OutType, lookup>(o, i1, i2, e2); }
+			{ return cctmp::generic_assembly_apply<zip_algo, environment, OutType>(o, i1, i2, e2); }
 
-	}; template<auto lookup>
-		constexpr auto _zip_ = U_store_T<T_zip<lookup>>;
+	}; template<auto environment>
+		constexpr auto _zip_ = U_store_T<T_zip<environment>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -697,7 +697,7 @@ namespace cctmp_chord {
 
 // arg:
 
-	template<auto lookup>
+	template<auto environment>
 	struct T_fasten
 	{
 		template
@@ -706,10 +706,10 @@ namespace cctmp_chord {
 			typename CarInType, typename CdrInType, typename EndType
 		>
 		constexpr static auto result(OutType o, AuxType a, InType i, CarInType i1, CdrInType i2, EndType e2)
-			{ return cctmp::generic_assembly_apply<fasten_algo, OutType, lookup>(o, i, i1, i2, e2); }
+			{ return cctmp::generic_assembly_apply<fasten_algo, environment, OutType>(o, i, i1, i2, e2); }
 
-	}; template<auto lookup>
-		constexpr auto _fasten_ = U_store_T<T_fasten<lookup>>;
+	}; template<auto environment>
+		constexpr auto _fasten_ = U_store_T<T_fasten<environment>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -799,15 +799,15 @@ namespace cctmp_chord {
 
 // arg:
 
-	template<auto lookup>
+	template<auto environment>
 	struct T_glide
 	{
 		template<typename OutType, typename CarInType, typename CdrInType, typename EndType>
 		constexpr static auto result(OutType o, CarInType i1, CdrInType i2, EndType e2)
-			{ return cctmp::generic_assembly_apply<glide_algo, OutType, lookup>(o, i1, i2, e2); }
+			{ return cctmp::generic_assembly_apply<glide_algo, environment, OutType>(o, i1, i2, e2); }
 
-	}; template<auto lookup>
-		constexpr auto _glide_ = U_store_T<T_glide<lookup>>;
+	}; template<auto environment>
+		constexpr auto _glide_ = U_store_T<T_glide<environment>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
