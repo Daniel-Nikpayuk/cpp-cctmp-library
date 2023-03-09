@@ -345,7 +345,7 @@ namespace cctmp {
 
 			// mutation:
 
-				assign , dereference ,
+				dereference , appoint ,
 
 			dimension
 		};

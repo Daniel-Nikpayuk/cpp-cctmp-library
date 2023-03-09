@@ -89,16 +89,6 @@ namespace cctmp {
 
 // mutation:
 
-	// assign:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::overload, Overload::assign, filler...>
-		{
-			template<typename T1, typename T2>
-			nik_ces auto result(T1 v1, T2 v2) { return *v1 = v2; }
-
-		}; nik_ce auto _assign_ = U_arg_overload<Overload::assign>;
-
 	// dereference:
 
 		template<auto... filler>
@@ -108,6 +98,16 @@ namespace cctmp {
 			nik_ces auto result(T v) { return *v; }
 
 		}; nik_ce auto _dereference_ = U_arg_overload<Overload::dereference>;
+
+	// appoint:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::overload, Overload::appoint, filler...>
+		{
+			template<typename T1, typename T2>
+			nik_ces auto result(T1 v1, T2 v2) { return *v1 = v2; }
+
+		}; nik_ce auto _appoint_ = U_arg_overload<Overload::appoint>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

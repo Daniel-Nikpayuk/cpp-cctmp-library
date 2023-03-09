@@ -27,7 +27,7 @@ namespace cctmp_chord {
 	constexpr auto _nop_          				= cctmp::_nop_;
 	constexpr auto _first_          			= cctmp::_first_;
 	constexpr auto _equal_       				= cctmp::_equal_;
-	constexpr auto _assign_      				= cctmp::_assign_;
+	constexpr auto _appoint_      				= cctmp::_appoint_;
 	constexpr auto _dereference_      			= cctmp::_dereference_;
 
 	template<typename T> constexpr auto U_store_T		= cctmp::U_store_T<T>;
@@ -38,7 +38,7 @@ namespace cctmp_chord {
 // conveniences:
 
 	template<auto action>
-	constexpr auto assign = arg_subpose<_assign_, _id_, action>;
+	constexpr auto appoint = arg_subpose<_appoint_, _id_, action>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -80,7 +80,7 @@ namespace cctmp_chord {
 	<
 		auto pre_out_next     = _id_          ,
 		auto loop_pred        = _equal_       ,
-		auto mutate_func      = _assign_      ,
+		auto mutate_func      = _appoint_     ,
 		auto out_next         = _increment_<> ,
 		auto post_mutate_func = _nop_
 	>
@@ -158,18 +158,18 @@ namespace cctmp_chord {
 
 	template
 	<
-		auto action           = _id_           ,
+		auto action           = _id_            ,
 
-		auto pre_end_next     = _id_           ,
-		auto pre_out_next     = _id_           ,
-		auto pre_in_next      = _id_           ,
-		auto loop_pred        = _equal_        ,
-		auto mutate_func      = assign<action> ,
-		auto out_next         = _increment_<>  ,
-		auto in_next          = _increment_<>  ,
-		auto post_mutate_func = _first_        ,
-		auto post_out_next    = _id_           ,
-		auto post_in_next     = _id_           ,
+		auto pre_end_next     = _id_            ,
+		auto pre_out_next     = _id_            ,
+		auto pre_in_next      = _id_            ,
+		auto loop_pred        = _equal_         ,
+		auto mutate_func      = appoint<action> ,
+		auto out_next         = _increment_<>   ,
+		auto in_next          = _increment_<>   ,
+		auto post_mutate_func = _first_         ,
+		auto post_out_next    = _id_            ,
+		auto post_in_next     = _id_            ,
 		auto post_end_next    = _id_
 	>
 	constexpr auto map_frame()
@@ -339,7 +339,7 @@ namespace cctmp_chord {
 		auto match_pred        = _constant_<false> ,
 		auto in_next           = _increment_<>     ,
 		auto post_match_pred   = _constant_<false> ,
-		auto found_mutate_func = _assign_          ,
+		auto found_mutate_func = _appoint_         ,
 		auto found_out_next    = _increment_<>
 	>
 	constexpr auto find_first_frame()
@@ -436,11 +436,11 @@ namespace cctmp_chord {
 		auto match_pred            = _constant_<false> ,
 		auto in_next               = _increment_<>     ,
 		auto post_match_pred       = _constant_<false> ,
-		auto found_mutate_func     = _assign_          ,
+		auto found_mutate_func     = _appoint_         ,
 		auto found_out_next        = _increment_<>     ,
 
 		auto found_in_next         = _increment_<>     ,
-		auto postfound_mutate_func = _assign_          ,
+		auto postfound_mutate_func = _appoint_         ,
 		auto postfound_out_next    = _increment_<>
 	>
 	constexpr auto find_all_frame()
@@ -533,7 +533,7 @@ namespace cctmp_chord {
 		auto pre_in2_next     = _id_          ,
 		auto loop_pred        = _equal_       ,
 		auto action_func      = _first_       ,
-		auto mutate_func      = _assign_      ,
+		auto mutate_func      = _appoint_     ,
 		auto out_next         = _increment_<> ,
 		auto in1_next         = _increment_<> ,
 		auto in2_next         = _increment_<> ,
@@ -646,7 +646,7 @@ namespace cctmp_chord {
 		auto pre_in2_next      = _id_              ,
 		auto loop_pred         = _equal_           ,
 		auto action_func       = _first_           ,
-		auto mutate_func       = _assign_          ,
+		auto mutate_func       = _appoint_         ,
 		auto aux_next          = _constant_<false> ,
 		auto combine_func      = _first_           ,
 		auto in_next           = _constant_<false> ,

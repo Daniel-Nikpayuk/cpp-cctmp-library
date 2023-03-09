@@ -83,6 +83,14 @@
 		static_assert(semidyntyp1  == 5);
 		static_assert(reassign_val == 17);
 
+	// falling factorial:
+
+		constexpr auto fall_val0 = fall_fact_2_v0<true>(7);
+		constexpr auto fall_val1 = fall_fact_2_v1<true>(7);
+
+		static_assert(fall_val0 == 42);
+		static_assert(fall_val1 == 42);
+
 	// side effects:
 
 		int n = 5, *ptr = &n;
@@ -90,11 +98,6 @@
 		side_effects_v0(ptr);
 
 		printf("%d\n", *ptr);	// prints: 3
-
-	// falling factorial:
-
-		printf("%d\n", fall_fact_2_v0<true>(7));	// prints: 42
-		printf("%d\n", fall_fact_2_v1<true>(7));	// prints: 42
 
 	// map:
 

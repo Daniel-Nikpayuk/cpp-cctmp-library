@@ -56,7 +56,7 @@ namespace cctmp {
 
 	// todo:
 
-		// 1. allow arg_subpose to compose void functions (change _assign_ to void).
+		// 1. allow arg_subpose to compose void functions (change _appoint_ to void).
 
 /***********************************************************************************************************************/
 
@@ -215,7 +215,7 @@ namespace cctmp {
 			binding( "upshift"               , _upshift_               ),
 			binding( "downshift"             , _downshift_             ),
 
-			binding( "assign"                , _assign_                ),
+			binding( "appoint"               , _appoint_               ),
 			binding( "dereference"           , _dereference_           ),
 			binding( "to_bool"               , _to_bool_               ),
 

@@ -776,6 +776,8 @@ namespace cctmp {
 
 // read:
 
+	// Does only/write need to be expanded to handle additional types such as function pointers?
+
 /***********************************************************************************************************************/
 
 // only:
