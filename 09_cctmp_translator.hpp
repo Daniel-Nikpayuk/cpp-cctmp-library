@@ -30,58 +30,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// nonterminal:
-
-/***********************************************************************************************************************/
-
-// action:
-
-	struct T_generic_assembly_ntta
-	{
-		template<typename AST, typename Stack>
-		using signature = void(*)(AST &, clexeme &, Stack &);
-
-		template<typename AST, typename Stack>
-		nik_ces void nop(AST & toc, clexeme & l, Stack & s) { }
-
-		template<typename AST, typename Stack>
-		nik_ces void new_definition(AST & toc, clexeme & l, Stack & s)
-			{ toc.set_kind(Context::define); }
-
-		template<typename AST, typename Stack>
-		nik_ces void new_coordinate(AST & toc, clexeme & l, Stack & s)
-			{ toc.set_kind(Context::label); }
-
-		template<typename AST, typename Stack>
-		nik_ces void new_conditional(AST & toc, clexeme & l, Stack & s)
-			{ toc.set_kind(Context::test); }
-
-		template<typename AST, typename Stack>
-		nik_ces void new_application(AST & toc, clexeme & l, Stack & s)
-			{ toc.set_kind(Context::apply); }
-
-		template<typename AST, typename Stack> // can assume "gi;" is the current stack front.
-		nik_ces void recover_instr_label(AST & toc, clexeme & l, Stack & s)
-		{
-			*(s.current    ) = 'l';
-			*(s.current - 1) = ';';
-			*(s.current - 2) = 'E';
-
-			new_coordinate(toc, l, s);
-		}
-
-		template<typename AST, typename Stack> // can assume "gi;" is the current stack front.
-		nik_ces void recover_instr_return(AST & toc, clexeme & l, Stack & s)
-		{
-			*(s.current    ) = 'r';
-			*(s.current - 1) = 'M';
-			*(s.current - 2) = ';';
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // terminal:
 
 /***********************************************************************************************************************/
@@ -539,6 +487,116 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// nonterminal:
+
+/***********************************************************************************************************************/
+
+// action:
+
+	struct T_generic_assembly_ntta
+	{
+		using Application = T_generic_assembly_tta_context_apply;
+
+		template<typename AST, typename Stack>
+		using signature = void(*)(AST &, clexeme &, Stack &);
+
+		template<typename AST, typename Stack>
+		nik_ces void nop(AST & toc, clexeme & l, Stack & s) { }
+
+		template<typename AST, typename Stack>
+		nik_ces void new_definition(AST & toc, clexeme & l, Stack & s)
+			{ toc.set_kind(Context::define); }
+
+		template<typename AST, typename Stack>
+		nik_ces void new_coordinate(AST & toc, clexeme & l, Stack & s)
+			{ toc.set_kind(Context::label); }
+
+		template<typename AST, typename Stack>
+		nik_ces void new_conditional(AST & toc, clexeme & l, Stack & s)
+			{ toc.set_kind(Context::test); }
+
+		template<typename AST, typename Stack>
+		nik_ces void new_application(AST & toc, clexeme & l, Stack & s)
+			{ toc.set_kind(Context::apply); }
+
+		template<typename AST, typename Stack> // can assume "gi;" is the current stack front.
+		nik_ces void recover_instr_label(AST & toc, clexeme & l, Stack & s)
+		{
+			*(s.current    ) = 'l';
+			*(s.current - 1) = ';';
+			*(s.current - 2) = 'E';
+
+			new_coordinate(toc, l, s);
+		}
+
+		template<typename AST, typename Stack> // can assume "gi;" is the current stack front.
+		nik_ces void recover_instr_return(AST & toc, clexeme & l, Stack & s)
+		{
+			*(s.current    ) = 'r';
+			*(s.current - 1) = 'M';
+			*(s.current - 2) = ';';
+		}
+
+	//	template<typename AST, typename Stack>
+	//	nik_ces void chord_repeat(AST & toc, clexeme & l, Stack & s)
+	//	{
+	//		Application::identifier_entry(toc, l);
+	//		toc.repeat_options(toc, s);
+	//	}
+
+	//	template<typename AST, typename Stack>
+	//	nik_ces void chord_map(AST & toc, clexeme & l, Stack & s)
+	//	{
+	//		Application::identifier_entry(toc, l);
+	//		toc.map_options(toc, s);
+	//	}
+
+	//	template<typename AST, typename Stack>
+	//	nik_ces void chord_fold(AST & toc, clexeme & l, Stack & s)
+	//	{
+	//		Application::identifier_entry(toc, l);
+	//		toc.fold_options(toc, s);
+	//	}
+
+	//	template<typename AST, typename Stack>
+	//	nik_ces void chord_find_first(AST & toc, clexeme & l, Stack & s)
+	//	{
+	//		Application::identifier_entry(toc, l);
+	//		toc.find_first_options(toc, s);
+	//	}
+
+	//	template<typename AST, typename Stack>
+	//	nik_ces void chord_find_all(AST & toc, clexeme & l, Stack & s)
+	//	{
+	//		Application::identifier_entry(toc, l);
+	//		toc.find_all_options(toc, s);
+	//	}
+
+	//	template<typename AST, typename Stack>
+	//	nik_ces void chord_zip(AST & toc, clexeme & l, Stack & s)
+	//	{
+	//		Application::identifier_entry(toc, l);
+	//		toc.zip_options(toc, s);
+	//	}
+
+	//	template<typename AST, typename Stack>
+	//	nik_ces void chord_fasten(AST & toc, clexeme & l, Stack & s)
+	//	{
+	//		Application::identifier_entry(toc, l);
+	//		toc.fasten_options(toc, s);
+	//	}
+
+	//	template<typename AST, typename Stack>
+	//	nik_ces void chord_glide(AST & toc, clexeme & l, Stack & s)
+	//	{
+	//		Application::identifier_entry(toc, l);
+	//		toc.glide_options(toc, s);
+	//	}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // interface:
 
 /***********************************************************************************************************************/
@@ -565,6 +623,14 @@ namespace cctmp {
 			nonterminal[ NAction::new_application      ] = NTTA::template new_application      <AST, Stack>;
 			nonterminal[ NAction::recover_instr_label  ] = NTTA::template recover_instr_label  <AST, Stack>;
 			nonterminal[ NAction::recover_instr_return ] = NTTA::template recover_instr_return <AST, Stack>;
+		//	nonterminal[ NAction::chord_repeat         ] = NTTA::template chord_repeat         <AST, Stack>;
+		//	nonterminal[ NAction::chord_map            ] = NTTA::template chord_map            <AST, Stack>;
+		//	nonterminal[ NAction::chord_fold           ] = NTTA::template chord_fold           <AST, Stack>;
+		//	nonterminal[ NAction::chord_find_first     ] = NTTA::template chord_find_first     <AST, Stack>;
+		//	nonterminal[ NAction::chord_find_all       ] = NTTA::template chord_find_all       <AST, Stack>;
+		//	nonterminal[ NAction::chord_zip            ] = NTTA::template chord_zip            <AST, Stack>;
+		//	nonterminal[ NAction::chord_fasten         ] = NTTA::template chord_fasten         <AST, Stack>;
+		//	nonterminal[ NAction::chord_glide          ] = NTTA::template chord_glide          <AST, Stack>;
 
 			terminal[ TAction::nop                ] = TTA::template nop                <AST>;
 			terminal[ TAction::resolve_identifier ] = TTA::template resolve_identifier <AST>;
@@ -578,6 +644,14 @@ namespace cctmp {
 			terminal[ TAction::resolve_label      ] = TTA::template resolve_label      <AST>;
 			terminal[ TAction::resolve_statement  ] = TTA::template resolve_statement  <AST>;
 			terminal[ TAction::resolve_quote      ] = TTA::template resolve_quote      <AST>;
+		//	terminal[ TAction::resolve_repeat     ] = TTA::template resolve_repeat     <AST>;
+		//	terminal[ TAction::resolve_map        ] = TTA::template resolve_map        <AST>;
+		//	terminal[ TAction::resolve_fold       ] = TTA::template resolve_fold       <AST>;
+		//	terminal[ TAction::resolve_find_first ] = TTA::template resolve_find_first <AST>;
+		//	terminal[ TAction::resolve_find_all   ] = TTA::template resolve_find_all   <AST>;
+		//	terminal[ TAction::resolve_zip        ] = TTA::template resolve_zip        <AST>;
+		//	terminal[ TAction::resolve_fasten     ] = TTA::template resolve_fasten     <AST>;
+		//	terminal[ TAction::resolve_glide      ] = TTA::template resolve_glide      <AST>;
 			terminal[ TAction::resolve_accept     ] = TTA::template resolve_accept     <AST>;
 		}
 

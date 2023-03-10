@@ -30,10 +30,11 @@
 #include"04_cctmp_interpreter.hpp"
 #include"05_cctmp_machine.hpp"
 #include"06_cctmp_lexer.hpp"
-#include"07_cctmp_parser.hpp"
-#include"08_cctmp_translator.hpp"
-#include"09_cctmp_targeter.hpp"
-#include"10_cctmp_metapiler.hpp"
+//#include"07_cctmp_chord.hpp"
+#include"08_cctmp_parser.hpp"
+#include"09_cctmp_translator.hpp"
+#include"10_cctmp_targeter.hpp"
+#include"11_cctmp_metapiler.hpp"
 
 #include"undef_macros.hpp"
 

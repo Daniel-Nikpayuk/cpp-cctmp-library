@@ -54,7 +54,7 @@ namespace cctmp_chord {
 	{
 		return cctmp::source
 		(
-			"repeat out end in            ;"
+			"f out end in                 ;"
 
 			"precycle:                    ;"
 			"   out = pre_out_next out    ;"
@@ -128,7 +128,7 @@ namespace cctmp_chord {
 	{
 		return cctmp::source
 		(
-			"map out in end               ;"
+			"f out in end                 ;"
 
 			"precycle:                    ;"
 			"   end = pre_end_next end    ;"
@@ -222,7 +222,7 @@ namespace cctmp_chord {
 	{
 		return cctmp::source
 		(
-			"fold out in end                  ;"
+			"f out in end                     ;"
 
 			"precycle:                        ;"
 			"   in = pre_in_next in           ;"
@@ -301,7 +301,7 @@ namespace cctmp_chord {
 	{
 		return cctmp::source
 		(
-			"find_first out in end         ;"
+			"f out in end                  ;"
 
 			"precycle:                     ;"
 			"    in = pre_in_next in       ;"
@@ -392,7 +392,7 @@ namespace cctmp_chord {
 	{
 		return cctmp::source
 		(
-			"find_all out in end               ;"
+			"f out in end                      ;"
 
 			"precycle:                         ;"
 			"    in = pre_in_next in           ;"
@@ -492,7 +492,7 @@ namespace cctmp_chord {
 	{
 		return cctmp::source
 		(
-			"zip out in1 in2 end2              ;"
+			"f out in1 in2 end2                ;"
 
 			"precycle:                         ;"
 			"  end2 = pre_end2_next end2       ;"
@@ -599,7 +599,7 @@ namespace cctmp_chord {
 	{
 		return cctmp::source
 		(
-			"fasten out in in1 in2 end2        ;"
+			"f out in in1 in2 end2             ;"
 
 			"precycle:                         ;"
 			"  end2 = pre_end2_next end2       ;"
@@ -724,7 +724,7 @@ namespace cctmp_chord {
 	{
 		return cctmp::source
 		(
-			"glide out in1 in2 end2            ;"
+			"f out in1 in2 end2                ;"
 
 			"precycle:                         ;"
 			"  end2 = pre_end2_next end2       ;"

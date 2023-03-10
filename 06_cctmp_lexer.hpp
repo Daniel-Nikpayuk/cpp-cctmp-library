@@ -558,11 +558,21 @@ namespace cctmp {
 		nik_ces auto size	= ArraySize::template result<>(T_dftt::State::accept);
 		nik_ces auto token	= T_dftt::State::token;
 
-		nik_ces auto paste_charset  () { return dfa_charset("_");      }
-		nik_ces auto test_charset   () { return dfa_charset("test");   }
-		nik_ces auto goto_charset   () { return dfa_charset("goto");   }
-		nik_ces auto branch_charset () { return dfa_charset("branch"); }
-		nik_ces auto return_charset () { return dfa_charset("return"); }
+		nik_ces auto paste_charset      () { return dfa_charset("_");      }
+		nik_ces auto void_charset       () { return dfa_charset("void");   }
+		nik_ces auto test_charset       () { return dfa_charset("test");   }
+		nik_ces auto goto_charset       () { return dfa_charset("goto");   }
+		nik_ces auto branch_charset     () { return dfa_charset("branch"); }
+		nik_ces auto return_charset     () { return dfa_charset("return"); }
+
+		nik_ces auto repeat_charset     () { return dfa_charset("repeat"); }
+		nik_ces auto map_charset        () { return dfa_charset("map"); }
+		nik_ces auto fold_charset       () { return dfa_charset("fold"); }
+		nik_ces auto find_first_charset () { return dfa_charset("find_first"); }
+		nik_ces auto find_all_charset   () { return dfa_charset("find_all"); }
+		nik_ces auto zip_charset        () { return dfa_charset("zip"); }
+		nik_ces auto fasten_charset     () { return dfa_charset("fasten"); }
+		nik_ces auto glide_charset      () { return dfa_charset("glide"); }
 
 		nik_ces auto find_pos(cstate_type n) { return numeric_find_pos(n, accept, end); }
 		nik_ces auto is_final(cstate_type n) { return (n != size); }
@@ -574,13 +584,23 @@ namespace cctmp {
 
 	struct T_generic_assembly_lexer
 	{
-		using T_dfa		= T_generic_assembly_dfa;
+		using T_dfa			= T_generic_assembly_dfa;
 
-		using T_paste_lexer	= T_keyword_lexer< T_dfa::paste_charset  , '_' >;
-		using T_test_lexer	= T_keyword_lexer< T_dfa::test_charset   , 't' >;
-		using T_goto_lexer	= T_keyword_lexer< T_dfa::goto_charset   , 'g' >;
-		using T_branch_lexer	= T_keyword_lexer< T_dfa::branch_charset , 'b' >;
-		using T_return_lexer	= T_keyword_lexer< T_dfa::return_charset , 'r' >;
+		using T_paste_lexer		= T_keyword_lexer< T_dfa::paste_charset      , '_' >;
+		using T_void_lexer		= T_keyword_lexer< T_dfa::void_charset       , 'v' >;
+		using T_test_lexer		= T_keyword_lexer< T_dfa::test_charset       , 't' >;
+		using T_goto_lexer		= T_keyword_lexer< T_dfa::goto_charset       , 'g' >;
+		using T_branch_lexer		= T_keyword_lexer< T_dfa::branch_charset     , 'b' >;
+		using T_return_lexer		= T_keyword_lexer< T_dfa::return_charset     , 'r' >;
+
+		using T_repeat_lexer		= T_keyword_lexer< T_dfa::repeat_charset     , '0' >;
+		using T_map_lexer		= T_keyword_lexer< T_dfa::map_charset        , '1' >;
+		using T_fold_lexer		= T_keyword_lexer< T_dfa::fold_charset       , '2' >;
+		using T_find_first_lexer	= T_keyword_lexer< T_dfa::find_first_charset , '3' >;
+		using T_find_all_lexer		= T_keyword_lexer< T_dfa::find_all_charset   , '4' >;
+		using T_zip_lexer		= T_keyword_lexer< T_dfa::zip_charset        , '5' >;
+		using T_fasten_lexer		= T_keyword_lexer< T_dfa::fasten_charset     , '6' >;
+		using T_glide_lexer		= T_keyword_lexer< T_dfa::glide_charset      , '7' >;
 
 		nik_ces lexeme lex(gstring_type b, gstring_type e)
 		{
@@ -623,9 +643,13 @@ namespace cctmp {
 
 			switch (e - b)
 			{
-				case 1  : { val = keyword_1(b, e); break; }
-				case 4  : { val = keyword_4(b, e); break; }
-				case 6  : { val = keyword_6(b, e); break; }
+				case  1 : { val = keyword_1  (b, e); break; }
+				case  3 : { val = keyword_3  (b, e); break; }
+				case  4 : { val = keyword_4  (b, e); break; }
+				case  5 : { val = keyword_5  (b, e); break; }
+				case  6 : { val = keyword_6  (b, e); break; }
+				case  8 : { val = keyword_8  (b, e); break; }
+				case 10 : { val = keyword_10 (b, e); break; }
 			}
 
 			return val;
@@ -637,18 +661,47 @@ namespace cctmp {
 			else                                     return TokenName::invalid;
 		}
 
+		nik_ces token_type keyword_3(gstring_type b, gstring_type e)
+		{
+			if      (recognizes< T_map_lexer >(b, e)) return T_map_lexer::token;
+			else if (recognizes< T_zip_lexer >(b, e)) return T_zip_lexer::token;
+			else                                      return TokenName::invalid;
+		}
+
 		nik_ces token_type keyword_4(gstring_type b, gstring_type e)
 		{
-			if      (recognizes< T_test_lexer >(b, e)) return T_test_lexer::token;
+			if      (recognizes< T_void_lexer >(b, e)) return T_void_lexer::token;
+			else if (recognizes< T_test_lexer >(b, e)) return T_test_lexer::token;
 			else if (recognizes< T_goto_lexer >(b, e)) return T_goto_lexer::token;
+			else if (recognizes< T_fold_lexer >(b, e)) return T_fold_lexer::token;
 			else                                       return TokenName::invalid;
+		}
+
+		nik_ces token_type keyword_5(gstring_type b, gstring_type e)
+		{
+			if   (recognizes< T_glide_lexer >(b, e)) return T_glide_lexer::token;
+			else                                     return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_6(gstring_type b, gstring_type e)
 		{
 			if      (recognizes< T_branch_lexer >(b, e)) return T_branch_lexer::token;
 			else if (recognizes< T_return_lexer >(b, e)) return T_return_lexer::token;
+			else if (recognizes< T_repeat_lexer >(b, e)) return T_repeat_lexer::token;
+			else if (recognizes< T_fasten_lexer >(b, e)) return T_fasten_lexer::token;
 			else                                         return TokenName::invalid;
+		}
+
+		nik_ces token_type keyword_8(gstring_type b, gstring_type e)
+		{
+			if   (recognizes< T_find_all_lexer >(b, e)) return T_find_all_lexer::token;
+			else                                        return TokenName::invalid;
+		}
+
+		nik_ces token_type keyword_10(gstring_type b, gstring_type e)
+		{
+			if   (recognizes< T_find_first_lexer >(b, e)) return T_find_first_lexer::token;
+			else                                          return TokenName::invalid;
 		}
 	};
 

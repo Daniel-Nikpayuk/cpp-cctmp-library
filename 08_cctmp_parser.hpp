@@ -284,6 +284,9 @@ namespace cctmp {
 					new_definition      , new_coordinate       ,
 					new_conditional     , new_application      ,
 					recover_instr_label , recover_instr_return ,
+				//	chord_repeat        , chord_map            , chord_fold ,
+				//	chord_find_first    , chord_find_all       , chord_zip  ,
+				//	chord_fasten        , chord_glide          ,
 					dimension
 				};
 			};
@@ -314,12 +317,23 @@ namespace cctmp {
 					resolve_mutable    ,
 					resolve_quote      ,
 					resolve_statement  ,
+
+				//	resolve_repeat     ,
+				//	resolve_map        ,
+				//	resolve_fold       ,
+				//	resolve_find_first ,
+				//	resolve_find_all   ,
+				//	resolve_zip        ,
+				//	resolve_fasten     ,
+				//	resolve_glide      ,
+
 					resolve_accept     ,
 					dimension
 				};
 			};
 
 			nik_ces gchar_type symbol[] = ";i!q=._lgtbr";
+		//	nik_ces gchar_type symbol[] = ";i!q=._lgvtbr01234567";
 
 			nik_ces auto size   = ArraySize::template result<>(symbol); // recognizes '\0'.
 			nik_ces auto finish = symbol + size;
@@ -360,6 +374,7 @@ namespace cctmp {
 			table_entry('I',  'i') = transition( "T=OV;"   , NAction::new_application      );
 			table_entry('I',  '!') = transition( "T=OV;"   , NAction::new_application      );
 			table_entry('I',  '.') = transition( "T=OV;"   , NAction::new_application      );
+		//	table_entry('I',  'v') = transition( "vOV;"    , NAction::new_application      );
 			table_entry('I',  't') = transition( "tOV;bi;" , NAction::new_conditional      );
 			table_entry('V',  'i') = transition( "MV"                                      );
 			table_entry('V',  '!') = transition( "MV"                                      );
@@ -371,6 +386,14 @@ namespace cctmp {
 			table_entry('T',  '.') = transition( "."                                       );
 			table_entry('O',  'i') = transition( "i"                                       );
 			table_entry('O',  'q') = transition( "q"                                       );
+		//	table_entry('O',  '0') = transition( "0"       , NAction::chord_repeat         );
+		//	table_entry('O',  '1') = transition( "1"       , NAction::chord_map            );
+		//	table_entry('O',  '2') = transition( "2"       , NAction::chord_fold           );
+		//	table_entry('O',  '3') = transition( "3"       , NAction::chord_find_first     );
+		//	table_entry('O',  '4') = transition( "4"       , NAction::chord_find_all       );
+		//	table_entry('O',  '5') = transition( "5"       , NAction::chord_zip            );
+		//	table_entry('O',  '6') = transition( "6"       , NAction::chord_fasten         );
+		//	table_entry('O',  '7') = transition( "7"       , NAction::chord_glide          );
 			table_entry('M',  'i') = transition( "i"                                       );
 			table_entry('M',  '!') = transition( "!i"                                      );
 			table_entry('M',  'q') = transition( "q"                                       );
@@ -380,6 +403,7 @@ namespace cctmp {
 			list_entry( '!') = TAction::resolve_mutable    ;
 			list_entry( '_') = TAction::resolve_paste      ;
 			list_entry( '.') = TAction::resolve_copy       ;
+		//	list_entry( 'v') = TAction::resolve_void       ;
 			list_entry( 't') = TAction::resolve_test       ;
 			list_entry( 'b') = TAction::resolve_branch     ;
 			list_entry( 'g') = TAction::resolve_goto       ;
@@ -387,6 +411,14 @@ namespace cctmp {
 			list_entry( 'l') = TAction::resolve_label      ;
 			list_entry( ';') = TAction::resolve_statement  ;
 			list_entry( 'q') = TAction::resolve_quote      ;
+		//	list_entry( '0') = TAction::resolve_repeat     ;
+		//	list_entry( '1') = TAction::resolve_map        ;
+		//	list_entry( '2') = TAction::resolve_fold       ;
+		//	list_entry( '3') = TAction::resolve_find_first ;
+		//	list_entry( '4') = TAction::resolve_find_all   ;
+		//	list_entry( '5') = TAction::resolve_zip        ;
+		//	list_entry( '6') = TAction::resolve_fasten     ;
+		//	list_entry( '7') = TAction::resolve_glide      ;
 			list_entry('\0') = TAction::resolve_accept     ;
 		}
 
@@ -633,7 +665,7 @@ namespace cctmp {
 
 		gindex_type pad_entry_size  , entry_size   , line_size   , stack_size  ;
 		gindex_type dependency_size , replace_size , graph_size  ;
-		gindex_type identifier_size , mutable_size , quote_size  ;
+		gindex_type identifier_size , mutable_size , quote_size  ; // , void_size ;
 		gindex_type assign_size     , copy_size    , paste_size  , return_size ;
 		gindex_type label_size      , test_size    , branch_size , goto_size   ;
 
@@ -654,6 +686,7 @@ namespace cctmp {
 			identifier_size  {            },
 			mutable_size     {            },
 			quote_size       {            },
+		//	void_size        {            },
 
 			assign_size      {            },
 			copy_size        {            },
@@ -692,6 +725,7 @@ namespace cctmp {
 						case '=': {                    ++assign_size     ; break; }
 						case 'r': {                    ++return_size     ; break; }
 						case 'l': {                    ++label_size      ; break; }
+					//	case 'v': { ++cur_entry_size ; ++void_size       ; break; }
 						case 't': { ++cur_entry_size ; ++test_size       ; break; }
 						case 'b': {                    ++branch_size     ; break; }
 						case 'g': {                    ++goto_size       ; break; }
@@ -738,6 +772,7 @@ namespace cctmp {
 		label_type label;
 		goto_type go_to;
 		branch_type branch;
+	//	progression_type progression;
 		depend_type depend;
 		graph_type graph;
 		lookup_type lookup;
@@ -747,7 +782,8 @@ namespace cctmp {
 
 		nik_ce T_generic_assembly_ast() :
 
-			page{}, label{}, go_to{}, branch{}, graph{}, lookup{}, arg_index{}, label_index{} { }
+			page{}, label{}, go_to{}, branch{}, // progression{},
+			graph{}, lookup{}, arg_index{}, label_index{} { }
 
 		// match:
 
