@@ -672,6 +672,7 @@ namespace cctmp {
 		{
 			if      (recognizes< T_void_lexer >(b, e)) return T_void_lexer::token;
 			else if (recognizes< T_test_lexer >(b, e)) return T_test_lexer::token;
+			if      (recognizes< T_test_lexer >(b, e)) return T_test_lexer::token;
 			else if (recognizes< T_goto_lexer >(b, e)) return T_goto_lexer::token;
 			else if (recognizes< T_fold_lexer >(b, e)) return T_fold_lexer::token;
 			else                                       return TokenName::invalid;
@@ -703,6 +704,107 @@ namespace cctmp {
 			if   (recognizes< T_find_first_lexer >(b, e)) return T_find_first_lexer::token;
 			else                                          return TokenName::invalid;
 		}
+	};
+
+/***********************************************************************************************************************/
+
+// source:
+
+	template<typename CharType, auto Size>
+	struct T_generic_assembly_source
+	{
+		using T_lexer			= T_generic_assembly_lexer;
+
+		using char_type			= CharType;
+		using cchar_type		= char_type const;
+		using string_type		= cchar_type*;
+		using cstring_type		= string_type const;
+		using size_type			= decltype(Size);
+
+		nik_ces size_type length	= Size - 1;
+
+		cstring_type string;
+		cstring_type finish;
+
+		// how many of these are actually needed?
+
+		gindex_type pad_entry_size  , entry_size   , line_size   , stack_size  ;
+		gindex_type dependency_size , replace_size , graph_size  ;
+		gindex_type identifier_size , mutable_size , quote_size  ; // , void_size ;
+		gindex_type assign_size     , copy_size    , paste_size  , return_size ;
+		gindex_type label_size      , test_size    , branch_size , goto_size   ;
+
+		nik_ce T_generic_assembly_source(const CharType (&s)[Size]) :
+
+			string           { s          },
+			finish           { s + length },
+
+			pad_entry_size   {            },
+			entry_size       {            },
+			line_size        {            },
+			stack_size       {            },
+
+			dependency_size  {            },
+			replace_size     {            },
+			graph_size       {            },
+
+			identifier_size  {            },
+			mutable_size     {            },
+			quote_size       {            },
+		//	void_size        {            },
+
+			assign_size      {            },
+			copy_size        {            },
+			paste_size       {            },
+			return_size      {            },
+
+			label_size       {            },
+			test_size        {            },
+			branch_size      {            },
+			goto_size        {            }
+
+			{
+				auto k = string;
+
+				gindex_type cur_entry_size = _zero;
+
+				while (k != finish)
+				{
+					auto l = T_lexer::lex(k, finish);
+
+					switch (l.value)
+					{
+						case ';':
+						{
+							if (cur_entry_size > entry_size)
+								entry_size = cur_entry_size;
+							cur_entry_size = _zero;
+							++line_size;
+							break;
+						}
+						case 'i': { ++cur_entry_size ; ++identifier_size ; break; }
+						case '!': {                    ++mutable_size    ; break; }
+						case 'q': { ++cur_entry_size ; ++quote_size      ; break; }
+						case '.': { ++cur_entry_size ; ++copy_size       ; break; }
+						case '_': { ++cur_entry_size ; ++paste_size      ; break; }
+						case '=': {                    ++assign_size     ; break; }
+						case 'r': {                    ++return_size     ; break; }
+						case 'l': {                    ++label_size      ; break; }
+					//	case 'v': { ++cur_entry_size ; ++void_size       ; break; }
+						case 't': { ++cur_entry_size ; ++test_size       ; break; }
+						case 'b': {                    ++branch_size     ; break; }
+						case 'g': {                    ++goto_size       ; break; }
+					}
+
+					++stack_size;
+					k = l.finish;
+				}
+
+				dependency_size = goto_size       + branch_size;
+				graph_size      = dependency_size + label_size;
+				replace_size    = assign_size     - copy_size;
+				pad_entry_size  = entry_size      + replace_size;
+			}
 	};
 
 /***********************************************************************************************************************/

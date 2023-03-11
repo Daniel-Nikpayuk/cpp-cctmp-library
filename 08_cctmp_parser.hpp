@@ -41,15 +41,13 @@ namespace cctmp {
 
 // token kind:
 
-	struct TokenKind
-	{
-		enum : gkey_type
-		{
-			nontoken = 0,
-			nonterminal , terminal ,
-			dimension
-		};
-	};
+	struct TokenKind { enum : gkey_type { nontoken = 0, nonterminal , terminal , dimension }; };
+
+/***********************************************************************************************************************/
+
+// permission:
+
+	struct Permission { enum : gkey_type { none = 0, letter , stack , dimension }; };
 
 /***********************************************************************************************************************/
 
@@ -69,15 +67,28 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// tenet:
+
+	struct Tenet
+	{
+		action_type name;
+		gkey_type note;
+
+		nik_ce Tenet()                               : name{    }, note{    } { }
+		nik_ce Tenet(caction_type _a, gckey_type _p) : name{ _a }, note{ _p } { }
+	};
+
+/***********************************************************************************************************************/
+
 // production:
 
 	struct Production
 	{
 		Body body;
-		action_type action_name;
+		Tenet tenet;
 
-		nik_ce Production()                                 : body{    }, action_name{    } { }
-		nik_ce Production(const Body & _b, caction_type _a) : body{ _b }, action_name{ _a } { }
+		nik_ce Production()                                  : body{    }, tenet{    } { }
+		nik_ce Production(const Body & _b, const Tenet & _t) : body{ _b }, tenet{ _t } { }
 	};
 
 /***********************************************************************************************************************/
@@ -143,11 +154,15 @@ namespace cctmp {
 		using NAction		= typename act_type::NAction;
 		using TAction		= typename act_type::TAction;
 
+		using prod_type		= Production const*;
+		using tenet_type	= Tenet const*;
+
 		stack_type stack;
 		token_type front;
 		string_type letter;
 		lexeme word;
-		Production production;
+		prod_type production;
+		tenet_type tenet;
 
 		T_ast tree;
 
@@ -158,6 +173,7 @@ namespace cctmp {
 			letter     { src.string                       },
 			word       { T_lexer::lex(letter, src.finish) },
 			production {                                  },
+			tenet      {                                  },
 
 			tree       {                                  }
 
@@ -177,11 +193,8 @@ namespace cctmp {
 				front = stack.front();
 			}
 
-			// temporary code location:
-
-			auto n = pda.action_name(*stack.current);
-			auto update = act.terminal_action(n);
-			update(tree, word);
+			update_tenet(*stack.current);
+			terminal_action(tenet->name); // accept action.
 		}
 
 		nik_ce void nonterminal()
@@ -196,6 +209,7 @@ namespace cctmp {
 			if (front != word.value) ; // error.
 			else
 			{
+				update_tenet(word.value);
 				terminal_update_action();
 				update_word();
 				terminal_update_stack();
@@ -209,14 +223,17 @@ namespace cctmp {
 
 		nik_ce void update_production()
 		{
-			production = pda.production(front, word.value);
+			production = &pda.production(front, word.value);
 			// if (production == empty) error;
 		}
+
+		nik_ce void update_tenet(gcchar_type c)
+			{ tenet = &pda.tenet(c); }
 
 		nik_ce void nonterminal_update_stack()
 		{
 			stack.pop();
-			stack.push(production.body.symbol, production.body.size);
+			stack.push(production->body.symbol, production->body.size);
 		}
 
 		nik_ce void update_word()
@@ -226,31 +243,59 @@ namespace cctmp {
 		}
 
 		nik_ce void terminal_update_stack()
-		{
-			stack.pop();
-		}
+			{ stack.pop(); }
 
-		nik_ce void nonterminal_update_action()
+		nik_ce void nonterminal_action(caction_type n)
 		{
-			auto n = production.action_name;
-
 			if (n != NAction::nop)
 			{
 				auto update = act.nonterminal_action(n);
 
-				update(tree, word, stack);
+				update(tree, word);
 			}
 		}
 
-		nik_ce void terminal_update_action()
+		nik_ce void terminal_action(caction_type n)
 		{
-			auto n = pda.action_name(word.value);
-
 			if (n != TAction::nop)
 			{
 				auto update = act.terminal_action(n);
 
 				update(tree, word);
+			}
+		}
+
+		nik_ce void letter_action(caction_type n)
+		{
+			auto update = act.letter_action(n);
+
+			update(tree); // needs to be updated.
+		}
+
+		nik_ce void stack_action(caction_type n)
+		{
+			auto update = act.stack_action(n);
+
+			update(tree, word, stack);
+		}
+
+		nik_ce void nonterminal_update_action()
+		{
+			switch (production->tenet.note)
+			{
+				case Permission::none   : { nonterminal_action(production->tenet.name); break; }
+				case Permission::letter : {      letter_action(production->tenet.name); break; }
+				case Permission::stack  : {       stack_action(production->tenet.name); break; }
+			}
+		}
+
+		nik_ce void terminal_update_action()
+		{
+			switch (tenet->note)
+			{
+				case Permission::none   : { terminal_action(tenet->name); break; }
+				case Permission::letter : {   letter_action(tenet->name); break; }
+				case Permission::stack  : {    stack_action(tenet->name); break; }
 			}
 		}
 	};
@@ -274,6 +319,34 @@ namespace cctmp {
 	{
 		using ArraySize	= T_store_U<_array_size_>;
 
+		struct Letter
+		{
+			struct Action
+			{
+				enum : action_type
+				{
+					parse_repeat     , parse_map      , parse_fold ,
+					parse_find_first , parse_find_all , parse_zip  ,
+					parse_fasten     , parse_glide    ,
+					dimension
+				};
+			};
+
+		}; using LAction = typename Letter::Action;
+
+		struct Stack
+		{
+			struct Action
+			{
+				enum : action_type
+				{
+					instr_label , instr_return ,
+					dimension
+				};
+			};
+
+		}; using SAction = typename Stack::Action;
+
 		struct Nonterminal
 		{
 			struct Action
@@ -281,12 +354,8 @@ namespace cctmp {
 				enum : action_type
 				{
 					nop = 0,
-					new_definition      , new_coordinate       ,
-					new_conditional     , new_application      ,
-					recover_instr_label , recover_instr_return ,
-				//	chord_repeat        , chord_map            , chord_fold ,
-				//	chord_find_first    , chord_find_all       , chord_zip  ,
-				//	chord_fasten        , chord_glide          ,
+					new_definition  , new_coordinate  ,
+					new_conditional , new_application ,
 					dimension
 				};
 			};
@@ -306,27 +375,13 @@ namespace cctmp {
 				enum : action_type
 				{
 					nop = 0,
-					resolve_identifier ,
-					resolve_paste      ,
-					resolve_copy       ,
-					resolve_test       ,
-					resolve_branch     ,
-					resolve_goto       ,
-					resolve_return     ,
-					resolve_label      ,
-					resolve_mutable    ,
-					resolve_quote      ,
-					resolve_statement  ,
-
-				//	resolve_repeat     ,
-				//	resolve_map        ,
-				//	resolve_fold       ,
-				//	resolve_find_first ,
-				//	resolve_find_all   ,
-				//	resolve_zip        ,
-				//	resolve_fasten     ,
-				//	resolve_glide      ,
-
+					resolve_identifier , resolve_paste     , resolve_copy    ,
+					resolve_test       , resolve_branch    , resolve_goto    ,
+					resolve_return     , resolve_label     , resolve_mutable ,
+					resolve_quote      , resolve_statement ,
+				//	resolve_repeat     , resolve_map       , resolve_fold    ,
+				//	resolve_find_first , resolve_find_all  , resolve_zip     ,
+				//	resolve_fasten     , resolve_glide     ,
 					resolve_accept     ,
 					dimension
 				};
@@ -341,85 +396,85 @@ namespace cctmp {
 		}; using TAction = typename Terminal::Action;
 
 		template<auto Size>
-		nik_ces Production transition(gcchar_type (&str)[Size], caction_type action = NAction::nop)
-		{
-			auto body = Body(str, Size - 1);
+		nik_ces Production ntransition(gcchar_type (&str)[Size],
+			caction_type act = NAction::nop, gckey_type perm = Permission::none)
+				{ return Production{Body(str, Size - 1), Tenet(act, perm)}; }
 
-			return Production{ body , action };
-		}
+		nik_ces Tenet ttransition(caction_type act = TAction::nop, gckey_type perm = Permission::none)
+			{ return Tenet(act, perm); }
 
 		Production table[Nonterminal::size][Terminal::size];
-		action_type list[Terminal::size];
+		Tenet list[Terminal::size];
 
 		nik_ce T_generic_assembly_pdtt() : table{}, list{}
 		{
-			table_entry('S',  'i') = transition( "iN;BC"   , NAction::new_definition       );
-			table_entry('N',  'i') = transition( "iN"                                      );
-			table_entry('N',  ';') = transition( ""                                        );
-			table_entry('C',  'l') = transition( "BC"                                      );
-			table_entry('C', '\0') = transition( ""                                        );
-			table_entry('B',  'l') = transition( "l;E"     , NAction::new_coordinate       );
-			table_entry('E',  'i') = transition( "IJgi;"                                   );
-			table_entry('E',  '!') = transition( "IJgi;"                                   );
-			table_entry('E',  '.') = transition( "IJgi;"                                   );
-			table_entry('E',  't') = transition( "IJgi;"                                   );
-			table_entry('E',  'r') = transition( "rM;"                                     );
-			table_entry('J',  'i') = transition( "IJ"                                      );
-			table_entry('J',  '!') = transition( "IJ"                                      );
-			table_entry('J',  '.') = transition( "IJ"                                      );
-			table_entry('J',  't') = transition( "IJ"                                      );
-			table_entry('J',  'g') = transition( ""                                        );
-			table_entry('J',  'l') = transition( ""        , NAction::recover_instr_label  );
-			table_entry('J',  'r') = transition( ""        , NAction::recover_instr_return );
-			table_entry('I',  'i') = transition( "T=OV;"   , NAction::new_application      );
-			table_entry('I',  '!') = transition( "T=OV;"   , NAction::new_application      );
-			table_entry('I',  '.') = transition( "T=OV;"   , NAction::new_application      );
-		//	table_entry('I',  'v') = transition( "vOV;"    , NAction::new_application      );
-			table_entry('I',  't') = transition( "tOV;bi;" , NAction::new_conditional      );
-			table_entry('V',  'i') = transition( "MV"                                      );
-			table_entry('V',  '!') = transition( "MV"                                      );
-			table_entry('V',  'q') = transition( "MV"                                      );
-			table_entry('V',  '_') = transition( "MV"                                      );
-			table_entry('V',  ';') = transition( ""                                        );
-			table_entry('T',  'i') = transition( "i"                                       );
-			table_entry('T',  '!') = transition( "!i"                                      );
-			table_entry('T',  '.') = transition( "."                                       );
-			table_entry('O',  'i') = transition( "i"                                       );
-			table_entry('O',  'q') = transition( "q"                                       );
-		//	table_entry('O',  '0') = transition( "0"       , NAction::chord_repeat         );
-		//	table_entry('O',  '1') = transition( "1"       , NAction::chord_map            );
-		//	table_entry('O',  '2') = transition( "2"       , NAction::chord_fold           );
-		//	table_entry('O',  '3') = transition( "3"       , NAction::chord_find_first     );
-		//	table_entry('O',  '4') = transition( "4"       , NAction::chord_find_all       );
-		//	table_entry('O',  '5') = transition( "5"       , NAction::chord_zip            );
-		//	table_entry('O',  '6') = transition( "6"       , NAction::chord_fasten         );
-		//	table_entry('O',  '7') = transition( "7"       , NAction::chord_glide          );
-			table_entry('M',  'i') = transition( "i"                                       );
-			table_entry('M',  '!') = transition( "!i"                                      );
-			table_entry('M',  'q') = transition( "q"                                       );
-			table_entry('M',  '_') = transition( "_"                                       );
+			table_entry('S',  'i') = ntransition( "iN;BC"   , NAction::new_definition  );
+			table_entry('N',  'i') = ntransition( "iN"                                 );
+			table_entry('N',  ';') = ntransition( ""                                   );
+			table_entry('C',  'l') = ntransition( "BC"                                 );
+			table_entry('C', '\0') = ntransition( ""                                   );
+			table_entry('B',  'l') = ntransition( "l;E"     , NAction::new_coordinate  );
+			table_entry('E',  'i') = ntransition( "IJgi;"                              );
+			table_entry('E',  '!') = ntransition( "IJgi;"                              );
+			table_entry('E',  '.') = ntransition( "IJgi;"                              );
+			table_entry('E',  't') = ntransition( "IJgi;"                              );
+			table_entry('E',  'r') = ntransition( "rM;"                                );
+			table_entry('J',  'i') = ntransition( "IJ"                                 );
+			table_entry('J',  '!') = ntransition( "IJ"                                 );
+			table_entry('J',  '.') = ntransition( "IJ"                                 );
+			table_entry('J',  't') = ntransition( "IJ"                                 );
+			table_entry('J',  'g') = ntransition( ""                                   );
+			table_entry('J',  'l') = ntransition( ""        , SAction::instr_label      , Permission::stack );
+			table_entry('J',  'r') = ntransition( ""        , SAction::instr_return     , Permission::stack );
+			table_entry('I',  'i') = ntransition( "T=OV;"   , NAction::new_application );
+			table_entry('I',  '!') = ntransition( "T=OV;"   , NAction::new_application );
+			table_entry('I',  '.') = ntransition( "T=OV;"   , NAction::new_application );
+		//	table_entry('I',  'v') = ntransition( "vOV;"    , NAction::new_application );
+			table_entry('I',  't') = ntransition( "tOV;bi;" , NAction::new_conditional );
+			table_entry('V',  'i') = ntransition( "MV"                                 );
+			table_entry('V',  '!') = ntransition( "MV"                                 );
+			table_entry('V',  'q') = ntransition( "MV"                                 );
+			table_entry('V',  '_') = ntransition( "MV"                                 );
+			table_entry('V',  ';') = ntransition( ""                                   );
+			table_entry('T',  'i') = ntransition( "i"                                  );
+			table_entry('T',  '!') = ntransition( "!i"                                 );
+			table_entry('T',  '.') = ntransition( "."                                  );
+			table_entry('O',  'i') = ntransition( "i"                                  );
+			table_entry('O',  'q') = ntransition( "q"                                  );
+		//	table_entry('O',  '0') = ntransition( "0"                                  );
+		//	table_entry('O',  '1') = ntransition( "1"                                  );
+		//	table_entry('O',  '2') = ntransition( "2"                                  );
+		//	table_entry('O',  '3') = ntransition( "3"                                  );
+		//	table_entry('O',  '4') = ntransition( "4"                                  );
+		//	table_entry('O',  '5') = ntransition( "5"                                  );
+		//	table_entry('O',  '6') = ntransition( "6"                                  );
+		//	table_entry('O',  '7') = ntransition( "7"                                  );
+			table_entry('M',  'i') = ntransition( "i"                                  );
+			table_entry('M',  '!') = ntransition( "!i"                                 );
+			table_entry('M',  'q') = ntransition( "q"                                  );
+			table_entry('M',  '_') = ntransition( "_"                                  );
 
-			list_entry( 'i') = TAction::resolve_identifier ;
-			list_entry( '!') = TAction::resolve_mutable    ;
-			list_entry( '_') = TAction::resolve_paste      ;
-			list_entry( '.') = TAction::resolve_copy       ;
-		//	list_entry( 'v') = TAction::resolve_void       ;
-			list_entry( 't') = TAction::resolve_test       ;
-			list_entry( 'b') = TAction::resolve_branch     ;
-			list_entry( 'g') = TAction::resolve_goto       ;
-			list_entry( 'r') = TAction::resolve_return     ;
-			list_entry( 'l') = TAction::resolve_label      ;
-			list_entry( ';') = TAction::resolve_statement  ;
-			list_entry( 'q') = TAction::resolve_quote      ;
-		//	list_entry( '0') = TAction::resolve_repeat     ;
-		//	list_entry( '1') = TAction::resolve_map        ;
-		//	list_entry( '2') = TAction::resolve_fold       ;
-		//	list_entry( '3') = TAction::resolve_find_first ;
-		//	list_entry( '4') = TAction::resolve_find_all   ;
-		//	list_entry( '5') = TAction::resolve_zip        ;
-		//	list_entry( '6') = TAction::resolve_fasten     ;
-		//	list_entry( '7') = TAction::resolve_glide      ;
-			list_entry('\0') = TAction::resolve_accept     ;
+			list_entry( 'i') = ttransition( TAction::resolve_identifier );
+			list_entry( '!') = ttransition( TAction::resolve_mutable    );
+			list_entry( '_') = ttransition( TAction::resolve_paste      );
+			list_entry( '.') = ttransition( TAction::resolve_copy       );
+		//	list_entry( 'v') = ttransition( TAction::resolve_void       );
+			list_entry( 't') = ttransition( TAction::resolve_test       );
+			list_entry( 'b') = ttransition( TAction::resolve_branch     );
+			list_entry( 'g') = ttransition( TAction::resolve_goto       );
+			list_entry( 'r') = ttransition( TAction::resolve_return     );
+			list_entry( 'l') = ttransition( TAction::resolve_label      );
+			list_entry( ';') = ttransition( TAction::resolve_statement  );
+			list_entry( 'q') = ttransition( TAction::resolve_quote      );
+		//	list_entry( '0') = ttransition( LAction::parse_repeat        , Permission::letter );
+		//	list_entry( '1') = ttransition( LAction::parse_map           , Permission::letter );
+		//	list_entry( '2') = ttransition( LAction::parse_fold          , Permission::letter );
+		//	list_entry( '3') = ttransition( LAction::parse_find_first    , Permission::letter );
+		//	list_entry( '4') = ttransition( LAction::parse_find_all      , Permission::letter );
+		//	list_entry( '5') = ttransition( LAction::parse_zip           , Permission::letter );
+		//	list_entry( '6') = ttransition( LAction::parse_fasten        , Permission::letter );
+		//	list_entry( '7') = ttransition( LAction::parse_glide         , Permission::letter );
+			list_entry('\0') = ttransition( TAction::resolve_accept     );
 		}
 
 		nik_ce Production & table_entry(gcchar_type row_c, gcchar_type col_c)
@@ -438,14 +493,14 @@ namespace cctmp {
 			return table[row][col];
 		}
 
-		nik_ce action_type & list_entry(gcchar_type loc_c)
+		nik_ce Tenet & list_entry(gcchar_type loc_c)
 		{
 			auto loc = numeric_find_pos(loc_c, Terminal::symbol, Terminal::finish);
 
 			return list[loc];
 		}
 
-		nik_ce caction_type & action_name(gcchar_type loc_c) const
+		nik_ce const Tenet & tenet(gcchar_type loc_c) const
 		{
 			auto loc = numeric_find_pos(loc_c, Terminal::symbol, Terminal::finish);
 
@@ -639,107 +694,6 @@ namespace cctmp {
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return locus; }
 		nik_ce auto size  () const { return (locus - start); }
-	};
-
-/***********************************************************************************************************************/
-
-// source:
-
-	template<typename CharType, auto Size>
-	struct T_generic_assembly_source
-	{
-		using T_lexer			= T_generic_assembly_lexer;
-
-		using char_type			= CharType;
-		using cchar_type		= char_type const;
-		using string_type		= cchar_type*;
-		using cstring_type		= string_type const;
-		using size_type			= decltype(Size);
-
-		nik_ces size_type length	= Size - 1;
-
-		cstring_type string;
-		cstring_type finish;
-
-		// how many of these are actually needed?
-
-		gindex_type pad_entry_size  , entry_size   , line_size   , stack_size  ;
-		gindex_type dependency_size , replace_size , graph_size  ;
-		gindex_type identifier_size , mutable_size , quote_size  ; // , void_size ;
-		gindex_type assign_size     , copy_size    , paste_size  , return_size ;
-		gindex_type label_size      , test_size    , branch_size , goto_size   ;
-
-		nik_ce T_generic_assembly_source(const CharType (&s)[Size]) :
-
-			string           { s          },
-			finish           { s + length },
-
-			pad_entry_size   {            },
-			entry_size       {            },
-			line_size        {            },
-			stack_size       {            },
-
-			dependency_size  {            },
-			replace_size     {            },
-			graph_size       {            },
-
-			identifier_size  {            },
-			mutable_size     {            },
-			quote_size       {            },
-		//	void_size        {            },
-
-			assign_size      {            },
-			copy_size        {            },
-			paste_size       {            },
-			return_size      {            },
-
-			label_size       {            },
-			test_size        {            },
-			branch_size      {            },
-			goto_size        {            }
-
-			{
-				auto k = string;
-
-				gindex_type cur_entry_size = _zero;
-
-				while (k != finish)
-				{
-					auto l = T_lexer::lex(k, finish);
-
-					switch (l.value)
-					{
-						case ';':
-						{
-							if (cur_entry_size > entry_size)
-								entry_size = cur_entry_size;
-							cur_entry_size = _zero;
-							++line_size;
-							break;
-						}
-						case 'i': { ++cur_entry_size ; ++identifier_size ; break; }
-						case '!': {                    ++mutable_size    ; break; }
-						case 'q': { ++cur_entry_size ; ++quote_size      ; break; }
-						case '.': { ++cur_entry_size ; ++copy_size       ; break; }
-						case '_': { ++cur_entry_size ; ++paste_size      ; break; }
-						case '=': {                    ++assign_size     ; break; }
-						case 'r': {                    ++return_size     ; break; }
-						case 'l': {                    ++label_size      ; break; }
-					//	case 'v': { ++cur_entry_size ; ++void_size       ; break; }
-						case 't': { ++cur_entry_size ; ++test_size       ; break; }
-						case 'b': {                    ++branch_size     ; break; }
-						case 'g': {                    ++goto_size       ; break; }
-					}
-
-					++stack_size;
-					k = l.finish;
-				}
-
-				dependency_size = goto_size       + branch_size;
-				graph_size      = dependency_size + label_size;
-				replace_size    = assign_size     - copy_size;
-				pad_entry_size  = entry_size      + replace_size;
-			}
 	};
 
 /***********************************************************************************************************************/

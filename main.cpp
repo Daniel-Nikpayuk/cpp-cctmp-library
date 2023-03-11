@@ -41,7 +41,7 @@
 #include"documentation/01_case_studies.hpp"
 #include"documentation/03_chord_machines.hpp"
 
-//#include"testing/metapiler_printer.hpp"
+#include"testing/metapiler_printer.hpp"
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

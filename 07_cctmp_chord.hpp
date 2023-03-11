@@ -146,7 +146,7 @@ namespace cctmp {
 
 // automaton:
 
-	struct T_generic_assembly_dfa
+	struct T_chord_assembly_dfa
 	{
 		using T_dftt		= T_generic_assembly_dftt;
 
@@ -182,7 +182,7 @@ namespace cctmp {
 
 // interface:
 
-	struct T_generic_assembly_lexer
+	struct T_chord_assembly_lexer
 	{
 		using T_dfa		= T_generic_assembly_dfa;
 

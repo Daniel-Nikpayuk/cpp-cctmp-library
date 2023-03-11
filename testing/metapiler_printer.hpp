@@ -39,7 +39,7 @@ namespace cctmp {
 			else if constexpr (eval<_same_, f, _upshift_               >) return "_upshift_              ";
 			else if constexpr (eval<_same_, f, _downshift_             >) return "_downshift_            ";
 
-			else if constexpr (eval<_same_, f, _assign_                >) return "_assign_               ";
+			else if constexpr (eval<_same_, f, _appoint_               >) return "_appoint_              ";
 			else if constexpr (eval<_same_, f, _dereference_           >) return "_dereference_          ";
 			else if constexpr (eval<_same_, f, _to_bool_               >) return "_to_bool_              ";
 

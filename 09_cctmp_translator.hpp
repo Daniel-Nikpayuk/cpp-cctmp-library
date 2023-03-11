@@ -30,6 +30,40 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// nonterminal:
+
+/***********************************************************************************************************************/
+
+// action:
+
+	struct T_generic_assembly_nta
+	{
+		template<typename AST>
+		using signature = void(*)(AST&, clexeme&);
+
+		template<typename AST>
+		nik_ces void nop(AST & toc, clexeme & l) { }
+
+		template<typename AST>
+		nik_ces void new_definition(AST & toc, clexeme & l)
+			{ toc.set_kind(Context::define); }
+
+		template<typename AST>
+		nik_ces void new_coordinate(AST & toc, clexeme & l)
+			{ toc.set_kind(Context::label); }
+
+		template<typename AST>
+		nik_ces void new_conditional(AST & toc, clexeme & l)
+			{ toc.set_kind(Context::test); }
+
+		template<typename AST>
+		nik_ces void new_application(AST & toc, clexeme & l)
+			{ toc.set_kind(Context::apply); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // terminal:
 
 /***********************************************************************************************************************/
@@ -362,8 +396,8 @@ namespace cctmp {
 
 	struct T_generic_assembly_tta
 	{
-		template<typename AST, typename Stack>
-		using signature = void(*)(AST &, clexeme &);
+		template<typename AST>
+		using signature = void(*)(AST&, clexeme&);
 
 		using Definition	= T_generic_assembly_tta_context_define;
 		using Application	= T_generic_assembly_tta_context_apply;
@@ -487,111 +521,107 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// nonterminal:
+// letter:
 
 /***********************************************************************************************************************/
 
 // action:
 
-	struct T_generic_assembly_ntta
+	struct T_generic_assembly_lta
 	{
-		using Application = T_generic_assembly_tta_context_apply;
+	//	using Application = T_generic_assembly_tta_context_apply;
 
-		template<typename AST, typename Stack>
-		using signature = void(*)(AST &, clexeme &, Stack &);
+		template<typename AST>
+		using signature = void(*)(AST&); // needs to be updated.
 
-		template<typename AST, typename Stack>
-		nik_ces void nop(AST & toc, clexeme & l, Stack & s) { }
+		template<typename AST>
+		nik_ces void parse_repeat(AST & toc)
+		{
+		//	Application::identifier_entry(toc, l);
+		//	toc.repeat_options(toc, s);
+		}
 
-		template<typename AST, typename Stack>
-		nik_ces void new_definition(AST & toc, clexeme & l, Stack & s)
-			{ toc.set_kind(Context::define); }
+		template<typename AST>
+		nik_ces void parse_map(AST & toc)
+		{
+		//	Application::identifier_entry(toc, l);
+		//	toc.map_options(toc, s);
+		}
 
-		template<typename AST, typename Stack>
-		nik_ces void new_coordinate(AST & toc, clexeme & l, Stack & s)
-			{ toc.set_kind(Context::label); }
+		template<typename AST>
+		nik_ces void parse_fold(AST & toc)
+		{
+		//	Application::identifier_entry(toc, l);
+		//	toc.fold_options(toc, s);
+		}
 
-		template<typename AST, typename Stack>
-		nik_ces void new_conditional(AST & toc, clexeme & l, Stack & s)
-			{ toc.set_kind(Context::test); }
+		template<typename AST>
+		nik_ces void parse_find_first(AST & toc)
+		{
+		//	Application::identifier_entry(toc, l);
+		//	toc.find_first_options(toc, s);
+		}
 
+		template<typename AST>
+		nik_ces void parse_find_all(AST & toc)
+		{
+		//	Application::identifier_entry(toc, l);
+		//	toc.find_all_options(toc, s);
+		}
+
+		template<typename AST>
+		nik_ces void parse_zip(AST & toc)
+		{
+		//	Application::identifier_entry(toc, l);
+		//	toc.zip_options(toc, s);
+		}
+
+		template<typename AST>
+		nik_ces void parse_fasten(AST & toc)
+		{
+		//	Application::identifier_entry(toc, l);
+		//	toc.fasten_options(toc, s);
+		}
+
+		template<typename AST>
+		nik_ces void parse_glide(AST & toc)
+		{
+		//	Application::identifier_entry(toc, l);
+		//	toc.glide_options(toc, s);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// stack:
+
+/***********************************************************************************************************************/
+
+// action:
+
+	struct T_generic_assembly_sta
+	{
 		template<typename AST, typename Stack>
-		nik_ces void new_application(AST & toc, clexeme & l, Stack & s)
-			{ toc.set_kind(Context::apply); }
+		using signature = void(*)(AST&, clexeme&, Stack&);
 
 		template<typename AST, typename Stack> // can assume "gi;" is the current stack front.
-		nik_ces void recover_instr_label(AST & toc, clexeme & l, Stack & s)
+		nik_ces void instr_label(AST & toc, clexeme & l, Stack & s)
 		{
 			*(s.current    ) = 'l';
 			*(s.current - 1) = ';';
 			*(s.current - 2) = 'E';
 
-			new_coordinate(toc, l, s);
+			T_generic_assembly_nta::new_coordinate(toc, l);
 		}
 
 		template<typename AST, typename Stack> // can assume "gi;" is the current stack front.
-		nik_ces void recover_instr_return(AST & toc, clexeme & l, Stack & s)
+		nik_ces void instr_return(AST & toc, clexeme & l, Stack & s)
 		{
 			*(s.current    ) = 'r';
 			*(s.current - 1) = 'M';
 			*(s.current - 2) = ';';
 		}
-
-	//	template<typename AST, typename Stack>
-	//	nik_ces void chord_repeat(AST & toc, clexeme & l, Stack & s)
-	//	{
-	//		Application::identifier_entry(toc, l);
-	//		toc.repeat_options(toc, s);
-	//	}
-
-	//	template<typename AST, typename Stack>
-	//	nik_ces void chord_map(AST & toc, clexeme & l, Stack & s)
-	//	{
-	//		Application::identifier_entry(toc, l);
-	//		toc.map_options(toc, s);
-	//	}
-
-	//	template<typename AST, typename Stack>
-	//	nik_ces void chord_fold(AST & toc, clexeme & l, Stack & s)
-	//	{
-	//		Application::identifier_entry(toc, l);
-	//		toc.fold_options(toc, s);
-	//	}
-
-	//	template<typename AST, typename Stack>
-	//	nik_ces void chord_find_first(AST & toc, clexeme & l, Stack & s)
-	//	{
-	//		Application::identifier_entry(toc, l);
-	//		toc.find_first_options(toc, s);
-	//	}
-
-	//	template<typename AST, typename Stack>
-	//	nik_ces void chord_find_all(AST & toc, clexeme & l, Stack & s)
-	//	{
-	//		Application::identifier_entry(toc, l);
-	//		toc.find_all_options(toc, s);
-	//	}
-
-	//	template<typename AST, typename Stack>
-	//	nik_ces void chord_zip(AST & toc, clexeme & l, Stack & s)
-	//	{
-	//		Application::identifier_entry(toc, l);
-	//		toc.zip_options(toc, s);
-	//	}
-
-	//	template<typename AST, typename Stack>
-	//	nik_ces void chord_fasten(AST & toc, clexeme & l, Stack & s)
-	//	{
-	//		Application::identifier_entry(toc, l);
-	//		toc.fasten_options(toc, s);
-	//	}
-
-	//	template<typename AST, typename Stack>
-	//	nik_ces void chord_glide(AST & toc, clexeme & l, Stack & s)
-	//	{
-	//		Application::identifier_entry(toc, l);
-	//		toc.glide_options(toc, s);
-	//	}
 	};
 
 /***********************************************************************************************************************/
@@ -604,59 +634,74 @@ namespace cctmp {
 	template<typename AST, typename Stack>
 	struct T_generic_assembly_ta
 	{
-		using NTTA			= T_generic_assembly_ntta;
-		using nonterminal_type		= typename NTTA::template signature<AST, Stack>;
-		using TTA			= T_generic_assembly_tta;
-		using terminal_type		= typename TTA::template signature<AST, Stack>;
-		using NAction			= typename T_generic_assembly_pdtt::NAction;
-		using TAction			= typename T_generic_assembly_pdtt::TAction;
+		using NTA		= T_generic_assembly_nta;
+		using n_action_type	= typename NTA::template signature<AST>;
+		using NAction		= typename T_generic_assembly_pdtt::NAction;
 
-		nonterminal_type nonterminal[NAction::dimension];
-		   terminal_type    terminal[TAction::dimension];
+		using TTA		= T_generic_assembly_tta;
+		using t_action_type	= typename TTA::template signature<AST>;
+		using TAction		= typename T_generic_assembly_pdtt::TAction;
 
-		nik_ce T_generic_assembly_ta() : nonterminal{}, terminal{}
+		using LTA		= T_generic_assembly_lta;
+		using l_action_type	= typename LTA::template signature<AST>;
+		using LAction		= typename T_generic_assembly_pdtt::LAction;
+
+		using STA		= T_generic_assembly_sta;
+		using s_action_type	= typename STA::template signature<AST, Stack>;
+		using SAction		= typename T_generic_assembly_pdtt::SAction;
+
+		n_action_type n_array[NAction::dimension];
+		t_action_type t_array[TAction::dimension];
+		l_action_type l_array[LAction::dimension];
+		s_action_type s_array[SAction::dimension];
+
+		nik_ce T_generic_assembly_ta() : n_array{}, t_array{}, l_array{}, s_array{}
 		{
-			nonterminal[ NAction::nop                  ] = NTTA::template nop                  <AST, Stack>;
-			nonterminal[ NAction::new_definition       ] = NTTA::template new_definition       <AST, Stack>;
-			nonterminal[ NAction::new_coordinate       ] = NTTA::template new_coordinate       <AST, Stack>;
-			nonterminal[ NAction::new_conditional      ] = NTTA::template new_conditional      <AST, Stack>;
-			nonterminal[ NAction::new_application      ] = NTTA::template new_application      <AST, Stack>;
-			nonterminal[ NAction::recover_instr_label  ] = NTTA::template recover_instr_label  <AST, Stack>;
-			nonterminal[ NAction::recover_instr_return ] = NTTA::template recover_instr_return <AST, Stack>;
-		//	nonterminal[ NAction::chord_repeat         ] = NTTA::template chord_repeat         <AST, Stack>;
-		//	nonterminal[ NAction::chord_map            ] = NTTA::template chord_map            <AST, Stack>;
-		//	nonterminal[ NAction::chord_fold           ] = NTTA::template chord_fold           <AST, Stack>;
-		//	nonterminal[ NAction::chord_find_first     ] = NTTA::template chord_find_first     <AST, Stack>;
-		//	nonterminal[ NAction::chord_find_all       ] = NTTA::template chord_find_all       <AST, Stack>;
-		//	nonterminal[ NAction::chord_zip            ] = NTTA::template chord_zip            <AST, Stack>;
-		//	nonterminal[ NAction::chord_fasten         ] = NTTA::template chord_fasten         <AST, Stack>;
-		//	nonterminal[ NAction::chord_glide          ] = NTTA::template chord_glide          <AST, Stack>;
+			n_array[ NAction::nop                ] = NTA::template nop                <AST>;
+			n_array[ NAction::new_definition     ] = NTA::template new_definition     <AST>;
+			n_array[ NAction::new_coordinate     ] = NTA::template new_coordinate     <AST>;
+			n_array[ NAction::new_conditional    ] = NTA::template new_conditional    <AST>;
+			n_array[ NAction::new_application    ] = NTA::template new_application    <AST>;
 
-			terminal[ TAction::nop                ] = TTA::template nop                <AST>;
-			terminal[ TAction::resolve_identifier ] = TTA::template resolve_identifier <AST>;
-			terminal[ TAction::resolve_mutable    ] = TTA::template resolve_mutable    <AST>;
-			terminal[ TAction::resolve_paste      ] = TTA::template resolve_paste      <AST>;
-			terminal[ TAction::resolve_copy       ] = TTA::template resolve_copy       <AST>;
-			terminal[ TAction::resolve_test       ] = TTA::template resolve_test       <AST>;
-			terminal[ TAction::resolve_branch     ] = TTA::template resolve_branch     <AST>;
-			terminal[ TAction::resolve_goto       ] = TTA::template resolve_goto       <AST>;
-			terminal[ TAction::resolve_return     ] = TTA::template resolve_return     <AST>;
-			terminal[ TAction::resolve_label      ] = TTA::template resolve_label      <AST>;
-			terminal[ TAction::resolve_statement  ] = TTA::template resolve_statement  <AST>;
-			terminal[ TAction::resolve_quote      ] = TTA::template resolve_quote      <AST>;
-		//	terminal[ TAction::resolve_repeat     ] = TTA::template resolve_repeat     <AST>;
-		//	terminal[ TAction::resolve_map        ] = TTA::template resolve_map        <AST>;
-		//	terminal[ TAction::resolve_fold       ] = TTA::template resolve_fold       <AST>;
-		//	terminal[ TAction::resolve_find_first ] = TTA::template resolve_find_first <AST>;
-		//	terminal[ TAction::resolve_find_all   ] = TTA::template resolve_find_all   <AST>;
-		//	terminal[ TAction::resolve_zip        ] = TTA::template resolve_zip        <AST>;
-		//	terminal[ TAction::resolve_fasten     ] = TTA::template resolve_fasten     <AST>;
-		//	terminal[ TAction::resolve_glide      ] = TTA::template resolve_glide      <AST>;
-			terminal[ TAction::resolve_accept     ] = TTA::template resolve_accept     <AST>;
+			t_array[ TAction::nop                ] = TTA::template nop                <AST>;
+			t_array[ TAction::resolve_identifier ] = TTA::template resolve_identifier <AST>;
+			t_array[ TAction::resolve_mutable    ] = TTA::template resolve_mutable    <AST>;
+			t_array[ TAction::resolve_paste      ] = TTA::template resolve_paste      <AST>;
+			t_array[ TAction::resolve_copy       ] = TTA::template resolve_copy       <AST>;
+			t_array[ TAction::resolve_test       ] = TTA::template resolve_test       <AST>;
+			t_array[ TAction::resolve_branch     ] = TTA::template resolve_branch     <AST>;
+			t_array[ TAction::resolve_goto       ] = TTA::template resolve_goto       <AST>;
+			t_array[ TAction::resolve_return     ] = TTA::template resolve_return     <AST>;
+			t_array[ TAction::resolve_label      ] = TTA::template resolve_label      <AST>;
+			t_array[ TAction::resolve_statement  ] = TTA::template resolve_statement  <AST>;
+			t_array[ TAction::resolve_quote      ] = TTA::template resolve_quote      <AST>;
+		//	t_array[ TAction::resolve_repeat     ] = TTA::template resolve_repeat     <AST>;
+		//	t_array[ TAction::resolve_map        ] = TTA::template resolve_map        <AST>;
+		//	t_array[ TAction::resolve_fold       ] = TTA::template resolve_fold       <AST>;
+		//	t_array[ TAction::resolve_find_first ] = TTA::template resolve_find_first <AST>;
+		//	t_array[ TAction::resolve_find_all   ] = TTA::template resolve_find_all   <AST>;
+		//	t_array[ TAction::resolve_zip        ] = TTA::template resolve_zip        <AST>;
+		//	t_array[ TAction::resolve_fasten     ] = TTA::template resolve_fasten     <AST>;
+		//	t_array[ TAction::resolve_glide      ] = TTA::template resolve_glide      <AST>;
+			t_array[ TAction::resolve_accept     ] = TTA::template resolve_accept     <AST>;
+
+			l_array[ LAction::parse_repeat       ] = LTA::template parse_repeat       <AST>;
+			l_array[ LAction::parse_map          ] = LTA::template parse_map          <AST>;
+			l_array[ LAction::parse_fold         ] = LTA::template parse_fold         <AST>;
+			l_array[ LAction::parse_find_first   ] = LTA::template parse_find_first   <AST>;
+			l_array[ LAction::parse_find_all     ] = LTA::template parse_find_all     <AST>;
+			l_array[ LAction::parse_zip          ] = LTA::template parse_zip          <AST>;
+			l_array[ LAction::parse_fasten       ] = LTA::template parse_fasten       <AST>;
+			l_array[ LAction::parse_glide        ] = LTA::template parse_glide        <AST>;
+
+			s_array[ SAction::instr_label        ] = STA::template instr_label        <AST, Stack>;
+			s_array[ SAction::instr_return       ] = STA::template instr_return       <AST, Stack>;
 		}
 
-		nik_ce nonterminal_type nonterminal_action(gcindex_type pos) const { return nonterminal[pos]; }
-		nik_ce    terminal_type    terminal_action(gcindex_type pos) const { return    terminal[pos]; }
+		nik_ce const n_action_type nonterminal_action(gcindex_type pos) const { return n_array[pos]; }
+		nik_ce const t_action_type    terminal_action(gcindex_type pos) const { return t_array[pos]; }
+		nik_ce const l_action_type      letter_action(gcindex_type pos) const { return l_array[pos]; }
+		nik_ce const s_action_type       stack_action(gcindex_type pos) const { return s_array[pos]; }
 	};
 
 	// interface:
