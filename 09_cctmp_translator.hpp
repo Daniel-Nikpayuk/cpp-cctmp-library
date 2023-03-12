@@ -544,73 +544,73 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// letter:
+// string:
 
 /***********************************************************************************************************************/
 
 // action:
 
-	struct T_generic_assembly_lta
+	struct T_generic_assembly_rta
 	{
 	//	using Application = T_generic_assembly_tta_context_apply;
 
 		template<typename AST>
-		using signature = void(*)(AST&); // needs to be updated.
+		using signature = void(*)(AST&, lexeme&);
 
 		template<typename AST>
-		nik_ces void parse_repeat(AST & toc)
+		nik_ces void parse_repeat(AST & toc, lexeme & l)
 		{
-		//	Application::identifier_entry(toc, l);
-		//	toc.repeat_options(toc, s);
+		//	toc.update_lookup();
+		//	toc.set_current_entry(l, Sign::repeat, progression.position());
 		}
 
 		template<typename AST>
-		nik_ces void parse_map(AST & toc)
+		nik_ces void parse_map(AST & toc, lexeme & l)
 		{
-		//	Application::identifier_entry(toc, l);
-		//	toc.map_options(toc, s);
+		//	toc.update_lookup();
+		//	toc.set_current_entry(l, Sign::map, progression.position());
 		}
 
 		template<typename AST>
-		nik_ces void parse_fold(AST & toc)
+		nik_ces void parse_fold(AST & toc, lexeme & l)
 		{
-		//	Application::identifier_entry(toc, l);
-		//	toc.fold_options(toc, s);
+		//	toc.update_lookup();
+		//	toc.set_current_entry(l, Sign::fold, progression.position());
 		}
 
 		template<typename AST>
-		nik_ces void parse_find_first(AST & toc)
+		nik_ces void parse_find_first(AST & toc, lexeme & l)
 		{
-		//	Application::identifier_entry(toc, l);
-		//	toc.find_first_options(toc, s);
+		//	toc.update_lookup();
+		//	toc.set_current_entry(l, Sign::find_first, progression.position());
 		}
 
 		template<typename AST>
-		nik_ces void parse_find_all(AST & toc)
+		nik_ces void parse_find_all(AST & toc, lexeme & l)
 		{
-		//	Application::identifier_entry(toc, l);
-		//	toc.find_all_options(toc, s);
+		//	toc.update_lookup();
+		//	toc.set_current_entry(l, Sign::find_all, progression.position());
 		}
 
 		template<typename AST>
-		nik_ces void parse_zip(AST & toc)
+		nik_ces void parse_zip(AST & toc, lexeme & l)
 		{
-		//	Application::identifier_entry(toc, l);
-		//	toc.zip_options(toc, s);
+		//	toc.update_lookup();
+		//	toc.set_current_entry(l, Sign::zip, progression.position());
 		}
 
 		template<typename AST>
-		nik_ces void parse_fasten(AST & toc)
+		nik_ces void parse_fasten(AST & toc, lexeme & l)
 		{
-		//	Application::identifier_entry(toc, l);
-		//	toc.fasten_options(toc, s);
+		//	toc.update_lookup();
+		//	toc.set_current_entry(l, Sign::fasten, progression.position());
 		}
 
 		template<typename AST>
-		nik_ces void parse_glide(AST & toc)
+		nik_ces void parse_glide(AST & toc, lexeme & l)
 		{
-		//	Application::identifier_entry(toc, l);
-		//	toc.glide_options(toc, s);
+		//	toc.update_lookup();
+		//	toc.set_current_entry(l, Sign::glide, progression.position());
 		}
 	};
 
@@ -665,9 +665,9 @@ namespace cctmp {
 		using t_action_type	= typename TTA::template signature<AST>;
 		using TAction		= typename T_generic_assembly_pdtt::TAction;
 
-		using LTA		= T_generic_assembly_lta;
-		using l_action_type	= typename LTA::template signature<AST>;
-		using LAction		= typename T_generic_assembly_pdtt::LAction;
+		using RTA		= T_generic_assembly_rta;
+		using r_action_type	= typename RTA::template signature<AST>;
+		using RAction		= typename T_generic_assembly_pdtt::RAction;
 
 		using STA		= T_generic_assembly_sta;
 		using s_action_type	= typename STA::template signature<AST, Stack>;
@@ -675,10 +675,10 @@ namespace cctmp {
 
 		n_action_type n_array[NAction::dimension];
 		t_action_type t_array[TAction::dimension];
-		l_action_type l_array[LAction::dimension];
+		r_action_type r_array[RAction::dimension];
 		s_action_type s_array[SAction::dimension];
 
-		nik_ce T_generic_assembly_ta() : n_array{}, t_array{}, l_array{}, s_array{}
+		nik_ce T_generic_assembly_ta() : n_array{}, t_array{}, r_array{}, s_array{}
 		{
 			n_array[ NAction::nop                ] = NTA::template nop                <AST>;
 			n_array[ NAction::new_definition     ] = NTA::template new_definition     <AST>;
@@ -701,14 +701,14 @@ namespace cctmp {
 			t_array[ TAction::resolve_quote      ] = TTA::template resolve_quote      <AST>;
 			t_array[ TAction::resolve_accept     ] = TTA::template resolve_accept     <AST>;
 
-			l_array[ LAction::parse_repeat       ] = LTA::template parse_repeat       <AST>;
-			l_array[ LAction::parse_map          ] = LTA::template parse_map          <AST>;
-			l_array[ LAction::parse_fold         ] = LTA::template parse_fold         <AST>;
-			l_array[ LAction::parse_find_first   ] = LTA::template parse_find_first   <AST>;
-			l_array[ LAction::parse_find_all     ] = LTA::template parse_find_all     <AST>;
-			l_array[ LAction::parse_zip          ] = LTA::template parse_zip          <AST>;
-			l_array[ LAction::parse_fasten       ] = LTA::template parse_fasten       <AST>;
-			l_array[ LAction::parse_glide        ] = LTA::template parse_glide        <AST>;
+			r_array[ RAction::parse_repeat       ] = RTA::template parse_repeat       <AST>;
+			r_array[ RAction::parse_map          ] = RTA::template parse_map          <AST>;
+			r_array[ RAction::parse_fold         ] = RTA::template parse_fold         <AST>;
+			r_array[ RAction::parse_find_first   ] = RTA::template parse_find_first   <AST>;
+			r_array[ RAction::parse_find_all     ] = RTA::template parse_find_all     <AST>;
+			r_array[ RAction::parse_zip          ] = RTA::template parse_zip          <AST>;
+			r_array[ RAction::parse_fasten       ] = RTA::template parse_fasten       <AST>;
+			r_array[ RAction::parse_glide        ] = RTA::template parse_glide        <AST>;
 
 			s_array[ SAction::instr_label        ] = STA::template instr_label        <AST, Stack>;
 			s_array[ SAction::instr_return       ] = STA::template instr_return       <AST, Stack>;
@@ -716,7 +716,7 @@ namespace cctmp {
 
 		nik_ce const n_action_type nonterminal_action(gcindex_type pos) const { return n_array[pos]; }
 		nik_ce const t_action_type    terminal_action(gcindex_type pos) const { return t_array[pos]; }
-		nik_ce const l_action_type      letter_action(gcindex_type pos) const { return l_array[pos]; }
+		nik_ce const r_action_type      string_action(gcindex_type pos) const { return r_array[pos]; }
 		nik_ce const s_action_type       stack_action(gcindex_type pos) const { return s_array[pos]; }
 	};
 

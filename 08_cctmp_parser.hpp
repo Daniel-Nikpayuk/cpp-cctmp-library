@@ -47,7 +47,7 @@ namespace cctmp {
 
 // permission:
 
-	struct Permission { enum : gkey_type { none = 0, letter , stack , dimension }; };
+	struct Permission { enum : gkey_type { none = 0, string , stack , dimension }; };
 
 /***********************************************************************************************************************/
 
@@ -265,11 +265,11 @@ namespace cctmp {
 			}
 		}
 
-		nik_ce void letter_action(caction_type n)
+		nik_ce void string_action(caction_type n)
 		{
-			auto update = act.letter_action(n);
+			auto update = act.string_action(n);
 
-			update(tree); // needs to be updated.
+			update(tree, word);
 		}
 
 		nik_ce void stack_action(caction_type n)
@@ -284,7 +284,7 @@ namespace cctmp {
 			switch (production->tenet.note)
 			{
 				case Permission::none   : { nonterminal_action(production->tenet.name); break; }
-				case Permission::letter : {      letter_action(production->tenet.name); break; }
+				case Permission::string : {      string_action(production->tenet.name); break; }
 				case Permission::stack  : {       stack_action(production->tenet.name); break; }
 			}
 		}
@@ -294,7 +294,7 @@ namespace cctmp {
 			switch (tenet->note)
 			{
 				case Permission::none   : { terminal_action(tenet->name); break; }
-				case Permission::letter : {   letter_action(tenet->name); break; }
+				case Permission::string : {   string_action(tenet->name); break; }
 				case Permission::stack  : {    stack_action(tenet->name); break; }
 			}
 		}
@@ -319,7 +319,7 @@ namespace cctmp {
 	{
 		using ArraySize	= T_store_U<_array_size_>;
 
-		struct Letter
+		struct String
 		{
 			struct Action
 			{
@@ -332,7 +332,7 @@ namespace cctmp {
 				};
 			};
 
-		}; using LAction = typename Letter::Action;
+		}; using RAction = typename String::Action;
 
 		struct Stack
 		{
@@ -467,14 +467,14 @@ namespace cctmp {
 			list_entry( 'l') = ttransition( TAction::resolve_label      );
 			list_entry( ';') = ttransition( TAction::resolve_statement  );
 			list_entry( 'q') = ttransition( TAction::resolve_quote      );
-			list_entry( '0') = ttransition( LAction::parse_repeat       ,  Permission::letter );
-			list_entry( '1') = ttransition( LAction::parse_map          ,  Permission::letter );
-			list_entry( '2') = ttransition( LAction::parse_fold         ,  Permission::letter );
-			list_entry( '3') = ttransition( LAction::parse_find_first   ,  Permission::letter );
-			list_entry( '4') = ttransition( LAction::parse_find_all     ,  Permission::letter );
-			list_entry( '5') = ttransition( LAction::parse_zip          ,  Permission::letter );
-			list_entry( '6') = ttransition( LAction::parse_fasten       ,  Permission::letter );
-			list_entry( '7') = ttransition( LAction::parse_glide        ,  Permission::letter );
+			list_entry( '0') = ttransition( RAction::parse_repeat       ,  Permission::string );
+			list_entry( '1') = ttransition( RAction::parse_map          ,  Permission::string );
+			list_entry( '2') = ttransition( RAction::parse_fold         ,  Permission::string );
+			list_entry( '3') = ttransition( RAction::parse_find_first   ,  Permission::string );
+			list_entry( '4') = ttransition( RAction::parse_find_all     ,  Permission::string );
+			list_entry( '5') = ttransition( RAction::parse_zip          ,  Permission::string );
+			list_entry( '6') = ttransition( RAction::parse_fasten       ,  Permission::string );
+			list_entry( '7') = ttransition( RAction::parse_glide        ,  Permission::string );
 			list_entry('\0') = ttransition( TAction::resolve_accept     );
 		}
 
@@ -634,11 +634,11 @@ namespace cctmp {
 		context_type kind;
 		bool has_void; // currently allows discard.
 		bool has_paste;
-		bool has_env;
+		bool has_lookup;
 		bool has_arg_op;
 
 		nik_ce Line() : kind{}, array{}, start{array}, entry{array},
-				has_void{}, has_paste{}, has_env{}, has_arg_op{} { }
+				has_void{}, has_paste{}, has_lookup{}, has_arg_op{} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return entry; }
@@ -828,12 +828,12 @@ namespace cctmp {
 
 			nik_ce auto has_void   () const { return page.line->has_void; }
 			nik_ce auto has_paste  () const { return page.line->has_paste; }
-			nik_ce auto has_env    () const { return page.line->has_env; }
+			nik_ce auto has_lookup () const { return page.line->has_lookup; }
 			nik_ce auto has_arg_op () const { return page.line->has_arg_op; }
 
 			nik_ce void set_void   () { page.line->has_void   = true  ; }
 			nik_ce void set_paste  () { page.line->has_paste  = true  ; }
-			nik_ce void set_env    () { page.line->has_env    = true  ; }
+			nik_ce void set_lookup () { page.line->has_lookup = true  ; }
 			nik_ce void set_arg_op () { page.line->has_arg_op = true  ; }
 
 		// increment:
@@ -862,8 +862,8 @@ namespace cctmp {
 
 			nik_ce void update_lookup()
 			{
-				if (!page.line->has_env)
-					{ set_env(); bookmark_lookup(); increment_lookup(); }
+				if (!page.line->has_lookup)
+					{ set_lookup(); bookmark_lookup(); increment_lookup(); }
 			}
 
 			nik_ce void update_copy_paste()
