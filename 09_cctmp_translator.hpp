@@ -219,6 +219,21 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// (context) void:
+
+	struct T_generic_assembly_tta_context_void
+	{
+		template<typename AST>
+		nik_ces void set(AST & toc, clexeme & l)
+			{ toc.set_void(); }
+
+		template<typename AST>
+		nik_ces void increment(AST & toc, clexeme & l)
+			{ toc.increment_entry(); }
+	};
+
+/***********************************************************************************************************************/
+
 // (context) re_turn:
 
 	struct T_generic_assembly_tta_context_return
@@ -401,6 +416,7 @@ namespace cctmp {
 
 		using Definition	= T_generic_assembly_tta_context_define;
 		using Application	= T_generic_assembly_tta_context_apply;
+		using Void		= T_generic_assembly_tta_context_void;
 		using Return		= T_generic_assembly_tta_context_return;
 		using Test		= T_generic_assembly_tta_context_test;
 		using Branch		= T_generic_assembly_tta_context_branch;
@@ -430,19 +446,15 @@ namespace cctmp {
 			}
 
 			template<typename AST>
-			nik_ces void resolve_mutable(AST & toc, clexeme & l)
-				{ toc.set_side(); }
+			nik_ces void resolve_void(AST & toc, clexeme & l)
+			{
+				Void::set(toc, l);
+				Void::increment(toc, l);
+			}
 
 			template<typename AST>
-			nik_ces void resolve_copy(AST & toc, clexeme & l)
-			{
-				switch (toc.kind())
-				{
-					case Context::apply : { Application::copy_entry (toc, l); break; }
-				}
-
-				toc.increment_entry();
-			}
+			nik_ces void resolve_return(AST & toc, clexeme & l)
+				{ toc.set_kind(Context::re_turn); }
 
 			template<typename AST>
 			nik_ces void resolve_paste(AST & toc, clexeme & l)
@@ -458,20 +470,19 @@ namespace cctmp {
 			}
 
 			template<typename AST>
-			nik_ces void resolve_return(AST & toc, clexeme & l)
-				{ toc.set_kind(Context::re_turn); }
+			nik_ces void resolve_copy(AST & toc, clexeme & l)
+			{
+				switch (toc.kind())
+				{
+					case Context::apply : { Application::copy_entry (toc, l); break; }
+				}
 
-			template<typename AST>
-			nik_ces void resolve_quote(AST & toc, clexeme & l)
-				{ }
-
-			template<typename AST>
-			nik_ces void resolve_label(AST & toc, clexeme & l)
-			{ 
-				Label::set(toc, l);
-				Label::bookmark(toc, l);
-				Label::increment(toc, l);
+				toc.increment_entry();
 			}
+
+			template<typename AST>
+			nik_ces void resolve_mutable(AST & toc, clexeme & l)
+				{ toc.set_side(); }
 
 			template<typename AST>
 			nik_ces void resolve_test(AST & toc, clexeme & l)
@@ -497,6 +508,14 @@ namespace cctmp {
 			}
 
 			template<typename AST>
+			nik_ces void resolve_label(AST & toc, clexeme & l)
+			{ 
+				Label::set(toc, l);
+				Label::bookmark(toc, l);
+				Label::increment(toc, l);
+			}
+
+			template<typename AST>
 			nik_ces void resolve_statement(AST & toc, clexeme & l)
 			{
 				switch (toc.kind())
@@ -509,6 +528,10 @@ namespace cctmp {
 				toc.increment_line();
 				toc.update_copy_paste();
 			}
+
+			template<typename AST>
+			nik_ces void resolve_quote(AST & toc, clexeme & l)
+				{ }
 
 			template<typename AST>
 			nik_ces void resolve_accept(AST & toc, clexeme & l)
@@ -665,24 +688,17 @@ namespace cctmp {
 
 			t_array[ TAction::nop                ] = TTA::template nop                <AST>;
 			t_array[ TAction::resolve_identifier ] = TTA::template resolve_identifier <AST>;
-			t_array[ TAction::resolve_mutable    ] = TTA::template resolve_mutable    <AST>;
+			t_array[ TAction::resolve_void       ] = TTA::template resolve_void       <AST>;
+			t_array[ TAction::resolve_return     ] = TTA::template resolve_return     <AST>;
 			t_array[ TAction::resolve_paste      ] = TTA::template resolve_paste      <AST>;
 			t_array[ TAction::resolve_copy       ] = TTA::template resolve_copy       <AST>;
+			t_array[ TAction::resolve_mutable    ] = TTA::template resolve_mutable    <AST>;
 			t_array[ TAction::resolve_test       ] = TTA::template resolve_test       <AST>;
 			t_array[ TAction::resolve_branch     ] = TTA::template resolve_branch     <AST>;
 			t_array[ TAction::resolve_goto       ] = TTA::template resolve_goto       <AST>;
-			t_array[ TAction::resolve_return     ] = TTA::template resolve_return     <AST>;
 			t_array[ TAction::resolve_label      ] = TTA::template resolve_label      <AST>;
 			t_array[ TAction::resolve_statement  ] = TTA::template resolve_statement  <AST>;
 			t_array[ TAction::resolve_quote      ] = TTA::template resolve_quote      <AST>;
-		//	t_array[ TAction::resolve_repeat     ] = TTA::template resolve_repeat     <AST>;
-		//	t_array[ TAction::resolve_map        ] = TTA::template resolve_map        <AST>;
-		//	t_array[ TAction::resolve_fold       ] = TTA::template resolve_fold       <AST>;
-		//	t_array[ TAction::resolve_find_first ] = TTA::template resolve_find_first <AST>;
-		//	t_array[ TAction::resolve_find_all   ] = TTA::template resolve_find_all   <AST>;
-		//	t_array[ TAction::resolve_zip        ] = TTA::template resolve_zip        <AST>;
-		//	t_array[ TAction::resolve_fasten     ] = TTA::template resolve_fasten     <AST>;
-		//	t_array[ TAction::resolve_glide      ] = TTA::template resolve_glide      <AST>;
 			t_array[ TAction::resolve_accept     ] = TTA::template resolve_accept     <AST>;
 
 			l_array[ LAction::parse_repeat       ] = LTA::template parse_repeat       <AST>;

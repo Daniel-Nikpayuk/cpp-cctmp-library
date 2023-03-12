@@ -43,6 +43,7 @@ namespace cctmp {
 		nik_ces auto length		= ( 1 * src.goto_size    )
 						+ ( 1 * src.branch_size  )
 						+ ( 2 * src.test_size    )
+						+ ( 2 * src.void_size    )
 						+ ( 2 * src.copy_size    )
 						+ ( 3 * src.return_size  ) // upper bound: (1 * size <= 3 * size)
 						+ ( 4 * src.replace_size );

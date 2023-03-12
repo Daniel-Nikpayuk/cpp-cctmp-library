@@ -375,20 +375,19 @@ namespace cctmp {
 				enum : action_type
 				{
 					nop = 0,
-					resolve_identifier , resolve_paste     , resolve_copy    ,
+					resolve_identifier , resolve_void      , resolve_return  ,
+					resolve_paste      , resolve_copy      , resolve_mutable ,
 					resolve_test       , resolve_branch    , resolve_goto    ,
-					resolve_return     , resolve_label     , resolve_mutable ,
-					resolve_quote      , resolve_statement ,
-				//	resolve_repeat     , resolve_map       , resolve_fold    ,
-				//	resolve_find_first , resolve_find_all  , resolve_zip     ,
-				//	resolve_fasten     , resolve_glide     ,
+					resolve_label      , resolve_statement , resolve_quote   ,
+					resolve_repeat     , resolve_map       , resolve_fold    ,
+					resolve_find_first , resolve_find_all  , resolve_zip     ,
+					resolve_fasten     , resolve_glide     ,
 					resolve_accept     ,
 					dimension
 				};
 			};
 
-			nik_ces gchar_type symbol[] = ";i!q=._lgtbr";
-		//	nik_ces gchar_type symbol[] = ";i!q=._lgvtbr01234567";
+			nik_ces gchar_type symbol[] = ";i!q=._lgvtbr01234567";
 
 			nik_ces auto size   = ArraySize::template result<>(symbol); // recognizes '\0'.
 			nik_ces auto finish = symbol + size;
@@ -418,19 +417,21 @@ namespace cctmp {
 			table_entry('E',  '!') = ntransition( "IJgi;"                              );
 			table_entry('E',  '.') = ntransition( "IJgi;"                              );
 			table_entry('E',  't') = ntransition( "IJgi;"                              );
+			table_entry('E',  'v') = ntransition( "IJgi;"                              );
 			table_entry('E',  'r') = ntransition( "rM;"                                );
 			table_entry('J',  'i') = ntransition( "IJ"                                 );
 			table_entry('J',  '!') = ntransition( "IJ"                                 );
 			table_entry('J',  '.') = ntransition( "IJ"                                 );
 			table_entry('J',  't') = ntransition( "IJ"                                 );
+			table_entry('J',  'v') = ntransition( "IJ"                                 );
 			table_entry('J',  'g') = ntransition( ""                                   );
-			table_entry('J',  'l') = ntransition( ""        , SAction::instr_label      , Permission::stack );
-			table_entry('J',  'r') = ntransition( ""        , SAction::instr_return     , Permission::stack );
+			table_entry('J',  'l') = ntransition( ""        , SAction::instr_label     ,  Permission::stack );
+			table_entry('J',  'r') = ntransition( ""        , SAction::instr_return    ,  Permission::stack );
 			table_entry('I',  'i') = ntransition( "T=OV;"   , NAction::new_application );
 			table_entry('I',  '!') = ntransition( "T=OV;"   , NAction::new_application );
 			table_entry('I',  '.') = ntransition( "T=OV;"   , NAction::new_application );
-		//	table_entry('I',  'v') = ntransition( "vOV;"    , NAction::new_application );
 			table_entry('I',  't') = ntransition( "tOV;bi;" , NAction::new_conditional );
+			table_entry('I',  'v') = ntransition( "vOV;"    , NAction::new_application );
 			table_entry('V',  'i') = ntransition( "MV"                                 );
 			table_entry('V',  '!') = ntransition( "MV"                                 );
 			table_entry('V',  'q') = ntransition( "MV"                                 );
@@ -441,39 +442,39 @@ namespace cctmp {
 			table_entry('T',  '.') = ntransition( "."                                  );
 			table_entry('O',  'i') = ntransition( "i"                                  );
 			table_entry('O',  'q') = ntransition( "q"                                  );
-		//	table_entry('O',  '0') = ntransition( "0"                                  );
-		//	table_entry('O',  '1') = ntransition( "1"                                  );
-		//	table_entry('O',  '2') = ntransition( "2"                                  );
-		//	table_entry('O',  '3') = ntransition( "3"                                  );
-		//	table_entry('O',  '4') = ntransition( "4"                                  );
-		//	table_entry('O',  '5') = ntransition( "5"                                  );
-		//	table_entry('O',  '6') = ntransition( "6"                                  );
-		//	table_entry('O',  '7') = ntransition( "7"                                  );
+			table_entry('O',  '0') = ntransition( "0"                                  );
+			table_entry('O',  '1') = ntransition( "1"                                  );
+			table_entry('O',  '2') = ntransition( "2"                                  );
+			table_entry('O',  '3') = ntransition( "3"                                  );
+			table_entry('O',  '4') = ntransition( "4"                                  );
+			table_entry('O',  '5') = ntransition( "5"                                  );
+			table_entry('O',  '6') = ntransition( "6"                                  );
+			table_entry('O',  '7') = ntransition( "7"                                  );
 			table_entry('M',  'i') = ntransition( "i"                                  );
 			table_entry('M',  '!') = ntransition( "!i"                                 );
 			table_entry('M',  'q') = ntransition( "q"                                  );
 			table_entry('M',  '_') = ntransition( "_"                                  );
 
 			list_entry( 'i') = ttransition( TAction::resolve_identifier );
-			list_entry( '!') = ttransition( TAction::resolve_mutable    );
+			list_entry( 'v') = ttransition( TAction::resolve_void       );
+			list_entry( 'r') = ttransition( TAction::resolve_return     );
 			list_entry( '_') = ttransition( TAction::resolve_paste      );
 			list_entry( '.') = ttransition( TAction::resolve_copy       );
-		//	list_entry( 'v') = ttransition( TAction::resolve_void       );
+			list_entry( '!') = ttransition( TAction::resolve_mutable    );
 			list_entry( 't') = ttransition( TAction::resolve_test       );
 			list_entry( 'b') = ttransition( TAction::resolve_branch     );
 			list_entry( 'g') = ttransition( TAction::resolve_goto       );
-			list_entry( 'r') = ttransition( TAction::resolve_return     );
 			list_entry( 'l') = ttransition( TAction::resolve_label      );
 			list_entry( ';') = ttransition( TAction::resolve_statement  );
 			list_entry( 'q') = ttransition( TAction::resolve_quote      );
-		//	list_entry( '0') = ttransition( LAction::parse_repeat        , Permission::letter );
-		//	list_entry( '1') = ttransition( LAction::parse_map           , Permission::letter );
-		//	list_entry( '2') = ttransition( LAction::parse_fold          , Permission::letter );
-		//	list_entry( '3') = ttransition( LAction::parse_find_first    , Permission::letter );
-		//	list_entry( '4') = ttransition( LAction::parse_find_all      , Permission::letter );
-		//	list_entry( '5') = ttransition( LAction::parse_zip           , Permission::letter );
-		//	list_entry( '6') = ttransition( LAction::parse_fasten        , Permission::letter );
-		//	list_entry( '7') = ttransition( LAction::parse_glide         , Permission::letter );
+			list_entry( '0') = ttransition( LAction::parse_repeat       ,  Permission::letter );
+			list_entry( '1') = ttransition( LAction::parse_map          ,  Permission::letter );
+			list_entry( '2') = ttransition( LAction::parse_fold         ,  Permission::letter );
+			list_entry( '3') = ttransition( LAction::parse_find_first   ,  Permission::letter );
+			list_entry( '4') = ttransition( LAction::parse_find_all     ,  Permission::letter );
+			list_entry( '5') = ttransition( LAction::parse_zip          ,  Permission::letter );
+			list_entry( '6') = ttransition( LAction::parse_fasten       ,  Permission::letter );
+			list_entry( '7') = ttransition( LAction::parse_glide        ,  Permission::letter );
 			list_entry('\0') = ttransition( TAction::resolve_accept     );
 		}
 
@@ -579,7 +580,7 @@ namespace cctmp {
 			enum : sign_type
 			{
 				na = 0,
-				carg , marg, var , copy , paste , recurse , label , jump , lookup ,
+				carg , marg , var , copy , paste , recurse , label , jump , lookup ,
 				dimension
 			};
 
@@ -782,8 +783,8 @@ namespace cctmp {
 
 		// local:
 
-			nik_ce auto has_side() const { return page.has_local_side; }
-			nik_ce auto has_copy() const { return page.has_local_copy; }
+			nik_ce auto has_side   () const { return page.has_local_side ; }
+			nik_ce auto has_copy   () const { return page.has_local_copy ; }
 
 			nik_ce void set_side   () { page.has_local_side = true  ; }
 			nik_ce void unset_side () { page.has_local_side = false ; }

@@ -730,7 +730,7 @@ namespace cctmp {
 
 		gindex_type pad_entry_size  , entry_size   , line_size   , stack_size  ;
 		gindex_type dependency_size , replace_size , graph_size  ;
-		gindex_type identifier_size , mutable_size , quote_size  ; // , void_size ;
+		gindex_type identifier_size , mutable_size , quote_size  , void_size   ;
 		gindex_type assign_size     , copy_size    , paste_size  , return_size ;
 		gindex_type label_size      , test_size    , branch_size , goto_size   ;
 
@@ -751,7 +751,7 @@ namespace cctmp {
 			identifier_size  {            },
 			mutable_size     {            },
 			quote_size       {            },
-		//	void_size        {            },
+			void_size        {            },
 
 			assign_size      {            },
 			copy_size        {            },
@@ -790,7 +790,7 @@ namespace cctmp {
 						case '=': {                    ++assign_size     ; break; }
 						case 'r': {                    ++return_size     ; break; }
 						case 'l': {                    ++label_size      ; break; }
-					//	case 'v': { ++cur_entry_size ; ++void_size       ; break; }
+						case 'v': { ++cur_entry_size ; ++void_size       ; break; }
 						case 't': { ++cur_entry_size ; ++test_size       ; break; }
 						case 'b': {                    ++branch_size     ; break; }
 						case 'g': {                    ++goto_size       ; break; }
@@ -800,10 +800,10 @@ namespace cctmp {
 					k = l.finish;
 				}
 
-				dependency_size = goto_size       + branch_size;
-				graph_size      = dependency_size + label_size;
-				replace_size    = assign_size     - copy_size;
-				pad_entry_size  = entry_size      + replace_size;
+				dependency_size = goto_size       + branch_size  ;
+				graph_size      = dependency_size + label_size   ;
+				replace_size    = assign_size     - copy_size    ;
+				pad_entry_size  = entry_size      + replace_size ;
 			}
 	};
 

@@ -41,7 +41,7 @@
 #include"documentation/01_case_studies.hpp"
 #include"documentation/03_chord_machines.hpp"
 
-#include"testing/metapiler_printer.hpp"
+//#include"testing/metapiler_printer.hpp"
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -92,13 +92,21 @@
 		static_assert(fall_val0 == 42);
 		static_assert(fall_val1 == 42);
 
+	// void effects:
+
+		int vf_n = 5, *vf_ptr = &vf_n;
+
+		void_effects_v0(vf_ptr);
+
+		printf("%d\n", *vf_ptr); // prints: 3
+
 	// side effects:
 
-		int n = 5, *ptr = &n;
+		int sf_n = 5, *sf_ptr = &sf_n;
 
-		side_effects_v0(ptr);
+		side_effects_v0(sf_ptr);
 
-		printf("%d\n", *ptr);	// prints: 3
+		printf("%d\n", *sf_ptr); // prints: 3
 
 	// map:
 
