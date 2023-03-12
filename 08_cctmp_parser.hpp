@@ -580,7 +580,7 @@ namespace cctmp {
 			enum : sign_type
 			{
 				na = 0,
-				carg , marg , var , copy , paste , recurse , label , jump , lookup ,
+				carg , marg , var , copy , paste , recurse , label , jump , env ,
 				dimension
 			};
 
@@ -592,7 +592,7 @@ namespace cctmp {
 			nik_ces bool is_recurse (sign_type s) { return (s == recurse); }
 			nik_ces bool is_label   (sign_type s) { return (s == label  ); }
 			nik_ces bool is_jump    (sign_type s) { return (s == jump   ); }
-			nik_ces bool is_lookup  (sign_type s) { return (s == lookup ); }
+			nik_ces bool is_env     (sign_type s) { return (s == env    ); }
 		};
 
 /***********************************************************************************************************************/
@@ -634,11 +634,11 @@ namespace cctmp {
 		context_type kind;
 		bool has_void; // currently allows discard.
 		bool has_paste;
-		bool has_lookup;
+		bool has_env;
 		bool has_arg_op;
 
 		nik_ce Line() : kind{}, array{}, start{array}, entry{array},
-				has_void{}, has_paste{}, has_lookup{}, has_arg_op{} { }
+				has_void{}, has_paste{}, has_env{}, has_arg_op{} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return entry; }
@@ -828,12 +828,12 @@ namespace cctmp {
 
 			nik_ce auto has_void   () const { return page.line->has_void; }
 			nik_ce auto has_paste  () const { return page.line->has_paste; }
-			nik_ce auto has_lookup () const { return page.line->has_lookup; }
+			nik_ce auto has_env    () const { return page.line->has_env; }
 			nik_ce auto has_arg_op () const { return page.line->has_arg_op; }
 
 			nik_ce void set_void   () { page.line->has_void   = true  ; }
 			nik_ce void set_paste  () { page.line->has_paste  = true  ; }
-			nik_ce void set_lookup () { page.line->has_lookup = true  ; }
+			nik_ce void set_env    () { page.line->has_env    = true  ; }
 			nik_ce void set_arg_op () { page.line->has_arg_op = true  ; }
 
 		// increment:
@@ -862,8 +862,8 @@ namespace cctmp {
 
 			nik_ce void update_lookup()
 			{
-				if (!page.line->has_lookup)
-					{ set_lookup(); bookmark_lookup(); increment_lookup(); }
+				if (!page.line->has_env)
+					{ set_env(); bookmark_lookup(); increment_lookup(); }
 			}
 
 			nik_ce void update_copy_paste()

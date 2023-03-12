@@ -97,12 +97,12 @@ namespace cctmp {
 
 // application assignment :
 // argument assignment    :
-// lookup assignment      :
+// environment assignment :
 // copy/paste assignment  :
 // variable assignment    :
 
-// operator lookup        :
-// operand lookup         :
+// environment operator   :
+// environment operand    :
 
 // semidynamic typing     :
 
@@ -189,7 +189,7 @@ namespace cctmp {
 	template<typename T>
 	constexpr auto x_to5_plus1_v0(T x)
 	{
-		constexpr auto e0 = env<constant_machine_lookup>;
+		constexpr auto e0 = env<constant_machine_frame>;
 
 		return generic_assembly_apply<_x_to5_plus1_v0, e0, T>(x, T(0));
 	}
@@ -247,7 +247,7 @@ namespace cctmp {
 	constexpr auto semidynamic_typing_v0(const complex_number & c, int n)
 	{
 		constexpr auto c1 = complex_number(1, 0);
-		constexpr auto e0 = env<constant_machine_lookup>;
+		constexpr auto e0 = env<constant_machine_frame>;
 
 		return generic_assembly_apply<_semidynamic_typing_v0, e0, int>(c, c1, n);
 	}
@@ -283,7 +283,7 @@ namespace cctmp {
 	template<typename T>
 	constexpr auto factorial_v0(T v)
 	{
-		constexpr auto e0 = env<constant_machine_lookup>;
+		constexpr auto e0 = env<constant_machine_frame>;
 
 		return generic_assembly_apply<_factorial_v0, e0, T>(v);
 	}
@@ -395,7 +395,7 @@ namespace cctmp {
 	template<typename T>
 	constexpr auto factorial_v4(T v)
 	{
-		constexpr auto e0 = env<constant_machine_lookup>;
+		constexpr auto e0 = env<constant_machine_frame>;
 
 		return generic_assembly_apply<_factorial_v4, e0, T>(v);
 	}
@@ -435,7 +435,7 @@ namespace cctmp {
 	template<typename T>
 	constexpr auto fibonacci_v0(T v)
 	{
-		constexpr auto e0 = env<constant_machine_lookup>;
+		constexpr auto e0 = env<constant_machine_frame>;
 
 		return generic_assembly_apply<_fibonacci_v0, e0, T>(v, T(0), T(0));
 	}
@@ -470,7 +470,7 @@ namespace cctmp {
 	template<typename T>
 	constexpr auto fibonacci_v1(T v)
 	{
-		constexpr auto e0 = env<constant_machine_lookup>;
+		constexpr auto e0 = env<constant_machine_frame>;
 
 		return generic_assembly_apply<_fibonacci_v1, e0, T>(v);
 	}
@@ -513,7 +513,7 @@ namespace cctmp {
 
 	}; constexpr auto _ptr_side_dec_ = U_store_T<T_ptr_side_dec>;
 
-	constexpr auto fall_fact_2_ptr_lookup = cctmp::make_frame<fall_fact_2_frame<_ptr_side_dec_>>;
+	constexpr auto fall_fact_2_ptr_frame = cctmp::make_frame<fall_fact_2_frame<_ptr_side_dec_>>;
 
 	template<bool punct>
 	constexpr auto _fall_fact_2_v0()
@@ -547,7 +547,7 @@ namespace cctmp {
 	constexpr auto fall_fact_2_v0(T x)
 	{
 		constexpr auto src = _fall_fact_2_v0<punct>;
-		constexpr auto e0  = env<fall_fact_2_ptr_lookup>;
+		constexpr auto e0  = env<fall_fact_2_ptr_frame>;
 
 		return generic_assembly_apply<src, e0, T>(&x);
 	}
@@ -570,7 +570,7 @@ namespace cctmp {
 
 	}; constexpr auto _ref_side_dec_ = U_store_T<T_ref_side_dec>;
 
-	constexpr auto fall_fact_2_ref_lookup = cctmp::make_frame<fall_fact_2_frame<_ref_side_dec_>>;
+	constexpr auto fall_fact_2_ref_frame = cctmp::make_frame<fall_fact_2_frame<_ref_side_dec_>>;
 
 	template<bool punct>
 	constexpr auto _fall_fact_2_v1()
@@ -602,7 +602,7 @@ namespace cctmp {
 	constexpr auto fall_fact_2_v1(T x)
 	{
 		constexpr auto src = _fall_fact_2_v1<punct>;
-		constexpr auto e0  = env<fall_fact_2_ref_lookup>;
+		constexpr auto e0  = env<fall_fact_2_ref_frame>;
 
 		return generic_assembly_apply<src, e0, T, T&>(x);
 	}

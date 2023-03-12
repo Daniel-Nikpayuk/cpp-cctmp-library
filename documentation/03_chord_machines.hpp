@@ -74,7 +74,7 @@ namespace cctmp_chord {
 
 /***********************************************************************************************************************/
 
-// lookup:
+// frame:
 
 	template
 	<
@@ -84,7 +84,7 @@ namespace cctmp_chord {
 		auto out_next         = _increment_<> ,
 		auto post_mutate_func = _nop_
 	>
-	constexpr auto repeat_frame()
+	constexpr auto repeat_table()
 	{
 		return cctmp::table
 		(
@@ -99,7 +99,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto repeat_lookup = cctmp::make_frame<repeat_frame<Vs...>>;
+	constexpr auto repeat_frame = cctmp::make_frame<repeat_table<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -154,7 +154,7 @@ namespace cctmp_chord {
 
 /***********************************************************************************************************************/
 
-// lookup:
+// frame:
 
 	template
 	<
@@ -172,7 +172,7 @@ namespace cctmp_chord {
 		auto post_in_next     = _id_            ,
 		auto post_end_next    = _id_
 	>
-	constexpr auto map_frame()
+	constexpr auto map_table()
 	{
 		return cctmp::table
 		(
@@ -193,7 +193,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto map_lookup = cctmp::make_frame<map_frame<Vs...>>;
+	constexpr auto map_frame = cctmp::make_frame<map_table<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -242,7 +242,7 @@ namespace cctmp_chord {
 
 /***********************************************************************************************************************/
 
-// lookup:
+// frame:
 
 	template
 	<
@@ -253,7 +253,7 @@ namespace cctmp_chord {
 		auto in_next           = _increment_<> ,
 		auto post_combine_func = _first_
 	>
-	constexpr auto fold_frame()
+	constexpr auto fold_table()
 	{
 		return cctmp::table
 		(
@@ -268,7 +268,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto fold_lookup = cctmp::make_frame<fold_frame<Vs...>>;
+	constexpr auto fold_frame = cctmp::make_frame<fold_table<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -330,7 +330,7 @@ namespace cctmp_chord {
 
 /***********************************************************************************************************************/
 
-// lookup:
+// frame:
 
 	template
 	<
@@ -342,7 +342,7 @@ namespace cctmp_chord {
 		auto found_mutate_func = _appoint_         ,
 		auto found_out_next    = _increment_<>
 	>
-	constexpr auto find_first_frame()
+	constexpr auto find_first_table()
 	{
 		return cctmp::table
 		(
@@ -359,7 +359,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto find_first_lookup = cctmp::make_frame<find_first_frame<Vs...>>;
+	constexpr auto find_first_frame = cctmp::make_frame<find_first_table<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -427,7 +427,7 @@ namespace cctmp_chord {
 
 /***********************************************************************************************************************/
 
-// lookup:
+// frame:
 
 	template
 	<
@@ -443,7 +443,7 @@ namespace cctmp_chord {
 		auto postfound_mutate_func = _appoint_         ,
 		auto postfound_out_next    = _increment_<>
 	>
-	constexpr auto find_all_frame()
+	constexpr auto find_all_table()
 	{
 		return cctmp::table
 		(
@@ -463,7 +463,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto find_all_lookup = cctmp::make_frame<find_all_frame<Vs...>>;
+	constexpr auto find_all_frame = cctmp::make_frame<find_all_table<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -523,7 +523,7 @@ namespace cctmp_chord {
 
 /***********************************************************************************************************************/
 
-// lookup:
+// frame:
 
 	template
 	<
@@ -544,7 +544,7 @@ namespace cctmp_chord {
 		auto post_in2_next    = _id_          ,
 		auto post_end2_next   = _id_
 	>
-	constexpr auto zip_frame()
+	constexpr auto zip_table()
 	{
 		return cctmp::table
 		(
@@ -570,7 +570,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto zip_lookup = cctmp::make_frame<zip_frame<Vs...>>;
+	constexpr auto zip_frame = cctmp::make_frame<zip_table<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -636,7 +636,7 @@ namespace cctmp_chord {
 
 /***********************************************************************************************************************/
 
-// lookup:
+// frame:
 
 	template
 	<
@@ -661,7 +661,7 @@ namespace cctmp_chord {
 		auto post_in2_next     = _id_              ,
 		auto post_end2_next    = _id_
 	>
-	constexpr auto fasten_frame()
+	constexpr auto fasten_table()
 	{
 		return cctmp::table
 		(
@@ -691,7 +691,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto fasten_lookup = cctmp::make_frame<fasten_frame<Vs...>>;
+	constexpr auto fasten_frame = cctmp::make_frame<fasten_table<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -752,7 +752,7 @@ namespace cctmp_chord {
 
 /***********************************************************************************************************************/
 
-// lookup:
+// frame:
 
 	template
 	<
@@ -770,7 +770,7 @@ namespace cctmp_chord {
 		auto post_in2_next     = _id_          ,
 		auto post_end2_next    = _id_
 	>
-	constexpr auto glide_frame()
+	constexpr auto glide_table()
 	{
 		return cctmp::table
 		(
@@ -793,7 +793,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto glide_lookup = cctmp::make_frame<glide_frame<Vs...>>;
+	constexpr auto glide_frame = cctmp::make_frame<glide_table<Vs...>>;
 
 /***********************************************************************************************************************/
 

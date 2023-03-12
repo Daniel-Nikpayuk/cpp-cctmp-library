@@ -204,7 +204,7 @@ namespace cctmp {
 
 // default:
 
-	nik_ce auto default_machine_frame()
+	nik_ce auto default_machine_table()
 	{
 		return table
 		(
@@ -265,13 +265,13 @@ namespace cctmp {
 		);
 	};
 
-	nik_ce auto default_machine_lookup = make_frame<default_machine_frame>;
+	nik_ce auto default_machine_frame = make_frame<default_machine_table>;
 
 /***********************************************************************************************************************/
 
 // constant:
 
-	nik_ce auto constant_machine_frame()
+	nik_ce auto constant_machine_table()
 	{
 		return table
 		(
@@ -291,7 +291,7 @@ namespace cctmp {
 		);
 	};
 
-	nik_ce auto constant_machine_lookup = make_frame<constant_machine_frame>;
+	nik_ce auto constant_machine_frame = make_frame<constant_machine_table>;
 
 /***********************************************************************************************************************/
 
@@ -351,7 +351,7 @@ namespace cctmp {
 	template<auto SourceCallable, auto Env = U_null_Vs>
 	struct T_generic_assembly_metapiler
 	{
-		nik_ces auto env	= eval<_push_, H_id, Env, default_machine_lookup>;
+		nik_ces auto env	= eval<_push_, H_id, Env, default_machine_frame>;
 		nik_ces auto target	= T_generic_assembly_targeter<SourceCallable>::value;
 		nik_ces auto toc	= target.toc;
 
@@ -423,7 +423,7 @@ namespace cctmp {
 				nik_ce auto sign = toc.lookup_entry_sign(n, m);
 
 				if nik_ce      (Sign::is_recurse(sign)) return that_f;
-				else if nik_ce (Sign::is_lookup (sign)) return resolve<n, m>(env);
+				else if nik_ce (Sign::is_env    (sign)) return resolve<n, m>(env);
 				else                                    return toc.lookup_entry_index(n, m);
 			}
 

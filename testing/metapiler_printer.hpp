@@ -192,7 +192,7 @@ namespace cctmp {
 					case Sign::recurse   : { str = "recurse"; sub = 7; break; }
 					case Sign::label     : { str = "label"  ; sub = 5; break; }
 					case Sign::jump      : { str = "jump"   ; sub = 4; break; }
-					case Sign::lookup    : { str = "lookup" ; sub = 6; break; }
+					case Sign::env       : { str = "env"    ; sub = 3; break; }
 					case Sign::dimension : { str = "dim"    ; sub = 3; break; }
 				}
 
@@ -215,9 +215,9 @@ namespace cctmp {
 			template<typename LineType>
 			void print_line(const LineType & line, gckey_type spacing)
 			{
-				auto str0 = line.has_lookup ? "lookup" : "      ";
-				auto str1 = line.has_paste  ? "paste"  :  "     ";
-				auto str2 = line.has_void   ? "void"   :   "    ";
+				auto str0 = line.has_env   ? "env"   : "   "  ;
+				auto str1 = line.has_paste ? "paste" : "     ";
+				auto str2 = line.has_void  ? "void"  : "    " ;
 
 				printf("|%s|%s|%s| ", str0, str1, str2);
 

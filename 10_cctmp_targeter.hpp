@@ -125,7 +125,7 @@ namespace cctmp {
 
 			nik_ce void add_test_instr(cline_type & l)
 			{
-				if (l.has_lookup) add_lookup();
+				if (l.has_env) add_lookup();
 
 				add_instr(MN::select, MT::pair, Mark::value);
 				add_instr(call_name(l), MT::id);
@@ -155,7 +155,7 @@ namespace cctmp {
 
 			nik_ce void add_apply_instr(cline_type & l)
 			{
-				if (l.has_lookup) add_lookup();
+				if (l.has_env) add_lookup();
 				if (!l.has_arg_op) add_instr(MN::select, MT::pair, Mark::value);
 
 				if (l.has_arg_op) add_arg_op_instr(l);
@@ -191,7 +191,7 @@ namespace cctmp {
 				auto sign = first_sign(l);
 
 				if (Sign::is_carg(sign)) add_get_arg_instr(l, first_index(l));
-				else if (Sign::is_lookup(sign)) add_get_lookup_instr(l);
+				else if (Sign::is_env(sign)) add_get_lookup_instr(l);
 
 				add_instr(MN::first , MT::id);
 			}

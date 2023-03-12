@@ -111,7 +111,7 @@
 	// map:
 
 		constexpr auto _sq_ = arg_compose<_multiply_, _arg_at_<0>, _arg_at_<0>>;
-		constexpr auto map  = cctmp_chord::_map_<env<cctmp_chord::map_lookup<_sq_>>>;
+		constexpr auto map  = cctmp_chord::_map_<env<cctmp_chord::map_frame<_sq_>>>;
 
 		int x[10];
 

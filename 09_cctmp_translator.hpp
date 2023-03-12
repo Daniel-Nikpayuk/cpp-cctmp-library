@@ -123,10 +123,10 @@ namespace cctmp {
 			}
 
 			template<typename AST>
-			nik_ces void identifier_lookup(AST & toc, clexeme & l)
+			nik_ces void identifier_env(AST & toc, clexeme & l)
 			{
 				auto j = toc.match_name(l.start, l.finish);
-				auto s = j ? Sign::recurse : Sign::lookup;
+				auto s = j ? Sign::recurse : Sign::env;
 
 				toc.update_lookup();
 				toc.set_current_entry(l, s);
@@ -137,7 +137,7 @@ namespace cctmp {
 			{
 				auto k = toc.match_arguments(l.start, l.finish);
 				if (toc.is_arg_match(k)) identifier_arg(toc, l, k->index);
-				else identifier_lookup(toc, l);
+				else identifier_env(toc, l);
 			}
 
 		// copy:
@@ -194,7 +194,7 @@ namespace cctmp {
 
 				if (Sign::is_carg(sign)) statement_first_index(toc);
 				if (Sign::is_marg(sign)) statement_first_void(toc);
-				else if (Sign::is_lookup(sign)) statement_first_variable(toc);
+				else if (Sign::is_env(sign)) statement_first_variable(toc);
 			}
 
 			template<typename AST>
@@ -247,8 +247,8 @@ namespace cctmp {
 				if (toc.is_arg_match(k)) toc.set_current_entry(l, Sign::carg, k->index);
 				else
 				{
-					toc.update_lookup(); // can assume at most one lookup.
-					toc.set_current_entry(l, Sign::lookup);
+					toc.update_lookup(); // can assume at most one env.
+					toc.set_current_entry(l, Sign::env);
 				}
 			}
 
