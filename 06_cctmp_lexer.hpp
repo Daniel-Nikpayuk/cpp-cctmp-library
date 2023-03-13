@@ -709,42 +709,31 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// source:
+// scanner:
 
-	template<typename CharType, auto Size>
-	struct T_generic_assembly_source
+/***********************************************************************************************************************/
+
+// analyzer:
+
+	struct T_generic_assembly_analyzer
 	{
-		using T_lexer			= T_generic_assembly_lexer;
-
-		using char_type			= CharType;
-		using cchar_type		= char_type const;
-		using string_type		= cchar_type*;
-		using cstring_type		= string_type const;
-		using size_type			= decltype(Size);
-
-		nik_ces size_type length	= Size - 1;
-
-		cstring_type string;
-		cstring_type finish;
+		using T_lexer = T_generic_assembly_lexer;
 
 		// how many of these are actually needed?
 
-		gindex_type pad_entry_size  , entry_size   , line_size   , stack_size  ;
+		gindex_type pad_entry_size  , entry_size   , line_size   ;
 		gindex_type dependency_size , replace_size , graph_size  ;
 		gindex_type identifier_size , mutable_size , quote_size  , void_size   ;
 		gindex_type assign_size     , copy_size    , paste_size  , return_size ;
 		gindex_type label_size      , test_size    , branch_size , goto_size   ;
 
-		nik_ce T_generic_assembly_source(const CharType (&s)[Size]) :
-
-			string           { s          },
-			finish           { s + length },
+		nik_ce T_generic_assembly_analyzer(gstring_type b, gstring_type e) :
 
 			pad_entry_size   {            },
 			entry_size       {            },
 			line_size        {            },
-			stack_size       {            },
 
 			dependency_size  {            },
 			replace_size     {            },
@@ -770,11 +759,9 @@ namespace cctmp {
 
 				lexeme l;
 
-				auto k = string;
-
-				while (k != finish)
+				while (b != e)
 				{
-					T_lexer::lex(l, k, finish);
+					T_lexer::lex(l, b, e);
 
 					switch (l.token)
 					{
@@ -800,8 +787,7 @@ namespace cctmp {
 						case 'g': {                    ++goto_size       ; break; }
 					}
 
-					++stack_size;
-					k = l.finish;
+					b = l.finish;
 				}
 
 				dependency_size = goto_size       + branch_size  ;
@@ -809,6 +795,17 @@ namespace cctmp {
 				replace_size    = assign_size     - copy_size    ;
 				pad_entry_size  = entry_size      + replace_size ;
 			}
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<auto static_source>
+	struct T_generic_assembly_scanner
+	{
+		nik_ces auto src   = T_store_U<static_source>::value;
+		nik_ces auto value = T_generic_assembly_analyzer(src.begin(), src.end() - 1);
 	};
 
 /***********************************************************************************************************************/

@@ -157,17 +157,22 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-	template<auto SourceCallable>
+	template<auto callable_source>
 	struct syntax_printer
 	{
 		private:
 
-			using T_parser = T_generic_assembly_parser<T_generic_assembly_translator>;
+			constexpr static auto static_src	= _static_object_<callable_source>;
+			constexpr static auto static_scanner	= U_store_T<T_generic_assembly_scanner<static_src>>;
+			constexpr static auto src		= T_store_U<static_scanner>::src;
 
-			constexpr static auto src    = T_parser::template parse<SourceCallable>;
-			constexpr static auto syntax = src.tree;
-			constexpr static auto page   = syntax.page;
-			constexpr static auto lookup = syntax.lookup;
+			using T_ast	= T_generic_assembly_ast<static_scanner>;
+			using T_parser	= T_generic_assembly_parser<T_ast, T_generic_assembly_translator>;
+
+			constexpr static auto parsed		= T_parser(src.begin(), src.end());
+			constexpr static auto syntax 		= parsed.value.tree;
+			constexpr static auto page   		= syntax.page;
+			constexpr static auto lookup 		= syntax.lookup;
 
 			void print_spacing(gckey_type size) { for (auto k = 0; k != size; ++k) printf(" "); }
 
@@ -215,9 +220,9 @@ namespace cctmp {
 			template<typename LineType>
 			void print_line(const LineType & line, gckey_type spacing)
 			{
-				auto str0 = line.has_env   ? "env"   : "   "  ;
-				auto str1 = line.has_paste ? "paste" : "     ";
-				auto str2 = line.has_void  ? "void"  : "    " ;
+				auto str0 = line.has_lookup ? "lookup": "      ";
+				auto str1 = line.has_paste  ? "paste" : "     " ;
+				auto str2 = line.has_void   ? "void"  : "    "  ;
 
 				printf("|%s|%s|%s| ", str0, str1, str2);
 
@@ -243,15 +248,17 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-	template<auto SourceCallable>
+	template<auto callable_source>
 	struct target_printer
 	{
 		private:
 
-			constexpr static auto target	= T_generic_assembly_targeter<SourceCallable>::value;
-			constexpr static auto contr	= target.contr;
+			constexpr static auto static_src	= _static_object_<callable_source>;
+			constexpr static auto static_scanner	= U_store_T<T_generic_assembly_scanner<static_src>>;
+			constexpr static auto target		= T_generic_assembly_targeter<static_scanner>::value;
+			constexpr static auto contr		= target.contr;
 
-			using Instr		= typename decltype(target)::Instr;
+			using Instr				= typename decltype(target)::Instr;
 
 			template<typename InstrType>
 			void print_instr(const InstrType & instr, gcindex_type line)
@@ -287,13 +294,13 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-	template<auto SourceCallable, auto... Lookups>
+	template<auto callable_source, auto... Frames>
 	struct metapiler_printer
 	{
 		private:
 
-			constexpr static auto env	= U_pack_Vs<Lookups...>;
-			constexpr static auto metapiler	= T_generic_assembly_metapiler<SourceCallable, env>{};
+			constexpr static auto env	= U_pack_Vs<Frames...>;
+			constexpr static auto metapiler	= T_generic_assembly_metapiler<callable_source, env>{};
 			constexpr static auto contr	= metapiler.contr;
 			constexpr static auto lookup	= metapiler.template resolve_lookup<false>;
 

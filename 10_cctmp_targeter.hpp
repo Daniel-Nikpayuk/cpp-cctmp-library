@@ -27,34 +27,34 @@ namespace cctmp {
 
 // architecture:
 
-	template<auto SourceCallable>
+	template<auto static_scanner>
 	struct T_generic_assembly_architecture
 	{
-		nik_ces auto static_inv	= _static_object_<SourceCallable>;
-		nik_ces auto inventory	= T_store_U<static_inv>::value;
-		using T_ast		= T_generic_assembly_ast<static_inv>;
+		nik_ces auto src	= T_store_U<static_scanner>::src;
+		nik_ces auto scanner	= T_store_U<static_scanner>::value;
+		using T_ast		= T_generic_assembly_ast<static_scanner>;
 		using T_parser		= T_generic_assembly_parser<T_ast, T_generic_assembly_translator>;
 
-		nik_ces auto parsed	= T_parser(inventory.string, inventory.finish);
-		nik_ces auto toc	= parsed.p.tree;
+		nik_ces auto parsed	= T_parser(src.begin(), src.end());
+		nik_ces auto toc	= parsed.value.tree;
 
 		struct Instr { enum : gkey_type { name = 0, note  , pos }; };
 		struct Mark  { enum : gkey_type { none = 0, value       }; };
 
 		nik_ces auto instr_length	= _three;
-		nik_ces auto length		= ( 1 * inventory.goto_size    )
-						+ ( 1 * inventory.branch_size  )
-						+ ( 2 * inventory.test_size    )
-						+ ( 2 * inventory.void_size    )
-						+ ( 2 * inventory.copy_size    )
-						+ ( 3 * inventory.return_size  ) // upper bound: (1 * size <= 3 * size)
-						+ ( 4 * inventory.replace_size );
+		nik_ces auto length		= ( 1 * scanner.goto_size    )
+						+ ( 1 * scanner.branch_size  )
+						+ ( 2 * scanner.test_size    )
+						+ ( 2 * scanner.void_size    )
+						+ ( 2 * scanner.copy_size    )
+						+ ( 3 * scanner.return_size  ) // upper bound: (1 * size <= 3 * size)
+						+ ( 4 * scanner.replace_size );
 
-		using label_type		= sequence    < gindex_type , inventory.label_size      >;
-		using instr_type		= sequence    < gindex_type , instr_length              >;
-		using contr_type		= sequence    < instr_type  , length                    >;
-		using contr_lookup_type		= subsequence < instr_type  , toc.lookup.size()         >;
-		using contr_jump_type		= subsequence < instr_type  , inventory.dependency_size >;
+		using label_type		= sequence    < gindex_type , scanner.label_size      >;
+		using instr_type		= sequence    < gindex_type , instr_length            >;
+		using contr_type		= sequence    < instr_type  , length                  >;
+		using contr_lookup_type		= subsequence < instr_type  , toc.lookup.size()       >;
+		using contr_jump_type		= subsequence < instr_type  , scanner.dependency_size >;
 		using cline_type		= typename decltype(toc.page)::cline_type;
 
 		label_type label;
@@ -227,10 +227,10 @@ namespace cctmp {
 
 // automaton:
 
-	template<auto SourceCallable>
+	template<auto static_scanner>
 	struct T_generic_assembly_targeter
 	{
-		nik_ces auto value = T_generic_assembly_architecture<SourceCallable>{};
+		nik_ces auto value = T_generic_assembly_architecture<static_scanner>{};
 	};
 
 /***********************************************************************************************************************/

@@ -513,6 +513,7 @@ namespace cctmp {
 
 	struct T_generic_assembly_pda
 	{
+		using ArraySize				= T_store_U<_array_size_>;
 		using T_pdtt				= T_generic_assembly_pdtt;
 
 		nik_ces auto value			= T_pdtt{};
@@ -521,7 +522,8 @@ namespace cctmp {
 		nik_ces auto nonterminal_start		= T_pdtt::Nonterminal::start;
 		nik_ces auto terminal_symbol		= T_pdtt::Terminal::symbol;
 		nik_ces auto terminal_finish		= T_pdtt::Terminal::finish;
-		nik_ces auto stack_size			= 100; // needs a proper bound.
+		nik_ces auto stack_size			= ArraySize::template result<>("tOV;bi;Jgi;C$");
+								// this literal is the longest possible sentential.
 
 		nik_ces bool is_nonterminal(ctoken_type t)
 		{
@@ -700,27 +702,22 @@ namespace cctmp {
 
 // interface (table of contents):
 
-	template<auto StaticInventory>
+	template<auto static_scanner>
 	struct T_generic_assembly_ast
 	{
-		nik_ces auto inv	= T_store_U<StaticInventory>::value;
+		nik_ces auto scanner	= T_store_U<static_scanner>::value;
 
-		using inv_type		= decltype(inv);
-		using char_type		= typename inv_type::char_type;
-		using string_type	= typename inv_type::string_type;
-		using cstring_type	= typename inv_type::cstring_type;
-
-		using page_type		= Page<char_type, inv.line_size, inv.pad_entry_size>;
+		using page_type		= Page<gchar_type, scanner.line_size, scanner.pad_entry_size>;
 		using line_type		= typename page_type::line_type;
 		using entry_type	= typename line_type::entry_type;
 		using centry_type	= typename line_type::centry_type;
 
-		using label_type	= Subpage < page_type , inv.label_size      >;
-		using goto_type		= Subpage < page_type , inv.goto_size       >;
-		using branch_type	= Subpage < page_type , inv.branch_size     >;
-		using depend_type	= Subpage < page_type , inv.dependency_size >;
-		using graph_type	= Subpage < page_type , inv.graph_size      >;
-		using lookup_type	= Subpage < page_type , inv.line_size       >;
+		using label_type	= Subpage < page_type , scanner.label_size      >;
+		using goto_type		= Subpage < page_type , scanner.goto_size       >;
+		using branch_type	= Subpage < page_type , scanner.branch_size     >;
+		using depend_type	= Subpage < page_type , scanner.dependency_size >;
+		using graph_type	= Subpage < page_type , scanner.graph_size      >;
+		using lookup_type	= Subpage < page_type , scanner.line_size       >;
 
 		page_type page;
 		label_type label;
@@ -743,14 +740,14 @@ namespace cctmp {
 
 			nik_ce auto is_arg_match(centry_type *k) const { return (k != page.begin()->end()); }
 
-			nik_ce auto match_name(string_type b, cstring_type e)
+			nik_ce auto match_name(gstring_type b, gcstring_type e)
 			{
 				auto k = page.begin()->begin();
 
 				return ptr_diff_equal(k->start, k->finish, b, e);
 			}
 
-			nik_ce auto match_arguments(string_type b, cstring_type e)
+			nik_ce auto match_arguments(gstring_type b, gcstring_type e)
 			{
 				auto l = page.begin();
 				auto k = l->begin() + 1; // args, not name.
@@ -765,7 +762,7 @@ namespace cctmp {
 				return k;
 			}
 
-			nik_ce auto match_label(string_type b, cstring_type e)
+			nik_ce auto match_label(gstring_type b, gcstring_type e)
 			{
 				auto k = label.begin();
 
@@ -798,8 +795,8 @@ namespace cctmp {
 			nik_ce auto current_sign_at   (gcindex_type pos) const { return page.line->array[pos].sign; }
 			nik_ce auto current_index_at  (gcindex_type pos) const { return page.line->array[pos].index; }
 
-			nik_ce void set_arg_start  (cstring_type start)  { page.array[_zero].entry->start  = start; }
-			nik_ce void set_arg_finish (cstring_type finish) { page.array[_zero].entry->finish = finish; }
+			nik_ce void set_arg_start  (gcstring_type start)  { page.array[_zero].entry->start  = start; }
+			nik_ce void set_arg_finish (gcstring_type finish) { page.array[_zero].entry->finish = finish; }
 			nik_ce void set_arg_sign   (csign_type sign)     { page.array[_zero].entry->sign   = sign; }
 			nik_ce void set_arg_index  (gcindex_type index)  { page.array[_zero].entry->index  = index; }
 
@@ -918,6 +915,11 @@ namespace cctmp {
 		using T_pda		= T_generic_assembly_pda;
 		using parseme_type	= parseme<T_ast>;
 
+		parseme_type value;
+
+		nik_ce T_generic_assembly_parser(gcstring_type b, gcstring_type e) : value{}
+			{ parse(value, b, e); }
+
 		nik_ces void parse(parseme_type & p, gcstring_type b, gcstring_type e)
 		{
 			using T_stack  = Stack<T_pda::stack_size>;
@@ -925,10 +927,6 @@ namespace cctmp {
 
 			T_generic_parser<T_action, T_ast, T_pda, T_lexer>::parse(p, b, e);
 		}
-
-		parseme_type p;
-
-		nik_ce T_generic_assembly_parser(gcstring_type b, gcstring_type e) : p{} { parse(p, b, e); }
 	};
 
 /***********************************************************************************************************************/

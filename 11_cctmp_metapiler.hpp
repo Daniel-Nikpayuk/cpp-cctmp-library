@@ -348,12 +348,14 @@ namespace cctmp {
 
 // automaton:
 
-	template<auto SourceCallable, auto Env = U_null_Vs>
+	template<auto callable_source, auto Env = U_null_Vs>
 	struct T_generic_assembly_metapiler
 	{
-		nik_ces auto env	= eval<_push_, H_id, Env, default_machine_frame>;
-		nik_ces auto target	= T_generic_assembly_targeter<SourceCallable>::value;
-		nik_ces auto toc	= target.toc;
+		nik_ces auto static_src		= _static_object_<callable_source>;
+		nik_ces auto static_scanner	= U_store_T<T_generic_assembly_scanner<static_src>>;
+		nik_ces auto target		= T_generic_assembly_targeter<static_scanner>::value;
+		nik_ces auto toc		= target.toc;
+		nik_ces auto env		= eval<_push_, H_id, Env, default_machine_frame>;
 
 		// toc:
 
@@ -527,12 +529,12 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename CharType, auto Size>
-		nik_ce auto source(const CharType (&s)[Size]) { return T_generic_assembly_source(s); }
+		nik_ce auto source(const CharType (&s)[Size]) { return selection(s); }
 
-		template<auto SourceCallable, auto Env, typename S, typename... Ts>
+		template<auto callable_source, auto Env, typename S, typename... Ts>
 		nik_ce auto generic_assembly_apply(Ts... vs)
 		{
-			using T_function = T_generic_assembly_metapiler<SourceCallable, Env>;
+			using T_function = T_generic_assembly_metapiler<callable_source, Env>;
 
 			return T_function::template result<S, Ts...>(vs...);
 		}
