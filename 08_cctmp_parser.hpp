@@ -25,7 +25,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// (generic) stack:
+// generic parser:
 
 /***********************************************************************************************************************/
 
@@ -93,7 +93,7 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// interface:
+// stack:
 
 	template<auto Size>
 	struct Stack
@@ -129,173 +129,171 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
+
+// parseme:
+
+	template<typename T_ast>
+	struct parseme
+	{
+		gstring_type  start;
+		gstring_type finish;
+		T_ast         tree;
+
+		nik_ce parseme() : start{}, finish{}, tree{} { }
+	};
+
 /***********************************************************************************************************************/
 
-// generic parser:
+// parsoid:
+
+	template<auto Size>
+	struct parsoid
+	{
+		using stack_type	= Stack<Size>;
+		using prod_type		= Production const*;
+		using tenet_type	= Tenet const*;
+
+		stack_type stack;
+		prod_type production;
+		tenet_type tenet;
+		lexeme word;
+
+		nik_ce parsoid(ctoken_type start_symbol) : stack{start_symbol}, production{}, tenet{}, word{} { }
+	};
 
 /***********************************************************************************************************************/
 
 // interface:
 
-	template<typename T_action, typename T_ast, typename T_pda, auto StaticSource>
+	template<typename T_action, typename T_ast, typename T_pda, typename T_lexer>
 	struct T_generic_parser
 	{
-		nik_ces auto src	= T_store_U<StaticSource>::value;
-		nik_ces auto pda	= T_pda::value;
 		nik_ces auto act	= T_action::value;
-
-		using stack_type	= Stack<src.stack_size>;
-		using src_type		= decltype(src);
-		using char_type		= typename src_type::char_type;
-		using string_type	= typename src_type::string_type;
-		using T_lexer		= typename src_type::T_lexer;
+		nik_ces auto pda	= T_pda::value;
 
 		using act_type		= decltype(act);
 		using NAction		= typename act_type::NAction;
 		using TAction		= typename act_type::TAction;
 
-		using prod_type		= Production const*;
-		using tenet_type	= Tenet const*;
+		using parseme_type	= parseme<T_ast>;
+		using parsoid_type	= parsoid<T_pda::stack_size>;
 
-		stack_type stack;
-		token_type front;
-		string_type letter;
-		lexeme word;
-		prod_type production;
-		tenet_type tenet;
-
-		T_ast tree;
-
-		nik_ce T_generic_parser(bool p = true) :
-
-			stack      { T_pda::nonterminal_start         },
-			front      { stack.front()                    },
-			letter     { src.string                       },
-			word       { T_lexer::lex(letter, src.finish) },
-			production {                                  },
-			tenet      {                                  },
-
-			tree       {                                  }
-
-			{ if (p) parse(); }
-
-		nik_ce void parse()
+		nik_ces void parse(parseme_type & p, gcstring_type b, gcstring_type e)
 		{
-			while (*stack.current != '\0')
-			{
-				switch (T_pda::token_kind(front))
-				{
-					case TokenKind::nonterminal : { nonterminal(); break; }
-					case TokenKind::terminal    : {    terminal(); break; }
-					default                     : {       error(); break; }
-				}
+			parsoid_type q{T_pda::nonterminal_start};
 
-				front = stack.front();
+			T_lexer::lex(q.word, b, e);
+
+			while (q.stack.front() != '\0')
+			{
+				switch (T_pda::token_kind(q.stack.front()))
+				{
+					case TokenKind::nonterminal : { nonterminal(p, q)    ; break; }
+					case TokenKind::terminal    : {    terminal(p, q, e) ; break; }
+					default                     : {       error(p, q)    ; break; }
+				}
 			}
 
-			update_tenet(*stack.current);
-			terminal_action(tenet->name); // accept action.
+			update_tenet(q, q.stack.front());
+			terminal_action(p, q, q.tenet->name); // accept action.
 		}
 
-		nik_ce void nonterminal()
+		nik_ces void nonterminal(parseme_type & p, parsoid_type & q)
 		{
-			update_production();
-			nonterminal_update_stack();
-			nonterminal_update_action();
+			update_production(q);
+			nonterminal_update_stack(q);
+			nonterminal_update_action(p, q);
 		}
 
-		nik_ce void terminal()
+		nik_ces void terminal(parseme_type & p, parsoid_type & q, gcstring_type e)
 		{
-			if (front != word.value) ; // error.
+			if (q.stack.front() != q.word.token) ; // error.
 			else
 			{
-				update_tenet(word.value);
-				terminal_update_action();
-				update_word();
-				terminal_update_stack();
+				update_tenet(q, q.word.token);
+				terminal_update_action(p, q);
+				update_word(q, e);
+				terminal_update_stack(q);
 			}
 		}
 
-		nik_ce void error()
+		nik_ces void error(parseme_type & p, parsoid_type & q)
 		{
 			// nothing yet.
 		}
 
-		nik_ce void update_production()
+		nik_ces void update_production(parsoid_type & q)
 		{
-			production = &pda.production(front, word.value);
+			q.production = &pda.production(q.stack.front(), q.word.token);
 			// if (production == empty) error;
 		}
 
-		nik_ce void update_tenet(gcchar_type c)
-			{ tenet = &pda.tenet(c); }
+		nik_ces void update_tenet(parsoid_type & q, ctoken_type t)
+			{ q.tenet = &pda.tenet(t); }
 
-		nik_ce void nonterminal_update_stack()
+		nik_ces void nonterminal_update_stack(parsoid_type & q)
 		{
-			stack.pop();
-			stack.push(production->body.symbol, production->body.size);
+			q.stack.pop();
+			q.stack.push(q.production->body.symbol, q.production->body.size);
 		}
 
-		nik_ce void update_word()
-		{
-			letter = word.finish;
-			word   = T_lexer::lex(letter, src.finish);
-		}
+		nik_ces void update_word(parsoid_type & q, gcstring_type e)
+			{ T_lexer::lex(q.word, q.word.finish, e); }
 
-		nik_ce void terminal_update_stack()
-			{ stack.pop(); }
+		nik_ces void terminal_update_stack(parsoid_type & q)
+			{ q.stack.pop(); }
 
-		nik_ce void nonterminal_action(caction_type n)
+		nik_ces void nonterminal_action(parseme_type & p, parsoid_type & q, caction_type n)
 		{
 			if (n != NAction::nop)
 			{
 				auto update = act.nonterminal_action(n);
 
-				update(tree, word);
+				update(p.tree, q.word);
 			}
 		}
 
-		nik_ce void terminal_action(caction_type n)
+		nik_ces void terminal_action(parseme_type & p, parsoid_type & q, caction_type n)
 		{
 			if (n != TAction::nop)
 			{
 				auto update = act.terminal_action(n);
 
-				update(tree, word);
+				update(p.tree, q.word);
 			}
 		}
 
-		nik_ce void string_action(caction_type n)
+		nik_ces void string_action(parseme_type & p, parsoid_type & q, caction_type n)
 		{
 			auto update = act.string_action(n);
 
-			update(tree, word);
+			update(p.tree, q.word);
 		}
 
-		nik_ce void stack_action(caction_type n)
+		nik_ces void stack_action(parseme_type & p, parsoid_type & q, caction_type n)
 		{
 			auto update = act.stack_action(n);
 
-			update(tree, word, stack);
+			update(p.tree, q.word, q.stack);
 		}
 
-		nik_ce void nonterminal_update_action()
+		nik_ces void nonterminal_update_action(parseme_type & p, parsoid_type & q)
 		{
-			switch (production->tenet.note)
+			switch (q.production->tenet.note)
 			{
-				case Permission::none   : { nonterminal_action(production->tenet.name); break; }
-				case Permission::string : {      string_action(production->tenet.name); break; }
-				case Permission::stack  : {       stack_action(production->tenet.name); break; }
+				case Permission::none   : { nonterminal_action(p, q, q.production->tenet.name); break; }
+				case Permission::string : {      string_action(p, q, q.production->tenet.name); break; }
+				case Permission::stack  : {       stack_action(p, q, q.production->tenet.name); break; }
 			}
 		}
 
-		nik_ce void terminal_update_action()
+		nik_ces void terminal_update_action(parseme_type & p, parsoid_type & q)
 		{
-			switch (tenet->note)
+			switch (q.tenet->note)
 			{
-				case Permission::none   : { terminal_action(tenet->name); break; }
-				case Permission::string : {   string_action(tenet->name); break; }
-				case Permission::stack  : {    stack_action(tenet->name); break; }
+				case Permission::none   : { terminal_action(p, q, q.tenet->name); break; }
+				case Permission::string : {   string_action(p, q, q.tenet->name); break; }
+				case Permission::stack  : {    stack_action(p, q, q.tenet->name); break; }
 			}
 		}
 	};
@@ -523,6 +521,7 @@ namespace cctmp {
 		nik_ces auto nonterminal_start		= T_pdtt::Nonterminal::start;
 		nik_ces auto terminal_symbol		= T_pdtt::Terminal::symbol;
 		nik_ces auto terminal_finish		= T_pdtt::Terminal::finish;
+		nik_ces auto stack_size			= 100; // needs a proper bound.
 
 		nik_ces bool is_nonterminal(ctoken_type t)
 		{
@@ -701,27 +700,27 @@ namespace cctmp {
 
 // interface (table of contents):
 
-	template<auto StaticSource>
+	template<auto StaticInventory>
 	struct T_generic_assembly_ast
 	{
-		nik_ces auto src	= T_store_U<StaticSource>::value;
+		nik_ces auto inv	= T_store_U<StaticInventory>::value;
 
-		using src_type		= decltype(src);
-		using char_type		= typename src_type::char_type;
-		using string_type	= typename src_type::string_type;
-		using cstring_type	= typename src_type::cstring_type;
+		using inv_type		= decltype(inv);
+		using char_type		= typename inv_type::char_type;
+		using string_type	= typename inv_type::string_type;
+		using cstring_type	= typename inv_type::cstring_type;
 
-		using page_type		= Page<char_type, src.line_size, src.pad_entry_size>;
+		using page_type		= Page<char_type, inv.line_size, inv.pad_entry_size>;
 		using line_type		= typename page_type::line_type;
 		using entry_type	= typename line_type::entry_type;
 		using centry_type	= typename line_type::centry_type;
 
-		using label_type	= Subpage < page_type , src.label_size      >;
-		using goto_type		= Subpage < page_type , src.goto_size       >;
-		using branch_type	= Subpage < page_type , src.branch_size     >;
-		using depend_type	= Subpage < page_type , src.dependency_size >;
-		using graph_type	= Subpage < page_type , src.graph_size      >;
-		using lookup_type	= Subpage < page_type , src.line_size       >;
+		using label_type	= Subpage < page_type , inv.label_size      >;
+		using goto_type		= Subpage < page_type , inv.goto_size       >;
+		using branch_type	= Subpage < page_type , inv.branch_size     >;
+		using depend_type	= Subpage < page_type , inv.dependency_size >;
+		using graph_type	= Subpage < page_type , inv.graph_size      >;
+		using lookup_type	= Subpage < page_type , inv.line_size       >;
 
 		page_type page;
 		label_type label;
@@ -816,7 +815,7 @@ namespace cctmp {
 
 				entry->start  = l.start;
 				entry->finish = l.finish;
-				entry->token  = l.value;
+				entry->token  = l.token;
 				entry->sign   = sign;
 				entry->index  = index;
 			}
@@ -912,23 +911,24 @@ namespace cctmp {
 
 // interface:
 
-	template<template<typename, typename> typename T_translator>
+	template<typename T_ast, template<typename, typename> typename T_translator>
 	struct T_generic_assembly_parser
 	{
-		using T_pda = T_generic_assembly_pda;
+		using T_lexer		= T_generic_assembly_lexer;
+		using T_pda		= T_generic_assembly_pda;
+		using parseme_type	= parseme<T_ast>;
 
-		template<auto static_src>
-		struct parser
+		nik_ces void parse(parseme_type & p, gcstring_type b, gcstring_type e)
 		{
-			nik_ces auto src	= T_store_U<static_src>::value;
-			using T_stack		= Stack<src.stack_size>;
-			using T_ast		= T_generic_assembly_ast<static_src>;
-			using T_action		= T_translator<T_ast, T_stack>;
-			nik_ces auto value     	= T_generic_parser<T_action, T_ast, T_pda, static_src>{};
-		};
+			using T_stack  = Stack<T_pda::stack_size>;
+			using T_action = T_translator<T_ast, T_stack>;
 
-		template<auto SourceCallable>
-		nik_ces auto parse = parser<_static_object_<SourceCallable>>::value;
+			T_generic_parser<T_action, T_ast, T_pda, T_lexer>::parse(p, b, e);
+		}
+
+		parseme_type p;
+
+		nik_ce T_generic_assembly_parser(gcstring_type b, gcstring_type e) : p{} { parse(p, b, e); }
 	};
 
 /***********************************************************************************************************************/

@@ -234,15 +234,9 @@ namespace cctmp {
 	{
 		gstring_type  start;
 		gstring_type finish;
-		gindex_type   value;
+		gindex_type   token;
 
-		nik_ce lexeme() :
-
-			start{}, finish{}, value{} { }
-
-		nik_ce lexeme(gcstring_type _s, gcstring_type _f, gcindex_type _v) :
-
-			start{_s}, finish{_f}, value{_v} { }
+		nik_ce lexeme() : start{}, finish{}, token{} { }
 	};
 
 	using clexeme = lexeme const;
@@ -255,32 +249,36 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// recognize:
+// generic lexer:
 
 	template<typename T_dftt>
-	nik_ce lexeme recognize(gstring_type b, gstring_type e)
+	struct T_generic_lexer
 	{
-		nik_ce auto transition_table = T_dftt::value;
+		nik_ces auto transition_table = T_dftt::value;
 
-		gstring_type k = skip_whitespace(b, e);
-		b = k;
-
-		state_type s = StateName::initial;
-
-		while (k != e)
+		nik_ces void lex(lexeme & l, gstring_type b, gstring_type e)
 		{
-			auto ns = transition_table.move(s, *k);
+			l.start = skip_whitespace(b, e);
+			b       = l.start;
 
-			if (ns == StateName::empty) break;
-			else
+			state_type s = StateName::initial;
+
+			while (b != e)
 			{
-				s = ns;
-				++k;
-			}
-		}
+				auto ns = transition_table.move(s, *b);
 
-		return lexeme{b, k, s};
-	}
+				if (ns == StateName::empty) break;
+				else
+				{
+					s = ns;
+					++b;
+				}
+			}
+
+			l.finish = b;
+			l.token  = s;
+		}
+	};
 
 /***********************************************************************************************************************/
 
@@ -289,8 +287,11 @@ namespace cctmp {
 	template<typename T_lexer>
 	nik_ce gcbool_type recognizes(gstring_type b, gstring_type e)
 	{
-		auto l = T_lexer::lex(b, e);
-		return (l.value != TokenName::invalid);
+		lexeme l;
+
+		T_lexer::lex(l, b, e);
+
+		return (l.token != TokenName::invalid);
 	}
 
 /***********************************************************************************************************************/
@@ -393,12 +394,13 @@ namespace cctmp {
 		using T_dfa		= T_keyword_dfa<CharsetCallable>;
 		nik_ces auto token	= Token;
 
-		nik_ces lexeme lex(gstring_type b, gstring_type e)
+		nik_ces void lex(lexeme & l, gstring_type b, gstring_type e)
 		{
-			auto l       = recognize<T_dfa>(b, e);
-			token_type t = (l.value == T_dfa::accept) ? Token : TokenName::invalid;
+			T_generic_lexer<T_dfa>::lex(l, b, e);
 
-			return lexeme{l.start, l.finish, (gindex_type) t};
+			token_type t = (l.token == T_dfa::accept) ? Token : TokenName::invalid;
+
+			l.token = (gindex_type) t;
 		}
 	};
 
@@ -602,18 +604,18 @@ namespace cctmp {
 		using T_fasten_lexer		= T_keyword_lexer< T_dfa::fasten_charset     , '6' >;
 		using T_glide_lexer		= T_keyword_lexer< T_dfa::glide_charset      , '7' >;
 
-		nik_ces lexeme lex(gstring_type b, gstring_type e)
+		nik_ces void lex(lexeme & l, gstring_type b, gstring_type e)
 		{
-			auto l = recognize<T_dfa>(b, e);
-			auto n = T_dfa::find_pos(l.value);
+			T_generic_lexer<T_dfa>::lex(l, b, e);
 
+			auto       n = T_dfa::find_pos(l.token);
 			token_type t = TokenName::invalid;
 			if (T_dfa::is_final(n)) t = T_dfa::token[n];
 
-			return keyword_check(l.start, l.finish, t);
+			return keyword_check(l, t);
 		}
 
-		nik_ces lexeme keyword_check(gstring_type b, gstring_type e, ctoken_type t)
+		nik_ces void keyword_check(lexeme & l, ctoken_type t)
 		{
 			token_type rt = t;
 
@@ -621,20 +623,20 @@ namespace cctmp {
 			{
 				case 'i':
 				{
-					ctoken_type t0 = keyword(b, e);
+					ctoken_type t0 = keyword(l.start, l.finish);
 					rt = (t0 == TokenName::invalid) ? t : t0;
 					break;
 				}
 				case 'l':
 				{
-					ctoken_type t0 = keyword(b, e - 1);
+					ctoken_type t0 = keyword(l.start, l.finish - 1);
 					ctoken_type t1 = TokenName::keyword_label_error;
 					rt = (t0 == TokenName::invalid) ? t : t1;
 					break;
 				}
 			}
 
-			return lexeme{b, e, (gindex_type) rt};
+			l.token = (gindex_type) rt;
 		}
 
 		nik_ces token_type keyword(gstring_type b, gstring_type e)
@@ -764,15 +766,17 @@ namespace cctmp {
 			goto_size        {            }
 
 			{
-				auto k = string;
-
 				gindex_type cur_entry_size = _zero;
+
+				lexeme l;
+
+				auto k = string;
 
 				while (k != finish)
 				{
-					auto l = T_lexer::lex(k, finish);
+					T_lexer::lex(l, k, finish);
 
-					switch (l.value)
+					switch (l.token)
 					{
 						case ';':
 						{

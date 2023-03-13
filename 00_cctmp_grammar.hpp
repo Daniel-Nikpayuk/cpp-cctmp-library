@@ -243,6 +243,29 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// selection:
+
+	template<typename Type, auto Size>
+	struct selection
+	{
+		using type		= Type;
+		using ctype		= type const;
+		using ptr_ctype		= ctype*;
+		using cptr_ctype	= ptr_ctype const;
+		using size_type		= decltype(Size);
+
+		cptr_ctype start;
+		cptr_ctype finish;
+
+		nik_ce selection(const Type (&_s)[Size]) : start{_s}, finish{_s + Size} { }
+
+		nik_ce auto begin () const { return start; }
+		nik_ce auto end   () const { return finish; }
+		nik_ce auto size  () const { return Size; }
+	};
+
+/***********************************************************************************************************************/
+
 // tuple:
 
 	template<typename... Ts>

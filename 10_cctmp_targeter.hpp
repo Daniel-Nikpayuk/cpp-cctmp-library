@@ -30,29 +30,31 @@ namespace cctmp {
 	template<auto SourceCallable>
 	struct T_generic_assembly_architecture
 	{
-		using T_parser		= T_generic_assembly_parser<T_generic_assembly_translator>;
+		nik_ces auto static_inv	= _static_object_<SourceCallable>;
+		nik_ces auto inventory	= T_store_U<static_inv>::value;
+		using T_ast		= T_generic_assembly_ast<static_inv>;
+		using T_parser		= T_generic_assembly_parser<T_ast, T_generic_assembly_translator>;
 
-		nik_ces auto parser	= T_parser::template parse<SourceCallable>;
-		nik_ces auto src	= parser.src;
-		nik_ces auto toc	= parser.tree;
+		nik_ces auto parsed	= T_parser(inventory.string, inventory.finish);
+		nik_ces auto toc	= parsed.p.tree;
 
 		struct Instr { enum : gkey_type { name = 0, note  , pos }; };
 		struct Mark  { enum : gkey_type { none = 0, value       }; };
 
 		nik_ces auto instr_length	= _three;
-		nik_ces auto length		= ( 1 * src.goto_size    )
-						+ ( 1 * src.branch_size  )
-						+ ( 2 * src.test_size    )
-						+ ( 2 * src.void_size    )
-						+ ( 2 * src.copy_size    )
-						+ ( 3 * src.return_size  ) // upper bound: (1 * size <= 3 * size)
-						+ ( 4 * src.replace_size );
+		nik_ces auto length		= ( 1 * inventory.goto_size    )
+						+ ( 1 * inventory.branch_size  )
+						+ ( 2 * inventory.test_size    )
+						+ ( 2 * inventory.void_size    )
+						+ ( 2 * inventory.copy_size    )
+						+ ( 3 * inventory.return_size  ) // upper bound: (1 * size <= 3 * size)
+						+ ( 4 * inventory.replace_size );
 
-		using label_type		= sequence    < gindex_type , src.label_size      >;
-		using instr_type		= sequence    < gindex_type , instr_length        >;
-		using contr_type		= sequence    < instr_type  , length              >;
-		using contr_lookup_type		= subsequence < instr_type  , toc.lookup.size()   >;
-		using contr_jump_type		= subsequence < instr_type  , src.dependency_size >;
+		using label_type		= sequence    < gindex_type , inventory.label_size      >;
+		using instr_type		= sequence    < gindex_type , instr_length              >;
+		using contr_type		= sequence    < instr_type  , length                    >;
+		using contr_lookup_type		= subsequence < instr_type  , toc.lookup.size()         >;
+		using contr_jump_type		= subsequence < instr_type  , inventory.dependency_size >;
 		using cline_type		= typename decltype(toc.page)::cline_type;
 
 		label_type label;
