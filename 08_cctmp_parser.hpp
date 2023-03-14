@@ -522,7 +522,7 @@ namespace cctmp {
 		nik_ces auto nonterminal_start		= T_pdtt::Nonterminal::start;
 		nik_ces auto terminal_symbol		= T_pdtt::Terminal::symbol;
 		nik_ces auto terminal_finish		= T_pdtt::Terminal::finish;
-		nik_ces auto stack_size			= ArraySize::template result<>("tOV;bi;Jgi;C$");
+		nik_ces auto stack_size			= ArraySize::template result<>("tOV;bi;Jgi;C$") - 1;
 								// this literal is the longest possible sentential.
 
 		nik_ces bool is_nonterminal(ctoken_type t)
