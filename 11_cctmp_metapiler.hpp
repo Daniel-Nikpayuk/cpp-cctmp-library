@@ -95,7 +95,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// frame:
+// environment:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -107,13 +107,12 @@ namespace cctmp {
 	template<typename CharType, auto Size, typename ValueType>
 	struct binding
 	{
-		using char_type			= CharType;
-		using string_type		= char_type const*;
-		using size_type			= decltype(Size);
+		using char_type		= CharType;
+		using string_type	= char_type const*;
 
-		nik_ces size_type size		= Size - 1; // best policy?
-		nik_ces auto value		= U_restore_T<ValueType>;
-		using value_type		= decltype(value);
+		nik_ces auto length	= Size;
+		nik_ces auto size	= Size - 1;
+		nik_ces auto value	= U_restore_T<ValueType>;
 
 		string_type string;
 
@@ -123,75 +122,51 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// table:
+// frame:
 
 /***********************************************************************************************************************/
 
 	template<typename CharType, typename... Bindings>
-	struct table
+	struct frame
 	{
 		using char_type			= T_restore_T<CharType>;
-		using cchar_type		= char_type const;
 		using string_type		= char_type const*;
 		using cstring_type		= string_type const;
 
-		nik_ces auto size		= sizeof...(Bindings);
-		using size_type			= decltype(size);
-
-		nik_ces auto sizes		= array<size_type, Bindings::size...>;
+		nik_ces auto length		= sizeof...(Bindings);
+		nik_ces auto sizes		= array<decltype(length), Bindings::size...>;
 		nik_ces auto values		= U_pack_Vs<Bindings::value...>;
 
-		cstring_type string[size];
+		cstring_type string[length];
 
-		nik_ce table(CharType, Bindings... bs) : string{bs.string...} { }
+		nik_ce frame(CharType, Bindings... bs) : string{bs.string...} { }
 	};
 
 /***********************************************************************************************************************/
 
-// function:
+// frame lookup:
 
-	template<auto f, typename StringType>
-	nik_ce auto key_function(StringType str_begin, StringType str_end)
+	template<auto static_frame, typename StringType>
+	nik_ce auto lookup_frame(StringType str_begin, StringType str_end)
 	{
-		nik_ce auto table		= f();
+		nik_ce auto frame = static_call<static_frame>;
 
-		using table_type		= decltype(table);
-		using size_type			= typename table_type::size_type;
-		using string_type		= typename table_type::string_type;
-		using cstring_type		= typename table_type::cstring_type;
+		auto key  = frame.string;
+		auto end  = frame.string + frame.length;
+		auto size = frame.sizes;
 
-		cstring_type *key		= table.string;
-		cstring_type *key_end		= key + table.size;
-
-		size_type *size			= table.sizes;
-
-		while (key != key_end)
+		while (key != end)
 		{
-			string_type b		= *key;
-			string_type e		= b + *(size++);
+			auto b = *key;
+			auto e = *key + *(size++);
 
 			if (ptr_diff_equal(b, e, str_begin, str_end)) break;
 
 			++key;
 		}
 
-		return key - table.string;
+		return key - frame.string;
 	}
-
-	template<auto f>
-	nik_ce auto make_key_function()
-	{
-		using table_type	= T_out_type<f>;
-		using string_type	= typename table_type::string_type;
-
-		nik_ce auto values	= table_type::values;
-		nik_ce auto key_f	= key_function<f, string_type>;
-
-		return U_pack_Vs<key_f, values>;
-	}
-
-	template<auto f>
-	nik_ce auto make_frame = make_key_function<f>();
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -204,9 +179,9 @@ namespace cctmp {
 
 // default:
 
-	nik_ce auto default_machine_table()
+	nik_ce auto default_machine_frame_callable()
 	{
-		return table
+		return frame
 		(
 		 	U_char,
 
@@ -265,15 +240,15 @@ namespace cctmp {
 		);
 	};
 
-	nik_ce auto default_machine_frame = make_frame<default_machine_table>;
+	nik_ce auto default_machine_frame = _static_callable_<default_machine_frame_callable>;
 
 /***********************************************************************************************************************/
 
 // constant:
 
-	nik_ce auto constant_machine_table()
+	nik_ce auto constant_machine_frame_callable()
 	{
-		return table
+		return frame
 		(
 		 	U_char,
 
@@ -291,7 +266,7 @@ namespace cctmp {
 		);
 	};
 
-	nik_ce auto constant_machine_frame = make_frame<constant_machine_table>;
+	nik_ce auto constant_machine_frame = _static_callable_<constant_machine_frame_callable>;
 
 /***********************************************************************************************************************/
 
@@ -312,16 +287,17 @@ namespace cctmp {
 
 	struct survey
 	{
-		template<auto frame>
+		template<auto static_frame>
 		nik_ces auto find(gstring_type start, gstring_type finish)
 		{
-			nik_ce auto key_f  = unpack_<frame, _car_>;
-			nik_ce auto values = unpack_<frame, _cadr_>;
-			nik_ce auto size   = unpack_<values, _length_>;
+			nik_ce auto key_f  = lookup_frame<static_frame, gstring_type>;
+			nik_ce auto frame  = static_call<static_frame>;
+			nik_ce auto values = decltype(frame)::values;
+			nik_ce auto length = decltype(frame)::length;
 
 			auto key = key_f(start, finish);
 
-			return survey(key, size);
+			return survey(key, length);
 		}
 
 		nik_ces auto search(const survey *begin, const survey *end)
@@ -341,7 +317,7 @@ namespace cctmp {
 		bool match;
 		gindex_type key;
 
-		nik_ce survey(gcindex_type _k, gcindex_type size) : match{_k != size}, key{_k} { }
+		nik_ce survey(gcindex_type k, gcindex_type l) : match{k != l}, key{k} { }
 	};
 
 /***********************************************************************************************************************/
@@ -351,7 +327,7 @@ namespace cctmp {
 	template<auto callable_source, auto Env = U_null_Vs>
 	struct T_generic_assembly_metapiler
 	{
-		nik_ces auto static_src		= _static_object_<callable_source>;
+		nik_ces auto static_src		= _static_callable_<callable_source>;
 		nik_ces auto static_scanner	= U_store_T<T_generic_assembly_scanner<static_src>>;
 		nik_ces auto target		= T_generic_assembly_targeter<static_scanner>::value;
 		nik_ces auto toc		= target.toc;
@@ -404,17 +380,17 @@ namespace cctmp {
 
 		// lookup:
 
-			template<auto n, auto m, auto... frames>
-			nik_ces auto resolve(nik_avp(T_pack_Vs<frames...>*))
+			template<auto n, auto m, auto... static_frames>
+			nik_ces auto resolve(nik_avp(T_pack_Vs<static_frames...>*))
 			{
-				nik_ce auto   start    = toc.lookup_entry_start(n, m);
-				nik_ce auto   finish   = toc.lookup_entry_finish(n, m);
+				nik_ce auto start        = toc.lookup_entry_start(n, m);
+				nik_ce auto finish       = toc.lookup_entry_finish(n, m);
 
-				nik_ce survey record[] = { survey::find<frames>(start, finish)... };
-				nik_ce auto   pos      = survey::search(record, record + sizeof...(frames));
+				nik_ce survey record[]   = { survey::find<static_frames>(start, finish)... };
+				nik_ce auto   pos        = survey::search(record, record + sizeof...(static_frames));
 
-				nik_ce auto   frame    = eval<_par_at_, pos, frames...>;
-				nik_ce auto   values   = unpack_<frame, _cadr_>;
+				nik_ce auto static_frame = eval<_par_at_, pos, static_frames...>;
+				nik_ce auto values       = decltype(static_call<static_frame>)::values;
 
 				return unpack_<values, _par_at_, record[pos].key>;
 			}

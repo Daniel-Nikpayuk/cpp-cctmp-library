@@ -2394,7 +2394,7 @@ namespace cctmp_program
 	template<auto SourceCallable>
 	struct GenericAssemblyPDA
 	{
-		nik_ces auto static_src	= _static_object_<SourceCallable>;
+		nik_ces auto static_src	= _static_callable_<SourceCallable>;
 		nik_ces auto src	= T_store_U<static_src>::value;
 		nik_ces auto tt		= T_generic_assembly_pdtt::value;
 

@@ -185,7 +185,7 @@ namespace cctmp {
 		};
 
 		template<auto SourceCallable, auto Size = 5'000>
-		nik_ces auto parse = parser<_static_object_<SourceCallable>, Size>::value;
+		nik_ces auto parse = parser<_static_callable_<SourceCallable>, Size>::value;
 	};
 
 /***********************************************************************************************************************/

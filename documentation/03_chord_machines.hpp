@@ -84,9 +84,9 @@ namespace cctmp_chord {
 		auto out_next         = _increment_<> ,
 		auto post_mutate_func = _nop_
 	>
-	constexpr auto repeat_table()
+	constexpr auto repeat_frame_callable()
 	{
-		return cctmp::table
+		return cctmp::frame
 		(
 		 	cctmp::U_char,
 
@@ -99,7 +99,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto repeat_frame = cctmp::make_frame<repeat_table<Vs...>>;
+	constexpr auto repeat_frame = cctmp::_static_callable_<repeat_frame_callable<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -172,9 +172,9 @@ namespace cctmp_chord {
 		auto post_in_next     = _id_            ,
 		auto post_end_next    = _id_
 	>
-	constexpr auto map_table()
+	constexpr auto map_frame_callable()
 	{
-		return cctmp::table
+		return cctmp::frame
 		(
 		 	cctmp::U_char,
 
@@ -193,7 +193,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto map_frame = cctmp::make_frame<map_table<Vs...>>;
+	constexpr auto map_frame = cctmp::_static_callable_<map_frame_callable<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -253,9 +253,9 @@ namespace cctmp_chord {
 		auto in_next           = _increment_<> ,
 		auto post_combine_func = _first_
 	>
-	constexpr auto fold_table()
+	constexpr auto fold_frame_callable()
 	{
-		return cctmp::table
+		return cctmp::frame
 		(
 		 	cctmp::U_char,
 
@@ -268,7 +268,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto fold_frame = cctmp::make_frame<fold_table<Vs...>>;
+	constexpr auto fold_frame = cctmp::_static_callable_<fold_frame_callable<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -342,9 +342,9 @@ namespace cctmp_chord {
 		auto found_mutate_func = _appoint_         ,
 		auto found_out_next    = _increment_<>
 	>
-	constexpr auto find_first_table()
+	constexpr auto find_first_frame_callable()
 	{
-		return cctmp::table
+		return cctmp::frame
 		(
 		 	cctmp::U_char,
 
@@ -359,7 +359,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto find_first_frame = cctmp::make_frame<find_first_table<Vs...>>;
+	constexpr auto find_first_frame = cctmp::_static_callable_<find_first_frame_callable<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -443,9 +443,9 @@ namespace cctmp_chord {
 		auto postfound_mutate_func = _appoint_         ,
 		auto postfound_out_next    = _increment_<>
 	>
-	constexpr auto find_all_table()
+	constexpr auto find_all_frame_callable()
 	{
-		return cctmp::table
+		return cctmp::frame
 		(
 		 	cctmp::U_char,
 
@@ -463,7 +463,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto find_all_frame = cctmp::make_frame<find_all_table<Vs...>>;
+	constexpr auto find_all_frame = cctmp::_static_callable_<find_all_frame_callable<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -544,9 +544,9 @@ namespace cctmp_chord {
 		auto post_in2_next    = _id_          ,
 		auto post_end2_next   = _id_
 	>
-	constexpr auto zip_table()
+	constexpr auto zip_frame_callable()
 	{
-		return cctmp::table
+		return cctmp::frame
 		(
 		 	cctmp::U_char,
 
@@ -570,7 +570,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto zip_frame = cctmp::make_frame<zip_table<Vs...>>;
+	constexpr auto zip_frame = cctmp::_static_callable_<zip_frame_callable<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -661,9 +661,9 @@ namespace cctmp_chord {
 		auto post_in2_next     = _id_              ,
 		auto post_end2_next    = _id_
 	>
-	constexpr auto fasten_table()
+	constexpr auto fasten_frame_callable()
 	{
-		return cctmp::table
+		return cctmp::frame
 		(
 		 	cctmp::U_char,
 
@@ -691,7 +691,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto fasten_frame = cctmp::make_frame<fasten_table<Vs...>>;
+	constexpr auto fasten_frame = cctmp::_static_callable_<fasten_frame_callable<Vs...>>;
 
 /***********************************************************************************************************************/
 
@@ -770,9 +770,9 @@ namespace cctmp_chord {
 		auto post_in2_next     = _id_          ,
 		auto post_end2_next    = _id_
 	>
-	constexpr auto glide_table()
+	constexpr auto glide_frame_callable()
 	{
-		return cctmp::table
+		return cctmp::frame
 		(
 		 	cctmp::U_char,
 
@@ -793,7 +793,7 @@ namespace cctmp_chord {
 	};
 
 	template<auto... Vs>
-	constexpr auto glide_frame = cctmp::make_frame<glide_table<Vs...>>;
+	constexpr auto glide_frame = cctmp::_static_callable_<glide_frame_callable<Vs...>>;
 
 /***********************************************************************************************************************/
 

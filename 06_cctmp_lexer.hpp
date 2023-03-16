@@ -144,14 +144,14 @@ namespace cctmp {
 
 // matches identifier:
 
-	nik_ce bool matches_underscore_latin_alphabet(gcchar_type c)
+	nik_ce bool matches_ula(gcchar_type c) // underscore latin alphabet
 	{
 		return (c == '_') || matches_latin_lowercase(c) || matches_latin_uppercase(c);
 	}
 
-	nik_ce bool matches_underscore_latin_alphanumeric(gcchar_type c)
+	nik_ce bool matches_ulan(gcchar_type c) // underscore latin alphanumeric
 	{
-		return matches_digit(c) || matches_underscore_latin_alphabet(c);
+		return matches_digit(c) || matches_ula(c);
 	}
 
 /***********************************************************************************************************************/
@@ -164,23 +164,6 @@ namespace cctmp {
 
 		return b;
 	}
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// static:
-
-/***********************************************************************************************************************/
-
-// object:
-
-	template<auto Callable>
-	struct T_static_object
-	{
-		nik_ces auto value = Callable();
-
-	}; template<auto Callable>
-		nik_ce auto _static_object_ = U_store_T<T_static_object<Callable>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -354,7 +337,7 @@ namespace cctmp {
 	template<auto CharsetCallable>
 	struct T_keyword_dftt
 	{
-		nik_ces auto static_charset		= _static_object_<CharsetCallable>;
+		nik_ces auto static_charset		= _static_callable_<CharsetCallable>;
 		nik_ces auto charset			= T_store_U<static_charset>::value;
 		nik_ces gkey_type state_size		= charset.length + 2;
 		nik_ces gkey_type charset_size		= charset.size + 1;
@@ -419,75 +402,72 @@ namespace cctmp {
 		{
 			enum : state_type
 			{
-				empty   = StateName::empty,
-				initial = StateName::initial,
-				underscore_latin_alphanumeric,
-				ulan    = underscore_latin_alphanumeric,
-				semicolon,
-				equal,
-				punctuation,
-				period,
-				colon,
-				backslash,
-				no_quote,
-				l_quote,
-				r_quote,
-				dimension
-			};
-
-			nik_ces state_type accept[] =
-			{
-				ulan        ,
+				empty       = StateName::empty,
+				initial     = StateName::initial,
+				ulan        , // underscore latin alphanumeric
 				semicolon   ,
 				equal       ,
 				punctuation ,
 				period      ,
 				colon       ,
-				r_quote
+				backslash   ,
+				no_quote    ,
+				l_quote     ,
+				r_quote     ,
+				dimension
 			};
 
-			nik_ces token_type token[] =
-			{
-				'i'  ,
-				';'  ,
-				'='  ,
-				'!'  ,
-				'.'  ,
-				'l'  ,
-				'q'
-			};
+			nik_ces auto status = table
+			(
+				U_store_T<state_type>,
+				U_store_T<gchar_type>,
+
+				pair( ulan        , 'i' ),
+				pair( semicolon   , ';' ),
+				pair( equal       , '=' ),
+				pair( punctuation , '!' ),
+				pair( period      , '.' ),
+				pair( colon       , 'l' ),
+				pair( r_quote     , 'q' )
+			);
 		};
 
 		struct Charset
 		{
 			enum : gkey_type
 			{
-				other = 0,
-				underscore_latin_alphabet,
-				ula = underscore_latin_alphabet,
-				digit,
-				semicolon,
-				equal,
-				punctuation,
-				period,
-				colon,
-				backslash,
-				quote,
+				other       = 0,
+				ula         , // underscore latin alphabet
+				digit       ,
+				semicolon   ,
+				equal       ,
+				punctuation ,
+				period      ,
+				colon       ,
+				backslash   ,
+				quote       ,
 				dimension
 			};
 
+			nik_ces auto charmap = table
+			(
+				U_store_T<gchar_type>,
+				U_store_T<gkey_type>,
+
+				pair( ';'  , Charset::semicolon   ),
+				pair( '='  , Charset::equal       ),
+				pair( '!'  , Charset::punctuation ),
+				pair( '.'  , Charset::period      ),
+				pair( ':'  , Charset::colon       ),
+				pair( '\'' , Charset::quote       ),
+				pair( '\\' , Charset::backslash   )
+			);
+
 			nik_ces gkey_type map(gcchar_type c)
 			{
-				if      (matches_underscore_latin_alphabet(c)) return Charset::ula;
-				else if (matches_digit(c)                    ) return Charset::digit;
-				else if (c == ';'                            ) return Charset::semicolon;
-				else if (c == '='                            ) return Charset::equal;
-				else if (c == '!'                            ) return Charset::punctuation;
-				else if (c == '.'                            ) return Charset::period;
-				else if (c == ':'                            ) return Charset::colon;
-				else if (c == '\''                           ) return Charset::quote;
-				else if (c == '\\'                           ) return Charset::backslash;
-				else                                           return Charset::other;
+				if      (matches_ula(c))   return Charset::ula;
+				else if (matches_digit(c)) return Charset::digit;
+				else                       return charmap.lookup(c, Charset::other);
 			}
 		};
 
@@ -549,16 +529,9 @@ namespace cctmp {
 
 	struct T_generic_assembly_dfa
 	{
-		using T_dftt		= T_generic_assembly_dftt;
-
-		using ArrayEnd		= T_store_U< _array_end_  >;
-		using ArraySize		= T_store_U< _array_size_ >;
-
-		nik_ces auto value	= T_dftt{};
-		nik_ces auto accept	= T_dftt::State::accept;
-		nik_ces auto end	= ArrayEnd::template result<>(T_dftt::State::accept);
-		nik_ces auto size	= ArraySize::template result<>(T_dftt::State::accept);
-		nik_ces auto token	= T_dftt::State::token;
+		using T_dftt			= T_generic_assembly_dftt;
+		nik_ces auto value		= T_dftt{};
+		nik_ces auto status		= T_dftt::State::status;
 
 		nik_ces auto paste_charset      () { return dfa_charset("_");      }
 		nik_ces auto void_charset       () { return dfa_charset("void");   }
@@ -575,9 +548,6 @@ namespace cctmp {
 		nik_ces auto zip_charset        () { return dfa_charset("zip"); }
 		nik_ces auto fasten_charset     () { return dfa_charset("fasten"); }
 		nik_ces auto glide_charset      () { return dfa_charset("glide"); }
-
-		nik_ces auto find_pos(cstate_type n) { return numeric_find_pos(n, accept, end); }
-		nik_ces auto is_final(cstate_type n) { return (n != size); }
 	};
 
 /***********************************************************************************************************************/
@@ -608,9 +578,7 @@ namespace cctmp {
 		{
 			T_generic_lexer<T_dfa>::lex(l, b, e);
 
-			auto       n = T_dfa::find_pos(l.token);
-			token_type t = TokenName::invalid;
-			if (T_dfa::is_final(n)) t = T_dfa::token[n];
+			token_type t = T_dfa::status.lookup(l.token, TokenName::invalid);
 
 			return keyword_check(l, t);
 		}
@@ -711,101 +679,202 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// scanner:
+// chord assembly:
 
 /***********************************************************************************************************************/
 
-// analyzer:
+// transition table:
 
-	struct T_generic_assembly_analyzer
+	struct T_chord_assembly_dftt
 	{
-		using T_lexer = T_generic_assembly_lexer;
-
-		// how many of these are actually needed?
-
-		gindex_type pad_entry_size  , entry_size   , line_size   ;
-		gindex_type dependency_size , replace_size , graph_size  ;
-		gindex_type identifier_size , mutable_size , quote_size  , void_size   ;
-		gindex_type assign_size     , copy_size    , paste_size  , return_size ;
-		gindex_type label_size      , test_size    , branch_size , goto_size   ;
-
-		nik_ce T_generic_assembly_analyzer(gstring_type b, gstring_type e) :
-
-			pad_entry_size   {            },
-			entry_size       {            },
-			line_size        {            },
-
-			dependency_size  {            },
-			replace_size     {            },
-			graph_size       {            },
-
-			identifier_size  {            },
-			mutable_size     {            },
-			quote_size       {            },
-			void_size        {            },
-
-			assign_size      {            },
-			copy_size        {            },
-			paste_size       {            },
-			return_size      {            },
-
-			label_size       {            },
-			test_size        {            },
-			branch_size      {            },
-			goto_size        {            }
-
+		struct State
+		{
+			enum : state_type
 			{
-				gindex_type cur_entry_size = _zero;
+				empty         = StateName::empty,
+				initial       = StateName::initial,
+				ulan          , // underscore latin alphanumeric
+				l_angle       ,
+				r_angle       ,
+				bar           ,
+				at            ,
+				star          ,
+				plus          ,
+				minus         ,
+				l_bracket     ,
+				r_bracket     ,
+				l_parenthesis ,
+				r_parenthesis ,
+				l_brace       ,
+				r_brace       ,
+				comma         ,
+				backslash     ,
+				no_quote      ,
+				l_quote       ,
+				r_quote       ,
+				dimension
+			};
 
-				lexeme l;
+			nik_ces auto status = table
+			(
+				U_store_T<state_type>,
+				U_store_T<gchar_type>,
 
-				while (b != e)
-				{
-					T_lexer::lex(l, b, e);
+				pair( ulan          , 'i' ),
+				pair( l_angle       , '<' ),
+				pair( r_angle       , '>' ),
+				pair( bar           , '|' ),
+				pair( at            , '@' ),
+				pair( star          , '*' ),
+				pair( plus          , '+' ),
+				pair( minus         , '-' ),
+				pair( l_bracket     , '[' ),
+				pair( r_bracket     , ']' ),
+				pair( l_parenthesis , '(' ),
+				pair( r_parenthesis , ')' ),
+				pair( l_brace       , '{' ),
+				pair( r_brace       , '}' ),
+				pair( comma         , ',' ),
+				pair( r_quote       , 'q' )
+			);
+		};
 
-					switch (l.token)
-					{
-						case ';':
-						{
-							if (cur_entry_size > entry_size)
-								entry_size = cur_entry_size;
-							cur_entry_size = _zero;
-							++line_size;
-							break;
-						}
-						case 'i': { ++cur_entry_size ; ++identifier_size ; break; }
-						case '!': {                    ++mutable_size    ; break; }
-						case 'q': { ++cur_entry_size ; ++quote_size      ; break; }
-						case '.': { ++cur_entry_size ; ++copy_size       ; break; }
-						case '_': { ++cur_entry_size ; ++paste_size      ; break; }
-						case '=': {                    ++assign_size     ; break; }
-						case 'r': {                    ++return_size     ; break; }
-						case 'l': {                    ++label_size      ; break; }
-						case 'v': { ++cur_entry_size ; ++void_size       ; break; }
-						case 't': { ++cur_entry_size ; ++test_size       ; break; }
-						case 'b': {                    ++branch_size     ; break; }
-						case 'g': {                    ++goto_size       ; break; }
-					}
+		struct Charset
+		{
+			enum : gkey_type
+			{
+				other = 0,
+				ula           , // underscore latin alphabet
+				digit         ,
+				l_angle       ,
+				r_angle       ,
+				bar           ,
+				at            ,
+				star          ,
+				plus          ,
+				minus         ,
+				l_bracket     ,
+				r_bracket     ,
+				l_parenthesis ,
+				r_parenthesis ,
+				l_brace       ,
+				r_brace       ,
+				comma         ,
+				backslash     ,
+				quote         ,
+				dimension
+			};
 
-					b = l.finish;
-				}
+			nik_ces auto charmap = table
+			(
+				U_store_T<gchar_type>,
+				U_store_T<gkey_type>,
 
-				dependency_size = goto_size       + branch_size  ;
-				graph_size      = dependency_size + label_size   ;
-				replace_size    = assign_size     - copy_size    ;
-				pad_entry_size  = entry_size      + replace_size ;
+				pair( '<'  , Charset::l_angle       ),
+				pair( '>'  , Charset::r_angle       ),
+				pair( '|'  , Charset::bar           ),
+				pair( '@'  , Charset::at            ),
+				pair( '*'  , Charset::star          ),
+				pair( '+'  , Charset::plus          ),
+				pair( '-'  , Charset::minus         ),
+				pair( '['  , Charset::l_bracket     ),
+				pair( ']'  , Charset::r_bracket     ),
+				pair( '('  , Charset::l_parenthesis ),
+				pair( ')'  , Charset::r_parenthesis ),
+				pair( '{'  , Charset::l_brace       ),
+				pair( '}'  , Charset::r_brace       ),
+				pair( ','  , Charset::comma         ),
+				pair( '\'' , Charset::quote         ),
+				pair( '\\' , Charset::backslash     )
+			);
+
+			nik_ces gkey_type map(gcchar_type c)
+			{
+				if      (matches_ula(c))   return Charset::ula;
+				else if (matches_digit(c)) return Charset::digit;
+				else                       return charmap.lookup(c, Charset::other);
 			}
+		};
+
+		state_type table[State::dimension][Charset::dimension];
+
+		nik_ce T_chord_assembly_dftt() : table{}
+		{
+		//	table [ State::initial   ][ Charset::ula         ] = State::ulan;
+		//	table [ State::initial   ][ Charset::semicolon   ] = State::semicolon;
+		//	table [ State::initial   ][ Charset::equal       ] = State::equal;
+		//	table [ State::initial   ][ Charset::punctuation ] = State::punctuation;
+		//	table [ State::initial   ][ Charset::period      ] = State::period;
+		//	table [ State::initial   ][ Charset::quote       ] = State::l_quote;
+
+		//	table [ State::ulan      ][ Charset::ula         ] = State::ulan;
+		//	table [ State::ulan      ][ Charset::digit       ] = State::ulan;
+		//	table [ State::ulan      ][ Charset::colon       ] = State::colon;
+
+		//	table [ State::l_quote   ][ Charset::ula         ] = State::no_quote;
+		//	table [ State::l_quote   ][ Charset::digit       ] = State::no_quote;
+		//	table [ State::l_quote   ][ Charset::semicolon   ] = State::no_quote;
+		//	table [ State::l_quote   ][ Charset::equal       ] = State::no_quote;
+		//	table [ State::l_quote   ][ Charset::punctuation ] = State::no_quote;
+		//	table [ State::l_quote   ][ Charset::period      ] = State::no_quote;
+		//	table [ State::l_quote   ][ Charset::colon       ] = State::no_quote;
+		//	table [ State::l_quote   ][ Charset::backslash   ] = State::backslash;
+		//	table [ State::l_quote   ][ Charset::other       ] = State::no_quote;
+
+		//	table [ State::backslash ][ Charset::ula         ] = State::no_quote;
+		//	table [ State::backslash ][ Charset::digit       ] = State::no_quote;
+		//	table [ State::backslash ][ Charset::semicolon   ] = State::no_quote;
+		//	table [ State::backslash ][ Charset::equal       ] = State::no_quote;
+		//	table [ State::backslash ][ Charset::punctuation ] = State::no_quote;
+		//	table [ State::backslash ][ Charset::period      ] = State::no_quote;
+		//	table [ State::backslash ][ Charset::colon       ] = State::no_quote;
+		//	table [ State::backslash ][ Charset::backslash   ] = State::no_quote;
+		//	table [ State::backslash ][ Charset::quote       ] = State::no_quote;
+		//	table [ State::backslash ][ Charset::other       ] = State::no_quote;
+
+		//	table [ State::no_quote  ][ Charset::ula         ] = State::no_quote;
+		//	table [ State::no_quote  ][ Charset::digit       ] = State::no_quote;
+		//	table [ State::no_quote  ][ Charset::semicolon   ] = State::no_quote;
+		//	table [ State::no_quote  ][ Charset::equal       ] = State::no_quote;
+		//	table [ State::no_quote  ][ Charset::punctuation ] = State::no_quote;
+		//	table [ State::no_quote  ][ Charset::period      ] = State::no_quote;
+		//	table [ State::no_quote  ][ Charset::colon       ] = State::no_quote;
+		//	table [ State::no_quote  ][ Charset::backslash   ] = State::backslash;
+		//	table [ State::no_quote  ][ Charset::quote       ] = State::r_quote;
+		//	table [ State::no_quote  ][ Charset::other       ] = State::no_quote;
+		}
+
+		nik_ce cstate_type move(cstate_type s, gcchar_type c) const
+			{ return table[s][Charset::map(c)]; }
+	};
+
+/***********************************************************************************************************************/
+
+// automaton:
+
+	struct T_chord_assembly_dfa
+	{
+		using T_dftt		= T_chord_assembly_dftt;
+		nik_ces auto value	= T_dftt{};
+		nik_ces auto status	= T_dftt::State::status;
 	};
 
 /***********************************************************************************************************************/
 
 // interface:
 
-	template<auto static_source>
-	struct T_generic_assembly_scanner
+	struct T_chord_assembly_lexer
 	{
-		nik_ces auto src   = T_store_U<static_source>::value;
-		nik_ces auto value = T_generic_assembly_analyzer(src.begin(), src.end() - 1);
+		using T_dfa = T_chord_assembly_dfa;
+
+		nik_ces void lex(lexeme & l, gstring_type b, gstring_type e)
+		{
+			T_generic_lexer<T_dfa>::lex(l, b, e);
+
+			token_type t = T_dfa::status.lookup(l.token, TokenName::invalid);
+
+			return T_generic_assembly_lexer::keyword_check(l, t);
+		}
 	};
 
 /***********************************************************************************************************************/

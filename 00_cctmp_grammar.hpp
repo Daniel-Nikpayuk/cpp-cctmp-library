@@ -133,6 +133,26 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// static:
+
+/***********************************************************************************************************************/
+
+// callable:
+
+	template<auto Callable>
+	struct T_static_callable
+	{
+		nik_ces auto value = Callable();
+
+	}; template<auto Callable>
+		nik_ce auto _static_callable_ = U_store_T<T_static_callable<Callable>>;
+
+	template<auto U>
+	nik_ce auto static_call = T_store_U<U>::value;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // types:
 
 /***********************************************************************************************************************/
@@ -262,6 +282,48 @@ namespace cctmp {
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return finish; }
 		nik_ce auto size  () const { return Size; }
+	};
+
+/***********************************************************************************************************************/
+
+// pair:
+
+	template<typename T0, typename T1>
+	struct pair
+	{
+		T0 v0;
+		T1 v1;
+
+		nik_ce pair(const T0 & _v0, const T1 & _v1) : v0{_v0}, v1{_v1} { }
+	};
+
+/***********************************************************************************************************************/
+
+// table:
+
+	template<typename TU0, typename TU1, typename... Pairs>
+	struct table
+	{
+		using T0		= T_restore_T<TU0>;
+		using T1		= T_restore_T<TU1>;
+
+		nik_ces auto length	= sizeof...(Pairs);
+
+		T0 v0[length];
+		T1 v1[length];
+
+		nik_ce table(TU0, TU1, const Pairs &... ps) : v0{ps.v0...}, v1{ps.v1...} { }
+
+		nik_ce const T1 & lookup(const T0 & _v0, const T1 & _v1) const
+		{
+			auto k = v0;
+			auto e = v0 + length;
+
+			while (k != e) if (*k == _v0) break; else ++k;
+
+			if (k != e) return v1[k - v0];
+			else        return _v1;
+		}
 	};
 
 /***********************************************************************************************************************/

@@ -162,7 +162,7 @@ namespace cctmp {
 	{
 		private:
 
-			constexpr static auto static_src	= _static_object_<callable_source>;
+			constexpr static auto static_src	= _static_callable_<callable_source>;
 			constexpr static auto static_scanner	= U_store_T<T_generic_assembly_scanner<static_src>>;
 			constexpr static auto src		= T_store_U<static_scanner>::src;
 
@@ -253,7 +253,7 @@ namespace cctmp {
 	{
 		private:
 
-			constexpr static auto static_src	= _static_object_<callable_source>;
+			constexpr static auto static_src	= _static_callable_<callable_source>;
 			constexpr static auto static_scanner	= U_store_T<T_generic_assembly_scanner<static_src>>;
 			constexpr static auto target		= T_generic_assembly_targeter<static_scanner>::value;
 			constexpr static auto contr		= target.contr;

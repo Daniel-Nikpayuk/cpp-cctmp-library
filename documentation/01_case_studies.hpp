@@ -485,9 +485,9 @@ namespace cctmp {
 // frame:
 
 	template<auto side_dec>
-	constexpr auto fall_fact_2_frame()
+	constexpr auto fall_fact_2_frame_callable()
 	{
-		return cctmp::table
+		return cctmp::frame
 		(
 		 	cctmp::U_char,
 
@@ -513,7 +513,7 @@ namespace cctmp {
 
 	}; constexpr auto _ptr_side_dec_ = U_store_T<T_ptr_side_dec>;
 
-	constexpr auto fall_fact_2_ptr_frame = cctmp::make_frame<fall_fact_2_frame<_ptr_side_dec_>>;
+	constexpr auto fall_fact_2_ptr_frame = cctmp::_static_callable_<fall_fact_2_frame_callable<_ptr_side_dec_>>;
 
 	template<bool punct>
 	constexpr auto _fall_fact_2_v0()
@@ -570,7 +570,7 @@ namespace cctmp {
 
 	}; constexpr auto _ref_side_dec_ = U_store_T<T_ref_side_dec>;
 
-	constexpr auto fall_fact_2_ref_frame = cctmp::make_frame<fall_fact_2_frame<_ref_side_dec_>>;
+	constexpr auto fall_fact_2_ref_frame = cctmp::_static_callable_<fall_fact_2_frame_callable<_ref_side_dec_>>;
 
 	template<bool punct>
 	constexpr auto _fall_fact_2_v1()
