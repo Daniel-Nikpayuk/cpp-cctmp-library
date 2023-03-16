@@ -425,9 +425,9 @@ namespace cctmp {
 				dimension
 			};
 
-			nik_ces auto status = table
+			nik_ces auto accept = table
 			(
-				U_state_type, U_gchar_type,
+				U_state_type, U_token_type,
 
 				pair( ulan        , 'i' ),
 				pair( semicolon   , ';' ),
@@ -492,6 +492,7 @@ namespace cctmp {
 			table [ State::ulan      ][ Charset::digit       ] = State::ulan;
 			table [ State::ulan      ][ Charset::colon       ] = State::colon;
 
+			table [ State::l_quote   ][ Charset::other       ] = State::no_quote;
 			table [ State::l_quote   ][ Charset::ula         ] = State::no_quote;
 			table [ State::l_quote   ][ Charset::digit       ] = State::no_quote;
 			table [ State::l_quote   ][ Charset::semicolon   ] = State::no_quote;
@@ -500,8 +501,8 @@ namespace cctmp {
 			table [ State::l_quote   ][ Charset::period      ] = State::no_quote;
 			table [ State::l_quote   ][ Charset::colon       ] = State::no_quote;
 			table [ State::l_quote   ][ Charset::backslash   ] = State::backslash;
-			table [ State::l_quote   ][ Charset::other       ] = State::no_quote;
 
+			table [ State::backslash ][ Charset::other       ] = State::no_quote;
 			table [ State::backslash ][ Charset::ula         ] = State::no_quote;
 			table [ State::backslash ][ Charset::digit       ] = State::no_quote;
 			table [ State::backslash ][ Charset::semicolon   ] = State::no_quote;
@@ -511,8 +512,8 @@ namespace cctmp {
 			table [ State::backslash ][ Charset::colon       ] = State::no_quote;
 			table [ State::backslash ][ Charset::backslash   ] = State::no_quote;
 			table [ State::backslash ][ Charset::quote       ] = State::no_quote;
-			table [ State::backslash ][ Charset::other       ] = State::no_quote;
 
+			table [ State::no_quote  ][ Charset::other       ] = State::no_quote;
 			table [ State::no_quote  ][ Charset::ula         ] = State::no_quote;
 			table [ State::no_quote  ][ Charset::digit       ] = State::no_quote;
 			table [ State::no_quote  ][ Charset::semicolon   ] = State::no_quote;
@@ -522,7 +523,6 @@ namespace cctmp {
 			table [ State::no_quote  ][ Charset::colon       ] = State::no_quote;
 			table [ State::no_quote  ][ Charset::backslash   ] = State::backslash;
 			table [ State::no_quote  ][ Charset::quote       ] = State::r_quote;
-			table [ State::no_quote  ][ Charset::other       ] = State::no_quote;
 		}
 
 		nik_ce cstate_type move(cstate_type s, gcchar_type c) const
@@ -537,7 +537,7 @@ namespace cctmp {
 	{
 		using T_dftt			= T_generic_assembly_dftt;
 		nik_ces auto value		= T_dftt{};
-		nik_ces auto status		= T_dftt::State::status;
+		nik_ces auto accept		= T_dftt::State::accept;
 
 		nik_ces auto paste_charset      () { return dfa_charset("_");      }
 		nik_ces auto void_charset       () { return dfa_charset("void");   }
@@ -584,7 +584,7 @@ namespace cctmp {
 		{
 			T_generic_lexer<T_dfa>::lex(l, b, e);
 
-			token_type t = T_dfa::status.lookup(l.token, TokenName::invalid);
+			token_type t = T_dfa::accept.lookup(l.token, TokenName::invalid);
 
 			return keyword_check(l, t);
 		}
@@ -721,9 +721,9 @@ namespace cctmp {
 				dimension
 			};
 
-			nik_ces auto status = table
+			nik_ces auto accept = table
 			(
-				U_state_type, U_gchar_type,
+				U_state_type, U_token_type,
 
 				pair( ulan          , 'i' ),
 				pair( l_angle       , '<' ),
@@ -748,7 +748,7 @@ namespace cctmp {
 		{
 			enum : gkey_type
 			{
-				other = 0,
+				other         = 0,
 				ula           , // underscore latin alphabet
 				digit         ,
 				l_angle       ,
@@ -804,48 +804,84 @@ namespace cctmp {
 
 		nik_ce T_chord_assembly_dftt() : table{}
 		{
-		//	table [ State::initial   ][ Charset::ula         ] = State::ulan;
-		//	table [ State::initial   ][ Charset::semicolon   ] = State::semicolon;
-		//	table [ State::initial   ][ Charset::equal       ] = State::equal;
-		//	table [ State::initial   ][ Charset::punctuation ] = State::punctuation;
-		//	table [ State::initial   ][ Charset::period      ] = State::period;
-		//	table [ State::initial   ][ Charset::quote       ] = State::l_quote;
+			table [ State::initial       ][ Charset::ula           ] = State::ulan;
+			table [ State::initial       ][ Charset::l_angle       ] = State::l_angle;
+			table [ State::initial       ][ Charset::r_angle       ] = State::r_angle;
+			table [ State::initial       ][ Charset::bar           ] = State::bar;
+			table [ State::initial       ][ Charset::at            ] = State::at;
+			table [ State::initial       ][ Charset::star          ] = State::star;
+			table [ State::initial       ][ Charset::plus          ] = State::plus;
+			table [ State::initial       ][ Charset::minus         ] = State::minus;
+			table [ State::initial       ][ Charset::l_bracket     ] = State::l_bracket;
+			table [ State::initial       ][ Charset::r_bracket     ] = State::r_bracket;
+			table [ State::initial       ][ Charset::l_parenthesis ] = State::l_parenthesis;
+			table [ State::initial       ][ Charset::r_parenthesis ] = State::r_parenthesis;
+			table [ State::initial       ][ Charset::l_brace       ] = State::l_brace;
+			table [ State::initial       ][ Charset::r_brace       ] = State::r_brace;
+			table [ State::initial       ][ Charset::comma         ] = State::comma;
+			table [ State::initial       ][ Charset::quote         ] = State::l_quote;
 
-		//	table [ State::ulan      ][ Charset::ula         ] = State::ulan;
-		//	table [ State::ulan      ][ Charset::digit       ] = State::ulan;
-		//	table [ State::ulan      ][ Charset::colon       ] = State::colon;
+			table [ State::ulan          ][ Charset::ula           ] = State::ulan;
+			table [ State::ulan          ][ Charset::digit         ] = State::ulan;
 
-		//	table [ State::l_quote   ][ Charset::ula         ] = State::no_quote;
-		//	table [ State::l_quote   ][ Charset::digit       ] = State::no_quote;
-		//	table [ State::l_quote   ][ Charset::semicolon   ] = State::no_quote;
-		//	table [ State::l_quote   ][ Charset::equal       ] = State::no_quote;
-		//	table [ State::l_quote   ][ Charset::punctuation ] = State::no_quote;
-		//	table [ State::l_quote   ][ Charset::period      ] = State::no_quote;
-		//	table [ State::l_quote   ][ Charset::colon       ] = State::no_quote;
-		//	table [ State::l_quote   ][ Charset::backslash   ] = State::backslash;
-		//	table [ State::l_quote   ][ Charset::other       ] = State::no_quote;
+			table [ State::backslash     ][ Charset::other         ] = State::no_quote;
+			table [ State::backslash     ][ Charset::ula           ] = State::no_quote;
+			table [ State::backslash     ][ Charset::digit         ] = State::no_quote;
+			table [ State::backslash     ][ Charset::l_angle       ] = State::no_quote;
+			table [ State::backslash     ][ Charset::r_angle       ] = State::no_quote;
+			table [ State::backslash     ][ Charset::bar           ] = State::no_quote;
+			table [ State::backslash     ][ Charset::at            ] = State::no_quote;
+			table [ State::backslash     ][ Charset::star          ] = State::no_quote;
+			table [ State::backslash     ][ Charset::plus          ] = State::no_quote;
+			table [ State::backslash     ][ Charset::minus         ] = State::no_quote;
+			table [ State::backslash     ][ Charset::l_bracket     ] = State::no_quote;
+			table [ State::backslash     ][ Charset::r_bracket     ] = State::no_quote;
+			table [ State::backslash     ][ Charset::l_parenthesis ] = State::no_quote;
+			table [ State::backslash     ][ Charset::r_parenthesis ] = State::no_quote;
+			table [ State::backslash     ][ Charset::l_brace       ] = State::no_quote;
+			table [ State::backslash     ][ Charset::r_brace       ] = State::no_quote;
+			table [ State::backslash     ][ Charset::comma         ] = State::no_quote;
+			table [ State::backslash     ][ Charset::backslash     ] = State::backslash;
 
-		//	table [ State::backslash ][ Charset::ula         ] = State::no_quote;
-		//	table [ State::backslash ][ Charset::digit       ] = State::no_quote;
-		//	table [ State::backslash ][ Charset::semicolon   ] = State::no_quote;
-		//	table [ State::backslash ][ Charset::equal       ] = State::no_quote;
-		//	table [ State::backslash ][ Charset::punctuation ] = State::no_quote;
-		//	table [ State::backslash ][ Charset::period      ] = State::no_quote;
-		//	table [ State::backslash ][ Charset::colon       ] = State::no_quote;
-		//	table [ State::backslash ][ Charset::backslash   ] = State::no_quote;
-		//	table [ State::backslash ][ Charset::quote       ] = State::no_quote;
-		//	table [ State::backslash ][ Charset::other       ] = State::no_quote;
+			table [ State::backslash     ][ Charset::other         ] = State::no_quote;
+			table [ State::backslash     ][ Charset::ula           ] = State::no_quote;
+			table [ State::backslash     ][ Charset::digit         ] = State::no_quote;
+			table [ State::backslash     ][ Charset::l_angle       ] = State::no_quote;
+			table [ State::backslash     ][ Charset::r_angle       ] = State::no_quote;
+			table [ State::backslash     ][ Charset::bar           ] = State::no_quote;
+			table [ State::backslash     ][ Charset::at            ] = State::no_quote;
+			table [ State::backslash     ][ Charset::star          ] = State::no_quote;
+			table [ State::backslash     ][ Charset::plus          ] = State::no_quote;
+			table [ State::backslash     ][ Charset::minus         ] = State::no_quote;
+			table [ State::backslash     ][ Charset::l_bracket     ] = State::no_quote;
+			table [ State::backslash     ][ Charset::r_bracket     ] = State::no_quote;
+			table [ State::backslash     ][ Charset::l_parenthesis ] = State::no_quote;
+			table [ State::backslash     ][ Charset::r_parenthesis ] = State::no_quote;
+			table [ State::backslash     ][ Charset::l_brace       ] = State::no_quote;
+			table [ State::backslash     ][ Charset::r_brace       ] = State::no_quote;
+			table [ State::backslash     ][ Charset::comma         ] = State::no_quote;
+			table [ State::backslash     ][ Charset::backslash     ] = State::no_quote;
+			table [ State::backslash     ][ Charset::quote         ] = State::no_quote;
 
-		//	table [ State::no_quote  ][ Charset::ula         ] = State::no_quote;
-		//	table [ State::no_quote  ][ Charset::digit       ] = State::no_quote;
-		//	table [ State::no_quote  ][ Charset::semicolon   ] = State::no_quote;
-		//	table [ State::no_quote  ][ Charset::equal       ] = State::no_quote;
-		//	table [ State::no_quote  ][ Charset::punctuation ] = State::no_quote;
-		//	table [ State::no_quote  ][ Charset::period      ] = State::no_quote;
-		//	table [ State::no_quote  ][ Charset::colon       ] = State::no_quote;
-		//	table [ State::no_quote  ][ Charset::backslash   ] = State::backslash;
-		//	table [ State::no_quote  ][ Charset::quote       ] = State::r_quote;
-		//	table [ State::no_quote  ][ Charset::other       ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::other         ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::ula           ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::digit         ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::l_angle       ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::r_angle       ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::bar           ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::at            ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::star          ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::plus          ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::minus         ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::l_bracket     ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::r_bracket     ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::l_parenthesis ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::r_parenthesis ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::l_brace       ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::r_brace       ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::comma         ] = State::no_quote;
+			table [ State::no_quote      ][ Charset::backslash     ] = State::backslash;
+			table [ State::no_quote      ][ Charset::quote         ] = State::r_quote;
 		}
 
 		nik_ce cstate_type move(cstate_type s, gcchar_type c) const
@@ -860,7 +896,7 @@ namespace cctmp {
 	{
 		using T_dftt		= T_chord_assembly_dftt;
 		nik_ces auto value	= T_dftt{};
-		nik_ces auto status	= T_dftt::State::status;
+		nik_ces auto accept	= T_dftt::State::accept;
 	};
 
 /***********************************************************************************************************************/
@@ -875,10 +911,28 @@ namespace cctmp {
 		{
 			T_generic_lexer<T_dfa>::lex(l, b, e);
 
-			token_type t = T_dfa::status.lookup(l.token, TokenName::invalid);
+			token_type t = T_dfa::accept.lookup(l.token, TokenName::invalid);
 
-			return T_generic_assembly_lexer::keyword_check(l, t);
+			return keyword_check(l, t);
 		}
+
+		nik_ces void keyword_check(lexeme & l, ctoken_type t)
+		{
+			token_type rt = t;
+
+			switch (t)
+			{
+				case 'i':
+				{
+					ctoken_type t0 = T_generic_assembly_lexer::keyword(l.start, l.finish);
+					rt = (t0 == TokenName::invalid) ? t : t0;
+					break;
+				}
+			}
+
+			l.token = (gindex_type) rt;
+		}
+
 	};
 
 /***********************************************************************************************************************/

@@ -120,6 +120,6 @@
 		for (int k = 0; k < 10; ++k) printf("%d, ", x[k]);
 		printf("\n");			// prints: 0, 1, 4, 9, 16, 25, 36, 49, 64, 81,
 
-	//	return 0;
+		return 0;
 	}
 
