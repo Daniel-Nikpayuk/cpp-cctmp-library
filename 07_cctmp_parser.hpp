@@ -218,10 +218,10 @@ namespace cctmp {
 	template<typename T_action, typename T_ast, typename T_pda, typename T_lexer>
 	struct T_generic_parser
 	{
-		nik_ces auto act	= T_action::value;
-		nik_ces auto pda	= T_pda::value;
+		nik_ces auto act	= member_value_T<T_action>;
+		nik_ces auto pda	= member_value_T<T_pda>;
 
-		using act_type		= decltype(act);
+		using act_type		= member_type_T<T_action>;
 		using NAction		= typename act_type::NAction;
 		using TAction		= typename act_type::TAction;
 

@@ -143,12 +143,28 @@ namespace cctmp {
 	struct T_static_callable
 	{
 		nik_ces auto value = Callable();
+		using type         = decltype(value);
 
 	}; template<auto Callable>
 		nik_ce auto _static_callable_ = U_store_T<T_static_callable<Callable>>;
 
+/***********************************************************************************************************************/
+
+// member value:
+
+	template<typename T>
+	nik_ce auto member_value_T = T::value;
+
 	template<auto U>
-	nik_ce auto static_call = T_store_U<U>::value;
+	nik_ce auto member_value_U = member_value_T<T_store_U<U>>;
+
+// member type:
+
+	template<typename T>
+	using member_type_T = typename T::type;
+
+	template<auto U>
+	using member_type_U = member_type_T<T_store_U<U>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -164,12 +180,16 @@ namespace cctmp {
 		using global_bool_type		= bool;
 		using gbool_type		= global_bool_type;
 		using gcbool_type		= global_bool_type const;
+		nik_ce auto U_gbool_type	= U_store_T<gbool_type>;
+		nik_ce auto U_gcbool_type	= U_store_T<gcbool_type>;
 
 	// [0-10]:
 
 		using global_key_type		= unsigned char;
 		using gkey_type			= global_key_type;
 		using gckey_type		= global_key_type const;
+		nik_ce auto U_gkey_type		= U_store_T<gkey_type>;
+		nik_ce auto U_gckey_type	= U_store_T<gckey_type>;
 
 		nik_ce gkey_type _zero		=   0;
 		nik_ce gkey_type _one		=   1;
@@ -188,6 +208,8 @@ namespace cctmp {
 		using global_index_type		= unsigned short;
 		using gindex_type		= global_index_type;
 		using gcindex_type		= global_index_type const;
+		nik_ce auto U_gindex_type	= U_store_T<gindex_type>;
+		nik_ce auto U_gcindex_type	= U_store_T<gcindex_type>;
 
 		nik_ce gindex_type _2_0		=   1;
 		nik_ce gindex_type _2_1		=   2;
@@ -203,6 +225,8 @@ namespace cctmp {
 		using global_depth_type		= unsigned short;
 		using gdepth_type		= global_depth_type;
 		using gcdepth_type		= global_depth_type const;
+		nik_ce auto U_gdepth_type	= U_store_T<gdepth_type>;
+		nik_ce auto U_gcdepth_type	= U_store_T<gcdepth_type>;
 
 /***********************************************************************************************************************/
 
@@ -312,7 +336,9 @@ namespace cctmp {
 		T0 v0[length];
 		T1 v1[length];
 
-		nik_ce table(TU0, TU1, const Pairs &... ps) : v0{ps.v0...}, v1{ps.v1...} { }
+		nik_ce table(const TU0 &, const TU1 &, const Pairs &... ps) :
+
+			v0{ps.v0...}, v1{ps.v1...} { }
 
 		nik_ce const T1 & lookup(const T0 & _v0, const T1 & _v1) const
 		{

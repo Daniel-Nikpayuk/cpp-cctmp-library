@@ -31,7 +31,7 @@ namespace cctmp {
 	struct T_generic_assembly_architecture
 	{
 		nik_ces auto src	= T_store_U<static_scanner>::src;
-		nik_ces auto scanner	= T_store_U<static_scanner>::value;
+		nik_ces auto scanner	= member_value_U<static_scanner>;
 		using T_ast		= T_generic_assembly_ast<static_scanner>;
 		using T_parser		= T_generic_assembly_parser<T_ast, T_generic_assembly_translator>;
 

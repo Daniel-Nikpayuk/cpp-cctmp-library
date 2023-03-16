@@ -30,10 +30,14 @@ namespace cctmp {
 	using global_char_type		= char;
 	using gchar_type		= global_char_type;
 	using gcchar_type		= global_char_type const;
+	nik_ce auto U_gchar_type	= U_store_T<gchar_type>;
+	nik_ce auto U_gcchar_type	= U_store_T<gcchar_type>;
 
 	using global_string_type	= gcchar_type*;
 	using gstring_type		= global_string_type;
 	using gcstring_type		= global_string_type const;
+	nik_ce auto U_gstring_type	= U_store_T<gstring_type>;
+	nik_ce auto U_gcstring_type	= U_store_T<gcstring_type>;
 
 /***********************************************************************************************************************/
 
@@ -174,8 +178,10 @@ namespace cctmp {
 
 // state:
 
-	using state_type  = gindex_type;
-	using cstate_type = state_type const;
+	using state_type  		= gindex_type;
+	using cstate_type 		= state_type const;
+	nik_ce auto U_state_type	= U_store_T<state_type>;
+	nik_ce auto U_cstate_type	= U_store_T<cstate_type>;
 
 	struct StateName
 	{
@@ -193,8 +199,10 @@ namespace cctmp {
 
 // token:
 
-	using token_type  = gchar_type;
-	using ctoken_type = token_type const;
+	using token_type  		= gchar_type;
+	using ctoken_type 		= token_type const;
+	nik_ce auto U_token_type	= U_store_T<token_type>;
+	nik_ce auto U_ctoken_type	= U_store_T<ctoken_type>;
 
 	struct TokenName
 	{
@@ -237,7 +245,7 @@ namespace cctmp {
 	template<typename T_dftt>
 	struct T_generic_lexer
 	{
-		nik_ces auto transition_table = T_dftt::value;
+		nik_ces auto transition_table = member_value_T<T_dftt>;
 
 		nik_ces void lex(lexeme & l, gstring_type b, gstring_type e)
 		{
@@ -338,7 +346,7 @@ namespace cctmp {
 	struct T_keyword_dftt
 	{
 		nik_ces auto static_charset		= _static_callable_<CharsetCallable>;
-		nik_ces auto charset			= T_store_U<static_charset>::value;
+		nik_ces auto charset			= member_value_U<static_charset>;
 		nik_ces gkey_type state_size		= charset.length + 2;
 		nik_ces gkey_type charset_size		= charset.size + 1;
 
@@ -419,8 +427,7 @@ namespace cctmp {
 
 			nik_ces auto status = table
 			(
-				U_store_T<state_type>,
-				U_store_T<gchar_type>,
+				U_state_type, U_gchar_type,
 
 				pair( ulan        , 'i' ),
 				pair( semicolon   , ';' ),
@@ -449,10 +456,9 @@ namespace cctmp {
 				dimension
 			};
 
-			nik_ces auto charmap = table
+			nik_ces auto charmap = table // 00_grammar table
 			(
-				U_store_T<gchar_type>,
-				U_store_T<gkey_type>,
+				U_gchar_type, U_gkey_type,
 
 				pair( ';'  , Charset::semicolon   ),
 				pair( '='  , Charset::equal       ),
@@ -717,8 +723,7 @@ namespace cctmp {
 
 			nik_ces auto status = table
 			(
-				U_store_T<state_type>,
-				U_store_T<gchar_type>,
+				U_state_type, U_gchar_type,
 
 				pair( ulan          , 'i' ),
 				pair( l_angle       , '<' ),
@@ -765,10 +770,9 @@ namespace cctmp {
 				dimension
 			};
 
-			nik_ces auto charmap = table
+			nik_ces auto charmap = table // 00_grammar table
 			(
-				U_store_T<gchar_type>,
-				U_store_T<gkey_type>,
+				U_gchar_type, U_gkey_type,
 
 				pair( '<'  , Charset::l_angle       ),
 				pair( '>'  , Charset::r_angle       ),

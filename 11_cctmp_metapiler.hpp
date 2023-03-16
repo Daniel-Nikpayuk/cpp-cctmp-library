@@ -116,7 +116,7 @@ namespace cctmp {
 
 		string_type string;
 
-		nik_ce binding(const CharType (&s)[Size], ValueType) : string{s} { }
+		nik_ce binding(const CharType (&s)[Size], const ValueType &) : string{s} { }
 	};
 
 /***********************************************************************************************************************/
@@ -129,44 +129,37 @@ namespace cctmp {
 	template<typename CharType, typename... Bindings>
 	struct frame
 	{
-		using char_type			= T_restore_T<CharType>;
-		using string_type		= char_type const*;
-		using cstring_type		= string_type const;
+		using char_type		= T_restore_T<CharType>;
+		using string_type	= char_type const*;
+		using cstring_type	= string_type const;
 
-		nik_ces auto length		= sizeof...(Bindings);
-		nik_ces auto sizes		= array<decltype(length), Bindings::size...>;
-		nik_ces auto values		= U_pack_Vs<Bindings::value...>;
+		nik_ces auto length	= sizeof...(Bindings);
+		nik_ces auto sizes	= array<decltype(length), Bindings::size...>;
+		nik_ces auto values	= U_pack_Vs<member_value_T<Bindings>...>;
 
 		cstring_type string[length];
 
-		nik_ce frame(CharType, Bindings... bs) : string{bs.string...} { }
-	};
+		nik_ce frame(const CharType &, const Bindings &... bs) : string{bs.string...} { }
 
-/***********************************************************************************************************************/
-
-// frame lookup:
-
-	template<auto static_frame, typename StringType>
-	nik_ce auto lookup_frame(StringType str_begin, StringType str_end)
-	{
-		nik_ce auto frame = static_call<static_frame>;
-
-		auto key  = frame.string;
-		auto end  = frame.string + frame.length;
-		auto size = frame.sizes;
-
-		while (key != end)
+		nik_ce auto lookup(string_type str_begin, cstring_type str_end) const
 		{
-			auto b = *key;
-			auto e = *key + *(size++);
+			auto key  = string;
+			auto end  = string + length;
+			auto size = sizes;
 
-			if (ptr_diff_equal(b, e, str_begin, str_end)) break;
+			while (key != end)
+			{
+				auto b = *key;
+				auto e = *key + *(size++);
 
-			++key;
+				if (ptr_diff_equal(b, e, str_begin, str_end)) break;
+
+				++key;
+			}
+
+			return key - string;
 		}
-
-		return key - frame.string;
-	}
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -290,12 +283,10 @@ namespace cctmp {
 		template<auto static_frame>
 		nik_ces auto find(gstring_type start, gstring_type finish)
 		{
-			nik_ce auto key_f  = lookup_frame<static_frame, gstring_type>;
-			nik_ce auto frame  = static_call<static_frame>;
-			nik_ce auto values = decltype(frame)::values;
-			nik_ce auto length = decltype(frame)::length;
+			nik_ce auto frame  = member_value_U<static_frame>;
+			nik_ce auto length = frame.length;
 
-			auto key = key_f(start, finish);
+			auto key = frame.lookup(start, finish);
 
 			return survey(key, length);
 		}
@@ -329,7 +320,7 @@ namespace cctmp {
 	{
 		nik_ces auto static_src		= _static_callable_<callable_source>;
 		nik_ces auto static_scanner	= U_store_T<T_generic_assembly_scanner<static_src>>;
-		nik_ces auto target		= T_generic_assembly_targeter<static_scanner>::value;
+		nik_ces auto target		= member_value_T<T_generic_assembly_targeter<static_scanner>>;
 		nik_ces auto toc		= target.toc;
 		nik_ces auto env		= eval<_push_, H_id, Env, default_machine_frame>;
 
@@ -390,7 +381,7 @@ namespace cctmp {
 				nik_ce auto   pos        = survey::search(record, record + sizeof...(static_frames));
 
 				nik_ce auto static_frame = eval<_par_at_, pos, static_frames...>;
-				nik_ce auto values       = decltype(static_call<static_frame>)::values;
+				nik_ce auto values       = member_type_U<static_frame>::values;
 
 				return unpack_<values, _par_at_, record[pos].key>;
 			}

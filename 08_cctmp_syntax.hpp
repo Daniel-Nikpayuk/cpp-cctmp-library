@@ -118,7 +118,7 @@ namespace cctmp {
 	template<auto static_source>
 	struct T_generic_assembly_scanner
 	{
-		nik_ces auto src   = T_store_U<static_source>::value;
+		nik_ces auto src   = member_value_U<static_source>;
 		nik_ces auto value = T_generic_assembly_analyzer(src.begin(), src.end() - 1);
 	};
 
@@ -281,7 +281,7 @@ namespace cctmp {
 	template<auto static_scanner>
 	struct T_generic_assembly_ast
 	{
-		nik_ces auto scanner	= T_store_U<static_scanner>::value;
+		nik_ces auto scanner	= member_value_U<static_scanner>;
 
 		using page_type		= Page<gchar_type, scanner.line_size, scanner.pad_entry_size>;
 		using line_type		= typename page_type::line_type;

@@ -723,7 +723,11 @@ namespace cctmp {
 	// interface:
 
 		template<typename AST, typename Stack>
-		struct T_generic_assembly_translator { nik_ces auto value = T_generic_assembly_ta<AST, Stack>{}; };
+		struct T_generic_assembly_translator
+		{
+			nik_ces auto value = T_generic_assembly_ta<AST, Stack>{};
+			using type         = decltype(value);
+		};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
