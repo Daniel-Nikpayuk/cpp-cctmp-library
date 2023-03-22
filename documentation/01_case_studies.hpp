@@ -306,6 +306,77 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// binary dispatch:
+
+/***********************************************************************************************************************/
+
+// version 0:
+
+	constexpr auto _binary_dispatch_v0()
+	{
+		return source
+		(
+			"dispatch n g h x y         ;"
+
+			"body:                      ;"
+			"  test equal n zero        ;"
+			"  branch to_g              ;"
+			"  f # h                    ;"
+			"goto done                  ;"
+
+			"to_g:                      ;"
+			"  f # g                    ;"
+
+			"done:                      ;"
+			"  . = f x y                ;"
+			"  return _                 ;"
+		);
+	}
+
+	template<typename G, typename H, typename T>
+	constexpr auto binary_dispatch_v0(int n, G g, H h, T x, T y)
+	{
+		constexpr auto e0 = env<constant_machine_frame>;
+
+		return generic_assembly_apply<_binary_dispatch_v0, e0, T>(n, g, h, x, y);
+	}
+
+/***********************************************************************************************************************/
+
+// version 1:
+
+	constexpr auto _binary_dispatch_v1()
+	{
+		return source
+		(
+			"dispatch n g h x y         ;"
+
+			"body:                      ;"
+			"  f # h                    ;"
+			"  test equal n zero        ;"
+			"  branch to_g              ;"
+			"goto done                  ;"
+
+			"to_g:                      ;"
+			"  f # g                    ;"
+
+			"done:                      ;"
+			"  . = f x y                ;"
+			"  return _                 ;"
+		);
+	}
+
+	template<typename G, typename H, typename T>
+	constexpr auto binary_dispatch_v1(int n, G g, H h, T x, T y)
+	{
+		constexpr auto e0 = env<constant_machine_frame>;
+
+		return generic_assembly_apply<_binary_dispatch_v1, e0, T>(n, g, h, x, y);
+	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // factorial:
 
 /***********************************************************************************************************************/

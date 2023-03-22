@@ -82,11 +82,6 @@ namespace cctmp {
 			else if constexpr (eval<_same_, f, _sequence_last_         >) return "_sequence_last_        ";
 			else if constexpr (eval<_same_, f, _sequence_end_          >) return "_sequence_end_         ";
 
-			else if constexpr (eval<_same_, f, _is_tuple_              >) return "_is_tuple_             ";
-			else if constexpr (eval<_same_, f, _tuple_type_            >) return "_tuple_type_           ";
-			else if constexpr (eval<_same_, f, _tuple_size_            >) return "_tuple_size_           ";
-			else if constexpr (eval<_same_, f, _to_tuple_              >) return "_to_tuple_             ";
-
 			else                                                          return "(?)                    ";
 		}
 	};
@@ -120,7 +115,7 @@ namespace cctmp {
 				case MN::reselect  : { str = "MN::reselect " ; break; }
 				case MN::right     : { str = "MN::right    " ; break; }
 				case MN::replace   : { str = "MN::replace  " ; break; }
-				case MN::rotate    : { str = "MN::rotate   " ; break; }
+				case MN::pad       : { str = "MN::pad      " ; break; }
 				case MN::call      : { str = "MN::call     " ; break; }
 				case MN::recall    : { str = "MN::recall   " ; break; }
 				case MN::dimension : { str = "MN::dimension" ; break; }
@@ -139,6 +134,7 @@ namespace cctmp {
 				case MT::front     : { str = "MT::front    " ; break; }
 				case MT::go_to     : { str = "MT::go_to    " ; break; }
 				case MT::branch    : { str = "MT::branch   " ; break; }
+				case MT::segment   : { str = "MT::segment  " ; break; }
 				case MT::pair      : { str = "MT::pair     " ; break; }
 				case MT::value     : { str = "MT::value    " ; break; }
 				case MT::side      : { str = "MT::side     " ; break; }
@@ -191,7 +187,6 @@ namespace cctmp {
 					case Sign::na        : { str = " "      ; sub = 1; break; }
 					case Sign::carg      : { str = "carg"   ; sub = 4; break; }
 					case Sign::marg      : { str = "marg"   ; sub = 4; break; }
-					case Sign::var       : { str = "var"    ; sub = 3; break; }
 					case Sign::copy      : { str = "copy"   ; sub = 4; break; }
 					case Sign::paste     : { str = "paste"  ; sub = 5; break; }
 					case Sign::recurse   : { str = "recurse"; sub = 7; break; }
@@ -208,7 +203,6 @@ namespace cctmp {
 
 				auto print_right  = Sign::is_carg  (entry.sign)
 						 || Sign::is_marg  (entry.sign)
-						 || Sign::is_var   (entry.sign)
 						 || Sign::is_paste (entry.sign)
 						 || Sign::is_label (entry.sign)
 						 || Sign::is_jump  (entry.sign);

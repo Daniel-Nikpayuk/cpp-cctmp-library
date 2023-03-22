@@ -61,9 +61,15 @@ namespace cctmp {
 			template<typename AST>
 			nik_ces void new_def_arg(AST & toc, clexeme & l)
 			{
-				toc.set_current_entry(l, Sign::carg, toc.arg_index);
-				toc.increment_arg_index();
+				toc.set_current_entry(l, Sign::carg, toc.arg_size);
+				toc.increment_arg_size();
 			}
+
+		// def(inition) size:
+
+			template<typename AST>
+			nik_ces void new_def_end(AST & toc, clexeme & l)
+				{ toc.set_arity(toc.arg_size); }
 
 		// label:
 
@@ -71,8 +77,8 @@ namespace cctmp {
 			nik_ces void new_label(AST & toc, clexeme & l)
 			{
 				toc.set_kind(Context::label);
-				toc.set_current_entry(l, Sign::label, toc.label_index);
-				toc.increment_label_index();
+				toc.set_current_entry(l, Sign::label, toc.label_size);
+				toc.increment_label_size();
 			}
 
 		// goto:
@@ -143,13 +149,13 @@ namespace cctmp {
 			template<typename AST>
 			nik_ces void new_lvalue_variable(AST & toc, clexeme & l)
 			{
-				toc.set_current_entry(l, Sign::var, toc.arg_index);
+				toc.set_current_entry(l, Sign::carg, toc.arg_size);
 				toc.set_arg_start(toc.current_start_at(_zero));
 				toc.set_arg_finish(toc.current_finish_at(_zero));
 				toc.set_arg_sign(Sign::carg);
-				toc.set_arg_index(toc.arg_index);
+				toc.set_arg_index(toc.arg_size);
 
-				toc.increment_arg_index();
+				toc.increment_arg_size();
 				toc.increment_arg_entry();
 			}
 
@@ -518,6 +524,7 @@ namespace cctmp {
 			n_array [ NAction::nop             ] = NTA::template nop             <AST>;
 			n_array [ NAction::new_definition  ] = NTA::template new_definition  <AST>;
 			n_array [ NAction::new_def_arg     ] = NTA::template new_def_arg     <AST>;
+			n_array [ NAction::new_def_end     ] = NTA::template new_def_end     <AST>;
 			n_array [ NAction::new_label       ] = NTA::template new_label       <AST>;
 			n_array [ NAction::new_goto        ] = NTA::template new_goto        <AST>;
 			n_array [ NAction::new_assignment  ] = NTA::template new_assignment  <AST>;

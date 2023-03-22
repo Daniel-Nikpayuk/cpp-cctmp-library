@@ -77,6 +77,10 @@
 		constexpr auto semidyntyp2  = semidynamic_typing_v1(complex_number(0, 1), 17);
 		constexpr auto semidyntyp3  = semidynamic_typing_v1(complex_number(1, 0), 17);
 		constexpr auto reassign_val = reassign_v0(2, 17);
+		constexpr auto bin_dis_val0 = binary_dispatch_v0(0, _add_, _multiply_, 5, 6);
+		constexpr auto bin_dis_val1 = binary_dispatch_v0(1, _add_, _multiply_, 5, 6);
+		constexpr auto bin_dis_val2 = binary_dispatch_v1(0, _add_, _multiply_, 5, 6);
+		constexpr auto bin_dis_val3 = binary_dispatch_v1(1, _add_, _multiply_, 5, 6);
 
 		static_assert(comp_sq      == complex_number(-3.0, 4.0));
 		static_assert(comp_sum_sqs == complex_number(-4.0, 4.0));
@@ -87,6 +91,10 @@
 		static_assert(semidyntyp2  == 18);
 		static_assert(semidyntyp3  == 5);
 		static_assert(reassign_val == 17);
+		static_assert(bin_dis_val0 == 11);
+		static_assert(bin_dis_val1 == 30);
+		static_assert(bin_dis_val2 == 11);
+		static_assert(bin_dis_val3 == 30);
 
 	// falling factorial:
 

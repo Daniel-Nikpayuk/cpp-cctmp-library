@@ -159,13 +159,12 @@ namespace cctmp {
 			enum : sign_type
 			{
 				na = 0,
-				carg , marg , var , copy , paste , recurse , label , jump , env ,
+				carg , marg , copy , paste , recurse , label , jump , env ,
 				dimension
 			};
 
 			nik_ces bool is_carg    (sign_type s) { return (s == carg   ); }
 			nik_ces bool is_marg    (sign_type s) { return (s == marg   ); }
-			nik_ces bool is_var     (sign_type s) { return (s == var    ); }
 			nik_ces bool is_copy    (sign_type s) { return (s == copy   ); }
 			nik_ces bool is_paste   (sign_type s) { return (s == paste  ); }
 			nik_ces bool is_recurse (sign_type s) { return (s == recurse); }
@@ -303,13 +302,13 @@ namespace cctmp {
 		graph_type graph;
 		lookup_type lookup;
 
-		gindex_type arg_index;
-		gindex_type label_index;
+		gindex_type arity;
+		gindex_type arg_size;
+		gindex_type label_size;
 
 		nik_ce T_generic_assembly_ast() :
 
-			page{}, label{}, go_to{}, branch{}, // progression{},
-			graph{}, lookup{}, arg_index{}, label_index{} { }
+			page{}, label{}, go_to{}, branch{}, graph{}, lookup{}, arity{}, arg_size{}, label_size{} { }
 
 		// match:
 
@@ -368,8 +367,8 @@ namespace cctmp {
 
 			nik_ce void set_arg_start  (gcstring_type start)  { page.array[_zero].entry->start  = start; }
 			nik_ce void set_arg_finish (gcstring_type finish) { page.array[_zero].entry->finish = finish; }
-			nik_ce void set_arg_sign   (csign_type sign)     { page.array[_zero].entry->sign   = sign; }
-			nik_ce void set_arg_index  (gcindex_type index)  { page.array[_zero].entry->index  = index; }
+			nik_ce void set_arg_sign   (csign_type sign)      { page.array[_zero].entry->sign   = sign; }
+			nik_ce void set_arg_index  (gcindex_type index)   { page.array[_zero].entry->index  = index; }
 
 			nik_ce void set_current_sign_at(gcindex_type pos, csign_type sign)
 				{ page.line->array[pos].sign = sign; }
@@ -404,19 +403,23 @@ namespace cctmp {
 			nik_ce void set_paste  () { page.line->has_paste  = true  ; }
 			nik_ce void set_lookup () { page.line->has_lookup = true  ; }
 
+		// page:
+
+			nik_ce void set_arity(gcindex_type n) { arity = n; }
+
 		// increment:
 
-			nik_ce void increment_arg_index   () { ++arg_index          ; }
-			nik_ce void increment_label_index () { ++label_index        ; }
-			nik_ce void increment_arg_entry   () { ++page.array[0].entry; }
-			nik_ce void increment_entry       () { ++page.line->entry   ; }
-			nik_ce void increment_line        () { ++page.line          ; }
-			nik_ce void increment_label       () { ++label.locus        ; }
-			nik_ce void increment_goto        () { ++go_to.locus        ; }
-			nik_ce void increment_branch      () { ++branch.locus       ; }
-			nik_ce void increment_depend      () { ++depend.locus       ; }
-			nik_ce void increment_graph       () { ++graph.locus        ; }
-			nik_ce void increment_lookup      () { ++lookup.locus       ; }
+			nik_ce void increment_arg_size   () { ++arg_size            ; }
+			nik_ce void increment_label_size () { ++label_size          ; }
+			nik_ce void increment_arg_entry  () { ++page.array[0].entry ; }
+			nik_ce void increment_entry      () { ++page.line->entry    ; }
+			nik_ce void increment_line       () { ++page.line           ; }
+			nik_ce void increment_label      () { ++label.locus         ; }
+			nik_ce void increment_goto       () { ++go_to.locus         ; }
+			nik_ce void increment_branch     () { ++branch.locus        ; }
+			nik_ce void increment_depend     () { ++depend.locus        ; }
+			nik_ce void increment_graph      () { ++graph.locus         ; }
+			nik_ce void increment_lookup     () { ++lookup.locus        ; }
 
 		// bookmark:
 

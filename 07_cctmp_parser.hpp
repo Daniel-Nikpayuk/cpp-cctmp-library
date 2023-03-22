@@ -349,9 +349,9 @@ namespace cctmp {
 				{
 					err = ActionName::err, nop = ActionName::nop,
 
-					new_definition , new_def_arg     , new_label       , new_goto        ,
-					new_assignment , new_application , new_conditional , new_jvalue      ,
-					new_mvalue     , new_lvalue      , new_rvalue      ,
+					new_definition , new_def_arg     , new_def_end     , new_label       ,
+					new_goto       , new_assignment  , new_application , new_conditional ,
+					new_jvalue     , new_mvalue      , new_lvalue      , new_rvalue      ,
 					new_copy       , new_paste       , new_return      , new_quote       ,
 					dimension
 				};
@@ -438,7 +438,7 @@ namespace cctmp {
 		{
 			n_entry(n_base, 'S',  'i') = Production{ "iN;BC"   , NAction::new_definition  };
 			n_entry(n_base, 'N',  'i') = Production{ "iN"      , NAction::new_def_arg     };
-			n_entry(n_base, 'N',  ';') = Production{ ""                                   };
+			n_entry(n_base, 'N',  ';') = Production{ ""        , NAction::new_def_end     };
 			n_entry(n_base, 'C',  'l') = Production{ "BC"                                 };
 			n_entry(n_base, 'C', '\0') = Production{ ""                                   };
 			n_entry(n_base, 'B',  'l') = Production{ "l;E"     , NAction::new_label       };

@@ -27,6 +27,8 @@ namespace cctmp {
 
 // architecture:
 
+/***********************************************************************************************************************/
+
 	template<auto static_scanner>
 	struct T_generic_assembly_architecture
 	{
@@ -73,6 +75,10 @@ namespace cctmp {
 			// can check if function calls are redundant and refactor,
 			// but it also might not be necessary if the compiler optimizes.
 
+			auto pad = (toc.arg_size - toc.arity);
+
+			if (pad > 0) add_pad_instr(pad);
+
 			for (auto k = toc.page.begin(); k != toc.page.end(); ++k)
 			{
 				switch (k->kind)
@@ -115,12 +121,19 @@ namespace cctmp {
 				increment_instr();
 			}
 
+			nik_ce void add_pad_instr(gcindex_type pad)
+			{
+				set_instr_pos(pad);
+
+				add_instr(MN::pad, MT::segment, Mark::value);
+				add_instr(MN::pad, MT::id);
+			}
+
 			nik_ce void add_replace_instr(cline_type & l)
 			{
 				auto sign = first_sign(l);
 
-				if      (Sign::is_var(sign) ) add_instr(MN::rotate, MT::id);
-				else if (Sign::is_carg(sign))
+				if (Sign::is_carg(sign))
 				{
 					set_instr_pos(first_index(l));
 
