@@ -601,27 +601,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// id:
-
-/*
-	template<auto... filler>
-	struct T_machine<MN::select, MT::id, filler...>
-	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto ins	= MD::instr(c, i);
-			nik_ce auto n   = ins[MI::pos];
-			nik_ce auto p   = unpack_<l, _par_at_, n>;
-
-			return NIK_MACHINE_TEMPLATE(c, i), p
-				NIK_MACHINE_RESULT_TS(s, c, i, l, Ts...)(vs...);
-		}
-	};
-*/
-
-/***********************************************************************************************************************/
-
 // pair:
 
 	template<auto... filler>
