@@ -42,142 +42,108 @@ namespace cctmp {
 		using signature = void(*)(AST&, clexeme&);
 
 		template<typename AST>
+		nik_ces void err(AST & toc, clexeme & l) { }
+
+		template<typename AST>
 		nik_ces void nop(AST & toc, clexeme & l) { }
 
-		template<typename AST>
-		nik_ces void new_definition(AST & toc, clexeme & l)
-			{ toc.set_kind(Context::define); }
-
-		template<typename AST>
-		nik_ces void new_coordinate(AST & toc, clexeme & l)
-			{ toc.set_kind(Context::label); }
-
-		template<typename AST>
-		nik_ces void new_conditional(AST & toc, clexeme & l)
-			{ toc.set_kind(Context::test); }
-
-		template<typename AST>
-		nik_ces void new_application(AST & toc, clexeme & l)
-			{ toc.set_kind(Context::apply); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// terminal:
-
-/***********************************************************************************************************************/
-
-// (context) define:
-
-	struct T_generic_assembly_tta_context_define
-	{
-		// identifier:
+		// definition:
 
 			template<typename AST>
-			nik_ces void identifier_entry(AST & toc, clexeme & l)
-				{ toc.set_current_entry(l, Sign::carg); }
-
-		// statement (end of line):
-
-			template<typename AST>
-			nik_ces void statement_first(AST & toc)
-				{ toc.set_current_sign_at(_zero, Sign::na); }
-
-			template<typename AST>
-			nik_ces void statement_rest(AST & toc)
+			nik_ces void new_definition(AST & toc, clexeme & l)
 			{
-				auto line = toc.page.line;
-
-				for (auto k = line->array + 1; k != line->end(); ++k)
-				{
-					k->index = toc.arg_index;
-					toc.increment_arg_index();
-				}
+				toc.set_kind(Context::define);
+				toc.set_current_entry(l, Sign::na);
 			}
 
+		// def(inition) arg(ument):
+
 			template<typename AST>
-			nik_ces void statement_entry(AST & toc, clexeme & l)
+			nik_ces void new_def_arg(AST & toc, clexeme & l)
 			{
-				statement_first(toc);
-				statement_rest(toc);
+				toc.set_current_entry(l, Sign::carg, toc.arg_index);
+				toc.increment_arg_index();
 			}
-	};
 
-/***********************************************************************************************************************/
-
-// (context) apply:
-
-	struct T_generic_assembly_tta_context_apply
-	{
-		// identifier:
+		// label:
 
 			template<typename AST>
-			nik_ces void identifier_arg(AST & toc, clexeme & l, gcindex_type index)
+			nik_ces void new_label(AST & toc, clexeme & l)
 			{
-				auto sign  = toc.has_side() ? Sign::marg : Sign::carg;
+				toc.set_kind(Context::label);
+				toc.set_current_entry(l, Sign::label, toc.label_index);
+				toc.increment_label_index();
+			}
+
+		// goto:
+
+			template<typename AST>
+			nik_ces void new_goto(AST & toc, clexeme & l)
+				{ toc.set_kind(Context::go_to); }
+
+		// assignment:
+
+			template<typename AST>
+			nik_ces void new_assignment(AST & toc, clexeme & l)
+			{
+				toc.set_kind(Context::assign);
+				toc.update_lookup();
+			}
+
+		// application:
+
+			template<typename AST>
+			nik_ces void new_application(AST & toc, clexeme & l)
+			{
+				toc.set_kind(Context::apply);
+				toc.set_void(); // cfg optimization.
+				toc.update_lookup();
+			}
+
+		// conditional:
+
+			template<typename AST>
+			nik_ces void new_conditional(AST & toc, clexeme & l)
+			{
+				toc.set_kind(Context::test);
+				toc.set_current_entry(l, Sign::copy);
+				toc.update_lookup();
+			}
+
+		// jvalue:
+
+			template<typename AST>
+			nik_ces void new_jvalue(AST & toc, clexeme & l)
+				{ toc.set_current_entry(l, Sign::jump); }
+
+		// mvalue:
+
+			template<typename AST>
+			nik_ces void new_mvalue_identifier(AST & toc, clexeme & l, gcindex_type index)
+			{
 				auto shift = toc.has_paste() ? _one : _zero;
 
-				toc.unset_side();
-				toc.set_current_entry(l, sign, index + shift);
+				toc.set_current_entry(l, Sign::marg, index + shift);
 			}
 
 			template<typename AST>
-			nik_ces void identifier_env(AST & toc, clexeme & l)
-			{
-				auto j = toc.match_name(l.start, l.finish);
-				auto s = j ? Sign::recurse : Sign::env;
-
-				toc.update_lookup();
-				toc.set_current_entry(l, s);
-			}
-
-			template<typename AST>
-			nik_ces void identifier_entry(AST & toc, clexeme & l)
+			nik_ces void new_mvalue(AST & toc, clexeme & l)
 			{
 				auto k = toc.match_arguments(l.start, l.finish);
-				if (toc.is_arg_match(k)) identifier_arg(toc, l, k->index);
-				else identifier_env(toc, l);
+				if (toc.is_arg_match(k)) new_mvalue_identifier(toc, l, k->index);
+				// else error
 			}
 
-		// copy:
+		// lvalue:
 
 			template<typename AST>
-			nik_ces void copy_entry(AST & toc, clexeme & l)
+			nik_ces void new_lvalue_identifier(AST & toc, clexeme & l, gcindex_type index)
+				{ toc.set_current_entry(l, Sign::carg, index); }
+
+			template<typename AST>
+			nik_ces void new_lvalue_variable(AST & toc, clexeme & l)
 			{
-				toc.set_current_entry(l, Sign::copy);
-				toc.set_copy();
-			}
-
-		// paste:
-
-			template<typename AST>
-			nik_ces void paste_entry(AST & toc, clexeme & l)
-				{ toc.set_current_entry(l, Sign::paste); }
-
-		// statement (end of line):
-
-			template<typename AST>
-			nik_ces void statement_first_index(AST & toc)
-			{
-				if (toc.has_paste())
-				{
-					auto shift = toc.current_index_at(_zero) - 1;
-
-					toc.set_current_index_at(_zero, shift);
-				}
-			}
-
-			template<typename AST>
-			nik_ces void statement_first_void(AST & toc)
-				{ toc.set_void(); }
-
-			template<typename AST>
-			nik_ces void statement_first_variable(AST & toc)
-			{
-				toc.set_current_sign_at(_zero, Sign::var);
-				toc.set_current_index_at(_zero, toc.arg_index);
-
+				toc.set_current_entry(l, Sign::var, toc.arg_index);
 				toc.set_arg_start(toc.current_start_at(_zero));
 				toc.set_arg_finish(toc.current_finish_at(_zero));
 				toc.set_arg_sign(Sign::carg);
@@ -188,111 +154,83 @@ namespace cctmp {
 			}
 
 			template<typename AST>
-			nik_ces void statement_first(AST & toc)
+			nik_ces void new_lvalue_unknown(AST & toc, clexeme & l)
 			{
-				auto sign = toc.current_sign_at(_zero);
-
-				if (Sign::is_carg(sign)) statement_first_index(toc);
-				if (Sign::is_marg(sign)) statement_first_void(toc);
-				else if (Sign::is_env(sign)) statement_first_variable(toc);
+				if (toc.match_name(l.start, l.finish)) // Sign::recurse:
+				{
+					// error.
+				}
+				else new_lvalue_variable(toc, l);
 			}
 
 			template<typename AST>
-			nik_ces void statement_second_arg_op(AST & toc)
-				{ toc.set_arg_op(); }
-
-			template<typename AST>
-			nik_ces void statement_second(AST & toc)
-			{
-				auto sign = toc.current_sign_at(_one);
-
-				if (Sign::is_carg(sign)) statement_second_arg_op(toc);
-			}
-
-			template<typename AST>
-			nik_ces void statement_entry(AST & toc, clexeme & l)
-			{
-				statement_first(toc);
-				statement_second(toc);
-			}
-	};
-
-/***********************************************************************************************************************/
-
-// (context) void:
-
-	struct T_generic_assembly_tta_context_void
-	{
-		template<typename AST>
-		nik_ces void set(AST & toc, clexeme & l)
-			{ toc.set_void(); }
-
-		template<typename AST>
-		nik_ces void increment(AST & toc, clexeme & l)
-			{ toc.increment_entry(); }
-	};
-
-/***********************************************************************************************************************/
-
-// (context) re_turn:
-
-	struct T_generic_assembly_tta_context_return
-	{
-		// identifier:
-
-			template<typename AST>
-			nik_ces void identifier_entry(AST & toc, clexeme & l)
+			nik_ces void new_lvalue(AST & toc, clexeme & l)
 			{
 				auto k = toc.match_arguments(l.start, l.finish);
-				if (toc.is_arg_match(k)) toc.set_current_entry(l, Sign::carg, k->index);
-				else
-				{
-					toc.update_lookup(); // can assume at most one env.
-					toc.set_current_entry(l, Sign::env);
-				}
+				if (toc.is_arg_match(k)) new_lvalue_identifier(toc, l, k->index);
+				else new_lvalue_unknown(toc, l);
+			}
+
+		// rvalue:
+
+			template<typename AST>
+			nik_ces void new_rvalue_identifier(AST & toc, clexeme & l, gcindex_type index)
+			{
+				auto shift = toc.has_paste() ? _one : _zero;
+
+				toc.set_current_entry(l, Sign::carg, index + shift);
+			}
+
+			template<typename AST>
+			nik_ces void new_rvalue_unknown(AST & toc, clexeme & l)
+			{
+				auto j = toc.match_name(l.start, l.finish);
+				auto s = j ? Sign::recurse : Sign::env;
+
+				toc.set_current_entry(l, s);
+				toc.update_lookup();
+			}
+
+			template<typename AST>
+			nik_ces void new_rvalue(AST & toc, clexeme & l)
+			{
+				auto k = toc.match_arguments(l.start, l.finish);
+				if (toc.is_arg_match(k)) new_rvalue_identifier(toc, l, k->index);
+				else new_rvalue_unknown(toc, l);
+			}
+
+		// copy:
+
+			template<typename AST>
+			nik_ces void new_copy(AST & toc, clexeme & l)
+			{
+				toc.set_current_entry(l, Sign::copy);
+				toc.set_copy();
 			}
 
 		// paste:
 
 			template<typename AST>
-			nik_ces void paste_entry(AST & toc, clexeme & l)
+			nik_ces void new_paste(AST & toc, clexeme & l)
 				{ toc.set_current_entry(l, Sign::paste); }
+
+		// return:
+
+			template<typename AST>
+			nik_ces void new_return(AST & toc, clexeme & l)
+				{ toc.set_kind(Context::re_turn); }
+
+		// quote:
+
+			template<typename AST>
+			nik_ces void new_quote(AST & toc, clexeme & l)
+				{ } // nothing yet.
 	};
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// (context) test:
-
-	struct T_generic_assembly_tta_context_test
-	{
-		using Application = T_generic_assembly_tta_context_apply;
-
-		template<typename AST>
-		nik_ces void set(AST & toc, clexeme & l)
-			{ toc.set_current_entry(l, Sign::copy); }
-
-		template<typename AST>
-		nik_ces void increment(AST & toc, clexeme & l)
-			{ toc.increment_entry(); }
-
-		// identifier:
-
-			template<typename AST>
-			nik_ces void identifier_entry(AST & toc, clexeme & l)
-				{ Application::identifier_entry(toc, l); }
-
-		// paste:
-
-			template<typename AST>
-			nik_ces void paste_entry(AST & toc, clexeme & l)
-				{ toc.set_current_entry(l, Sign::paste); }
-
-		// statement (end of line):
-
-			template<typename AST>
-			nik_ces void statement_entry(AST & toc, clexeme & l)
-				{ Application::statement_second(toc); }
-	};
+// terminal:
 
 /***********************************************************************************************************************/
 
@@ -319,12 +257,6 @@ namespace cctmp {
 			toc.increment_depend();
 			toc.increment_branch();
 		}
-
-		// identifier:
-
-			template<typename AST>
-			nik_ces void identifier_entry(AST & toc, clexeme & l)
-				{ toc.set_current_entry(l, Sign::jump); }
 	};
 
 /***********************************************************************************************************************/
@@ -333,10 +265,6 @@ namespace cctmp {
 
 	struct T_generic_assembly_tta_context_goto
 	{
-		template<typename AST>
-		nik_ces void set(AST & toc, clexeme & l)
-			{ toc.set_kind(Context::go_to); }
-
 		template<typename AST>
 		nik_ces void bookmark(AST & toc, clexeme & l)
 		{
@@ -352,12 +280,6 @@ namespace cctmp {
 			toc.increment_depend();
 			toc.increment_goto();
 		}
-
-		// identifier:
-
-			template<typename AST>
-			nik_ces void identifier_entry(AST & toc, clexeme & l)
-				{ toc.set_current_entry(l, Sign::jump); }
 	};
 
 /***********************************************************************************************************************/
@@ -366,10 +288,6 @@ namespace cctmp {
 
 	struct T_generic_assembly_tta_context_label
 	{
-		template<typename AST>
-		nik_ces void set(AST & toc, clexeme & l)
-			{ toc.set_current_entry(l, Sign::label, toc.label_index++); }
-
 		template<typename AST>
 		nik_ces void bookmark(AST & toc, clexeme & l)
 		{
@@ -414,15 +332,14 @@ namespace cctmp {
 		template<typename AST>
 		using signature = void(*)(AST&, clexeme&);
 
-		using Definition	= T_generic_assembly_tta_context_define;
-		using Application	= T_generic_assembly_tta_context_apply;
-		using Void		= T_generic_assembly_tta_context_void;
-		using Return		= T_generic_assembly_tta_context_return;
-		using Test		= T_generic_assembly_tta_context_test;
+		using NTA		= T_generic_assembly_nta;
 		using Branch		= T_generic_assembly_tta_context_branch;
 		using Goto		= T_generic_assembly_tta_context_goto;
 		using Label		= T_generic_assembly_tta_context_label;
 		using Accept		= T_generic_assembly_tta_context_accept;
+
+		template<typename AST>
+		nik_ces void err(AST & toc, clexeme & l) { }
 
 		template<typename AST>
 		nik_ces void nop(AST & toc, clexeme & l) { }
@@ -431,65 +348,23 @@ namespace cctmp {
 
 			template<typename AST>
 			nik_ces void resolve_identifier(AST & toc, clexeme & l)
-			{
-				switch (toc.kind())
-				{
-					case Context::apply   : { Application::identifier_entry (toc, l); break; }
-					case Context::re_turn : { Return::identifier_entry      (toc, l); break; }
-					case Context::test    : { Test::identifier_entry        (toc, l); break; }
-					case Context::branch  : { Branch::identifier_entry      (toc, l); break; }
-					case Context::go_to   : { Goto::identifier_entry        (toc, l); break; }
-					case Context::define  : { Definition::identifier_entry  (toc, l); break; }
-				}
-
-				toc.increment_entry();
-			}
+				{ toc.increment_entry(); }
 
 			template<typename AST>
 			nik_ces void resolve_void(AST & toc, clexeme & l)
-			{
-				Void::set(toc, l);
-				Void::increment(toc, l);
-			}
-
-			template<typename AST>
-			nik_ces void resolve_return(AST & toc, clexeme & l)
-				{ toc.set_kind(Context::re_turn); }
-
-			template<typename AST>
-			nik_ces void resolve_paste(AST & toc, clexeme & l)
-			{
-				switch (toc.kind())
-				{
-					case Context::apply   : { Application::paste_entry (toc, l); break; }
-					case Context::test    : { Test::paste_entry        (toc, l); break; }
-					case Context::re_turn : { Return::paste_entry      (toc, l); break; }
-				}
-
-				toc.increment_entry();
-			}
-
-			template<typename AST>
-			nik_ces void resolve_copy(AST & toc, clexeme & l)
-			{
-				switch (toc.kind())
-				{
-					case Context::apply : { Application::copy_entry (toc, l); break; }
-				}
-
-				toc.increment_entry();
-			}
-
-			template<typename AST>
-			nik_ces void resolve_mutable(AST & toc, clexeme & l)
-				{ toc.set_side(); }
+				{ toc.increment_entry(); } // symbolic entry.
 
 			template<typename AST>
 			nik_ces void resolve_test(AST & toc, clexeme & l)
-			{
-				Test::set(toc, l);
-				Test::increment(toc, l);
-			}
+				{ toc.increment_entry(); } // symbolic entry.
+
+			template<typename AST>
+			nik_ces void resolve_copy(AST & toc, clexeme & l)
+				{ toc.increment_entry(); }
+
+			template<typename AST>
+			nik_ces void resolve_paste(AST & toc, clexeme & l)
+				{ toc.increment_entry(); }
 
 			template<typename AST>
 			nik_ces void resolve_branch(AST & toc, clexeme & l)
@@ -502,7 +377,6 @@ namespace cctmp {
 			template<typename AST>
 			nik_ces void resolve_goto(AST & toc, clexeme & l)
 			{
-				Goto::set(toc, l);
 				Goto::bookmark(toc, l);
 				Goto::increment(toc, l);
 			}
@@ -510,7 +384,6 @@ namespace cctmp {
 			template<typename AST>
 			nik_ces void resolve_label(AST & toc, clexeme & l)
 			{ 
-				Label::set(toc, l);
 				Label::bookmark(toc, l);
 				Label::increment(toc, l);
 			}
@@ -518,20 +391,13 @@ namespace cctmp {
 			template<typename AST>
 			nik_ces void resolve_statement(AST & toc, clexeme & l)
 			{
-				switch (toc.kind())
-				{
-					case Context::apply   : { Application::statement_entry (toc, l); break; }
-					case Context::test    : { Test::statement_entry        (toc, l); break; }
-					case Context::define  : { Definition::statement_entry  (toc, l); break; }
-				}
-
 				toc.increment_line();
 				toc.update_copy_paste();
 			}
 
 			template<typename AST>
 			nik_ces void resolve_quote(AST & toc, clexeme & l)
-				{ }
+				{ } // nothing yet.
 
 			template<typename AST>
 			nik_ces void resolve_accept(AST & toc, clexeme & l)
@@ -544,106 +410,74 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// string:
+// nonterminal recovery:
 
 /***********************************************************************************************************************/
 
 // action:
 
-	struct T_generic_assembly_rta
+	struct T_generic_assembly_nrta
 	{
-	//	using Application = T_generic_assembly_tta_context_apply;
+		template<typename AST, typename Stack>
+		using signature = void(*)(AST&, clexeme&, Stack&);
 
-		template<typename AST>
-		using signature = void(*)(AST&, lexeme&);
+		template<typename AST, typename Stack>
+		nik_ces void err(AST & toc, clexeme & l, Stack & s) { }
 
-		template<typename AST>
-		nik_ces void parse_repeat(AST & toc, lexeme & l)
+		template<typename AST, typename Stack> // should confirm "Jgi;" is the current stack front.
+		nik_ces void instr_label(AST & toc, clexeme & l, Stack & s)
 		{
-		//	toc.update_lookup();
-		//	toc.set_current_entry(l, Sign::repeat, progression.position());
+			s.pop();
+
+			*(s.current    ) = 'l';
+			*(s.current - 1) = ';';
+			*(s.current - 2) = 'E';
+
+			T_generic_assembly_nta::new_label(toc, l);
 		}
 
-		template<typename AST>
-		nik_ces void parse_map(AST & toc, lexeme & l)
+		template<typename AST, typename Stack> // should confirm "Jgi;" is the current stack front.
+		nik_ces void instr_return(AST & toc, clexeme & l, Stack & s)
 		{
-		//	toc.update_lookup();
-		//	toc.set_current_entry(l, Sign::map, progression.position());
-		}
+			s.pop();
 
-		template<typename AST>
-		nik_ces void parse_fold(AST & toc, lexeme & l)
-		{
-		//	toc.update_lookup();
-		//	toc.set_current_entry(l, Sign::fold, progression.position());
-		}
+			*(s.current    ) = 'r';
+			*(s.current - 1) = 'M';
 
-		template<typename AST>
-		nik_ces void parse_find_first(AST & toc, lexeme & l)
-		{
-		//	toc.update_lookup();
-		//	toc.set_current_entry(l, Sign::find_first, progression.position());
-		}
-
-		template<typename AST>
-		nik_ces void parse_find_all(AST & toc, lexeme & l)
-		{
-		//	toc.update_lookup();
-		//	toc.set_current_entry(l, Sign::find_all, progression.position());
-		}
-
-		template<typename AST>
-		nik_ces void parse_zip(AST & toc, lexeme & l)
-		{
-		//	toc.update_lookup();
-		//	toc.set_current_entry(l, Sign::zip, progression.position());
-		}
-
-		template<typename AST>
-		nik_ces void parse_fasten(AST & toc, lexeme & l)
-		{
-		//	toc.update_lookup();
-		//	toc.set_current_entry(l, Sign::fasten, progression.position());
-		}
-
-		template<typename AST>
-		nik_ces void parse_glide(AST & toc, lexeme & l)
-		{
-		//	toc.update_lookup();
-		//	toc.set_current_entry(l, Sign::glide, progression.position());
+			T_generic_assembly_nta::new_return(toc, l);
 		}
 	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// stack:
+// terminal recovery:
 
 /***********************************************************************************************************************/
 
 // action:
 
-	struct T_generic_assembly_sta
+	struct T_generic_assembly_trta
 	{
 		template<typename AST, typename Stack>
 		using signature = void(*)(AST&, clexeme&, Stack&);
 
-		template<typename AST, typename Stack> // can assume "gi;" is the current stack front.
-		nik_ces void instr_label(AST & toc, clexeme & l, Stack & s)
-		{
-			*(s.current    ) = 'l';
-			*(s.current - 1) = ';';
-			*(s.current - 2) = 'E';
+		template<typename AST, typename Stack>
+		nik_ces void err(AST & toc, clexeme & l, Stack & s) { }
 
-			T_generic_assembly_nta::new_coordinate(toc, l);
-		}
-
-		template<typename AST, typename Stack> // can assume "gi;" is the current stack front.
-		nik_ces void instr_return(AST & toc, clexeme & l, Stack & s)
+		template<typename AST, typename Stack>
+		nik_ces void assign_to_apply(AST & toc, clexeme & l, Stack & s)
 		{
-			*(s.current    ) = 'r';
-			*(s.current - 1) = 'M';
-			*(s.current - 2) = ';';
+			if (toc.kind() == Context::assign) // can assume "#M;" is the current stack front:
+			{
+				toc.set_kind(Context::apply);
+
+				*(s.current    ) = 'M';
+				*(s.current - 1) = 'V';
+
+				s.push("=", _one);
+			}
+			// else ; // error
 		}
 	};
 
@@ -665,59 +499,65 @@ namespace cctmp {
 		using t_action_type	= typename TTA::template signature<AST>;
 		using TAction		= typename T_generic_assembly_pdtt::TAction;
 
-		using RTA		= T_generic_assembly_rta;
-		using r_action_type	= typename RTA::template signature<AST>;
-		using RAction		= typename T_generic_assembly_pdtt::RAction;
+		using NRTA		= T_generic_assembly_nrta;
+		using nr_action_type	= typename NRTA::template signature<AST, Stack>;
+		using NRAction		= typename T_generic_assembly_pdtt::NRAction;
 
-		using STA		= T_generic_assembly_sta;
-		using s_action_type	= typename STA::template signature<AST, Stack>;
-		using SAction		= typename T_generic_assembly_pdtt::SAction;
+		using TRTA		= T_generic_assembly_trta;
+		using tr_action_type	= typename TRTA::template signature<AST, Stack>;
+		using TRAction		= typename T_generic_assembly_pdtt::TRAction;
 
-		n_action_type n_array[NAction::dimension];
-		t_action_type t_array[TAction::dimension];
-		r_action_type r_array[RAction::dimension];
-		s_action_type s_array[SAction::dimension];
+		 n_action_type  n_array[ NAction::dimension];
+		 t_action_type  t_array[ TAction::dimension];
+		nr_action_type nr_array[NRAction::dimension];
+		tr_action_type tr_array[TRAction::dimension];
 
-		nik_ce T_generic_assembly_ta() : n_array{}, t_array{}, r_array{}, s_array{}
+		nik_ce T_generic_assembly_ta() : n_array{}, t_array{}, nr_array{}, tr_array{}
 		{
-			n_array[ NAction::nop                ] = NTA::template nop                <AST>;
-			n_array[ NAction::new_definition     ] = NTA::template new_definition     <AST>;
-			n_array[ NAction::new_coordinate     ] = NTA::template new_coordinate     <AST>;
-			n_array[ NAction::new_conditional    ] = NTA::template new_conditional    <AST>;
-			n_array[ NAction::new_application    ] = NTA::template new_application    <AST>;
+			n_array [ NAction::err             ] = NTA::template err             <AST>;
+			n_array [ NAction::nop             ] = NTA::template nop             <AST>;
+			n_array [ NAction::new_definition  ] = NTA::template new_definition  <AST>;
+			n_array [ NAction::new_def_arg     ] = NTA::template new_def_arg     <AST>;
+			n_array [ NAction::new_label       ] = NTA::template new_label       <AST>;
+			n_array [ NAction::new_goto        ] = NTA::template new_goto        <AST>;
+			n_array [ NAction::new_assignment  ] = NTA::template new_assignment  <AST>;
+			n_array [ NAction::new_application ] = NTA::template new_application <AST>;
+			n_array [ NAction::new_conditional ] = NTA::template new_conditional <AST>;
+			n_array [ NAction::new_jvalue      ] = NTA::template new_jvalue      <AST>;
+			n_array [ NAction::new_mvalue      ] = NTA::template new_mvalue      <AST>;
+			n_array [ NAction::new_lvalue      ] = NTA::template new_lvalue      <AST>;
+			n_array [ NAction::new_rvalue      ] = NTA::template new_rvalue      <AST>;
+			n_array [ NAction::new_copy        ] = NTA::template new_copy        <AST>;
+			n_array [ NAction::new_paste       ] = NTA::template new_paste       <AST>;
+			n_array [ NAction::new_return      ] = NTA::template new_return      <AST>;
+			n_array [ NAction::new_quote       ] = NTA::template new_quote       <AST>;
 
-			t_array[ TAction::nop                ] = TTA::template nop                <AST>;
-			t_array[ TAction::resolve_identifier ] = TTA::template resolve_identifier <AST>;
-			t_array[ TAction::resolve_void       ] = TTA::template resolve_void       <AST>;
-			t_array[ TAction::resolve_return     ] = TTA::template resolve_return     <AST>;
-			t_array[ TAction::resolve_paste      ] = TTA::template resolve_paste      <AST>;
-			t_array[ TAction::resolve_copy       ] = TTA::template resolve_copy       <AST>;
-			t_array[ TAction::resolve_mutable    ] = TTA::template resolve_mutable    <AST>;
-			t_array[ TAction::resolve_test       ] = TTA::template resolve_test       <AST>;
-			t_array[ TAction::resolve_branch     ] = TTA::template resolve_branch     <AST>;
-			t_array[ TAction::resolve_goto       ] = TTA::template resolve_goto       <AST>;
-			t_array[ TAction::resolve_label      ] = TTA::template resolve_label      <AST>;
-			t_array[ TAction::resolve_statement  ] = TTA::template resolve_statement  <AST>;
-			t_array[ TAction::resolve_quote      ] = TTA::template resolve_quote      <AST>;
-			t_array[ TAction::resolve_accept     ] = TTA::template resolve_accept     <AST>;
+			t_array [ TAction::err                ] = TTA::template err                <AST>;
+			t_array [ TAction::nop                ] = TTA::template nop                <AST>;
+			t_array [ TAction::resolve_identifier ] = TTA::template resolve_identifier <AST>;
+			t_array [ TAction::resolve_void       ] = TTA::template resolve_void       <AST>;
+			t_array [ TAction::resolve_paste      ] = TTA::template resolve_paste      <AST>;
+			t_array [ TAction::resolve_copy       ] = TTA::template resolve_copy       <AST>;
+			t_array [ TAction::resolve_test       ] = TTA::template resolve_test       <AST>;
+			t_array [ TAction::resolve_branch     ] = TTA::template resolve_branch     <AST>;
+			t_array [ TAction::resolve_goto       ] = TTA::template resolve_goto       <AST>;
+			t_array [ TAction::resolve_label      ] = TTA::template resolve_label      <AST>;
+			t_array [ TAction::resolve_statement  ] = TTA::template resolve_statement  <AST>;
+			t_array [ TAction::resolve_quote      ] = TTA::template resolve_quote      <AST>;
+			t_array [ TAction::resolve_accept     ] = TTA::template resolve_accept     <AST>;
 
-			r_array[ RAction::parse_repeat       ] = RTA::template parse_repeat       <AST>;
-			r_array[ RAction::parse_map          ] = RTA::template parse_map          <AST>;
-			r_array[ RAction::parse_fold         ] = RTA::template parse_fold         <AST>;
-			r_array[ RAction::parse_find_first   ] = RTA::template parse_find_first   <AST>;
-			r_array[ RAction::parse_find_all     ] = RTA::template parse_find_all     <AST>;
-			r_array[ RAction::parse_zip          ] = RTA::template parse_zip          <AST>;
-			r_array[ RAction::parse_fasten       ] = RTA::template parse_fasten       <AST>;
-			r_array[ RAction::parse_glide        ] = RTA::template parse_glide        <AST>;
+			nr_array [ NRAction::err          ] = NRTA::template err          <AST, Stack>;
+			nr_array [ NRAction::instr_label  ] = NRTA::template instr_label  <AST, Stack>;
+			nr_array [ NRAction::instr_return ] = NRTA::template instr_return <AST, Stack>;
 
-			s_array[ SAction::instr_label        ] = STA::template instr_label        <AST, Stack>;
-			s_array[ SAction::instr_return       ] = STA::template instr_return       <AST, Stack>;
+			tr_array [ TRAction::err             ] = TRTA::template err             <AST, Stack>;
+			tr_array [ TRAction::assign_to_apply ] = TRTA::template assign_to_apply <AST, Stack>;
 		}
 
-		nik_ce const n_action_type nonterminal_action(gcindex_type pos) const { return n_array[pos]; }
-		nik_ce const t_action_type    terminal_action(gcindex_type pos) const { return t_array[pos]; }
-		nik_ce const r_action_type      string_action(gcindex_type pos) const { return r_array[pos]; }
-		nik_ce const s_action_type       stack_action(gcindex_type pos) const { return s_array[pos]; }
+		nik_ce const  n_action_type nonterminal          (gcindex_type pos) const { return  n_array[pos]; }
+		nik_ce const  t_action_type    terminal          (gcindex_type pos) const { return  t_array[pos]; }
+		nik_ce const nr_action_type nonterminal_recovery (gcindex_type pos) const { return nr_array[pos]; }
+		nik_ce const tr_action_type    terminal_recovery (gcindex_type pos) const { return tr_array[pos]; }
 	};
 
 	// interface:

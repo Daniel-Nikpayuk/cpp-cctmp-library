@@ -140,7 +140,7 @@ namespace cctmp {
 				case MT::go_to     : { str = "MT::go_to    " ; break; }
 				case MT::branch    : { str = "MT::branch   " ; break; }
 				case MT::pair      : { str = "MT::pair     " ; break; }
-				case MT::arg       : { str = "MT::arg      " ; break; }
+				case MT::value     : { str = "MT::value    " ; break; }
 				case MT::side      : { str = "MT::side     " ; break; }
 				case MT::void_f    : { str = "MT::void_f   " ; break; }
 				case MT::dimension : { str = "MT::dimension" ; break; }

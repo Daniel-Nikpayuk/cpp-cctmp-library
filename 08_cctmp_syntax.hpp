@@ -40,7 +40,7 @@ namespace cctmp {
 		gindex_type pad_entry_size  , entry_size   , line_size   ;
 		gindex_type dependency_size , replace_size , graph_size  ;
 		gindex_type identifier_size , mutable_size , quote_size  , void_size   ;
-		gindex_type assign_size     , copy_size    , paste_size  , return_size ;
+		gindex_type assign_size     , apply_size   , copy_size   , paste_size  , return_size ;
 		gindex_type label_size      , test_size    , branch_size , goto_size   ;
 
 		nik_ce T_generic_assembly_analyzer(gstring_type b, gstring_type e) :
@@ -59,6 +59,7 @@ namespace cctmp {
 			void_size        {            },
 
 			assign_size      {            },
+			apply_size       {            },
 			copy_size        {            },
 			paste_size       {            },
 			return_size      {            },
@@ -92,7 +93,8 @@ namespace cctmp {
 						case 'q': { ++cur_entry_size ; ++quote_size      ; break; }
 						case '.': { ++cur_entry_size ; ++copy_size       ; break; }
 						case '_': { ++cur_entry_size ; ++paste_size      ; break; }
-						case '=': {                    ++assign_size     ; break; }
+						case '#': {                    ++assign_size     ; break; }
+						case '=': {                    ++apply_size      ; break; }
 						case 'r': {                    ++return_size     ; break; }
 						case 'l': {                    ++label_size      ; break; }
 						case 'v': { ++cur_entry_size ; ++void_size       ; break; }
@@ -106,7 +108,7 @@ namespace cctmp {
 
 				dependency_size = goto_size       + branch_size  ;
 				graph_size      = dependency_size + label_size   ;
-				replace_size    = assign_size     - copy_size    ;
+				replace_size    = assign_size     + apply_size   - copy_size ;
 				pad_entry_size  = entry_size      + replace_size ;
 			}
 	};
@@ -142,7 +144,7 @@ namespace cctmp {
 			enum : context_type
 			{
 				none = 0,
-				define , apply , re_turn , test , branch , go_to , label ,
+				define , assign , apply , re_turn , test , branch , go_to , label ,
 				dimension
 			};
 		};
@@ -212,10 +214,9 @@ namespace cctmp {
 		bool has_void; // currently allows discard.
 		bool has_paste;
 		bool has_lookup;
-		bool has_arg_op;
 
 		nik_ce Line() : kind{}, array{}, start{array}, entry{array},
-				has_void{}, has_paste{}, has_lookup{}, has_arg_op{} { }
+				has_void{}, has_paste{}, has_lookup{} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return entry; }
@@ -239,10 +240,9 @@ namespace cctmp {
 		cline_type *start;
 		line_type *line;
 
-		bool has_local_side;
 		bool has_local_copy;
 
-		nik_ce Page() : array{}, start{array}, line{array}, has_local_side{}, has_local_copy{} { }
+		nik_ce Page() : array{}, start{array}, line{array}, has_local_copy{} { }
 
 		nik_ce auto begin () const { return start; }
 		nik_ce auto end   () const { return line; }
@@ -299,7 +299,6 @@ namespace cctmp {
 		label_type label;
 		goto_type go_to;
 		branch_type branch;
-	//	progression_type progression;
 		depend_type depend;
 		graph_type graph;
 		lookup_type lookup;
@@ -355,11 +354,7 @@ namespace cctmp {
 
 		// local:
 
-			nik_ce auto has_side   () const { return page.has_local_side ; }
 			nik_ce auto has_copy   () const { return page.has_local_copy ; }
-
-			nik_ce void set_side   () { page.has_local_side = true  ; }
-			nik_ce void unset_side () { page.has_local_side = false ; }
 
 			nik_ce void set_copy   () { page.has_local_copy = true  ; }
 			nik_ce void unset_copy () { page.has_local_copy = false ; }
@@ -382,6 +377,9 @@ namespace cctmp {
 			nik_ce void set_current_index_at(gcindex_type pos, gcindex_type index)
 				{ page.line->array[pos].index = index; }
 
+			nik_ce void set_current_sign(csign_type sign)
+				{ page.line->entry->sign = sign; }
+
 			nik_ce void set_current_entry(clexeme & l, csign_type sign, gcindex_type index = _zero)
 			{
 				auto entry = page.line->entry;
@@ -401,25 +399,24 @@ namespace cctmp {
 			nik_ce auto has_void   () const { return page.line->has_void; }
 			nik_ce auto has_paste  () const { return page.line->has_paste; }
 			nik_ce auto has_lookup () const { return page.line->has_lookup; }
-			nik_ce auto has_arg_op () const { return page.line->has_arg_op; }
 
 			nik_ce void set_void   () { page.line->has_void   = true  ; }
 			nik_ce void set_paste  () { page.line->has_paste  = true  ; }
 			nik_ce void set_lookup () { page.line->has_lookup = true  ; }
-			nik_ce void set_arg_op () { page.line->has_arg_op = true  ; }
 
 		// increment:
 
-			nik_ce void increment_arg_index () { ++arg_index          ; }
-			nik_ce void increment_arg_entry () { ++page.array[0].entry; }
-			nik_ce void increment_entry     () { ++page.line->entry   ; }
-			nik_ce void increment_line      () { ++page.line          ; }
-			nik_ce void increment_label     () { ++label.locus        ; }
-			nik_ce void increment_goto      () { ++go_to.locus        ; }
-			nik_ce void increment_branch    () { ++branch.locus       ; }
-			nik_ce void increment_depend    () { ++depend.locus       ; }
-			nik_ce void increment_graph     () { ++graph.locus        ; }
-			nik_ce void increment_lookup    () { ++lookup.locus       ; }
+			nik_ce void increment_arg_index   () { ++arg_index          ; }
+			nik_ce void increment_label_index () { ++label_index        ; }
+			nik_ce void increment_arg_entry   () { ++page.array[0].entry; }
+			nik_ce void increment_entry       () { ++page.line->entry   ; }
+			nik_ce void increment_line        () { ++page.line          ; }
+			nik_ce void increment_label       () { ++label.locus        ; }
+			nik_ce void increment_goto        () { ++go_to.locus        ; }
+			nik_ce void increment_branch      () { ++branch.locus       ; }
+			nik_ce void increment_depend      () { ++depend.locus       ; }
+			nik_ce void increment_graph       () { ++graph.locus        ; }
+			nik_ce void increment_lookup      () { ++lookup.locus       ; }
 
 		// bookmark:
 
@@ -455,13 +452,18 @@ namespace cctmp {
 			nik_ce auto lookup_entry_index(gindex_type m, gindex_type n) const
 				{ return lookup.array[m]->array[n].index; }
 
+			nik_ce auto lookup_line_assign(gindex_type n) const
+				{ return (lookup.array[n]->kind == Context::assign); }
+
 			nik_ce auto lookup_line_void(gindex_type n) const
 				{ return lookup.array[n]->has_void; }
 
 			nik_ce auto lookup_line_shift(gindex_type n) const
 			{
 				auto kind  = lookup.array[n]->kind;
-				auto shift = (kind == Context::apply || kind == Context::test);
+				auto shift = kind == Context::assign ||
+					     kind == Context::apply  ||
+					     kind == Context::test   ;
 
 				return shift ? _one : _zero;
 			}

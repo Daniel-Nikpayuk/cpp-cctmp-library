@@ -179,7 +179,7 @@ namespace cctmp {
 			"x_to5_plus1 x y        ;"
 
 			"body:                  ;"
-			"y = one                ;"
+			"y # one                ;"
 			". = multiply x x x x x ;"
 			". = add _ y            ;"
 			"return _               ;"
@@ -210,7 +210,7 @@ namespace cctmp {
 			"f x y              ;"
 
 			"body:              ;"
-			"  x = y            ;"
+			"  x # y            ;"
 			"  return x         ;"
 		);
 	}
@@ -239,7 +239,7 @@ namespace cctmp {
 			"  return c                 ;"
 
 			"set_c_to_five:             ;"
-			"  c = five                 ;"
+			"  c # five                 ;"
 			"  return c                 ;"
 		);
 	}
@@ -379,7 +379,7 @@ namespace cctmp {
 			"factorial n      ;"
 
 			"body:            ;"
-			"p = one          ;"
+			"p # one          ;"
 			"test is_zero n   ;"
 			"branch done      ;"
 			". = decrement n  ;"

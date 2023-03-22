@@ -77,9 +77,10 @@ namespace cctmp {
 			{
 				switch (k->kind)
 				{
-					case Context::label   : { add_label_instr  (*k); break; }
-					case Context::test    : { add_test_instr   (*k); break; }
+					case Context::assign  : { add_assign_instr (*k); break; }
 					case Context::apply   : { add_apply_instr  (*k); break; }
+					case Context::test    : { add_test_instr   (*k); break; }
+					case Context::label   : { add_label_instr  (*k); break; }
 					case Context::branch  : { add_branch_instr (*k); break; }
 					case Context::go_to   : { add_goto_instr   (*k); break; }
 					case Context::re_turn : { add_return_instr (*k); break; }
@@ -102,6 +103,9 @@ namespace cctmp {
 
 		// add:
 
+			nik_ce void add_lookup () { *(contr_lookup.locus++) = contr.value; }
+			nik_ce void add_jump   () { *(contr_jump.locus++  ) = contr.value; }
+
 			nik_ce void add_instr(gckey_type name, gckey_type note, gckey_type m = Mark::none)
 			{
 				increment_value(name);
@@ -111,19 +115,40 @@ namespace cctmp {
 				increment_instr();
 			}
 
-			nik_ce void add_arg_op_instr(cline_type & l)
+			nik_ce void add_replace_instr(cline_type & l)
 			{
-				increment_value(call_name(l));
-				increment_value(MT::arg);
-				increment_value(second_index(l));
+				auto sign = first_sign(l);
 
-				increment_instr();
+				if      (Sign::is_var(sign) ) add_instr(MN::rotate, MT::id);
+				else if (Sign::is_carg(sign))
+				{
+					set_instr_pos(first_index(l));
+
+					add_instr(MN::reselect, MT::front, Mark::value);
+					add_instr(MN::replace, MT::id);
+				}
+				// else if Sign::is_copy do nothing.
 			}
 
-			nik_ce void add_lookup () { *(contr_lookup.locus++) = contr.value; }
-			nik_ce void add_jump   () { *(contr_jump.locus++  ) = contr.value; }
+			nik_ce void add_assign_instr(cline_type & l)
+			{
+				if (l.has_lookup) add_lookup();
 
-			nik_ce void add_label_instr(cline_type & l) { set_label_line(l); }
+				add_instr(MN::select, MT::pair, Mark::value);
+				add_instr(call_name(l), MT::value);
+
+				add_replace_instr(l);
+			}
+
+			nik_ce void add_apply_instr(cline_type & l)
+			{
+				if (l.has_lookup) add_lookup();
+
+				add_instr(MN::select, MT::pair, Mark::value);
+				add_instr(call_name(l), call_note(l));
+
+				if (!l.has_void) add_replace_instr(l);
+			}
 
 			nik_ce void add_test_instr(cline_type & l)
 			{
@@ -133,38 +158,8 @@ namespace cctmp {
 				add_instr(call_name(l), MT::id);
 			}
 
-			nik_ce void add_get_arg_instr(cline_type & l, gcindex_type index)
-			{
-				set_instr_pos(index);
-
-				add_instr(MN::select, MT::front, Mark::value);
-				add_instr(MN::right, MT::id);
-			}
-
-			nik_ce void add_replace_instr(cline_type & l)
-			{
-				auto sign = first_sign(l);
-
-				if (Sign::is_var(sign)) add_instr(MN::rotate, MT::id);
-				else if (Sign::is_carg(sign))
-				{
-					set_instr_pos(first_index(l));
-
-					add_instr(MN::reselect, MT::front, Mark::value);
-					add_instr(MN::replace, MT::id);
-				}
-			}
-
-			nik_ce void add_apply_instr(cline_type & l)
-			{
-				if (l.has_lookup) add_lookup();
-				if (!l.has_arg_op) add_instr(MN::select, MT::pair, Mark::value);
-
-				if (l.has_arg_op) add_arg_op_instr(l);
-				else add_instr(call_name(l), call_note(l));
-
-				if (!l.has_void) add_replace_instr(l);
-			}
+			nik_ce void add_label_instr(cline_type & l)
+				{ set_label_line(l); }
 
 			nik_ce void add_branch_instr(cline_type & l)
 			{
@@ -180,6 +175,14 @@ namespace cctmp {
 				add_instr(MN::jump, MT::go_to, Mark::value);
 			}
 
+			nik_ce void add_get_arg_instr(cline_type & l, gcindex_type index)
+			{
+				set_instr_pos(index);
+
+				add_instr(MN::select, MT::front, Mark::value);
+				add_instr(MN::right, MT::id);
+			}
+
 			nik_ce void add_get_lookup_instr(cline_type & l)
 			{
 				add_lookup();
@@ -192,8 +195,9 @@ namespace cctmp {
 			{
 				auto sign = first_sign(l);
 
-				if (Sign::is_carg(sign)) add_get_arg_instr(l, first_index(l));
-				else if (Sign::is_env(sign)) add_get_lookup_instr(l);
+				if      (Sign::is_carg(sign)) add_get_arg_instr(l, first_index(l));
+				else if (Sign::is_env(sign) ) add_get_lookup_instr(l);
+				// else if (Sign::is_quote(sign))
 
 				add_instr(MN::first , MT::id);
 			}

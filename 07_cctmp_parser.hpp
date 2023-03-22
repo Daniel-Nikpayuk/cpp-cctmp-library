@@ -31,11 +31,12 @@ namespace cctmp {
 
 // attributes:
 
+/***********************************************************************************************************************/
+
+// symbol:
+
 	using symbol_type  = gchar_type;
 	using csymbol_type = symbol_type const;
-
-	using action_type  = gindex_type;
-	using caction_type = action_type const;
 
 /***********************************************************************************************************************/
 
@@ -45,9 +46,12 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// permission:
+// action:
 
-	struct Permission { enum : gkey_type { none = 0, string , stack , dimension }; };
+	using action_type  = gindex_type;
+	using caction_type = action_type const;
+
+	struct ActionName { enum : action_type { err = 0, nop , dimension }; };
 
 /***********************************************************************************************************************/
 
@@ -61,21 +65,8 @@ namespace cctmp {
 		csymbol_type *symbol;
 		size_type size;
 
-		nik_ce Body()                                : symbol{    }, size{    } { }
-		nik_ce Body(csymbol_type *_b, csize_type _s) : symbol{ _b }, size{ _s } { }
-	};
-
-/***********************************************************************************************************************/
-
-// tenet:
-
-	struct Tenet
-	{
-		action_type name;
-		gkey_type note;
-
-		nik_ce Tenet()                               : name{    }, note{    } { }
-		nik_ce Tenet(caction_type _a, gckey_type _p) : name{ _a }, note{ _p } { }
+		nik_ce Body() : symbol{}, size{} { }
+		nik_ce Body(csymbol_type *_b, csize_type _s) : symbol{_b}, size{_s} { }
 	};
 
 /***********************************************************************************************************************/
@@ -85,10 +76,13 @@ namespace cctmp {
 	struct Production
 	{
 		Body body;
-		Tenet tenet;
+		action_type action;
 
-		nik_ce Production()                                  : body{    }, tenet{    } { }
-		nik_ce Production(const Body & _b, const Tenet & _t) : body{ _b }, tenet{ _t } { }
+		nik_ce Production() : body{}, action{ActionName::err} { }
+
+		template<auto Size>
+		nik_ce Production(gcchar_type (&str)[Size], caction_type _a = ActionName::nop) :
+			body{str, Size - 1}, action{_a} { }
 	};
 
 /***********************************************************************************************************************/
@@ -97,48 +91,26 @@ namespace cctmp {
 
 	struct T_generic_pdtt
 	{
-		template<auto Size>
-		nik_ces Production ntransition(gcchar_type (&str)[Size], caction_type act, gckey_type perm)
-			{ return Production{Body(str, Size - 1), Tenet(act, perm)}; }
+		// list:
 
-		nik_ces Tenet ttransition(caction_type act, gckey_type perm)
-			{ return Tenet(act, perm); }
+			template<typename L, typename T>
+			nik_ces T & list_entry(T (&l)[L::size], gcchar_type loc_c)
+			{
+				auto loc = numeric_find_pos(loc_c, L::symbol, L::finish);
 
-		template<typename N, typename T>
-		nik_ces Production & table_entry(
-				Production (&t)[N::size][T::size], gcchar_type row_c, gcchar_type col_c)
-		{
-			auto row = numeric_find_pos(row_c, N::symbol, N::finish);
-			auto col = numeric_find_pos(col_c, T::symbol, T::finish);
+				return l[loc];
+			}
 
-			return t[row][col];
-		}
+		// table:
 
-		template<typename N, typename T>
-		nik_ces const Production & production(
-				const Production (&t)[N::size][T::size], gcchar_type row_c, gcchar_type col_c)
-		{
-			auto row = numeric_find_pos(row_c, N::symbol, N::finish);
-			auto col = numeric_find_pos(col_c, T::symbol, T::finish);
+			template<typename R, typename C, typename T>
+			nik_ces T & table_entry(T (&t)[R::size][C::size], gcchar_type row_c, gcchar_type col_c)
+			{
+				auto row = numeric_find_pos(row_c, R::symbol, R::finish);
+				auto col = numeric_find_pos(col_c, C::symbol, C::finish);
 
-			return t[row][col];
-		}
-
-		template<typename T>
-		nik_ces Tenet & list_entry(Tenet (&l)[T::size], gcchar_type loc_c)
-		{
-			auto loc = numeric_find_pos(loc_c, T::symbol, T::finish);
-
-			return l[loc];
-		}
-
-		template<typename T>
-		nik_ces const Tenet & tenet(const Tenet (&l)[T::size], gcchar_type loc_c)
-		{
-			auto loc = numeric_find_pos(loc_c, T::symbol, T::finish);
-
-			return l[loc];
-		}
+				return t[row][col];
+			}
 	};
 
 /***********************************************************************************************************************/
@@ -206,14 +178,15 @@ namespace cctmp {
 	{
 		using stack_type	= Stack<Size>;
 		using prod_type		= Production const*;
-		using tenet_type	= Tenet const*;
 
 		stack_type stack;
-		prod_type production;
-		tenet_type tenet;
+		prod_type prod;
+		action_type action;
 		lexeme word;
 
-		nik_ce parsoid(ctoken_type start_symbol) : stack{start_symbol}, production{}, tenet{}, word{} { }
+		nik_ce parsoid(ctoken_type start_symbol) :
+
+			stack{start_symbol}, prod{}, action{}, word{} { }
 	};
 
 /***********************************************************************************************************************/
@@ -229,6 +202,8 @@ namespace cctmp {
 		using act_type		= member_type_T<T_action>;
 		using NAction		= typename act_type::NAction;
 		using TAction		= typename act_type::TAction;
+		using NRAction		= typename act_type::NRAction;
+		using TRAction		= typename act_type::TRAction;
 
 		using parseme_type	= parseme<T_ast>;
 		using parsoid_type	= parsoid<T_pda::stack_size>;
@@ -245,112 +220,111 @@ namespace cctmp {
 				{
 					case TokenKind::nonterminal : { nonterminal(p, q)    ; break; }
 					case TokenKind::terminal    : {    terminal(p, q, e) ; break; }
-					default                     : {       error(p, q)    ; break; }
+					default                     : {      report(p, q)    ; break; }
 				}
 			}
 
-			update_tenet(q, q.stack.front());
-			terminal_action(p, q, q.tenet->name); // accept action.
+			update_action(q, q.stack.front());
+			terminal_update_action(p, q); // accept action.
 		}
 
-		nik_ces void nonterminal(parseme_type & p, parsoid_type & q)
-		{
-			update_production(q);
-			nonterminal_update_stack(q);
-			nonterminal_update_action(p, q);
-		}
+		// nonterminal:
 
-		nik_ces void terminal(parseme_type & p, parsoid_type & q, gcstring_type e)
-		{
-			if (q.stack.front() != q.word.token) ; // error.
-			else
+			nik_ces bool is_nonterminal_err(const parsoid_type & q)
+				{ return (q.prod->action == ActionName::err); }
+
+			nik_ces void nonterminal(parseme_type & p, parsoid_type & q)
 			{
-				update_tenet(q, q.word.token);
-				terminal_update_action(p, q);
-				update_word(q, e);
-				terminal_update_stack(q);
+				update_production(q);
+
+				if (is_nonterminal_err(q)) nonterminal_recovery_action(p, q);
+				else
+				{
+					nonterminal_update_stack(q);
+					nonterminal_update_action(p, q);
+				}
 			}
-		}
 
-		nik_ces void error(parseme_type & p, parsoid_type & q)
-		{
-			// nothing yet.
-		}
+			nik_ces void update_production(parsoid_type & q)
+				{ q.prod = &pda.production(q.stack.front(), q.word.token); }
 
-		nik_ces void update_production(parsoid_type & q)
-		{
-			q.production = &pda.production(q.stack.front(), q.word.token);
-			// if (production == empty) error;
-		}
-
-		nik_ces void update_tenet(parsoid_type & q, ctoken_type t)
-			{ q.tenet = &pda.tenet(t); }
-
-		nik_ces void nonterminal_update_stack(parsoid_type & q)
-		{
-			q.stack.pop();
-			q.stack.push(q.production->body.symbol, q.production->body.size);
-		}
-
-		nik_ces void update_word(parsoid_type & q, gcstring_type e)
-			{ T_lexer::lex(q.word, q.word.finish, e); }
-
-		nik_ces void terminal_update_stack(parsoid_type & q)
-			{ q.stack.pop(); }
-
-		nik_ces void nonterminal_action(parseme_type & p, parsoid_type & q, caction_type n)
-		{
-			if (n != NAction::nop)
+			nik_ces void nonterminal_update_stack(parsoid_type & q)
 			{
-				auto update = act.nonterminal_action(n);
-
-				update(p.tree, q.word);
+				q.stack.pop();
+				q.stack.push(q.prod->body.symbol, q.prod->body.size);
 			}
-		}
 
-		nik_ces void terminal_action(parseme_type & p, parsoid_type & q, caction_type n)
-		{
-			if (n != TAction::nop)
+			nik_ces void nonterminal_update_action(parseme_type & p, parsoid_type & q)
 			{
-				auto update = act.terminal_action(n);
+				caction_type n = q.prod->action;
 
-				update(p.tree, q.word);
+				if (n > NAction::nop)
+				{
+					auto update = act.nonterminal(n);
+
+					update(p.tree, q.word);
+				}
 			}
-		}
 
-		nik_ces void string_action(parseme_type & p, parsoid_type & q, caction_type n)
-		{
-			auto update = act.string_action(n);
-
-			update(p.tree, q.word);
-		}
-
-		nik_ces void stack_action(parseme_type & p, parsoid_type & q, caction_type n)
-		{
-			auto update = act.stack_action(n);
-
-			update(p.tree, q.word, q.stack);
-		}
-
-		nik_ces void nonterminal_update_action(parseme_type & p, parsoid_type & q)
-		{
-			switch (q.production->tenet.note)
+			nik_ces void nonterminal_recovery_action(parseme_type & p, parsoid_type & q)
 			{
-				case Permission::none   : { nonterminal_action(p, q, q.production->tenet.name); break; }
-				case Permission::string : {      string_action(p, q, q.production->tenet.name); break; }
-				case Permission::stack  : {       stack_action(p, q, q.production->tenet.name); break; }
-			}
-		}
+				auto n      = pda.nonterminal_recovery(q.stack.front(), q.word.token);
+				auto update = act.nonterminal_recovery(n);
 
-		nik_ces void terminal_update_action(parseme_type & p, parsoid_type & q)
-		{
-			switch (q.tenet->note)
-			{
-				case Permission::none   : { terminal_action(p, q, q.tenet->name); break; }
-				case Permission::string : {   string_action(p, q, q.tenet->name); break; }
-				case Permission::stack  : {    stack_action(p, q, q.tenet->name); break; }
+				update(p.tree, q.word, q.stack);
 			}
-		}
+
+		// terminal:
+
+			nik_ces bool is_terminal_err(const parsoid_type & q)
+				{ return (q.action == ActionName::err) || (q.word.token != q.stack.front()); }
+
+			nik_ces void terminal(parseme_type & p, parsoid_type & q, gcstring_type e)
+			{
+				update_action(q, q.word.token);
+
+				if (is_terminal_err(q)) terminal_recovery_action(p, q);
+				else
+				{
+					terminal_update_action(p, q);
+					update_word(q, e);
+					terminal_update_stack(q);
+				}
+			}
+
+			nik_ces void update_action(parsoid_type & q, ctoken_type t)
+				{ q.action = pda.action(t); }
+
+			nik_ces void update_word(parsoid_type & q, gcstring_type e)
+				{ T_lexer::lex(q.word, q.word.finish, e); }
+
+			nik_ces void terminal_update_stack(parsoid_type & q)
+				{ q.stack.pop(); }
+
+			nik_ces void terminal_update_action(parseme_type & p, parsoid_type & q)
+			{
+				caction_type n = q.action;
+
+				if (n > TAction::err)
+				{
+					auto update = act.terminal(n);
+
+					update(p.tree, q.word);
+				}
+			}
+
+			nik_ces void terminal_recovery_action(parseme_type & p, parsoid_type & q)
+			{
+				auto n      = pda.terminal_recovery(q.stack.front(), q.word.token);
+				auto update = act.terminal_recovery(n);
+
+				update(p.tree, q.word, q.stack);
+			}
+
+		// report:
+
+			nik_ces void report(parseme_type & p, parsoid_type & q)
+				{ } // nothing yet.
 	};
 
 /***********************************************************************************************************************/
@@ -367,48 +341,24 @@ namespace cctmp {
 	{
 		using ArraySize	= T_store_U<_array_size_>;
 
-		struct String
-		{
-			struct Action
-			{
-				enum : action_type
-				{
-					parse_repeat     , parse_map      , parse_fold ,
-					parse_find_first , parse_find_all , parse_zip  ,
-					parse_fasten     , parse_glide    ,
-					dimension
-				};
-			};
-
-		}; using RAction = typename String::Action;
-
-		struct Stack
-		{
-			struct Action
-			{
-				enum : action_type
-				{
-					instr_label , instr_return ,
-					dimension
-				};
-			};
-
-		}; using SAction = typename Stack::Action;
-
 		struct Nonterminal
 		{
 			struct Action
 			{
 				enum : action_type
 				{
-					nop = 0,
-					new_definition  , new_coordinate  ,
-					new_conditional , new_application ,
+					err = ActionName::err, nop = ActionName::nop,
+
+					new_definition , new_def_arg     , new_label       , new_goto        ,
+					new_assignment , new_application , new_conditional , new_jvalue      ,
+					new_mvalue     , new_lvalue      , new_rvalue      ,
+					new_copy       , new_paste       , new_return      , new_quote       ,
 					dimension
 				};
 			};
 
-			nik_ces gchar_type symbol[] = "VMOJINTECBS";
+
+			nik_ces gchar_type symbol[] = "VMPTOJINECBS";
 
 			nik_ces auto size   = ArraySize::template result<>(symbol) - 1;
 			nik_ces auto finish = symbol + size;
@@ -422,118 +372,139 @@ namespace cctmp {
 			{
 				enum : action_type
 				{
-					nop = 0,
+					err = ActionName::err, nop = ActionName::nop,
+
 					resolve_identifier , resolve_void      , resolve_return  ,
 					resolve_paste      , resolve_copy      , resolve_mutable ,
 					resolve_test       , resolve_branch    , resolve_goto    ,
 					resolve_label      , resolve_statement , resolve_quote   ,
-					resolve_repeat     , resolve_map       , resolve_fold    ,
-					resolve_find_first , resolve_find_all  , resolve_zip     ,
-					resolve_fasten     , resolve_glide     ,
 					resolve_accept     ,
 					dimension
 				};
 			};
 
-			nik_ces gchar_type symbol[] = ";i!q=._lgvtbr01234567";
+			nik_ces gchar_type symbol[] = ";i!q#=._lgvtbr";
 
 			nik_ces auto size   = ArraySize::template result<>(symbol); // recognizes '\0'.
 			nik_ces auto finish = symbol + size;
 
 		}; using TAction = typename Terminal::Action;
 
-		nik_ces auto t_entry = T_generic_pdtt::template table_entry<Nonterminal, Terminal>;
-		nik_ces auto l_entry = T_generic_pdtt::template list_entry<Terminal>;
-
-		template<auto Size>
-		nik_ces Production ntransition(gcchar_type (&str)[Size],
-			caction_type act = NAction::nop, gckey_type perm = Permission::none)
-				{ return T_generic_pdtt::ntransition(str, act, perm); }
-
-		nik_ces Tenet ttransition(caction_type act = TAction::nop, gckey_type perm = Permission::none)
-			{ return T_generic_pdtt::ttransition(act, perm); }
-
-		Production table[Nonterminal::size][Terminal::size];
-		Tenet list[Terminal::size];
-
-		nik_ce T_generic_assembly_pdtt() : table{}, list{}
+		struct NonterminalRecovery
 		{
-			t_entry(table, 'S',  'i') = ntransition( "iN;BC"   , NAction::new_definition  );
-			t_entry(table, 'N',  'i') = ntransition( "iN"                                 );
-			t_entry(table, 'N',  ';') = ntransition( ""                                   );
-			t_entry(table, 'C',  'l') = ntransition( "BC"                                 );
-			t_entry(table, 'C', '\0') = ntransition( ""                                   );
-			t_entry(table, 'B',  'l') = ntransition( "l;E"     , NAction::new_coordinate  );
-			t_entry(table, 'E',  'i') = ntransition( "IJgi;"                              );
-			t_entry(table, 'E',  '!') = ntransition( "IJgi;"                              );
-			t_entry(table, 'E',  '.') = ntransition( "IJgi;"                              );
-			t_entry(table, 'E',  't') = ntransition( "IJgi;"                              );
-			t_entry(table, 'E',  'v') = ntransition( "IJgi;"                              );
-			t_entry(table, 'E',  'r') = ntransition( "rM;"                                );
-			t_entry(table, 'J',  'i') = ntransition( "IJ"                                 );
-			t_entry(table, 'J',  '!') = ntransition( "IJ"                                 );
-			t_entry(table, 'J',  '.') = ntransition( "IJ"                                 );
-			t_entry(table, 'J',  't') = ntransition( "IJ"                                 );
-			t_entry(table, 'J',  'v') = ntransition( "IJ"                                 );
-			t_entry(table, 'J',  'g') = ntransition( ""                                   );
-			t_entry(table, 'J',  'l') = ntransition( ""        , SAction::instr_label     ,  Permission::stack );
-			t_entry(table, 'J',  'r') = ntransition( ""        , SAction::instr_return    ,  Permission::stack );
-			t_entry(table, 'I',  'i') = ntransition( "T=OV;"   , NAction::new_application );
-			t_entry(table, 'I',  '!') = ntransition( "T=OV;"   , NAction::new_application );
-			t_entry(table, 'I',  '.') = ntransition( "T=OV;"   , NAction::new_application );
-			t_entry(table, 'I',  't') = ntransition( "tOV;bi;" , NAction::new_conditional );
-			t_entry(table, 'I',  'v') = ntransition( "vOV;"    , NAction::new_application );
-			t_entry(table, 'V',  'i') = ntransition( "MV"                                 );
-			t_entry(table, 'V',  '!') = ntransition( "MV"                                 );
-			t_entry(table, 'V',  'q') = ntransition( "MV"                                 );
-			t_entry(table, 'V',  '_') = ntransition( "MV"                                 );
-			t_entry(table, 'V',  ';') = ntransition( ""                                   );
-			t_entry(table, 'T',  'i') = ntransition( "i"                                  );
-			t_entry(table, 'T',  '!') = ntransition( "!i"                                 );
-			t_entry(table, 'T',  '.') = ntransition( "."                                  );
-			t_entry(table, 'O',  'i') = ntransition( "i"                                  );
-			t_entry(table, 'O',  'q') = ntransition( "q"                                  );
-			t_entry(table, 'O',  '0') = ntransition( "0"                                  );
-			t_entry(table, 'O',  '1') = ntransition( "1"                                  );
-			t_entry(table, 'O',  '2') = ntransition( "2"                                  );
-			t_entry(table, 'O',  '3') = ntransition( "3"                                  );
-			t_entry(table, 'O',  '4') = ntransition( "4"                                  );
-			t_entry(table, 'O',  '5') = ntransition( "5"                                  );
-			t_entry(table, 'O',  '6') = ntransition( "6"                                  );
-			t_entry(table, 'O',  '7') = ntransition( "7"                                  );
-			t_entry(table, 'M',  'i') = ntransition( "i"                                  );
-			t_entry(table, 'M',  '!') = ntransition( "!i"                                 );
-			t_entry(table, 'M',  'q') = ntransition( "q"                                  );
-			t_entry(table, 'M',  '_') = ntransition( "_"                                  );
+			struct Action
+			{
+				enum : action_type
+				{
+					err = ActionName::err,
 
-			l_entry(list,  'i') = ttransition( TAction::resolve_identifier );
-			l_entry(list,  'v') = ttransition( TAction::resolve_void       );
-			l_entry(list,  'r') = ttransition( TAction::resolve_return     );
-			l_entry(list,  '_') = ttransition( TAction::resolve_paste      );
-			l_entry(list,  '.') = ttransition( TAction::resolve_copy       );
-			l_entry(list,  '!') = ttransition( TAction::resolve_mutable    );
-			l_entry(list,  't') = ttransition( TAction::resolve_test       );
-			l_entry(list,  'b') = ttransition( TAction::resolve_branch     );
-			l_entry(list,  'g') = ttransition( TAction::resolve_goto       );
-			l_entry(list,  'l') = ttransition( TAction::resolve_label      );
-			l_entry(list,  ';') = ttransition( TAction::resolve_statement  );
-			l_entry(list,  'q') = ttransition( TAction::resolve_quote      );
-			l_entry(list,  '0') = ttransition( RAction::parse_repeat       ,  Permission::string );
-			l_entry(list,  '1') = ttransition( RAction::parse_map          ,  Permission::string );
-			l_entry(list,  '2') = ttransition( RAction::parse_fold         ,  Permission::string );
-			l_entry(list,  '3') = ttransition( RAction::parse_find_first   ,  Permission::string );
-			l_entry(list,  '4') = ttransition( RAction::parse_find_all     ,  Permission::string );
-			l_entry(list,  '5') = ttransition( RAction::parse_zip          ,  Permission::string );
-			l_entry(list,  '6') = ttransition( RAction::parse_fasten       ,  Permission::string );
-			l_entry(list,  '7') = ttransition( RAction::parse_glide        ,  Permission::string );
-			l_entry(list, '\0') = ttransition( TAction::resolve_accept     );
+					instr_label , instr_return ,
+					dimension
+				};
+			};
+
+		}; using NRAction = typename NonterminalRecovery::Action;
+
+		struct TerminalRecovery
+		{
+			struct Action
+			{
+				enum : action_type
+				{
+					err = ActionName::err,
+
+					assign_to_apply ,
+					dimension
+				};
+			};
+
+		}; using TRAction = typename TerminalRecovery::Action;
+
+		nik_ces auto   n_entry = T_generic_pdtt::template table_entry<Nonterminal, Terminal, Production>;
+		nik_ces auto  cn_entry = T_generic_pdtt::template table_entry<Nonterminal, Terminal, Production const>;
+		nik_ces auto   t_entry = T_generic_pdtt::template list_entry<Terminal, action_type>;
+		nik_ces auto  ct_entry = T_generic_pdtt::template list_entry<Terminal, caction_type>;
+		nik_ces auto  nr_entry = T_generic_pdtt::template table_entry<Nonterminal, Terminal, action_type>;
+		nik_ces auto cnr_entry = T_generic_pdtt::template table_entry<Nonterminal, Terminal, caction_type>;
+		nik_ces auto  tr_entry = T_generic_pdtt::template table_entry<Terminal, Terminal, action_type>;
+		nik_ces auto ctr_entry = T_generic_pdtt::template table_entry<Terminal, Terminal, caction_type>;
+
+		Production   n_base [Nonterminal::size][Terminal::size];
+		action_type  t_base [   Terminal::size];
+		action_type nr_base [Nonterminal::size][Terminal::size];
+		action_type tr_base [   Terminal::size][Terminal::size];
+
+		nik_ce T_generic_assembly_pdtt() : n_base{}, t_base{}, nr_base{}, tr_base{}
+		{
+			n_entry(n_base, 'S',  'i') = Production{ "iN;BC"   , NAction::new_definition  };
+			n_entry(n_base, 'N',  'i') = Production{ "iN"      , NAction::new_def_arg     };
+			n_entry(n_base, 'N',  ';') = Production{ ""                                   };
+			n_entry(n_base, 'C',  'l') = Production{ "BC"                                 };
+			n_entry(n_base, 'C', '\0') = Production{ ""                                   };
+			n_entry(n_base, 'B',  'l') = Production{ "l;E"     , NAction::new_label       };
+			n_entry(n_base, 'E',  'i') = Production{ "IJgO;"                              };
+			n_entry(n_base, 'E',  '.') = Production{ "IJgO;"                              };
+			n_entry(n_base, 'E',  '!') = Production{ "IJgO;"                              };
+			n_entry(n_base, 'E',  't') = Production{ "IJgO;"                              };
+			n_entry(n_base, 'E',  'v') = Production{ "IJgO;"                              };
+			n_entry(n_base, 'E',  'r') = Production{ "rM;"     , NAction::new_return      };
+			n_entry(n_base, 'J',  'i') = Production{ "IJ"                                 };
+			n_entry(n_base, 'J',  '.') = Production{ "IJ"                                 };
+			n_entry(n_base, 'J',  '!') = Production{ "IJ"                                 };
+			n_entry(n_base, 'J',  't') = Production{ "IJ"                                 };
+			n_entry(n_base, 'J',  'v') = Production{ "IJ"                                 };
+			n_entry(n_base, 'J',  'g') = Production{ ""        , NAction::new_goto        };
+			n_entry(n_base, 'I',  'i') = Production{ "P#M;"    , NAction::new_assignment  };
+			n_entry(n_base, 'I',  '.') = Production{ "P#M;"    , NAction::new_assignment  };
+			n_entry(n_base, 'I',  '!') = Production{ "!T=MV;"  , NAction::new_application };
+			n_entry(n_base, 'I',  't') = Production{ "tMV;bO;" , NAction::new_conditional };
+			n_entry(n_base, 'I',  'v') = Production{ "vMV;"    , NAction::new_application };
+			n_entry(n_base, 'V',  'i') = Production{ "MV"                                 };
+			n_entry(n_base, 'V',  '!') = Production{ "!TV"                                };
+			n_entry(n_base, 'V',  '_') = Production{ "MV"                                 };
+			n_entry(n_base, 'V',  'q') = Production{ "MV"                                 };
+			n_entry(n_base, 'V',  ';') = Production{ ""                                   };
+			n_entry(n_base, 'T',  'i') = Production{ "i"       , NAction::new_mvalue      };
+			n_entry(n_base, 'O',  'i') = Production{ "i"       , NAction::new_jvalue      };
+			n_entry(n_base, 'P',  'i') = Production{ "i"       , NAction::new_lvalue      };
+			n_entry(n_base, 'P',  '.') = Production{ "."       , NAction::new_copy        };
+			n_entry(n_base, 'M',  'i') = Production{ "i"       , NAction::new_rvalue      };
+			n_entry(n_base, 'M',  '_') = Production{ "_"       , NAction::new_paste       };
+			n_entry(n_base, 'M',  'q') = Production{ "q"       , NAction::new_quote       };
+
+			t_entry(t_base,  '#') = TAction::nop                ;
+			t_entry(t_base,  '=') = TAction::nop                ;
+			t_entry(t_base,  'r') = TAction::nop                ;
+			t_entry(t_base,  '!') = TAction::nop                ;
+			t_entry(t_base,  'i') = TAction::resolve_identifier ;
+			t_entry(t_base,  'v') = TAction::resolve_void       ;
+			t_entry(t_base,  '_') = TAction::resolve_paste      ;
+			t_entry(t_base,  '.') = TAction::resolve_copy       ;
+			t_entry(t_base,  't') = TAction::resolve_test       ;
+			t_entry(t_base,  'b') = TAction::resolve_branch     ;
+			t_entry(t_base,  'g') = TAction::resolve_goto       ;
+			t_entry(t_base,  'l') = TAction::resolve_label      ;
+			t_entry(t_base,  ';') = TAction::resolve_statement  ;
+			t_entry(t_base,  'q') = TAction::resolve_quote      ;
+			t_entry(t_base, '\0') = TAction::resolve_accept     ;
+
+			nr_entry(nr_base, 'J',  'l') = NRAction::instr_label  ;
+			nr_entry(nr_base, 'J',  'r') = NRAction::instr_return ;
+
+			tr_entry(tr_base, '#', '=') = TRAction::assign_to_apply ;
 		}
 
 		nik_ce const Production & production(gcchar_type row_c, gcchar_type col_c) const
-			{ return T_generic_pdtt::template production<Nonterminal, Terminal>(table, row_c, col_c); }
+			{ return cn_entry(n_base, row_c, col_c); }
 
-		nik_ce const Tenet & tenet(gcchar_type loc_c) const
-			{ return T_generic_pdtt::template tenet<Terminal>(list, loc_c); }
+		nik_ce caction_type & action(gcchar_type loc_c) const
+			{ return ct_entry(t_base, loc_c); }
+
+		nik_ce caction_type & nonterminal_recovery(gcchar_type row_c, gcchar_type col_c) const
+			{ return cnr_entry(nr_base, row_c, col_c); }
+
+		nik_ce caction_type & terminal_recovery(gcchar_type row_c, gcchar_type col_c) const
+			{ return ctr_entry(tr_base, row_c, col_c); }
 	};
 
 /***********************************************************************************************************************/

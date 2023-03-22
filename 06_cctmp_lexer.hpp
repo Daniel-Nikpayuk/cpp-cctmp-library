@@ -185,8 +185,6 @@ namespace cctmp {
 
 	struct StateName
 	{
-		using cstate_array = cstate_type*;
-
 		enum : state_type
 		{
 			empty = 0,
@@ -445,6 +443,7 @@ namespace cctmp {
 				initial     = StateName::initial,
 				ulan        , // underscore latin alphanumeric
 				semicolon   ,
+				octothorpe  ,
 				equal       ,
 				punctuation ,
 				period      ,
@@ -462,6 +461,7 @@ namespace cctmp {
 
 				pair( ulan        , 'i' ),
 				pair( semicolon   , ';' ),
+				pair( octothorpe  , '#' ),
 				pair( equal       , '=' ),
 				pair( punctuation , '!' ),
 				pair( period      , '.' ),
@@ -478,6 +478,7 @@ namespace cctmp {
 				ula         , // underscore latin alphabet
 				digit       ,
 				semicolon   ,
+				octothorpe  ,
 				equal       ,
 				punctuation ,
 				period      ,
@@ -492,6 +493,7 @@ namespace cctmp {
 				U_gchar_type, U_gkey_type,
 
 				pair( ';'  , Charset::semicolon   ),
+				pair( '#'  , Charset::octothorpe  ),
 				pair( '='  , Charset::equal       ),
 				pair( '!'  , Charset::punctuation ),
 				pair( '.'  , Charset::period      ),
@@ -514,6 +516,7 @@ namespace cctmp {
 		{
 			table[ State::initial ][ Charset::ula         ] = State::ulan;
 			table[ State::initial ][ Charset::semicolon   ] = State::semicolon;
+			table[ State::initial ][ Charset::octothorpe  ] = State::octothorpe;
 			table[ State::initial ][ Charset::equal       ] = State::equal;
 			table[ State::initial ][ Charset::punctuation ] = State::punctuation;
 			table[ State::initial ][ Charset::period      ] = State::period;
@@ -546,15 +549,6 @@ namespace cctmp {
 		nik_ces auto goto_charset       () { return dfa_charset("goto");   }
 		nik_ces auto branch_charset     () { return dfa_charset("branch"); }
 		nik_ces auto return_charset     () { return dfa_charset("return"); }
-
-		nik_ces auto repeat_charset     () { return dfa_charset("repeat"); }
-		nik_ces auto map_charset        () { return dfa_charset("map"); }
-		nik_ces auto fold_charset       () { return dfa_charset("fold"); }
-		nik_ces auto find_first_charset () { return dfa_charset("find_first"); }
-		nik_ces auto find_all_charset   () { return dfa_charset("find_all"); }
-		nik_ces auto zip_charset        () { return dfa_charset("zip"); }
-		nik_ces auto fasten_charset     () { return dfa_charset("fasten"); }
-		nik_ces auto glide_charset      () { return dfa_charset("glide"); }
 	};
 
 /***********************************************************************************************************************/
@@ -571,15 +565,6 @@ namespace cctmp {
 		using T_goto_lexer		= T_keyword_lexer< T_dfa::goto_charset       , 'g' >;
 		using T_branch_lexer		= T_keyword_lexer< T_dfa::branch_charset     , 'b' >;
 		using T_return_lexer		= T_keyword_lexer< T_dfa::return_charset     , 'r' >;
-
-		using T_repeat_lexer		= T_keyword_lexer< T_dfa::repeat_charset     , '0' >;
-		using T_map_lexer		= T_keyword_lexer< T_dfa::map_charset        , '1' >;
-		using T_fold_lexer		= T_keyword_lexer< T_dfa::fold_charset       , '2' >;
-		using T_find_first_lexer	= T_keyword_lexer< T_dfa::find_first_charset , '3' >;
-		using T_find_all_lexer		= T_keyword_lexer< T_dfa::find_all_charset   , '4' >;
-		using T_zip_lexer		= T_keyword_lexer< T_dfa::zip_charset        , '5' >;
-		using T_fasten_lexer		= T_keyword_lexer< T_dfa::fasten_charset     , '6' >;
-		using T_glide_lexer		= T_keyword_lexer< T_dfa::glide_charset      , '7' >;
 
 		nik_ces void lex(lexeme & l, gstring_type b, gstring_type e)
 		{
@@ -620,13 +605,9 @@ namespace cctmp {
 
 			switch (e - b)
 			{
-				case  1 : { val = keyword_1  (b, e); break; }
-				case  3 : { val = keyword_3  (b, e); break; }
-				case  4 : { val = keyword_4  (b, e); break; }
-				case  5 : { val = keyword_5  (b, e); break; }
-				case  6 : { val = keyword_6  (b, e); break; }
-				case  8 : { val = keyword_8  (b, e); break; }
-				case 10 : { val = keyword_10 (b, e); break; }
+				case  1 : { val = keyword_1 (b, e); break; }
+				case  4 : { val = keyword_4 (b, e); break; }
+				case  6 : { val = keyword_6 (b, e); break; }
 			}
 
 			return val;
@@ -638,48 +619,19 @@ namespace cctmp {
 			else                                     return TokenName::invalid;
 		}
 
-		nik_ces token_type keyword_3(gstring_type b, gstring_type e)
-		{
-			if      (recognizes< T_map_lexer >(b, e)) return T_map_lexer::token;
-			else if (recognizes< T_zip_lexer >(b, e)) return T_zip_lexer::token;
-			else                                      return TokenName::invalid;
-		}
-
 		nik_ces token_type keyword_4(gstring_type b, gstring_type e)
 		{
 			if      (recognizes< T_void_lexer >(b, e)) return T_void_lexer::token;
 			else if (recognizes< T_test_lexer >(b, e)) return T_test_lexer::token;
-			if      (recognizes< T_test_lexer >(b, e)) return T_test_lexer::token;
 			else if (recognizes< T_goto_lexer >(b, e)) return T_goto_lexer::token;
-			else if (recognizes< T_fold_lexer >(b, e)) return T_fold_lexer::token;
 			else                                       return TokenName::invalid;
-		}
-
-		nik_ces token_type keyword_5(gstring_type b, gstring_type e)
-		{
-			if   (recognizes< T_glide_lexer >(b, e)) return T_glide_lexer::token;
-			else                                     return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_6(gstring_type b, gstring_type e)
 		{
 			if      (recognizes< T_branch_lexer >(b, e)) return T_branch_lexer::token;
 			else if (recognizes< T_return_lexer >(b, e)) return T_return_lexer::token;
-			else if (recognizes< T_repeat_lexer >(b, e)) return T_repeat_lexer::token;
-			else if (recognizes< T_fasten_lexer >(b, e)) return T_fasten_lexer::token;
 			else                                         return TokenName::invalid;
-		}
-
-		nik_ces token_type keyword_8(gstring_type b, gstring_type e)
-		{
-			if   (recognizes< T_find_all_lexer >(b, e)) return T_find_all_lexer::token;
-			else                                        return TokenName::invalid;
-		}
-
-		nik_ces token_type keyword_10(gstring_type b, gstring_type e)
-		{
-			if   (recognizes< T_find_first_lexer >(b, e)) return T_find_first_lexer::token;
-			else                                          return TokenName::invalid;
 		}
 	};
 
@@ -708,6 +660,7 @@ namespace cctmp {
 				star          ,
 				plus          ,
 				minus         ,
+				octothorpe    ,
 				l_bracket     ,
 				r_bracket     ,
 				l_parenthesis ,
@@ -734,6 +687,7 @@ namespace cctmp {
 				pair( star          , '*' ),
 				pair( plus          , '+' ),
 				pair( minus         , '-' ),
+				pair( octothorpe    , '#' ),
 				pair( l_bracket     , '[' ),
 				pair( r_bracket     , ']' ),
 				pair( l_parenthesis , '(' ),
@@ -759,6 +713,7 @@ namespace cctmp {
 				star          ,
 				plus          ,
 				minus         ,
+				octothorpe    ,
 				l_bracket     ,
 				r_bracket     ,
 				l_parenthesis ,
@@ -782,6 +737,7 @@ namespace cctmp {
 				pair( '*'  , Charset::star          ),
 				pair( '+'  , Charset::plus          ),
 				pair( '-'  , Charset::minus         ),
+				pair( '#'  , Charset::octothorpe    ),
 				pair( '['  , Charset::l_bracket     ),
 				pair( ']'  , Charset::r_bracket     ),
 				pair( '('  , Charset::l_parenthesis ),
@@ -813,6 +769,7 @@ namespace cctmp {
 			table[ State::initial ][ Charset::star          ] = State::star;
 			table[ State::initial ][ Charset::plus          ] = State::plus;
 			table[ State::initial ][ Charset::minus         ] = State::minus;
+			table[ State::initial ][ Charset::octothorpe    ] = State::octothorpe;
 			table[ State::initial ][ Charset::l_bracket     ] = State::l_bracket;
 			table[ State::initial ][ Charset::r_bracket     ] = State::r_bracket;
 			table[ State::initial ][ Charset::l_parenthesis ] = State::l_parenthesis;
@@ -838,9 +795,18 @@ namespace cctmp {
 
 	struct T_chord_assembly_dfa
 	{
-		using T_dftt		= T_chord_assembly_dftt;
-		nik_ces auto value	= T_dftt{};
-		nik_ces auto accept	= T_dftt::State::accept;
+		using T_dftt			= T_chord_assembly_dftt;
+		nik_ces auto value		= T_dftt{};
+		nik_ces auto accept		= T_dftt::State::accept;
+
+		nik_ces auto repeat_charset     () { return dfa_charset("repeat"); }
+		nik_ces auto map_charset        () { return dfa_charset("map"); }
+		nik_ces auto fold_charset       () { return dfa_charset("fold"); }
+		nik_ces auto find_first_charset () { return dfa_charset("find_first"); }
+		nik_ces auto find_all_charset   () { return dfa_charset("find_all"); }
+		nik_ces auto zip_charset        () { return dfa_charset("zip"); }
+		nik_ces auto fasten_charset     () { return dfa_charset("fasten"); }
+		nik_ces auto glide_charset      () { return dfa_charset("glide"); }
 	};
 
 /***********************************************************************************************************************/
@@ -849,7 +815,16 @@ namespace cctmp {
 
 	struct T_chord_assembly_lexer
 	{
-		using T_dfa = T_chord_assembly_dfa;
+		using T_dfa			= T_chord_assembly_dfa;
+
+		using T_repeat_lexer		= T_keyword_lexer< T_dfa::repeat_charset     , '0' >;
+		using T_map_lexer		= T_keyword_lexer< T_dfa::map_charset        , '1' >;
+		using T_fold_lexer		= T_keyword_lexer< T_dfa::fold_charset       , '2' >;
+		using T_find_first_lexer	= T_keyword_lexer< T_dfa::find_first_charset , '3' >;
+		using T_find_all_lexer		= T_keyword_lexer< T_dfa::find_all_charset   , '4' >;
+		using T_zip_lexer		= T_keyword_lexer< T_dfa::zip_charset        , '5' >;
+		using T_fasten_lexer		= T_keyword_lexer< T_dfa::fasten_charset     , '6' >;
+		using T_glide_lexer		= T_keyword_lexer< T_dfa::glide_charset      , '7' >;
 
 		nik_ces void lex(lexeme & l, gstring_type b, gstring_type e)
 		{
@@ -868,7 +843,7 @@ namespace cctmp {
 			{
 				case 'i':
 				{
-					ctoken_type t0 = T_generic_assembly_lexer::keyword(l.start, l.finish);
+					ctoken_type t0 = keyword(l.start, l.finish);
 					rt = (t0 == TokenName::invalid) ? t : t0;
 					break;
 				}
@@ -877,6 +852,60 @@ namespace cctmp {
 			l.token = (gindex_type) rt;
 		}
 
+		nik_ces token_type keyword(gstring_type b, gstring_type e)
+		{
+			token_type val = TokenName::invalid;
+
+			switch (e - b)
+			{
+				case  3 : { val = keyword_3  (b, e); break; }
+				case  4 : { val = keyword_4  (b, e); break; }
+				case  5 : { val = keyword_5  (b, e); break; }
+				case  6 : { val = keyword_6  (b, e); break; }
+				case  8 : { val = keyword_8  (b, e); break; }
+				case 10 : { val = keyword_10 (b, e); break; }
+			}
+
+			return val;
+		}
+
+		nik_ces token_type keyword_3(gstring_type b, gstring_type e)
+		{
+			if      (recognizes< T_map_lexer >(b, e)) return T_map_lexer::token;
+			else if (recognizes< T_zip_lexer >(b, e)) return T_zip_lexer::token;
+			else                                      return TokenName::invalid;
+		}
+
+		nik_ces token_type keyword_4(gstring_type b, gstring_type e)
+		{
+			if   (recognizes< T_fold_lexer >(b, e)) return T_fold_lexer::token;
+			else                                    return TokenName::invalid;
+		}
+
+		nik_ces token_type keyword_5(gstring_type b, gstring_type e)
+		{
+			if   (recognizes< T_glide_lexer >(b, e)) return T_glide_lexer::token;
+			else                                     return TokenName::invalid;
+		}
+
+		nik_ces token_type keyword_6(gstring_type b, gstring_type e)
+		{
+			if      (recognizes< T_repeat_lexer >(b, e)) return T_repeat_lexer::token;
+			else if (recognizes< T_fasten_lexer >(b, e)) return T_fasten_lexer::token;
+			else                                         return TokenName::invalid;
+		}
+
+		nik_ces token_type keyword_8(gstring_type b, gstring_type e)
+		{
+			if   (recognizes< T_find_all_lexer >(b, e)) return T_find_all_lexer::token;
+			else                                        return TokenName::invalid;
+		}
+
+		nik_ces token_type keyword_10(gstring_type b, gstring_type e)
+		{
+			if   (recognizes< T_find_first_lexer >(b, e)) return T_find_first_lexer::token;
+			else                                          return TokenName::invalid;
+		}
 	};
 
 /***********************************************************************************************************************/

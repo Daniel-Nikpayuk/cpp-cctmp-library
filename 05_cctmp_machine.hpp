@@ -267,7 +267,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			pair , front , go_to , branch , arg , side , void_f ,
+			pair , front , go_to , branch , value , side , void_f ,
 			dimension
 		};
 	};
@@ -738,20 +738,21 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// arg:
+// value:
 
-	template<auto... filler>
-	struct T_machine<MN::call, MT::arg, filler...>
+	template
+	<
+		template<auto...> typename B0, auto n, nik_vp(p0)(B0<n>*),
+		template<auto...> typename B1, auto t, nik_vp(p1)(B1<t>*)
+	>
+	struct T_machine<MN::call, MT::value, p0, p1>
 	{
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins	= MD::instr(c, i);
-			nik_ce auto n   = ins[MI::pos];
-
 					 // does not propagate references.
-			auto val   = T_cast_at<_id_, n, Ts...>::template result<Ts...>(vs...);
-			using TVal = decltype(val);
+			auto val   = T_cast_at<t, n, Ts...>::template result<Ts...>(vs...);
+			using TVal = modify_type<_read_only_, decltype(val)>;
 
 			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)((TVal) val, vs...);
 		}
@@ -821,6 +822,28 @@ namespace cctmp {
 		{
 			auto val   = T_store_U<f>::template result<> // does not propagate references.
 					(T_cast_at<ts, ns, T, Ts...>::template result<T, Ts...>(v, vs...)...);
+			using TVal = modify_type<_read_only_, decltype(val)>;
+
+			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)((TVal) val, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// value:
+
+	template
+	<
+		template<auto...> typename B0, auto n, nik_vp(p0)(B0<n>*),
+		template<auto...> typename B1, auto t, nik_vp(p1)(B1<t>*)
+	>
+	struct T_machine<MN::recall, MT::id, p0, p1>
+	{
+		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
+		{
+					// does not propagate references.
+			auto val   = T_cast_at<t, n, T, Ts...>::template result<T, Ts...>(v, vs...);
 			using TVal = modify_type<_read_only_, decltype(val)>;
 
 			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)((TVal) val, vs...);

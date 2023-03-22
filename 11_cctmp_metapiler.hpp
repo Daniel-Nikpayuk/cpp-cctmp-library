@@ -396,56 +396,59 @@ namespace cctmp {
 				else                                    return toc.lookup_entry_index(n, m);
 			}
 
-			template<auto this_f, auto n, auto m>
-			nik_ces auto resolve_first() { return resolve_value<this_f, n, m>(); }
-
-			template<auto this_f, auto n, auto m>
-			nik_ces auto resolve_rest() { return resolve_value<_constant_<this_f>, n, m>(); }
-
 			template<auto n, auto m>
 			nik_ces auto resolve_type()
 			{
 				nik_ce auto sign = toc.lookup_entry_sign(n, m);
 
-				if constexpr (Sign::is_marg(sign)) return _read_write_;
-				else                               return _id_;
+				if nik_ce (Sign::is_marg(sign)) return _read_write_;
+				else                            return _id_;
+			}
+
+			template<auto this_f, auto n, auto m0>
+			nik_ces auto resolve_line_assign(nik_avp(T_pack_Vs<m0>*))
+			{
+				nik_ce auto f_pack = U_pack_Vs<resolve_value<this_f, n, m0>()>;
+				nik_ce auto t_pack = U_pack_Vs<resolve_type<n, m0>()>;
+
+				return eval<_list_<>, f_pack, t_pack>;
 			}
 
 			template<auto this_f, auto n, auto m0, auto... ms>
 			nik_ces auto resolve_void_swap(nik_avp(T_pack_Vs<m0, ms...>*))
 			{
-				nik_ce auto first  = resolve_first<this_f, n, m0>();
-				nik_ce auto second = resolve_rest<this_f, n, _zero>();
-				nik_ce auto f_pack = U_pack_Vs<first, second, resolve_rest<this_f, n, ms>()...>;
+				nik_ce auto first  = resolve_value<this_f, n, m0>();
+				nik_ce auto second = resolve_value<this_f, n, _zero>();
+				nik_ce auto f_pack = U_pack_Vs<first, second, resolve_value<this_f, n, ms>()...>;
 				nik_ce auto t_pack = U_pack_Vs<_read_write_, resolve_type<n, ms>()...>;
 
 				return eval<_list_<>, f_pack, t_pack>;
 			}
 
 			template<auto this_f, auto n, auto m0, auto... ms>
-			nik_ces auto resolve_void_def(nik_avp(T_pack_Vs<m0, ms...>*))
+			nik_ces auto resolve_void(nik_avp(T_pack_Vs<m0, ms...>*))
 			{
-				nik_ce auto first  = resolve_first<this_f, n, m0>();
-				nik_ce auto f_pack = U_pack_Vs<first, resolve_rest<this_f, n, ms>()...>;
+				nik_ce auto first  = resolve_value<this_f, n, m0>();
+				nik_ce auto f_pack = U_pack_Vs<first, resolve_value<this_f, n, ms>()...>;
 				nik_ce auto t_pack = U_pack_Vs<resolve_type<n, ms>()...>;
 
 				return eval<_list_<>, f_pack, t_pack>;
 			}
 
 			template<auto this_f, auto n, typename Pack>
-			nik_ces auto resolve_void_operator(Pack p)
+			nik_ces auto resolve_line_void(Pack p)
 			{
 				nik_ce auto sign = toc.lookup_entry_sign(n, _zero);
 
-				if constexpr (Sign::is_marg(sign)) return resolve_void_swap<this_f, n>(p);
-				else                               return resolve_void_def<this_f, n>(p);
+				if nik_ce (Sign::is_marg(sign)) return resolve_void_swap<this_f, n>(p);
+				else                            return resolve_void<this_f, n>(p);
 			}
 
 			template<auto this_f, auto n, auto m0, auto... ms>
-			nik_ces auto resolve_def_operator(nik_avp(T_pack_Vs<m0, ms...>*))
+			nik_ces auto resolve_line_apply(nik_avp(T_pack_Vs<m0, ms...>*))
 			{
-				nik_ce auto first  = resolve_first<this_f, n, m0>();
-				nik_ce auto f_pack = U_pack_Vs<first, resolve_rest<this_f, n, ms>()...>;
+				nik_ce auto first  = resolve_value<this_f, n, m0>();
+				nik_ce auto f_pack = U_pack_Vs<first, resolve_value<this_f, n, ms>()...>;
 				nik_ce auto t_pack = U_pack_Vs<resolve_type<n, ms>()...>;
 
 				return eval<_list_<>, f_pack, t_pack>;
@@ -454,8 +457,9 @@ namespace cctmp {
 			template<auto this_f, auto n, typename Pack>
 			nik_ces auto unpack_entry(Pack p)
 			{
-				if constexpr (toc.lookup_line_void(n)) return resolve_void_operator<this_f, n>(p);
-				else                                   return resolve_def_operator<this_f, n>(p);
+				if nik_ce      (toc.lookup_line_assign(n)) return resolve_line_assign <this_f, n>(p);
+				else if nik_ce (toc.lookup_line_void(n)  ) return resolve_line_void   <this_f, n>(p);
+				else                                       return resolve_line_apply  <this_f, n>(p);
 			}
 
 			template<auto this_f, auto... l_ps, auto... e_ps>
