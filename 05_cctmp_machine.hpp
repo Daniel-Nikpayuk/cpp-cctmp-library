@@ -483,14 +483,34 @@ namespace cctmp {
 	template<auto t, auto n, typename... Ts>
 	struct T_cast_at : public T_modify_at<t, n, type_at<n, Ts...>> { };
 
-	// constant:
+	// (lookup) pack:
 
-		template<auto t, typename C, nik_vp(p)(C*), typename... Types>
+		template<auto, auto> struct T_cast_lookup { };
+
+		template<auto Key, auto Map>
+		nik_ce auto U_cast_lookup = store<T_cast_lookup<Key, Map>*>;
+
+	// lookup:
+
+		template
+		<
+			auto t,
+			auto key, auto static_frame, nik_vp(p)(T_cast_lookup<key, static_frame>*),
+			typename... Types
+		>
 		struct T_cast_at<t, p, Types...>
 		{
+			nik_ces auto frame = member_value_U<static_frame>;
+			nik_ces auto value = frame.tuple.template value<key>();
+
 			template<typename... Ts>
-			nik_ces auto result(Ts... vs) { return C::template result<>(); }
+			nik_ces auto result(Ts... vs) { return value; }
 		};
+
+	// function:
+
+		template<auto f, typename... Ts>
+		using T_cast_op = T_cast_at<_id_, f, Ts...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -728,7 +748,8 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			auto val   = T_store_U<f>::template result<> // does not propagate references.
+			auto U     = T_cast_op<f, Ts...>::template result<Ts...>(vs...);
+			auto val   = T_restore_T<decltype(U)>::template result<> // does not propagate references.
 					(T_cast_at<ts, ns, Ts...>::template result<Ts...>(vs...)...);
 			using TVal = modify_type<_read_only_, decltype(val)>;
 
@@ -772,7 +793,8 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			auto val   = T_store_U<f>::template result<> // does not propagate references.
+			auto U     = T_cast_op<f, Ts...>::template result<Ts...>(vs...);
+			auto val   = T_restore_T<decltype(U)>::template result<> // does not propagate references.
 					(T_cast_at<ts, ns, Ts...>::template result<Ts...>(vs...)...);
 			using TVal = modify_type<_read_only_, decltype(val)>;
 
@@ -794,7 +816,9 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			T_store_U<f>::template result<>
+			auto U = T_cast_op<f, Ts...>::template result<Ts...>(vs...);
+
+			T_restore_T<decltype(U)>::template result<>
 				(T_cast_at<ts, ns, Ts...>::template result<Ts...>(vs...)...);
 
 			return NIK_MACHINE_TS(s, c, i, l, Ts...)(vs...);
@@ -820,7 +844,8 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			auto val   = T_store_U<f>::template result<> // does not propagate references.
+			auto U     = T_cast_op<f, T, Ts...>::template result<T, Ts...>(v, vs...);
+			auto val   = T_restore_T<decltype(U)>::template result<> // does not propagate references.
 					(T_cast_at<ts, ns, T, Ts...>::template result<T, Ts...>(v, vs...)...);
 			using TVal = modify_type<_read_only_, decltype(val)>;
 
@@ -837,7 +862,7 @@ namespace cctmp {
 		template<auto...> typename B0, auto n, nik_vp(p0)(B0<n>*),
 		template<auto...> typename B1, auto t, nik_vp(p1)(B1<t>*)
 	>
-	struct T_machine<MN::recall, MT::id, p0, p1>
+	struct T_machine<MN::recall, MT::value, p0, p1>
 	{
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
@@ -864,7 +889,8 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			auto val   = T_store_U<f>::template result<> // does not propagate references.
+			auto U     = T_cast_op<f, T, Ts...>::template result<T, Ts...>(v, vs...);
+			auto val   = T_restore_T<decltype(U)>::template result<> // does not propagate references.
 					(T_cast_at<ts, ns, T, Ts...>::template result<T, Ts...>(v, vs...)...);
 			using TVal = modify_type<_read_only_, decltype(val)>;
 
@@ -886,7 +912,9 @@ namespace cctmp {
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			T_store_U<f>::template result<>
+			auto U = T_cast_op<f, T, Ts...>::template result<T, Ts...>(v, vs...);
+
+			T_restore_T<decltype(U)>::template result<>
 				(T_cast_at<ts, ns, T, Ts...>::template result<T, Ts...>(v, vs...)...);
 
 			return NIK_MACHINE_TS(s, c, i, l, Ts...)(vs...);

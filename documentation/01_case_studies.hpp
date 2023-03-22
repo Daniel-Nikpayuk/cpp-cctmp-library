@@ -73,6 +73,26 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// frame:
+
+	constexpr auto constant_complex_frame_callable()
+	{
+		return frame
+		(
+		 	U_char,
+
+			binding( "_0_0i" , complex_number{0, 0} ),
+			binding( "_1_0i" , complex_number{1, 0} ),
+			binding( "_0_1i" , complex_number{0, 1} )
+		);
+	};
+
+	constexpr auto constant_complex_frame = _static_callable_<constant_complex_frame_callable>;
+
+/***********************************************************************************************************************/
+
+// make:
+
 	constexpr auto make_complex(const float x, const float y) { return complex_number(x, y); }
 	constexpr auto _make_complex_ = _wrap_<make_complex>;
 
@@ -226,6 +246,8 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// version 0:
+
 	constexpr auto _semidynamic_typing_v0()
 	{
 		return source
@@ -250,6 +272,35 @@ namespace cctmp {
 		constexpr auto e0 = env<constant_machine_frame>;
 
 		return generic_assembly_apply<_semidynamic_typing_v0, e0, int>(c, c1, n);
+	}
+
+/***********************************************************************************************************************/
+
+// version 1:
+
+	constexpr auto _semidynamic_typing_v1()
+	{
+		return source
+		(
+			"func c n               ;"
+
+			"body:                  ;"
+			"  test equal c _1_0i   ;"
+			"  branch set_c_to_five ;"
+			"  c = increment n      ;" // { c = increment c; } would error.
+			"  return c             ;"
+
+			"set_c_to_five:         ;"
+			"  c # five             ;"
+			"  return c             ;"
+		);
+	}
+
+	constexpr auto semidynamic_typing_v1(const complex_number & c, int n)
+	{
+		constexpr auto e0 = env<constant_machine_frame, constant_complex_frame>;
+
+		return generic_assembly_apply<_semidynamic_typing_v1, e0, int>(c, n);
 	}
 
 /***********************************************************************************************************************/

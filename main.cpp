@@ -74,6 +74,8 @@
 		constexpr auto polynom_val  = x_to5_plus1_v0(2);
 		constexpr auto semidyntyp0  = semidynamic_typing_v0(complex_number(0, 1), 17);
 		constexpr auto semidyntyp1  = semidynamic_typing_v0(complex_number(1, 0), 17);
+		constexpr auto semidyntyp2  = semidynamic_typing_v1(complex_number(0, 1), 17);
+		constexpr auto semidyntyp3  = semidynamic_typing_v1(complex_number(1, 0), 17);
 		constexpr auto reassign_val = reassign_v0(2, 17);
 
 		static_assert(comp_sq      == complex_number(-3.0, 4.0));
@@ -82,6 +84,8 @@
 		static_assert(polynom_val  == 33);
 		static_assert(semidyntyp0  == 18);
 		static_assert(semidyntyp1  == 5);
+		static_assert(semidyntyp2  == 18);
+		static_assert(semidyntyp3  == 5);
 		static_assert(reassign_val == 17);
 
 	// falling factorial:

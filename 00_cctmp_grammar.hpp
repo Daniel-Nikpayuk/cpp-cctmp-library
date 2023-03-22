@@ -353,25 +353,6 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
-
-// tuple:
-
-	template<typename... Ts>
-	struct tuple
-	{
-		nik_ce tuple(Ts... vs) { }
-	};
-
-	template<typename T, typename... Ts>
-	struct tuple<T, Ts...>
-	{
-		T value;
-		tuple<Ts...> rest;
-
-		nik_ce tuple(T v, Ts... vs) : value{v}, rest{vs...} { }
-	};
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -426,7 +407,7 @@ namespace cctmp {
 			overload , higher_order ,
 			abstract , access       , list     ,
 			boolean  , number       , pointer  , reference ,
-			array    , function     , sequence , tuple     ,
+			array    , function     , sequence ,
 			dimension
 		};
 	};
@@ -845,39 +826,6 @@ namespace cctmp {
 
 		template<auto... Vs> using T_par_sequence		= T_parameter<Pattern::sequence, Vs...>;
 		template<auto... Vs> nik_ce auto U_par_sequence		= U_parameter<Pattern::sequence, Vs...>;
-
-/***********************************************************************************************************************/
-
-// tuple:
-
-	struct Tuple
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// meta:
-
-				is   ,
-				type , size ,
-
-			// basis:
-
-				to_tuple ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_tuple			= T_argument<Pattern::tuple, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_tuple		= U_argument<Pattern::tuple, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_tuple			= T_parameter<Pattern::tuple, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_tuple		= U_parameter<Pattern::tuple, Vs...>;
 
 /***********************************************************************************************************************/
 

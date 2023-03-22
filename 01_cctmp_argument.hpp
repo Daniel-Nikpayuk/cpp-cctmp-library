@@ -705,59 +705,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// tuple:
-
-/***********************************************************************************************************************/
-
-// meta:
-
-	// is:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::tuple, Tuple::is, filler...>
-		{
-			template<typename T>     nik_ces auto result(T)                    { return false; }
-			template<typename... Ts> nik_ces auto result(const tuple<Ts...> &) { return true; }
-
-		}; nik_ce auto _is_tuple_ = U_arg_tuple<Tuple::is>;
-
-	// type:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::tuple, Tuple::type, filler...>
-		{
-			template<typename... Ts>
-			nik_ces auto result(const tuple<Ts...> &) { return U_pack_Ts<Ts...>; }
-
-		}; nik_ce auto _tuple_type_ = U_arg_tuple<Tuple::type>;
-
-	// size:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::tuple, Tuple::size, filler...>
-		{
-			template<typename... Ts>
-			nik_ces auto result(const tuple<Ts...> &) { return sizeof...(Ts); }
-
-		}; nik_ce auto _tuple_size_ = U_arg_tuple<Tuple::size>;
-
-/***********************************************************************************************************************/
-
-// basis:
-
-	// tuple:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::tuple, Tuple::to_tuple, filler...>
-		{
-			template<typename... Ts>
-			nik_ces auto result(Ts... vs) { return tuple<Ts...>(vs...); }
-
-		}; nik_ce auto _to_tuple_ = U_arg_tuple<Tuple::to_tuple>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // identity:
 
 /***********************************************************************************************************************/

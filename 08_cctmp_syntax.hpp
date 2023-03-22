@@ -455,6 +455,9 @@ namespace cctmp {
 			nik_ce auto lookup_line_assign(gindex_type n) const
 				{ return (lookup.array[n]->kind == Context::assign); }
 
+			nik_ce auto lookup_line_return(gindex_type n) const
+				{ return (lookup.array[n]->kind == Context::re_turn); }
+
 			nik_ce auto lookup_line_void(gindex_type n) const
 				{ return lookup.array[n]->has_void; }
 

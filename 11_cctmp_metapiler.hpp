@@ -50,6 +50,46 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// tuple:
+
+/***********************************************************************************************************************/
+
+// value:
+
+	template<typename T, auto>
+	struct Value
+	{
+		T v;
+
+		nik_ce Value(const T & _v) : v{_v} { }
+	};
+
+/***********************************************************************************************************************/
+
+// struct:
+
+	template<typename...> struct MITuple;
+
+	template<template<auto...> typename B, auto... Is, typename... Ts>
+	struct MITuple<void(*const)(B<Is...>*), Ts...> : public Value<Ts, gindex_type{Is}>...
+	{
+		nik_ce MITuple(Ts... vs) : Value<Ts, gindex_type{Is}>{vs}... { }
+
+		template<auto n>
+		nik_ce auto value() const
+		{
+			using T = type_at<n, Ts...>;
+
+			return static_cast<Value<T, gindex_type{n}> const*>(this)->v;
+		}
+	};
+
+	template<typename... Ts>
+	using Tuple = MITuple<decltype(eval<_par_segment_, sizeof...(Ts)>), Ts...>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // chord:
@@ -109,14 +149,15 @@ namespace cctmp {
 	{
 		using char_type		= CharType;
 		using string_type	= char_type const*;
+		using value_type	= ValueType;
 
 		nik_ces auto length	= Size;
 		nik_ces auto size	= Size - 1;
-		nik_ces auto value	= U_restore_T<ValueType>;
 
 		string_type string;
+		value_type value;
 
-		nik_ce binding(const CharType (&s)[Size], const ValueType &) : string{s} { }
+		nik_ce binding(const CharType (&s)[Size], const ValueType & v) : string{s}, value{v} { }
 	};
 
 /***********************************************************************************************************************/
@@ -132,14 +173,16 @@ namespace cctmp {
 		using char_type		= T_restore_T<CharType>;
 		using string_type	= char_type const*;
 		using cstring_type	= string_type const;
+		using tuple_type	= Tuple<typename Bindings::value_type...>;
 
 		nik_ces auto length	= sizeof...(Bindings);
 		nik_ces auto sizes	= array<decltype(length), Bindings::size...>;
-		nik_ces auto values	= U_pack_Vs<member_value_T<Bindings>...>;
 
 		cstring_type string[length];
+		tuple_type tuple;
 
-		nik_ce frame(const CharType &, const Bindings &... bs) : string{bs.string...} { }
+		nik_ce frame(const CharType &, const Bindings &... bs) :
+			string{bs.string...}, tuple{bs.value...} { }
 
 		nik_ce auto lookup(string_type str_begin, cstring_type str_end) const
 		{
@@ -224,12 +267,7 @@ namespace cctmp {
 			binding( "to_sequence"           , _to_sequence_           ),
 			binding( "sequence_begin"        , _sequence_begin_        ),
 			binding( "sequence_last"         , _sequence_last_         ),
-			binding( "sequence_end"          , _sequence_end_          ),
-
-			binding( "is_tuple"              , _is_tuple_              ),
-			binding( "tuple_type"            , _tuple_type_            ),
-			binding( "tuple_size"            , _tuple_size_            ),
-			binding( "to_tuple"              , _to_tuple_              )
+			binding( "sequence_end"          , _sequence_end_          )
 		);
 	};
 
@@ -245,21 +283,39 @@ namespace cctmp {
 		(
 		 	U_char,
 
-			binding( "zero"  , _constant_< _zero  >),
-			binding( "one"   , _constant_< _one   >),
-			binding( "two"   , _constant_< _two   >),
-			binding( "three" , _constant_< _three >),
-			binding( "four"  , _constant_< _four  >),
-			binding( "five"  , _constant_< _five  >),
-			binding( "six"   , _constant_< _six   >),
-			binding( "seven" , _constant_< _seven >),
-			binding( "eight" , _constant_< _eight >),
-			binding( "nine"  , _constant_< _nine  >),
-			binding( "ten"   , _constant_< _ten   >)
+			binding( "zero"  , _zero  ),
+			binding( "one"   , _one   ),
+			binding( "two"   , _two   ),
+			binding( "three" , _three ),
+			binding( "four"  , _four  ),
+			binding( "five"  , _five  ),
+			binding( "six"   , _six   ),
+			binding( "seven" , _seven ),
+			binding( "eight" , _eight ),
+			binding( "nine"  , _nine  ),
+			binding( "ten"   , _ten   )
 		);
 	};
 
 	nik_ce auto constant_machine_frame = _static_callable_<constant_machine_frame_callable>;
+
+/***********************************************************************************************************************/
+
+// recurse:
+
+	template<auto f>
+	nik_ce auto recurse_machine_frame_callable()
+	{
+		return frame
+		(
+		 	U_char,
+
+			binding( "this" , f )
+		);
+	};
+
+	template<auto f>
+	nik_ce auto recurse_machine_frame = _static_callable_<recurse_machine_frame_callable<f>>;
 
 /***********************************************************************************************************************/
 
@@ -381,18 +437,23 @@ namespace cctmp {
 				nik_ce auto   pos        = survey::search(record, record + sizeof...(static_frames));
 
 				nik_ce auto static_frame = eval<_par_at_, pos, static_frames...>;
-				nik_ce auto values       = member_type_U<static_frame>::values;
 
-				return unpack_<values, _par_at_, record[pos].key>;
+				return U_cast_lookup<record[pos].key, static_frame>;
 			}
 
-			template<auto that_f, auto n, auto m>
+			template<auto this_f>
+			nik_ces auto resolve_recurse()
+			{
+				return U_cast_lookup<_zero, recurse_machine_frame<this_f>>;
+			}
+	
+			template<auto this_f, auto n, auto m>
 			nik_ces auto resolve_value()
 			{
 				nik_ce auto sign = toc.lookup_entry_sign(n, m);
 
-				if nik_ce      (Sign::is_recurse(sign)) return that_f;
-				else if nik_ce (Sign::is_env    (sign)) return resolve<n, m>(env);
+				if nik_ce      (Sign::is_env(sign))     return resolve<n, m>(env);
+				else if nik_ce (Sign::is_recurse(sign)) return resolve_recurse<this_f>();
 				else                                    return toc.lookup_entry_index(n, m);
 			}
 
@@ -406,7 +467,7 @@ namespace cctmp {
 			}
 
 			template<auto this_f, auto n, auto m0>
-			nik_ces auto resolve_line_assign(nik_avp(T_pack_Vs<m0>*))
+			nik_ces auto resolve_line_single(nik_avp(T_pack_Vs<m0>*))
 			{
 				nik_ce auto f_pack = U_pack_Vs<resolve_value<this_f, n, m0>()>;
 				nik_ce auto t_pack = U_pack_Vs<resolve_type<n, m0>()>;
@@ -457,7 +518,8 @@ namespace cctmp {
 			template<auto this_f, auto n, typename Pack>
 			nik_ces auto unpack_entry(Pack p)
 			{
-				if nik_ce      (toc.lookup_line_assign(n)) return resolve_line_assign <this_f, n>(p);
+				if nik_ce      (toc.lookup_line_assign(n)) return resolve_line_single <this_f, n>(p);
+				else if nik_ce (toc.lookup_line_return(n)) return resolve_line_single <this_f, n>(p);
 				else if nik_ce (toc.lookup_line_void(n)  ) return resolve_line_void   <this_f, n>(p);
 				else                                       return resolve_line_apply  <this_f, n>(p);
 			}

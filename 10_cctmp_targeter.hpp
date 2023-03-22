@@ -175,6 +175,14 @@ namespace cctmp {
 				add_instr(MN::jump, MT::go_to, Mark::value);
 			}
 
+			nik_ce void add_get_lookup_instr(cline_type & l)
+			{
+				add_lookup();
+
+				add_instr(MN::select, MT::pair, Mark::value);
+				add_instr(call_name(l), MT::value);
+			}
+
 			nik_ce void add_get_arg_instr(cline_type & l, gcindex_type index)
 			{
 				set_instr_pos(index);
@@ -183,20 +191,12 @@ namespace cctmp {
 				add_instr(MN::right, MT::id);
 			}
 
-			nik_ce void add_get_lookup_instr(cline_type & l)
-			{
-				add_lookup();
-
-				add_instr(MN::select, MT::pair, Mark::value);
-				add_instr(MN::call, MT::id);
-			}
-
 			nik_ce void add_return_instr(cline_type & l)
 			{
 				auto sign = first_sign(l);
 
-				if      (Sign::is_carg(sign)) add_get_arg_instr(l, first_index(l));
-				else if (Sign::is_env(sign) ) add_get_lookup_instr(l);
+				if      (Sign::is_env(sign))  add_get_lookup_instr(l);
+				else if (Sign::is_carg(sign)) add_get_arg_instr(l, first_index(l));
 				// else if (Sign::is_quote(sign))
 
 				add_instr(MN::first , MT::id);
