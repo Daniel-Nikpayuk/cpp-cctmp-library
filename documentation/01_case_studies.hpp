@@ -19,7 +19,7 @@
 
 // case studies:
 
-namespace cctmp {
+namespace chord {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -77,13 +77,13 @@ namespace cctmp {
 
 	constexpr auto constant_complex_frame_callable()
 	{
-		return frame
+		return cctmp::frame
 		(
-		 	U_char,
+			cctmp::U_char,
 
-			binding( "_0_0i" , complex_number{0, 0} ),
-			binding( "_1_0i" , complex_number{1, 0} ),
-			binding( "_0_1i" , complex_number{0, 1} )
+			cctmp::binding( "_0_0i" , complex_number{0, 0} ),
+			cctmp::binding( "_1_0i" , complex_number{1, 0} ),
+			cctmp::binding( "_0_1i" , complex_number{0, 1} )
 		);
 	};
 
@@ -785,5 +785,5 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace cctmp
+} // namespace chord
 

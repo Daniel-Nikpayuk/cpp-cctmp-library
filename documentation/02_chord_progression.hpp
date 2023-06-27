@@ -38,9 +38,9 @@ namespace cctmp_chord {
 	// available functional operators: { repeat, map, fold, find_first, find_all, zip, fasten, glide }
 	// special characters            :    ~!@#$%^&*()_+`-={}|[]\:";'<>?,./
 	// disallowed                    :    "
-	// already used                  :    !_=:;'.
-	// chord reserved                :    <>{}[](),@*+-|#
-	// remaining                     :    ~$%^&`\?/
+	// already used                  :    !_#=:;'.
+	// chord reserved                :    <>{}[](),@*+-|~
+	// remaining                     :    $%^&`\?/
 
 /***********************************************************************************************************************/
 

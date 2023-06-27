@@ -400,5 +400,46 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+	// todo:
+
+		// 1. allow arg_subpose to compose void functions (change _appoint_ to void).
+
+/***********************************************************************************************************************/
+
+// pose:
+
+	template<auto Name, auto f, auto gs_p>
+	struct T_arg_pose
+	{
+		nik_ces auto lookup = U_pack_Vs<f, gs_p>;
+
+		template<auto m = _zero, auto n = _one>
+		nik_ces auto contr = controller
+		<
+			instruction< CN::select , n >,
+			instruction< Name           >,
+			instruction< CN::select , m >,
+			instruction< CN::apply      >,
+			instruction< CN::first      >
+		>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr<>, lookup>(vs...); }
+
+	}; template<auto Name, auto f, auto gs_p>
+		nik_ce auto _arg_pose_ = U_store_T<T_arg_pose<Name, f, gs_p>>;
+
+	// syntactic sugar:
+
+		template<auto f, auto... gs>
+		nik_ce auto arg_subpose = _arg_pose_<CN::mapwise, f, U_pack_Vs<gs...>>;
+
+		template<auto f, auto... gs>
+		nik_ce auto arg_compose = _arg_pose_<CN::applywise, f, U_pack_Vs<gs...>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 } // namespace cctmp
 

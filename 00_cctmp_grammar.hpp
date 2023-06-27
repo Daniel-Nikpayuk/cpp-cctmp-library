@@ -31,7 +31,7 @@ namespace cctmp {
 
 // T -> U:
 
-	template<typename T> nik_ces void store(T) { }
+	template<typename T> nik_ce void store(T) { }
 
 	template<typename T>
 	nik_ce auto U_store_T = store<T*>;
@@ -94,14 +94,12 @@ namespace cctmp {
 
 	template<auto... Vs>
 	nik_ce auto U_pack_Vs = store<T_pack_Vs<Vs...>*>;
-
 	nik_ce auto U_null_Vs = U_pack_Vs<>;
 
 // typename:
 
 	template<typename... Ts>
 	nik_ce auto U_pack_Ts = U_pack_Vs<U_store_T<Ts>...>;
-
 	nik_ce auto U_null_Ts = U_null_Vs;
 
 // auto template:
@@ -113,7 +111,6 @@ namespace cctmp {
 
 	template<template<auto...> typename... Bs>
 	nik_ce auto U_pack_Bs = U_pack_Vs<U_store_B<Bs>...>;
-
 	nik_ce auto U_null_Bs = U_null_Vs;
 
 	nik_ce auto H_id = U_store_B<T_pack_Vs>;
@@ -127,8 +124,26 @@ namespace cctmp {
 
 	template<template<typename...> typename... As>
 	nik_ce auto U_pack_As = U_pack_Vs<U_store_A<As>...>;
-
 	nik_ce auto U_null_As = U_null_Vs;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// using:
+
+/***********************************************************************************************************************/
+
+	template<template<auto...> typename B, auto... Ws>
+	struct T_using
+	{
+		template<auto... Vs>
+		using result = B<Ws..., Vs...>;
+	};
+
+	// syntactic sugar:
+
+		template<template<auto...> typename B, auto... Ws>
+		nik_ce auto H_using = U_store_B<T_using<B, Ws...>::template result>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -153,10 +168,10 @@ namespace cctmp {
 // member value:
 
 	template<typename T>
-	nik_ce auto member_value_T = T::value;
+	nik_ce auto & member_value_T = T::value;
 
 	template<auto U>
-	nik_ce auto member_value_U = member_value_T<T_store_U<U>>;
+	nik_ce auto & member_value_U = member_value_T<T_store_U<U>>;
 
 // member type:
 
@@ -230,6 +245,16 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// strings:
+
+	using global_char_type		= char;
+	using gchar_type		= global_char_type;
+	using gcchar_type		= global_char_type const;
+	nik_ce auto U_gchar_type	= U_store_T<gchar_type>;
+	nik_ce auto U_gcchar_type	= U_store_T<gcchar_type>;
+
+/***********************************************************************************************************************/
+
 // array:
 
 	template<typename Type, Type... Vs>
@@ -238,119 +263,72 @@ namespace cctmp {
 	nik_ce gindex_type array_2_N[] = { _2_0, _2_1, _2_2, _2_3, _2_4, _2_5, _2_6, _2_7, _2_8, _2_9 };
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// declarations:
+
+/***********************************************************************************************************************/
+
+// selector:
+
+	// immutable:
+
+		template<typename Type, typename SizeType = gindex_type> class cselector;
+
+	// mutable:
+
+		template<typename Type, typename SizeType = gindex_type> struct selector;
+
+/***********************************************************************************************************************/
+
+// iterator:
+
+	// immutable:
+
+		template<typename Type, typename SizeType = gindex_type> class citerator;
+
+	// mutable:
+
+		template<typename Type, typename SizeType = gindex_type> struct iterator;
+
+/***********************************************************************************************************************/
+
+// literal:
+
+	template<typename Type, typename SizeType = gindex_type> struct literal;
+
+	// string:
+
+		template<typename Type = gchar_type, typename SizeType = gindex_type> struct string_literal;
+
+/***********************************************************************************************************************/
 
 // sequence:
 
-	template<typename Type, auto Size>
-	struct sequence
-	{
-		using type			= Type; // mutable intention.
-		using ctype			= type const;
+	template<typename Type, auto Size> class sequence;
 
-		nik_ces auto length		= Size;
+	// subsequence:
 
-		type array[length];
-		ctype *start;
-		type *value;
-
-		nik_ce sequence() : array{}, start{array}, value{array} { }
-
-		nik_ce auto begin () const { return start; }
-		nik_ce auto end   () const { return value; }
-		nik_ce auto size  () const { return (value - start); }
-	};
-
-/***********************************************************************************************************************/
-
-// subsequence:
-
-	template<typename Type, auto Size>
-	struct subsequence
-	{
-		using type			= Type; // mutable intention.
-		using ctype			= type const;
-		using locus_type		= type*; // mutable intention.
-		using clocus_type		= locus_type const;
-
-		nik_ces auto length		= Size;
-
-		locus_type array[length];
-		clocus_type *start;
-		locus_type *locus;
-
-		nik_ce subsequence() : array{}, start{array}, locus{array} { }
-
-		nik_ce auto begin () const { return start; }
-		nik_ce auto end   () const { return locus; }
-		nik_ce auto size  () const { return (locus - start); }
-	};
-
-/***********************************************************************************************************************/
-
-// selection:
-
-	template<typename Type, auto Size>
-	struct selection
-	{
-		using type		= Type;
-		using ctype		= type const;
-		using ptr_ctype		= ctype*;
-		using cptr_ctype	= ptr_ctype const;
-		using size_type		= decltype(Size);
-
-		cptr_ctype start;
-		cptr_ctype finish;
-
-		nik_ce selection(const Type (&_s)[Size]) : start{_s}, finish{_s + Size} { }
-
-		nik_ce auto begin () const { return start; }
-		nik_ce auto end   () const { return finish; }
-		nik_ce auto size  () const { return Size; }
-	};
+		template<typename Type, auto Size>
+		using subsequence = sequence<Type*, Size>;
 
 /***********************************************************************************************************************/
 
 // pair:
 
-	template<typename T0, typename T1>
-	struct pair
-	{
-		T0 v0;
-		T1 v1;
+	template<typename T0, typename T1> struct pair;
 
-		nik_ce pair(const T0 & _v0, const T1 & _v1) : v0{_v0}, v1{_v1} { }
-	};
+/***********************************************************************************************************************/
+
+// binding:
+
+//	template<typename T0, typename T1, typename SizeType = gindex_type> struct binding;
 
 /***********************************************************************************************************************/
 
 // table:
 
-	template<typename TU0, typename TU1, typename... Pairs>
-	struct table
-	{
-		using T0		= T_restore_T<TU0>;
-		using T1		= T_restore_T<TU1>;
-
-		nik_ces auto length	= sizeof...(Pairs);
-
-		T0 v0[length];
-		T1 v1[length];
-
-		nik_ce table(const TU0 &, const TU1 &, const Pairs &... ps) :
-
-			v0{ps.v0...}, v1{ps.v1...} { }
-
-		nik_ce const T1 & lookup(const T0 & _v0, const T1 & _v1) const
-		{
-			auto k = v0;
-			auto e = v0 + length;
-
-			while (k != e) if (*k == _v0) break; else ++k;
-
-			if (k != e) return v1[k - v0];
-			else        return _v1;
-		}
-	};
+	template<typename TU0, typename TU1, typename... Pairs> struct table;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -380,21 +358,6 @@ namespace cctmp {
 		};
 	};
 
-	// argument:
-
-		// no default definition.
-
-		template<auto Key, auto... Vs>       using T_argument = T_grammar<Shape::argument, Key, Vs...>;
-		template<auto Key, auto... Vs> nik_ce auto U_argument = U_grammar<Shape::argument, Key, Vs...>;
-
-	// parameter:
-
-		template<gkey_type Key, gkey_type Op, auto... Vs>
-		struct T_grammar<Shape::parameter, Key, Op, Vs...> { }; // empty default definition.
-
-		template<auto Key, auto... Vs>       using T_parameter = T_grammar<Shape::parameter, Key, Vs...>;
-		template<auto Key, auto... Vs> nik_ce auto U_parameter = U_grammar<Shape::parameter, Key, Vs...>;
-
 /***********************************************************************************************************************/
 
 // patterns:
@@ -405,9 +368,10 @@ namespace cctmp {
 		{
 			id = 0, identity = id, // convenience for default params.
 			overload , higher_order ,
+			boolean  , number       , array    ,
+			selector , iterator     , sequence , subarray , pair ,
 			abstract , access       , list     ,
-			boolean  , number       , pointer  , reference ,
-			array    , function     , sequence ,
+			pointer  , reference    , function ,
 			dimension
 		};
 	};
@@ -415,449 +379,127 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// operators:
+// argument:
+
+	// no default definition.
+
+	template<auto Key, auto... Vs>       using T_argument = T_grammar<Shape::argument, Key, Vs...>;
+	template<auto Key, auto... Vs> nik_ce auto U_argument = U_grammar<Shape::argument, Key, Vs...>;
 
 /***********************************************************************************************************************/
 
 // overload:
 
-	struct Overload
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// basis:
-
-				nop , first ,
-
-			// bitwise:
-
-				upshift , downshift ,
-
-			// mutation:
-
-				dereference , appoint ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_overload		= T_argument<Pattern::overload, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_overload		= U_argument<Pattern::overload, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_overload		= T_parameter<Pattern::overload, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_overload		= U_parameter<Pattern::overload, Vs...>;
-
-/***********************************************************************************************************************/
+	template<auto... Vs> using T_arg_overload		= T_argument<Pattern::overload, Vs...>;
+	template<auto... Vs> nik_ce auto U_arg_overload		= U_argument<Pattern::overload, Vs...>;
 
 // higher order:
 
-	struct HigherOrder
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
+	template<auto... Vs> using T_arg_higher_order		= T_argument<Pattern::higher_order, Vs...>;
+	template<auto... Vs> nik_ce auto U_arg_higher_order	= U_argument<Pattern::higher_order, Vs...>;
 
-			// basis:
+// boolean:
 
-				cast , constant , wrap , bind , curry ,
+	template<auto... Vs> using T_arg_boolean		= T_argument<Pattern::boolean, Vs...>;
+	template<auto... Vs> nik_ce auto U_arg_boolean		= U_argument<Pattern::boolean, Vs...>;
 
-			dimension
-		};
-	};
+// number:
 
-	// argument:
+	template<auto... Vs> using T_arg_number			= T_argument<Pattern::number, Vs...>;
+	template<auto... Vs> nik_ce auto U_arg_number		= U_argument<Pattern::number, Vs...>;
 
-		template<auto... Vs> using T_arg_higher_order		= T_argument<Pattern::higher_order, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_higher_order	= U_argument<Pattern::higher_order, Vs...>;
+// array:
 
-	// parameter:
+	template<auto... Vs> using T_arg_array			= T_argument<Pattern::array, Vs...>;
+	template<auto... Vs> nik_ce auto U_arg_array		= U_argument<Pattern::array, Vs...>;
 
-		template<auto... Vs> using T_par_higher_order		= T_parameter<Pattern::higher_order, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_higher_order	= U_parameter<Pattern::higher_order, Vs...>;
+// selector:
+
+	template<auto... Vs> using T_arg_selector		= T_argument<Pattern::selector, Vs...>;
+	template<auto... Vs> nik_ce auto U_arg_selector		= U_argument<Pattern::selector, Vs...>;
+
+// iterator:
+
+	template<auto... Vs> using T_arg_iterator		= T_argument<Pattern::iterator, Vs...>;
+	template<auto... Vs> nik_ce auto U_arg_iterator		= U_argument<Pattern::iterator, Vs...>;
+
+// sequence:
+
+	template<auto... Vs> using T_arg_sequence		= T_argument<Pattern::sequence, Vs...>;
+	template<auto... Vs> nik_ce auto U_arg_sequence		= U_argument<Pattern::sequence, Vs...>;
+
+// subarray:
+
+	template<auto... Vs> using T_arg_subarray		= T_argument<Pattern::subarray, Vs...>;
+	template<auto... Vs> nik_ce auto U_arg_subarray		= U_argument<Pattern::subarray, Vs...>;
+
+// pair:
+
+	template<auto... Vs> using T_arg_pair			= T_argument<Pattern::pair, Vs...>;
+	template<auto... Vs> nik_ce auto U_arg_pair		= U_argument<Pattern::pair, Vs...>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// parameter:
+
+	template<gkey_type Key, gkey_type Op, auto... Vs>
+	struct T_grammar<Shape::parameter, Key, Op, Vs...> { }; // empty default definition.
+
+	template<auto Key, auto... Vs>       using T_parameter = T_grammar<Shape::parameter, Key, Vs...>;
+	template<auto Key, auto... Vs> nik_ce auto U_parameter = U_grammar<Shape::parameter, Key, Vs...>;
 
 /***********************************************************************************************************************/
 
 // abstract:
 
-	struct Abstract
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// comparison:
-
-				same ,
-
-			// variadic:
-
-				is_null , length , car , cadr ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_abstract		= T_argument<Pattern::abstract, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_abstract		= U_argument<Pattern::abstract, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_abstract		= T_parameter<Pattern::abstract, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_abstract		= U_parameter<Pattern::abstract, Vs...>;
-
-/***********************************************************************************************************************/
+	template<auto... Vs> using T_par_abstract		= T_parameter<Pattern::abstract, Vs...>;
+	template<auto... Vs> nik_ce auto U_par_abstract		= U_parameter<Pattern::abstract, Vs...>;
 
 // access:
 
-	struct Access
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// basis:
-
-				is_const  ,
-				add_const , remove_const , to_const , from_const ,
-
-			// comparison:
-
-				csame ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_access			= T_argument<Pattern::access, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_access		= U_argument<Pattern::access, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_access			= T_parameter<Pattern::access, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_access		= U_parameter<Pattern::access, Vs...>;
-
-/***********************************************************************************************************************/
+	template<auto... Vs> using T_par_access			= T_parameter<Pattern::access, Vs...>;
+	template<auto... Vs> nik_ce auto U_par_access		= U_parameter<Pattern::access, Vs...>;
 
 // list:
 
-	struct List
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// basis:
-
-				name ,
-
-			// comparison:
-
-				similar ,
-
-			// variadic:
-
-				to_list , b0_unpack , rename ,
-
-			// functional:
-
-				pad , cdr , map , zip , unite , cons , push ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_list			= T_argument<Pattern::list, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_list		= U_argument<Pattern::list, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_list			= T_parameter<Pattern::list, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_list		= U_parameter<Pattern::list, Vs...>;
-
-/***********************************************************************************************************************/
+	template<auto... Vs> using T_par_list			= T_parameter<Pattern::list, Vs...>;
+	template<auto... Vs> nik_ce auto U_par_list		= U_parameter<Pattern::list, Vs...>;
 
 // boolean:
 
-	struct Boolean
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// basis:
-
-				if_then_else ,
-
-			// lazy:
-
-				stem , costem , distem ,
-
-			// logical:
-
-				not_ , and_ , or_ , implies , equivalent ,
-
-			// propositional:
-
-				and_wise ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_boolean		= T_argument<Pattern::boolean, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_boolean		= U_argument<Pattern::boolean, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_boolean		= T_parameter<Pattern::boolean, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_boolean		= U_parameter<Pattern::boolean, Vs...>;
-
-/***********************************************************************************************************************/
+	template<auto... Vs> using T_par_boolean		= T_parameter<Pattern::boolean, Vs...>;
+	template<auto... Vs> nik_ce auto U_par_boolean		= U_parameter<Pattern::boolean, Vs...>;
 
 // number:
 
-	struct Number
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// basis:
-
-				is_unsigned , not_unsigned ,
-				is_signed   , not_signed   ,
-				is_integer  , not_integer  ,
-
-			// comparison:
-
-				equal        , not_equal             ,
-				less_than    , less_than_or_equal    ,
-				greater_than , greater_than_or_equal ,
-
-			// arithmetic:
-
-				add , subtract , multiply , divide , modulo ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_number			= T_argument<Pattern::number, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_number		= U_argument<Pattern::number, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_number			= T_parameter<Pattern::number, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_number		= U_parameter<Pattern::number, Vs...>;
-
-/***********************************************************************************************************************/
+	template<auto... Vs> using T_par_number			= T_parameter<Pattern::number, Vs...>;
+	template<auto... Vs> nik_ce auto U_par_number		= U_parameter<Pattern::number, Vs...>;
 
 // pointer:
 
-	struct Pointer
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// basis:
-
-				is  ,
-				add , remove , to , from ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_pointer		= T_argument<Pattern::pointer, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_pointer		= U_argument<Pattern::pointer, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_pointer		= T_parameter<Pattern::pointer, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_pointer		= U_parameter<Pattern::pointer, Vs...>;
-
-/***********************************************************************************************************************/
+	template<auto... Vs> using T_par_pointer		= T_parameter<Pattern::pointer, Vs...>;
+	template<auto... Vs> nik_ce auto U_par_pointer		= U_parameter<Pattern::pointer, Vs...>;
 
 // reference:
 
-	struct Reference
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// basis:
-
-				is  ,
-				add , remove , to , from ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_reference		= T_argument<Pattern::reference, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_reference	= U_argument<Pattern::reference, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_reference		= T_parameter<Pattern::reference, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_reference	= U_parameter<Pattern::reference, Vs...>;
-
-/***********************************************************************************************************************/
+	template<auto... Vs> using T_par_reference		= T_parameter<Pattern::reference, Vs...>;
+	template<auto... Vs> nik_ce auto U_par_reference	= U_parameter<Pattern::reference, Vs...>;
 
 // array:
 
-	struct Array
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// meta:
-
-				is   ,
-				type , size ,
-
-			// basis:
-
-				to_array , begin , last , end , apply ,
-
-			// 2^N:
-
-				log_floor ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_array			= T_argument<Pattern::array, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_array		= U_argument<Pattern::array, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_array			= T_parameter<Pattern::array, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_array		= U_parameter<Pattern::array, Vs...>;
-
-/***********************************************************************************************************************/
+	template<auto... Vs> using T_par_array			= T_parameter<Pattern::array, Vs...>;
+	template<auto... Vs> nik_ce auto U_par_array		= U_parameter<Pattern::array, Vs...>;
 
 // function:
 
-	struct Function
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// meta:
-
-				type  ,
-				arity , out_type , in_types ,
-
-			// call:
-
-				eval , procedure , method , tailor , alias , custom ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_function		= T_argument<Pattern::function, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_function		= U_argument<Pattern::function, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_function		= T_parameter<Pattern::function, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_function		= U_parameter<Pattern::function, Vs...>;
-
-/***********************************************************************************************************************/
-
-// sequence:
-
-	struct Sequence
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// meta:
-
-				is   ,
-				type , size ,
-
-			// basis:
-
-				to_sequence , begin , last , end , apply ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_sequence		= T_argument<Pattern::sequence, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_sequence		= U_argument<Pattern::sequence, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_sequence		= T_parameter<Pattern::sequence, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_sequence		= U_parameter<Pattern::sequence, Vs...>;
-
-/***********************************************************************************************************************/
+	template<auto... Vs> using T_par_function		= T_parameter<Pattern::function, Vs...>;
+	template<auto... Vs> nik_ce auto U_par_function		= U_parameter<Pattern::function, Vs...>;
 
 // identity:
 
-	struct Identity
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-
-			// list to:
-
-				list_to_array ,
-
-			// array to:
-
-				array_to_list ,
-
-			dimension
-		};
-	};
-
-	// argument:
-
-		template<auto... Vs> using T_arg_identity		= T_argument<Pattern::identity, Vs...>;
-		template<auto... Vs> nik_ce auto U_arg_identity		= U_argument<Pattern::identity, Vs...>;
-
-	// parameter:
-
-		template<auto... Vs> using T_par_identity		= T_parameter<Pattern::identity, Vs...>;
-		template<auto... Vs> nik_ce auto U_par_identity		= U_parameter<Pattern::identity, Vs...>;
+	template<auto... Vs> using T_par_identity		= T_parameter<Pattern::identity, Vs...>;
+	template<auto... Vs> nik_ce auto U_par_identity		= U_parameter<Pattern::identity, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

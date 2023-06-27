@@ -327,14 +327,25 @@ namespace cctmp {
 
 		// accessors:
 
-			nik_ces auto instr(ccontr_type c, gcindex_type i)
-				{ return c[i]; }
+			nik_ces auto instr(ccontr_type c, gcindex_type i) { return c[i]; }
+
+			template<typename T>
+			nik_ces auto instr(nik_avp(T*), gcindex_type i) { return T::instr(i); }
 
 		// navigators:
 
 			nik_ces gkey_type   next_name  (ccontr_type c, gcindex_type i) { return c[i+1][MI::name]; }
 			nik_ces gkey_type   next_note  (ccontr_type c, gcindex_type i) { return c[i+1][MI::note]; }
 			nik_ces gindex_type next_index (ccontr_type  , gcindex_type i) { return i+1; }
+
+			template<typename T>
+			nik_ces gkey_type next_name(nik_avp(T*), gcindex_type i) { return T::next_name(i); }
+
+			template<typename T>
+			nik_ces gkey_type next_note(nik_avp(T*), gcindex_type i) { return T::next_note(i); }
+
+			template<typename T>
+			nik_ces gindex_type next_index(nik_avp(T*), gcindex_type i) { return T::next_index(i); }
 	};
 
 	using MD = MachineDispatch;
@@ -465,13 +476,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// modify type:
-
-	template<auto Op, typename T>
-	using modify_type = T_store_U<eval<Op, U_store_T<T>>>;
-
-/***********************************************************************************************************************/
-
 // type at:
 
 	template<auto n, typename... Ts>
@@ -525,8 +529,8 @@ namespace cctmp {
 		>
 		struct T_cast_at<t, p, Types...>
 		{
-			nik_ces auto frame = member_value_U<static_frame>;
-			nik_ces auto value = frame.tuple.template value<key>();
+			nik_ces auto & frame = member_value_U<static_frame>;
+			nik_ces auto   value = frame.template map<key>();
 
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs) { return value; }

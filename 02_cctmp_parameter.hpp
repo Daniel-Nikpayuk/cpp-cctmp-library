@@ -27,7 +27,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// default:
+// eval:
 
 	template<auto Op, bool V>
 	nik_ce auto eval_assert() { static_assert(V, "eval: undefined operator"); }
@@ -42,10 +42,10 @@ namespace cctmp {
 	template<auto Key, auto Op, auto... Ws, nik_vp(op)(T_argument<Key, Op, Ws...>*), auto... Vs>
 	nik_ce auto eval<op, Vs...> = T_argument<Key, Op, Ws...>::template result<decltype(Vs)...>(Vs...);
 
-// alias:
+// modify type:
 
-	template<auto Op, auto... Ws>       using T_alias  = T_par_function<Function::alias, Op, Ws...>;
-	template<auto Op, auto... Ws> nik_ce auto  _alias_ = U_store_T<T_alias<Op, Ws...>>;
+	template<auto Op, typename T>
+	using modify_type = T_store_U<eval<Op, U_store_T<T>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -65,11 +65,27 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// operators:
+
+	struct ParAbstract
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			same ,				// comparison
+			is_null , length , car , cadr ,	// variadic
+			alias ,				// operational
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
 // comparison:
 
 	// same:
 
-		nik_ce auto _same_ = U_par_abstract<Abstract::same>;
+		nik_ce auto _same_ = U_par_abstract<ParAbstract::same>;
 
 		template<auto V0, auto V1> nik_ce auto eval<_same_, V0, V1> = false;
 		template<auto V>           nik_ce auto eval<_same_, V , V > = true;
@@ -80,36 +96,63 @@ namespace cctmp {
 
 	// is null:
 
-		nik_ce auto _is_null_ = U_par_abstract<Abstract::is_null>;
+		nik_ce auto _is_null_ = U_par_abstract<ParAbstract::is_null>;
 
 		template<auto... Vs>
 		nik_ce auto eval<_is_null_, Vs...> = (sizeof...(Vs) == 0);
 
 	// length:
 
-		nik_ce auto _length_ = U_par_abstract<Abstract::length>;
+		nik_ce auto _length_ = U_par_abstract<ParAbstract::length>;
 
 		template<auto... Vs>
 		nik_ce auto eval<_length_, Vs...> = sizeof...(Vs);
 
 	// car:
 
-		nik_ce auto _car_ = U_par_abstract<Abstract::car>;
+		nik_ce auto _car_ = U_par_abstract<ParAbstract::car>;
 
 		template<auto V0, auto... Vs>
 		nik_ce auto eval<_car_, V0, Vs...> = V0;
 
 	// cadr:
 
-		nik_ce auto _cadr_ = U_par_abstract<Abstract::cadr>;
+		nik_ce auto _cadr_ = U_par_abstract<ParAbstract::cadr>;
 
 		template<auto V0, auto V1, auto... Vs>
 		nik_ce auto eval<_cadr_, V0, V1, Vs...> = V1;
 
 /***********************************************************************************************************************/
+
+// operational:
+
+	// alias:
+
+		template<auto Op, auto... Ws>
+		nik_ce auto  _alias_ = U_store_T<T_par_abstract<ParAbstract::alias, Op, Ws...>>;
+
+		template<auto Op, auto... Ws, nik_vp(op)(T_par_abstract<ParAbstract::alias, Op, Ws...>*), auto... Vs>
+		nik_ce auto eval<op, Vs...> = eval<Op, Ws..., Vs...>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // access:
+
+/***********************************************************************************************************************/
+
+// operators:
+
+	struct ParAccess
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			is_const , add_const , remove_const , to_const , from_const ,	// basis
+			csame ,								// comparison
+			dimension
+		};
+	};
 
 /***********************************************************************************************************************/
 
@@ -136,35 +179,35 @@ namespace cctmp {
 
 	// is const:
 
-		nik_ce auto _is_const_ = U_par_access<Access::is_const>;
+		nik_ce auto _is_const_ = U_par_access<ParAccess::is_const>;
 
 		template<auto U>
 		nik_ce auto eval<_is_const_, U> = reflect<is_const, U>;
 
 	// add const:
 
-		nik_ce auto _add_const_ = U_par_access<Access::add_const>;
+		nik_ce auto _add_const_ = U_par_access<ParAccess::add_const>;
 
 		template<auto U>
 		nik_ce auto eval<_add_const_, U> = modify<add_const, U>;
 
 	// remove const:
 
-		nik_ce auto _remove_const_ = U_par_access<Access::remove_const>;
+		nik_ce auto _remove_const_ = U_par_access<ParAccess::remove_const>;
 
 		template<auto U>
 		nik_ce auto eval<_remove_const_, U> = modify<remove_const, U>;
 
 	// to const (optimization):
 
-		nik_ce auto _to_const_ = U_par_access<Access::to_const>;
+		nik_ce auto _to_const_ = U_par_access<ParAccess::to_const>;
 
 		template<auto U>
 		nik_ce auto eval<_to_const_, U> = modify<add_const, U>;
 
 	// from const (optimization):
 
-		nik_ce auto _from_const_ = U_par_access<Access::from_const>;
+		nik_ce auto _from_const_ = U_par_access<ParAccess::from_const>;
 
 		template<auto U>
 		nik_ce auto eval<_from_const_, U> = modify<remove_const, U>;
@@ -175,7 +218,7 @@ namespace cctmp {
 
 	// csame:
 
-		nik_ce auto _csame_ = U_par_access<Access::csame>;
+		nik_ce auto _csame_ = U_par_access<ParAccess::csame>;
 
 		template<auto V0, auto V1>
 		nik_ce auto eval<_csame_, V0, V1> = eval
@@ -192,11 +235,28 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// operators:
+
+	struct ParList
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			name    ,					// basis
+			similar ,					// comparison
+			to_list , b0_unpack , rename ,			// variadic
+			pad , cdr , map , zip , unite , cons , push ,	// functional
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
 // basis:
 
 	// name:
 
-		nik_ce auto _name_ = U_par_list<List::name>;
+		nik_ce auto _name_ = U_par_list<ParList::name>;
 
 		template<template<auto...> typename B, auto... Vs, nik_vp(p)(B<Vs...>*)>
 		nik_ce auto eval<_name_, p> = U_store_B<B>;
@@ -207,7 +267,7 @@ namespace cctmp {
 
 	// similar:
 
-		nik_ce auto _similar_ = U_par_list<List::similar>;
+		nik_ce auto _similar_ = U_par_list<ParList::similar>;
 
 		template<auto V0, auto V1>
 		nik_ce auto eval<_similar_, V0, V1> = eval
@@ -223,21 +283,21 @@ namespace cctmp {
 
 	// to list:
 
-		nik_ce auto _to_list_ = U_par_list<List::to_list>;
+		nik_ce auto _to_list_ = U_par_list<ParList::to_list>;
 
 		template<template<auto...> typename B, nik_vp(b)(T_store_B<B>*), auto... Vs>
 		nik_ce auto eval<_to_list_, b, Vs...> = U_store_T<B<Vs...>>;
 
 	// back (zero) unpack:
 
-		nik_ce auto _b0_unpack_ = U_par_list<List::b0_unpack>;
+		nik_ce auto _b0_unpack_ = U_par_list<ParList::b0_unpack>;
 
 		template<template<auto...> typename B, auto... Ws, nik_vp(p)(B<Ws...>*), auto... Vs>
 		nik_ce auto eval<_b0_unpack_, p, Vs...> = eval<Vs..., Ws...>;
 
 	// rename:
 
-		nik_ce auto _rename_ = U_par_list<List::rename>;
+		nik_ce auto _rename_ = U_par_list<ParList::rename>;
 
 		template<auto b, auto p>
 		nik_ce auto eval<_rename_, b, p> = eval<_b0_unpack_, p, _to_list_, b>;
@@ -248,27 +308,27 @@ namespace cctmp {
 
 	// pad:
 
-		nik_ce auto _pad_ = U_par_list<List::pad>;
+		nik_ce auto _pad_ = U_par_list<ParList::pad>;
 
 		NIK_DEFINE_EVAL_PADS(65)
 
 	// cdr:
 
-		nik_ce auto _cdr_ = U_par_list<List::cdr>;
+		nik_ce auto _cdr_ = U_par_list<ParList::cdr>;
 
 		template<auto b, auto V0, auto... Vs>
 		nik_ce auto eval<_cdr_, b, V0, Vs...> = eval<_to_list_, b, Vs...>;
 
 	// map:
 
-		nik_ce auto _map_ = U_par_list<List::map>;
+		nik_ce auto _map_ = U_par_list<ParList::map>;
 
 		template<auto b, auto Op, auto... Vs>
 		nik_ce auto eval<_map_, b, Op, Vs...> = eval<_to_list_, b, eval<Op, Vs>...>;
 
 	// zip:
 
-		nik_ce auto _zip_ = U_par_list<List::zip>;
+		nik_ce auto _zip_ = U_par_list<ParList::zip>;
 
 		template<auto b, auto Op, template<auto...> typename B, auto... Ws, nik_vp(p)(B<Ws...>*), auto... Vs>
 		nik_ce auto eval<_zip_, b, Op, p, Vs...> = eval<_to_list_, b, eval<Op, Ws, Vs>...>;
@@ -277,7 +337,7 @@ namespace cctmp {
 
 		// alt == eval<_b0_unpack_, p2, _f2_unpack_, p1, _to_list_, b, Vs...>;
 
-		nik_ce auto _unite_ = U_par_list<List::unite>;
+		nik_ce auto _unite_ = U_par_list<ParList::unite>;
 
 		template
 		<
@@ -290,14 +350,14 @@ namespace cctmp {
 
 	// cons:
 
-		nik_ce auto _cons_ = U_par_list<List::cons>;
+		nik_ce auto _cons_ = U_par_list<ParList::cons>;
 
 		template<auto b, auto p, auto... Vs>
 		nik_ce auto eval<_cons_, b, p, Vs...> = eval<_unite_, b, U_null_Vs, p, Vs...>;
 
 	// push:
 
-		nik_ce auto _push_ = U_par_list<List::push>;
+		nik_ce auto _push_ = U_par_list<ParList::push>;
 
 		template<auto b, auto p, auto... Vs>
 		nik_ce auto eval<_push_, b, p, Vs...> = eval<_unite_, b, p, U_null_Vs, Vs...>;
@@ -320,11 +380,27 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// operators:
+
+	struct ParBoolean
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			if_then_else ,						// basis
+			stem         , costem , distem ,			// lazy
+			and_wise     ,						// propositional
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
 // basis:
 
 	// if then else:
 
-		nik_ce auto _if_then_else_ = U_par_boolean<Boolean::if_then_else>;
+		nik_ce auto _if_then_else_ = U_par_boolean<ParBoolean::if_then_else>;
 
 		template<auto ante, auto conse> nik_ce auto eval<_if_then_else_, true , ante, conse> = ante;
 		template<auto ante, auto conse> nik_ce auto eval<_if_then_else_, false, ante, conse> = conse;
@@ -335,7 +411,7 @@ namespace cctmp {
 
 	// stem:
 
-		nik_ce auto _stem_ = U_par_boolean<Boolean::stem>;
+		nik_ce auto _stem_ = U_par_boolean<ParBoolean::stem>;
 
 		template<auto ante, auto conse, auto... Vs>
 		nik_ce auto eval<_stem_, true , ante, conse, Vs...> = ante;
@@ -345,7 +421,7 @@ namespace cctmp {
 
 	// costem:
 
-		nik_ce auto _costem_ = U_par_boolean<Boolean::costem>;
+		nik_ce auto _costem_ = U_par_boolean<ParBoolean::costem>;
 
 		template<auto ante, auto conse, auto... Vs>
 		nik_ce auto eval<_costem_, true, ante, conse, Vs...> = eval<ante, Vs...>;
@@ -355,7 +431,7 @@ namespace cctmp {
 
 	// distem:
 
-		nik_ce auto _distem_ = U_par_boolean<Boolean::distem>;
+		nik_ce auto _distem_ = U_par_boolean<ParBoolean::distem>;
 
 		template<auto ante, auto conse, auto... Vs>
 		nik_ce auto eval<_distem_, true, ante, conse, Vs...> = eval<ante, Vs...>;
@@ -369,7 +445,7 @@ namespace cctmp {
 
 	// and wise:
 
-		nik_ce auto _and_wise_ = U_par_boolean<Boolean::and_wise>;
+		nik_ce auto _and_wise_ = U_par_boolean<ParBoolean::and_wise>;
 
 		template<template<auto...> typename B, auto... Preds, nik_vp(p)(B<Preds...>*), auto... Vs>
 		nik_ce auto eval<_and_wise_, p, Vs...> = eval<_and_, eval<Preds, Vs>...>;
@@ -390,11 +466,27 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// operators:
+
+	struct ParNumber
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			is_unsigned , not_unsigned ,	// basis
+			is_signed   , not_signed   ,
+			is_integer  , not_integer  ,
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
 // basis:
 
 	// is unsigned:
 
-		nik_ce auto _is_unsigned_ = U_par_number<Number::is_unsigned>;
+		nik_ce auto _is_unsigned_ = U_par_number<ParNumber::is_unsigned>;
 
 		template<auto V>                         nik_ce auto eval<_is_unsigned_, V> = false;
 		template<nik_vp(V)(unsigned char     *)> nik_ce auto eval<_is_unsigned_, V> = true;
@@ -405,14 +497,14 @@ namespace cctmp {
 
 	// not unsigned:
 
-		nik_ce auto _not_unsigned_ = U_par_number<Number::not_unsigned>;
+		nik_ce auto _not_unsigned_ = U_par_number<ParNumber::not_unsigned>;
 
 		template<auto V>
 		nik_ce auto eval<_not_unsigned_, V> = not(eval<_is_unsigned_, V>);
 
 	// is signed:
 
-		nik_ce auto _is_signed_ = U_par_number<Number::is_signed>;
+		nik_ce auto _is_signed_ = U_par_number<ParNumber::is_signed>;
 
 		template<auto V>                       nik_ce auto eval<_is_signed_, V> = false;
 		template<nik_vp(V)(signed char     *)> nik_ce auto eval<_is_signed_, V> = true;
@@ -423,21 +515,21 @@ namespace cctmp {
 
 	// not signed:
 
-		nik_ce auto _not_signed_ = U_par_number<Number::not_signed>;
+		nik_ce auto _not_signed_ = U_par_number<ParNumber::not_signed>;
 
 		template<auto V>
 		nik_ce auto eval<_not_signed_, V> = not(eval<_is_signed_, V>);
 
 	// is integer:
 
-		nik_ce auto _is_integer_ = U_par_number<Number::is_integer>;
+		nik_ce auto _is_integer_ = U_par_number<ParNumber::is_integer>;
 
 		template<auto V>
 		nik_ce auto eval<_is_integer_, V> = eval<_is_unsigned_, V> || eval<_is_signed_, V>;
 
 	// not integer:
 
-		nik_ce auto _not_integer_ = U_par_number<Number::not_integer>;
+		nik_ce auto _not_integer_ = U_par_number<ParNumber::not_integer>;
 
 		template<auto V>
 		nik_ce auto eval<_not_integer_, V> = not(eval<_is_integer_, V>);
@@ -446,6 +538,20 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // pointer:
+
+/***********************************************************************************************************************/
+
+// operators:
+
+	struct ParPointer
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			is , add , remove , to , from , // basis
+			dimension
+		};
+	};
 
 /***********************************************************************************************************************/
 
@@ -472,28 +578,28 @@ namespace cctmp {
 
 	// is:
 
-		nik_ce auto _is_pointer_ = U_par_pointer<Pointer::is>;
+		nik_ce auto _is_pointer_ = U_par_pointer<ParPointer::is>;
 
 		template<auto U>
 		nik_ce auto eval<_is_pointer_, U> = reflect<is_pointer, U>;
 
 	// add:
 
-		nik_ce auto _add_pointer_ = U_par_pointer<Pointer::add>;
+		nik_ce auto _add_pointer_ = U_par_pointer<ParPointer::add>;
 
 		template<auto U>
 		nik_ce auto eval<_add_pointer_, U> = modify<add_pointer, U>;
 
 	// remove:
 
-		nik_ce auto _remove_pointer_ = U_par_pointer<Pointer::remove>;
+		nik_ce auto _remove_pointer_ = U_par_pointer<ParPointer::remove>;
 
 		template<auto U>
 		nik_ce auto eval<_remove_pointer_, U> = modify<remove_pointer, U>;
 
 	// to:
 
-		nik_ce auto _to_pointer_ = U_par_pointer<Pointer::to>;
+		nik_ce auto _to_pointer_ = U_par_pointer<ParPointer::to>;
 
 		template<auto U>
 		nik_ce auto eval<_to_pointer_, U> = stem_
@@ -503,7 +609,7 @@ namespace cctmp {
 
 	// from (optimization):
 
-		nik_ce auto _from_pointer_ = U_par_pointer<Pointer::from>;
+		nik_ce auto _from_pointer_ = U_par_pointer<ParPointer::from>;
 
 		template<auto U>
 		nik_ce auto eval<_from_pointer_, U> = modify<remove_pointer, U>;
@@ -512,6 +618,20 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // reference:
+
+/***********************************************************************************************************************/
+
+// operators:
+
+	struct ParReference
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			is , add , remove , to , from , // basis
+			dimension
+		};
+	};
 
 /***********************************************************************************************************************/
 
@@ -538,28 +658,28 @@ namespace cctmp {
 
 	// is:
 
-		nik_ce auto _is_reference_ = U_par_reference<Reference::is>;
+		nik_ce auto _is_reference_ = U_par_reference<ParReference::is>;
 
 		template<auto U>
 		nik_ce auto eval<_is_reference_, U> = reflect<is_reference, U>;
 
 	// add:
 
-		nik_ce auto _add_reference_ = U_par_reference<Reference::add>;
+		nik_ce auto _add_reference_ = U_par_reference<ParReference::add>;
 
 		template<auto U>
 		nik_ce auto eval<_add_reference_, U> = modify<add_reference, U>;
 
 	// remove:
 
-		nik_ce auto _remove_reference_ = U_par_reference<Reference::remove>;
+		nik_ce auto _remove_reference_ = U_par_reference<ParReference::remove>;
 
 		template<auto U>
 		nik_ce auto eval<_remove_reference_, U> = modify<remove_reference, U>;
 
 	// to:
 
-		nik_ce auto _to_reference_ = U_par_reference<Reference::to>;
+		nik_ce auto _to_reference_ = U_par_reference<ParReference::to>;
 
 		template<auto U>
 		nik_ce auto eval<_to_reference_, U> = stem_
@@ -569,7 +689,7 @@ namespace cctmp {
 
 	// from (optimization):
 
-		nik_ce auto _from_reference_ = U_par_reference<Reference::from>;
+		nik_ce auto _from_reference_ = U_par_reference<ParReference::from>;
 
 		template<auto U>
 		nik_ce auto eval<_from_reference_, U> = modify<remove_reference, U>;
@@ -581,41 +701,28 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// operators:
+
+	struct ParArray
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id,	// convenience for default params.
+			to_array  ,		// basis
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
 // basis:
 
 	// cons:
 
-		nik_ce auto _to_array_ = U_par_array<Array::to_array>;
+		nik_ce auto _to_array_ = U_par_array<ParArray::to_array>;
 
 		template<auto U, auto... Vs>
 		nik_ce auto eval<_to_array_, U, Vs...> = array<T_store_U<U>, Vs...>;
-
-/***********************************************************************************************************************/
-
-// near linear:
-
-	// The size parameter (S) might seem redundant as one can potentially deduce it from sizeof...(Is),
-	// but there are many contexts in which we know an initial size but not a final one.
-
-	// apply:
-
-		nik_ce auto _array_apply_ = U_par_array<Array::apply>;
-
-		template
-		<
-			auto Op, auto U, auto S,
-			template<auto...> typename B, auto... Is, nik_vp(p)(B<Is...>*),
-			auto f, auto a, auto l, auto... as
-		>
-		nik_ce auto eval<_array_apply_, Op, U, S, p, f, a, l, as...> = eval
-		<
-			Op,
-			T_store_U
-			<
-				_sequence_apply_<U, S, f>
-
-			>::template result(a, a + l, as...).value[Is]...
-		>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -624,32 +731,47 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// operators:
+
+	struct ParFunction
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			type , arity , out_type , in_types ,		// meta
+			eval , procedure , method , tailor , custom ,	// call
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
 // meta:
 
 	// type:
 
-		nik_ce auto _function_type_ = U_par_function<Function::type>;
+		nik_ce auto _function_type_ = U_par_function<ParFunction::type>;
 
 		template<typename OutType, typename... InTypes, OutType(*f)(InTypes...)>
 		nik_ce auto eval<_function_type_, f> = U_store_T<OutType(*)(InTypes...)>;
 
 	// arity:
 
-		nik_ce auto _function_arity_ = U_par_function<Function::arity>;
+		nik_ce auto _function_arity_ = U_par_function<ParFunction::arity>;
 
 		template<typename OutType, typename... InTypes, OutType(*f)(InTypes...)>
 		nik_ce auto eval<_function_arity_, f> = sizeof...(InTypes);
 
 	// out type:
 
-		nik_ce auto _function_out_type_ = U_par_function<Function::out_type>;
+		nik_ce auto _function_out_type_ = U_par_function<ParFunction::out_type>;
 
 		template<typename OutType, typename... InTypes, OutType(*f)(InTypes...)>
 		nik_ce auto eval<_function_out_type_, f> = U_store_T<OutType>;
 
 	// in types:
 
-		nik_ce auto _function_in_types_ = U_par_function<Function::in_types>;
+		nik_ce auto _function_in_types_ = U_par_function<ParFunction::in_types>;
 
 		template
 		<
@@ -664,36 +786,31 @@ namespace cctmp {
 
 	// eval:
 
-		nik_ce auto _eval_ = U_par_function<Function::eval>;
+		nik_ce auto _eval_ = U_par_function<ParFunction::eval>;
 
 		template<auto Op1, auto Op0, auto... Vs>
 		nik_ce auto eval<_eval_, Op1, Op0, Vs...> = eval<Op1, eval<Op0, Vs...>>;
 
 	// procedure:
 
-		nik_ce auto _procedure_ = U_par_function<Function::procedure>;
+		nik_ce auto _procedure_ = U_par_function<ParFunction::procedure>;
 
 		template<auto Op, auto... Vs>
 		nik_ce auto eval<_procedure_, Op, Vs...> = T_store_U<Op>::result(Vs...);
 
 	// method:
 
-		nik_ce auto _method_ = U_par_function<Function::method>;
+		nik_ce auto _method_ = U_par_function<ParFunction::method>;
 
 		template<auto Op, template<auto...> typename B, auto... Ws, nik_vp(p)(B<Ws...>*), auto... Vs>
 		nik_ce auto eval<_method_, Op, p, Vs...> = T_store_U<Op>::template result<Ws...>(Vs...);
 
 	// tailor:
 
-		nik_ce auto _tailor_ = U_par_function<Function::tailor>;
+		nik_ce auto _tailor_ = U_par_function<ParFunction::tailor>;
 
 		template<auto Op, template<auto...> typename B, auto... Ws, nik_vp(p)(B<Ws...>*), auto... Vs>
 		nik_ce auto eval<_tailor_, Op, p, Vs...> = T_store_U<Op>::template result<Vs...>(Ws...);
-
-	// alias:
-
-		template<auto Op, auto... Ws, nik_vp(op)(T_alias<Op, Ws...>*), auto... Vs>
-		nik_ce auto eval<op, Vs...> = eval<Op, Ws..., Vs...>;
 
 		// syntactic sugar:
 
@@ -706,7 +823,7 @@ namespace cctmp {
 
 	// custom:
 
-		template<auto Op>          using T_custom   = T_par_function<Function::custom, Op>;
+		template<auto Op>          using T_custom   = T_par_function<ParFunction::custom, Op>;
 		template<auto Op>    nik_ce auto  _custom_  = U_store_T<T_custom<Op>>;
 		template<typename T> nik_ce auto U_custom_T = _custom_<U_store_T<T>>;
 
@@ -732,11 +849,26 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// operators:
+
+	struct ParIdentity
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			list_to_array , // list to
+			array_to_list , // array to
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
 // list to:
 
 	// array:
 
-		nik_ce auto _list_to_array_ = U_par_identity<Identity::list_to_array>;
+		nik_ce auto _list_to_array_ = U_par_identity<ParIdentity::list_to_array>;
 
 		template<auto U, auto p>
 		nik_ce auto eval<_list_to_array_, U, p> = eval<_b0_unpack_, p, _to_array_, U>;
@@ -747,29 +879,10 @@ namespace cctmp {
 
 	// list:
 
-		nik_ce auto _array_to_list_ = U_par_identity<Identity::array_to_list>;
+		nik_ce auto _array_to_list_ = U_par_identity<ParIdentity::array_to_list>;
 
 		template<auto b, auto a, auto... Vs>
 		nik_ce auto eval<_array_to_list_, b, a, Vs...> = eval<_to_list_, b, a[Vs]...>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// using:
-
-/***********************************************************************************************************************/
-
-	template<template<auto...> typename B, auto... Ws>
-	struct T_using
-	{
-		template<auto... Vs>
-		using result = B<Ws..., Vs...>;
-	};
-
-	// syntactic sugar:
-
-		template<template<auto...> typename B, auto... Ws>
-		nik_ce auto H_using = U_store_B<T_using<B, Ws...>::template result>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

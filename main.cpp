@@ -29,19 +29,26 @@
 #include"03_cctmp_praxis.hpp"
 #include"04_cctmp_interpreter.hpp"
 #include"05_cctmp_machine.hpp"
-#include"06_cctmp_lexer.hpp"
-#include"07_cctmp_parser.hpp"
-#include"08_cctmp_syntax.hpp"
-#include"09_cctmp_translator.hpp"
-#include"10_cctmp_targeter.hpp"
-#include"11_cctmp_metapiler.hpp"
+#include"06_cctmp_scope.hpp"
+#include"07_cctmp_relation.hpp"
+#include"08_cctmp_graph.hpp"
+#include"09_cctmp_lexer.hpp"
+#include"10_cctmp_syntax.hpp"
+#include"11_cctmp_parser.hpp"
+#include"12_cctmp_generator.hpp"
+
+#include"13_chord_lexer.hpp"
+#include"14_chord_syntax.hpp"
+#include"15_chord_parser.hpp"
+#include"16_chord_metapiler.hpp"
 
 #include"undef_macros.hpp"
 
 #include"documentation/01_case_studies.hpp"
-#include"documentation/03_chord_machines.hpp"
 
-//#include"testing/metapiler_printer.hpp"
+#include"testing/00_generic_printers.hpp"
+#include"testing/01_parser_generator_printers.hpp"
+#include"testing/02_chord_assembly_printers.hpp"
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -55,35 +62,41 @@
 
 	// factorial:
 
-		static_assert(factorial_v0(0) ==     1);
-		static_assert(factorial_v1(3) ==     6);
-		static_assert(factorial_v2(5) ==   120);
-		static_assert(factorial_v3(7) ==  5040);
-		static_assert(factorial_v4(8) == 40320);
+		static_assert(chord::factorial_v0(0) ==     1);
+		static_assert(chord::factorial_v1(3) ==     6);
+		static_assert(chord::factorial_v2(5) ==   120);
+		static_assert(chord::factorial_v3(7) ==  5040);
+		static_assert(chord::factorial_v4(8) == 40320);
 
 	// fibonacci:
 
-		static_assert(fibonacci_v0(7) ==   21);
-		static_assert(fibonacci_v1(8) ==   34);
+		static_assert(chord::fibonacci_v0(7) ==   21);
+		static_assert(chord::fibonacci_v1(8) ==   34);
 
 	// case studies:
 
-		constexpr auto comp_sq      = square_v0(complex_number(1, 2));
-		constexpr auto comp_sum_sqs = sum_of_squares_v0(complex_number(1, 2), complex_number(0, 1));
-		constexpr auto int_sum_sqs  = sum_of_squares_v0(3, 4);
-		constexpr auto polynom_val  = x_to5_plus1_v0(2);
-		constexpr auto semidyntyp0  = semidynamic_typing_v0(complex_number(0, 1), 17);
-		constexpr auto semidyntyp1  = semidynamic_typing_v0(complex_number(1, 0), 17);
-		constexpr auto semidyntyp2  = semidynamic_typing_v1(complex_number(0, 1), 17);
-		constexpr auto semidyntyp3  = semidynamic_typing_v1(complex_number(1, 0), 17);
-		constexpr auto reassign_val = reassign_v0(2, 17);
-		constexpr auto bin_dis_val0 = binary_dispatch_v0(0, _add_, _multiply_, 5, 6);
-		constexpr auto bin_dis_val1 = binary_dispatch_v0(1, _add_, _multiply_, 5, 6);
-		constexpr auto bin_dis_val2 = binary_dispatch_v1(0, _add_, _multiply_, 5, 6);
-		constexpr auto bin_dis_val3 = binary_dispatch_v1(1, _add_, _multiply_, 5, 6);
+		constexpr auto _1_0i        = chord::complex_number(1, 0);
+		constexpr auto _0_1i        = chord::complex_number(0, 1);
+		constexpr auto _1_2i        = chord::complex_number(1, 2);
+		constexpr auto _m3f_4fi     = chord::complex_number(-3.0, 4.0);
+		constexpr auto _m4f_4fi     = chord::complex_number(-4.0, 4.0);
 
-		static_assert(comp_sq      == complex_number(-3.0, 4.0));
-		static_assert(comp_sum_sqs == complex_number(-4.0, 4.0));
+		constexpr auto comp_sq      = chord::square_v0(_1_2i);
+		constexpr auto comp_sum_sqs = chord::sum_of_squares_v0(_1_2i, _0_1i);
+		constexpr auto int_sum_sqs  = chord::sum_of_squares_v0(3, 4);
+		constexpr auto polynom_val  = chord::x_to5_plus1_v0(2);
+		constexpr auto semidyntyp0  = chord::semidynamic_typing_v0(_0_1i, 17);
+		constexpr auto semidyntyp1  = chord::semidynamic_typing_v0(_1_0i, 17);
+		constexpr auto semidyntyp2  = chord::semidynamic_typing_v1(_0_1i, 17);
+		constexpr auto semidyntyp3  = chord::semidynamic_typing_v1(_1_0i, 17);
+		constexpr auto reassign_val = chord::reassign_v0(2, 17);
+		constexpr auto bin_dis_val0 = chord::binary_dispatch_v0(0, _add_, _multiply_, 5, 6);
+		constexpr auto bin_dis_val1 = chord::binary_dispatch_v0(1, _add_, _multiply_, 5, 6);
+		constexpr auto bin_dis_val2 = chord::binary_dispatch_v1(0, _add_, _multiply_, 5, 6);
+		constexpr auto bin_dis_val3 = chord::binary_dispatch_v1(1, _add_, _multiply_, 5, 6);
+
+		static_assert(comp_sq      == _m3f_4fi);
+		static_assert(comp_sum_sqs == _m4f_4fi);
 		static_assert(int_sum_sqs  == 25);
 		static_assert(polynom_val  == 33);
 		static_assert(semidyntyp0  == 18);
@@ -98,8 +111,8 @@
 
 	// falling factorial:
 
-		constexpr auto fall_val0 = fall_fact_2_v0<true>(7);
-		constexpr auto fall_val1 = fall_fact_2_v1<true>(7);
+		constexpr auto fall_val0 = chord::fall_fact_2_v0<true>(7);
+		constexpr auto fall_val1 = chord::fall_fact_2_v1<true>(7);
 
 		static_assert(fall_val0 == 42);
 		static_assert(fall_val1 == 42);
@@ -108,7 +121,7 @@
 
 		int vf_n = 5, *vf_ptr = &vf_n;
 
-		void_effects_v0(vf_ptr);
+		chord::void_effects_v0(vf_ptr);
 
 		printf("%d\n", *vf_ptr); // prints: 3
 
@@ -116,21 +129,9 @@
 
 		int sf_n = 5, *sf_ptr = &sf_n;
 
-		side_effects_v0(sf_ptr);
+		chord::side_effects_v0(sf_ptr);
 
 		printf("%d\n", *sf_ptr); // prints: 3
-
-	// map:
-
-		constexpr auto _sq_ = arg_compose<_multiply_, _arg_at_<0>, _arg_at_<0>>;
-		constexpr auto map  = cctmp_chord::_map_<env<cctmp_chord::map_frame<_sq_>>>;
-
-		int x[10];
-
-		apply<map>(x, 0, 10);
-
-		for (int k = 0; k < 10; ++k) printf("%d, ", x[k]);
-		printf("\n");			// prints: 0, 1, 4, 9, 16, 25, 36, 49, 64, 81,
 
 		return 0;
 	}

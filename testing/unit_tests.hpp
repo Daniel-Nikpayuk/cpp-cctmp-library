@@ -2851,6 +2851,677 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// navigators:
+
+/***********************************************************************************************************************/
+
+	using hier_type = T_hierarchy<1, 10>;
+	using cnav_type = typename hier_type::cnavigator_type;
+	using  nav_type = typename hier_type::navigator_type;
+
+/***********************************************************************************************************************/
+
+	void nav_test(nav_type & n)
+	{
+		nav_type m = n;
+
+		+m;
+		*m = 6;
+	}
+
+/***********************************************************************************************************************/
+
+		hier_type h{2};
+
+		nav_type n{h.begin()};
+
+		*n = 4;
+		h.append(n, 5);
+
+		nav_test(n);
+
+		auto v0 = *n;
+		+n;
+		auto v1 = *n;
+
+		printf("%hu %hu\n", v0, v1);
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// parser generator:
+
+/***********************************************************************************************************************/
+
+// analyzer:
+
+	// i a i i i i i : i ;
+	// i a i i       : i ;
+	//   a m         : i ;
+	// i a i i           ;
+	//   a m             ;
+	// i a i i i     : i ;
+
+	// if ; update symbol_max; is_first = true; is_arrow_scope = false; is_action_scope = false;
+	// if i is_first? update body_max; ++head_total; is_first = false;
+	// if a ++cur_body_max; ++body_total; is_arrow_scope = true;
+	// if i is_arrow_scope ++cur_symbol_max; ++symbol_total;
+	// if : is_arrow_scope = false; is_action_scope = true;
+	// if i is_action_scope ++action_total;
+
+/***********************************************************************************************************************/
+
+// abstract syntax tree:
+
+	// level 0: cfg
+	// level 1: heads
+	// level 2: bodies
+	// level 3: symbols
+
+	//		0     - 15
+	//	       / \
+	//	      1   1   - 4
+	//	     / \ / \
+	//	    2  2 2  2 - 7
+	//	    |  | |  |
+	//	    3  3 3  3 - 0
+
+	//	(1)*(15 + 3) + (15)*(4 + 3) + (15*4)*(7 + 3) + (15*4*7)*(0 + 3)
+
+/***********************************************************************************************************************/
+
+	//	printf("%hu %hu %hu\n", parsed.head_size(), parsed.body_size(), parsed.symbol_size());
+	//	printf("max   { head body symbol }: %d %d %d\n", ast::head_max, ast::body_max, ast::symbol_max);
+	//	printf("total { head body symbol }: %d %d %d\n", ast::head_total, ast::body_total, ast::symbol_total);
+
+	//	printf("%d\n", ast::hierarchy_size);
+
+/***********************************************************************************************************************/
+
+	struct matrix_2x2_hierarchy
+	{
+		using hierarchy_type = T_hierarchy<3, 16>;
+
+		hierarchy_type hierarchy;
+
+		constexpr matrix_2x2_hierarchy() : hierarchy(2, 1, 0)
+		{
+			auto n = hierarchy.navigate();
+
+			hierarchy.append( n, 2); // B
+			hierarchy.append( n, 1); // C
+			hierarchy.append(+n, 3); // D
+		}
+
+		//	 2,  2,  5,  9,  0,	// A:  0  A -- C
+		//	 1,  1, 13,      2,	// B:  5  |     
+		//	 0,  1,  0,      1,	// C:  9  B -- D
+		//	 0,  0,          3,	// D: 13
+	};
+
+	struct T_matrix_2x2_hierarchy
+	{
+		constexpr static auto shape = matrix_2x2_hierarchy{};
+		constexpr static auto value = shape.hierarchy;
+
+	}; constexpr auto U_matrix_2x2_hierarchy = U_store_T<T_matrix_2x2_hierarchy>;
+
+	//	auto T = Z;
+	//	auto n = T.cnavigate();
+
+	//	T.value(  +n) = 2;
+	//	T.value( ++n) = 1;
+	//	T.value(+--n) = 3;
+
+	//	T.print(); // prints:	[ 0  1 ]
+			   // 		[ 2  3 ]
+
+/***********************************************************************************************************************/
+
+/*
+	struct matrix_2x2 : public sequence<int, 4>
+	{
+		using base = sequence<int, 4>;
+
+		constexpr static auto shape	= member_value_U<U_matrix_2x2_hierarchy>;
+		using shape_type		= decltype(shape);
+		using cnavigator_type		= typename shape_type::cnavigator_type;
+		using navigator_type		= typename shape_type::navigator_type;
+
+		template<typename... Ts>
+		constexpr matrix_2x2(const Ts &... vs) : base{vs...} { }
+
+		constexpr auto cnavigate() const { return shape.cnavigate(); }
+		constexpr const auto & value(cnavigator_type & i) const { return base::operator[](*i); }
+		constexpr auto & value(cnavigator_type & i) { return base::operator[](*i); }
+
+		constexpr matrix_2x2 operator + (const matrix_2x2 & m) const
+		{
+			return matrix_2x2
+			{
+				base::operator[](0) + m[0] ,
+				base::operator[](1) + m[1] ,
+				base::operator[](2) + m[2] ,
+				base::operator[](3) + m[3]
+			};
+		}
+
+		constexpr matrix_2x2 operator * (const matrix_2x2 & m) const
+		{
+			return matrix_2x2
+			{
+				base::operator[](0) * m[0] + base::operator[](1) * m[2] ,
+				base::operator[](0) * m[1] + base::operator[](1) * m[3] ,
+				base::operator[](2) * m[0] + base::operator[](3) * m[2] ,
+				base::operator[](2) * m[1] + base::operator[](3) * m[3]
+			};
+		}
+
+		constexpr void print() const
+		{
+			printf("[ %d  %d ]\n[ %d  %d ]\n",
+				base::operator[](0),
+				base::operator[](1),
+				base::operator[](2),
+				base::operator[](3));
+		}
+	};
+*/
+
+/***********************************************************************************************************************/
+
+/*
+	constexpr auto Z = matrix_2x2
+	{
+		0, 0,
+		0, 0
+	};
+
+	constexpr auto I = matrix_2x2
+	{
+		1, 0,
+		0, 1
+	};
+*/
+
+/***********************************************************************************************************************/
+
+/*
+	constexpr auto make_seq()
+	{
+		sequence<int, 5> s{0, 1, 2, 3};
+
+		s.push(4);
+
+	//	printf("size: %d\n", (int) s.size());
+	//	for (auto k = s.cbegin(); k != s.cend(); ++k) printf("%d ", *k);
+	//	printf("\n");
+
+		return s;
+	}
+
+	constexpr auto s = make_seq();
+*/
+
+/***********************************************************************************************************************/
+
+	template<typename Shape>
+	void print_shape(const Shape & s)
+	{
+		auto k = s.cbegin();
+
+		while (k != s.cend())
+		{
+			auto i = citerator{k};
+			auto e = k + i.length() + 3;
+
+			while (k != e) printf("%hu ", *k++);
+			printf("| ");
+
+			if (i.clength() == 0) break;
+		}
+
+		printf("\n");
+	}
+
+/***********************************************************************************************************************/
+
+	struct ShapeTest
+	{
+		T_shape<100> graph;
+
+		constexpr ShapeTest(gindex_type l, gindex_type v = 0) : graph{l, v}
+		{
+			auto i = iterator{graph.iterate()};
+
+			graph.append(i, 3, 2);
+			graph.append(i, 1, 1);
+			graph.append(+i, 1, 1);
+		}
+	};
+
+	constexpr auto shape_test	= ShapeTest{5, 4};
+	constexpr auto & graph		= shape_test.graph;
+
+/***********************************************************************************************************************/
+
+	template<typename Shape>
+	void print_shape(const Shape & s)
+	{
+		auto k = s.cbegin();
+
+		while (k != s.cend())
+		{
+			auto i = citerator{k};
+			auto e = k + i.length() + 3;
+
+			while (k != e) printf("%hu ", *k++);
+			printf("| ");
+
+			if (i.clength() == 0) break;
+		}
+
+		printf("\n");
+	}
+
+	struct HierarchyTest
+	{
+		bool success;
+		T_hierarchy<3, 100> hierarchy;
+
+		template<typename... Ts>
+		constexpr HierarchyTest(gindex_type l, Ts... ls) : success{}, hierarchy{l, ls...}
+		{
+			auto n = navigator{hierarchy.navigate()};
+
+			hierarchy.append(n, 2);
+			hierarchy.append(n, 1);
+			hierarchy.append(+n, 1);
+		}
+	};
+
+	constexpr auto hierarchy_test	= HierarchyTest{2, 2, 0};
+	constexpr auto & hierarchy	= hierarchy_test.hierarchy;
+
+/***********************************************************************************************************************/
+
+	constexpr auto src 			= _parser_generator_v0;
+	using tkn				= typename T_parser_generator_mod_dftt::Token;
+
+//	constexpr auto src 			= _generic_assembly_v0;
+//	using tkn				= typename T_generic_assembly_dftt::Token;
+
+/***********************************************************************************************************************/
+
+//	constexpr static auto static_src	= _static_callable_<src>;
+//	constexpr static auto static_scanner	= U_store_T<T_parser_generator_scanner<static_src, tkn>>;
+//	constexpr static auto & scanner	  	= member_value_U<static_scanner>;
+
+//	constexpr static auto static_parsed	= U_store_T<T_parser_generator_parsed<static_scanner>>;
+//	constexpr static auto & parsed	  	= member_value_U<static_parsed>;
+
+//	constexpr static auto static_targeted	= U_store_T<T_parser_generator_targeted<static_parsed>>;
+//	constexpr static auto tr_table		= T_parser_generator_tt<static_targeted>{};
+
+	//	printf("%hu\n", scanner.total[Level::symbol]);
+	//	printf("%hu\n", scanner.total[Level::body]);
+	//	printf("%hu\n", scanner.total[Level::head]);
+	//	printf("%hu\n", scanner.total[Level::action]);
+
+	//	printf("%hu\n", scanner.max[Level::symbol]);
+	//	printf("%hu\n", scanner.max[Level::body]);
+
+	//	printf("%hu\n", (gindex_type) tr_table.row_size);
+	//	printf("%hu\n", (gindex_type) tr_table.col_size);
+
+	//	auto printer = parser_generator_syntax_printer<src, tkn>{};
+
+	//	printer.print_cfg();
+	//	printer.print_nonterm_symbol_first();
+	//	printer.print_head_symbol_first();
+	//	printer.print_head();
+	//	printer.print_symbols();
+	//	printer.print_actions();
+
+	//	printer.print_head_first();
+	//	printer.print_body_first();
+
+	//	printer.print_head_follow();
+
+	//	printer.print_tr_table(); // (9, 11);
+
+/***********************************************************************************************************************/
+
+		nik_ce T_generic_assembly_pdtt() : n_base{}, t_base{}, nr_base{}, tr_base{}
+		{
+			n_entry(n_base, 'A',  'i') = Production{ "iA"      , NAction::def_arg     };
+			n_entry(n_base, 'A',  ';') = Production{ ""        , NAction::def_end     };
+
+			n_entry(n_base, 'B',  'i') = Production{ "RX"                             };
+			n_entry(n_base, 'B',  '_') = Production{ "RX"                             };
+			n_entry(n_base, 'B',  'q') = Production{ "RX"                             };
+			n_entry(n_base, 'B',  '|') = Production{ ""                               };
+			n_entry(n_base, 'B',  '>') = Production{ ""                               };
+
+			n_entry(n_base, 'C',  'i') = Production{ "R"                              };
+			n_entry(n_base, 'C',  '_') = Production{ "R"                              };
+			n_entry(n_base, 'C',  'q') = Production{ "R"                              };
+			n_entry(n_base, 'C',  '0') = Production{ "0<U|B|B>YD,Z{}"                 };
+			n_entry(n_base, 'C',  '1') = Production{ "1<B|B|B>{}YD,Z"                 };
+			n_entry(n_base, 'C',  '2') = Production{ "2<U|B>YD,Z"                     };
+			n_entry(n_base, 'C',  '3') = Production{ "3<U|B|B>YDZYD,Z"                };
+			n_entry(n_base, 'C',  '4') = Production{ "4<U|B|B>YPZYP,PZ"               };
+			n_entry(n_base, 'C',  '5') = Production{ "5<B|B|B>YPZYPZYP,PZ"            };
+			n_entry(n_base, 'C',  '6') = Production{ "6<B|B|B|B>YPZ{}YPZYP,PZ"        };
+			n_entry(n_base, 'C',  '7') = Production{ "7<B|B|B|B>{}YPZYP,PZ"           };
+
+			n_entry(n_base, 'D',  'i') = Production{ "R"                              };
+			n_entry(n_base, 'D',  '_') = Production{ "R"                              };
+			n_entry(n_base, 'D',  'q') = Production{ "R"                              };
+			n_entry(n_base, 'D',  ']') = Production{ ""                               };
+			n_entry(n_base, 'D',  ')') = Production{ ""                               };
+			n_entry(n_base, 'D',  '+') = Production{ "+"                              };
+			n_entry(n_base, 'D',  '-') = Production{ "-"                              };
+			n_entry(n_base, 'D',  ',') = Production{ ""                               };
+
+			n_entry(n_base, 'E',  'i') = Production{ "IHG"                            };
+			n_entry(n_base, 'E',  '.') = Production{ "IHG"                            };
+			n_entry(n_base, 'E',  '!') = Production{ "IHG"                            };
+			n_entry(n_base, 'E',  't') = Production{ "IHG"                            };
+			n_entry(n_base, 'E',  'v') = Production{ "IHG"                            };
+			n_entry(n_base, 'E',  'r') = Production{ "rC;"     , NAction::re_turn     };
+
+			n_entry(n_base, 'G',  'r') = Production{ "rC;"     , NAction::re_turn     };
+			n_entry(n_base, 'G',  'g') = Production{ "gJ;"                            };
+
+			n_entry(n_base, 'H',  'i') = Production{ "IH"                             };
+			n_entry(n_base, 'H',  '.') = Production{ "IH"                             };
+			n_entry(n_base, 'H',  '!') = Production{ "IH"                             };
+			n_entry(n_base, 'H',  't') = Production{ "IH"                             };
+			n_entry(n_base, 'H',  'v') = Production{ "IH"                             };
+			n_entry(n_base, 'H',  'r') = Production{ ""                               };
+			n_entry(n_base, 'H',  'g') = Production{ ""        , NAction::go_to       };
+
+			n_entry(n_base, 'I',  'i') = Production{ "LK"                             };
+			n_entry(n_base, 'I',  '.') = Production{ "LK"                             };
+			n_entry(n_base, 'I',  '!') = Production{ "!M=CV;"  , NAction::application };
+			n_entry(n_base, 'I',  't') = Production{ "tRV;bJ;" , NAction::conditional };
+			n_entry(n_base, 'I',  'v') = Production{ "vCV;"    , NAction::application };
+
+			n_entry(n_base, 'J',  'i') = Production{ "i"       , NAction::jvalue      };
+
+			n_entry(n_base, 'K',  '#') = Production{ "#C;"     , NAction::assignment  };
+			n_entry(n_base, 'K',  '=') = Production{ "=CV;"    , NAction::application };
+
+			n_entry(n_base, 'L',  'i') = Production{ "i"       , NAction::lvalue      };
+			n_entry(n_base, 'L',  '.') = Production{ "."       , NAction::copy        };
+
+			n_entry(n_base, 'M',  'i') = Production{ "i"       , NAction::mvalue      };
+
+			n_entry(n_base, 'N',  'i') = Production{ "i"       , NAction::def_name    };
+
+			n_entry(n_base, 'O',  'l') = Production{ "TO"                             };
+			n_entry(n_base, 'O', '\0') = Production{ ""                               };
+
+			n_entry(n_base, 'P',  'i') = Production{ "R|Q"                            };
+			n_entry(n_base, 'P',  '_') = Production{ "R|Q"                            };
+			n_entry(n_base, 'P',  'q') = Production{ "R|Q"                            };
+			n_entry(n_base, 'P',  ']') = Production{ ""                               };
+			n_entry(n_base, 'P',  ')') = Production{ ""                               };
+			n_entry(n_base, 'P',  '+') = Production{ "+|-"                            };
+			n_entry(n_base, 'P',  '-') = Production{ "-|+"                            };
+			n_entry(n_base, 'P',  ',') = Production{ ""                               };
+
+			n_entry(n_base, 'Q',  'i') = Production{ "R"                              };
+			n_entry(n_base, 'Q',  '_') = Production{ "R"                              };
+			n_entry(n_base, 'Q',  'q') = Production{ "R"                              };
+			n_entry(n_base, 'Q',  '~') = Production{ "~"                              };
+
+			n_entry(n_base, 'R',  'i') = Production{ "i"       , NAction::rvalue      };
+			n_entry(n_base, 'R',  '_') = Production{ "_"       , NAction::paste       };
+			n_entry(n_base, 'R',  'q') = Production{ "q"       , NAction::quote       };
+
+			n_entry(n_base, 'S',  'i') = Production{ "NA;TO"   , NAction::definition  };
+
+			n_entry(n_base, 'T',  'l') = Production{ "l;E"     , NAction::label       };
+
+			n_entry(n_base, 'U',  'i') = Production{ "W"                              };
+			n_entry(n_base, 'U',  '_') = Production{ "W"                              };
+			n_entry(n_base, 'U',  'q') = Production{ "W"                              };
+			n_entry(n_base, 'U',  '@') = Production{ "W"                              };
+			n_entry(n_base, 'U',  '*') = Production{ "W"                              };
+			n_entry(n_base, 'U',  '|') = Production{ ""                               };
+			n_entry(n_base, 'U',  '>') = Production{ ""                               };
+
+			n_entry(n_base, 'V',  'i') = Production{ "CV"                             };
+			n_entry(n_base, 'V',  '_') = Production{ "CV"                             };
+			n_entry(n_base, 'V',  'q') = Production{ "CV"                             };
+			n_entry(n_base, 'V',  '!') = Production{ "!MV"                            };
+			n_entry(n_base, 'V',  '0') = Production{ "CV"                             };
+			n_entry(n_base, 'V',  '1') = Production{ "CV"                             };
+			n_entry(n_base, 'V',  '2') = Production{ "CV"                             };
+			n_entry(n_base, 'V',  '3') = Production{ "CV"                             };
+			n_entry(n_base, 'V',  '4') = Production{ "CV"                             };
+			n_entry(n_base, 'V',  '5') = Production{ "CV"                             };
+			n_entry(n_base, 'V',  '6') = Production{ "CV"                             };
+			n_entry(n_base, 'V',  '7') = Production{ "CV"                             };
+			n_entry(n_base, 'V',  ';') = Production{ ""                               };
+
+			n_entry(n_base, 'W',  'i') = Production{ "R"                              };
+			n_entry(n_base, 'W',  '_') = Production{ "R"                              };
+			n_entry(n_base, 'W',  'q') = Production{ "R"                              };
+			n_entry(n_base, 'W',  '@') = Production{ "@"                              };
+			n_entry(n_base, 'W',  '*') = Production{ "*"                              };
+
+			n_entry(n_base, 'X',  'i') = Production{ "WU"                             };
+			n_entry(n_base, 'X',  '_') = Production{ "WU"                             };
+			n_entry(n_base, 'X',  'q') = Production{ "WU"                             };
+			n_entry(n_base, 'X',  '@') = Production{ "WU"                             };
+			n_entry(n_base, 'X',  '*') = Production{ "WU"                             };
+			n_entry(n_base, 'X',  '|') = Production{ ""                               };
+			n_entry(n_base, 'X',  '>') = Production{ ""                               };
+
+			n_entry(n_base, 'Y',  '[') = Production{ "["                              };
+			n_entry(n_base, 'Y',  '(') = Production{ "("                              };
+
+			n_entry(n_base, 'Z',  ']') = Production{ "]"                              };
+			n_entry(n_base, 'Z',  ')') = Production{ ")"                              };
+
+			t_entry(t_base,  '#') = TAction::nop                ;
+			t_entry(t_base,  '=') = TAction::nop                ;
+			t_entry(t_base,  'r') = TAction::nop                ;
+			t_entry(t_base,  '!') = TAction::nop                ;
+			t_entry(t_base,  'i') = TAction::resolve_identifier ;
+			t_entry(t_base,  'v') = TAction::resolve_void       ;
+			t_entry(t_base,  '_') = TAction::resolve_paste      ;
+			t_entry(t_base,  '.') = TAction::resolve_copy       ;
+			t_entry(t_base,  't') = TAction::resolve_test       ;
+			t_entry(t_base,  'b') = TAction::resolve_branch     ;
+			t_entry(t_base,  'g') = TAction::resolve_goto       ;
+			t_entry(t_base,  'l') = TAction::resolve_label      ;
+			t_entry(t_base,  ';') = TAction::resolve_statement  ;
+			t_entry(t_base,  'q') = TAction::resolve_quote      ;
+			t_entry(t_base, '\0') = TAction::resolve_accept     ;
+		}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// selector/iterator/guide/navigator:
+
+/***********************************************************************************************************************/
+
+	//	int x[5];
+
+	//	auto s = selector<int>{x, x + 5};
+
+	//	for (auto k = s.begin(); k != s.end(); ++k) *k = s.left_size(k);
+	//	for (auto k = s.cbegin(); k != s.cend(); ++k) printf("%d, ", *k);
+	//	printf("\n");
+
+		//
+
+	//	sequence<int, 5> s;
+	//	s.push(0);
+	//	s.push(1);
+	//	s.push(-1);
+	//	s.push(2);
+	//	s.push(0);
+
+	//	auto j = s.iterate();
+
+	//	j.ref_at(4) = 3;
+	//	*++j = 7;
+
+	//	printf("%d\n", (int) s.size());
+	//	for (auto k = s.citerate(); k.not_end(); ++k) printf("%d, ", *k);
+	//	printf("\n");
+	//	printf("%s\n", s.citerate().contains(-1).not_end() ? "true" : "false");
+	//	printf("%d\n", (int) s.citerate().contains(-1).left_size());
+
+/***********************************************************************************************************************/
+
+	void print_guide(const cguider & g)
+	{
+		printf("%hu\n", g.cabsolute_size());
+		printf("%hu\n", g.crelative_size());
+		printf("%hu\n", *g);
+		printf("%lu\n", (long unsigned) g.cbegin());
+		printf("%lu\n", (long unsigned) g.cend());
+	}
+
+	template<typename Shape>
+	void print_shape(const Shape & s)
+	{
+		auto j = s.cselect();
+		auto k = j.cbegin();
+
+		while (k != j.cend())
+		{
+			auto i = (gindex_type) j.left_size(k);
+			auto g = cguider{j.cbegin(), i};
+			auto e = k + g.dim() + g.cabsolute_size();
+
+			while (k != e) printf("%hu ", *k++);
+
+			if (k != j.cend()) printf("| ");
+		}
+
+		printf("\n");
+	}
+
+/***********************************************************************************************************************/
+
+	struct make_shape
+	{
+		T_shape<100> s;
+		cguider g;
+
+		constexpr make_shape() : s{3}, g{s.cguide()}
+		{
+			auto h = s.guide();
+
+			s.append(h, 2, 1);
+			h.go();
+			s.append(h, 3, 4);
+			s.append(h, 4, 7);
+			h.cross(1);
+			s.append(h, 5, 2);
+		}
+	};
+
+	struct T_static_shape
+	{
+		constexpr static auto value	= make_shape{};
+		constexpr static auto & shape	= value.s;
+		constexpr static auto & guide	= value.g;
+
+	}; constexpr auto static_shape = U_store_T<T_static_shape>;
+
+	template<auto U>
+	constexpr auto made_shape = T_store_U<U>::shape;
+
+	template<auto U>
+	constexpr auto made_guide = T_store_U<U>::guide;
+
+/***********************************************************************************************************************/
+
+	struct make_hierarchy
+	{
+		T_hierarchy<4, 100> h;
+		cnavigator<4> n;
+
+		constexpr make_hierarchy() : h{3, 2, 2, 4}, n{h.cnavigate()}
+		{
+			auto m = h.navigate();
+
+			h.append(m, 1);
+			m.go();
+			h.append(m, 2);
+			m.go();
+			h.append(m, 3);
+			-m;
+			h.append(m, 4);
+		}
+	};
+
+	struct T_static_hierarchy
+	{
+		constexpr static auto value		= make_hierarchy{};
+		constexpr static auto & hierarchy	= value.h;
+		constexpr static auto & navigator	= value.n;
+
+	}; constexpr auto static_hierarchy = U_store_T<T_static_hierarchy>;
+
+	template<auto U>
+	constexpr auto made_hierarchy = T_store_U<U>::hierarchy;
+
+/***********************************************************************************************************************/
+
+// parser generator printers:
+
+	//	auto parsed_printer = parser_generator_parsed_printer<static_grammar>{};
+	//	parsed_printer.print_head();
+	//	parsed_printer.print_symbols();
+	//	parsed_printer.print_actions();
+	//	parsed_printer.print_cfg();
+
+	//	auto targeted_printer = parser_generator_targeted_printer<static_grammar>{};
+	//	targeted_printer.print_nonterm_symbol_first();
+	//	targeted_printer.print_head_symbol_first();
+	//	targeted_printer.print_head_first();
+	//	targeted_printer.print_body_first();
+	//	targeted_printer.print_head_follow();
+
+	//	auto tr_table_printer = parser_generator_tt_printer<static_grammar>{};
+	//	auto & tr_table = tr_table_printer.tr_table;
+
+	//	printf("%hu\n", (gindex_type) tr_table.row_size);
+	//	printf("%hu\n", (gindex_type) tr_table.col_size);
+	//	printf("%hu\n", (gindex_type) tr_table.parsed.term_size);
+	//	printf("%hu\n", (gindex_type) tr_table.prod_size);
+
+	//	tr_table_printer.print_tr_table(9, 11);
+
+/***********************************************************************************************************************/
+
+// action mapping:
+
+	for (action_type act = 3; act != 20; ++act)
+	{
+		auto str	= action.rlookup(act, "?");
+		auto pos	= pg_parsed.find_action(str);
+		auto & act_lev	= pg_parsed.action_level[pos];
+
+		if (pos < 10) printf("0");
+		printf("%hu  ", (gindex_type) pos);
+		print_string_literal(act_lev);
+		printf("\n");
+	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 } // case studies
