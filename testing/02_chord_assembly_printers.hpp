@@ -42,6 +42,7 @@ namespace cctmp {
 		private:
 
 			using T_grammar					= T_store_U<static_grammar>;
+			using Token					= typename T_grammar::Token;
 			using strlit_type				= string_literal<>;
 			using cstrlit_type				= strlit_type const;
 			using cstrlit_ref				= cstrlit_type&;
@@ -56,10 +57,10 @@ namespace cctmp {
 			//
 
 			template<auto st, auto ss>
-			constexpr static auto U_static_parsed		= U_store_T<chord::T_generic_assembly_parsed<st, ss>>;
+			constexpr static auto U_static_parsed		= U_store_T<chord::T_chord_assembly_parsed<st, ss>>;
 
 			constexpr static auto static_src		= _static_callable_<callable_source>;
-			constexpr static auto static_scanned		= U_store_T<chord::T_generic_assembly_scanned<static_src>>;
+			constexpr static auto static_scanned		= U_store_T<chord::T_chord_assembly_scanned<static_src>>;
 			constexpr static auto static_parsed		= U_static_parsed<static_pg_parsed, static_scanned>;
 
 			using parsed_type				= member_type_U<static_parsed>;
@@ -96,16 +97,26 @@ namespace cctmp {
 
 				switch (entry.sign)
 				{
-					case chord::Sign::na        : { str = " "    ; sub = 1; break; }
-					case chord::Sign::carg      : { str = "carg" ; sub = 4; break; }
-					case chord::Sign::marg      : { str = "marg" ; sub = 4; break; }
-					case chord::Sign::copy      : { str = "."    ; sub = 1; break; }
-					case chord::Sign::paste     : { str = "_"    ; sub = 1; break; }
-					case chord::Sign::recurse   : { str = "rec"  ; sub = 3; break; }
-					case chord::Sign::label     : { str = "l"    ; sub = 1; break; }
-					case chord::Sign::jump      : { str = "jump" ; sub = 4; break; }
-					case chord::Sign::env       : { str = "env"  ; sub = 3; break; }
-					case chord::Sign::dimension : { str = "dim"  ; sub = 3; break; }
+					case chord::Sign::na      : { str = " "    ; sub = 1; break; }
+					case chord::Sign::carg    : { str = "carg" ; sub = 4; break; }
+					case chord::Sign::marg    : { str = "marg" ; sub = 4; break; }
+					case chord::Sign::copy    : { str = "."    ; sub = 1; break; }
+					case chord::Sign::paste   : { str = "_"    ; sub = 1; break; }
+					case chord::Sign::recurse : { str = "rec"  ; sub = 3; break; }
+					case chord::Sign::label   : { str = "l"    ; sub = 1; break; }
+					case chord::Sign::jump    : { str = "jump" ; sub = 4; break; }
+					case chord::Sign::env     : { str = "env"  ; sub = 3; break; }
+
+					case chord::Sign::repeat : { str = "chord" ; sub = 5; break; }
+					case chord::Sign::fold   : { str = "chord" ; sub = 5; break; }
+					case chord::Sign::find   : { str = "chord" ; sub = 5; break; }
+					case chord::Sign::sift   : { str = "chord" ; sub = 5; break; }
+					case chord::Sign::map    : { str = "chord" ; sub = 5; break; }
+					case chord::Sign::zip    : { str = "chord" ; sub = 5; break; }
+					case chord::Sign::fasten : { str = "chord" ; sub = 5; break; }
+					case chord::Sign::glide  : { str = "chord" ; sub = 5; break; }
+
+					case chord::Sign::dimension : { str = "dim" ; sub = 3; break; }
 				}
 
 				auto size = sub + entry.size();
@@ -117,7 +128,16 @@ namespace cctmp {
 						 || chord::Sign::is_marg  (entry.sign)
 						 || chord::Sign::is_paste (entry.sign)
 						 || chord::Sign::is_label (entry.sign)
-						 || chord::Sign::is_jump  (entry.sign);
+						 || chord::Sign::is_jump  (entry.sign)
+
+						 || chord::Sign::is_repeat (entry.sign)
+						 || chord::Sign::is_fold   (entry.sign)
+						 || chord::Sign::is_find   (entry.sign)
+						 || chord::Sign::is_sift   (entry.sign)
+						 || chord::Sign::is_map    (entry.sign)
+						 || chord::Sign::is_zip    (entry.sign)
+						 || chord::Sign::is_fasten (entry.sign)
+						 || chord::Sign::is_glide  (entry.sign);
 
 				if (print_right) printf("{%s|%d}", str, (int) entry.index);
 				else             printf("{%s}", str);
@@ -145,6 +165,78 @@ namespace cctmp {
 				auto str2 = line.has_void   ? "void"  : "    "  ;
 
 				printf("|%s|%s|%s|%s| ", str, str0, str1, str2);
+			}
+
+			template<typename FuncType>
+			void print_chord_function(const FuncType & func, gckey_type spacing)
+			{
+				for (auto k = func.cbegin(); k != func.cend(); ++k)
+				{
+					generic_printer::print_spacing(1);
+					generic_printer::print_string(*k);
+				}
+			}
+
+			template<typename ChordType>
+			void print_chord_parameter(const ChordType & chord, gckey_type spacing)
+			{
+				auto & parameter = chord.parameter;
+
+				for (auto k = parameter.cbegin(); k != parameter.cend(); ++k)
+				{
+					printf(" |");
+					print_chord_function(*k, spacing);
+				}
+			}
+
+			template<typename ChordType>
+			void print_chord_iterator(const ChordType & chord, gckey_type spacing)
+			{
+				auto & iterator = chord.iterator;
+
+				for (auto k = iterator.cbegin(); k != iterator.cend(); ++k)
+					print_chord_function(*k, spacing);
+			}
+
+			template<typename ChordType>
+			void print_chord_interval(const ChordType & chord, gckey_type spacing)
+			{
+				auto & interval = chord.interval;
+
+				for (auto k = interval.cbegin(); k != interval.cend(); ++k)
+				{
+					auto lstr = (k->left  == chord::Ival::closed) ? '[' : '(';
+					auto rstr = (k->right == chord::Ival::closed) ? ']' : ')';
+
+					printf(" %c", lstr);
+					print_chord_iterator(chord, spacing);
+					printf(" %c ", rstr);
+				}
+			}
+
+			template<typename ChordType>
+			void print_chord_info(const ChordType & chord, gckey_type spacing)
+			{
+				auto str = "";
+				auto sub =  0;
+
+				switch (chord.token)
+				{
+					case Token::repeat : { str = "repeat" ; sub =  6; break; }
+					case Token::fold   : { str = "fold"   ; sub =  4; break; }
+					case Token::find   : { str = "find"   ; sub = 10; break; }
+					case Token::sift   : { str = "sift"   ; sub =  8; break; }
+					case Token::map    : { str = "map"    ; sub =  3; break; }
+					case Token::zip    : { str = "zip"    ; sub =  3; break; }
+					case Token::fasten : { str = "fasten" ; sub =  6; break; }
+					case Token::glide  : { str = "glide"  ; sub =  5; break; }
+				}
+
+				if (spacing > sub) generic_printer::print_spacing(spacing - sub);
+				printf("%s", str);
+
+				print_chord_parameter (chord, spacing);
+				print_chord_interval  (chord, spacing);
 			}
 
 		public:
@@ -216,6 +308,18 @@ namespace cctmp {
 
 				printf("\n");
 			}
+
+			void print_chord(gckey_type spacing = _zero)
+			{
+				auto & chord = parsed.chord_level;
+
+				printf("\n");
+
+				for (auto k = chord.cbegin(); k != chord.cend(); ++k)
+					print_chord_info(*k, spacing);
+
+				printf("\n");
+			}
 	};
 
 /***********************************************************************************************************************/
@@ -229,6 +333,9 @@ namespace cctmp {
 
 	struct machine_printer
 	{
+		using MN = chord::MN;
+		using MT = chord::MT;
+
 		constexpr static auto offset(gcindex_type num)
 		{
 			if      (num <  10) return "  ";
@@ -290,28 +397,27 @@ namespace cctmp {
 		private:
 
 			constexpr static auto static_src	= _static_callable_<callable_source>;
-			constexpr static auto static_scanned	= U_store_T<chord::T_generic_assembly_scanned<static_src>>;
-			constexpr static auto static_targeted	= U_store_T<chord::T_generic_assembly_targeted<static_scanned>>;
+			constexpr static auto static_scanned	= U_store_T<chord::T_chord_assembly_scanned<static_src>>;
+			constexpr static auto static_targeted	= U_store_T<chord::T_chord_assembly_targeted<static_scanned>>;
 
 			constexpr static auto & targeted	= member_value_U<static_targeted>;
 			constexpr static auto & contr		= targeted.contr;
 
-			using Instr				= MI;
-		//	using Instr				= typename member_type_U<static_targeted>::Instr;
+			using MI				= chord::MI;
 
 			template<typename InstrType>
 			void print_instr(const InstrType & instr, gcindex_type line)
 			{
 				auto offset   = machine_printer::offset(line);
 
-				auto name     = instr[Instr::name];
+				auto name     = instr[MI::name];
 				auto name_str = machine_printer::name(name);
 
-				auto note     = instr[Instr::note];
+				auto note     = instr[MI::note];
 				auto note_str = machine_printer::note(note);
 
 				auto size     = instr.size();
-				auto value    = instr[Instr::pos];
+				auto value    = instr[MI::pos];
 
 				printf("%s%hu|    %s    %s    ", offset, line, name_str, note_str);
 
@@ -405,7 +511,7 @@ namespace cctmp {
 		private:
 
 			constexpr static auto env	= U_pack_Vs<Frames...>;
-			constexpr static auto metapiler	= chord::T_generic_assembly_metapiler<callable_source, env>{};
+			constexpr static auto metapiler	= chord::T_chord_assembly_metapiler<callable_source, env>{};
 			constexpr static auto lookup	= metapiler.template resolve_lookup<false>;
 
 			void print_f_pack_value(gcindex_type val) { printf("%hu ", val); }
@@ -453,16 +559,6 @@ namespace cctmp {
 			chord_assembly_metapiler_printer() { }
 
 			void print_lookup() { unpack_lookup(lookup); }
-
-		//	void print_lookup()
-		//	{
-		//		constexpr auto static_grammar = U_store_T<chord::T_generic_assembly_grammar>;
-		//		auto parsed_printer = chord_assembly_parsed_printer<static_grammar, callable_source>{};
-
-		//		auto & toc = metapiler.toc;
-
-		//		parsed_printer.print_entry_info(toc.lookup_entry(0, 0), 9);
-		//	}
 	};
 
 /***********************************************************************************************************************/

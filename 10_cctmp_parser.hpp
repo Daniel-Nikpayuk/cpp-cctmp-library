@@ -115,32 +115,6 @@ namespace cctmp {
 
 // stack:
 
-/*
-	template<gindex_type Size>
-	struct Stack : public sequence<symbol_type, Size>
-	{
-		using base		= sequence<symbol_type, Size>;
-		using cselector_type	= typename base::cselector_type;
-
-		nik_ce Stack(csymbol_ref s, csymbol_ref f) : base{}
-		{
-			base::push(f);
-			front() = s;
-		}
-
-		nik_ce csymbol_ref front() const { return *base::cend(); }
-		nik_ce  symbol_ref front()       { return *base::end(); }
-
-		nik_ce void pop() { if (base::not_empty()) base::downsize(); }
-
-		nik_ce void push(const cselector_type & s)
-		{
-			for (auto e = s.cend(); e != s.cbegin();)
-				*(base::initial + ++base::terminal) = *--e;
-		}
-	};
-*/
-
 	template<gindex_type Size>
 	struct Stack : public sequence<symbol_type, Size>
 	{
@@ -429,7 +403,7 @@ namespace cctmp {
 				pair( 'a' , Token::arrow      ),
 				pair( ';' , Token::semicolon  ),
 				pair( ':' , Token::colon      ),
-				pair( 'm' , Token::empty      ),
+				pair( 'm' , Token::empty      ), // empty, not none.
 				pair( '=' , Token::equal      ),
 				pair( '$' , Token::prompt     )
 			);
@@ -518,35 +492,46 @@ namespace cctmp {
 
 // interface:
 
+#ifdef NIK_PARSER_GENERATOR_PDA
+#include"transition_tables/00_parser_generator_parser.hpp"
+#else
+
 	template<typename T_grammar>
 	struct T_parser_generator_pda
 	{
-		using T_lexer				= typename T_grammar::T_lexer;
 		using ActName				= typename T_grammar::ActName;
+		using T_lexer				= typename T_grammar::T_lexer;
 		using Terminal				= typename T_grammar::Terminal;
 		using Nonterminal			= typename T_grammar::Nonterminal;
 		using CharToSymbol			= T_char_to_symbol<T_grammar>;
 
+		nik_ces auto row_size			= Nonterminal::dimension;
+		nik_ces auto col_size			= Terminal::dimension;
+
 		nik_ces auto prod_size			= string_literal("aMAsB").size();
-		using prod_type				= Production<prod_size>;
-		using cprod_type			= prod_type const;
 
 		nik_ces auto & stack_start		= Nonterminal::stack_start;
 		nik_ces auto & stack_finish		= Terminal::stack_finish;
-		nik_ces auto stack_size			= literal("TNAsBD").size(); // literal is intentional.
+
+		nik_ces auto stack_size			= literal("TNAsBD").size();
+								// literal is intentional.
 								// this literal is the longest possible sentential.
 
-		prod_type list[Nonterminal::dimension * Terminal::dimension]; // list instead of table due to clang bug.
+		using prod_type				= Production<prod_size>;
+		using cprod_type			= prod_type const;
+		using list_type				= sequence<prod_type, row_size * col_size>;
+
+		list_type list; // list instead of table due to clang bug.
 
 		nik_ce void set_entry(gcchar_type row_c, gcchar_type col_c, cstrlit_ref str, caction_type act = ActName::nop)
 		{
 			auto row = Nonterminal::symbol.lookup(row_c, Nonterminal::invalid);
 			auto col = Terminal::symbol.lookup(col_c, Terminal::invalid);
 
-			list[row * Terminal::dimension + col].template map<CharToSymbol>(str, act);
+			list[row * col_size + col].template map<CharToSymbol>(str, act);
 		}
 
-		nik_ce T_parser_generator_pda() : list{}
+		nik_ce T_parser_generator_pda()
 		{
 			set_entry( 'S' , 'i' , "iFD"   , ActName::l_value );
 			set_entry( 'D' , 'i' , "iHD"   , ActName::l_value );
@@ -574,8 +559,10 @@ namespace cctmp {
 		}
 
 		nik_ce cprod_type & production(csymbol_ref row, ctoken_type col) const
-			{ return list[row.token() * Terminal::dimension + col]; }
+			{ return list[row.token() * col_size + col]; }
 	};
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -634,7 +621,7 @@ namespace cctmp {
 		using T_parser			= T_parser_generator_parser<T_action, T_grammar>;
 
 		nik_ces auto & src		= T_store_U<static_scanned>::src;
-		nik_ces auto parser		= T_parser(src.cselect());
+		nik_ces auto parser		= T_parser{src.cselect()};
 		nik_ces auto & value		= parser.parseme.tree;
 		nik_ces auto & start_str	= value.start_str;
 		using type			= modify_type<_from_reference_, decltype(value)>;

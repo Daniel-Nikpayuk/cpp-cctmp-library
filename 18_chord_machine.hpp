@@ -19,350 +19,25 @@
 
 // machine:
 
-namespace cctmp {
+namespace chord {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// dependencies:
+	template<typename T>
+	using T_restore_T					= cctmp::T_restore_T<T>;
+
+	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
+
+	nik_ce auto _car_					= cctmp::_car_;
+	nik_ce auto _cadr_					= cctmp::_cadr_;
+	nik_ce auto _read_only_					= cctmp::_read_only_;
+
+	template<auto n, typename... Ts>
+	using type_at						= cctmp::type_at<n, Ts...>;
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// segment:
-
-/***********************************************************************************************************************/
-
-	struct T_interpreter_segment
-	{
-		nik_ces auto sH0 = U_pack_Vs<H_id>;
-		nik_ces auto  H0 = U_pack_Vs<_car_, sH0>;
-
-		template<auto n>
-		nik_ces auto contr = controller
-		<
-			instruction < IN::call , IT::praxis , PN::segment , n >,
-			instruction < IN::halt , IT::eval                     >
-		>;
-
-		template<auto d, auto n, auto m = _zero>
-		nik_ces auto result = T_interpreter_start::template result<d, contr<n>, m>(H0);
-	};
-
-/***********************************************************************************************************************/
-
-// params (syntactic sugar):
-
-	nik_ce auto _dpar_at_		= U_custom_T<T_interpreter_params< IT::back   , _car_           >>;
-	nik_ce auto _dpar_left_		= U_custom_T<T_interpreter_params< IT::front  , _list_<>        >>;
-	nik_ce auto _dpar_right_	= U_custom_T<T_interpreter_params< IT::back   , _list_<>        >>;
-	nik_ce auto _dpar_replace_	= U_custom_T<T_interpreter_params< IT::mutate , _list_<> , _one >>;
-	nik_ce auto _dpar_segment_	= U_custom_T<T_interpreter_segment>;
-
-	nik_ce auto _par_at_		= ID::template with_initial_depth< _dpar_at_      >;
-	nik_ce auto _par_left_		= ID::template with_initial_depth< _dpar_left_    >;
-	nik_ce auto _par_right_		= ID::template with_initial_depth< _dpar_right_   >;
-	nik_ce auto _par_replace_	= ID::template with_initial_depth< _dpar_replace_ >;
-	nik_ce auto _par_segment_	= ID::template with_initial_depth< _dpar_segment_ >;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// chain:
-
-	template<gkey_type, auto...> struct T_chain;
-
-/***********************************************************************************************************************/
-
-// names:
-
-	struct ChainName
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-			first , select , front , at , map , mapwise , apply , applywise ,
-			dimension
-		};
-	};
-
-	using CN = ChainName;
-
-/***********************************************************************************************************************/
-
-// instructions:
-
-	struct ChainInstr
-	{
-		enum : gkey_type
-		{
-			size = 0,
-			name , pos ,
-			dimension
-		};
-	};
-
-	using CI = ChainInstr;
-
-/***********************************************************************************************************************/
-
-// dispatch:
-
-	struct ChainDispatch
-	{
-		// defaults:
-
-			nik_ces gindex_type initial_index = _zero;
-
-		// accessors:
-
-			nik_ces auto instr(ccontr_type c, gcindex_type i) { return c[i]; }
-
-		// navigators:
-
-			nik_ces gkey_type   next_name  (ccontr_type c, gcindex_type i) { return c[i+1][CI::name]; }
-			nik_ces gindex_type next_index (ccontr_type  , gcindex_type i) { return i+1; }
-	};
-
-	using CD = ChainDispatch;
-
-/***********************************************************************************************************************/
-
-// start:
-
-	struct T_chain_start
-	{
-		nik_ces auto i = CD::initial_index;
-
-		template<auto c, auto l, typename... Ts>
-		nik_ces auto result(Ts... vs) { return NIK_CHAIN_TS(c, i, l, Ts...)(vs...); }
-	};
-
-/***********************************************************************************************************************/
-
-// first:
-
-	template<auto... filler>
-	struct T_chain<CN::first, filler...>
-	{
-		template<NIK_CHAIN_PARAMS(c, i, l), typename T0, typename... Ts>
-		nik_ces auto result(T0 v0, Ts... vs) { return v0; }
-	};
-
-/***********************************************************************************************************************/
-
-// select:
-
-	template<auto... filler>
-	struct T_chain<CN::select, filler...>
-	{
-		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
-		nik_ces auto result(Ts... vs)
-		{
-			nik_ce auto ins = CD::instr(c, i);
-			nik_ce auto n   = ins[CI::pos];
-			nik_ce auto p   = unpack_<l, _par_at_, n>;
-
-			return NIK_CHAIN_TEMPLATE(c, i), p
-				NIK_CHAIN_RESULT_TS(c, i, l, Ts...)(vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// front:
-
-	template<auto... filler>
-	struct T_chain<CN::front, filler...>
-	{
-		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
-		nik_ces auto result(Ts... vs)
-		{
-			nik_ce auto ins = CD::instr(c, i);
-			nik_ce auto n   = ins[CI::pos];
-			nik_ce auto p0  = eval<_par_left_ , n, U_store_T<Ts>...>;
-			nik_ce auto p1  = eval<_par_right_, n, U_store_T<Ts>...>;
-
-			return NIK_CHAIN_TEMPLATE(c, i), p0, p1
-				NIK_CHAIN_RESULT_TS(c, i, l, Ts...)(vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// at:
-
-	template
-	<
-		template<auto...> typename B0, auto... LUs, nik_vp(p0)(B0<LUs...>*),
-		template<auto...> typename B1, auto... RUs, nik_vp(p1)(B1<RUs...>*)
-	>
-	struct T_chain<CN::at, p0, p1>
-	{
-		template<NIK_CHAIN_PARAMS(c, i, l), typename TN, typename... Ts>
-		nik_ces auto at(T_store_U<LUs>... lvs, TN vn, Ts... vs)
-			{ return NIK_CHAIN_TS(c, i, l, TN)(vn); }
-
-		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
-		nik_ces auto result(Ts... vs) { return at<c, i, l, T_store_U<RUs>...>(vs...); }
-	};
-
-/***********************************************************************************************************************/
-
-// map:
-
-	template<auto f>
-	struct T_chain<CN::map, f>
-	{
-		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
-		nik_ces auto result(Ts... vs)
-			{ return NIK_CHAIN(c, i, l)(T_store_U<f>::template result<Ts>(vs)...); }
-	};
-
-/***********************************************************************************************************************/
-
-// mapwise:
-
-	template<template<auto...> typename B, auto... fs, nik_vp(p)(B<fs...>*)>
-	struct T_chain<CN::mapwise, p>
-	{
-		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
-		nik_ces auto result(Ts... vs)
-			{ return NIK_CHAIN(c, i, l)(T_store_U<fs>::template result<Ts>(vs)...); }
-	};
-
-/***********************************************************************************************************************/
-
-// apply:
-
-	template<auto f>
-	struct T_chain<CN::apply, f>
-	{
-		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
-		nik_ces auto result(Ts... vs)
-			{ return NIK_CHAIN(c, i, l)(T_store_U<f>::template result<Ts...>(vs...)); }
-	};
-
-/***********************************************************************************************************************/
-
-// applywise:
-
-	template<template<auto...> typename B, auto... fs, nik_vp(p)(B<fs...>*)>
-	struct T_chain<CN::applywise, p>
-	{
-		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
-		nik_ces auto result(Ts... vs)
-			{ return NIK_CHAIN(c, i, l)(T_store_U<fs>::template result<Ts...>(vs...)...); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// space:
-
-	template<gkey_type, gkey_type, auto...> struct T_machine;
-
-/***********************************************************************************************************************/
-
-// names:
-
-	struct MachineName
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-			first , jump    , select , reselect ,
-			right , replace , pad ,
-			call  , recall  ,
-			dimension
-		};
-	};
-
-	using MN = MachineName;
-
-/***********************************************************************************************************************/
-
-// notes:
-
-	struct MachineNote
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-			pair , front , go_to , branch , segment , value , side , void_f ,
-			dimension
-		};
-	};
-
-	using MT = MachineNote;
-
-/***********************************************************************************************************************/
-
-// instructions:
-
-	struct MachineInstr
-	{
-		enum : gkey_type
-		{
-			size = 0,
-			name , note , pos ,
-			dimension
-		};
-	};
-
-	using MI = MachineInstr;
-
-/***********************************************************************************************************************/
-
-// dispatch:
-
-	struct MachineDispatch
-	{
-		// defaults:
-
-			nik_ces gindex_type initial_index = _zero;
-
-		// accessors:
-
-			nik_ces auto instr(ccontr_type c, gcindex_type i) { return c[i]; }
-
-			template<typename T>
-			nik_ces auto instr(nik_avp(T*), gcindex_type i) { return T::instr(i); }
-
-		// navigators:
-
-			nik_ces gkey_type   next_name  (ccontr_type c, gcindex_type i) { return c[i+1][MI::name]; }
-			nik_ces gkey_type   next_note  (ccontr_type c, gcindex_type i) { return c[i+1][MI::note]; }
-			nik_ces gindex_type next_index (ccontr_type  , gcindex_type i) { return i+1; }
-
-			template<typename T>
-			nik_ces gkey_type next_name(nik_avp(T*), gcindex_type i) { return T::next_name(i); }
-
-			template<typename T>
-			nik_ces gkey_type next_note(nik_avp(T*), gcindex_type i) { return T::next_note(i); }
-
-			template<typename T>
-			nik_ces gindex_type next_index(nik_avp(T*), gcindex_type i) { return T::next_index(i); }
-	};
-
-	using MD = MachineDispatch;
-
-/***********************************************************************************************************************/
-
-// start:
-
-	struct T_machine_start
-	{
-		nik_ces auto i = MD::initial_index;
-
-		template<auto s, auto c, auto l, typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
-			{ return NIK_MACHINE_TS(s, c, i, l, Ts...)(vs...); }
-	};
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -476,13 +151,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// type at:
-
-	template<auto n, typename... Ts>
-	using type_at = T_store_U<eval<_par_at_, n, U_store_T<Ts>...>>;
-
-/***********************************************************************************************************************/
-
 // modify at:
 
 	template<auto t, auto n, typename T>
@@ -517,29 +185,152 @@ namespace cctmp {
 		template<auto, auto> struct T_cast_lookup { };
 
 		template<auto Key, auto Map>
-		nik_ce auto U_cast_lookup = store<T_cast_lookup<Key, Map>*>;
+		nik_ce auto U_cast_lookup = cctmp::store<T_cast_lookup<Key, Map>*>;
 
 	// lookup:
 
-		template
-		<
-			auto t,
-			auto key, auto static_frame, nik_vp(p)(T_cast_lookup<key, static_frame>*),
-			typename... Types
-		>
-		struct T_cast_at<t, p, Types...>
-		{
-			nik_ces auto & frame = member_value_U<static_frame>;
-			nik_ces auto   value = frame.template map<key>();
+		// cast:
 
-			template<typename... Ts>
-			nik_ces auto result(Ts... vs) { return value; }
-		};
+			template
+			<
+				auto t,
+				auto key, auto static_frame, nik_vp(p)(T_cast_lookup<key, static_frame>*),
+				typename... Types
+			>
+			struct T_cast_at<t, p, Types...>
+			{
+				nik_ces auto & frame = member_value_U<static_frame>;
+				nik_ces auto   value = frame.template map<key>();
+
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return value; }
+			};
+
+		// chord:
+
+			template
+			<
+				auto t,
+				auto sign, auto pos, auto static_parsed, auto env,
+				nik_vp(value)(T_one_cycle<sign, pos, static_parsed, env>*),
+				typename... Types
+			>
+			struct T_cast_at<t, value, Types...>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return value; }
+			};
 
 	// function:
 
 		template<auto f, typename... Ts>
 		using T_cast_op = T_cast_at<_id_, f, Ts...>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// space:
+
+	template<gkey_type, gkey_type, auto...> struct T_machine;
+
+/***********************************************************************************************************************/
+
+// names:
+
+	struct MachineName
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			first , jump    , select , reselect ,
+			right , replace , pad ,
+			call  , recall  ,
+			dimension
+		};
+	};
+
+	using MN = MachineName;
+
+/***********************************************************************************************************************/
+
+// notes:
+
+	struct MachineNote
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			pair , front , go_to , branch , segment , value , side , void_f ,
+			dimension
+		};
+	};
+
+	using MT = MachineNote;
+
+/***********************************************************************************************************************/
+
+// instructions:
+
+	struct MachineInstr
+	{
+		enum : gkey_type
+		{
+			size = 0,
+			name , note , pos ,
+			dimension
+		};
+	};
+
+	using MI = MachineInstr;
+
+/***********************************************************************************************************************/
+
+// dispatch:
+
+	struct MachineDispatch
+	{
+		// defaults:
+
+			nik_ces gindex_type initial_index = _zero;
+
+		// accessors:
+
+			nik_ces auto instr(ccontr_type c, gcindex_type i) { return c[i]; }
+
+			template<typename T>
+			nik_ces auto instr(nik_avp(T*), gcindex_type i) { return T::instr(i); }
+
+		// navigators:
+
+			nik_ces gkey_type   next_name  (ccontr_type c, gcindex_type i) { return c[i+1][MI::name]; }
+			nik_ces gkey_type   next_note  (ccontr_type c, gcindex_type i) { return c[i+1][MI::note]; }
+			nik_ces gindex_type next_index (ccontr_type  , gcindex_type i) { return i+1; }
+
+			template<typename T>
+			nik_ces gkey_type next_name(nik_avp(T*), gcindex_type i) { return T::next_name(i); }
+
+			template<typename T>
+			nik_ces gkey_type next_note(nik_avp(T*), gcindex_type i) { return T::next_note(i); }
+
+			template<typename T>
+			nik_ces gindex_type next_index(nik_avp(T*), gcindex_type i) { return T::next_index(i); }
+	};
+
+	using MD = MachineDispatch;
+
+/***********************************************************************************************************************/
+
+// start:
+
+	struct T_machine_start
+	{
+		nik_ces auto i = MD::initial_index;
+
+		template<auto s, auto c, auto l, typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+			{ return NIK_MACHINE_TS(s, c, i, l, Ts...)(vs...); }
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -954,5 +745,5 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace cctmp
+} // namespace chord
 

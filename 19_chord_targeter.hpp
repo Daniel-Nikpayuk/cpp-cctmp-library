@@ -17,63 +17,11 @@
 **
 ************************************************************************************************************************/
 
-// metapiler:
+// targeter:
 
 namespace chord {
 
-	template<typename T>
-	nik_ce auto U_store_T					= cctmp::U_store_T<T>;
-
-	template<auto... Vs>
-	nik_ce auto U_pack_Vs					= cctmp::U_pack_Vs<Vs...>;
-
-	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
-
-	nik_ce auto H_id					= cctmp::H_id;
-
-	nik_ce auto _id_					= cctmp::_id_;
-
-	template<auto f>
-	nik_ce auto _wrap_					= cctmp::_wrap_<f>;
-
-	nik_ce auto _map_					= cctmp::_map_;
-	nik_ce auto _push_					= cctmp::_push_;
-
-	nik_ce auto _read_only_					= cctmp::_read_only_;
-	nik_ce auto _read_write_				= cctmp::_read_write_;
-
-	template<auto p, auto Op, auto... Vs>
-	nik_ce auto unpack_					= cctmp::unpack_<p, Op, Vs...>;
-
-	template<auto H = H_id>
-	nik_ce auto _list_					= cctmp::_list_<H>;
-
-	template<typename T>
-	nik_ce auto U_custom_T					= cctmp::U_custom_T<T>;
-
-	nik_ce auto _par_at_					= cctmp::_par_at_;
-
-	nik_ce auto _instr_					= cctmp::_instr_;
-	nik_ce auto _contr_					= cctmp::_contr_;
-
-	template<auto Key, auto Map>
-	nik_ce auto U_cast_lookup				= cctmp::U_cast_lookup<Key, Map>;
-
-	using MI						= cctmp::MI;
-	using MN						= cctmp::MN;
-	using MT						= cctmp::MT;
-
-	using T_machine_start					= cctmp::T_machine_start;
-
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// source:
-
-	template<typename CharType, auto N>
-	nik_ce auto source(const CharType (&s)[N]) { return cctmp::string_literal(s); }
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -81,21 +29,23 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
+// interface:
+
 	template<auto static_scanned>
-	struct T_generic_assembly_targeter
+	struct T_chord_assembly_targeter
 	{
 		template<auto st, auto ss>
-		nik_ces auto U_static_parsed		= U_store_T<T_generic_assembly_parsed<st, ss>>;
+		nik_ces auto U_static_parsed		= U_store_T<T_chord_assembly_parsed<st, ss>>;
 
-		using T_pg_grammar			= T_generic_assembly_grammar;
+		using T_pg_grammar			= T_chord_assembly_grammar;
 		using T_pg_tt				= cctmp::T_generic_tt<T_pg_grammar>;
 
 		nik_ces auto static_grammar		= U_store_T<T_pg_grammar>;
 		nik_ces auto static_pg_parsed		= T_pg_tt::static_parsed;
 		nik_ces auto static_parsed		= U_static_parsed<static_pg_parsed, static_scanned>;
 
-		nik_ces auto scanned			= member_value_U<static_scanned>;
-		nik_ces auto toc			= member_value_U<static_parsed>;
+		nik_ces auto & scanned			= member_value_U<static_scanned>;
+		nik_ces auto & toc			= member_value_U<static_parsed>;
 
 		using Total				= typename member_type_U<static_scanned>::Total;
 
@@ -128,7 +78,7 @@ namespace chord {
 		contr_lookup_type contr_lookup;
 		contr_jump_type contr_jump;
 
-		nik_ce T_generic_assembly_targeter() { translate(); resolve_lookup(); resolve_jump(); }
+		nik_ce T_chord_assembly_targeter() { translate(); resolve_lookup(); resolve_jump(); }
 
 		nik_ce void translate()
 		{
@@ -311,9 +261,9 @@ namespace chord {
 // automaton:
 
 	template<auto static_scanned>
-	struct T_generic_assembly_targeted
+	struct T_chord_assembly_targeted
 	{
-		nik_ces auto value	= T_generic_assembly_targeter<static_scanned>{};
+		nik_ces auto value	= T_chord_assembly_targeter<static_scanned>{};
 		using type		= decltype(value);
 
 		// accessors:
@@ -363,8 +313,8 @@ namespace chord {
 			cctmp::binding( "upshift"               , cctmp::_upshift_               ),
 			cctmp::binding( "downshift"             , cctmp::_downshift_             ),
 
-			cctmp::binding( "appoint"               , cctmp::_appoint_               ),
 			cctmp::binding( "dereference"           , cctmp::_dereference_           ),
+			cctmp::binding( "appoint"               , cctmp::_appoint_               ),
 			cctmp::binding( "to_bool"               , cctmp::_to_bool_               ),
 
 			cctmp::binding( "not"                   , cctmp::_not_                   ),
@@ -449,206 +399,6 @@ namespace chord {
 
 	template<auto f>
 	nik_ce auto recurse_machine_frame = _static_callable_<recurse_machine_frame_callable<f>>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// metapiler:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<auto callable_source, auto Env = U_null_Vs>
-	struct T_generic_assembly_metapiler
-	{
-		nik_ces auto static_src		= _static_callable_<callable_source>;
-		nik_ces auto static_scanned	= U_store_T<T_generic_assembly_scanned<static_src>>;
-		nik_ces auto static_targeted	= U_store_T<T_generic_assembly_targeted<static_scanned>>;
-
-		nik_ces auto & targeted		= member_value_U<static_targeted>;
-		nik_ces auto & toc		= targeted.toc;
-		nik_ces auto & lookup		= toc.lookup_level;
-
-		nik_ces auto env		= eval<_push_, H_id, Env, default_machine_frame>;
-
-		// toc:
-
-			struct T_entry_poses
-			{
-				template<auto n>
-				nik_ces auto result = eval<_par_segment_, lookup[n].size()>;
-
-			}; nik_ces auto _entry_poses_ = U_custom_T<T_entry_poses>;
-
-		// lookup:
-
-			using pair_type  = cctmp::pair<gindex_type, gindex_type>;
-			using citer_type = citerator<strlit_type>;
-
-			nik_ces void update_frame(pair_type & pos, bool & match, citer_type k)
-			{
-				if (!match)
-				{
-					match   = k.not_end();
-					pos.v0 += not match;
-					pos.v1  = k.left_size();
-				}
-			}
-
-			template<auto n, auto m, auto... static_frames>
-			nik_ces auto find_frame()
-			{
-				nik_ce const auto & entry = toc.lookup_entry(n, m);
-
-				pair_type pos;
-				bool match{false};
-
-				(update_frame(pos, match, member_value_U<static_frames>.contains(entry)), ...);
-
-				return pos;
-			}
-
-			template<auto n, auto m, auto... static_frames>
-			nik_ces auto resolve(nik_avp(T_pack_Vs<static_frames...>*))
-			{
-				nik_ce auto record	 = find_frame<n, m, static_frames...>();
-				nik_ce auto position     = record.v0;
-				nik_ce auto subposition  = record.v1;
-				nik_ce auto static_frame = eval<_par_at_, position, static_frames...>;
-
-				return U_cast_lookup<subposition, static_frame>;
-			}
-
-			template<auto this_f>
-			nik_ces auto resolve_recurse()
-			{
-				return U_cast_lookup<_zero, recurse_machine_frame<this_f>>;
-			}
-	
-			template<auto this_f, auto n, auto m>
-			nik_ces auto resolve_value()
-			{
-				nik_ce auto sign = toc.lookup_entry_sign(n, m);
-
-				if nik_ce      (Sign::is_env(sign))     return resolve<n, m>(env);
-				else if nik_ce (Sign::is_recurse(sign)) return resolve_recurse<this_f>();
-				else                                    return toc.lookup_entry_index(n, m);
-			}
-
-			template<auto n, auto m>
-			nik_ces auto resolve_type()
-			{
-				nik_ce auto sign = toc.lookup_entry_sign(n, m);
-
-				if nik_ce (Sign::is_marg(sign)) return _read_write_;
-				else                            return _id_;
-			}
-
-			template<auto this_f, auto n, auto m0>
-			nik_ces auto resolve_line_single(nik_avp(T_pack_Vs<m0>*))
-			{
-				nik_ce auto f_pack = U_pack_Vs<resolve_value<this_f, n, m0>()>;
-				nik_ce auto t_pack = U_pack_Vs<resolve_type<n, m0>()>;
-
-				return eval<_list_<>, f_pack, t_pack>;
-			}
-
-			template<auto this_f, auto n, auto m0, auto m1, auto... ms>
-			nik_ces auto resolve_void_swap(nik_avp(T_pack_Vs<m0, m1, ms...>*))
-			{
-				nik_ce auto first  = resolve_value<this_f, n, m1>();
-				nik_ce auto second = resolve_value<this_f, n, m0>();
-				nik_ce auto f_pack = U_pack_Vs<first, second, resolve_value<this_f, n, ms>()...>;
-				nik_ce auto t_pack = U_pack_Vs<_read_write_, resolve_type<n, ms>()...>;
-
-				return eval<_list_<>, f_pack, t_pack>;
-			}
-
-			template<auto this_f, auto n, auto m0, auto... ms>
-			nik_ces auto resolve_void(nik_avp(T_pack_Vs<m0, ms...>*))
-			{
-				nik_ce auto first  = resolve_value<this_f, n, m0>();
-				nik_ce auto f_pack = U_pack_Vs<first, resolve_value<this_f, n, ms>()...>;
-				nik_ce auto t_pack = U_pack_Vs<resolve_type<n, ms>()...>;
-
-				return eval<_list_<>, f_pack, t_pack>;
-			}
-
-			template<auto this_f, auto n, typename Pack>
-			nik_ces auto resolve_line_void(Pack p)
-			{
-				nik_ce auto sign = toc.lookup_entry_sign(n, _zero);
-
-				if nik_ce (Sign::is_marg(sign)) return resolve_void_swap<this_f, n>(p);
-				else                            return resolve_void<this_f, n>(p);
-			}
-
-			template<auto this_f, auto n, auto m0, auto... ms>
-			nik_ces auto resolve_line_apply(nik_avp(T_pack_Vs<m0, ms...>*))
-			{
-				nik_ce auto first  = resolve_value<this_f, n, m0>();
-				nik_ce auto f_pack = U_pack_Vs<first, resolve_value<this_f, n, ms>()...>;
-				nik_ce auto t_pack = U_pack_Vs<resolve_type<n, ms>()...>;
-
-				return eval<_list_<>, f_pack, t_pack>;
-			}
-
-			template<auto this_f, auto n, typename Pack>
-			nik_ces auto unpack_entry(Pack p)
-			{
-				if nik_ce      (lookup[n].is_assign()) return resolve_line_single <this_f, n>(p);
-				else if nik_ce (lookup[n].is_return()) return resolve_line_single <this_f, n>(p);
-				else if nik_ce (lookup[n].is_void  ()) return resolve_line_void   <this_f, n>(p);
-				else                                   return resolve_line_apply  <this_f, n>(p);
-			}
-
-			template<auto this_f, auto... l_ps, auto... e_ps>
-			nik_ces auto to_pack(nik_avp(T_pack_Vs<l_ps...>*), nik_avp(T_pack_Vs<e_ps...>*))
-			{
-				return eval<_list_<>, unpack_entry<this_f, l_ps>(e_ps)...>;
-			}
-
-			template<auto this_f>
-			nik_ces auto to_lookup_pack()
-			{
-				nik_ce auto line_poses  = eval<_par_segment_, lookup.size()>;
-				nik_ce auto entry_poses = unpack_<line_poses, _map_, H_id, _entry_poses_>;
-
-				return to_pack<this_f>(line_poses, entry_poses);
-			}
-
-			template<auto this_f>
-			nik_ces auto resolve_lookup = to_lookup_pack<this_f>();
-
-		// function:
-
-			template<typename S, typename... Ts>
-			nik_ces S result(Ts... vs)
-			{
-				nik_ce auto out_type = U_store_T<S>;
-				nik_ce auto contr    = static_targeted;
-				nik_ce auto this_f   = _wrap_<result<S, Ts...>>;
-				nik_ce auto lookup   = resolve_lookup<this_f>;
-
-				return T_machine_start::template result
-				<
-					out_type, contr, lookup, modify_type<_read_only_, Ts>...
-
-				>((modify_type<_read_only_, Ts>) vs...);
-			}
-	};
-
-	// syntactic sugar:
-
-		template<auto callable_source, auto Env, typename S, typename... Ts>
-		nik_ce auto generic_assembly_apply(Ts... vs)
-		{
-			using T_function = T_generic_assembly_metapiler<callable_source, Env>;
-
-			return T_function::template result<S, Ts...>(vs...);
-		}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

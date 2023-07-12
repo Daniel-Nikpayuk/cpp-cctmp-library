@@ -194,7 +194,7 @@ namespace cctmp {
 			{
 				auto head   = parsed.head_at(+h);
 				auto symbol = parsed.symbol_level[head.index];
-				auto length = (symbol.finish - symbol.start);
+				auto length = symbol.size();
 				auto size   = generic_printer::get_digit_spacing(~h);
 
 				generic_printer::print_spacing(spacing.v0 + _one - length);
@@ -450,7 +450,7 @@ namespace cctmp {
 				constexpr auto prod_size = tr_table.prod_size;
 				constexpr auto row_size  = tr_table.row_size;
 				constexpr auto col_size  = tr_table.col_size;
-				
+
 				auto spacing = spacing_type{sp, 2};
 				auto pos     = pair<gindex_type, gindex_type>{0, 0};
 
@@ -484,6 +484,35 @@ namespace cctmp {
 						}
 
 						printf("\n");
+					}
+				}
+			}
+
+			void print_num_tr_table()
+			{
+				constexpr auto & list = tr_table.list;
+
+				printf("\t\tnik_ces auto start_index	= %hu;\n", tr_table.start_index);
+				printf("\t\tnik_ces auto row_size		= %hu;\n", tr_table.row_size);
+				printf("\t\tnik_ces auto col_size		= %hu;\n", tr_table.col_size);
+				printf("\n");
+
+				for (auto k = list.cbegin(); k != list.cend(); ++k)
+				{
+					if (k->valid)
+					{
+						gindex_type num	= list.left_size(k);
+
+						for (auto j = k->cbegin(); j != k->cend(); ++j)
+						{
+							auto j_str = j->is_nonterminal() ? "true" : "false";
+							auto j_tok = j->token();
+
+							printf("\t\t\tlist[%hu].push({%s, %hu});\n", num, j_str, j_tok);
+						}
+
+						printf("\t\t\tlist[%hu].valid = true;\n", num);
+						printf("\t\t\tlist[%hu].action = %hu;\n" , num, k->action);
 					}
 				}
 			}

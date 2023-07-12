@@ -25,6 +25,58 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// dependencies:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// segment:
+
+/***********************************************************************************************************************/
+
+	struct T_interpreter_segment
+	{
+		nik_ces auto sH0 = U_pack_Vs<H_id>;
+		nik_ces auto  H0 = U_pack_Vs<_car_, sH0>;
+
+		template<auto n>
+		nik_ces auto contr = controller
+		<
+			instruction < IN::call , IT::praxis , PN::segment , n >,
+			instruction < IN::halt , IT::eval                     >
+		>;
+
+		template<auto d, auto n, auto m = _zero>
+		nik_ces auto result = T_interpreter_start::template result<d, contr<n>, m>(H0);
+	};
+
+/***********************************************************************************************************************/
+
+// params (syntactic sugar):
+
+	nik_ce auto _dpar_at_		= U_custom_T<T_interpreter_params< IT::back   , _car_           >>;
+	nik_ce auto _dpar_left_		= U_custom_T<T_interpreter_params< IT::front  , _list_<>        >>;
+	nik_ce auto _dpar_right_	= U_custom_T<T_interpreter_params< IT::back   , _list_<>        >>;
+	nik_ce auto _dpar_replace_	= U_custom_T<T_interpreter_params< IT::mutate , _list_<> , _one >>;
+	nik_ce auto _dpar_segment_	= U_custom_T<T_interpreter_segment>;
+
+	nik_ce auto _par_at_		= ID::template with_initial_depth< _dpar_at_      >;
+	nik_ce auto _par_left_		= ID::template with_initial_depth< _dpar_left_    >;
+	nik_ce auto _par_right_		= ID::template with_initial_depth< _dpar_right_   >;
+	nik_ce auto _par_replace_	= ID::template with_initial_depth< _dpar_replace_ >;
+	nik_ce auto _par_segment_	= ID::template with_initial_depth< _dpar_segment_ >;
+
+/***********************************************************************************************************************/
+
+// type at:
+
+	template<auto n, typename... Ts>
+	using type_at = T_store_U<eval<_par_at_, n, U_store_T<Ts>...>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // sequence:
 
 	// some methods might seem redundant given selectors and iterators,

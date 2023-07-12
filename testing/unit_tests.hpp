@@ -3521,6 +3521,90 @@ namespace cctmp_program
 	}
 
 /***********************************************************************************************************************/
+
+	//	chord::grammar_tests(); // 24 tests.
+
+	//	implementation:
+
+	//		proof of concept:		parser generator:
+
+	//			gcc compile time:  		gcc compile time:
+          			                    
+	//			real	0m2.402s		real	0m4.060s
+	//			user	0m2.205s		user	0m3.759s
+	//			sys	0m0.191s		sys	0m0.221s
+          			                    
+	//			clang compile time:		clang compile time:
+          			                    
+	//			real	0m4.980s		real	0m6.557s
+	//			user	0m4.781s		user	0m6.306s
+	//			sys	0m0.197s		sys	0m0.210s
+
+	//	extended (chord):
+
+	//		parser generator:		pre generated:
+
+	//			gcc compile time:		gcc compile time:
+	//			                                
+	//			real	0m6.213s                real	0m3.804s
+	//			user	0m5.846s                user	0m3.530s
+	//			sys	0m0.366s                sys	0m0.263s
+	//			                                
+	//			clang compile time:             clang compile time:
+	//			                                
+	//			real	0m8.496s                real	0m6.710s
+	//			user	0m8.243s                user	0m6.494s
+	//			sys	0m0.227s                sys	0m0.217s
+
+	//	pg and chord pre generated:
+
+	//			gcc compile time:
+	//			
+	//			real	0m3.731s
+	//			user	0m3.457s
+	//			sys	0m0.270s
+	//			
+	//			clang compile time:
+	//			
+	//			real	0m6.294s
+	//			user	0m6.099s
+	//			sys	0m0.194s
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// generic syntax tree:
+
+		nik_ces auto source() { return cctmp::context_free_grammar
+		(
+		// start:
+
+			"origin",
+
+		// atomics:
+
+			"origin -> (head   : Head)   <= head_max   ;"
+			"head   -> (body   : Body)   <= body_max   ;"
+			"body   -> (symbol : Symbol) <= symbol_max ;"
+			"       -> (action : Action)               ;"
+		)};
+
+/***********************************************************************************************************************/
+
+	using chord_grammar			= chord::T_chord_assembly_grammar;
+	constexpr auto static_grammar		= U_store_T<chord_grammar>;
+	constexpr auto src			= _fold_v0;
+
+/***********************************************************************************************************************/
+
+	//	auto parsed_printer = chord_assembly_parsed_printer<static_grammar, src>{};
+	//	parsed_printer.print_tree();
+	//	parsed_printer.print_chord();
+
+	//	auto tr_table_printer = parser_generator_tt_printer<static_grammar>{};
+	//	tr_table_printer.print_num_tr_table();
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 

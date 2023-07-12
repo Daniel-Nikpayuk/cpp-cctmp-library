@@ -35,7 +35,7 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
-			id = 0, identity = id, // convenience for default params.
+			id = 0, identity = id,// convenience for default params.
 			nop         , first     , // basis
 			upshift     , downshift , // bitwise
 			dereference , appoint   , // mutation

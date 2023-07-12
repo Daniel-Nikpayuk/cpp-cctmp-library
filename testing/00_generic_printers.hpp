@@ -76,12 +76,19 @@ namespace cctmp {
 		using parsoid_ref				= typename base::parsoid_ref;
 
 		using T_grammar					= T_parser_generator_grammar;
-		constexpr static auto & static_grammar		= U_store_T<T_grammar>;
+		using T_parser					= T_parser_generator_parser<T_action, T_grammar>;
+
 		constexpr static auto & grammar_map		= T_grammar::map;
 
-		using T_pg_tt					= T_generic_tt<T_grammar>;
-		constexpr static auto static_pg_parsed		= T_pg_tt::static_parsed;
-		constexpr static auto & pg_parsed		= member_value_U<static_pg_parsed>;
+		// avoids T_pg_tt due to optimized printers:
+
+		constexpr static auto static_src		= _static_callable_<T_grammar::source>;
+		constexpr static auto static_grammar	 	= U_store_T<T_grammar>;
+		constexpr static auto static_scanned		= _parser_generator_scanned_<static_src>;
+
+		constexpr static auto & src			= T_store_U<static_scanned>::src;
+		constexpr static auto parser			= T_parser{src.cselect()};
+		constexpr static auto & pg_parsed		= parser.parseme.tree;
 
 		//
 

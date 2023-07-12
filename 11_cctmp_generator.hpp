@@ -719,7 +719,7 @@ namespace cctmp {
 		list_type list; // list instead of table due to clang bug.
 		bool ambiguous;
 
-		nik_ce T_parser_generator_metapiler() : list{}, ambiguous{}
+		nik_ce T_parser_generator_metapiler() : ambiguous{}
 		{
 			list.fullsize();
 

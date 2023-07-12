@@ -25,21 +25,6 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-	nik_ce auto _zero					= cctmp::_zero;
-	nik_ce auto _one					= cctmp::_one;
-	nik_ce auto _two					= cctmp::_two;
-	nik_ce auto _three					= cctmp::_three;
-	nik_ce auto _four					= cctmp::_four;
-	nik_ce auto _five					= cctmp::_five;
-	nik_ce auto _six					= cctmp::_six;
-	nik_ce auto _seven					= cctmp::_seven;
-	nik_ce auto _eight					= cctmp::_eight;
-	nik_ce auto _nine					= cctmp::_nine;
-	nik_ce auto _ten					= cctmp::_ten;
-
-	template<auto U>
-	nik_ce auto & member_value_U				= cctmp::member_value_U<U>;
-
 	template<auto U>
 	using T_store_U						= cctmp::T_store_U<U>;
 
@@ -58,8 +43,6 @@ namespace chord {
 	nik_ce auto _level_append_0_action_			= cctmp::_level_append_0_action_;
 	nik_ce auto _level_1_append_action_			= cctmp::_level_1_append_action_;
 
-	using gckey_type					= cctmp::gckey_type;
-
 	using strlit_type					= cctmp::strlit_type;
 	using cstrlit_type					= cctmp::cstrlit_type;
 	using cstrlit_ref					= cctmp::cstrlit_ref;
@@ -70,6 +53,9 @@ namespace chord {
 
 	using cguider						= cctmp::cguider;
 	using cguider_ctype_ref					= cctmp::cguider_ctype_ref;
+
+	using icon						= cctmp::icon;
+	using cicon						= cctmp::cicon;
 
 	using action_type					= cctmp::action_type;
 	nik_ce auto U_action_type				= cctmp::U_action_type;
@@ -92,11 +78,11 @@ namespace chord {
 
 // scanner:
 
-	class T_generic_assembly_scanner
+	class T_chord_assembly_scanner
 	{
 		public:
 
-			using T_lexer		= T_generic_assembly_lexer;
+			using T_lexer		= T_chord_assembly_lexer;
 			using Token		= typename T_lexer::Token;
 
 			// how many of these are actually needed?
@@ -110,6 +96,8 @@ namespace chord {
 					identifier , mu_table , quote  , vo_id ,
 					assign     , apply    , copy   , paste , re_turn ,
 					label      , test     , branch , go_to ,
+					repeat     , fold     , find   , sift  ,
+					fasten     , glide    , zip    , map   , chord   ,
 					dimension
 				};
 			};
@@ -129,7 +117,7 @@ namespace chord {
 			max_type max;
 			total_type total;
 
-			nik_ce T_generic_assembly_scanner(lexeme l)
+			nik_ce T_chord_assembly_scanner(lexeme l)
 			{
 				current.fullsize();
 				max.fullsize();
@@ -155,6 +143,15 @@ namespace chord {
 						case Token::test       : { update_test        (); break; }
 						case Token::branch     : { update_branch      (); break; }
 						case Token::go_to      : { update_goto        (); break; }
+
+						case Token::repeat : { update_repeat (); break; }
+						case Token::fold   : { update_fold   (); break; }
+						case Token::find   : { update_find   (); break; }
+						case Token::sift   : { update_sift   (); break; }
+						case Token::map    : { update_map    (); break; }
+						case Token::zip    : { update_zip    (); break; }
+						case Token::glide  : { update_glide  (); break; }
+						case Token::fasten : { update_fasten (); break; }
 					}
 				}
 
@@ -175,31 +172,27 @@ namespace chord {
 			nik_ce void update_void      () { ++current[Level::entry]; ++total[Total::vo_id]; }
 			nik_ce void update_test      () { ++current[Level::entry]; ++total[Total::test ]; }
 
-			nik_ce void update_identifier()
-			{
-				++current[Level::entry];
-				++total[Total::identifier];
-				++total[Level::entry];
-			}
+			nik_ce void update_identifier () { update_entry(Total::identifier); }
+			nik_ce void update_quote      () { update_entry(Total::quote     ); }
+			nik_ce void update_period     () { update_entry(Total::copy      ); }
+			nik_ce void update_underscore () { update_entry(Total::paste     ); }
 
-			nik_ce void update_quote()
-			{
-				++current[Level::entry];
-				++total[Total::quote];
-				++total[Level::entry];
-			}
+			nik_ce void update_repeat () { update_entry(Total::repeat); }
+			nik_ce void update_fold   () { update_entry(Total::fold  ); }
+			nik_ce void update_find   () { update_entry(Total::find  ); }
+			nik_ce void update_sift   () { update_entry(Total::sift  ); }
+			nik_ce void update_map    () { update_entry(Total::map   ); }
+			nik_ce void update_zip    () { update_entry(Total::zip   ); }
+			nik_ce void update_glide  () { update_entry(Total::glide ); }
+			nik_ce void update_fasten () { update_entry(Total::fasten); }
 
-			nik_ce void update_period()
-			{
-				++current[Level::entry];
-				++total[Total::copy];
-				++total[Level::entry];
-			}
+			nik_ce void update_entry_max () { update_max(Level::entry); }
+			nik_ce void update_line_max  () { update_max(Level::line ); } // redundant ? (total == max)
 
-			nik_ce void update_underscore()
+			nik_ce void update_entry(gckey_type index)
 			{
 				++current[Level::entry];
-				++total[Total::paste];
+				++total[index];
 				++total[Level::entry];
 			}
 
@@ -209,16 +202,22 @@ namespace chord {
 				current[level] = _zero;
 			}
 
-			nik_ce void update_entry_max () { update_max(Level::entry); }
-			nik_ce void update_line_max  () { update_max(Level::line); } // redundant ? (total == max)
-
 			nik_ce void update_accept()
 			{
 				total[Total::jump   ] = total[Total::go_to ] + total[Total::branch ] ;
 				total[Total::tag    ] = total[Total::jump  ] + total[Total::label  ] ;
 				total[Total::replace] = total[Total::assign] +
-						        total[Total::apply ] - total[Total::copy   ] ;
+							total[Total::apply ] - total[Total::copy   ] ;
 				total[Total::arg    ] = max  [Level::entry ] + total[Total::replace] ;
+
+				total[Total::chord  ] = total[Total::repeat] +
+							total[Total::fold  ] +
+							total[Total::find  ] +
+							total[Total::sift  ] +
+							total[Total::map   ] +
+							total[Total::zip   ] +
+							total[Total::glide ] +
+							total[Total::fasten] ;
 			}
 	};
 
@@ -227,10 +226,10 @@ namespace chord {
 // interface:
 
 	template<auto static_source>
-	struct T_generic_assembly_scanned
+	struct T_chord_assembly_scanned
 	{
 		nik_ces auto src	= member_value_U<static_source>;
-		nik_ces auto value	= T_generic_assembly_scanner(src.cselect());
+		nik_ces auto value	= T_chord_assembly_scanner{src.cselect()};
 		using type		= decltype(value);
 
 		using Token			= typename type::Token;
@@ -282,6 +281,8 @@ namespace chord {
 			{
 				na = 0,
 				carg , marg , copy , paste , recurse , label , jump , env ,
+				repeat , fold , find , sift ,
+				map , zip , glide , fasten ,
 				dimension
 			};
 
@@ -293,6 +294,21 @@ namespace chord {
 			nik_ces bool is_label   (sign_type s) { return (s == label  ); }
 			nik_ces bool is_jump    (sign_type s) { return (s == jump   ); }
 			nik_ces bool is_env     (sign_type s) { return (s == env    ); }
+
+			nik_ces bool is_repeat (sign_type s) { return (s == repeat); }
+			nik_ces bool is_fold   (sign_type s) { return (s == fold  ); }
+			nik_ces bool is_find   (sign_type s) { return (s == find  ); }
+			nik_ces bool is_sift   (sign_type s) { return (s == sift  ); }
+			nik_ces bool is_map    (sign_type s) { return (s == map   ); }
+			nik_ces bool is_zip    (sign_type s) { return (s == zip   ); }
+			nik_ces bool is_glide  (sign_type s) { return (s == glide ); }
+			nik_ces bool is_fasten (sign_type s) { return (s == fasten); }
+
+			nik_ces bool is_chord(sign_type s)
+			{
+				return	(s == repeat) || (s == fold) || (s == find ) || (s == sift  ) ||
+					(s == map   ) || (s == zip ) || (s == glide) || (s == fasten) ;
+			}
 		};
 
 /***********************************************************************************************************************/
@@ -312,7 +328,10 @@ namespace chord {
 		bool has_paste;
 		bool has_lookup;
 
-		nik_ce level_line() : kind{}, has_void{}, has_paste{}, has_lookup{} { }
+		nik_ce level_line() :
+
+			kind{Context::none},
+			has_void{}, has_paste{}, has_lookup{} { }
 	};
 
 /***********************************************************************************************************************/
@@ -422,16 +441,114 @@ namespace chord {
 	using level_env = T_level_env<gindex_type, Size>;
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// interface (tree; table of contents):
+// chord:
+
+/***********************************************************************************************************************/
+
+// interval:
+
+	struct Ival
+	{
+		enum : gkey_type { na, closed, open, dimension };
+
+		gkey_type left;
+		gkey_type right;
+
+		nik_ce Ival() : left{}, right{} { }
+
+		nik_ce bool is_left_closed  () const { return (left == closed); }
+		nik_ce bool is_left_open    () const { return (left == open); }
+		nik_ce bool is_right_closed () const { return (right == closed); }
+		nik_ce bool is_right_open   () const { return (right == open); }
+	};
+
+/***********************************************************************************************************************/
+
+// function:
+
+	struct ChordFunc
+	{
+		nik_ces auto id			= strlit_type("id");
+		nik_ces auto appoint		= strlit_type("appoint");
+		nik_ces auto deref		= strlit_type("dereference");
+		nik_ces auto not_equal		= strlit_type("not_equal");
+		nik_ces auto inc		= strlit_type("increment");
+		nik_ces auto dec		= strlit_type("decrement");
+	};
+
+/***********************************************************************************************************************/
+
+// level:
+
+	template<typename CharType, gindex_type Size = 10>
+	struct T_level_chord
+	{
+		using function_type  = cctmp::sequence < icon          , 3>;
+		using parameter_type = cctmp::sequence < function_type , 6>;
+		using interval_type  = cctmp::sequence < Ival          , 3>;
+		using iterator_type  = cctmp::sequence < function_type , 4>;
+
+		token_type token;
+		parameter_type parameter;
+		interval_type interval;
+		iterator_type iterator;
+
+		nik_ce T_level_chord() : token{} { }
+
+	// token:
+
+		nik_ce void set_token(ctoken_type t) { token = t; }
+
+	// param:
+
+		nik_ce void set_param_val(cstrlit_ref s) { parameter.last()->push(icon{s.cbegin(), s.cend()}); }
+		nik_ce void set_param_val(clexeme *l)
+		{
+			parameter.last()->end()->copy(l);
+			parameter.last()->upsize();
+		}
+
+		nik_ce void param_upsize() { parameter.upsize(); }
+
+	// iter:
+
+		nik_ce void set_iter_val(cstrlit_ref s) { iterator.last()->push(icon{s.cbegin(), s.cend()}); }
+		nik_ce void set_iter_val(clexeme *l)
+		{
+			iterator.last()->end()->copy(l);
+			iterator.last()->upsize();
+		}
+
+		nik_ce void iter_upsize() { iterator.upsize(); }
+
+		nik_ce bool is_reversible(gindex_type pos) const { return (iterator[pos].size() == 2); }
+
+	// ival:
+
+		nik_ce void set_left(gckey_type i) { interval.end()->left = i; }
+		nik_ce void set_right(gckey_type i) { interval.end()->right = i; interval.upsize(); }
+	};
+
+	using level_chord = T_level_chord<gchar_type>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// tree (table of contents):
+
+/***********************************************************************************************************************/
+
+// interface:
 
 	template<auto static_scanned>
-	struct T_generic_assembly_ast
+	struct T_chord_assembly_ast
 	{
 		using scanned_type		= member_type_U<static_scanned>;
-		using T_lexer			= T_generic_assembly_lexer;
+		using T_lexer			= T_chord_assembly_lexer;
 		using Token			= typename T_lexer::Token;
-		using Total			= typename T_generic_assembly_scanner::Total;
+		using Total			= typename T_chord_assembly_scanner::Total;
 
 		nik_ces auto & scanned		= member_value_U<static_scanned>;
 		nik_ces auto invalid_token	= T_store_U<static_scanned>::invalid_token;
@@ -447,6 +564,7 @@ namespace chord {
 		nik_ces gindex_type jump_total		= scanned.total[Total::jump] + go_into_total;
 		nik_ces gindex_type tag_total		= scanned.total[Total::tag] + go_into_total;
 		nik_ces gindex_type arg_total		= scanned.total[Total::arg];
+		nik_ces gindex_type chord_total		= scanned.total[Total::chord];
 
 		nik_ces gindex_type entry_max		= scanned.max[Level::entry];
 		nik_ces gindex_type line_max		= line_total; // rline_total ?
@@ -465,9 +583,10 @@ namespace chord {
 
 		using level_line_type			= cctmp::sequence < level_line   , rline_total >;
 		using level_entry_type			= cctmp::sequence < level_entry  , entry_total >;
-		using level_lookup_type			= cctmp::sequence < level_lookup , rline_total >;
 		using level_tag_type			= cctmp::sequence < level_tag    , tag_total   >;
 		using level_arg_type			= cctmp::sequence < level_arg    , arg_total   >;
+		using level_lookup_type			= cctmp::sequence < level_lookup , rline_total >;
+		using level_chord_type			= cctmp::sequence < level_chord  , chord_total >;
 
 		using label_type			= cctmp::subsequence < level_tag , label_total >;
 		using jump_type				= cctmp::subsequence < level_tag , jump_total  >;
@@ -479,7 +598,7 @@ namespace chord {
 		level_lookup_type lookup_level;
 		level_tag_type tag_level;
 		level_arg_type arg_level;
-		level_arg name;
+		level_chord_type chord_level;
 
 		level_line_type *level_1;
 		level_entry_type *level_0;
@@ -487,11 +606,12 @@ namespace chord {
 		label_type label;
 		jump_type jump;
 
+		level_arg name;
 		lexeme lexed;
 		gindex_type arity;
 		bool has_local_copy;
 
-		nik_ce T_generic_assembly_ast() :
+		nik_ce T_chord_assembly_ast() :
 
 			hierarchy{line_max, entry_max, gindex_type{0}}, current{hierarchy.origin()},
 			level_0{&entry_level}, level_1{&line_level},
@@ -687,334 +807,16 @@ namespace chord {
 				append_entry(l, s);
 				update_lookup();
 			}
-	};
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
+		// chord:
 
-// translation action:
-
-	template<action_type, auto...> struct T_generic_assembly_translation_action;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// name:
-
-	struct GenericAssemblyActionName
-	{
-		enum : action_type
-		{
-			nop = AN::nop,
-
-			define_name, define_arg,
-			end_arg, new_line, first_line,
-			label, branch, go_to, go_into, re_turn,
-			application, voidication, conditional, assignment,
-			lvalue, mvalue, rvalue,
-			copy, paste, quote,
-			accept,
-
-			dimension
-		};
-
-	}; using GAAN = GenericAssemblyActionName;
-
-/***********************************************************************************************************************/
-
-// nop:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::nop, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l) { }
-	};
-
-// define name:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::define_name, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->append_name(l); }
-	};
-
-// define arg:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::define_arg, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->append_arg(l); }
-	};
-
-// end arg:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::end_arg, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->set_arity(); }
-	};
-
-// first line:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::first_line, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->first_line(); }
-	};
-
-// new line:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::new_line, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->append_line();
-			t->update_copy_paste();
-		}
-	};
-
-// label:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::label, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->set_kind(Context::label);
-			t->append_entry(l, Sign::label, t->label.size());
-			t->tag_label();
-		}
-	};
-
-// branch:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::branch, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->set_kind(Context::branch);
-			t->append_entry(l, Sign::jump);
-			t->tag_branch();
-		}
-	};
-
-// goto:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::go_to, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->set_kind(Context::go_to);
-			t->append_entry(l, Sign::jump);
-			t->tag_goto();
-		}
-	};
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::go_into, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			lexeme k = *l;
-			t->set_kind(Context::go_to);
-			t->append_entry(&--k, Sign::jump);
-			t->tag_goto();
-			t->append_line();
-		}
-	};
-
-// return:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::re_turn, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->set_kind(Context::re_turn); }
-	};
-
-// application:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::application, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->set_kind(Context::apply);
-			t->update_lookup();
-		}
-	};
-
-// voidication:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::voidication, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->set_kind(Context::apply);
-			t->set_void();
-			t->update_lookup();
-		}
-	};
-
-// conditional:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::conditional, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->set_kind(Context::test);
-			t->append_entry(l, Sign::copy);
-			t->update_lookup();
-		}
-	};
-
-// assignment:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::assignment, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->set_kind(Context::assign);
-			t->update_lookup();
-		}
-	};
-
-// value:
-
-	// l(eft):
-
-		template<auto... filler>
-		struct T_generic_assembly_translation_action<GAAN::lvalue, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
+			nik_ce void set_chord(clexeme *l, csign_type s)
 			{
-				auto k = t->match_arguments(l);
-				if (k.not_end()) t->lvalue_identifier(l, k.left_size());
-				else t->lvalue_unknown(l);
+				append_entry(l, s, chord_level.size());
+				chord_level.end()->set_token(l->token);
+				chord_level.upsize();
 			}
-		};
-
-	// m(utable):
-
-		template<auto... filler>
-		struct T_generic_assembly_translation_action<GAAN::mvalue, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-			{
-				auto k = t->match_arguments(l);
-				if (k.not_end()) t->mvalue_identifier(l, k.left_size());
-				else { } // error
-			}
-		};
-
-	// r(ight):
-
-		template<auto... filler>
-		struct T_generic_assembly_translation_action<GAAN::rvalue, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-			{
-				auto k = t->match_arguments(l);
-				if (k.not_end()) t->rvalue_identifier(l, k.left_size());
-				else t->rvalue_unknown(l);
-			}
-		};
-
-// copy:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::copy, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->append_entry(l, Sign::copy);
-			t->set_copy();
-		}
 	};
-
-// paste:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::paste, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->append_entry(l, Sign::paste); }
-	};
-
-// quote:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::quote, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ } // nothing yet.
-	};
-
-// accept:
-
-	template<auto... filler>
-	struct T_generic_assembly_translation_action<GAAN::accept, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->resolve_lookup();
-			t->resolve_jump();
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename AST>
-	struct T_generic_assembly_ta :
-		public cctmp::T_generic_translation_action<T_generic_assembly_translation_action, AST, GAAN>
-			{ };
-
-	// interface:
-
-		template<typename AST>
-		struct T_generic_assembly_action
-		{
-			using T_ast		= AST;
-
-			nik_ces auto value	= T_generic_assembly_ta<AST>{};
-			using type		= decltype(value);
-		};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -31,18 +31,23 @@ mawk "$mawk_prog_rest"  "01_cctmp_argument.hpp"      >> "cpp_cctmp_library.hpp" 
 mawk "$mawk_prog_rest"  "02_cctmp_parameter.hpp"     >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "03_cctmp_praxis.hpp"        >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "04_cctmp_interpreter.hpp"   >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "05_cctmp_machine.hpp"       >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "06_cctmp_scope.hpp"         >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "07_cctmp_relation.hpp"      >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "08_cctmp_graph.hpp"         >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "09_cctmp_lexer.hpp"         >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "10_cctmp_syntax.hpp"        >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "11_cctmp_parser.hpp"        >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "12_cctmp_generator.hpp"     >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "13_chord_lexer.hpp"         >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "14_chord_syntax.hpp"        >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "05_cctmp_scope.hpp"         >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "06_cctmp_relation.hpp"      >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "07_cctmp_graph.hpp"         >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "08_cctmp_lexer.hpp"         >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "09_cctmp_syntax.hpp"        >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "10_cctmp_parser.hpp"        >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "11_cctmp_generator.hpp"     >> "cpp_cctmp_library.hpp" &&
+
+mawk "$mawk_prog_rest"  "12_chord_lexer.hpp"         >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "13_chord_syntax.hpp"        >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "14_chord_action.hpp"        >> "cpp_cctmp_library.hpp" &&
 mawk "$mawk_prog_rest"  "15_chord_parser.hpp"        >> "cpp_cctmp_library.hpp" &&
-mawk "$mawk_prog_rest"  "16_chord_metapiler.hpp"     >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "16_chord_chain.hpp"         >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "17_chord_progression.hpp"   >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "18_chord_machine.hpp"       >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "19_chord_targeter.hpp"      >> "cpp_cctmp_library.hpp" &&
+mawk "$mawk_prog_rest"  "20_chord_metapiler.hpp"     >> "cpp_cctmp_library.hpp" &&
 
 mawk "$mawk_prog_rest"  "undef_macros.hpp"           >> "cpp_cctmp_library.hpp"
 

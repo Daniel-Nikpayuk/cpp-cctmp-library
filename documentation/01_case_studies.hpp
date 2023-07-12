@@ -154,7 +154,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto square_v0(T v)
-		{ return generic_assembly_apply<_square_v0, env<>, T>(v); }
+		{ return metapiler_apply<_square_v0, env<>, T>(v); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -181,7 +181,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto sum_of_squares_v0(T x, T y)
-		{ return generic_assembly_apply<_sum_of_squares_v0, env<>, T>(x, y); }
+		{ return metapiler_apply<_sum_of_squares_v0, env<>, T>(x, y); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -211,7 +211,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return generic_assembly_apply<_x_to5_plus1_v0, e0, T>(x, T(0));
+		return metapiler_apply<_x_to5_plus1_v0, e0, T>(x, T(0));
 	}
 
 /***********************************************************************************************************************/
@@ -237,7 +237,7 @@ namespace chord {
 
 	template<typename T1, typename T2>
 	constexpr auto reassign_v0(T1 x, T2 y)
-		{ return generic_assembly_apply<_reassign_v0, env<>, T2>(x, y); }
+		{ return metapiler_apply<_reassign_v0, env<>, T2>(x, y); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -271,7 +271,7 @@ namespace chord {
 		constexpr auto c1 = complex_number(1, 0);
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return generic_assembly_apply<_semidynamic_typing_v0, e0, int>(c, c1, n);
+		return metapiler_apply<_semidynamic_typing_v0, e0, int>(c, c1, n);
 	}
 
 /***********************************************************************************************************************/
@@ -300,7 +300,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame, constant_complex_frame>;
 
-		return generic_assembly_apply<_semidynamic_typing_v1, e0, int>(c, n);
+		return metapiler_apply<_semidynamic_typing_v1, e0, int>(c, n);
 	}
 
 /***********************************************************************************************************************/
@@ -338,7 +338,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return generic_assembly_apply<_binary_dispatch_v0, e0, T>(n, g, h, x, y);
+		return metapiler_apply<_binary_dispatch_v0, e0, T>(n, g, h, x, y);
 	}
 
 /***********************************************************************************************************************/
@@ -371,7 +371,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return generic_assembly_apply<_binary_dispatch_v1, e0, T>(n, g, h, x, y);
+		return metapiler_apply<_binary_dispatch_v1, e0, T>(n, g, h, x, y);
 	}
 
 /***********************************************************************************************************************/
@@ -407,7 +407,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return generic_assembly_apply<_factorial_v0, e0, T>(v);
+		return metapiler_apply<_factorial_v0, e0, T>(v);
 	}
 
 /***********************************************************************************************************************/
@@ -435,7 +435,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v1(T v)
-		{ return generic_assembly_apply<_factorial_v1, env<>, T>(v, T(1)); }
+		{ return metapiler_apply<_factorial_v1, env<>, T>(v, T(1)); }
 
 /***********************************************************************************************************************/
 
@@ -462,7 +462,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v2(T v)
-		{ return generic_assembly_apply<_factorial_v2, env<>, T>(T(1), v); }
+		{ return metapiler_apply<_factorial_v2, env<>, T>(T(1), v); }
 
 /***********************************************************************************************************************/
 
@@ -488,7 +488,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v3(T v)
-		{ return generic_assembly_apply<_factorial_v3, env<>, T>(T(1), v); }
+		{ return metapiler_apply<_factorial_v3, env<>, T>(T(1), v); }
 
 /***********************************************************************************************************************/
 
@@ -519,7 +519,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return generic_assembly_apply<_factorial_v4, e0, T>(v);
+		return metapiler_apply<_factorial_v4, e0, T>(v);
 	}
 
 /***********************************************************************************************************************/
@@ -559,7 +559,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return generic_assembly_apply<_fibonacci_v0, e0, T>(v, T(0), T(0));
+		return metapiler_apply<_fibonacci_v0, e0, T>(v, T(0), T(0));
 	}
 
 /***********************************************************************************************************************/
@@ -594,7 +594,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return generic_assembly_apply<_fibonacci_v1, e0, T>(v);
+		return metapiler_apply<_fibonacci_v1, e0, T>(v);
 	}
 
 /***********************************************************************************************************************/
@@ -671,7 +671,7 @@ namespace chord {
 		constexpr auto src = _fall_fact_2_v0<punct>;
 		constexpr auto e0  = env<fall_fact_2_ptr_frame>;
 
-		return generic_assembly_apply<src, e0, T>(&x);
+		return metapiler_apply<src, e0, T>(&x);
 	}
 
 /***********************************************************************************************************************/
@@ -726,7 +726,7 @@ namespace chord {
 		constexpr auto src = _fall_fact_2_v1<punct>;
 		constexpr auto e0  = env<fall_fact_2_ref_frame>;
 
-		return generic_assembly_apply<src, e0, T, T&>(x);
+		return metapiler_apply<src, e0, T, T&>(x);
 	}
 
 /***********************************************************************************************************************/
@@ -753,7 +753,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto void_effects_v0(T x)
-		{ return generic_assembly_apply<_void_effects_v0, env<>, T>(x, 2); }
+		{ return metapiler_apply<_void_effects_v0, env<>, T>(x, 2); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -779,7 +779,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto side_effects_v0(T x)
-		{ return generic_assembly_apply<_side_effects_v0, env<>, T>(x, 2); }
+		{ return metapiler_apply<_side_effects_v0, env<>, T>(x, 2); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -283,6 +283,8 @@ namespace cctmp {
 						case Token::empty      : { update_empty      (); break; }
 					}
 				}
+
+				update_body_max();
 			}
 
 		private:
@@ -354,7 +356,7 @@ namespace cctmp {
 		nik_ces auto & src_pair		= member_value_U<static_source>;
 		nik_ces auto & start_str	= src_pair.v0;
 		nik_ces auto & src		= src_pair.v1;
-		nik_ces auto value		= T_parser_generator_scanner(src.cselect());
+		nik_ces auto value		= T_parser_generator_scanner{src.cselect()};
 		using type			= decltype(value);
 
 		using Token			= typename type::Token;
@@ -439,6 +441,7 @@ namespace cctmp {
 		public:
 
 			nik_ce T_icon() : base{} { }
+			nik_ce T_icon(ctype_cptr s, ctype_cptr f) : base{s, f} { }
 
 			nik_ce void copy(const T_lexeme<Type> *l)
 			{
@@ -528,51 +531,51 @@ namespace cctmp {
 	template<auto static_scanned, auto static_grammar>
 	struct T_parser_generator_ast
 	{
-		using scanned_type		= member_type_U<static_scanned>;
-		using T_lexer			= T_parser_generator_lexer;
-		using Token			= typename T_lexer::Token;
-		using T_grammar			= T_store_U<static_grammar>;
-		using ActName			= typename T_grammar::ActName;
+		using scanned_type			= member_type_U<static_scanned>;
+		using T_lexer				= T_parser_generator_lexer;
+		using Token				= typename T_lexer::Token;
+		using T_grammar				= T_store_U<static_grammar>;
+		using ActName				= typename T_grammar::ActName;
 
-		nik_ces auto & scanned		= member_value_U<static_scanned>;
-		nik_ces auto & start_str	= T_store_U<static_scanned>::start_str;
-		nik_ces auto invalid_token	= T_store_U<static_scanned>::invalid_token;
-		nik_ces auto prompt_token	= T_store_U<static_scanned>::prompt_token;
+		nik_ces auto & scanned			= member_value_U<static_scanned>;
+		nik_ces auto & start_str		= T_store_U<static_scanned>::start_str;
+		nik_ces auto invalid_token		= T_store_U<static_scanned>::invalid_token;
+		nik_ces auto prompt_token		= T_store_U<static_scanned>::prompt_token;
 
-		nik_ces auto grammar_size	= T_grammar::size;
-		nik_ces auto & grammar_map	= T_grammar::map;
-		nik_ces auto & grammar_action	= T_grammar::action;
+		nik_ces auto grammar_size		= T_grammar::size;
+		nik_ces auto & grammar_map		= T_grammar::map;
+		nik_ces auto & grammar_action		= T_grammar::action;
 
-		nik_ces auto symbol_total	= scanned.total[Level::symbol];
-		nik_ces auto body_total		= scanned.total[Level::body];
-		nik_ces auto head_total		= scanned.total[Level::head];
-		nik_ces auto action_total	= scanned.total[Level::action];
-		nik_ces auto action_length	= ActName::dimension;
+		nik_ces gindex_type symbol_total	= scanned.total[Level::symbol];
+		nik_ces gindex_type body_total		= scanned.total[Level::body];
+		nik_ces gindex_type head_total		= scanned.total[Level::head];
+		nik_ces gindex_type action_total	= scanned.total[Level::action];
+		nik_ces gindex_type action_length	= ActName::dimension;
 
-		nik_ces auto symbol_max		= scanned.max[Level::symbol];
-		nik_ces auto body_max		= scanned.max[Level::body];
-		nik_ces auto head_max		= head_total;
+		nik_ces gindex_type symbol_max		= scanned.max[Level::symbol];
+		nik_ces gindex_type body_max		= scanned.max[Level::body];
+		nik_ces gindex_type head_max		= head_total;
 
-		nik_ces auto level_3_size	= head_max + 3;
-		nik_ces auto level_2_size	= head_total * (body_max + 3);
-		nik_ces auto level_1_size	= body_total * (symbol_max + 3);
-		nik_ces auto level_0_size	= symbol_total * 3;
+		nik_ces gindex_type level_3_size	= head_max + 3;
+		nik_ces gindex_type level_2_size	= head_total * (body_max + 3);
+		nik_ces gindex_type level_1_size	= body_total * (symbol_max + 3);
+		nik_ces gindex_type level_0_size	= symbol_total * 3;
 
-		nik_ces auto hierarchy_length	= level_0_size + level_1_size + level_2_size + level_3_size;
+		nik_ces gindex_type hierarchy_length	= level_0_size + level_1_size + level_2_size + level_3_size;
 
-		using hierarchy_type		= T_hierarchy < gindex_type{4} , gindex_type{hierarchy_length} >;
-		using cnavigator_type		= typename hierarchy_type::cnavigator_type;
-		using navigator_type		= typename hierarchy_type::navigator_type;
+		using hierarchy_type			= T_hierarchy < gindex_type{4} , hierarchy_length >;
+		using cnavigator_type			= typename hierarchy_type::cnavigator_type;
+		using navigator_type			= typename hierarchy_type::navigator_type;
 
-		using level_head_type		= sequence < level_head   , gindex_type{head_total   } >;
-		using level_body_type		= sequence < level_body   , gindex_type{body_total   } >;
-		using level_symbol_type		= sequence < level_symbol , gindex_type{symbol_total } >;
-		using level_action_type		= sequence < level_symbol , gindex_type{action_length} >;
+		using level_head_type			= sequence < level_head   , head_total    >;
+		using level_body_type			= sequence < level_body   , body_total    >;
+		using level_symbol_type			= sequence < level_symbol , symbol_total  >;
+		using level_action_type			= sequence < level_symbol , action_length >;
 
-		using level_head_ptr		= level_head_type*;
-		using level_body_ptr		= level_body_type*;
-		using level_symbol_ptr		= level_symbol_type*;
-		using level_action_ptr		= level_action_type*;
+		using level_head_ptr			= level_head_type*;
+		using level_body_ptr			= level_body_type*;
+		using level_symbol_ptr			= level_symbol_type*;
+		using level_action_ptr			= level_action_type*;
 
 		hierarchy_type hierarchy;
 		navigator_type current;

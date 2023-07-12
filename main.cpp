@@ -19,6 +19,9 @@
 
 #include<cstdio>
 
+#define NIK_PARSER_GENERATOR_PDA // bug: currently both need to be on or both off.
+#define NIK_CHORD_ASSEMBLY_PDA
+
 /***********************************************************************************************************************/
 
 #include"define_macros.hpp"
@@ -28,27 +31,34 @@
 #include"02_cctmp_parameter.hpp"
 #include"03_cctmp_praxis.hpp"
 #include"04_cctmp_interpreter.hpp"
-#include"05_cctmp_machine.hpp"
-#include"06_cctmp_scope.hpp"
-#include"07_cctmp_relation.hpp"
-#include"08_cctmp_graph.hpp"
-#include"09_cctmp_lexer.hpp"
-#include"10_cctmp_syntax.hpp"
-#include"11_cctmp_parser.hpp"
-#include"12_cctmp_generator.hpp"
+#include"05_cctmp_scope.hpp"
+#include"06_cctmp_relation.hpp"
+#include"07_cctmp_graph.hpp"
+#include"08_cctmp_lexer.hpp"
+#include"09_cctmp_syntax.hpp"
+#include"10_cctmp_parser.hpp"
+#include"11_cctmp_generator.hpp"
 
-#include"13_chord_lexer.hpp"
-#include"14_chord_syntax.hpp"
+#include"12_chord_lexer.hpp"
+#include"13_chord_syntax.hpp"
+#include"14_chord_action.hpp"
 #include"15_chord_parser.hpp"
-#include"16_chord_metapiler.hpp"
+#include"16_chord_chain.hpp"
+#include"17_chord_progression.hpp"
+#include"18_chord_machine.hpp"
+#include"19_chord_targeter.hpp"
+#include"20_chord_metapiler.hpp"
 
 #include"undef_macros.hpp"
 
-#include"documentation/01_case_studies.hpp"
+//#include"documentation/01_case_studies.hpp"
+#include"documentation/02_chord_progressions.hpp"
 
 #include"testing/00_generic_printers.hpp"
 #include"testing/01_parser_generator_printers.hpp"
 #include"testing/02_chord_assembly_printers.hpp"
+//#include"testing/04_chord_grammar_tests.hpp"
+#include"testing/05_progression_grammar_tests.hpp"
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -59,79 +69,16 @@
 
 	int main(int argc, char *argv[])
 	{
+	//	chord::grammar_tests(); // 24 tests.
 
-	// factorial:
-
-		static_assert(chord::factorial_v0(0) ==     1);
-		static_assert(chord::factorial_v1(3) ==     6);
-		static_assert(chord::factorial_v2(5) ==   120);
-		static_assert(chord::factorial_v3(7) ==  5040);
-		static_assert(chord::factorial_v4(8) == 40320);
-
-	// fibonacci:
-
-		static_assert(chord::fibonacci_v0(7) ==   21);
-		static_assert(chord::fibonacci_v1(8) ==   34);
-
-	// case studies:
-
-		constexpr auto _1_0i        = chord::complex_number(1, 0);
-		constexpr auto _0_1i        = chord::complex_number(0, 1);
-		constexpr auto _1_2i        = chord::complex_number(1, 2);
-		constexpr auto _m3f_4fi     = chord::complex_number(-3.0, 4.0);
-		constexpr auto _m4f_4fi     = chord::complex_number(-4.0, 4.0);
-
-		constexpr auto comp_sq      = chord::square_v0(_1_2i);
-		constexpr auto comp_sum_sqs = chord::sum_of_squares_v0(_1_2i, _0_1i);
-		constexpr auto int_sum_sqs  = chord::sum_of_squares_v0(3, 4);
-		constexpr auto polynom_val  = chord::x_to5_plus1_v0(2);
-		constexpr auto semidyntyp0  = chord::semidynamic_typing_v0(_0_1i, 17);
-		constexpr auto semidyntyp1  = chord::semidynamic_typing_v0(_1_0i, 17);
-		constexpr auto semidyntyp2  = chord::semidynamic_typing_v1(_0_1i, 17);
-		constexpr auto semidyntyp3  = chord::semidynamic_typing_v1(_1_0i, 17);
-		constexpr auto reassign_val = chord::reassign_v0(2, 17);
-		constexpr auto bin_dis_val0 = chord::binary_dispatch_v0(0, _add_, _multiply_, 5, 6);
-		constexpr auto bin_dis_val1 = chord::binary_dispatch_v0(1, _add_, _multiply_, 5, 6);
-		constexpr auto bin_dis_val2 = chord::binary_dispatch_v1(0, _add_, _multiply_, 5, 6);
-		constexpr auto bin_dis_val3 = chord::binary_dispatch_v1(1, _add_, _multiply_, 5, 6);
-
-		static_assert(comp_sq      == _m3f_4fi);
-		static_assert(comp_sum_sqs == _m4f_4fi);
-		static_assert(int_sum_sqs  == 25);
-		static_assert(polynom_val  == 33);
-		static_assert(semidyntyp0  == 18);
-		static_assert(semidyntyp1  == 5);
-		static_assert(semidyntyp2  == 18);
-		static_assert(semidyntyp3  == 5);
-		static_assert(reassign_val == 17);
-		static_assert(bin_dis_val0 == 11);
-		static_assert(bin_dis_val1 == 30);
-		static_assert(bin_dis_val2 == 11);
-		static_assert(bin_dis_val3 == 30);
-
-	// falling factorial:
-
-		constexpr auto fall_val0 = chord::fall_fact_2_v0<true>(7);
-		constexpr auto fall_val1 = chord::fall_fact_2_v1<true>(7);
-
-		static_assert(fall_val0 == 42);
-		static_assert(fall_val1 == 42);
-
-	// void effects:
-
-		int vf_n = 5, *vf_ptr = &vf_n;
-
-		chord::void_effects_v0(vf_ptr);
-
-		printf("%d\n", *vf_ptr); // prints: 3
-
-	// side effects:
-
-		int sf_n = 5, *sf_ptr = &sf_n;
-
-		chord::side_effects_v0(sf_ptr);
-
-		printf("%d\n", *sf_ptr); // prints: 3
+	//	chord::repeat_tests ();
+	//	chord::fold_tests   ();
+	//	chord::find_tests   ();
+	//	chord::sift_tests   ();
+	//	chord::map_tests    ();
+	//	chord::zip_tests    ();
+	//	chord::glide_tests  ();
+	//	chord::fasten_tests ();
 
 		return 0;
 	}
