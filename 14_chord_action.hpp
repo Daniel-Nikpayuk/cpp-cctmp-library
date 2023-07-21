@@ -44,15 +44,18 @@ namespace chord {
 			end_arg, new_line, first_line,
 			label, branch, go_to, go_into, re_turn,
 			application, voidication, conditional, assignment,
-			copy, paste, quote, lvalue, mvalue, rvalue,
+			copy, paste, quote, lvalue, mvalue, rvalue, svalue,
 			accept,
 
-			repeat, fold, find, sift, map, zip, glide, fasten,
-			param_upsize, param_action, param_mutate, param_loop_pred,
-			param_value, param_deref, param_id, param_2args, param_1arg,
-			iter_upsize, iter_next, iter_pair, iter_inc, iter_dec, iter_inc_dec,
-			iter_dec_inc, iter_value, iter_deref, iter_id, iter_none,
-			left_closed, left_open, right_closed, right_open,
+			morph, morph_value, morph_id, morph_deref, morph_inc, morph_dec,
+
+			cycle,
+			cycle_param_upsize, cycle_param_action, cycle_param_mutate, cycle_param_loop_pred,
+			cycle_param_value, cycle_param_deref, cycle_param_id, cycle_param_2args, cycle_param_1arg,
+			cycle_iter_upsize, cycle_iter_next, cycle_iter_pair, cycle_iter_inc, cycle_iter_dec,
+			cycle_iter_inc_dec, cycle_iter_dec_inc, cycle_iter_value, cycle_iter_deref, cycle_iter_id,
+			cycle_iter_none, cycle_ival_left_closed, cycle_ival_left_open, cycle_ival_right_closed,
+			cycle_ival_right_open, cycle_ival_lead,
 
 			dimension
 		};
@@ -198,7 +201,7 @@ namespace chord {
 		nik_ces void result(AST *t, clexeme *l)
 		{
 			t->set_kind(Context::apply);
-			t->update_lookup();
+			t->update_link();
 		}
 	};
 
@@ -212,7 +215,7 @@ namespace chord {
 		{
 			t->set_kind(Context::apply);
 			t->set_void();
-			t->update_lookup();
+			t->update_link();
 		}
 	};
 
@@ -226,7 +229,7 @@ namespace chord {
 		{
 			t->set_kind(Context::test);
 			t->append_entry(l, Sign::copy);
-			t->update_lookup();
+			t->update_link();
 		}
 	};
 
@@ -239,7 +242,7 @@ namespace chord {
 		nik_ces void result(AST *t, clexeme *l)
 		{
 			t->set_kind(Context::assign);
-			t->update_lookup();
+			t->update_link();
 		}
 	};
 
@@ -284,7 +287,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->resolve_lookup();
+			t->resolve_link();
 			t->resolve_jump();
 		}
 	};
@@ -335,197 +338,211 @@ namespace chord {
 			}
 		};
 
+	// s(tatic):
+
+		template<auto... filler>
+		struct T_chord_assembly_translation_action<CAAN::svalue, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				auto k = t->match_arguments(l);
+				if (k.not_end()) t->svalue_identifier(l, k.left_size());
+				else t->svalue_unknown(l);
+			}
+		};
+
 /***********************************************************************************************************************/
 
-// chord:
+// morph:
 
-	// repeat:
+	template<auto... filler>
+	struct T_chord_assembly_translation_action<CAAN::morph, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->set_morph(l); }
+	};
+
+// parameter:
+
+	// morph value:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::repeat, filler...>
+		struct T_chord_assembly_translation_action<CAAN::morph_value, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->set_chord(l, Sign::repeat); }
+			{
+				auto k = t->match_arguments(l);
+				if (k.not_end()) t->morph_identifier(l, k.left_size());
+				else t->morph_unknown(l);
+			}
 		};
 
-	// fold:
+	// morph id:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::fold, filler...>
+		struct T_chord_assembly_translation_action<CAAN::morph_id, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->set_chord(l, Sign::fold); }
+				{ t->morph_known(Morph::id); }
 		};
 
-	// find:
+	// morph deref:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::find, filler...>
+		struct T_chord_assembly_translation_action<CAAN::morph_deref, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->set_chord(l, Sign::find); }
+				{ t->morph_known(Morph::deref); }
 		};
 
-	// sift:
+	// morph inc:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::sift, filler...>
+		struct T_chord_assembly_translation_action<CAAN::morph_inc, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->set_chord(l, Sign::sift); }
+				{ t->morph_known(Morph::inc); }
 		};
 
-	// map:
+	// morph dec:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::map, filler...>
+		struct T_chord_assembly_translation_action<CAAN::morph_dec, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->set_chord(l, Sign::map); }
+				{ t->morph_known(Morph::dec); }
 		};
 
-	// zip:
+/***********************************************************************************************************************/
 
-		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::zip, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-				{ t->set_chord(l, Sign::zip); }
-		};
+// cycle:
 
-	// glide:
+	template<auto... filler>
+	struct T_chord_assembly_translation_action<CAAN::cycle, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->set_cycle(l); }
+	};
 
-		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::glide, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-				{ t->set_chord(l, Sign::glide); }
-		};
-
-	// fasten:
-
-		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::fasten, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-				{ t->set_chord(l, Sign::fasten); }
-		};
-
-// function:
+// parameter:
 
 	// param upsize:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::param_upsize, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_param_upsize, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->param_upsize(); }
+				{ t->cycle_level.last()->param_upsize(); }
 		};
 
 	// param action:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::param_action, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_param_action, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->chord_level.last()->param_upsize();
-				t->chord_level.last()->set_param_val(ChordFunc::id);
-				t->chord_level.last()->set_param_val(ChordFunc::deref);
+				t->cycle_level.last()->param_upsize();
+				t->cycle_param_known(Morph::id);
+				t->cycle_param_known(Morph::deref);
 			}
 		};
 
 	// param mutate:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::param_mutate, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_param_mutate, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->chord_level.last()->param_upsize();
-				t->chord_level.last()->set_param_val(ChordFunc::appoint);
-				t->chord_level.last()->set_param_val(ChordFunc::id);
-				t->chord_level.last()->set_param_val(ChordFunc::id);
+				t->cycle_level.last()->param_upsize();
+				t->cycle_param_known(Morph::appoint);
+				t->cycle_param_known(Morph::id);
+				t->cycle_param_known(Morph::id);
 			}
 		};
 
 	// param loop pred:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::param_loop_pred, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_param_loop_pred, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->chord_level.last()->param_upsize();
-				t->chord_level.last()->set_param_val(ChordFunc::not_equal);
-				t->chord_level.last()->set_param_val(ChordFunc::id);
-				t->chord_level.last()->set_param_val(ChordFunc::id);
+				t->cycle_level.last()->param_upsize();
+				t->cycle_param_known(Morph::not_equal);
+				t->cycle_param_known(Morph::id);
+				t->cycle_param_known(Morph::id);
 			}
 		};
 
 	// param value:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::param_value, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_param_value, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->set_param_val(l); }
+			{
+				auto k = t->match_arguments(l);
+				if (k.not_end()) t->cycle_param_identifier(l, k.left_size());
+				else t->cycle_param_unknown(l);
+			}
 		};
 
 	// param deref:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::param_deref, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_param_deref, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->set_param_val(ChordFunc::deref); }
+				{ t->cycle_param_known(Morph::deref); }
 		};
 
 	// param id:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::param_id, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_param_id, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->set_param_val(ChordFunc::id); }
+				{ t->cycle_param_known(Morph::id); }
 		};
 
 	// param 2args:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::param_2args, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_param_2args, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->chord_level.last()->set_param_val(ChordFunc::deref);
-				t->chord_level.last()->set_param_val(ChordFunc::deref);
+				t->cycle_param_known(Morph::deref);
+				t->cycle_param_known(Morph::deref);
 			}
 		};
 
 	// param 1arg:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::param_1arg, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_param_1arg, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->set_param_val(ChordFunc::deref); }
+				{ t->cycle_param_known(Morph::deref); }
 		};
 
 // iterator:
@@ -533,128 +550,132 @@ namespace chord {
 	// iter upsize:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::iter_upsize, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_iter_upsize, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->iter_upsize(); }
+				{ t->cycle_level.last()->iter_upsize(); }
 		};
 
 	// iter next:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::iter_next, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_iter_next, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->chord_level.last()->iter_upsize();
-				t->chord_level.last()->set_iter_val(ChordFunc::inc);
+				t->cycle_level.last()->iter_upsize();
+				t->cycle_iter_known(Morph::inc);
 			}
 		};
 
 	// iter pair:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::iter_pair, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_iter_pair, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->chord_level.last()->iter_upsize();
-				t->chord_level.last()->set_iter_val(ChordFunc::inc);
-				t->chord_level.last()->set_iter_val(ChordFunc::dec);
+				t->cycle_level.last()->iter_upsize();
+				t->cycle_iter_known(Morph::inc);
+				t->cycle_iter_known(Morph::dec);
 			}
 		};
 
 	// iter inc:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::iter_inc, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_iter_inc, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->chord_level.last()->iter_upsize();
-				t->chord_level.last()->set_iter_val(ChordFunc::inc);
+				t->cycle_level.last()->iter_upsize();
+				t->cycle_iter_known(Morph::inc);
 			}
 		};
 
 	// iter dec:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::iter_dec, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_iter_dec, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->chord_level.last()->iter_upsize();
-				t->chord_level.last()->set_iter_val(ChordFunc::dec);
+				t->cycle_level.last()->iter_upsize();
+				t->cycle_iter_known(Morph::dec);
 			}
 		};
 
 	// iter inc dec:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::iter_inc_dec, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_iter_inc_dec, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->chord_level.last()->iter_upsize();
-				t->chord_level.last()->set_iter_val(ChordFunc::inc);
-				t->chord_level.last()->set_iter_val(ChordFunc::dec);
+				t->cycle_level.last()->iter_upsize();
+				t->cycle_iter_known(Morph::inc);
+				t->cycle_iter_known(Morph::dec);
 			}
 		};
 
 	// iter dec inc:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::iter_dec_inc, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_iter_dec_inc, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->chord_level.last()->iter_upsize();
-				t->chord_level.last()->set_iter_val(ChordFunc::dec);
-				t->chord_level.last()->set_iter_val(ChordFunc::inc);
+				t->cycle_level.last()->iter_upsize();
+				t->cycle_iter_known(Morph::dec);
+				t->cycle_iter_known(Morph::inc);
 			}
 		};
 
 	// iter value:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::iter_value, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_iter_value, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->set_iter_val(l); }
+			{
+				auto k = t->match_arguments(l);
+				if (k.not_end()) t->cycle_iter_identifier(l, k.left_size());
+				else t->cycle_iter_unknown(l);
+			}
 		};
 
 	// iter deref:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::iter_deref, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_iter_deref, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->set_iter_val(ChordFunc::deref); }
+				{ t->cycle_iter_known(Morph::deref); }
 		};
 
 	// iter id:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::iter_id, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_iter_id, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->set_iter_val(ChordFunc::id); }
+				{ t->cycle_iter_known(Morph::id); }
 		};
 
 	// iter none:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::iter_none, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_iter_none, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
@@ -666,41 +687,51 @@ namespace chord {
 	// left closed:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::left_closed, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_ival_left_closed, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->set_left(Ival::closed); }
+				{ t->cycle_level.last()->set_left(Ival::closed); }
 		};
 
 	// left open:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::left_open, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_ival_left_open, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->set_left(Ival::open); }
+				{ t->cycle_level.last()->set_left(Ival::open); }
 		};
 
 	// right closed:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::right_closed, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_ival_right_closed, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->set_right(Ival::closed); }
+				{ t->cycle_level.last()->set_right(Ival::closed); }
 		};
 
 	// right open:
 
 		template<auto... filler>
-		struct T_chord_assembly_translation_action<CAAN::right_open, filler...>
+		struct T_chord_assembly_translation_action<CAAN::cycle_ival_right_open, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->chord_level.last()->set_right(Ival::open); }
+				{ t->cycle_level.last()->set_right(Ival::open); }
+		};
+
+	// ival lead:
+
+		template<auto... filler>
+		struct T_chord_assembly_translation_action<CAAN::cycle_ival_lead, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->cycle_level.last()->set_lead(); }
 		};
 
 /***********************************************************************************************************************/

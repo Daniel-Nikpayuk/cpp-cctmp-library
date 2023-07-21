@@ -492,9 +492,9 @@ namespace cctmp {
 			{
 				constexpr auto & list = tr_table.list;
 
-				printf("\t\tnik_ces auto start_index	= %hu;\n", tr_table.start_index);
-				printf("\t\tnik_ces auto row_size		= %hu;\n", tr_table.row_size);
-				printf("\t\tnik_ces auto col_size		= %hu;\n", tr_table.col_size);
+				printf("\t\tnik_ces auto start_index\t= %hu;\n", tr_table.start_index);
+				printf("\t\tnik_ces auto row_size\t\t= %hu;\n", tr_table.row_size);
+				printf("\t\tnik_ces auto col_size\t\t= %hu;\n", tr_table.col_size);
 				printf("\n");
 
 				for (auto k = list.cbegin(); k != list.cend(); ++k)
@@ -503,16 +503,24 @@ namespace cctmp {
 					{
 						gindex_type num	= list.left_size(k);
 
+						printf("\t\t\t");
+						unsigned count = 0; 
+
 						for (auto j = k->cbegin(); j != k->cend(); ++j)
 						{
 							auto j_str = j->is_nonterminal() ? "true" : "false";
 							auto j_tok = j->token();
 
-							printf("\t\t\tlist[%hu].push({%s, %hu});\n", num, j_str, j_tok);
+							printf("list[%hu].push({%s, %hu});", num, j_str, j_tok);
+
+							count = ((count + 1) % 3);
+
+							if (count) printf(" ");
+							else printf("\n\t\t\t");
 						}
 
-						printf("\t\t\tlist[%hu].valid = true;\n", num);
-						printf("\t\t\tlist[%hu].action = %hu;\n" , num, k->action);
+						printf("list[%hu].valid = true; ", num);
+						printf("list[%hu].action = %hu;\n" , num, k->action);
 					}
 				}
 			}

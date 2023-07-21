@@ -122,6 +122,10 @@ namespace chord {
 				r_fixed     ,
 				comma       ,
 
+				compose     ,
+				subpose     ,
+				curry       ,
+
 				repeat      ,
 				map         ,
 				fold        ,
@@ -338,6 +342,10 @@ namespace chord {
 		nik_ces auto branch_charset     () { return cctmp::dfa_charset("branch"); }
 		nik_ces auto return_charset     () { return cctmp::dfa_charset("return"); }
 
+		nik_ces auto compose_charset    () { return cctmp::dfa_charset("compose"); }
+		nik_ces auto subpose_charset    () { return cctmp::dfa_charset("subpose"); }
+		nik_ces auto curry_charset      () { return cctmp::dfa_charset("curry"); }
+
 		nik_ces auto repeat_charset     () { return cctmp::dfa_charset("repeat"); }
 		nik_ces auto map_charset        () { return cctmp::dfa_charset("map"); }
 		nik_ces auto fold_charset       () { return cctmp::dfa_charset("fold"); }
@@ -363,6 +371,10 @@ namespace chord {
 		using T_goto_lexer		= cctmp::T_keyword_lexer< T_dfa::goto_charset   , Token::go_to   >;
 		using T_branch_lexer		= cctmp::T_keyword_lexer< T_dfa::branch_charset , Token::branch  >;
 		using T_return_lexer		= cctmp::T_keyword_lexer< T_dfa::return_charset , Token::re_turn >;
+
+		using T_compose_lexer		= cctmp::T_keyword_lexer< T_dfa::compose_charset , Token::compose >;
+		using T_subpose_lexer		= cctmp::T_keyword_lexer< T_dfa::subpose_charset , Token::subpose >;
+		using T_curry_lexer		= cctmp::T_keyword_lexer< T_dfa::curry_charset   , Token::curry   >;
 
 		using T_repeat_lexer		= cctmp::T_keyword_lexer< T_dfa::repeat_charset , Token::repeat >;
 		using T_map_lexer		= cctmp::T_keyword_lexer< T_dfa::map_charset    , Token::map    >;
@@ -416,11 +428,12 @@ namespace chord {
 
 			switch (s.size())
 			{
-				case  1 : { val = keyword_1  (s); break; }
-				case  3 : { val = keyword_3  (s); break; }
-				case  4 : { val = keyword_4  (s); break; }
-				case  5 : { val = keyword_5  (s); break; }
-				case  6 : { val = keyword_6  (s); break; }
+				case 1 : { val = keyword_1 (s); break; }
+				case 3 : { val = keyword_3 (s); break; }
+				case 4 : { val = keyword_4 (s); break; }
+				case 5 : { val = keyword_5 (s); break; }
+				case 6 : { val = keyword_6 (s); break; }
+				case 7 : { val = keyword_7 (s); break; }
 			}
 
 			return val;
@@ -452,8 +465,9 @@ namespace chord {
 
 		nik_ces token_type keyword_5(const cselector<char> & s)
 		{
-			if   (cctmp::recognizes< T_glide_lexer >(s)) return T_glide_lexer::token;
-			else                                         return TokenName::invalid;
+			if      (cctmp::recognizes< T_glide_lexer >(s)) return T_glide_lexer::token;
+			else if (cctmp::recognizes< T_curry_lexer >(s)) return T_curry_lexer::token;
+			else                                            return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_6(const cselector<char> & s)
@@ -463,6 +477,13 @@ namespace chord {
 			else if (cctmp::recognizes< T_repeat_lexer >(s)) return T_repeat_lexer::token;
 			else if (cctmp::recognizes< T_fasten_lexer >(s)) return T_fasten_lexer::token;
 			else                                             return TokenName::invalid;
+		}
+
+		nik_ces token_type keyword_7(const cselector<char> & s)
+		{
+			if      (cctmp::recognizes< T_compose_lexer >(s)) return T_compose_lexer::token;
+			else if (cctmp::recognizes< T_subpose_lexer >(s)) return T_subpose_lexer::token;
+			else                                              return TokenName::invalid;
 		}
 	};
 

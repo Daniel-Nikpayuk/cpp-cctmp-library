@@ -62,7 +62,6 @@ namespace chord {
 	{
 		int arr0[] = { 1, 2, 3, 4, 5, 0 };
 		int arr1[] = { 5, 4, 3, 2, 1, 0 };
-		int arr2[] = { 7, 4, 6, 2, 9, 0 };
 
 		repeat_v0(arr0, arr0 + 5, arr1 + 5);
 		print_array(arr0);
@@ -75,8 +74,6 @@ namespace chord {
 	void fold_tests()
 	{
 		int arr0[] = { 1, 2, 3, 4, 5, 0 };
-		int arr1[] = { 5, 4, 3, 2, 1, 0 };
-		int arr2[] = { 7, 4, 6, 2, 9, 0 };
 
 		printf("%d\n", (int) fold_v0(0, arr0, arr0 + 5)); // prints: 15
 	}
@@ -87,8 +84,6 @@ namespace chord {
 
 	void find_tests()
 	{
-		int arr0[] = { 1, 2, 3, 4, 5, 0 };
-		int arr1[] = { 5, 4, 3, 2, 1, 0 };
 		int arr2[] = { 7, 4, 6, 2, 9, 0 };
 
 		int* found[1];
@@ -102,11 +97,9 @@ namespace chord {
 
 	void sift_tests()
 	{
-		int arr0[] = { 1, 2, 3, 4, 5, 0 };
-		int arr1[] = { 5, 4, 3, 2, 1, 0 };
 		int arr2[] = { 7, 4, 6, 2, 9, 0 };
 
-		int* sifted[5];
+		int* sifted[6];
 		auto sifted_end = sift_v0(sifted, arr2, arr2 + 5);
 		print_sifted(arr2, sifted, sifted_end);
 	}
@@ -119,7 +112,6 @@ namespace chord {
 	{
 		int arr0[] = { 1, 2, 3, 4, 5, 0 };
 		int arr1[] = { 5, 4, 3, 2, 1, 0 };
-		int arr2[] = { 7, 4, 6, 2, 9, 0 };
 
 		map_v0(arr1, arr0, arr0 + 5);
 		print_array(arr1);
@@ -133,7 +125,6 @@ namespace chord {
 	{
 		int arr0[] = { 1, 2, 3, 4, 5, 0 };
 		int arr1[] = { 5, 4, 3, 2, 1, 0 };
-		int arr2[] = { 7, 4, 6, 2, 9, 0 };
 
 		vec_sum_v0(arr0, arr0, arr1, arr1 + 5);
 		print_array(arr0);
@@ -147,7 +138,6 @@ namespace chord {
 	{
 		int arr0[] = { 1, 2, 3, 4, 5, 0 };
 		int arr1[] = { 5, 4, 3, 2, 1, 0 };
-		int arr2[] = { 7, 4, 6, 2, 9, 0 };
 
 		printf("%d\n", (int) dot_product_v0(0, arr0, arr1, arr1 + 5)); // prints: 35
 		printf("%d\n", (int) convolution_v0(0, arr0, arr1, arr1 + 5)); // prints: 55

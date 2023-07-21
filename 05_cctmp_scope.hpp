@@ -467,12 +467,15 @@ namespace cctmp {
 		using size_type		= SizeType;
 		using csize_type	= size_type const;
 
-		ctype_cptr start;
-		ctype_cptr finish;
+		ctype_ptr start;
+		ctype_ptr finish;
+
+		nik_ces ctype empty[] = { };
 
 		template<auto N>
 		nik_ce literal(const Type (&s)[N]) : start{s}, finish{s + N} { }
 
+		nik_ce literal() : start{empty}, finish{empty} { }
 		nik_ce literal(ctype_cptr s, ctype_cptr f) : start{s}, finish{f} { }
 
 		nik_ce auto size() const { return finish - start; }
@@ -521,6 +524,8 @@ namespace cctmp {
 
 		template<auto N>
 		nik_ce string_literal(const Type (&s)[N]) : base{s, s + (N-1)} { }
+
+		nik_ce string_literal() : base{} { } // maybe.
 
 		nik_ce bool operator == (const string_literal<Type, SizeType> & s) const
 			{ return apply<_subarray_same_<>>(*this, s); }

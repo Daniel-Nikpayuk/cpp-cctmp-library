@@ -129,10 +129,6 @@ namespace cctmp {
 			template<typename... Ts>
 			nik_ce proto_sequence(const Ts &... vs) : initial{type(vs)...} { }
 
-		//	nik_ce proto_sequence() : initial{} { }
-		//	nik_ce proto_sequence(const proto_sequence *s) :
-		//		initial{} { copy(initial, s->cbegin(), s->cend()); }
-
 			// immutable:
 
 				nik_ce size_type length () const { return Size; }
@@ -198,7 +194,6 @@ namespace cctmp {
 
 			template<typename... Ts>
 			nik_ce ce_sequence(const Ts &... vs) : base{vs...}, terminal{sizeof...(Ts)} { }
-		//	nik_ce ce_sequence(const Ts &... vs) : base{}, terminal{} { (push(vs), ...); }
 
 			nik_ce ce_sequence(const ce_sequence & s) :
 				base{}, terminal{s.size()} { base::copy(base::initial, s.cbegin(), s.cend()); }
@@ -302,7 +297,6 @@ namespace cctmp {
 
 			template<typename... Ts>
 			nik_ce sequence(const Ts &... vs) : base{vs...}, terminal{base::initial + sizeof...(Ts)} { }
-		//	nik_ce sequence(const Ts &... vs) : base{}, terminal{base::initial} { (push(vs), ...); }
 
 			nik_ce sequence(const sequence & s) :
 				base{}, terminal{base::initial + s.size()}
@@ -380,6 +374,32 @@ namespace cctmp {
 		nik_ce bool operator == (const pair & p) const { return (p.v0 == v0) && (p.v1 == v1); }
 		nik_ce bool operator != (const pair & p) const { return (p.v0 != v0) || (p.v1 != v1); }
 	};
+
+/***********************************************************************************************************************/
+
+// static:
+
+	// car:
+
+		template<auto static_pair>
+		struct T_static_car
+		{
+			nik_ces auto & value = member_value_U<static_pair>.v0;
+			using type           = modify_type<_from_reference_, decltype(value)>;
+
+		}; template<auto static_pair>
+			nik_ce auto _static_car_ = U_store_T<T_static_car<static_pair>>;
+
+	// cdr:
+
+		template<auto static_pair>
+		struct T_static_cdr
+		{
+			nik_ces auto & value = member_value_U<static_pair>.v1;
+			using type           = modify_type<_from_reference_, decltype(value)>;
+
+		}; template<auto static_pair>
+			nik_ce auto _static_cdr_ = U_store_T<T_static_cdr<static_pair>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -544,6 +564,11 @@ namespace cctmp {
 
 			template<auto N>
 			nik_ce binding(const KeyType (&s)[N], const ValueType & v) : strlit{s}, value{v} { }
+
+			nik_ce binding(const strlit_type & s, const value_type & v) : strlit{s}, value{v} { }
+
+			nik_ce const auto & key() const { return strlit; }
+			nik_ce const auto & map() const { return value; }
 	};
 
 /***********************************************************************************************************************/

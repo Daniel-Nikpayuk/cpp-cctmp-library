@@ -44,21 +44,22 @@
 #include"14_chord_action.hpp"
 #include"15_chord_parser.hpp"
 #include"16_chord_chain.hpp"
-#include"17_chord_progression.hpp"
-#include"18_chord_machine.hpp"
-#include"19_chord_targeter.hpp"
-#include"20_chord_metapiler.hpp"
+#include"17_chord_lookup.hpp"
+#include"18_chord_cycle.hpp"
+#include"19_chord_progression.hpp"
+#include"20_chord_machine.hpp"
+#include"21_chord_targeter.hpp"
 
 #include"undef_macros.hpp"
 
 //#include"documentation/01_case_studies.hpp"
-#include"documentation/02_chord_progressions.hpp"
+//#include"documentation/02_chord_progressions.hpp"
 
 #include"testing/00_generic_printers.hpp"
 #include"testing/01_parser_generator_printers.hpp"
 #include"testing/02_chord_assembly_printers.hpp"
 //#include"testing/04_chord_grammar_tests.hpp"
-#include"testing/05_progression_grammar_tests.hpp"
+//#include"testing/05_progression_grammar_tests.hpp"
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

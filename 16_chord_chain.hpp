@@ -28,22 +28,17 @@ namespace chord {
 	template<typename T>
 	nik_ce auto U_store_T					= cctmp::U_store_T<T>;
 
+	template<typename T>
+	nik_ce auto U_restore_T					= cctmp::U_restore_T<T>;
+
 	template<auto... Vs>
 	nik_ce auto U_pack_Vs					= cctmp::U_pack_Vs<Vs...>;
 
-//	nik_ce auto _id_					= cctmp::_id_;
-//	nik_ce auto _not_equal_					= cctmp::_not_equal_;
+	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
 
-//	template<auto V = _one>
-//	nik_ce auto _increment_					= cctmp::_increment_<V>;
+	nik_ce auto _id_					= cctmp::_id_;
 
-//	template<auto V = _one>
-//	nik_ce auto _decrement_					= cctmp::_decrement_<V>;
-
-//	nik_ce auto _same_					= cctmp::_same_;
-
-//	template<bool Pred, auto... Vs>
-//	nik_ce auto if_then_else_				= cctmp::if_then_else_<Pred, Vs...>;
+	nik_ce auto _same_					= cctmp::_same_;
 
 	template<auto p, auto Op, auto... Vs>
 	nik_ce auto unpack_					= cctmp::unpack_<p, Op, Vs...>;
@@ -255,80 +250,194 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// arg pose:
+// at:
+
+	// conceptually, modularizing out (division of labour) arg_at (focused on the registers)
+	// from the arbitrary function application (separate out compose and apply) is a better
+	// design, but given the nature of variadics the following might be more performant?
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// apply:
+
+/***********************************************************************************************************************/
+
+// function:
+
+	template<auto f, auto n>
+	struct T_apply_at
+	{
+		nik_ces auto lookup     = U_pack_Vs<f>;
+		nik_ces auto contr      = controller
+					<
+						instruction< CN::front  , n     >,
+						instruction< CN::at             >,
+						instruction< CN::select , _zero >,
+						instruction< CN::apply          >,
+						instruction< CN::first          >
+					>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs)
+			{ return T_chain_start::template result<contr, lookup, Ts...>(vs...); }
+	};
+
+/***********************************************************************************************************************/
+
+// id (optimized):
+
+	template<auto n>
+	struct T_apply_at<_id_, n>
+	{
+		nik_ces auto lookup     = U_null_Vs;
+		nik_ces auto contr      = controller
+					<
+						instruction< CN::front , n >,
+						instruction< CN::at        >,
+						instruction< CN::first     >
+					>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs)
+			{ return T_chain_start::template result<contr, lookup, Ts...>(vs...); }
+	};
+
+/***********************************************************************************************************************/
+
+// syntactic sugar:
+
+	template<auto f, auto n>
+	nik_ce auto _apply_at_ = U_store_T<T_apply_at<f, n>>;
+
+	template<auto n>
+	nik_ce auto _arg_at_ = _apply_at_<_id_, n>;
+
+	template<auto n, typename... Ts>
+	nik_ce auto arg_at(Ts... vs) { return T_apply_at<_id_, n>::template result<Ts...>(vs...); }
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// ref:
+
+	template<auto...> struct T_ref_at;
+
+/***********************************************************************************************************************/
+
+// position:
+
+	template<auto n>
+	struct T_ref_at<n>
+	{
+		template<typename... Ts>
+		nik_ces auto & result(Ts... vs)
+		{
+			nik_ce auto p0  = eval<_par_left_ , n, U_store_T<Ts>...>;
+			nik_ce auto p1  = eval<_par_right_, n, U_store_T<Ts>...>;
+
+			return T_ref_at<p0, p1>::template result<Ts...>(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// pair:
+
+	template
+	<
+		template<auto...> typename B0, auto... LUs, nik_vp(p0)(B0<LUs...>*),
+		template<auto...> typename B1, auto... RUs, nik_vp(p1)(B1<RUs...>*)
+	>
+	struct T_ref_at<p0, p1>
+	{
+		template<typename TN, typename... Ts>
+		nik_ces auto & ref_at(T_store_U<LUs>... lvs, TN vn, Ts... vs) { return vn; }
+
+		template<typename... Ts>
+		nik_ces auto & result(Ts... vs) { return ref_at<T_store_U<RUs>...>(vs...); }
+	};
+
+/***********************************************************************************************************************/
+
+// syntactic sugar:
+
+	template<auto n>
+	nik_ce auto _ref_at_ = U_store_T<T_ref_at<n>>;
+
+	template<auto n, typename... Ts>
+	nik_ce auto & ref_at(Ts... vs) { return T_ref_at<n>::template result<Ts...>(vs...); }
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// modify:
+
+/***********************************************************************************************************************/
+
+// type:
+
+	template<auto t, auto n, typename T>
+	struct T_modify_at
+	{
+		using Type = modify_type<t, T>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) // -> Type
+			{ return (Type) T_apply_at<_id_, n>::template result<Ts...>(vs...); }
+	};
+
+/***********************************************************************************************************************/
+
+// reference:
+
+	template<auto t, auto n, typename T>
+	struct T_modify_at<t, n, T&>
+	{
+		using Type = modify_type<t, T&>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) -> Type&
+			{ return (Type) T_ref_at<n>::template result<Ts...>(vs...); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// composition:
 
 	// todo:
 
-		// 1. allow arg_subpose to compose void functions (change _appoint_ to void).
+		// 1. allow composition with void functions (change _appoint_ to void).
 
 /***********************************************************************************************************************/
 
-// interface:
+// subpose:
 
-	template<auto Name, auto f, auto gs_p>
-	struct T_arg_pose
+	template<auto f, auto... gs>
+	struct T_subpose
 	{
-		nik_ces auto lookup = U_pack_Vs<f, gs_p>;
-
-		template<auto m = _zero, auto n = _one>
-		nik_ces auto contr = controller
-		<
-			instruction< CN::select , n >,
-			instruction< Name           >,
-			instruction< CN::select , m >,
-			instruction< CN::apply      >,
-			instruction< CN::first      >
-		>;
-
 		template<typename... Ts>
-		nik_ces auto result(Ts... vs) { return T_chain_start::template result<contr<>, lookup>(vs...); }
+		nik_ces auto result(Ts... vs)
+			{ return cctmp::apply<f>(T_store_U<gs>::template result<Ts>(vs)...); }
 
-	}; template<auto Name, auto f, auto gs_p>
-		nik_ce auto _arg_pose_ = U_store_T<T_arg_pose<Name, f, gs_p>>;
-
-	// syntactic sugar:
-
-		template<auto f, auto... gs>
-		nik_ce auto arg_subpose = _arg_pose_<CN::mapwise, f, U_pack_Vs<gs...>>;
-
-		template<auto f, auto... gs>
-		nik_ce auto arg_compose = _arg_pose_<CN::applywise, f, U_pack_Vs<gs...>>;
+	}; template<auto f, auto... gs>
+		nik_ce auto _subpose_ = U_store_T<T_subpose<f, gs...>>;
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
-// env lookup:
+// compose:
 
-	template<auto> struct T_env_lookup;
-
-	template<auto... static_frames, nik_vp(env)(T_pack_Vs<static_frames...>*)>
-	struct T_env_lookup<env>
+	template<auto f, auto... gs>
+	struct T_compose
 	{
-		using pair_type  = cctmp::pair<gindex_type, gindex_type>;
-		using citer_type = citerator<strlit_type>;
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs)
+			{ return cctmp::apply<f>(T_store_U<gs>::template result<Ts...>(vs...)...); }
 
-		nik_ces void update_frame(pair_type & pos, bool & match, citer_type k)
-		{
-			if (!match)
-			{
-				match   = k.not_end();
-				pos.v0 += not match;
-				pos.v1  = k.left_size();
-			}
-		}
-
-		template<typename EntryType>
-		nik_ces auto find_frame(const EntryType & entry)
-		{
-			pair_type pos;
-			bool match{false};
-
-			(update_frame(pos, match, member_value_U<static_frames>.contains(entry)), ...);
-
-			return pos;
-		}
-	};
+	}; template<auto f, auto... gs>
+		nik_ce auto _compose_ = U_store_T<T_compose<f, gs...>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

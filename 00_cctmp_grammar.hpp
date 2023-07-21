@@ -63,6 +63,10 @@ namespace cctmp {
 	// void:
 
 		nik_ce auto U_void = U_store_T<void>;
+
+	// builtin:
+
+		nik_ce auto U_bool = U_store_T<bool>;
 		nik_ce auto U_char = U_store_T<char>;
 
 	// unsigned:

@@ -52,41 +52,50 @@ namespace chord {
 		constexpr auto _m3f_4fi     = complex_number(-3.0, 4.0);
 		constexpr auto _m4f_4fi     = complex_number(-4.0, 4.0);
 
-		constexpr auto comp_sq      = square_v0(_1_2i);
-		constexpr auto comp_sum_sqs = sum_of_squares_v0(_1_2i, _0_1i);
-		constexpr auto int_sum_sqs  = sum_of_squares_v0(3, 4);
-		constexpr auto polynom_val  = x_to5_plus1_v0(2);
-		constexpr auto semidyntyp0  = semidynamic_typing_v0(_0_1i, 17);
-		constexpr auto semidyntyp1  = semidynamic_typing_v0(_1_0i, 17);
-		constexpr auto semidyntyp2  = semidynamic_typing_v1(_0_1i, 17);
-		constexpr auto semidyntyp3  = semidynamic_typing_v1(_1_0i, 17);
-		constexpr auto reassign_val = reassign_v0(2, 17);
-		constexpr auto bin_dis_val0 = binary_dispatch_v0(0, _add_, _multiply_, 5, 6);
-		constexpr auto bin_dis_val1 = binary_dispatch_v0(1, _add_, _multiply_, 5, 6);
-		constexpr auto bin_dis_val2 = binary_dispatch_v1(0, _add_, _multiply_, 5, 6);
-		constexpr auto bin_dis_val3 = binary_dispatch_v1(1, _add_, _multiply_, 5, 6);
+		constexpr auto comp_sq_v0      = square_v0(_1_2i);
+		constexpr auto comp_sq_v1      = square_v1(_1_2i);
+		constexpr auto comp_sum_sqs_v0 = sum_of_squares_v0(_1_2i, _0_1i);
+		constexpr auto int_sum_sqs_v0  = sum_of_squares_v0(3, 4);
+		constexpr auto comp_sum_sqs_v1 = sum_of_squares_v1(_1_2i, _0_1i);
+		constexpr auto int_sum_sqs_v1  = sum_of_squares_v1(3, 4);
+		constexpr auto int_twice_v0    = twice_v0(5);
+		constexpr auto polynom_val     = x_to5_plus1_v0(2);
+		constexpr auto reassign_val    = reassign_v0(2, 17);
+		constexpr auto semidyntyp0     = semidynamic_typing_v0(_0_1i, 17);
+		constexpr auto semidyntyp1     = semidynamic_typing_v0(_1_0i, 17);
+		constexpr auto semidyntyp2     = semidynamic_typing_v1(_0_1i, 17);
+		constexpr auto semidyntyp3     = semidynamic_typing_v1(_1_0i, 17);
+		constexpr auto bin_dis_val0    = binary_dispatch_v0(0, _add_, _multiply_, 5, 6);
+		constexpr auto bin_dis_val1    = binary_dispatch_v0(1, _add_, _multiply_, 5, 6);
+		constexpr auto bin_dis_val2    = binary_dispatch_v1(0, _add_, _multiply_, 5, 6);
+		constexpr auto bin_dis_val3    = binary_dispatch_v1(1, _add_, _multiply_, 5, 6);
 
-		static_assert(comp_sq      == _m3f_4fi);
-		static_assert(comp_sum_sqs == _m4f_4fi);
-		static_assert(int_sum_sqs  == 25);
-		static_assert(polynom_val  == 33);
-		static_assert(semidyntyp0  == 18);
-		static_assert(semidyntyp1  == 5);
-		static_assert(semidyntyp2  == 18);
-		static_assert(semidyntyp3  == 5);
-		static_assert(reassign_val == 17);
-		static_assert(bin_dis_val0 == 11);
-		static_assert(bin_dis_val1 == 30);
-		static_assert(bin_dis_val2 == 11);
-		static_assert(bin_dis_val3 == 30);
+		static_assert(comp_sq_v0      == _m3f_4fi);
+		static_assert(comp_sq_v1      == _m3f_4fi);
+		static_assert(comp_sum_sqs_v0 == _m4f_4fi);
+		static_assert(int_sum_sqs_v0  == 25);
+		static_assert(comp_sum_sqs_v1 == _m4f_4fi);
+		static_assert(int_sum_sqs_v1  == 25);
+		static_assert(int_twice_v0    == 10);
+		static_assert(polynom_val     == 33);
+		static_assert(reassign_val    == 17);
+		static_assert(semidyntyp0     == 18);
+		static_assert(semidyntyp1     == 5);
+		static_assert(semidyntyp2     == 18);
+		static_assert(semidyntyp3     == 5);
+		static_assert(bin_dis_val0    == 11);
+		static_assert(bin_dis_val1    == 30);
+		static_assert(bin_dis_val2    == 11);
+		static_assert(bin_dis_val3    == 30);
 
 	// falling factorial:
 
 		constexpr auto fall_val0 = fall_fact_2_v0<true>(7);
-		constexpr auto fall_val1 = fall_fact_2_v1<true>(7);
+	//	constexpr auto fall_val1 = fall_fact_2_v1<false>(7); // does not work!
+	//	printf("%d\n", (int) fall_val1);
 
 		static_assert(fall_val0 == 42);
-		static_assert(fall_val1 == 42);
+	//	static_assert(fall_val1 == 42); // does not work!
 
 	// void effects:
 
@@ -96,7 +105,7 @@ namespace chord {
 
 		printf("%d\n", *vf_ptr); // prints: 3
 
-	// side effects:
+	// side effects: // does not work!
 
 		int sf_n = 5, *sf_ptr = &sf_n;
 

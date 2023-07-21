@@ -84,7 +84,14 @@ namespace chord {
 			"RValue -> identifier : rvalue ;"
 			"       -> _          : paste  ;"
 			"       -> quote      : quote  ;"
-			"       -> CValue              ;"
+			"       -> HValue     : morph  ;"
+			"       -> CValue     : cycle  ;"
+
+			"SValue -> identifier : svalue ;"
+			"       -> _          : paste  ;"
+			"       -> quote      : quote  ;"
+			"       -> HValue     : morph  ;"
+			"       -> CValue     : cycle  ;"
 
 			"Start     -> identifier Arg FirstLine Block RecBlock : define_name ;"
 			"Arg       -> identifier Arg                          : define_arg  ;"
@@ -100,25 +107,40 @@ namespace chord {
 			"          -> return RValue \\;                       : return      ;"
 			"          -> Label NewLine Instrs                    : go_into     ;"
 			"Instr     -> LValue Disp                                           ;"
-			"          -> ! MValue \\= RValue Var                 : voidication ;"
-			"          -> test RValue Var NewLine branch Branch   : conditional ;"
-			"          -> void RValue Var                         : voidication ;"
+			"          -> ! MValue \\= SValue Var                 : voidication ;"
+			"          -> test SValue Var NewLine branch Branch   : conditional ;"
+			"          -> void SValue Var                         : voidication ;"
 			"Disp      -> # RValue                                : assignment  ;"
-			"          -> \\= RValue Var                          : application ;"
+			"          -> \\= SValue Var                          : application ;"
 			"Var       -> RValue Var                                            ;"
 			"          -> ! MValue Var                                          ;"
 			"          -> empty                                                 ;"
 
+		// morphism:
+
+			"HValue -> compose < MorParam MorParam NArgs \\> ;"
+			"       -> subpose < MorParam MorParam NArgs \\> ;"
+			"       -> curry   < MorParam MorParam NArgs \\> ;"
+
+			"MorParam -> identifier     : morph_value ;"
+			"NArgs    -> MorValue NArgs               ;"
+			"         -> empty                        ;"
+			"MorValue -> identifier     : morph_value ;"
+			"         -> @              : morph_id    ;"
+			"         -> *              : morph_deref ;"
+			"         -> +              : morph_inc   ;"
+			"         -> \\-            : morph_dec   ;"
+
 		// chord:
 
-			"CValue -> repeat RepeatOpt RepeatOutEnd { }                      : repeat ;"
-			"       -> fold   FoldOpt   { } FoldInEnd                         : fold   ;"
-			"       -> find   FindOpt   FindOut FindInEnd                     : find   ;"
-			"       -> sift   SiftOpt   SiftOut SiftInEnd                     : sift   ;"
-			"       -> map    MapOpt    MapOut MapInEnd                       : map    ;"
-			"       -> zip    ZipOpt    ZipOut ZipIn1 ZipIn2End2              : zip    ;"
-			"       -> glide  GlideOpt  { } GlideIn1 GlideIn2End2             : glide  ;"
-			"       -> fasten FastenOpt FastenOut { } FastenIn1 FastenIn2End2 : fasten ;"
+			"CValue -> repeat RepeatOpt RepeatOutEnd { }                      ;"
+			"       -> fold   FoldOpt   { } FoldInEnd                         ;"
+			"       -> find   FindOpt   FindOut FindInEnd                     ;"
+			"       -> sift   SiftOpt   SiftOut SiftInEnd                     ;"
+			"       -> map    MapOpt    MapOut MapInEnd                       ;"
+			"       -> zip    ZipOpt    ZipOut ZipIn1 ZipIn2End2              ;"
+			"       -> glide  GlideOpt  { } GlideIn1 GlideIn2End2             ;"
+			"       -> fasten FastenOpt FastenOut { } FastenIn1 FastenIn2End2 ;"
 
 		    // parameter:
 
@@ -132,63 +154,64 @@ namespace chord {
 
 			"FastenOpt -> < BAction | BCarry | UCarry | UCarry | Mutate | LoopPred \\> ;"
 
-			"UAction  -> ParValue 1Arg  : param_upsize    ;"
-			"         -> empty          : param_action    ;"
-			"BAction  -> ParIdent 2Args : param_upsize    ;"
-			"Combine  -> ParIdent 2Args : param_upsize    ;"
-			"Pred     -> ParValue 1Arg  : param_upsize    ;"
-			"BCarry   -> ParIdent 2Args : param_upsize    ;"
-			"UCarry   -> ParValue 1Arg  : param_upsize    ;"
-			"Mutate   -> ParIdent 2Args : param_upsize    ;"
-			"         -> empty          : param_mutate    ;"
-			"LoopPred -> ParIdent 2Args : param_upsize    ;"
-			"         -> empty          : param_loop_pred ;"
-			"2Args    -> ParValue 1Arg                    ;"
-			"         -> empty          : param_2args     ;"
-			"1Arg     -> ParValue                         ;"
-			"         -> empty          : param_1arg      ;"
-			"ParIdent -> identifier     : param_value     ;"
-			"ParValue -> identifier     : param_value     ;"
-			"         -> @              : param_id        ;"
-			"         -> *              : param_deref     ;"
+			"UAction  -> ParValue 1Arg  : cycle_param_upsize    ;"
+			"         -> empty          : cycle_param_action    ;"
+			"BAction  -> ParIdent 2Args : cycle_param_upsize    ;"
+			"Combine  -> ParIdent 2Args : cycle_param_upsize    ;"
+			"Pred     -> ParValue 1Arg  : cycle_param_upsize    ;"
+			"BCarry   -> ParIdent 2Args : cycle_param_upsize    ;"
+			"UCarry   -> ParValue 1Arg  : cycle_param_upsize    ;"
+			"Mutate   -> ParIdent 2Args : cycle_param_upsize    ;"
+			"         -> empty          : cycle_param_mutate    ;"
+			"LoopPred -> ParIdent 2Args : cycle_param_upsize    ;"
+			"         -> empty          : cycle_param_loop_pred ;"
+			"2Args    -> ParValue 1Arg                          ;"
+			"         -> empty          : cycle_param_2args     ;"
+			"1Arg     -> ParValue                               ;"
+			"         -> empty          : cycle_param_1arg      ;"
+			"ParIdent -> identifier     : cycle_param_value     ;"
+			"ParValue -> identifier     : cycle_param_value     ;"
+			"         -> @              : cycle_param_id        ;"
+			"         -> *              : cycle_param_deref     ;"
 
 		    // interval/iterator:
 
-			"RepeatOutEnd  -> LIval NextIter ,          RIval ;"
-			"FoldInEnd     -> LIval NextIter ,          RIval ;"
-			"FindOut       -> LIval NextIter            RIval ;"
-			"FindInEnd     -> LIval NextIter ,          RIval ;"
-			"SiftOut       -> LIval NextIter            RIval ;"
-			"SiftInEnd     -> LIval NextIter ,          RIval ;"
-			"MapOut        -> LIval PairIter            RIval ;"
-			"MapInEnd      -> LIval PairIter , PairIter RIval ;"
-			"ZipOut        -> LIval PairIter            RIval ;"
-			"ZipIn1        -> LIval PairIter            RIval ;"
-			"ZipIn2End2    -> LIval PairIter , PairIter RIval ;"
-			"GlideIn1      -> LIval PairIter            RIval ;"
-			"GlideIn2End2  -> LIval PairIter , PairIter RIval ;"
-			"FastenOut     -> LIval PairIter            RIval ;"
-			"FastenIn1     -> LIval PairIter            RIval ;"
-			"FastenIn2End2 -> LIval PairIter , PairIter RIval ;"
+			"RepeatOutEnd  -> LIval NextIter MIval          RIval ;"
+			"FoldInEnd     -> LIval NextIter MIval          RIval ;"
+			"FindOut       -> LIval NextIter                RIval ;"
+			"FindInEnd     -> LIval NextIter MIval          RIval ;"
+			"SiftOut       -> LIval NextIter                RIval ;"
+			"SiftInEnd     -> LIval NextIter MIval          RIval ;"
+			"MapOut        -> LIval PairIter                RIval ;"
+			"MapInEnd      -> LIval PairIter MIval PairIter RIval ;"
+			"ZipOut        -> LIval PairIter                RIval ;"
+			"ZipIn1        -> LIval PairIter                RIval ;"
+			"ZipIn2End2    -> LIval PairIter MIval PairIter RIval ;"
+			"GlideIn1      -> LIval PairIter                RIval ;"
+			"GlideIn2End2  -> LIval PairIter MIval PairIter RIval ;"
+			"FastenOut     -> LIval PairIter                RIval ;"
+			"FastenIn1     -> LIval PairIter                RIval ;"
+			"FastenIn2End2 -> LIval PairIter MIval PairIter RIval ;"
 
-			"NextIter  -> IterValue            : iter_upsize  ;"
-			"          -> +                    : iter_inc     ;"
-			"          -> \\-                  : iter_dec     ;"
-			"          -> empty                : iter_next    ;"
-			"PairIter  -> + | \\-              : iter_inc_dec ;"
-			"          -> \\- | +              : iter_dec_inc ;"
-			"          -> IterValue | PrevIter : iter_upsize  ;"
-			"          -> empty                : iter_pair    ;"
-			"PrevIter  -> IterValue                           ;"
-			"          -> ~                    : iter_none    ;"
-			"IterValue -> identifier           : iter_value   ;"
-			"          -> @                    : iter_id      ;"
-			"          -> *                    : iter_deref   ;"
+			"NextIter  -> IterValue            : cycle_iter_upsize  ;"
+			"          -> +                    : cycle_iter_inc     ;"
+			"          -> \\-                  : cycle_iter_dec     ;"
+			"          -> empty                : cycle_iter_next    ;"
+			"PairIter  -> + | \\-              : cycle_iter_inc_dec ;"
+			"          -> \\- | +              : cycle_iter_dec_inc ;"
+			"          -> IterValue | PrevIter : cycle_iter_upsize  ;"
+			"          -> empty                : cycle_iter_pair    ;"
+			"PrevIter  -> IterValue                                 ;"
+			"          -> ~                    : cycle_iter_none    ;"
+			"IterValue -> identifier           : cycle_iter_value   ;"
+			"          -> @                    : cycle_iter_id      ;"
+			"          -> *                    : cycle_iter_deref   ;"
 
-			"LIval -> [ : left_closed  ;"
-			"      -> ( : left_open    ;"
-			"RIval -> ] : right_closed ;"
-			"      -> ) : right_open   ;"
+			"LIval -> [ : cycle_ival_left_closed  ;"
+			"      -> ( : cycle_ival_left_open    ;"
+			"RIval -> ] : cycle_ival_right_closed ;"
+			"      -> ) : cycle_ival_right_open   ;"
+			"MIval -> , : cycle_ival_lead         ;"
 		);}
 
 		nik_ces auto map = cctmp::table
@@ -228,6 +251,10 @@ namespace chord {
 			sxt_pair( "|"   , Token::bar         ),
 			sxt_pair( ","   , Token::comma       ),
 
+			sxt_pair( "compose" , Token::compose ),
+			sxt_pair( "subpose" , Token::subpose ),
+			sxt_pair( "curry"   , Token::curry   ),
+
 			sxt_pair( "repeat" , Token::repeat ),
 			sxt_pair( "fold"   , Token::fold   ),
 			sxt_pair( "find"   , Token::find   ),
@@ -261,45 +288,52 @@ namespace chord {
 			sxa_pair( "lvalue"      , ActName::lvalue      ),
 			sxa_pair( "mvalue"      , ActName::mvalue      ),
 			sxa_pair( "rvalue"      , ActName::rvalue      ),
+			sxa_pair( "svalue"      , ActName::svalue      ),
 			sxa_pair( "copy"        , ActName::copy        ),
 			sxa_pair( "paste"       , ActName::paste       ),
 			sxa_pair( "quote"       , ActName::quote       ),
 
-			sxt_pair( "repeat" , ActName::repeat ),
-			sxt_pair( "fold"   , ActName::fold   ),
-			sxt_pair( "find"   , ActName::find   ),
-			sxt_pair( "sift"   , ActName::sift   ),
-			sxt_pair( "map"    , ActName::map    ),
-			sxt_pair( "zip"    , ActName::zip    ),
-			sxt_pair( "glide"  , ActName::glide  ),
-			sxt_pair( "fasten" , ActName::fasten ),
+		// morph:
 
-			sxt_pair( "param_upsize"    , ActName::param_upsize    ),
-			sxt_pair( "param_action"    , ActName::param_action    ),
-			sxt_pair( "param_mutate"    , ActName::param_mutate    ),
-			sxt_pair( "param_loop_pred" , ActName::param_loop_pred ),
-			sxt_pair( "param_value"     , ActName::param_value     ),
-			sxt_pair( "param_deref"     , ActName::param_deref     ),
-			sxt_pair( "param_id"        , ActName::param_id        ),
-			sxt_pair( "param_2args"     , ActName::param_2args     ),
-			sxt_pair( "param_1arg"      , ActName::param_1arg      ),
+			sxt_pair( "morph" , ActName::morph ),
 
-			sxt_pair( "iter_upsize"  , ActName::iter_upsize  ),
-			sxt_pair( "iter_next"    , ActName::iter_next    ),
-			sxt_pair( "iter_pair"    , ActName::iter_pair    ),
-			sxt_pair( "iter_inc"     , ActName::iter_inc     ),
-			sxt_pair( "iter_dec"     , ActName::iter_dec     ),
-			sxt_pair( "iter_inc_dec" , ActName::iter_inc_dec ),
-			sxt_pair( "iter_dec_inc" , ActName::iter_dec_inc ),
-			sxt_pair( "iter_value"   , ActName::iter_value   ),
-			sxt_pair( "iter_deref"   , ActName::iter_deref   ),
-			sxt_pair( "iter_id"      , ActName::iter_id      ),
-			sxt_pair( "iter_none"    , ActName::iter_none    ),
+			sxt_pair( "morph_value" , ActName::morph_value ),
+			sxt_pair( "morph_id"    , ActName::morph_id    ),
+			sxt_pair( "morph_deref" , ActName::morph_deref ),
+			sxt_pair( "morph_inc"   , ActName::morph_inc   ),
+			sxt_pair( "morph_dec"   , ActName::morph_dec   ),
 
-			sxt_pair( "left_closed"  , ActName::left_closed  ),
-			sxt_pair( "left_open"    , ActName::left_open    ),
-			sxt_pair( "right_closed" , ActName::right_closed ),
-			sxt_pair( "right_open"   , ActName::right_open   ),
+		// cycle:
+
+			sxt_pair( "cycle" , ActName::cycle ),
+
+			sxt_pair( "cycle_param_upsize"    , ActName::cycle_param_upsize    ),
+			sxt_pair( "cycle_param_action"    , ActName::cycle_param_action    ),
+			sxt_pair( "cycle_param_mutate"    , ActName::cycle_param_mutate    ),
+			sxt_pair( "cycle_param_loop_pred" , ActName::cycle_param_loop_pred ),
+			sxt_pair( "cycle_param_value"     , ActName::cycle_param_value     ),
+			sxt_pair( "cycle_param_deref"     , ActName::cycle_param_deref     ),
+			sxt_pair( "cycle_param_id"        , ActName::cycle_param_id        ),
+			sxt_pair( "cycle_param_2args"     , ActName::cycle_param_2args     ),
+			sxt_pair( "cycle_param_1arg"      , ActName::cycle_param_1arg      ),
+
+			sxt_pair( "cycle_iter_upsize"  , ActName::cycle_iter_upsize  ),
+			sxt_pair( "cycle_iter_next"    , ActName::cycle_iter_next    ),
+			sxt_pair( "cycle_iter_pair"    , ActName::cycle_iter_pair    ),
+			sxt_pair( "cycle_iter_inc"     , ActName::cycle_iter_inc     ),
+			sxt_pair( "cycle_iter_dec"     , ActName::cycle_iter_dec     ),
+			sxt_pair( "cycle_iter_inc_dec" , ActName::cycle_iter_inc_dec ),
+			sxt_pair( "cycle_iter_dec_inc" , ActName::cycle_iter_dec_inc ),
+			sxt_pair( "cycle_iter_value"   , ActName::cycle_iter_value   ),
+			sxt_pair( "cycle_iter_deref"   , ActName::cycle_iter_deref   ),
+			sxt_pair( "cycle_iter_id"      , ActName::cycle_iter_id      ),
+			sxt_pair( "cycle_iter_none"    , ActName::cycle_iter_none    ),
+
+			sxt_pair( "cycle_ival_left_closed"  , ActName::cycle_ival_left_closed  ),
+			sxt_pair( "cycle_ival_left_open"    , ActName::cycle_ival_left_open    ),
+			sxt_pair( "cycle_ival_right_closed" , ActName::cycle_ival_right_closed ),
+			sxt_pair( "cycle_ival_right_open"   , ActName::cycle_ival_right_open   ),
+			sxt_pair( "cycle_ival_lead"         , ActName::cycle_ival_lead         ),
 
 			sxa_pair( "accept" , ActName::accept )
 		);

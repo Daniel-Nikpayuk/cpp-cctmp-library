@@ -45,19 +45,13 @@ namespace chord {
 		constexpr complex_number(const float _x, const float _y) : x{_x}, y{_y} { }
 
 		constexpr const bool operator == (const complex_number & c) const
-		{
-			return (x == c.x && y == c.y);
-		}
+			{ return (x == c.x && y == c.y); }
 
 		constexpr const bool operator != (const complex_number & c) const
-		{
-			return (x != c.x || y != c.y);
-		}
+			{ return (x != c.x || y != c.y); }
 
 		constexpr const complex_number operator + (const complex_number & c) const
-		{
-			return complex_number(x + c.x, y + c.y);
-		}
+			{ return complex_number(x + c.x, y + c.y); }
 
 		constexpr const complex_number operator * (const complex_number & c) const
 		{
@@ -75,7 +69,7 @@ namespace chord {
 
 // frame:
 
-	constexpr auto constant_complex_frame_callable()
+	constexpr auto complex_constant_frame_callable()
 	{
 		return cctmp::frame
 		(
@@ -87,7 +81,7 @@ namespace chord {
 		);
 	};
 
-	constexpr auto constant_complex_frame = _static_callable_<constant_complex_frame_callable>;
+	constexpr auto complex_constant_frame = _static_callable_<complex_constant_frame_callable>;
 
 /***********************************************************************************************************************/
 
@@ -154,7 +148,32 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto square_v0(T v)
-		{ return metapiler_apply<_square_v0, env<>, T>(v); }
+		{ return metapiler_apply<_square_v0, null_env, T>(v); }
+
+/***********************************************************************************************************************/
+
+// version 1:
+
+	constexpr auto _square_v1()
+	{
+		return source
+		(
+			"square x                         ;"
+
+			"definitions:                     ;"
+			"sq # compose<multiply arg0 arg0> ;"
+
+			"body:                            ;"
+			". = sq x                         ;"
+			"return _                         ;"
+
+			, cctmp::binding( "arg0" , _arg_at_<0> )
+		);
+	}
+
+	template<typename T>
+	constexpr auto square_v1(T v)
+		{ return metapiler_apply<_square_v1, null_env, T>(v); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -181,7 +200,63 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto sum_of_squares_v0(T x, T y)
-		{ return metapiler_apply<_sum_of_squares_v0, env<>, T>(x, y); }
+		{ return metapiler_apply<_sum_of_squares_v0, null_env, T>(x, y); }
+
+/***********************************************************************************************************************/
+
+// version 1:
+
+	constexpr auto _sum_of_squares_v1()
+	{
+		return source
+                (
+			"f x y                                   ;"
+
+			"definitions:                            ;"
+			"sq        # compose<multiply arg0 arg0> ;"
+			"sum_of_sq # subpose<add sq sq>          ;"
+
+			"body:                                   ;"
+			". = sum_of_sq x y                       ;"
+			"return _                                ;"
+
+			, cctmp::binding( "arg0" , _arg_at_<0> )
+		);
+	}
+
+	template<typename T>
+	constexpr auto sum_of_squares_v1(T x, T y)
+		{ return metapiler_apply<_sum_of_squares_v1, null_env, T>(x, y); }
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// twice:
+
+/***********************************************************************************************************************/
+
+// version 0:
+
+	constexpr auto _twice_v0()
+	{
+		return source
+                (
+			"f x                         ;"
+
+			"definitions:                ;"
+			"twice # curry<multiply two> ;"
+
+			"body:                       ;"
+			". = twice x                 ;"
+			"return _                    ;"
+
+			, cctmp::binding( "two" , 2 )
+		);
+	}
+
+	template<typename T>
+	constexpr auto twice_v0(T x)
+		{ return metapiler_apply<_twice_v0, null_env, T>(x); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -237,7 +312,7 @@ namespace chord {
 
 	template<typename T1, typename T2>
 	constexpr auto reassign_v0(T1 x, T2 y)
-		{ return metapiler_apply<_reassign_v0, env<>, T2>(x, y); }
+		{ return metapiler_apply<_reassign_v0, null_env, T2>(x, y); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -298,7 +373,7 @@ namespace chord {
 
 	constexpr auto semidynamic_typing_v1(const complex_number & c, int n)
 	{
-		constexpr auto e0 = env<constant_machine_frame, constant_complex_frame>;
+		constexpr auto e0 = env<constant_machine_frame, complex_constant_frame>;
 
 		return metapiler_apply<_semidynamic_typing_v1, e0, int>(c, n);
 	}
@@ -435,7 +510,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v1(T v)
-		{ return metapiler_apply<_factorial_v1, env<>, T>(v, T(1)); }
+		{ return metapiler_apply<_factorial_v1, null_env, T>(v, T(1)); }
 
 /***********************************************************************************************************************/
 
@@ -462,7 +537,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v2(T v)
-		{ return metapiler_apply<_factorial_v2, env<>, T>(T(1), v); }
+		{ return metapiler_apply<_factorial_v2, null_env, T>(T(1), v); }
 
 /***********************************************************************************************************************/
 
@@ -488,7 +563,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v3(T v)
-		{ return metapiler_apply<_factorial_v3, env<>, T>(T(1), v); }
+		{ return metapiler_apply<_factorial_v3, null_env, T>(T(1), v); }
 
 /***********************************************************************************************************************/
 
@@ -604,21 +679,6 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
-// frame:
-
-	template<auto side_dec>
-	constexpr auto fall_fact_2_frame_callable()
-	{
-		return cctmp::frame
-		(
-		 	cctmp::U_char,
-
-			cctmp::binding( "side_dec" , side_dec )
-		);
-	};
-
-/***********************************************************************************************************************/
-
 // version 0 (pointer):
 
 	struct T_ptr_side_dec
@@ -626,16 +686,14 @@ namespace chord {
 		template<typename T>
 		constexpr static auto result(T x)
 		{
-			auto y = *x;
+			auto v = *x;
 
 			*x = *x - 1;
 
-			return y;
+			return v;
 		}
 
 	}; constexpr auto _ptr_side_dec_ = U_store_T<T_ptr_side_dec>;
-
-	constexpr auto fall_fact_2_ptr_frame = cctmp::_static_callable_<fall_fact_2_frame_callable<_ptr_side_dec_>>;
 
 	template<bool punct>
 	constexpr auto _fall_fact_2_v0()
@@ -651,6 +709,8 @@ namespace chord {
 				"  . = dereference x ;"
 				"  . = multiply v _  ;"
 				"  return _          ;"
+
+				, cctmp::binding( "side_dec" , _ptr_side_dec_ )
 			);
 		else
 			return source
@@ -662,6 +722,8 @@ namespace chord {
 				"  . = dereference x ;"
 				"  . = multiply v _  ;"
 				"  return _          ;"
+
+				, cctmp::binding( "side_dec" , _ptr_side_dec_ )
 			);
 	}
 
@@ -669,9 +731,8 @@ namespace chord {
 	constexpr auto fall_fact_2_v0(T x)
 	{
 		constexpr auto src = _fall_fact_2_v0<punct>;
-		constexpr auto e0  = env<fall_fact_2_ptr_frame>;
 
-		return metapiler_apply<src, e0, T>(&x);
+		return metapiler_apply<src, null_env, T>(&x);
 	}
 
 /***********************************************************************************************************************/
@@ -683,16 +744,14 @@ namespace chord {
 		template<typename T>
 		constexpr static auto result(T & x)
 		{
-			auto y = x;
+			auto v = x;
 
 			x = x - 1;
 
-			return y;
+			return v;
 		}
 
 	}; constexpr auto _ref_side_dec_ = U_store_T<T_ref_side_dec>;
-
-	constexpr auto fall_fact_2_ref_frame = cctmp::_static_callable_<fall_fact_2_frame_callable<_ref_side_dec_>>;
 
 	template<bool punct>
 	constexpr auto _fall_fact_2_v1()
@@ -705,8 +764,10 @@ namespace chord {
 
 				"body:               ;"
 				"  v = side_dec !x   ;" // works!
-				"  . = multiply v _  ;"
+				"  . = multiply v x  ;"
 				"  return _          ;"
+
+				, cctmp::binding( "side_dec" , _ref_side_dec_ )
 			);
 		else
 			return source
@@ -715,8 +776,10 @@ namespace chord {
 
 				"body:               ;"
 				"  v = side_dec x    ;" // error: read only.
-				"  . = multiply v _  ;"
+				"  . = multiply v x  ;"
 				"  return _          ;"
+
+				, cctmp::binding( "side_dec" , _ref_side_dec_ )
 			);
 	}
 
@@ -724,9 +787,8 @@ namespace chord {
 	constexpr auto fall_fact_2_v1(T x)
 	{
 		constexpr auto src = _fall_fact_2_v1<punct>;
-		constexpr auto e0  = env<fall_fact_2_ref_frame>;
 
-		return metapiler_apply<src, e0, T, T&>(x);
+		return metapiler_apply<src, null_env, T, T&>(x);
 	}
 
 /***********************************************************************************************************************/
@@ -753,7 +815,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto void_effects_v0(T x)
-		{ return metapiler_apply<_void_effects_v0, env<>, T>(x, 2); }
+		{ return metapiler_apply<_void_effects_v0, null_env, T>(x, 2); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -779,7 +841,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto side_effects_v0(T x)
-		{ return metapiler_apply<_side_effects_v0, env<>, T>(x, 2); }
+		{ return metapiler_apply<_side_effects_v0, null_env, T>(x, 2); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

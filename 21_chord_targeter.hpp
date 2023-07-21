@@ -25,7 +25,30 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+	nik_ce auto H_id					= cctmp::H_id;
+
+	nik_ce auto U_bool					= cctmp::U_bool;
+
+	template<auto f>
+	nik_ce auto _wrap_					= cctmp::_wrap_<f>;
+
+	nik_ce auto _cons_					= cctmp::_cons_;
+	nik_ce auto _push_					= cctmp::_push_;
+	nik_ce auto _from_const_				= cctmp::_from_const_;
+
+	template<auto H = H_id>
+	nik_ce auto _list_					= cctmp::_list_<H>;
+
+	template<typename T>
+	nik_ce auto U_custom_T					= cctmp::U_custom_T<T>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // targeter:
+
+	// currying is equivalent to an extra lvalue assignment.
 
 /***********************************************************************************************************************/
 
@@ -50,7 +73,7 @@ namespace chord {
 		using Total				= typename member_type_U<static_scanned>::Total;
 
 		nik_ces gindex_type instr_length	= MI::dimension; // to parallel machine instrs.
-		nik_ces gindex_type lookup_size		= toc.lookup_level.size();
+		nik_ces gindex_type link_size		= toc.link_level.size();
 		nik_ces gindex_type label_size		= scanned.total[Total::label];
 		nik_ces gindex_type go_into_size	= label_size;
 
@@ -62,23 +85,23 @@ namespace chord {
 							+ ( 2 * scanned.total[Total::vo_id  ] )
 							+ ( 2 * scanned.total[Total::copy   ] )
 							+ ( 3 * scanned.total[Total::re_turn] ) // upper bound:
-							+ ( 4 * scanned.total[Total::replace] ) // (1 * size <= 3 * size)
+							+ ( 3 * scanned.total[Total::replace] ) // (1 * size <= 3 * size)
 							+ 1; // to parallel machine contrs.
 
 		using label_type			= cctmp::sequence    < gindex_type , label_size   >;
 		using instr_type			= cctmp::sequence    < gindex_type , instr_length >;
 		using contr_type			= cctmp::sequence    < instr_type  , length       >;
-		using contr_lookup_type			= cctmp::subsequence < instr_type  , lookup_size  >;
+		using contr_link_type			= cctmp::subsequence < instr_type  , link_size    >;
 		using contr_jump_type			= cctmp::subsequence < instr_type  , jump_size    >;
 
 		struct Mark { enum : gkey_type { none = 0, value }; };
 
 		label_type label;
 		contr_type contr;
-		contr_lookup_type contr_lookup;
+		contr_link_type contr_link;
 		contr_jump_type contr_jump;
 
-		nik_ce T_chord_assembly_targeter() { translate(); resolve_lookup(); resolve_jump(); }
+		nik_ce T_chord_assembly_targeter() { translate(); resolve_link(); resolve_jump(); }
 
 		nik_ce void translate()
 		{
@@ -125,8 +148,8 @@ namespace chord {
 
 		// add:
 
-			nik_ce void add_lookup () { contr_lookup.push(contr.end()); }
-			nik_ce void add_jump   () { contr_jump.push(contr.end()); }
+			nik_ce void add_link () { contr_link.push(contr.end()); }
+			nik_ce void add_jump () { contr_jump.push(contr.end()); }
 
 			nik_ce void add_size_instr() { increment_instr(); }
 
@@ -154,11 +177,11 @@ namespace chord {
 			{
 				auto sign = first_sign(l);
 
-				if (Sign::is_carg(sign))
+				if (Sign::is_constant_arg(sign))
 				{
 					set_instr_pos(first_index(l));
 
-					add_instr(MN::reselect, MT::front, Mark::value);
+					add_instr(MN::reselect, MT::id, Mark::value);
 					add_instr(MN::replace, MT::id);
 				}
 				// else if Sign::is_copy do nothing.
@@ -166,30 +189,27 @@ namespace chord {
 
 			nik_ce void add_assign_instr(const cguider & l)
 			{
-				if (toc.has_lookup(l)) add_lookup();
+				if (toc.has_link(l)) add_link();
 
-				add_instr(MN::select, MT::pair, Mark::value);
-				add_instr(call_name(l), MT::value);
+				add_instr(call_name(l), MT::id, Mark::value);
 
 				add_replace_instr(l);
 			}
 
 			nik_ce void add_apply_instr(const cguider & l)
 			{
-				if (toc.has_lookup(l)) add_lookup();
+				if (toc.has_link(l)) add_link();
 
-				add_instr(MN::select, MT::pair, Mark::value);
-				add_instr(call_name(l), call_note(l));
+				add_instr(call_name(l), call_note(l), Mark::value);
 
 				if (!toc.has_void(l)) add_replace_instr(l);
 			}
 
 			nik_ce void add_test_instr(const cguider & l)
 			{
-				if (toc.has_lookup(l)) add_lookup();
+				if (toc.has_link(l)) add_link();
 
-				add_instr(MN::select, MT::pair, Mark::value);
-				add_instr(call_name(l), MT::id);
+				add_instr(call_name(l), MT::id, Mark::value);
 			}
 
 			nik_ce void add_label_instr(const cguider & l)
@@ -209,19 +229,18 @@ namespace chord {
 				add_instr(MN::jump, MT::go_to, Mark::value);
 			}
 
-			nik_ce void add_get_lookup_instr(const cguider & l)
+			nik_ce void add_get_link_instr(const cguider & l)
 			{
-				add_lookup();
+				add_link();
 
-				add_instr(MN::select, MT::pair, Mark::value);
-				add_instr(call_name(l), MT::value);
+				add_instr(call_name(l), MT::id, Mark::value);
 			}
 
 			nik_ce void add_get_arg_instr(const cguider & l, gcindex_type index)
 			{
 				set_instr_pos(index);
 
-				add_instr(MN::select, MT::front, Mark::value);
+				add_instr(MN::select, MT::id, Mark::value);
 				add_instr(MN::right, MT::id);
 			}
 
@@ -229,8 +248,8 @@ namespace chord {
 			{
 				auto sign = first_sign(l);
 
-				if      (Sign::is_env(sign))  add_get_lookup_instr(l);
-				else if (Sign::is_carg(sign)) add_get_arg_instr(l, first_index(l));
+				if      (Sign::is_env(sign)) add_get_link_instr(l);
+				else if (Sign::is_constant_arg(sign)) add_get_arg_instr(l, first_index(l));
 				// else if (Sign::is_quote(sign))
 
 				add_instr(MN::first , MT::id);
@@ -238,10 +257,10 @@ namespace chord {
 
 		// resolve:
 
-			nik_ce void resolve_lookup()
+			nik_ce void resolve_link()
 			{
 				auto num = 0;
-				for (auto k = contr_lookup.begin(); k != contr_lookup.end(); ++k, ++num)
+				for (auto k = contr_link.begin(); k != contr_link.end(); ++k, ++num)
 					(*k)->operator [] (MI::pos) = num;
 			}
 
@@ -263,8 +282,8 @@ namespace chord {
 	template<auto static_scanned>
 	struct T_chord_assembly_targeted
 	{
-		nik_ces auto value	= T_chord_assembly_targeter<static_scanned>{};
-		using type		= decltype(value);
+		nik_ces auto value		= T_chord_assembly_targeter<static_scanned>{};
+		using type			= decltype(value);
 
 		// accessors:
 
@@ -294,9 +313,6 @@ namespace chord {
 /***********************************************************************************************************************/
 
 // machine:
-
-	template<auto... frames>
-	nik_ce auto env = U_pack_Vs<frames...>;
 
 /***********************************************************************************************************************/
 
@@ -383,22 +399,93 @@ namespace chord {
 	nik_ce auto constant_machine_frame = _static_callable_<constant_machine_frame_callable>;
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// recurse:
+// environment:
 
-	template<auto f>
-	nik_ce auto recurse_machine_frame_callable()
+	template<auto... frames>
+	nik_ce auto env = U_pack_Vs<frames...>;
+
+	nik_ce auto null_env = env<>;
+
+/***********************************************************************************************************************/
+
+// user:
+
+	template<auto source_frame, auto... static_frames>
+	nik_ce auto user_env(nik_avp(T_pack_Vs<static_frames...>*))
 	{
-		return cctmp::frame
-		(
-			cctmp::U_char,
+		using T_local		= modify_type<_from_const_, member_type_U<source_frame>>;
 
-			cctmp::binding( "this" , f )
-		);
+		nik_ce auto U_local	= U_store_T<T_local>;
+		nik_ce auto no_local	= eval<_same_, U_local, U_bool>;
+
+		if nik_ce (no_local) return U_pack_Vs<static_frames..., default_machine_frame>;
+		else return U_pack_Vs<source_frame, static_frames..., default_machine_frame>;
+	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// metapiler:
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<auto callable_source, auto Env = U_null_Vs>
+	struct T_chord_assembly_metapiler
+	{
+		nik_ces auto static_pair	= _static_callable_<callable_source>;
+		nik_ces auto static_src		= cctmp::_static_car_<static_pair>;
+		nik_ces auto static_scanned	= U_store_T<T_chord_assembly_scanned<static_src>>;
+
+		nik_ces auto contr		= U_store_T<T_chord_assembly_targeted<static_scanned>>;
+		nik_ces auto env		= user_env<cctmp::_static_cdr_<static_pair>>(Env);
+
+		// function:
+
+			template<typename S, typename... Ts>
+			nik_ces S result(Ts... vs)
+			{
+				nik_ce auto out_type = U_store_T<S>;
+				nik_ce auto this_f   = _wrap_<result<S, Ts...>>;
+				nik_ce auto link     = U_pack_Vs<this_f, env>;
+
+				return T_machine_start::template result
+				<
+					out_type, contr, link, modify_type<_read_only_, Ts>...
+
+				>((modify_type<_read_only_, Ts>) vs...);
+			}
 	};
 
-	template<auto f>
-	nik_ce auto recurse_machine_frame = _static_callable_<recurse_machine_frame_callable<f>>;
+	// syntactic sugar:
+
+		template<auto callable_source, auto Env, typename S, typename... Ts>
+		nik_ce auto metapiler_apply(Ts... vs)
+		{
+			using T_function = T_chord_assembly_metapiler<callable_source, Env>;
+
+			return T_function::template result<S, Ts...>(vs...);
+		}
+
+/***********************************************************************************************************************/
+
+// source:
+
+	template<typename CharType, auto N, typename... Bindings>
+	nik_ce auto source(const CharType (&s)[N], const Bindings &... bs)
+	{
+		if nik_ce (sizeof...(Bindings) == 0) return cctmp::pair{cctmp::string_literal{s}, false};
+		else
+		{
+			nik_ce auto U_char_type = U_store_T<CharType>;
+
+			return cctmp::pair{cctmp::string_literal{s}, cctmp::frame{U_char_type, bs...}};
+		}
+	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
