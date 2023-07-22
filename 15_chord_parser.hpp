@@ -144,12 +144,12 @@ namespace chord {
 
 		    // parameter:
 
-			"RepeatOpt -> < UAction           | Mutate | LoopPred \\> ;"
-			"FoldOpt   -> < Combine           | Mutate | LoopPred \\> ;"
-			"FindOpt   -> < Pred              | Mutate | LoopPred \\> ;"
-			"SiftOpt   -> < Pred              | Mutate | LoopPred \\> ;"
-			"MapOpt    -> < UAction           | Mutate | LoopPred \\> ;"
-			"ZipOpt    -> < BAction           | Mutate | LoopPred \\> ;"
+			"RepeatOpt -> <           UAction | Mutate | LoopPred \\> ;"
+			"FoldOpt   -> <           Combine | Mutate | LoopPred \\> ;"
+			"FindOpt   -> <              Pred | Mutate | LoopPred \\> ;"
+			"SiftOpt   -> <              Pred | Mutate | LoopPred \\> ;"
+			"MapOpt    -> <           UAction | Mutate | LoopPred \\> ;"
+			"ZipOpt    -> <           BAction | Mutate | LoopPred \\> ;"
 			"GlideOpt  -> < BAction | Combine | Mutate | LoopPred \\> ;"
 
 			"FastenOpt -> < BAction | BCarry | UCarry | UCarry | Mutate | LoopPred \\> ;"
@@ -176,31 +176,35 @@ namespace chord {
 
 		    // interval/iterator:
 
-			"RepeatOutEnd  -> LIval NextIter MIval          RIval ;"
-			"FoldInEnd     -> LIval NextIter MIval          RIval ;"
-			"FindOut       -> LIval NextIter                RIval ;"
-			"FindInEnd     -> LIval NextIter MIval          RIval ;"
-			"SiftOut       -> LIval NextIter                RIval ;"
-			"SiftInEnd     -> LIval NextIter MIval          RIval ;"
-			"MapOut        -> LIval PairIter                RIval ;"
-			"MapInEnd      -> LIval PairIter MIval PairIter RIval ;"
-			"ZipOut        -> LIval PairIter                RIval ;"
-			"ZipIn1        -> LIval PairIter                RIval ;"
-			"ZipIn2End2    -> LIval PairIter MIval PairIter RIval ;"
-			"GlideIn1      -> LIval PairIter                RIval ;"
-			"GlideIn2End2  -> LIval PairIter MIval PairIter RIval ;"
-			"FastenOut     -> LIval PairIter                RIval ;"
-			"FastenIn1     -> LIval PairIter                RIval ;"
-			"FastenIn2End2 -> LIval PairIter MIval PairIter RIval ;"
+			"RepeatOutEnd  -> LIval  NextIter MIval           RIval ;"
+			"FoldInEnd     -> LIval  NextIter MIval           RIval ;"
+			"FindOut       -> LIval  NextIter                 RIval ;"
+			"FindInEnd     -> LIval  NextIter MIval           RIval ;"
+			"SiftOut       -> LIval  NextIter                 RIval ;"
+			"SiftInEnd     -> LIval  NextIter MIval           RIval ;"
+			"MapOut        -> LIval LPairIter                 RIval ;"
+			"MapInEnd      -> LIval LPairIter MIval RPairIter RIval ;"
+			"ZipOut        -> LIval LPairIter                 RIval ;"
+			"ZipIn1        -> LIval LPairIter                 RIval ;"
+			"ZipIn2End2    -> LIval LPairIter MIval RPairIter RIval ;"
+			"GlideIn1      -> LIval LPairIter                 RIval ;"
+			"GlideIn2End2  -> LIval LPairIter MIval RPairIter RIval ;"
+			"FastenOut     -> LIval LPairIter                 RIval ;"
+			"FastenIn1     -> LIval LPairIter                 RIval ;"
+			"FastenIn2End2 -> LIval LPairIter MIval RPairIter RIval ;"
 
 			"NextIter  -> IterValue            : cycle_iter_upsize  ;"
 			"          -> +                    : cycle_iter_inc     ;"
 			"          -> \\-                  : cycle_iter_dec     ;"
 			"          -> empty                : cycle_iter_next    ;"
-			"PairIter  -> + | \\-              : cycle_iter_inc_dec ;"
+			"LPairIter -> + | \\-              : cycle_iter_inc_dec ;"
 			"          -> \\- | +              : cycle_iter_dec_inc ;"
 			"          -> IterValue | PrevIter : cycle_iter_upsize  ;"
-			"          -> empty                : cycle_iter_pair    ;"
+			"          -> empty                : cycle_iter_lpair   ;"
+			"RPairIter -> + | \\-              : cycle_iter_inc_dec ;"
+			"          -> \\- | +              : cycle_iter_dec_inc ;"
+			"          -> IterValue | PrevIter : cycle_iter_upsize  ;"
+			"          -> empty                : cycle_iter_rpair   ;"
 			"PrevIter  -> IterValue                                 ;"
 			"          -> ~                    : cycle_iter_none    ;"
 			"IterValue -> identifier           : cycle_iter_value   ;"
@@ -319,7 +323,8 @@ namespace chord {
 
 			sxt_pair( "cycle_iter_upsize"  , ActName::cycle_iter_upsize  ),
 			sxt_pair( "cycle_iter_next"    , ActName::cycle_iter_next    ),
-			sxt_pair( "cycle_iter_pair"    , ActName::cycle_iter_pair    ),
+			sxt_pair( "cycle_iter_lpair"   , ActName::cycle_iter_lpair   ),
+			sxt_pair( "cycle_iter_rpair"   , ActName::cycle_iter_rpair   ),
 			sxt_pair( "cycle_iter_inc"     , ActName::cycle_iter_inc     ),
 			sxt_pair( "cycle_iter_dec"     , ActName::cycle_iter_dec     ),
 			sxt_pair( "cycle_iter_inc_dec" , ActName::cycle_iter_inc_dec ),

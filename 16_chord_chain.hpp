@@ -370,39 +370,6 @@ namespace chord {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-
-// modify:
-
-/***********************************************************************************************************************/
-
-// type:
-
-	template<auto t, auto n, typename T>
-	struct T_modify_at
-	{
-		using Type = modify_type<t, T>;
-
-		template<typename... Ts>
-		nik_ces auto result(Ts... vs) // -> Type
-			{ return (Type) T_apply_at<_id_, n>::template result<Ts...>(vs...); }
-	};
-
-/***********************************************************************************************************************/
-
-// reference:
-
-	template<auto t, auto n, typename T>
-	struct T_modify_at<t, n, T&>
-	{
-		using Type = modify_type<t, T&>;
-
-		template<typename... Ts>
-		nik_ces auto result(Ts... vs) -> Type&
-			{ return (Type) T_ref_at<n>::template result<Ts...>(vs...); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // composition:
@@ -420,7 +387,7 @@ namespace chord {
 	{
 		template<typename... Ts>
 		nik_ces auto result(Ts... vs)
-			{ return cctmp::apply<f>(T_store_U<gs>::template result<Ts>(vs)...); }
+			{ return T_store_U<f>::template result<>(T_store_U<gs>::template result<Ts>(vs)...); }
 
 	}; template<auto f, auto... gs>
 		nik_ce auto _subpose_ = U_store_T<T_subpose<f, gs...>>;
@@ -434,7 +401,7 @@ namespace chord {
 	{
 		template<typename... Ts>
 		nik_ces auto result(Ts... vs)
-			{ return cctmp::apply<f>(T_store_U<gs>::template result<Ts...>(vs...)...); }
+			{ return T_store_U<f>::template result<>(T_store_U<gs>::template result<Ts...>(vs...)...); }
 
 	}; template<auto f, auto... gs>
 		nik_ce auto _compose_ = U_store_T<T_compose<f, gs...>>;

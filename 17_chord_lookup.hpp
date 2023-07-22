@@ -25,6 +25,12 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+	nik_ce auto _par_segment_				= cctmp::_par_segment_;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 	template<typename... Ts>
 	nik_ce auto U_pack_Ts					= cctmp::U_pack_Ts<Ts...>;
 
@@ -47,7 +53,7 @@ namespace chord {
 
 // space:
 
-	template<gkey_type, gkey_type, auto, auto...> struct T_lookup;
+	template<gkey_type, gkey_type, auto...> struct T_lookup;
 
 /***********************************************************************************************************************/
 
@@ -80,9 +86,9 @@ namespace chord {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			unit, vo_id, swap, apply,	// line
-			tree, morph, cycle,		// link
-			frame,				// env
+			unit, vo_id, swap, apply,		// line
+			mu_table, constant, tree, morph, cycle,	// link
+			frame,					// env
 			dimension
 		};
 	};
@@ -144,91 +150,17 @@ namespace chord {
 
 // link:
 
-	// The navigational path leads to an entry, and that entry sign/index info is used to dispatch.
-	// Given constexpr17 restrictions, we might need to specify different value dispatches based
-	// on the different navigational paths.
+	template<auto... Vs> using T_lookup_morph_link		= T_lookup < LN::link , LT::morph    , Vs... >;
+	template<auto... Vs> using T_lookup_cycle_link		= T_lookup < LN::link , LT::cycle    , Vs... >;
+	template<auto... Vs> using T_lookup_tree_link		= T_lookup < LN::link , LT::tree     , Vs... >;
+	template<auto... Vs> using T_lookup_constant_link	= T_lookup < LN::link , LT::constant , Vs... >;
+	template<auto... Vs> using T_lookup_mutable_link	= T_lookup < LN::link , LT::mu_table , Vs... >;
 
-	template<auto... Vs> using T_lookup_tree_link		= T_lookup < LN::link , LT::tree  , Vs... >;
-	template<auto... Vs> using T_lookup_morph_link		= T_lookup < LN::link , LT::morph , Vs... >;
-	template<auto... Vs> using T_lookup_cycle_link		= T_lookup < LN::link , LT::cycle , Vs... >;
-
-	template<auto... Vs> nik_ce auto U_lookup_tree_link	= U_store_T < T_lookup_tree_link  < Vs... > >;
-	template<auto... Vs> nik_ce auto U_lookup_morph_link	= U_store_T < T_lookup_morph_link < Vs... > >;
-	template<auto... Vs> nik_ce auto U_lookup_cycle_link	= U_store_T < T_lookup_cycle_link < Vs... > >;
-
-/***********************************************************************************************************************/
-
-// tree:
-
-	template<auto static_parsed, auto this_f, auto env>
-	struct T_lookup<LN::link, LT::tree, static_parsed, this_f, env>
-	{
-		nik_ces auto & parsed = member_value_U<static_parsed>;
-
-		nik_ces bool is_arg(csign_type s)
-			{ return (Sign::is_constant_arg(s) || Sign::is_mutable_arg(s) || Sign::is_paste(s)); }
-
-		template<auto n, auto m, auto... Us>
-		nik_ces auto result(nik_vp(U)(T_pack_Vs<Us...>*))
-		{
-			nik_ce auto sign = parsed.link_entry_sign(n, m);
-
-			if nik_ce (Sign::is_static_arg(sign))
-			{
-				nik_ce auto pos = parsed.link_entry_index(n, m);
-				nik_ce auto U   = eval<_par_at_, pos, Us...>;
-
-				return U_restore_T<T_store_U<U>>;
-			}
-			else if nik_ce (Sign::is_env(sign))
-			{
-				using T_frame_lookup = T_lookup_frame<env>;
-				nik_ce auto & entry  = parsed.link_entry(n, m);
-				nik_ce auto record   = T_frame_lookup::find_frame(entry);
-
-				return T_frame_lookup::template map<record.v0, record.v1>();
-			}
-			else if nik_ce (Sign::is_morph(sign))
-			{
-				nik_ce auto index  = parsed.link_entry_index(n, m);
-				nik_ce auto & line = parsed.morph_level[index];
-				nik_ce auto types  = U_restore_T<decltype(U)>;
-				nik_ce auto pack   = eval<_par_segment_, line.parameter.size()>;
-				using T_morph      = T_morph_dispatch<line.token, static_parsed, this_f, env>;
-
-				return T_morph::template result<index, types>(pack);
-			}
-			else if nik_ce (Sign::is_cycle(sign))
-			{
-				nik_ce auto index = parsed.link_entry_index(n, m);
-				nik_ce auto token = parsed.cycle_level[index].token;
-				nik_ce auto types = U_restore_T<decltype(U)>;
-				using T_cycle     = T_cycle_dispatch<token, static_parsed, this_f, env>;
-
-				return T_cycle::template result<index, types>();
-			}
-			else if nik_ce (Sign::is_recurse(sign)) return this_f;
-			else return _nop_;
-
-		}
-
-			// modify at preserves the ref, but result itself does not!
-
-		template<auto n, auto m, typename... Ts>
-		nik_ces auto result(Ts... vs)
-		{
-			nik_ce auto sign = parsed.link_entry_sign(n, m);
-
-			if nik_ce (is_arg(sign))
-			{
-				nik_ce auto pos  = parsed.link_entry_index(n, m);
-				nik_ce auto type = if_then_else_<Sign::is_mutable_arg(sign), _read_write_, _id_>;
-
-				return T_modify_at<type, pos, type_at<pos, Ts...>>::template result<Ts...>(vs...);
-			}
-			else return result<n, m>(U_pack_Ts<Ts...>);
-		}
-	};
+	template<auto... Vs> nik_ce auto U_lookup_morph_link	= U_store_T < T_lookup_morph_link    < Vs... > >;
+	template<auto... Vs> nik_ce auto U_lookup_cycle_link	= U_store_T < T_lookup_cycle_link    < Vs... > >;
+	template<auto... Vs> nik_ce auto U_lookup_tree_link	= U_store_T < T_lookup_tree_link     < Vs... > >;
+	template<auto... Vs> nik_ce auto U_lookup_constant_link	= U_store_T < T_lookup_constant_link < Vs... > >;
+	template<auto... Vs> nik_ce auto U_lookup_mutable_link	= U_store_T < T_lookup_mutable_link  < Vs... > >;
 
 /***********************************************************************************************************************/
 
@@ -326,6 +258,146 @@ namespace chord {
 	};
 
 /***********************************************************************************************************************/
+
+// tree:
+
+	template<auto static_parsed, auto this_f, auto env>
+	struct T_lookup<LN::link, LT::tree, static_parsed, this_f, env>
+	{
+		nik_ces auto & parsed = member_value_U<static_parsed>;
+
+		template<auto n, auto m, auto... Us>
+		nik_ces auto result(nik_vp(U)(T_pack_Vs<Us...>*))
+		{
+			nik_ce auto sign = parsed.link_entry_sign(n, m);
+
+			if nik_ce (Sign::is_static_arg(sign))
+			{
+				nik_ce auto pos = parsed.link_entry_index(n, m);
+				nik_ce auto U   = eval<_par_at_, pos, Us...>;
+
+				return U_restore_T<T_store_U<U>>;
+			}
+			else if nik_ce (Sign::is_env(sign))
+			{
+				using T_frame_lookup = T_lookup_frame<env>;
+				nik_ce auto & entry  = parsed.link_entry(n, m);
+				nik_ce auto record   = T_frame_lookup::find_frame(entry);
+
+				return T_frame_lookup::template map<record.v0, record.v1>();
+			}
+			else if nik_ce (Sign::is_morph(sign))
+			{
+				nik_ce auto index  = parsed.link_entry_index(n, m);
+				nik_ce auto & line = parsed.morph_level[index];
+				nik_ce auto types  = U_restore_T<decltype(U)>;
+				nik_ce auto pack   = eval<_par_segment_, line.parameter.size()>;
+				using T_morph      = T_morph_dispatch<line.token, static_parsed, this_f, env>;
+
+				return T_morph::template result<index, types>(pack);
+			}
+			else if nik_ce (Sign::is_cycle(sign))
+			{
+				nik_ce auto index = parsed.link_entry_index(n, m);
+				nik_ce auto token = parsed.cycle_level[index].token;
+				nik_ce auto types = U_restore_T<decltype(U)>;
+				using T_cycle     = T_cycle_dispatch<token, static_parsed, this_f, env>;
+
+				return T_cycle::template result<index, types>();
+			}
+			else if nik_ce (Sign::is_recurse(sign)) return this_f;
+			else return _nop_;
+
+		}
+
+		template<auto n, auto m, typename... Ts>
+		nik_ces auto result(Ts...) { return result<n, m>(U_pack_Ts<Ts...>); }
+	};
+
+/***********************************************************************************************************************/
+
+// constant:
+
+	template<auto U_link>
+	struct T_lookup<LN::link, LT::constant, U_link>
+	{
+		using T_link = T_store_U<U_link>;
+
+		template<auto n, auto m, typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			nik_ce auto pos = T_link::parsed.link_entry_index(n, m);
+
+			return T_apply_at<_id_, pos>::template result<Ts...>(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	// pointer:
+
+		template<auto U_link, typename T, nik_vp(U)(T*)>
+		struct T_lookup<LN::link, LT::mu_table, U_link, U>
+		{
+			using T_link = T_store_U<U_link>;
+			using Type   = modify_type<_read_write_, T>;
+
+			template<auto n, auto m, typename... Ts>
+			nik_ces auto result(Ts... vs) -> Type
+			{
+				nik_ce auto pos = T_link::parsed.link_entry_index(n, m);
+
+				return (Type) T_apply_at<_id_, pos>::template result<Ts...>(vs...);
+			}
+		};
+
+	// reference:
+
+		template<auto U_link, typename T, nik_vp(U)(T&)>
+		struct T_lookup<LN::link, LT::mu_table, U_link, U>
+		{
+			using T_link = T_store_U<U_link>;
+			using Type   = modify_type<_read_write_, T>;
+
+			template<auto n, auto m, typename... Ts>
+			nik_ces auto result(Ts... vs) -> Type&
+			{
+				nik_ce auto pos = T_link::parsed.link_entry_index(n, m);
+
+				return (Type&) T_ref_at<pos>::template result<Ts...>(vs...);
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// resolve:
+
+	template<typename T_link, auto n, auto m, auto... Us>
+	nik_ce auto dispatch_link()
+	{
+		nik_ce auto sign   = T_link::parsed.link_entry_sign(n, m);
+		nik_ce auto U_link = U_store_T<T_link>;
+
+		if nik_ce (Sign::is_mutable_arg(sign))
+		{
+			nik_ce auto pos = T_link::parsed.link_entry_index(n, m);
+			nik_ce auto U   = eval<_par_at_, pos, Us...>;
+
+			return U_lookup_mutable_link<U_link, U>;
+		}
+		else if nik_ce (Sign::is_constant_arg(sign) || Sign::is_paste(sign))
+
+			return U_lookup_constant_link<U_link>;
+		else
+			return U_link;
+	}
+
+	template<typename T_link, auto n, auto m, typename... Ts>
+	using T_resolve_link = T_store_U<dispatch_link<T_link, n, m, U_store_T<Ts>...>()>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // line:
@@ -356,7 +428,8 @@ namespace chord {
 		using T_link = T_lookup_tree_link<static_parsed, this_f, env>;
 
 		template<auto n, typename... Ts>
-		nik_ces auto result(Ts... vs) { return T_link::template result<n, m0, Ts...>(vs...); }
+		nik_ces auto result(Ts... vs)
+			{ return T_resolve_link<T_link, n, m0, Ts...>::template result<n, m0, Ts...>(vs...); }
 	};
 
 /***********************************************************************************************************************/
@@ -375,10 +448,11 @@ namespace chord {
 		template<auto n, typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto F = T_link::template result<n, m0>(U_pack_Ts<Ts...>);
+			nik_ce auto f = T_link::template result<n, m0>(U_pack_Ts<Ts...>);
 
-			return cctmp::apply<F>(T_link::template result<n, ms, Ts...>(vs...)...);
-				// does not propogate reference.
+				// direct member call required to preserve reference semantics.
+			return T_store_U<f>::template result<>
+				(T_resolve_link<T_link, n, ms, Ts...>::template result<n, ms, Ts...>(vs...)...);
 		}
 	};
 
@@ -399,10 +473,11 @@ namespace chord {
 		template<auto n, typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto F = T_link::template result<n, m0>(U_pack_Ts<Ts...>);
+			nik_ce auto f = T_link::template result<n, m0>(U_pack_Ts<Ts...>);
 
-			return cctmp::apply<F>(T_link::template result<n, ms, Ts...>(vs...)...);
-				// does not propogate reference.
+				// direct member call required to preserve reference semantics.
+			return T_store_U<f>::template result<>
+				(T_resolve_link<T_link, n, ms, Ts...>::template result<n, ms, Ts...>(vs...)...);
 		}
 	};
 
@@ -423,13 +498,14 @@ namespace chord {
 		template<auto n, typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto F = T_link::template result<n, m1>(U_pack_Ts<Ts...>);
+			nik_ce auto f = T_link::template result<n, m1>(U_pack_Ts<Ts...>);
 
-			auto v = T_link::template result<n, m0, Ts...>(vs...);
-			using T = modify_type<_read_write_, decltype(v)>;
-
-			return cctmp::apply<F>((T) v, T_link::template result<n, ms, Ts...>(vs...)...);
-				// does not propogate reference.
+				// direct member call required to preserve reference semantics.
+			return T_store_U<f>::template result<>
+			(
+				T_resolve_link<T_link, n, m0, Ts...>::template result<n, m0, Ts...>(vs...),
+			 	T_resolve_link<T_link, n, ms, Ts...>::template result<n, ms, Ts...>(vs...)...
+			);
 		}
 	};
 

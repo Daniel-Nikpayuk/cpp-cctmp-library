@@ -132,6 +132,43 @@ namespace chord {
 	}; constexpr auto _carry_cdr_ = U_store_T<T_carry_cdr>;
 
 /***********************************************************************************************************************/
+
+// divide by:
+
+	template<auto V>
+	struct T_divide_by
+	{
+		template<typename T>
+		constexpr static auto result(T v) { return (v / V); }
+
+	}; template<auto V>
+		constexpr auto _divide_by_ = U_store_T<T_divide_by<V>>;
+
+/***********************************************************************************************************************/
+
+// modulo by:
+
+	template<auto V>
+	struct T_modulo_by
+	{
+		template<typename T>
+		constexpr static auto result(T v) { return (v % V); }
+
+	}; template<auto V>
+		constexpr auto _modulo_by_ = U_store_T<T_modulo_by<V>>;
+
+/***********************************************************************************************************************/
+
+// printer:
+
+	struct T_print
+	{
+		template<typename T>
+		constexpr static void result(T v, const char *f) { printf(f, *v); }
+
+	}; constexpr auto _print_ = U_store_T<T_print>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // repeat:
@@ -390,6 +427,84 @@ namespace chord {
 	template<typename Out, typename In, typename In1, typename In2, typename End2>
 	constexpr auto array_add_v0(Out out, In in, In1 in1, In2 in2, End2 end2)
 		{ return metapiler_apply<_array_add_v0, null_env, Out>(out, &in, in1, in2, end2); }
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// progressions:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// change of base printer:
+
+/***********************************************************************************************************************/
+
+// version 0:
+
+	template<auto n>
+	constexpr auto _change_of_base_printer_v0()
+	{
+		return source
+		(
+			"cob out in format                           ;"
+
+			"definitions:                                ;"
+			" arr_map # map<rem_by_n @||>[)[div_by_n|~,) ;"
+			" arr_pr  # repeat<@ @|print @ @|>(-,]{}     ;"
+
+			"body:                                       ;"
+			" . = arr_map !out in zero                   ;"
+			" . = arr_pr _ out format                    ;"
+			" return _                                   ;"
+
+			, cctmp::binding( "div_by_n" , _divide_by_<n> )
+			, cctmp::binding( "rem_by_n" , _modulo_by_<n> )
+			, cctmp::binding( "print"    , _print_        )
+			, cctmp::binding( "zero"     , 0              )
+		);
+	}
+
+	template<auto n, typename Out, typename In>
+	constexpr void change_of_base_printer_v0(const char *f, Out out, In in)
+	{
+		metapiler_apply<_change_of_base_printer_v0<n>, null_env, Out>(out, in, f);
+		printf("\n");
+	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// array printer:
+
+/***********************************************************************************************************************/
+
+// version 0:
+
+	constexpr auto _array_printer_v0()
+	{
+		return source
+		(
+			"f out end format                         ;"
+
+			"definitions:                             ;"
+			" arr_zero # repeat<@ @||>[,){}           ;"
+			" arr_pr   # repeat<@ @|print @ @|>(-,]{} ;"
+
+			"body:                                    ;"
+			" . = arr_zero !out end zero              ;"
+			" . = arr_pr _ out format                 ;"
+			" return _                                ;"
+
+			, cctmp::binding( "print" , _print_ )
+			, cctmp::binding( "zero"  , 0       )
+		);
+	}
+
+	template<typename Out, typename End>
+	constexpr void array_printer_v0(const char *in, Out out, End end)
+		{ metapiler_apply<_array_printer_v0, null_env, Out>(out, end, in); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -38,7 +38,6 @@ namespace chord {
 	nik_ce auto eval					= cctmp::eval<Op, Vs...>;
 
 	nik_ce auto _equal_					= cctmp::_equal_;
-	nik_ce auto _par_segment_				= cctmp::_par_segment_;
 
 	nik_ce auto _level_append_0_action_			= cctmp::_level_append_0_action_;
 	nik_ce auto _level_1_append_action_			= cctmp::_level_1_append_action_;
@@ -270,14 +269,15 @@ namespace chord {
 			enum : context_type
 			{
 				none = 0,
-				assign , apply , re_turn , test , branch , go_to , label ,
+				assign , re_turn , apply , vo_id , test , branch , go_to , label ,
 				dimension
 			};
 
 			nik_ces bool is_assign (context_type c) { return (c == assign  ); }
-			nik_ces bool is_apply  (context_type c) { return (c == apply   ); }
 			nik_ces bool is_return (context_type c) { return (c == re_turn ); }
+			nik_ces bool is_apply  (context_type c) { return (c == apply   ); }
 			nik_ces bool is_test   (context_type c) { return (c == test    ); }
+			nik_ces bool is_void   (context_type c) { return (c == vo_id   ); }
 			nik_ces bool is_branch (context_type c) { return (c == branch  ); }
 			nik_ces bool is_goto   (context_type c) { return (c == go_to   ); }
 			nik_ces bool is_label  (context_type c) { return (c == label   ); }
@@ -342,14 +342,13 @@ namespace chord {
 	{
 		context_type kind;
 
-		bool has_void; // currently allows discard.
 		bool has_paste;
 		bool has_link;
 
 		nik_ce level_line() :
 
 			kind{Context::none},
-			has_void{}, has_paste{}, has_link{} { }
+			has_paste{}, has_link{} { }
 	};
 
 /***********************************************************************************************************************/
@@ -392,16 +391,6 @@ namespace chord {
 		using base	= cctmp::T_icon<CharType>;
 		using cbase	= base const;
 
-		// maybe check this value before assigning static_arg,
-		// replacing it with curried_arg. Then when you lookup
-		// the value you know it's curried and can dispatch
-		// accordingly.
-
-		// Or: arg match, but then curry match against an independent array
-		// that hold's curried names. Cross reference.
-
-		// bool is_curried;
-
 		nik_ce T_level_arg() : base{} { }
 	};
 
@@ -436,7 +425,7 @@ namespace chord {
 		private:
 
 			nik_ce void update_size(gindex_type s) { difference = s - offset; }
-			nik_ce void update_shift() { offset = !is_void() && !is_return(); }
+			nik_ce void update_shift() { offset = (!is_void() && !is_return()); }
 
 		public:
 
@@ -463,11 +452,11 @@ namespace chord {
 
 		// line:
 
-			nik_ce bool is_assign () const { return Context::is_assign(line->kind); }
-			nik_ce bool is_return () const { return Context::is_return(line->kind); }
-			nik_ce bool is_apply  () const { return Context::is_apply (line->kind); }
-			nik_ce bool is_test   () const { return Context::is_test  (line->kind); }
-			nik_ce bool is_void   () const { return line->has_void; }
+			nik_ce bool is_assign () const { return Context::is_assign (line->kind); }
+			nik_ce bool is_return () const { return Context::is_return (line->kind); }
+			nik_ce bool is_apply  () const { return Context::is_apply  (line->kind); }
+			nik_ce bool is_void   () const { return Context::is_void   (line->kind); }
+			nik_ce bool is_test   () const { return Context::is_test   (line->kind); }
 	};
 
 	template<auto Size>
@@ -752,13 +741,13 @@ namespace chord {
 			nik_ce void append_line() { cctmp::apply<_level_1_append_action_>(this); }
 
 			nik_ce auto kind      (const cguider & g) const { return line_at(g).kind; }
-			nik_ce auto has_void  (const cguider & g) const { return line_at(g).has_void; }
+			nik_ce auto has_void  (const cguider & g) const { return (kind(g) == Context::vo_id); }
 			nik_ce auto has_paste (const cguider & g) const { return line_at(g).has_paste; }
 			nik_ce auto has_link  (const cguider & g) const { return line_at(g).has_link; }
 
 			nik_ce void set_kind(ccontext_type k) { line_level.last()->kind = k; }
 
-			nik_ce void set_void  () { line_level.last()->has_void  = true; }
+			nik_ce void set_void  () { line_level.last()->kind      = Context::vo_id; }
 			nik_ce void set_paste () { line_level.last()->has_paste = true; }
 			nik_ce void set_link  () { line_level.last()->has_link  = true; }
 

@@ -81,6 +81,9 @@
 	//	chord::glide_tests  ();
 	//	chord::fasten_tests ();
 
+	//	chord::change_of_base_tests ();
+	//	chord::array_printer_tests  ();
+
 		return 0;
 	}
 

@@ -122,6 +122,7 @@ namespace chord {
 				{
 					case Context::assign  : { add_assign_instr (line_iter); break; }
 					case Context::apply   : { add_apply_instr  (line_iter); break; }
+					case Context::vo_id   : { add_void_instr   (line_iter); break; }
 					case Context::test    : { add_test_instr   (line_iter); break; }
 					case Context::label   : { add_label_instr  (line_iter); break; }
 					case Context::branch  : { add_branch_instr (line_iter); break; }
@@ -134,7 +135,6 @@ namespace chord {
 		}
 
 		nik_ce auto call_name      (const cguider & l) const { return toc.has_paste (l) ? MN::recall : MN::call; }
-		nik_ce auto call_note      (const cguider & l) const { return toc.has_void  (l) ? MT::void_f : MT::id  ; }
 		nik_ce auto first_sign     (const cguider & l) const { return toc.entry_at(l.next()).sign; }
 		nik_ce auto first_index    (const cguider & l) const { return toc.entry_at(l.next()).index; }
 		nik_ce auto set_label_line (const cguider & l)       { label[first_index(l)] = contr.max(); }
@@ -189,7 +189,7 @@ namespace chord {
 
 			nik_ce void add_assign_instr(const cguider & l)
 			{
-				if (toc.has_link(l)) add_link();
+				if (toc.has_link(l)) add_link(); // if ?
 
 				add_instr(call_name(l), MT::id, Mark::value);
 
@@ -198,16 +198,23 @@ namespace chord {
 
 			nik_ce void add_apply_instr(const cguider & l)
 			{
-				if (toc.has_link(l)) add_link();
+				if (toc.has_link(l)) add_link(); // if ?
 
-				add_instr(call_name(l), call_note(l), Mark::value);
+				add_instr(call_name(l), MT::id, Mark::value);
 
-				if (!toc.has_void(l)) add_replace_instr(l);
+				add_replace_instr(l);
+			}
+
+			nik_ce void add_void_instr(const cguider & l)
+			{
+				if (toc.has_link(l)) add_link(); // if ?
+
+				add_instr(call_name(l), MT::void_f, Mark::value);
 			}
 
 			nik_ce void add_test_instr(const cguider & l)
 			{
-				if (toc.has_link(l)) add_link();
+				if (toc.has_link(l)) add_link(); // if ?
 
 				add_instr(call_name(l), MT::id, Mark::value);
 			}

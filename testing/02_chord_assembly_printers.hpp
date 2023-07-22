@@ -155,19 +155,19 @@ namespace cctmp {
 				{
 					case chord::Context::none    : { str = "      "; break; }
 					case chord::Context::assign  : { str = "assign"; break; }
+					case chord::Context::re_turn : { str = "return"; break; }
 					case chord::Context::apply   : { str = "apply "; break; }
+					case chord::Context::vo_id   : { str = "void  "; break; }
 					case chord::Context::test    : { str = "test  "; break; }
 					case chord::Context::label   : { str = "label "; break; }
 					case chord::Context::branch  : { str = "branch"; break; }
 					case chord::Context::go_to   : { str = "goto  "; break; }
-					case chord::Context::re_turn : { str = "return"; break; }
 				}
 
 				auto str0 = line.has_link  ? "link"  : "    " ;
 				auto str1 = line.has_paste ? "paste" : "     ";
-				auto str2 = line.has_void  ? "void"  : "    " ;
 
-				printf("|%s|%s|%s|%s| ", str, str0, str1, str2);
+				printf("|%s|%s|%s| ", str, str0, str1);
 			}
 
 			template<typename FuncType>
@@ -323,7 +323,10 @@ namespace cctmp {
 				for (auto k = link.cbegin(); k != link.cend(); ++k)
 				{
 					for (auto e = k->cbegin(); e != k->cend(); ++e)
+					{
+						printf(" ");
 						print_entry_info(entry_level[*e], spacing);
+					}
 
 					printf("\n");
 				}

@@ -3599,10 +3599,14 @@ namespace cctmp_program
 
 	//	auto parsed_printer = chord_assembly_parsed_printer<static_grammar, src>{};
 	//	parsed_printer.print_tree();
-	//	parsed_printer.print_chord();
+	//	parsed_printer.print_cycle();
+	//	parsed_printer.print_morph();
 
 	//	auto tr_table_printer = parser_generator_tt_printer<static_grammar>{};
 	//	tr_table_printer.print_num_tr_table();
+
+	//	auto targeted_printer = chord_assembly_targeted_printer<src>{};
+	//	targeted_printer.print_controller();
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
