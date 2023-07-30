@@ -330,10 +330,10 @@ namespace cctmp {
 					auto & nonterm = parsed.symbol_level[head.index];
 
 					parsed_printer::print_symbol(nonterm, head.index, spacing);
-				//	if constexpr (is_first) printf("| %hu | %s |", k->unresolved, k->has_empty ? "e" : " ");
-				//	else printf("| %hu | %s |", k->unresolved, k->has_prompt ? "$" : " ");
-					if constexpr (is_first) printf("| %s |", k->has_empty ? "e" : " ");
-					else printf("| %s |", k->has_prompt ? "$" : " ");
+					if constexpr (is_first) printf("| %hu | %s |", k->unresolved, k->has_empty ? "e" : " ");
+					else printf("| %hu | %s |", k->unresolved, k->has_prompt ? "$" : " ");
+				//	if constexpr (is_first) printf("| %s |", k->has_empty ? "e" : " ");
+				//	else printf("| %s |", k->has_prompt ? "$" : " ");
 
 					for (auto j = term.cbegin(); j != term.cend(); ++j)
 						parsed_printer::print_symbol(parsed.symbol_level[*j], *j, spacing);

@@ -416,6 +416,16 @@ namespace cctmp {
 
 			nik_ce auto _is_zero_ = _is_equal_<_zero>;
 
+		// is_not_equal:
+
+			template<auto V>
+			nik_ce auto _is_not_equal_ = _curry_<_not_equal_, V>;
+
+		// not_zero:
+
+			nik_ce auto _is_not_zero_ = _is_not_equal_<_zero>;
+			nik_ce auto _not_zero_    = _is_not_zero_;
+
 		// is_less_than:
 
 			template<auto V> nik_ce auto _is_less_than_		= _curry_<_gt_, V>;
@@ -624,233 +634,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// selector:
-
-/***********************************************************************************************************************/
-
-// operators:
-
-	struct ArgSelector
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-			is_c , is , type , make_c , make , // meta
-			dimension
-		};
-	};
-
-/***********************************************************************************************************************/
-
-// meta:
-
-	// is c:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::selector, ArgSelector::is_c, filler...>
-		{
-			template<typename T> nik_ces auto result(T) { return false; }
-
-			template<typename T, typename S>
-			nik_ces auto result(const cselector<T, S> &) { return true; }
-
-		}; nik_ce auto _is_cselector_ = U_arg_selector<ArgSelector::is_c>;
-
-	// is:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::selector, ArgSelector::is, filler...>
-		{
-			template<typename T> nik_ces auto result(T) { return false; }
-
-			template<typename T, typename S>
-			nik_ces auto result(const selector<T, S> &) { return true; }
-
-		}; nik_ce auto _is_selector_ = U_arg_selector<ArgSelector::is>;
-
-	// type:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::selector, ArgSelector::type, filler...>
-		{
-			template<typename T, typename S>
-			nik_ces auto result(const cselector<T, S> &) { return U_store_T<T>; }
-
-			template<typename T, typename S>
-			nik_ces auto result(const selector<T, S> &) { return U_store_T<T>; }
-		};
-
-		nik_ce auto _cselector_type_ = U_arg_selector<ArgSelector::type>;
-		nik_ce auto  _selector_type_ = U_arg_selector<ArgSelector::type>;
-
-	// make c:
-
-		template<auto U>
-		struct T_grammar<Shape::argument, Pattern::selector, ArgSelector::make_c, U>
-		{
-			using S = T_store_U<U>;
-
-			template<typename T>
-			nik_ces auto result(T*const s, T*const f) { return cselector<T, S>{s, f}; }
-
-			template<typename T>
-			nik_ces auto result(T*const s, T*const f, T*const k) { return cselector<T, S>{k, f}; }
-
-		}; template<auto U = U_gindex_type>
-			nik_ce auto _make_cselector_ = U_arg_selector<ArgSelector::make_c, U>;
-
-	// make:
-
-		template<auto U>
-		struct T_grammar<Shape::argument, Pattern::selector, ArgSelector::make, U>
-		{
-			using S = T_store_U<U>;
-
-			template<typename T>
-			nik_ces auto result(T*const s, T*const f) { return selector<T, S>{s, f}; }
-
-			template<typename T>
-			nik_ces auto result(T*const s, T*const f, T*const k) { return selector<T, S>{k, f}; }
-
-		}; template<auto U = U_gindex_type>
-			nik_ce auto _make_selector_ = U_arg_selector<ArgSelector::make, U>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// iterator:
-
-/***********************************************************************************************************************/
-
-// operators:
-
-	using ArgIterator = ArgSelector;
-
-/***********************************************************************************************************************/
-
-// meta:
-
-	// is c:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::iterator, ArgIterator::is_c, filler...>
-		{
-			template<typename T> nik_ces auto result(T) { return false; }
-
-			template<typename T, typename S>
-			nik_ces auto result(const citerator<T, S> &) { return true; }
-
-		}; nik_ce auto _is_citerator_ = U_arg_iterator<ArgIterator::is_c>;
-
-	// is:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::iterator, ArgIterator::is, filler...>
-		{
-			template<typename T> nik_ces auto result(T) { return false; }
-
-			template<typename T, typename S>
-			nik_ces auto result(const iterator<T, S> &) { return true; }
-
-		}; nik_ce auto _is_iterator_ = U_arg_iterator<ArgIterator::is>;
-
-	// type:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::iterator, ArgIterator::type, filler...>
-		{
-			template<typename T, typename S>
-			nik_ces auto result(const citerator<T, S> &) { return U_store_T<T>; }
-
-			template<typename T, typename S>
-			nik_ces auto result(const iterator<T, S> &) { return U_store_T<T>; }
-		};
-
-		nik_ce auto _citerator_type_ = U_arg_iterator<ArgIterator::type>;
-		nik_ce auto  _iterator_type_ = U_arg_iterator<ArgIterator::type>;
-
-	// make c:
-
-		template<auto U>
-		struct T_grammar<Shape::argument, Pattern::iterator, ArgIterator::make_c, U>
-		{
-			using S = T_store_U<U>;
-
-			template<typename T>
-			nik_ces auto result(T*const s, T*const f, T*const k) { return citerator<T, S>{s, f, k}; }
-
-		}; template<auto U = U_gindex_type>
-			nik_ce auto _make_citerator_ = U_arg_iterator<ArgIterator::make_c, U>;
-
-	// make:
-
-		template<auto U>
-		struct T_grammar<Shape::argument, Pattern::iterator, ArgIterator::make, U>
-		{
-			using S = T_store_U<U>;
-
-			template<typename T>
-			nik_ces auto result(T*const s, T*const f, T*const k) { return iterator<T, S>{s, f, k}; }
-
-		}; template<auto U = U_gindex_type>
-			nik_ce auto _make_iterator_ = U_arg_iterator<ArgIterator::make, U>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// sequence:
-
-/***********************************************************************************************************************/
-
-// operators:
-
-	struct ArgSequence
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-			is , type , length , // meta
-			dimension
-		};
-	};
-
-/***********************************************************************************************************************/
-
-// meta:
-
-	// is:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::sequence, ArgSequence::is, filler...>
-		{
-			template<typename T> nik_ces auto result(T) { return false; }
-			template<typename T, auto S> nik_ces auto result(const sequence<T, S> &) { return true; }
-
-		}; nik_ce auto _is_sequence_ = U_arg_sequence<ArgSequence::is>;
-
-	// type:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::sequence, ArgSequence::type, filler...>
-		{
-			template<typename T, auto S>
-			nik_ces auto result(const sequence<T, S> &) { return U_store_T<T>; }
-
-		}; nik_ce auto _sequence_type_ = U_arg_sequence<ArgSequence::type>;
-
-	// length:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::sequence, ArgSequence::length, filler...>
-		{
-			template<typename T, auto S>
-			nik_ces auto result(const sequence<T, S> &) { return S; }
-
-		}; nik_ce auto _sequence_length_ = U_arg_sequence<ArgSequence::length>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // subarray:
 
 /***********************************************************************************************************************/
@@ -939,49 +722,6 @@ namespace cctmp {
 
 		template<auto f = _equal_>
 		nik_ce auto _subarray_match_same_ = _subarray_match_<_subarray_same_<f>>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// pair:
-
-/***********************************************************************************************************************/
-
-// operators:
-
-	struct ArgPair
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-			is , type , 		// meta
-			dimension
-		};
-	};
-
-/***********************************************************************************************************************/
-
-// meta:
-
-	// is:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::pair, ArgPair::is, filler...>
-		{
-			template<typename T> nik_ces auto result(T) { return false; }
-			template<typename T0, typename T1> nik_ces auto result(const pair<T0, T1> &) { return true; }
-
-		}; nik_ce auto _is_pair_ = U_arg_pair<ArgPair::is>;
-
-	// type:
-
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::pair, ArgPair::type, filler...>
-		{
-			template<typename T0, typename T1>
-			nik_ces auto result(const pair<T0, T1> &) { return U_pack_Ts<T0, T1>; }
-
-		}; nik_ce auto _pair_type_ = U_arg_pair<ArgPair::type>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

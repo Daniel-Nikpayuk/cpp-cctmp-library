@@ -67,7 +67,7 @@ namespace chord {
 
 // symbols:
 
-	// available functional operators: { repeat, map, fold, find_first, find_all, zip, fasten, glide }
+	// available functional operators: { repeat, fold, find, sift, map, zip, glide, fasten }
 	// special characters            :    ~!@#$%^&*()_+`-={}|[]\:";'<>?,./
 	// disallowed                    :    "
 	// already used                  :    !_#=:;'.
@@ -308,7 +308,7 @@ namespace chord {
 			" . = arr_map !out in end      ;"
 			" return _                     ;"
 
-			, cctmp::binding( "square"  , _square_ )
+			, cctmp::binding( "square" , _square_ )
 		);
 	}
 

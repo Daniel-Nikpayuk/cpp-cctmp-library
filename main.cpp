@@ -50,6 +50,12 @@
 #include"20_chord_machine.hpp"
 #include"21_chord_targeter.hpp"
 
+//#include"22_math_byte_ring.hpp"
+//#include"23_math_byte_array_ring.hpp"
+//#include"24_math_cryptography.hpp"
+//#include"25_math_linear_algebra.hpp"
+//#include"26_math_signal_processing.hpp"
+
 #include"undef_macros.hpp"
 
 //#include"documentation/01_case_studies.hpp"

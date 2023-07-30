@@ -349,6 +349,7 @@ namespace chord {
 			cctmp::binding( "equal"                 , cctmp::_equal_                 ),
 			cctmp::binding( "is_zero"               , cctmp::_is_zero_               ),
 			cctmp::binding( "not_equal"             , cctmp::_not_equal_             ),
+			cctmp::binding( "not_zero"              , cctmp::_not_zero_              ),
 			cctmp::binding( "less_than"             , cctmp::_less_than_             ),
 			cctmp::binding( "less_than_or_equal"    , cctmp::_less_than_or_equal_    ),
 			cctmp::binding( "greater_than"          , cctmp::_greater_than_          ),

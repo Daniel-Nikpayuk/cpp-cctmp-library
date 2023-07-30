@@ -200,13 +200,13 @@ namespace cctmp {
 
 				auto j = iterator.cbegin();
 
-				for (auto k = interval.cbegin(); k != interval.cend(); ++k)
+				for (auto k = interval.cbegin(); k != interval.cend(); ++k, ++j)
 				{
 					auto lstr = (k->left  == chord::Ival::closed) ? '[' : '(';
 					auto rstr = (k->right == chord::Ival::closed) ? ']' : ')';
 
 					printf(" %c", lstr);
-					print_morphism(*j++, spacing);
+					print_morphism(*j, spacing);
 					if (k->is_lead)
 					{
 						printf(",");
@@ -368,6 +368,7 @@ namespace cctmp {
 
 // machine:
 
+/*
 	struct machine_printer
 	{
 		using MN = chord::MN;
@@ -419,11 +420,13 @@ namespace cctmp {
 			return str;
 		}
 	};
+*/
 
 /***********************************************************************************************************************/
 
 // interface:
 
+/*
 	template<auto callable_source>
 	struct chord_assembly_targeted_printer
 	{
@@ -470,6 +473,7 @@ namespace cctmp {
 					print_instr(*k, contr.left_size(k));
 			}
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -480,6 +484,7 @@ namespace cctmp {
 
 // parameter:
 
+/*
 	struct parameter_printer
 	{
 		template<auto f>
@@ -534,6 +539,7 @@ namespace cctmp {
 			else                                                          return "(?)                    ";
 		}
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

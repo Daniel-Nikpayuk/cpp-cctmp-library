@@ -105,7 +105,8 @@ namespace chord {
 			"          -> empty                                                 ;"
 			"LastInstr -> goto Goto \\;                                         ;"
 			"          -> return RValue \\;                       : return      ;"
-			"          -> Label NewLine Instrs                    : go_into     ;"
+			"          -> Label NewLine Instr                                    "
+			"                   NewLine RecInstr LastInstr        : go_into     ;"
 			"Instr     -> LValue Disp                                           ;"
 			"          -> ! MValue \\= SValue Var                 : voidication ;"
 			"          -> test SValue Var NewLine branch Branch   : conditional ;"
@@ -118,11 +119,10 @@ namespace chord {
 
 		// morphism:
 
-			"HValue -> compose < MorParam MorParam NArgs \\> ;"
-			"       -> subpose < MorParam MorParam NArgs \\> ;"
-			"       -> curry   < MorParam MorParam NArgs \\> ;"
+			"HValue -> compose < MorValue MorValue NArgs \\> ;"
+			"       -> subpose < MorValue MorValue NArgs \\> ;"
+			"       -> curry   < MorValue MorValue NArgs \\> ;"
 
-			"MorParam -> identifier     : morph_value ;"
 			"NArgs    -> MorValue NArgs               ;"
 			"         -> empty                        ;"
 			"MorValue -> identifier     : morph_value ;"

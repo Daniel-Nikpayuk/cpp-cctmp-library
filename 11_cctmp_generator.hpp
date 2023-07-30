@@ -399,12 +399,6 @@ namespace cctmp {
 
 		nik_ce void initialize()
 		{
-			locus.pivot_follow().one_more();
-			resolve();
-		}
-
-		nik_ce void resolve()
-		{
 			auto & current = locus.current;
 
 			while (current.not_end())
@@ -435,17 +429,21 @@ namespace cctmp {
 				}
 			}
 
-			if (success) locus.pivot_follow().one_less();
-
 			return success;
 		}
 
 		nik_ce void is_end_resolve()
 		{
-			bool one_less = false;
+			if (locus.pivot_index() != locus.local_index())
+			{
+				locus.pivot_follow().one_more();
+				locus.sifter->push(this);
+			}
+		}
 
-			if (locus.pivot_index() == locus.local_index()) one_less = true;
-			else if (locus.local->is_unresolved()) locus.sifter->push(this);
+		nik_ce void end_resolve() // assumes no "follow" cycles exist.
+		{
+			if (locus.local->is_unresolved()) locus.sifter->push(this);
 			else
 			{
 				auto & local_terminal = locus.local_terminal();
@@ -453,10 +451,9 @@ namespace cctmp {
 
 				pivot_terminal.unite(local_terminal.cselect());
 				if (locus.local->has_prompt) locus.pivot_follow().has_prompt = true;
-				one_less = true;
-			}
 
-			if (one_less) locus.pivot_follow().one_less();
+				locus.pivot_follow().one_less();
+			}
 		}
 	};
 
@@ -559,7 +556,7 @@ namespace cctmp {
 		}
 
 		nik_ce void resolve_all () { for (auto k = body_follow.iterate(); k.not_end(); ++k) k->resolve(); }
-		nik_ce void sift_once   () { for (auto i = sifter.reset(); i.not_end(); ++i) (*i)->is_end_resolve(); }
+		nik_ce void sift_once   () { for (auto i = sifter.reset(); i.not_end(); ++i) (*i)->end_resolve(); }
 		nik_ce void sift_all    () { while (sifter.not_empty()) sift_once(); }
 	};
 

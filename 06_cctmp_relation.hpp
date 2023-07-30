@@ -609,5 +609,107 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// generic:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// pair:
+
+/***********************************************************************************************************************/
+
+// operators:
+
+	struct ArgPair
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			is , type , 		// meta
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
+// meta:
+
+	// is:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::pair, ArgPair::is, filler...>
+		{
+			template<typename T> nik_ces auto result(T) { return false; }
+			template<typename T0, typename T1> nik_ces auto result(const pair<T0, T1> &) { return true; }
+
+		}; nik_ce auto _is_pair_ = U_arg_pair<ArgPair::is>;
+
+	// type:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::pair, ArgPair::type, filler...>
+		{
+			template<typename T0, typename T1>
+			nik_ces auto result(const pair<T0, T1> &) { return U_pack_Ts<T0, T1>; }
+
+		}; nik_ce auto _pair_type_ = U_arg_pair<ArgPair::type>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// sequence:
+
+/***********************************************************************************************************************/
+
+// operators:
+
+	struct ArgSequence
+	{
+		enum : gkey_type
+		{
+			id = 0, identity = id, // convenience for default params.
+			is , type , length , // meta
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
+// meta:
+
+	// is:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::sequence, ArgSequence::is, filler...>
+		{
+			template<typename T> nik_ces auto result(T) { return false; }
+			template<typename T, auto S> nik_ces auto result(const sequence<T, S> &) { return true; }
+
+		}; nik_ce auto _is_sequence_ = U_arg_sequence<ArgSequence::is>;
+
+	// type:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::sequence, ArgSequence::type, filler...>
+		{
+			template<typename T, auto S>
+			nik_ces auto result(const sequence<T, S> &) { return U_store_T<T>; }
+
+		}; nik_ce auto _sequence_type_ = U_arg_sequence<ArgSequence::type>;
+
+	// length:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::sequence, ArgSequence::length, filler...>
+		{
+			template<typename T, auto S>
+			nik_ces auto result(const sequence<T, S> &) { return S; }
+
+		}; nik_ce auto _sequence_length_ = U_arg_sequence<ArgSequence::length>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 } // namespace cctmp
 
