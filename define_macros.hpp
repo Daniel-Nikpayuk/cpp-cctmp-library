@@ -113,6 +113,10 @@
 															\
 		V ## _n_
 
+	#define NIK_T_V_1(_n_)												\
+															\
+		T ## _n_ v ## _n_
+
 	#define NIK_LFS_1(_n_)												\
 															\
 		fs ## _n_
@@ -137,6 +141,10 @@
 	#define NIK_OP_1(_n_)												\
 															\
 		Op
+
+	#define NIK_CAST_FS_T_V_1(_n_)											\
+															\
+		(T_store_U<Fs ## _n_>) v ## _n_...
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -368,12 +376,6 @@
 	#define NIK_2_N_SEGMENT_VARS(_n_, _v_)										\
 															\
 		NIK_2_ ## _n_ ## _IDS(_v_, NIK_PLUS() NIK_ID_1, NIK_COMMA)
-
-// tuple:
-
-	#define NIK_2_N_TUPLE_VARS(_n_, _t_)										\
-															\
-		_t_ NIK_PERIOD() NIK_2_ ## _n_ ## _IDS(NIK_REST, NIK_EMPTY_1, NIK_PERIOD)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -749,6 +751,10 @@
 															\
 		NIK_CHAIN_M(_c_, _i_, _l_), _t_ NIK_CHAIN_R
 
+	#define NIK_CHAIN_RESULT_2TS(_c_, _i_, _l_, _t0_, _t1_)								\
+															\
+		NIK_CHAIN_M(_c_, _i_, _l_), _t0_, _t1_ NIK_CHAIN_R
+
 	#define NIK_CHAIN(_c_, _i_, _l_)										\
 															\
 		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT(_c_, _i_, _l_)
@@ -756,6 +762,27 @@
 	#define NIK_CHAIN_TS(_c_, _i_, _l_, _t_)									\
 															\
 		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_TS(_c_, _i_, _l_, _t_)
+
+	#define NIK_CHAIN_2TS(_c_, _i_, _l_, _t0_, _t1_)								\
+															\
+		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_2TS(_c_, _i_, _l_, _t0_, _t1_)
+
+/***********************************************************************************************************************/
+
+// sift id:
+
+	#define NIK_DEFINE_CHAIN_SIFT_ID_2_N(_e_)									\
+															\
+		template<NIK_2_N_VARS(_e_, NIK_BFS_FS_VP_LFS_BFS_FS_1)>							\
+		struct T_chain<CN::sift, NIK_2_N_VARS(_e_, NIK_LFS_1)>							\
+		{													\
+			template<NIK_CHAIN_PARAMS(c, i, l), NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts>	\
+			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_T_V_1), Ts... vs)					\
+			{												\
+				return NIK_CHAIN(c, i, l) /* need to propagate types */					\
+					(vs..., NIK_2_N_VARS(_e_, NIK_CAST_FS_T_V_1));					\
+			}												\
+		};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

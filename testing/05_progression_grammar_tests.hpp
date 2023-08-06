@@ -63,8 +63,36 @@ namespace chord {
 		int arr0[] = { 1, 2, 3, 4, 5, 0 };
 		int arr1[] = { 5, 4, 3, 2, 1, 0 };
 
-		repeat_v0(arr0, arr0 + 5, arr1 + 5);
-		print_array(arr0);
+		repeat_v0(arr0, arr0 + 5, 3);
+		print_array(arr0); // prints: 3 3 3 3 3 0
+	}
+
+/***********************************************************************************************************************/
+
+// map:
+
+	void map_tests()
+	{
+		int arr[6];
+
+		int arr0[] = { 1, 2, 3, 4, 5, 0 };
+		int arr1[] = { 5, 4, 3, 2, 1, 0 };
+		int arr2[] = { 7, 4, 6, 2, 9, 0 };
+
+		map_v0(arr, arr0, arr0 + 5);
+		print_array(arr); // prints: 1 4 9 16 25 ?
+
+		vec_sum_v0(arr, arr0, arr0 + 5, arr0);
+		print_array(arr); // prints: 2 4 6 8 10 ?
+
+		array_add_v0(arr, arr1, arr1 + 5, arr2, 0);
+		print_array(arr); // prints: 2 9 9 4 0 1
+
+			//  12345
+			// +92647
+			// ------
+			// 104992
+			// 299401
 	}
 
 /***********************************************************************************************************************/
@@ -74,8 +102,11 @@ namespace chord {
 	void fold_tests()
 	{
 		int arr0[] = { 1, 2, 3, 4, 5, 0 };
+		int arr1[] = { 5, 4, 3, 2, 1, 0 };
 
 		printf("%d\n", (int) fold_v0(0, arr0, arr0 + 5)); // prints: 15
+		printf("%d\n", (int) dot_product_v0(0, arr0, arr0 + 5, arr1)); // prints: 35
+		printf("%d\n", (int) convolution_v0(0, arr0, arr0 + 5, arr1)); // prints: 55
 	}
 
 /***********************************************************************************************************************/
@@ -88,7 +119,7 @@ namespace chord {
 
 		int* found[1];
 		auto found_end = find_v0(found, arr2, arr2 + 5);
-		print_sifted(arr2, found, found_end);
+		print_sifted(arr2, found, found_end); // prints: (pos: 1, val: 4)
 	}
 
 /***********************************************************************************************************************/
@@ -101,63 +132,7 @@ namespace chord {
 
 		int* sifted[6];
 		auto sifted_end = sift_v0(sifted, arr2, arr2 + 5);
-		print_sifted(arr2, sifted, sifted_end);
-	}
-
-/***********************************************************************************************************************/
-
-// map:
-
-	void map_tests()
-	{
-		int arr0[] = { 1, 2, 3, 4, 5, 0 };
-		int arr1[] = { 5, 4, 3, 2, 1, 0 };
-
-		map_v0(arr1, arr0, arr0 + 5);
-		print_array(arr1);
-	}
-
-/***********************************************************************************************************************/
-
-// zip:
-
-	void zip_tests()
-	{
-		int arr0[] = { 1, 2, 3, 4, 5, 0 };
-		int arr1[] = { 5, 4, 3, 2, 1, 0 };
-
-		vec_sum_v0(arr0, arr0, arr1, arr1 + 5);
-		print_array(arr0);
-	}
-
-/***********************************************************************************************************************/
-
-// glide:
-
-	void glide_tests()
-	{
-		int arr0[] = { 1, 2, 3, 4, 5, 0 };
-		int arr1[] = { 5, 4, 3, 2, 1, 0 };
-
-		printf("%d\n", (int) dot_product_v0(0, arr0, arr1, arr1 + 5)); // prints: 35
-		printf("%d\n", (int) convolution_v0(0, arr0, arr1, arr1 + 5)); // prints: 55
-	}
-
-/***********************************************************************************************************************/
-
-// fasten:
-
-	void fasten_tests()
-	{
-		int arr0[] = { 1, 2, 3, 4, 5, 0 };
-		int arr1[] = { 5, 4, 3, 2, 1, 0 };
-		int arr2[] = { 7, 4, 6, 2, 9, 0 };
-
-		array_add_v0(arr0, 0, arr1, arr2, arr2 + 5);	//  12345
-		print_array(arr0);				// +92647
-								// ------
-								// 104992
-								// 299401
+		print_sifted(arr2, sifted, sifted_end); // prints: (pos: 1, val: 4) (pos: 3, val: 2)
 	}
 
 /***********************************************************************************************************************/

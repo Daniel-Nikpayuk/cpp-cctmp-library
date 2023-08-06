@@ -25,6 +25,15 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+	template<auto V>
+	nik_ce auto _static_callable_				= cctmp::_static_callable_<V>;
+
+	template<auto V>
+	nik_ce auto _static_car_				= cctmp::_static_car_<V>;
+
+	template<auto V>
+	nik_ce auto _static_cdr_				= cctmp::_static_cdr_<V>;
+
 	nik_ce auto H_id					= cctmp::H_id;
 
 	nik_ce auto U_bool					= cctmp::U_bool;
@@ -39,54 +48,59 @@ namespace chord {
 	template<auto H = H_id>
 	nik_ce auto _list_					= cctmp::_list_<H>;
 
-	template<typename T>
-	nik_ce auto U_custom_T					= cctmp::U_custom_T<T>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // targeter:
 
-	// currying is equivalent to an extra lvalue assignment.
-
 /***********************************************************************************************************************/
 
 // interface:
 
-	template<auto static_scanned>
+	template<auto static_source>
 	struct T_chord_assembly_targeter
 	{
+		using T_grammar				= T_chord_assembly_grammar;
+
+		nik_ces auto static_grammar		= U_store_T<T_grammar>;
+
+		// pg parsed:
+
+		template<auto ss, auto sg>
+		nik_ces auto U_static_pg_parsed		= U_store_T<cctmp::T_parser_generator_parsed<ss, sg>>;
+
+		nik_ces auto static_pg_src		= _static_callable_<T_grammar::source>;
+		nik_ces auto static_pg_scanned		= U_store_T<cctmp::T_parser_generator_scanned<static_pg_src>>;
+		nik_ces auto static_pg_parsed		= U_static_pg_parsed<static_pg_scanned, static_grammar>;
+
+		// scanned:
+
+		template<auto st, auto ss>
+		nik_ces auto U_static_scanned		= U_store_T<T_chord_assembly_scanner_parsed<st, ss>>;
+
+		nik_ces auto static_scanned		= U_static_scanned<static_pg_parsed, static_source>;
+
+		// parsed:
+
 		template<auto st, auto ss>
 		nik_ces auto U_static_parsed		= U_store_T<T_chord_assembly_parsed<st, ss>>;
 
-		using T_pg_grammar			= T_chord_assembly_grammar;
-		using T_pg_tt				= cctmp::T_generic_tt<T_pg_grammar>;
-
-		nik_ces auto static_grammar		= U_store_T<T_pg_grammar>;
-		nik_ces auto static_pg_parsed		= T_pg_tt::static_parsed;
 		nik_ces auto static_parsed		= U_static_parsed<static_pg_parsed, static_scanned>;
+
+		//
+
+		using Total				= typename T_chord_assembly_scanner_ast::Total;
 
 		nik_ces auto & scanned			= member_value_U<static_scanned>;
 		nik_ces auto & toc			= member_value_U<static_parsed>;
 
-		using Total				= typename member_type_U<static_scanned>::Total;
-
 		nik_ces gindex_type instr_length	= MI::dimension; // to parallel machine instrs.
 		nik_ces gindex_type link_size		= toc.link_level.size();
 		nik_ces gindex_type label_size		= scanned.total[Total::label];
-		nik_ces gindex_type go_into_size	= label_size;
 
-		nik_ces gindex_type jump_size		= scanned.total[Total::jump] + go_into_size;
-		nik_ces gindex_type length		= ( 1 * scanned.total[Total::label  ] ) // go_into.
-							+ ( 1 * scanned.total[Total::go_to  ] )
-							+ ( 1 * scanned.total[Total::branch ] )
-							+ ( 2 * scanned.total[Total::test   ] )
-							+ ( 2 * scanned.total[Total::vo_id  ] )
-							+ ( 2 * scanned.total[Total::copy   ] )
-							+ ( 3 * scanned.total[Total::re_turn] ) // upper bound:
-							+ ( 3 * scanned.total[Total::replace] ) // (1 * size <= 3 * size)
-							+ 1; // to parallel machine contrs.
+		nik_ces gindex_type jump_size		= scanned.total[Total::jump];
+		nik_ces gindex_type length		= scanned.target_size;
 
 		using label_type			= cctmp::sequence    < gindex_type , label_size   >;
 		using instr_type			= cctmp::sequence    < gindex_type , instr_length >;
@@ -110,9 +124,7 @@ namespace chord {
 			// can check if function calls are redundant and refactor,
 			// but it also might not be necessary if the compiler optimizes.
 
-			auto pad = toc.pad_size();
-
-			if (pad > 0) add_pad_instr(pad);
+			if (toc.padding > 0) add_pad_instr(toc.padding);
 
 			for (auto k = toc.hierarchy.cguide(); k.not_end(); ++k)
 			{
@@ -189,33 +201,27 @@ namespace chord {
 
 			nik_ce void add_assign_instr(const cguider & l)
 			{
-				if (toc.has_link(l)) add_link(); // if ?
-
+				add_link(); // if (toc.has_link(l)) ?
 				add_instr(call_name(l), MT::id, Mark::value);
-
 				add_replace_instr(l);
 			}
 
 			nik_ce void add_apply_instr(const cguider & l)
 			{
-				if (toc.has_link(l)) add_link(); // if ?
-
+				add_link(); // if (toc.has_link(l)) ?
 				add_instr(call_name(l), MT::id, Mark::value);
-
 				add_replace_instr(l);
 			}
 
 			nik_ce void add_void_instr(const cguider & l)
 			{
-				if (toc.has_link(l)) add_link(); // if ?
-
+				add_link(); // if (toc.has_link(l)) ?
 				add_instr(call_name(l), MT::void_f, Mark::value);
 			}
 
 			nik_ce void add_test_instr(const cguider & l)
 			{
-				if (toc.has_link(l)) add_link(); // if ?
-
+				add_link(); // if (toc.has_link(l)) ?
 				add_instr(call_name(l), MT::id, Mark::value);
 			}
 
@@ -286,10 +292,10 @@ namespace chord {
 
 // automaton:
 
-	template<auto static_scanned>
+	template<auto static_source>
 	struct T_chord_assembly_targeted
 	{
-		nik_ces auto value		= T_chord_assembly_targeter<static_scanned>{};
+		nik_ces auto value		= T_chord_assembly_targeter<static_source>{};
 		using type			= decltype(value);
 
 		// accessors:
@@ -304,16 +310,6 @@ namespace chord {
 			nik_ces gkey_type   next_note  (gcindex_type i) { return value.contr[i+1][MI::note]; }
 			nik_ces gindex_type next_index (gcindex_type i) { return i+1; }
 	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// tail call:
-
-/***********************************************************************************************************************/
-
-	// nothing yet.
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -446,27 +442,27 @@ namespace chord {
 	struct T_chord_assembly_metapiler
 	{
 		nik_ces auto static_pair	= _static_callable_<callable_source>;
-		nik_ces auto static_src		= cctmp::_static_car_<static_pair>;
-		nik_ces auto static_scanned	= U_store_T<T_chord_assembly_scanned<static_src>>;
+		nik_ces auto static_src		= _static_car_<static_pair>;
+		nik_ces auto static_frame	= _static_cdr_<static_pair>;
 
-		nik_ces auto contr		= U_store_T<T_chord_assembly_targeted<static_scanned>>;
-		nik_ces auto env		= user_env<cctmp::_static_cdr_<static_pair>>(Env);
+		nik_ces auto contr		= U_store_T<T_chord_assembly_targeted<static_src>>;
+		nik_ces auto env		= user_env<static_frame>(Env);
 
 		// function:
 
-			template<typename S, typename... Ts>
-			nik_ces S result(Ts... vs)
-			{
-				nik_ce auto out_type = U_store_T<S>;
-				nik_ce auto this_f   = _wrap_<result<S, Ts...>>;
-				nik_ce auto link     = U_pack_Vs<this_f, env>;
+		template<typename S, typename... Ts>
+		nik_ces S result(Ts... vs)
+		{
+			nik_ce auto out_type = U_store_T<S>;
+			nik_ce auto this_f   = _wrap_<result<S, Ts...>>;
+			nik_ce auto link     = U_pack_Vs<this_f, env>;
 
-				return T_machine_start::template result
-				<
-					out_type, contr, link, modify_type<_read_only_, Ts>...
+			return T_machine_start::template result
+			<
+				out_type, contr, link, modify_type<_read_only_, Ts>...
 
-				>((modify_type<_read_only_, Ts>) vs...);
-			}
+			>((modify_type<_read_only_, Ts>) vs...);
+		}
 	};
 
 	// syntactic sugar:

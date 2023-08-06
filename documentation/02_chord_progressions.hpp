@@ -67,12 +67,12 @@ namespace chord {
 
 // symbols:
 
-	// available functional operators: { repeat, fold, find, sift, map, zip, glide, fasten }
+	// available functional operators: { repeat, map, fold, find, sift }
 	// special characters            :    ~!@#$%^&*()_+`-={}|[]\:";'<>?,./
 	// disallowed                    :    "
 	// already used                  :    !_#=:;'.
-	// chord reserved                :    <>{}[](),@*+-|~
-	// remaining                     :    $%^&`\?/
+	// chord reserved                :    <>{}[](),^@*+-|~
+	// remaining                     :    $%&`\?/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -96,40 +96,20 @@ namespace chord {
 
 // carry:
 
+	template<auto radix>
 	struct T_carry_add
 	{
-		template<typename T0, typename T1>
-		constexpr static auto result(T0 v0, T1 v1) { return cctmp::pair(v0 + v1, v0); }
-
-	}; constexpr auto _carry_add_ = U_store_T<T_carry_add>;
-
-	template<auto b>
-	struct T_carry_cons
-	{
-		template<typename C, typename P>
-		constexpr static auto result(C c, P p)
+		template<typename In, typename In1, typename Carry>
+		constexpr static auto result(In in, In1 in1, Carry carry)
 		{
-			auto nc = (c + p.v0) % b;
+			auto val = (in + in1 + *carry) % radix;
+			*carry   = (val < in);
 
-			return cctmp::pair(nc, (nc < p.v1));
+			return val;
 		}
 
-	}; template<auto b = 10>
-		constexpr auto _carry_cons_ = U_store_T<T_carry_cons<b>>;
-
-	struct T_carry_car
-	{
-		template<typename P>
-		constexpr static auto result(P p) { return p.v0; }
-
-	}; constexpr auto _carry_car_ = U_store_T<T_carry_car>;
-
-	struct T_carry_cdr
-	{
-		template<typename P>
-		constexpr static auto result(P p) { return p.v1; }
-
-	}; constexpr auto _carry_cdr_ = U_store_T<T_carry_cdr>;
+	}; template<auto radix = 10>
+		constexpr auto _carry_add_ = U_store_T<T_carry_add<radix>>;
 
 /***********************************************************************************************************************/
 
@@ -163,8 +143,8 @@ namespace chord {
 
 	struct T_print
 	{
-		template<typename T>
-		constexpr static void result(T v, const char *f) { printf(f, *v); }
+		template<typename T0, typename T1>
+		constexpr static void result(T0 v0, T1 v1) { printf(v1, v0); }
 
 	}; constexpr auto _print_ = U_store_T<T_print>;
 
@@ -181,16 +161,14 @@ namespace chord {
 	{
 		return source
 		(
-			"f out end in                        ;"
+			"f out end in                     ;"
 
-			"definitions:                        ;"
-			" arr_repeat # repeat<c_five||>[,){} ;"
+			"definitions:                     ;"
+			" arr_repeat # repeat<@ @||>[,){} ;"
 
-			"body:                               ;"
-			" . = arr_repeat !out end in         ;"
-			" return _                           ;"
-
-			, cctmp::binding( "c_five" , cctmp::_constant_<5> )
+			"body:                            ;"
+			" . = arr_repeat !out end in      ;"
+			" return _                        ;"
 		);
 	}
 
@@ -201,30 +179,154 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// map:
+
+/***********************************************************************************************************************/
+
+// version 0:
+
+	constexpr auto _map_v0()
+	{
+		return source
+		(
+			"f out in end                  ;"
+
+			"definitions:                  ;"
+			" arr_map # map<square||>[)[,) ;"
+
+			"body:                         ;"
+			" . = arr_map !out in end      ;"
+			" return _                     ;"
+
+			, cctmp::binding( "square" , _square_ )
+		);
+	}
+
+	template<typename Out, typename In, typename End>
+	constexpr auto map_v0(Out out, In in, End end)
+		{ return metapiler_apply<_map_v0, null_env, Out>(out, in, end); }
+
+/***********************************************************************************************************************/
+
+// vector sum:
+
+	constexpr auto _vec_sum_v0()
+	{
+		return source
+		(
+			"f out in end in1             ;"
+
+			"definitions:                 ;"
+			" vec_sum # map<add||>[)[,)[) ;"
+
+			"body:                        ;"
+			" . = vec_sum !out in end in1 ;"
+			" return _                    ;"
+		);
+	}
+
+	template<typename Out, typename In, typename End, typename In1>
+	constexpr auto vec_sum_v0(Out out, In in, End end, In1 in1)
+		{ return metapiler_apply<_vec_sum_v0, null_env, Out>(out, in, end, in1); }
+
+/***********************************************************************************************************************/
+
+// array add:
+
+	constexpr auto _array_add_v0()
+	{
+		return source
+		(
+			"f out in end in1 aux                       ;"
+
+			"definitions:                               ;"
+			" arr_add # map<carry_add * * @||>[][,][]{} ;"
+
+			"body:                                      ;"
+			" . = arr_add !out in end in1 !aux          ;"
+			" return _                                  ;"
+
+			, cctmp::binding( "carry_add" , _carry_add_<> )
+		);
+	}
+
+	template<typename Out, typename In, typename End, typename In1, typename Aux>
+	constexpr auto array_add_v0(Out out, In in, End end, In1 in1, Aux aux)
+		{ return metapiler_apply<_array_add_v0, null_env, Out>(out, in, end, in1, &aux); }
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // fold:
 
 /***********************************************************************************************************************/
 
-// version 0 (full options):
+// version 0:
 
 	constexpr auto _fold_v0()
 	{
 		return source
 		(
-			"f out in end                                              ;"
+			"f out in end                     ;"
 
-			"definitions:                                              ;"
-			" arr_fold # fold<add * *|appoint @ @|not_equal @ @>{}[+,) ;"
+			"definitions:                     ;"
+			" arr_fold # fold<@ @|add||>{}[,) ;"
 
-			"body:                                                     ;"
-			" . = arr_fold !out in end                                 ;"
-			" return _                                                 ;"
+			"body:                            ;"
+			" . = arr_fold !out in end        ;"
+			" return _                        ;"
 		);
 	}
 
 	template<typename Out, typename In, typename End>
 	constexpr auto fold_v0(Out out, In in, End end)
 		{ return (Out) *metapiler_apply<_fold_v0, null_env, Out*>(&out, in, end); }
+
+/***********************************************************************************************************************/
+
+// dot product:
+
+	constexpr auto _dot_product_v0()
+	{
+		return source
+		(
+			"f out in end in1                            ;"
+
+			"definitions:                                ;"
+			" dot_prod # fold<multiply|add * @||>{}[,)[) ;"
+
+			"body:                                       ;"
+			" . = dot_prod !out in end in1               ;"
+			" return _                                   ;"
+		);
+	}
+
+	template<typename Out, typename In, typename End, typename In1>
+	constexpr auto dot_product_v0(Out out, In in, End end, In1 in1)
+		{ return (Out) *metapiler_apply<_dot_product_v0, null_env, Out*>(&out, in, end, in1); }
+
+/***********************************************************************************************************************/
+
+// convolution:
+
+	constexpr auto _convolution_v0()
+	{
+		return source
+		(
+			"f out in end in1                           ;"
+
+			"definitions:                               ;"
+			" conv # fold<multiply|add * @||>{}(-|+,][] ;"
+
+			"body:                                      ;"
+			" . = conv !out end in in1                  ;"
+			" return _                                  ;"
+		);
+	}
+
+	template<typename Out, typename In, typename End, typename In1>
+	constexpr auto convolution_v0(Out out, In in, End end, In1 in1)
+		{ return (Out) *metapiler_apply<_convolution_v0, null_env, Out*>(&out, in, end, in1); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -288,148 +390,6 @@ namespace chord {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-
-// map:
-
-/***********************************************************************************************************************/
-
-// version 0:
-
-	constexpr auto _map_v0()
-	{
-		return source
-		(
-			"f out in end                  ;"
-
-			"definitions:                  ;"
-			" arr_map # map<square||>[)[,) ;"
-
-			"body:                         ;"
-			" . = arr_map !out in end      ;"
-			" return _                     ;"
-
-			, cctmp::binding( "square" , _square_ )
-		);
-	}
-
-	template<typename Out, typename In, typename End>
-	constexpr auto map_v0(Out out, In in, End end)
-		{ return metapiler_apply<_map_v0, null_env, Out>(out, in, end); }
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// zip:
-
-/***********************************************************************************************************************/
-
-// version 0:
-
-	constexpr auto _vec_sum_v0()
-	{
-		return source
-		(
-			"f out in1 in2 end2             ;"
-
-			"definitions:                   ;"
-			" vec_sum # zip<add||>[)[)[,)   ;"
-
-			"body:                          ;"
-			" . = vec_sum !out in1 in2 end2 ;"
-			" return _                      ;"
-		);
-	}
-
-	template<typename Out, typename In1, typename In2, typename End2>
-	constexpr auto vec_sum_v0(Out out, In1 in1, In2 in2, End2 end2)
-		{ return metapiler_apply<_vec_sum_v0, null_env, Out>(out, in1, in2, end2); }
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// glide:
-
-/***********************************************************************************************************************/
-
-// version 0:
-
-	constexpr auto _dot_product_v0()
-	{
-		return source
-		(
-			"f out in1 in2 end2                           ;"
-
-			"definitions:                                 ;"
-			" dot_prod # glide<multiply|add * @||>{}[)[,) ;"
-
-			"body:                                        ;"
-			" . = dot_prod !out in1 in2 end2              ;"
-			" return _                                    ;"
-		);
-	}
-
-	template<typename Out, typename In1, typename In2, typename End2>
-	constexpr auto dot_product_v0(Out out, In1 in1, In2 in2, End2 end2)
-		{ return (Out) *metapiler_apply<_dot_product_v0, null_env, Out*>(&out, in1, in2, end2); }
-
-/***********************************************************************************************************************/
-
-// version 0:
-
-	constexpr auto _convolution_v0()
-	{
-		return source
-		(
-			"f out in1 in2 end2                             ;"
-
-			"definitions:                                   ;"
-			" conv # glide<multiply|add * @||>{}[](-|+,-|+] ;"
-
-			"body:                                          ;"
-			" . = conv !out in1 end2 in2                    ;"
-			" return _                                      ;"
-		);
-	}
-
-	template<typename Out, typename In1, typename In2, typename End2>
-	constexpr auto convolution_v0(Out out, In1 in1, In2 in2, End2 end2)
-		{ return (Out) *metapiler_apply<_convolution_v0, null_env, Out*>(&out, in1, in2, end2); }
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// fasten:
-
-/***********************************************************************************************************************/
-
-// version 0:
-
-	constexpr auto _array_add_v0()
-	{
-		return source
-		(
-			"f out in in1 in2 end2                                                          ;"
-
-			"definitions:                                                                   ;"
-			" arr_add # fasten<carry_add|carry_cons * @|carry_car @|carry_cdr @||>[]{}[][,] ;"
-
-			"body:                                                                          ;"
-			" . = arr_add !out !in in1 in2 end2                                             ;"
-			" return _                                                                      ;"
-
-			, cctmp::binding( "carry_add"  , _carry_add_    )
-			, cctmp::binding( "carry_cons" , _carry_cons_<> )
-			, cctmp::binding( "carry_car"  , _carry_car_    )
-			, cctmp::binding( "carry_cdr"  , _carry_cdr_    )
-		);
-	}
-
-	template<typename Out, typename In, typename In1, typename In2, typename End2>
-	constexpr auto array_add_v0(Out out, In in, In1 in1, In2 in2, End2 end2)
-		{ return metapiler_apply<_array_add_v0, null_env, Out>(out, &in, in1, in2, end2); }
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // progressions:
@@ -452,7 +412,7 @@ namespace chord {
 
 			"definitions:                                ;"
 			" arr_map # map<rem_by_n @||>[)[div_by_n|~,) ;"
-			" arr_pr  # repeat<@ @|print @ @|>(-,]{}     ;"
+			" arr_pr  # repeat<@ @|print * @|>(-|+,]{}   ;"
 
 			"body:                                       ;"
 			" . = arr_map !out in zero                   ;"
@@ -486,16 +446,16 @@ namespace chord {
 	{
 		return source
 		(
-			"f out end format                         ;"
+			"f out end format                           ;"
 
-			"definitions:                             ;"
-			" arr_zero # repeat<@ @||>[,){}           ;"
-			" arr_pr   # repeat<@ @|print @ @|>(-,]{} ;"
+			"definitions:                               ;"
+			" arr_zero # repeat<@ @||>[,){}             ;"
+			" arr_pr   # repeat<@ @|print * @|>(-|+,]{} ;"
 
-			"body:                                    ;"
-			" . = arr_zero !out end zero              ;"
-			" . = arr_pr _ out format                 ;"
-			" return _                                ;"
+			"body:                                      ;"
+			" . = arr_zero !out end zero                ;"
+			" . = arr_pr _ out format                   ;"
+			" return _                                  ;"
 
 			, cctmp::binding( "print" , _print_ )
 			, cctmp::binding( "zero"  , 0       )

@@ -31,19 +31,6 @@ namespace chord {
 	void grammar_tests()
 	{
 
-	// factorial:
-
-		static_assert(factorial_v0(0) ==     1);
-		static_assert(factorial_v1(3) ==     6);
-		static_assert(factorial_v2(5) ==   120);
-		static_assert(factorial_v3(7) ==  5040);
-		static_assert(factorial_v4(8) == 40320);
-
-	// fibonacci:
-
-		static_assert(fibonacci_v0(7) ==   21);
-		static_assert(fibonacci_v1(8) ==   34);
-
 	// case studies:
 
 		constexpr auto _1_0i        = complex_number(1, 0);
@@ -87,6 +74,19 @@ namespace chord {
 		static_assert(bin_dis_val1    == 30);
 		static_assert(bin_dis_val2    == 11);
 		static_assert(bin_dis_val3    == 30);
+
+	// factorial:
+
+		static_assert(factorial_v0(0) ==     1);
+		static_assert(factorial_v1(3) ==     6);
+		static_assert(factorial_v2(5) ==   120);
+		static_assert(factorial_v3(7) ==  5040);
+		static_assert(factorial_v4(8) == 40320);
+
+	// fibonacci:
+
+		static_assert(fibonacci_v0(7) ==   21);
+		static_assert(fibonacci_v1(8) ==   34);
 
 	// falling factorial:
 

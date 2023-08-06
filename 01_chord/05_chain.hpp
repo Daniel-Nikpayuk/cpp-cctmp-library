@@ -28,17 +28,15 @@ namespace chord {
 	template<typename T>
 	nik_ce auto U_store_T					= cctmp::U_store_T<T>;
 
-	template<typename T>
-	nik_ce auto U_restore_T					= cctmp::U_restore_T<T>;
-
 	template<auto... Vs>
 	nik_ce auto U_pack_Vs					= cctmp::U_pack_Vs<Vs...>;
 
 	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
 
-	nik_ce auto _id_					= cctmp::_id_;
+	template<auto Op, auto... Vs>
+	nik_ce auto eval					= cctmp::eval<Op, Vs...>;
 
-	nik_ce auto _same_					= cctmp::_same_;
+	nik_ce auto _id_					= cctmp::_id_;
 
 	template<auto p, auto Op, auto... Vs>
 	nik_ce auto unpack_					= cctmp::unpack_<p, Op, Vs...>;
@@ -48,6 +46,7 @@ namespace chord {
 	nik_ce auto _par_at_					= cctmp::_par_at_;
 	nik_ce auto _par_left_					= cctmp::_par_left_;
 	nik_ce auto _par_right_					= cctmp::_par_right_;
+	nik_ce auto _par_segment_				= cctmp::_par_segment_;
 
 	template<auto... Vs>
 	nik_ce auto instruction					= cctmp::instruction<Vs...>;
@@ -72,7 +71,9 @@ namespace chord {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first , select , front , at , map , mapwise , apply , applywise ,
+			none, first , select , front , at ,
+			pad, push, reselect, sift,
+			map , mapwise , apply , applywise ,
 			dimension
 		};
 	};
@@ -127,6 +128,17 @@ namespace chord {
 
 		template<auto c, auto l, typename... Ts>
 		nik_ces auto result(Ts... vs) { return NIK_CHAIN_TS(c, i, l, Ts...)(vs...); }
+	};
+
+/***********************************************************************************************************************/
+
+// none:
+
+	template<auto... filler>
+	struct T_chain<CN::none, filler...>
+	{
+		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
+		nik_ces void result(Ts... vs) { }
 	};
 
 /***********************************************************************************************************************/
@@ -197,6 +209,58 @@ namespace chord {
 		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
 		nik_ces auto result(Ts... vs) { return at<c, i, l, T_store_U<RUs>...>(vs...); }
 	};
+
+/***********************************************************************************************************************/
+
+// pad:
+
+	template<auto... filler>
+	struct T_chain<CN::pad, filler...>
+	{
+		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			nik_ce auto ins	= CD::instr(c, i);
+			nik_ce auto n   = ins[CI::pos];
+			nik_ce auto p   = eval<_par_segment_, n>;
+
+			return NIK_CHAIN_TEMPLATE(c, i), p
+				NIK_CHAIN_RESULT_TS(c, i, l, Ts...)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// push:
+
+	template<template<auto...> typename B, auto... Is, nik_vp(p)(B<Is...>*)>
+	struct T_chain<CN::push, p>
+	{
+		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
+		nik_ces auto result(Ts... vs)
+			{ return NIK_CHAIN_2TS(c, i, l, Ts..., decltype(Is)...)(vs..., Is...); }
+	};
+
+/***********************************************************************************************************************/
+
+// reselect:
+
+	template<template<auto...> typename B, auto... fs, nik_vp(p)(B<fs...>*)>
+	struct T_chain<CN::reselect, p>
+	{
+		template<NIK_CHAIN_PARAMS(c, i, l), typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			return NIK_CHAIN_TEMPLATE(c, i), fs...
+				NIK_CHAIN_RESULT_TS(c, i, l, Ts...)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// sift:
+
+	NIK_DEFINE_CHAIN_SIFT_ID_2_N(6)
 
 /***********************************************************************************************************************/
 

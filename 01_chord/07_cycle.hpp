@@ -25,6 +25,8 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+	nik_ce auto _same_					= cctmp::_same_;
+
 	template<auto... Vs>
 	nik_ce auto _curry_					= cctmp::_curry_<Vs...>;
 
@@ -102,15 +104,16 @@ namespace chord {
 		nik_ces auto & parsed = member_value_U<static_parsed>;
 		using T_link          = T_lookup_cycle_link<static_parsed, this_f, env>;
 
-		template<auto l, auto n, auto types>
-		nik_ces auto unary_func()
-		{
-			nik_ce auto op        = T_link::template parameter<l, n, 0>(types);
-			nik_ce auto arg       = T_link::template parameter<l, n, 1>(types);
-			nik_ce bool arg_is_id = eval<_same_, arg, _id_>;
+		template<auto l, auto types, auto... Is>
+		nik_ces auto all_id = (... && eval<_same_, _id_, T_link::template action<l, Is>(types)>);
 
-			if nik_ce (arg_is_id) return op;
-			else return _subpose_<op, arg>;
+		template<auto l, auto types, auto I0, auto... Is>
+		nik_ces auto action_func(nik_avp(T_pack_Vs<I0, Is...>*))
+		{
+			nik_ce auto op = T_link::template action<l, I0>(types);
+
+			if nik_ce (all_id<l, types, Is...>) return op;
+			else return _subpose_<op, T_link::template action<l, Is>(types)...>;
 		}
 
 		template<auto l, auto n, auto types>
@@ -180,6 +183,14 @@ namespace chord {
 			else if nik_ce (mode == DI::prev) return note_prev<l, n, types>();
 			else                              return _id_;
 		}
+
+		template<auto l, auto types, auto mode>
+		nik_ces auto tonic_iter()
+		{
+			if      nik_ce (mode == DI::next) return T_link::template tonic<l, 0>(types);
+			else if nik_ce (mode == DI::prev) return T_link::template tonic<l, 1>(types);
+			else                              return _id_;
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -218,7 +229,7 @@ namespace chord {
 	{
 		enum : gkey_type
 		{
-			interval, major, diminished, minor,
+			major, diminished, minor,
 			tonic_augmented, tone_augmented, peek_augmented,
 			dimension
 		};
@@ -243,16 +254,16 @@ namespace chord {
 			}
 
 			template<typename Interval, typename... Ts>
-			nik_ces auto open(gckey_type tonic, Ts... tones)
+			nik_ces auto open(Ts... tones)
 			{
 				if      (Interval::all_right_open(tones...)         ) return major;
-				else if (reversible<Interval>(tonic)                ) return tonic_augmented;
+				else if (Interval::cycle.tonic_is_reversible()      ) return tonic_augmented;
 				else if (right_closed_reversible<Interval>(tones...)) return tone_augmented;
 				else                                                  return peek_augmented;
 			}
 
 			template<typename Interval, typename... Ts>
-			nik_ces auto closed(gckey_type tonic, Ts... tones)
+			nik_ces auto closed(Ts... tones)
 			{
 				if (Interval::all_right_closed(tones...)) return diminished;
 				else                                      return minor;
@@ -260,11 +271,11 @@ namespace chord {
 
 		public:
 
-			template<typename Interval, typename... Ts>
-			nik_ces auto name(gckey_type root, gckey_type tonic, Ts... tones)
+			template<typename Interval, auto root, auto... tones>
+			nik_ces auto name(nik_avp(T_pack_Vs<root, tones...>*))
 			{
-				if (Interval::is_right_open(root)) return open<Interval>(tonic, tones...);
-				else                               return closed<Interval>(tonic, tones...);
+				if (Interval::is_right_open(root)) return open<Interval>(tones...);
+				else                               return closed<Interval>(tones...);
 			}
 	};
 
@@ -272,21 +283,8 @@ namespace chord {
 
 	template<gkey_type, typename> struct T_cycle_quality;
 
-	template<typename Interval, auto root, auto tonic, auto... tones>
-	using dispatch_chord = T_cycle_quality<DQ::name<Interval>(root, tonic, tones...), Interval>;
-
-/***********************************************************************************************************************/
-
-// interval:
-
-	template<gindex_type index, auto static_parsed>
-	struct T_cycle_quality<DQ::interval, T_cycle_interval<static_parsed, index>>
-	{
-		using Interval = T_cycle_interval<static_parsed, index>;
-
-		nik_ces bool is_pre_next  (gckey_type note) { return Interval::is_left_open(note); }
-		nik_ces bool is_post_func (gckey_type note) { return Interval::is_right_closed(note); }
-	};
+	template<typename Interval, auto pack>
+	using dispatch_chord = T_cycle_quality<DQ::name<Interval>(pack), Interval>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -306,11 +304,11 @@ namespace chord {
 
 		nik_ces auto pre_root_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
 		nik_ces auto pre_tone_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
-		nik_ces auto pre_tonic_iter_mode  (gckey_type note) { return DI::none; }
+		nik_ces auto pre_tonic_iter_mode  (               ) { return DI::none; }
 
-		nik_ces auto post_root_iter_mode  (gckey_type note) { return DI::none; }
+		nik_ces auto post_root_iter_mode  (               ) { return DI::none; }
 		nik_ces auto post_tone_iter_mode  (gckey_type note) { return DI::none; }
-		nik_ces auto post_tonic_iter_mode (gckey_type note) { return DI::none; }
+		nik_ces auto post_tonic_iter_mode (               ) { return DI::none; }
 
 		nik_ces bool is_peek      (gckey_type note) { return false; }
 		nik_ces bool is_post_func (gckey_type note) { return false; }
@@ -337,11 +335,11 @@ namespace chord {
 
 		nik_ces auto pre_root_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
 		nik_ces auto pre_tone_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
-		nik_ces auto pre_tonic_iter_mode  (gckey_type note) { return DI::prev; }
+		nik_ces auto pre_tonic_iter_mode  (               ) { return DI::prev; }
 
-		nik_ces auto post_root_iter_mode  (gckey_type note) { return DI::next; }
+		nik_ces auto post_root_iter_mode  (               ) { return DI::next; }
 		nik_ces auto post_tone_iter_mode  (gckey_type note) { return DI::post_next_mode<Interval>(note); }
-		nik_ces auto post_tonic_iter_mode (gckey_type note) { return DI::next; }
+		nik_ces auto post_tonic_iter_mode (               ) { return DI::next; }
 
 		nik_ces bool is_peek      (gckey_type note) { return false; }
 		nik_ces bool is_post_func (gckey_type note) { return true; }
@@ -361,11 +359,11 @@ namespace chord {
 
 		nik_ces auto pre_root_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
 		nik_ces auto pre_tone_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
-		nik_ces auto pre_tonic_iter_mode  (gckey_type note) { return DI::none; }
+		nik_ces auto pre_tonic_iter_mode  (               ) { return DI::none; }
 
-		nik_ces auto post_root_iter_mode  (gckey_type note) { return DI::none; }
+		nik_ces auto post_root_iter_mode  (               ) { return DI::none; }
 		nik_ces auto post_tone_iter_mode  (gckey_type note) { return DI::post_prev_mode<Interval>(note); }
-		nik_ces auto post_tonic_iter_mode (gckey_type note) { return DI::none; }
+		nik_ces auto post_tonic_iter_mode (               ) { return DI::none; }
 
 		nik_ces bool is_peek      (gckey_type note) { return false; }
 		nik_ces bool is_post_func (gckey_type note) { return false; }
@@ -385,11 +383,11 @@ namespace chord {
 
 		nik_ces auto pre_root_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
 		nik_ces auto pre_tone_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
-		nik_ces auto pre_tonic_iter_mode  (gckey_type note) { return DI::none; }
+		nik_ces auto pre_tonic_iter_mode  (               ) { return DI::none; }
 
-		nik_ces auto post_root_iter_mode  (gckey_type note) { return DI::next; }
+		nik_ces auto post_root_iter_mode  (               ) { return DI::next; }
 		nik_ces auto post_tone_iter_mode  (gckey_type note) { return DI::post_next_mode<Interval>(note); }
-		nik_ces auto post_tonic_iter_mode (gckey_type note) { return DI::none; }
+		nik_ces auto post_tonic_iter_mode (               ) { return DI::none; }
 
 		nik_ces bool is_peek      (gckey_type note) { return true; }
 		nik_ces bool is_post_func (gckey_type note) { return true; }
@@ -413,11 +411,11 @@ namespace chord {
 
 		nik_ces auto pre_root_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
 		nik_ces auto pre_tone_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
-		nik_ces auto pre_tonic_iter_mode  (gckey_type note) { return DI::none; }
+		nik_ces auto pre_tonic_iter_mode  (               ) { return DI::none; }
 
-		nik_ces auto post_root_iter_mode  (gckey_type note) { return DI::none; }
+		nik_ces auto post_root_iter_mode  (               ) { return DI::none; }
 		nik_ces auto post_tone_iter_mode  (gckey_type note) { return DI::none; }
-		nik_ces auto post_tonic_iter_mode (gckey_type note) { return DI::none; }
+		nik_ces auto post_tonic_iter_mode (               ) { return DI::none; }
 
 		nik_ces bool is_peek      (gckey_type note) { return false; }
 		nik_ces bool is_post_func (gckey_type note) { return true; }
@@ -441,11 +439,11 @@ namespace chord {
 
 		nik_ces auto pre_root_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
 		nik_ces auto pre_tone_iter_mode   (gckey_type note) { return DI::pre_next_mode<Interval>(note); }
-		nik_ces auto pre_tonic_iter_mode  (gckey_type note) { return DI::none; }
+		nik_ces auto pre_tonic_iter_mode  (               ) { return DI::none; }
 
-		nik_ces auto post_root_iter_mode  (gckey_type note) { return DI::none; }
+		nik_ces auto post_root_iter_mode  (               ) { return DI::none; }
 		nik_ces auto post_tone_iter_mode  (gckey_type note) { return DI::post_next_mode<Interval>(note); }
-		nik_ces auto post_tonic_iter_mode (gckey_type note) { return DI::none; }
+		nik_ces auto post_tonic_iter_mode (               ) { return DI::none; }
 
 		nik_ces bool is_peek      (gckey_type note) { return false; }
 		nik_ces bool is_post_func (gckey_type note) { return true; }

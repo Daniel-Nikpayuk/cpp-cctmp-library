@@ -121,10 +121,7 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::overload, ArgOverload::appoint, filler...>
 		{
 			template<typename T1, typename T2>
-			nik_ces auto result(T1 v1, T2 v2) { return *v1 = v2; }
-
-			template<typename T1, typename T2>
-			nik_ces auto result(T1 *v1, T2 v2) { return *v1 = (T1 const) v2; }
+			nik_ces auto result(T1 v1, T2 v2) { return *v1 = (decltype(*v1)) v2; }
 
 		}; nik_ce auto _appoint_ = U_arg_overload<ArgOverload::appoint>;
 

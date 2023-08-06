@@ -62,6 +62,8 @@
 
 #undef NIK_V_1
 
+#undef NIK_T_V_1
+
 #undef NIK_LFS_1
 
 #undef NIK_BFS_FS_VP_LFS_BFS_FS_1
@@ -73,6 +75,8 @@
 #undef NIK_EVAL_OP_V_V_1
 
 #undef NIK_OP_1
+
+#undef NIK_CAST_FS_T_V_1
 
 #undef NIK_10_IDS
 
@@ -216,8 +220,6 @@
 
 #undef NIK_2_N_SEGMENT_VARS
 
-#undef NIK_2_N_TUPLE_VARS
-
 #undef NIK_2_N_ACTION_FOLDS
 
 #undef NIK_DEFINE_EVAL_PAD
@@ -292,9 +294,15 @@
 
 #undef NIK_CHAIN_RESULT_TS
 
+#undef NIK_CHAIN_RESULT_2TS
+
 #undef NIK_CHAIN
 
 #undef NIK_CHAIN_TS
+
+#undef NIK_CHAIN_2TS
+
+#undef NIK_DEFINE_CHAIN_SIFT_ID_2_N
 
 #undef NIK_MACHINE_PARAMS
 

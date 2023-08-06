@@ -25,27 +25,24 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-	nik_ce auto _par_segment_				= cctmp::_par_segment_;
+	template<typename T>
+	nik_ce auto U_restore_T					= cctmp::U_restore_T<T>;
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
+	template<auto... Vs>
+	using T_pack_Vs						= cctmp::T_pack_Vs<Vs...>;
 
 	template<typename... Ts>
 	nik_ce auto U_pack_Ts					= cctmp::U_pack_Ts<Ts...>;
 
 	nik_ce auto _nop_					= cctmp::_nop_;
 
-	template<auto... Vs>
-	nik_ce auto if_then_else_				= cctmp::if_then_else_<Vs...>;
-
 	nik_ce auto _car_					= cctmp::_car_;
 	nik_ce auto _cadr_					= cctmp::_cadr_;
 
-	nik_ce auto _read_write_				= cctmp::_read_write_;
+	template<typename T>
+	nik_ce auto U_custom_T					= cctmp::U_custom_T<T>;
 
-	template<auto n, typename... Ts>
-	using type_at						= cctmp::type_at<n, Ts...>;
+	nik_ce auto _read_write_				= cctmp::_read_write_;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -112,7 +109,7 @@ namespace chord {
 	struct T_lookup<LN::env, LT::frame, env>
 	{
 		using pair_type  = cctmp::pair<gindex_type, gindex_type>;
-		using citer_type = citerator<strlit_type>;
+		using citer_type = cctmp::citerator<strlit_type>;
 
 		nik_ces void update_frame(pair_type & pos, bool & match, citer_type k)
 		{
@@ -150,6 +147,8 @@ namespace chord {
 
 // link:
 
+	template<auto... Vs> using T_lookup_id_link		= T_lookup < LN::link , LT::id       , Vs... >;
+
 	template<auto... Vs> using T_lookup_morph_link		= T_lookup < LN::link , LT::morph    , Vs... >;
 	template<auto... Vs> using T_lookup_cycle_link		= T_lookup < LN::link , LT::cycle    , Vs... >;
 	template<auto... Vs> using T_lookup_tree_link		= T_lookup < LN::link , LT::tree     , Vs... >;
@@ -164,24 +163,22 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
-// morph:
+// id (helper):
 
-	template<auto static_parsed, auto this_f, auto env>
-	struct T_lookup<LN::link, LT::morph, static_parsed, this_f, env>
+	template<auto env>
+	struct T_lookup<LN::link, LT::id, env>
 	{
-		nik_ces auto & parsed = member_value_U<static_parsed>;
-
-		template<auto n, auto m, auto... Us>
+		template<auto entry_disp, auto l, auto n, auto m, auto... Us>
 		nik_ces auto result(nik_avp(T_pack_Vs<Us...>*))
 		{
-			nik_ce auto & entry = parsed.morph_level[n].parameter[m];
+			nik_ce auto & entry = entry_disp(l, n, m);
 			nik_ce auto sign    = entry.sign;
 
 			if nik_ce (Sign::is_static_arg(sign))
 			{
 				nik_ce auto U = eval<_par_at_, entry.index, Us...>;
 
-				return U_restore_T<T_store_U<U>>;
+				return U_restore_T<T_store_U<U>>; // constexpr cast
 			}
 			else if nik_ce (Sign::is_env(sign))
 			{
@@ -190,11 +187,26 @@ namespace chord {
 
 				return T_frame_lookup::template map<record.v0, record.v1>();
 			}
-			else // recurse:
-			{
-				return this_f;
-			}
+			else return _id_; // error
 		}
+	};
+
+/***********************************************************************************************************************/
+
+// morph:
+
+	template<auto static_parsed, auto this_f, auto env>
+	struct T_lookup<LN::link, LT::morph, static_parsed, this_f, env>
+	{
+		nik_ces auto & parsed = member_value_U<static_parsed>;
+		using dispatch        = T_lookup_id_link<env>;
+
+		nik_ces auto & parameter_entry(gindex_type l, gindex_type n, gindex_type m)
+			{ return parsed.morph_level[l].parameter[m]; }
+
+		template<auto l, auto m, typename Pack>
+		nik_ces auto result(Pack p)
+			{ return dispatch::template result<parameter_entry, l, 0, m>(p); }
 	};
 
 /***********************************************************************************************************************/
@@ -205,56 +217,43 @@ namespace chord {
 	struct T_lookup<LN::link, LT::cycle, static_parsed, this_f, env>
 	{
 		nik_ces auto & parsed = member_value_U<static_parsed>;
+		using dispatch        = T_lookup_id_link<env>;
 
-		template<auto l, auto n, auto m, auto... Us>
-		nik_ces auto parameter(nik_avp(T_pack_Vs<Us...>*))
-		{
-			nik_ce auto & entry = parsed.cycle_level[l].parameter[n][m];
-			nik_ce auto sign    = entry.sign;
+		// action:
 
-			if nik_ce (Sign::is_static_arg(sign))
-			{
-				nik_ce auto U = eval<_par_at_, entry.index, Us...>;
+			nik_ces auto & action_entry(gindex_type l, gindex_type n, gindex_type m)
+				{ return parsed.cycle_level[l].action[m]; }
 
-				return U_restore_T<T_store_U<U>>;
-			}
-			else if nik_ce (Sign::is_env(sign))
-			{
-				using T_frame_lookup = T_lookup_frame<env>;
-				nik_ce auto record   = T_frame_lookup::find_frame(entry);
+			template<auto l, auto m, typename Pack>
+			nik_ces auto action(Pack p)
+				{ return dispatch::template result<action_entry, l, 0, m>(p); }
 
-				return T_frame_lookup::template map<record.v0, record.v1>();
-			}
-			else // recurse:
-			{
-				return this_f;
-			}
-		}
+		// parameter:
 
-		template<auto l, auto n, auto m, auto... Us>
-		nik_ces auto iterator(nik_avp(T_pack_Vs<Us...>*))
-		{
-			nik_ce auto & entry = parsed.cycle_level[l].iterator[n][m];
-			nik_ce auto sign    = entry.sign;
+			nik_ces auto & parameter_entry(gindex_type l, gindex_type n, gindex_type m)
+				{ return parsed.cycle_level[l].parameter[n][m]; }
 
-			if nik_ce (Sign::is_static_arg(sign))
-			{
-				nik_ce auto U = eval<_par_at_, entry.index, Us...>;
+			template<auto l, auto n, auto m, typename Pack>
+			nik_ces auto parameter(Pack p)
+				{ return dispatch::template result<parameter_entry, l, n, m>(p); }
 
-				return U_restore_T<T_store_U<U>>;
-			}
-			else if nik_ce (Sign::is_env(sign))
-			{
-				using T_frame_lookup = T_lookup_frame<env>;
-				nik_ce auto record   = T_frame_lookup::find_frame(entry);
+		// iterator:
 
-				return T_frame_lookup::template map<record.v0, record.v1>();
-			}
-			else // recurse:
-			{
-				return this_f;
-			}
-		}
+			nik_ces auto & iterator_entry(gindex_type l, gindex_type n, gindex_type m)
+				{ return parsed.cycle_level[l].iterator[n][m]; }
+
+			template<auto l, auto n, auto m, typename Pack>
+			nik_ces auto iterator(Pack p)
+				{ return dispatch::template result<iterator_entry, l, n, m>(p); }
+
+		// tonic:
+
+			nik_ces auto & tonic_entry(gindex_type l, gindex_type n, gindex_type m)
+				{ return parsed.cycle_level[l].tonic_iter[m]; }
+
+			template<auto l, auto m, typename Pack>
+			nik_ces auto tonic(Pack p)
+				{ return dispatch::template result<tonic_entry, l, 0, m>(p); }
 	};
 
 /***********************************************************************************************************************/
@@ -276,7 +275,7 @@ namespace chord {
 				nik_ce auto pos = parsed.link_entry_index(n, m);
 				nik_ce auto U   = eval<_par_at_, pos, Us...>;
 
-				return U_restore_T<T_store_U<U>>;
+				return U_restore_T<T_store_U<U>>; // constexpr cast
 			}
 			else if nik_ce (Sign::is_env(sign))
 			{
@@ -290,8 +289,8 @@ namespace chord {
 			{
 				nik_ce auto index  = parsed.link_entry_index(n, m);
 				nik_ce auto & line = parsed.morph_level[index];
-				nik_ce auto types  = U_restore_T<decltype(U)>;
 				nik_ce auto pack   = eval<_par_segment_, line.parameter.size()>;
+				nik_ce auto types  = U_restore_T<decltype(U)>;
 				using T_morph      = T_morph_dispatch<line.token, static_parsed, this_f, env>;
 
 				return T_morph::template result<index, types>(pack);
@@ -300,14 +299,15 @@ namespace chord {
 			{
 				nik_ce auto index = parsed.link_entry_index(n, m);
 				nik_ce auto token = parsed.cycle_level[index].token;
+				nik_ce auto size  = parsed.cycle_level[index].interval.size();
+				nik_ce auto notes = eval<_par_segment_, size>;
 				nik_ce auto types = U_restore_T<decltype(U)>;
 				using T_cycle     = T_cycle_dispatch<token, static_parsed, this_f, env>;
 
-				return T_cycle::template result<index, types>();
+				return T_cycle::template result<index, types>(notes);
 			}
 			else if nik_ce (Sign::is_recurse(sign)) return this_f;
 			else return _nop_;
-
 		}
 
 		template<auto n, auto m, typename... Ts>

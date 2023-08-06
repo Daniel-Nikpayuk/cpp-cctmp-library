@@ -123,41 +123,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// sift:
-
-	struct T_interpreter_sift
-	{
-		template<auto Ops>
-		struct T_last
-		{
-			template<auto V, auto N>
-			nik_ces auto result = stem_
-			<
-				eval<PP::_is_na_, V>, _pack_null_, Ops, V, N
-			>;
-
-		}; template<auto Ops>
-			nik_ces auto _last_ = U_custom_T<T_last<Ops>>;
-
-		template<auto Ops> nik_ces auto sH0 = U_pack_Vs<H_id, Ops, _last_<Ops>>;
-		template<auto Ops> nik_ces auto H0  = U_pack_Vs<_car_, sH0<_pack_filter_<Ops>>>;
-
-		template<auto n>
-		nik_ces auto contr = controller
-		<
-			instruction < IN::call , IT::praxis , PN::sift , n >,
-			instruction < IN::halt , IT::eval                  >
-		>;
-
-		template<auto d, auto Ops, auto... Vs>
-		nik_ces auto result = T_interpreter_start::template result<d, contr<sizeof...(Vs)>, _zero, Vs...>(H0<Ops>);
-	};
-
-	nik_ce auto _dpar_sift_ = U_custom_T<T_interpreter_sift>;
-	nik_ce auto  _par_sift_ = ID::template with_initial_depth<_dpar_sift_>;
-
-/***********************************************************************************************************************/
-
 // insert sort:
 
 	template<auto Op>

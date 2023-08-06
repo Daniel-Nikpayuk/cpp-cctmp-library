@@ -26,228 +26,14 @@ namespace chord {
 /***********************************************************************************************************************/
 
 	template<auto U>
-	using T_store_U						= cctmp::T_store_U<U>;
-
-	template<auto... Vs>
-	using T_pack_Vs						= cctmp::T_pack_Vs<Vs...>;
-
-	template<auto U>
 	using member_type_U					= cctmp::member_type_U<U>;
-
-	template<auto Op, auto... Vs>
-	nik_ce auto eval					= cctmp::eval<Op, Vs...>;
-
-	nik_ce auto _equal_					= cctmp::_equal_;
 
 	nik_ce auto _level_append_0_action_			= cctmp::_level_append_0_action_;
 	nik_ce auto _level_1_append_action_			= cctmp::_level_1_append_action_;
 
-	using strlit_type					= cctmp::strlit_type;
-	using cstrlit_type					= cctmp::cstrlit_type;
 	using cstrlit_ref					= cctmp::cstrlit_ref;
-	nik_ce auto U_strlit_type				= cctmp::U_strlit_type;
-
-	template<typename T, typename S = gindex_type>
-	using citerator						= cctmp::citerator<T, S>;
 
 	using cguider						= cctmp::cguider;
-	using cguider_ctype_ref					= cctmp::cguider_ctype_ref;
-
-	using icon						= cctmp::icon;
-	using cicon						= cctmp::cicon;
-
-	using action_type					= cctmp::action_type;
-	nik_ce auto U_action_type				= cctmp::U_action_type;
-
-	using AN						= cctmp::AN;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// scanner:
-
-/***********************************************************************************************************************/
-
-// level:
-
-	struct Level { enum : gkey_type { entry = 0, line, dimension }; };
-
-/***********************************************************************************************************************/
-
-// scanner:
-
-	class T_chord_assembly_scanner
-	{
-		public:
-
-			using T_lexer		= T_chord_assembly_lexer;
-			using Token		= typename T_lexer::Token;
-
-			// how many of these are actually needed?
-
-			struct Total
-			{
-				enum : gkey_type
-				{
-					arg        = Level::dimension  ,
-					jump       , replace  , tag    ,
-					identifier , mu_table , quote  , vo_id ,
-					assign     , apply    , copy   , paste , re_turn ,
-					label      , test     , branch , go_to ,
-					compose    , subpose  , curry  , morph ,
-					repeat     , fold     , find   , sift  ,
-					fasten     , glide    , zip    , map   , cycle   ,
-					dimension
-				};
-			};
-
-		private:
-
-			// casting prevents template<auto> + unnamed enum issues:
-
-			using current_type	= cctmp::sequence < gindex_type , (gindex_type) Level::dimension >;
-			using max_type		= cctmp::sequence < gindex_type , (gindex_type) Level::dimension >;
-			using total_type	= cctmp::sequence < gindex_type , (gindex_type) Total::dimension >;
-
-			current_type current;
-
-		public:
-
-			max_type max;
-			total_type total;
-
-			nik_ce T_chord_assembly_scanner(lexeme l)
-			{
-				current.fullsize();
-				max.fullsize();
-				total.fullsize();
-
-				while (l.not_empty())
-				{
-					T_lexer::lex(l.retract());
-
-					switch (l.token)
-					{
-						case Token::statement  : { update_semicolon   (); break; }
-						case Token::identifier : { update_identifier  (); break; }
-						case Token::mu_table   : { update_punctuation (); break; }
-						case Token::quote      : { update_quote       (); break; }
-						case Token::copy       : { update_period      (); break; }
-						case Token::paste      : { update_underscore  (); break; }
-						case Token::assign     : { update_octothorpe  (); break; }
-						case Token::apply      : { update_equal       (); break; }
-						case Token::re_turn    : { update_return      (); break; }
-						case Token::label      : { update_label       (); break; }
-						case Token::vo_id      : { update_void        (); break; }
-						case Token::test       : { update_test        (); break; }
-						case Token::branch     : { update_branch      (); break; }
-						case Token::go_to      : { update_goto        (); break; }
-
-						case Token::compose : { update_compose (); break; }
-						case Token::subpose : { update_subpose (); break; }
-						case Token::curry   : { update_curry   (); break; }
-
-						case Token::repeat : { update_repeat (); break; }
-						case Token::fold   : { update_fold   (); break; }
-						case Token::find   : { update_find   (); break; }
-						case Token::sift   : { update_sift   (); break; }
-						case Token::map    : { update_map    (); break; }
-						case Token::zip    : { update_zip    (); break; }
-						case Token::glide  : { update_glide  (); break; }
-						case Token::fasten : { update_fasten (); break; }
-					}
-				}
-
-				update_accept();
-			}
-
-		private:
-
-			nik_ce void update_punctuation () { ++total[Total::mu_table]; }
-			nik_ce void update_octothorpe  () { ++total[Total::assign  ]; }
-			nik_ce void update_equal       () { ++total[Total::apply   ]; }
-			nik_ce void update_return      () { ++total[Total::re_turn ]; }
-			nik_ce void update_branch      () { ++total[Total::branch  ]; }
-			nik_ce void update_goto        () { ++total[Total::go_to   ]; }
-
-			nik_ce void update_semicolon () {      update_entry_max(); ++total[Level::line ]; }
-			nik_ce void update_label     () {   ++total[Total::label]; ++total[Level::entry]; }
-			nik_ce void update_void      () { ++current[Level::entry]; ++total[Total::vo_id]; }
-			nik_ce void update_test      () { ++current[Level::entry]; ++total[Total::test ]; }
-
-			nik_ce void update_identifier () { update_entry(Total::identifier); }
-			nik_ce void update_quote      () { update_entry(Total::quote     ); }
-			nik_ce void update_period     () { update_entry(Total::copy      ); }
-			nik_ce void update_underscore () { update_entry(Total::paste     ); }
-
-			nik_ce void update_compose () { update_entry(Total::compose); }
-			nik_ce void update_subpose () { update_entry(Total::subpose); }
-			nik_ce void update_curry   () { update_entry(Total::curry); }
-
-			nik_ce void update_repeat () { update_entry(Total::repeat); }
-			nik_ce void update_fold   () { update_entry(Total::fold  ); }
-			nik_ce void update_find   () { update_entry(Total::find  ); }
-			nik_ce void update_sift   () { update_entry(Total::sift  ); }
-			nik_ce void update_map    () { update_entry(Total::map   ); }
-			nik_ce void update_zip    () { update_entry(Total::zip   ); }
-			nik_ce void update_glide  () { update_entry(Total::glide ); }
-			nik_ce void update_fasten () { update_entry(Total::fasten); }
-
-			nik_ce void update_entry_max () { update_max(Level::entry); }
-			nik_ce void update_line_max  () { update_max(Level::line ); } // redundant ? (total == max)
-
-			nik_ce void update_entry(gckey_type index)
-			{
-				++current[Level::entry];
-				++total[index];
-				++total[Level::entry];
-			}
-
-			nik_ce void update_max(gckey_type level)
-			{
-				if (current[level] > max[level]) max[level] = current[level];
-				current[level] = _zero;
-			}
-
-			nik_ce void update_accept()
-			{
-				total[Total::jump   ] = total[Total::go_to ] + total[Total::branch ] ;
-				total[Total::tag    ] = total[Total::jump  ] + total[Total::label  ] ;
-				total[Total::replace] = total[Total::assign] +
-							total[Total::apply ] - total[Total::copy   ] ;
-				total[Total::arg    ] = max  [Level::entry ] + total[Total::replace] ;
-
-				total[Total::morph  ] = total[Total::compose] +
-							total[Total::subpose] +
-							total[Total::curry  ] ;
-
-				total[Total::cycle  ] = total[Total::repeat] +
-							total[Total::fold  ] +
-							total[Total::find  ] +
-							total[Total::sift  ] +
-							total[Total::map   ] +
-							total[Total::zip   ] +
-							total[Total::glide ] +
-							total[Total::fasten] ;
-			}
-	};
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<auto static_source>
-	struct T_chord_assembly_scanned
-	{
-		nik_ces auto src	= member_value_U<static_source>;
-		nik_ces auto value	= T_chord_assembly_scanner{src.cselect()};
-		using type		= decltype(value);
-
-		using Token			= typename type::Token;
-		nik_ces auto invalid_token	= Token::invalid;
-		nik_ces auto prompt_token	= Token::prompt;
-	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -269,18 +55,18 @@ namespace chord {
 			enum : context_type
 			{
 				none = 0,
-				assign , re_turn , apply , vo_id , test , branch , go_to , label ,
+				assign , apply , vo_id , test , re_turn , label , branch , go_to ,
 				dimension
 			};
 
 			nik_ces bool is_assign (context_type c) { return (c == assign  ); }
-			nik_ces bool is_return (context_type c) { return (c == re_turn ); }
 			nik_ces bool is_apply  (context_type c) { return (c == apply   ); }
 			nik_ces bool is_test   (context_type c) { return (c == test    ); }
 			nik_ces bool is_void   (context_type c) { return (c == vo_id   ); }
+			nik_ces bool is_return (context_type c) { return (c == re_turn ); }
+			nik_ces bool is_label  (context_type c) { return (c == label   ); }
 			nik_ces bool is_branch (context_type c) { return (c == branch  ); }
 			nik_ces bool is_goto   (context_type c) { return (c == go_to   ); }
-			nik_ces bool is_label  (context_type c) { return (c == label   ); }
 		};
 
 	// sign:
@@ -398,10 +184,10 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
-// lookup:
+// link:
 
 	template<typename Type, auto Size>
-	class T_level_lookup : public cctmp::sequence<Type, Size>
+	class T_level_link : public cctmp::sequence<Type, Size>
 	{
 		protected:
 
@@ -429,7 +215,7 @@ namespace chord {
 
 		public:
 
-			nik_ce T_level_lookup() : position{}, difference{}, offset{}, line{} { }
+			nik_ce T_level_link() : position{}, difference{}, offset{}, line{} { }
 
 			nik_ce void initialize(const cguider & g, const level_line & l)
 			{
@@ -460,7 +246,7 @@ namespace chord {
 	};
 
 	template<auto Size>
-	using level_lookup = T_level_lookup<gindex_type, Size>;
+	using level_link = T_level_link<gindex_type, Size>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -532,95 +318,158 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
+// iterator:
+
+	template<typename CharType>
+	struct T_level_iterator : public T_level_entry<CharType>
+	{
+		using base = T_level_entry<CharType>;
+
+		bool is_none;
+		bool is_void;
+
+		nik_ce T_level_iterator() : base{}, is_none{}, is_void{} { }
+		nik_ce T_level_iterator(cstrlit_ref s) : base{s}, is_none{}, is_void{} { }
+	};
+
+	using level_iterator = T_level_iterator<gchar_type>;
+
+/***********************************************************************************************************************/
+
 // interval:
 
-	struct Ival
+	struct level_ival
 	{
 		enum : gkey_type { na, closed, open, dimension };
 
+		bool is_lead;
+		bool is_fixed;
 		gkey_type left;
 		gkey_type right;
-		bool is_lead;
 
-		nik_ce Ival() : left{}, right{}, is_lead{} { }
+		nik_ce level_ival() : is_lead{}, is_fixed{}, left{}, right{} { }
 
-		nik_ce bool is_left_closed  () const { return (left == closed); }
-		nik_ce bool is_left_open    () const { return (left == open); }
+		nik_ce bool is_left_closed  () const { return (left  == closed); }
+		nik_ce bool is_left_open    () const { return (left  == open); }
 		nik_ce bool is_right_closed () const { return (right == closed); }
 		nik_ce bool is_right_open   () const { return (right == open); }
 	};
+
+	using Ival = level_ival;
 
 /***********************************************************************************************************************/
 
 // level:
 
-	template<typename CharType>
-	struct T_level_cycle
+	template<typename CharType, gindex_type CycleSize>
+	class T_level_cycle
 	{
-		using entry_type     = cctmp::sequence < level_entry , 3>;
-		using parameter_type = cctmp::sequence < entry_type  , 6>;
-		using interval_type  = cctmp::sequence < Ival        , 3>;
-		using iterator_type  = cctmp::sequence < entry_type  , 4>;
+		nik_ces auto Size	= CycleSize + 1;
+
+		using level_iter	= T_level_iterator<CharType>;
+
+		using action_entry	= cctmp::sequence < level_entry , Size >;
+		using param_entry	= cctmp::sequence < level_entry , 3    >;
+		using iter_entry	= cctmp::sequence < level_iter  , 2    >;
+
+		using parameter_type	= cctmp::sequence < param_entry , 3    >;
+		using interval_type	= cctmp::sequence < level_ival  , Size >;
+		using iterator_type	= cctmp::sequence < iter_entry  , Size >;
+
+		public:
 
 		token_type token;
+		action_entry action;
 		parameter_type parameter;
 		interval_type interval;
 		iterator_type iterator;
+		iter_entry tonic_iter;
 
-		nik_ce T_level_cycle() : token{} { }
+			nik_ce T_level_cycle() : token{} { }
 
-	// token:
+		// token:
 
-		nik_ce void set_token(ctoken_type t) { token = t; }
+			nik_ce void set_token(ctoken_type t) { token = t; }
 
-	// param:
+		protected:
 
-		nik_ce void param_upsize() { parameter.upsize(); }
+		// append:
 
-		nik_ce void param_append(clexeme *l, csign_type s, gindex_type i = 0)
-		{
-			parameter.last()->end()->copy(l);
-			parameter.last()->end()->sign = s;
-			parameter.last()->end()->index = i;
-			parameter.last()->upsize();
-		}
+			template<typename Seq>
+			nik_ce void append(Seq *seq, clexeme *l, csign_type s, gindex_type i = 0)
+			{
+				seq->end()->copy(l);
+				seq->end()->sign = s;
+				seq->end()->index = i;
+				seq->upsize();
+			}
 
-		nik_ce void param_append(cstrlit_ref l, csign_type s, gindex_type i = 0)
-		{
-			parameter.last()->push(l);
-			parameter.last()->last()->sign = s;
-			parameter.last()->last()->index = i;
-		}
+			template<typename Seq>
+			nik_ce void append(Seq *seq, cstrlit_ref l, csign_type s, gindex_type i = 0)
+			{
+				seq->push(l);
+				seq->last()->sign = s;
+				seq->last()->index = i;
+			}
 
-	// iter:
+		public:
 
-		nik_ce void iter_upsize() { iterator.upsize(); }
+		// action:
 
-		nik_ce void iter_append(clexeme *l, csign_type s, gindex_type i = 0)
-		{
-			iterator.last()->end()->copy(l);
-			iterator.last()->end()->sign = s;
-			iterator.last()->end()->index = i;
-			iterator.last()->upsize();
-		}
+			nik_ce void action_append(clexeme *l, csign_type s, gindex_type i = 0)
+				{ append(&action, l, s, i); }
 
-		nik_ce void iter_append(cstrlit_ref l, csign_type s, gindex_type i = 0)
-		{
-			iterator.last()->push(l);
-			iterator.last()->last()->sign = s;
-			iterator.last()->last()->index = i;
-		}
+			nik_ce void action_append(cstrlit_ref l, csign_type s, gindex_type i = 0)
+				{ append(&action, l, s, i); }
 
-		nik_ce bool is_reversible(gindex_type pos) const { return (iterator[pos].size() == 2); }
+		// param:
 
-	// ival:
+			nik_ce void param_upsize() { parameter.upsize(); }
 
-		nik_ce void set_left(gckey_type i) { interval.end()->left = i; }
-		nik_ce void set_right(gckey_type i) { interval.end()->right = i; interval.upsize(); }
-		nik_ce void set_lead() { interval.end()->is_lead = true; }
+			nik_ce void param_append(clexeme *l, csign_type s, gindex_type i = 0)
+				{ append(parameter.last(), l, s, i); }
+
+			nik_ce void param_append(cstrlit_ref l, csign_type s, gindex_type i = 0)
+				{ append(parameter.last(), l, s, i); }
+
+		// iter:
+
+			nik_ce void iter_upsize() { iterator.upsize(); }
+
+			nik_ce void set_none() { iterator.last()->last()->is_none = true; }
+			nik_ce void set_void() { iterator.last()->last()->is_void = true; }
+
+			nik_ce void iter_append(clexeme *l, csign_type s, gindex_type i = 0)
+				{ append(iterator.last(), l, s, i); }
+
+			nik_ce void iter_append(cstrlit_ref l, csign_type s, gindex_type i = 0)
+				{ append(iterator.last(), l, s, i); }
+
+			nik_ce bool is_reversible(gindex_type pos) const { return (iterator[pos].size() == 2); }
+
+		// tonic:
+
+			nik_ce void tonic_append(clexeme *l, csign_type s, gindex_type i = 0)
+				{ append(&tonic_iter, l, s, i); }
+
+			nik_ce void tonic_append(cstrlit_ref l, csign_type s, gindex_type i = 0)
+				{ append(&tonic_iter, l, s, i); }
+
+			nik_ce void tonic_set_none() { tonic_iter.last()->is_none = true; }
+			nik_ce void tonic_set_void() { tonic_iter.last()->is_void = true; }
+
+			nik_ce bool tonic_is_reversible() const { return (tonic_iter.size() == 2); }
+
+		// ival:
+
+			nik_ce void set_fixed() { interval.end()->is_fixed = true; interval.upsize(); }
+			nik_ce void set_left(gckey_type i) { interval.end()->left = i; }
+			nik_ce void set_right(gckey_type i) { interval.end()->right = i; interval.upsize(); }
+			nik_ce void set_lead() { interval.end()->is_lead = true; }
 	};
 
-	using level_cycle = T_level_cycle<gchar_type>;
+	template<auto Size>
+	using level_cycle = T_level_cycle<gchar_type, Size>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -634,88 +483,67 @@ namespace chord {
 	template<auto static_scanned>
 	struct T_chord_assembly_ast
 	{
-		using scanned_type		= member_type_U<static_scanned>;
 		using T_lexer			= T_chord_assembly_lexer;
 		using Token			= typename T_lexer::Token;
-		using Total			= typename T_chord_assembly_scanner::Total;
+		using scanned_type		= member_type_U<static_scanned>;
+		using Total			= typename scanned_type::Total;
+		using Cap			= typename scanned_type::Cap;
 
 		nik_ces auto & scanned		= member_value_U<static_scanned>;
-		nik_ces auto invalid_token	= T_store_U<static_scanned>::invalid_token;
-		nik_ces auto prompt_token	= T_store_U<static_scanned>::prompt_token;
+		nik_ces auto padding		= scanned.total[Total::pad];
 
-		nik_ces gindex_type label_total		= scanned.total[Total::label];
-		nik_ces gindex_type go_into_total	= label_total;
+		using hierarchy_type		= cctmp::T_hierarchy<gindex_type{3}, scanned.hierarchy_size>;
+		using cnavigator_type		= typename hierarchy_type::cnavigator_type;
+		using navigator_type		= typename hierarchy_type::navigator_type;
 
-		nik_ces gindex_type entry_total		= scanned.total[Level::entry] + go_into_total;
-		nik_ces gindex_type line_total		= scanned.total[Level::line] + go_into_total;
-		nik_ces gindex_type rline_total		= line_total - 1; // rest (non arg) lines.
+		using level_link_type		= level_link  < scanned.capacity[Cap::tree]  >;
+		using level_morph_type		= level_morph < scanned.capacity[Cap::morph] >;
+		using level_cycle_type		= level_cycle < scanned.capacity[Cap::cycle] >;
 
-		nik_ces gindex_type jump_total		= scanned.total[Total::jump] + go_into_total;
-		nik_ces gindex_type tag_total		= scanned.total[Total::tag] + go_into_total;
-		nik_ces gindex_type arg_total		= scanned.total[Total::arg];
-		nik_ces gindex_type morph_total		= scanned.total[Total::morph];
-		nik_ces gindex_type cycle_total		= scanned.total[Total::cycle];
+		using level_line_seq		= cctmp::sequence < level_line       , scanned.total[Total::line ] >;
+		using level_entry_seq		= cctmp::sequence < level_entry      , scanned.total[Total::tree ] >;
+		using level_link_seq		= cctmp::sequence < level_link_type  , scanned.total[Total::line ] >;
+		using level_morph_seq		= cctmp::sequence < level_morph_type , scanned.total[Total::morph] >;
+		using level_cycle_seq		= cctmp::sequence < level_cycle_type , scanned.total[Total::cycle] >;
+		using level_arg_seq		= cctmp::sequence < level_arg        , scanned.arg_size            >;
+		using level_tag_seq		= cctmp::sequence < level_tag        , scanned.tag_size            >;
 
-		nik_ces gindex_type entry_max		= scanned.max[Level::entry];
-		nik_ces gindex_type line_max		= line_total; // rline_total ?
-
-		nik_ces gindex_type level_2_size	= line_max + 3;
-		nik_ces gindex_type level_1_size	= line_total * (entry_max + 3);
-		nik_ces gindex_type level_0_size	= entry_total * 3;
-
-		nik_ces gindex_type hierarchy_length	= level_0_size + level_1_size + level_2_size;
-
-		using hierarchy_type			= cctmp::T_hierarchy < gindex_type{3} , hierarchy_length >;
-		using cnavigator_type			= typename hierarchy_type::cnavigator_type;
-		using navigator_type			= typename hierarchy_type::navigator_type;
-
-		using level_link			= level_lookup<entry_max>;
-		using level_morphism			= level_morph<gindex_type{10}>; // temporary.
-
-		using level_line_type			= cctmp::sequence < level_line     , rline_total >;
-		using level_entry_type			= cctmp::sequence < level_entry    , entry_total >;
-		using level_tag_type			= cctmp::sequence < level_tag      , tag_total   >;
-		using level_arg_type			= cctmp::sequence < level_arg      , arg_total   >;
-		using level_link_type			= cctmp::sequence < level_link     , rline_total >;
-		using level_morph_type			= cctmp::sequence < level_morphism , morph_total >;
-		using level_cycle_type			= cctmp::sequence < level_cycle    , cycle_total >;
-
-		using label_type			= cctmp::subsequence < level_tag , label_total >;
-		using jump_type				= cctmp::subsequence < level_tag , jump_total  >;
+		using label_seq			= cctmp::subsequence < level_tag , scanned.total[Total::label] >;
+		using jump_seq			= cctmp::subsequence < level_tag , scanned.total[Total::jump ] >;
 
 		hierarchy_type hierarchy;
 		navigator_type current;
-		level_line_type line_level;
-		level_entry_type entry_level;
-		level_link_type link_level;
-		level_tag_type tag_level;
-		level_arg_type arg_level;
-		level_morph_type morph_level;
-		level_cycle_type cycle_level;
+		level_line_seq line_level;
+		level_entry_seq entry_level;
+		level_link_seq link_level;
+		level_tag_seq tag_level;
+		level_arg_seq arg_level;
+		level_morph_seq morph_level;
+		level_cycle_seq cycle_level;
 
-		level_line_type *level_1;
-		level_entry_type *level_0;
+		level_line_seq *level_1;
+		level_entry_seq *level_0;
 
-		label_type label;
-		jump_type jump;
+		label_seq label;
+		jump_seq jump;
 
 		level_arg name;
 		lexeme lexed;
-		gindex_type arity;
 		bool has_local_copy;
 
 		nik_ce T_chord_assembly_ast() :
 
-			hierarchy{line_max, entry_max, gindex_type{0}}, current{hierarchy.origin()},
-			level_0{&entry_level}, level_1{&line_level},
-			arity{}, has_local_copy{} { }
+			hierarchy{scanned.total[Total::line], scanned.capacity[Cap::tree], gindex_type{0}},
+			current{hierarchy.origin()},
+			level_0{&entry_level},
+			level_1{&line_level},
+			has_local_copy{} { }
 
 		// local:
 
 			nik_ce auto line_size   () const { return line_level.size()   ; }
 			nik_ce auto entry_size  () const { return entry_level.size()  ; }
 			nik_ce auto arg_size    () const { return arg_level.size()    ; }
-			nik_ce auto pad_size    () const { return arg_size() - arity  ; }
 
 			nik_ce auto has_copy   () const { return has_local_copy; }
 
@@ -724,8 +552,6 @@ namespace chord {
 
 			nik_ce void update_copy_paste()
 				{ if (has_local_copy) { set_paste(); unset_copy(); } }
-
-			nik_ce void set_arity  () { arity = arg_level.size(); }
 
 			nik_ce const auto & line_at  (const cguider & g) const { return line_level  [~g]; }
 			nik_ce const auto & entry_at (const cguider & g) const { return entry_level [~g]; }
@@ -939,6 +765,19 @@ namespace chord {
 				cycle_level.upsize();
 			}
 
+			// action:
+
+			nik_ce void cycle_action_identifier(clexeme *l, gindex_type index)
+				{ cycle_level.last()->action_append(l, Sign::static_arg, index); }
+
+			nik_ce void cycle_action_unknown(clexeme *l)
+				{ cycle_level.last()->action_append(l, Sign::env, Link::cycle_param); }
+
+			nik_ce void cycle_action_known(cstrlit_ref s)
+				{ cycle_level.last()->action_append(s, Sign::env, Link::cycle_param); }
+
+			// param:
+
 			nik_ce void cycle_param_identifier(clexeme *l, gindex_type index)
 				{ cycle_level.last()->param_append(l, Sign::static_arg, index); }
 
@@ -948,6 +787,8 @@ namespace chord {
 			nik_ce void cycle_param_known(cstrlit_ref s)
 				{ cycle_level.last()->param_append(s, Sign::env, Link::cycle_param); }
 
+			// iter:
+
 			nik_ce void cycle_iter_identifier(clexeme *l, gindex_type index)
 				{ cycle_level.last()->iter_append(l, Sign::static_arg, index); }
 
@@ -956,6 +797,17 @@ namespace chord {
 
 			nik_ce void cycle_iter_known(cstrlit_ref s)
 				{ cycle_level.last()->iter_append(s, Sign::env, Link::cycle_iter); }
+
+			// tonic:
+
+			nik_ce void cycle_tonic_identifier(clexeme *l, gindex_type index)
+				{ cycle_level.last()->tonic_append(l, Sign::static_arg, index); }
+
+			nik_ce void cycle_tonic_unknown(clexeme *l)
+				{ cycle_level.last()->tonic_append(l, Sign::env, Link::cycle_iter); }
+
+			nik_ce void cycle_tonic_known(cstrlit_ref s)
+				{ cycle_level.last()->tonic_append(s, Sign::env, Link::cycle_iter); }
 	};
 
 /***********************************************************************************************************************/

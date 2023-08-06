@@ -99,6 +99,7 @@ namespace chord {
 				label       ,
 				re_turn     ,
 				go_to       ,
+				tail        ,
 				mu_table    ,
 				apply       ,
 				test        ,
@@ -111,6 +112,7 @@ namespace chord {
 				bar         ,
 				identity    ,
 				dereference ,
+				caret       ,
 				increment   ,
 				decrement   ,
 				tilde       ,
@@ -131,9 +133,6 @@ namespace chord {
 				fold        ,
 				find        ,
 				sift        ,
-				zip         ,
-				glide       ,
-				fasten      ,
 
 			//	keyword_label_error ,
 
@@ -160,6 +159,7 @@ namespace chord {
 				bar           ,
 				at            ,
 				star          ,
+				caret         ,
 				plus          ,
 				minus         ,
 				tilde         ,
@@ -195,6 +195,7 @@ namespace chord {
 				cctmp::pair( bar           , Token::bar         ),
 				cctmp::pair( at            , Token::identity    ),
 				cctmp::pair( star          , Token::dereference ),
+				cctmp::pair( caret         , Token::caret       ),
 				cctmp::pair( plus          , Token::increment   ),
 				cctmp::pair( minus         , Token::decrement   ),
 				cctmp::pair( tilde         , Token::tilde       ),
@@ -229,6 +230,7 @@ namespace chord {
 				bar           ,
 				at            ,
 				star          ,
+				caret         ,
 				plus          ,
 				minus         ,
 				tilde         ,
@@ -261,6 +263,7 @@ namespace chord {
 				cctmp::pair( '|'  , Charset::bar           ),
 				cctmp::pair( '@'  , Charset::at            ),
 				cctmp::pair( '*'  , Charset::star          ),
+				cctmp::pair( '^'  , Charset::caret         ),
 				cctmp::pair( '+'  , Charset::plus          ),
 				cctmp::pair( '-'  , Charset::minus         ),
 				cctmp::pair( '~'  , Charset::tilde         ),
@@ -300,6 +303,7 @@ namespace chord {
 			table[ State::initial ][ Charset::bar           ] = State::bar;
 			table[ State::initial ][ Charset::at            ] = State::at;
 			table[ State::initial ][ Charset::star          ] = State::star;
+			table[ State::initial ][ Charset::caret         ] = State::caret;
 			table[ State::initial ][ Charset::plus          ] = State::plus;
 			table[ State::initial ][ Charset::minus         ] = State::minus;
 			table[ State::initial ][ Charset::tilde         ] = State::tilde;
@@ -339,6 +343,7 @@ namespace chord {
 		nik_ces auto void_charset       () { return cctmp::dfa_charset("void");   }
 		nik_ces auto test_charset       () { return cctmp::dfa_charset("test");   }
 		nik_ces auto goto_charset       () { return cctmp::dfa_charset("goto");   }
+		nik_ces auto tail_charset       () { return cctmp::dfa_charset("tail");   }
 		nik_ces auto branch_charset     () { return cctmp::dfa_charset("branch"); }
 		nik_ces auto return_charset     () { return cctmp::dfa_charset("return"); }
 
@@ -351,9 +356,6 @@ namespace chord {
 		nik_ces auto fold_charset       () { return cctmp::dfa_charset("fold"); }
 		nik_ces auto find_charset       () { return cctmp::dfa_charset("find"); }
 		nik_ces auto sift_charset       () { return cctmp::dfa_charset("sift"); }
-		nik_ces auto zip_charset        () { return cctmp::dfa_charset("zip"); }
-		nik_ces auto glide_charset      () { return cctmp::dfa_charset("glide"); }
-		nik_ces auto fasten_charset     () { return cctmp::dfa_charset("fasten"); }
 	};
 
 /***********************************************************************************************************************/
@@ -369,6 +371,7 @@ namespace chord {
 		using T_void_lexer		= cctmp::T_keyword_lexer< T_dfa::void_charset   , Token::vo_id   >;
 		using T_test_lexer		= cctmp::T_keyword_lexer< T_dfa::test_charset   , Token::test    >;
 		using T_goto_lexer		= cctmp::T_keyword_lexer< T_dfa::goto_charset   , Token::go_to   >;
+		using T_tail_lexer		= cctmp::T_keyword_lexer< T_dfa::tail_charset   , Token::tail    >;
 		using T_branch_lexer		= cctmp::T_keyword_lexer< T_dfa::branch_charset , Token::branch  >;
 		using T_return_lexer		= cctmp::T_keyword_lexer< T_dfa::return_charset , Token::re_turn >;
 
@@ -381,9 +384,6 @@ namespace chord {
 		using T_fold_lexer		= cctmp::T_keyword_lexer< T_dfa::fold_charset   , Token::fold   >;
 		using T_find_lexer		= cctmp::T_keyword_lexer< T_dfa::find_charset   , Token::find   >;
 		using T_sift_lexer		= cctmp::T_keyword_lexer< T_dfa::sift_charset   , Token::sift   >;
-		using T_zip_lexer		= cctmp::T_keyword_lexer< T_dfa::zip_charset    , Token::zip    >;
-		using T_glide_lexer		= cctmp::T_keyword_lexer< T_dfa::glide_charset  , Token::glide  >;
-		using T_fasten_lexer		= cctmp::T_keyword_lexer< T_dfa::fasten_charset , Token::fasten >;
 
 		nik_ces void lex(lexeme & l)
 		{
@@ -441,15 +441,14 @@ namespace chord {
 
 		nik_ces token_type keyword_1(const cselector<char> & s)
 		{
-			if   (cctmp::recognizes< T_paste_lexer >(s)) return T_paste_lexer::token;
-			else                                         return TokenName::invalid;
+			if (cctmp::recognizes< T_paste_lexer >(s)) return T_paste_lexer::token;
+			else                                       return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_3(const cselector<char> & s)
 		{
-			if      (cctmp::recognizes< T_map_lexer >(s)) return T_map_lexer::token;
-			else if (cctmp::recognizes< T_zip_lexer >(s)) return T_zip_lexer::token;
-			else                                          return TokenName::invalid;
+			if (cctmp::recognizes< T_map_lexer >(s)) return T_map_lexer::token;
+			else                                     return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_4(const cselector<char> & s)
@@ -457,6 +456,7 @@ namespace chord {
 			if      (cctmp::recognizes< T_void_lexer >(s)) return T_void_lexer::token;
 			else if (cctmp::recognizes< T_test_lexer >(s)) return T_test_lexer::token;
 			else if (cctmp::recognizes< T_goto_lexer >(s)) return T_goto_lexer::token;
+			else if (cctmp::recognizes< T_tail_lexer >(s)) return T_tail_lexer::token;
 			else if (cctmp::recognizes< T_fold_lexer >(s)) return T_fold_lexer::token;
 			else if (cctmp::recognizes< T_find_lexer >(s)) return T_find_lexer::token;
 			else if (cctmp::recognizes< T_sift_lexer >(s)) return T_sift_lexer::token;
@@ -465,9 +465,8 @@ namespace chord {
 
 		nik_ces token_type keyword_5(const cselector<char> & s)
 		{
-			if      (cctmp::recognizes< T_glide_lexer >(s)) return T_glide_lexer::token;
-			else if (cctmp::recognizes< T_curry_lexer >(s)) return T_curry_lexer::token;
-			else                                            return TokenName::invalid;
+			if (cctmp::recognizes< T_curry_lexer >(s)) return T_curry_lexer::token;
+			else                                       return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_6(const cselector<char> & s)
@@ -475,7 +474,6 @@ namespace chord {
 			if      (cctmp::recognizes< T_branch_lexer >(s)) return T_branch_lexer::token;
 			else if (cctmp::recognizes< T_return_lexer >(s)) return T_return_lexer::token;
 			else if (cctmp::recognizes< T_repeat_lexer >(s)) return T_repeat_lexer::token;
-			else if (cctmp::recognizes< T_fasten_lexer >(s)) return T_fasten_lexer::token;
 			else                                             return TokenName::invalid;
 		}
 

@@ -3482,17 +3482,17 @@ namespace cctmp_program
 // parser generator printers:
 
 	//	auto parsed_printer = parser_generator_parsed_printer<static_grammar>{};
+	//	parsed_printer.print_cfg();
 	//	parsed_printer.print_head();
 	//	parsed_printer.print_symbols();
 	//	parsed_printer.print_actions();
-	//	parsed_printer.print_cfg();
 
 	//	auto targeted_printer = parser_generator_targeted_printer<static_grammar>{};
-	//	targeted_printer.print_nonterm_symbol_first();
-	//	targeted_printer.print_head_symbol_first();
+	//	targeted_printer.print_head_follow();
 	//	targeted_printer.print_head_first();
 	//	targeted_printer.print_body_first();
-	//	targeted_printer.print_head_follow();
+	//	targeted_printer.print_head_symbol_first();
+	//	targeted_printer.print_nonterm_symbol_first();
 
 	//	auto tr_table_printer = parser_generator_tt_printer<static_grammar>{};
 	//	auto & tr_table = tr_table_printer.tr_table;
@@ -3591,19 +3591,25 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 
+	using chord_scanner_grammar		= chord::T_chord_assembly_scanner_grammar;
 	using chord_grammar			= chord::T_chord_assembly_grammar;
+	constexpr auto static_scanner_grammar	= U_store_T<chord_scanner_grammar>;
 	constexpr auto static_grammar		= U_store_T<chord_grammar>;
 	constexpr auto src			= _fold_v0;
 
 /***********************************************************************************************************************/
 
+	//	auto tr_table_printer = parser_generator_tt_printer<static_grammar>{};
+	//	tr_table_printer.print_num_tr_table();
+
+	//	auto scanned_printer = chord_assembly_scanner_parsed_printer<static_scanner_grammar, src>{};
+	//	scanned_printer.print_total();
+	//	scanned_printer.print_capacity();
+
 	//	auto parsed_printer = chord_assembly_parsed_printer<static_grammar, src>{};
 	//	parsed_printer.print_tree();
 	//	parsed_printer.print_cycle();
 	//	parsed_printer.print_morph();
-
-	//	auto tr_table_printer = parser_generator_tt_printer<static_grammar>{};
-	//	tr_table_printer.print_num_tr_table();
 
 	//	auto targeted_printer = chord_assembly_targeted_printer<src>{};
 	//	targeted_printer.print_controller();

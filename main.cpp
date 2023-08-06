@@ -19,42 +19,48 @@
 
 #include<cstdio>
 
-#define NIK_PARSER_GENERATOR_PDA // bug: currently both need to be on or both off.
-#define NIK_CHORD_ASSEMBLY_PDA
+#define NIK_PARSER_GENERATOR_PARSER_OBJ       "../transition_tables/00_parser_generator_parser.hpp"
+#define NIK_CHORD_ASSEMBLY_SCANNER_PARSER_OBJ "../transition_tables/01_chord_assembly_scanner.hpp"
+#define NIK_CHORD_ASSEMBLY_PARSER_OBJ         "../transition_tables/02_chord_assembly_parser.hpp"
+
+#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
+#define NIK_CHORD_ASSEMBLY_SCANNER_PARSER
+#define NIK_CHORD_ASSEMBLY_PARSER
 
 /***********************************************************************************************************************/
 
 #include"define_macros.hpp"
 
-#include"00_cctmp_grammar.hpp"
-#include"01_cctmp_argument.hpp"
-#include"02_cctmp_parameter.hpp"
-#include"03_cctmp_praxis.hpp"
-#include"04_cctmp_interpreter.hpp"
-#include"05_cctmp_scope.hpp"
-#include"06_cctmp_relation.hpp"
-#include"07_cctmp_graph.hpp"
-#include"08_cctmp_lexer.hpp"
-#include"09_cctmp_syntax.hpp"
-#include"10_cctmp_parser.hpp"
-#include"11_cctmp_generator.hpp"
+#include"00_cctmp/00_grammar.hpp"
+#include"00_cctmp/01_argument.hpp"
+#include"00_cctmp/02_parameter.hpp"
+#include"00_cctmp/03_praxis.hpp"
+#include"00_cctmp/04_interpreter.hpp"
+#include"00_cctmp/05_scope.hpp"
+#include"00_cctmp/06_relation.hpp"
+#include"00_cctmp/07_graph.hpp"
+#include"00_cctmp/08_lexer.hpp"
+#include"00_cctmp/09_syntax.hpp"
+#include"00_cctmp/10_parser.hpp"
+#include"00_cctmp/11_generator.hpp"
 
-#include"12_chord_lexer.hpp"
-#include"13_chord_syntax.hpp"
-#include"14_chord_action.hpp"
-#include"15_chord_parser.hpp"
-#include"16_chord_chain.hpp"
-#include"17_chord_lookup.hpp"
-#include"18_chord_cycle.hpp"
-#include"19_chord_progression.hpp"
-#include"20_chord_machine.hpp"
-#include"21_chord_targeter.hpp"
+#include"01_chord/00_lexer.hpp"
+#include"01_chord/01_scanner.hpp"
+#include"01_chord/02_syntax.hpp"
+#include"01_chord/03_action.hpp"
+#include"01_chord/04_parser.hpp"
+#include"01_chord/05_chain.hpp"
+#include"01_chord/06_lookup.hpp"
+#include"01_chord/07_cycle.hpp"
+#include"01_chord/08_progression.hpp"
+#include"01_chord/09_machine.hpp"
+#include"01_chord/10_targeter.hpp"
 
-//#include"22_math_byte_ring.hpp"
-//#include"23_math_byte_array_ring.hpp"
-//#include"24_math_cryptography.hpp"
-//#include"25_math_linear_algebra.hpp"
-//#include"26_math_signal_processing.hpp"
+//#include"02_math/00_byte_ring.hpp"
+//#include"02_math/01_byte_array_ring.hpp"
+//#include"02_math/02_cryptography.hpp"
+//#include"02_math/03_linear_algebra.hpp"
+//#include"02_math/04_signal_processing.hpp"
 
 #include"undef_macros.hpp"
 
@@ -79,13 +85,10 @@
 	//	chord::grammar_tests(); // 24 tests.
 
 	//	chord::repeat_tests ();
+	//	chord::map_tests    ();
 	//	chord::fold_tests   ();
 	//	chord::find_tests   ();
 	//	chord::sift_tests   ();
-	//	chord::map_tests    ();
-	//	chord::zip_tests    ();
-	//	chord::glide_tests  ();
-	//	chord::fasten_tests ();
 
 	//	chord::change_of_base_tests ();
 	//	chord::array_printer_tests  ();

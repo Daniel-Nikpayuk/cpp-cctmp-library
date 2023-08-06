@@ -492,8 +492,8 @@ namespace cctmp {
 
 // interface:
 
-#ifdef NIK_PARSER_GENERATOR_PDA
-#include"transition_tables/00_parser_generator_parser.hpp"
+#ifdef NIK_PARSER_GENERATOR_PARSER
+#include NIK_PARSER_GENERATOR_PARSER_OBJ
 #else
 
 	template<typename T_grammar>

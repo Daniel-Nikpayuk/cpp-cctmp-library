@@ -30,22 +30,22 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// parsed:
+// scanner:
 
 /***********************************************************************************************************************/
 
-// interface:
+// parsed:
 
 	template<auto static_grammar, auto callable_source>
-	struct chord_assembly_parsed_printer
+	struct chord_assembly_scanner_parsed_printer
 	{
 		private:
 
 			using T_grammar					= T_store_U<static_grammar>;
-			using Token					= typename T_grammar::Token;
-			using strlit_type				= string_literal<>;
-			using cstrlit_type				= strlit_type const;
-			using cstrlit_ref				= cstrlit_type&;
+			using CASAN					= chord::CASAN;
+			using T_ast					= chord::T_chord_assembly_scanner_ast;
+			using Total					= typename T_ast::Total;
+			using Capacity					= typename T_ast::Cap;
 
 			template<auto ss, auto sg>
 			constexpr static auto U_static_pg_parsed	= U_store_T<T_parser_generator_parsed<ss, sg>>;
@@ -57,11 +57,90 @@ namespace cctmp {
 			//
 
 			template<auto st, auto ss>
-			constexpr static auto U_static_parsed		= U_store_T<chord::T_chord_assembly_parsed<st, ss>>;
+			constexpr static auto U_static_parsed		= U_store_T<chord::T_chord_assembly_scanner_parsed<st, ss>>;
 
 			constexpr static auto static_pair		= _static_callable_<callable_source>;
 			constexpr static auto static_src		= _static_car_<static_pair>;
-			constexpr static auto static_scanned		= U_store_T<chord::T_chord_assembly_scanned<static_src>>;
+			constexpr static auto static_parsed		= U_static_parsed<static_pg_parsed, static_src>;
+
+			constexpr static auto & parsed			= member_value_U<static_parsed>;
+
+		public:
+
+			chord_assembly_scanner_parsed_printer() { }
+
+			void print_total()
+			{
+				printf("total\n\n");
+
+				printf("line  : %hu\n", parsed.total[ Total::line  ]);
+				printf("arg   : %hu\n", parsed.total[ Total::arg   ]);
+				printf("pad   : %hu\n", parsed.total[ Total::pad   ]);
+				printf("tree  : %hu\n", parsed.total[ Total::tree  ]);
+				printf("label : %hu\n", parsed.total[ Total::label ]);
+				printf("jump  : %hu\n", parsed.total[ Total::jump  ]);
+				printf("morph : %hu\n", parsed.total[ Total::morph ]);
+				printf("cycle : %hu\n", parsed.total[ Total::cycle ]);
+
+				printf("\n");
+			}
+
+			void print_capacity()
+			{
+				printf("capacity\n\n");
+
+				printf("tree  : %hu\n", parsed.capacity[ Capacity::tree  ]);
+				printf("morph : %hu\n", parsed.capacity[ Capacity::morph ]);
+				printf("cycle : %hu\n", parsed.capacity[ Capacity::cycle ]);
+
+				printf("\n");
+			}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// parsed:
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<auto static_grammar, auto callable_source>
+	struct chord_assembly_parsed_printer
+	{
+	//	private:
+		public:
+
+			using T_grammar					= T_store_U<static_grammar>;
+			using Token					= typename T_grammar::Token;
+			using strlit_type				= string_literal<>;
+			using cstrlit_type				= strlit_type const;
+			using cstrlit_ref				= cstrlit_type&;
+
+			// pg parsed:
+
+			template<auto ss, auto sg>
+			constexpr static auto U_static_pg_parsed	= U_store_T<T_parser_generator_parsed<ss, sg>>;
+
+			constexpr static auto static_pg_src		= _static_callable_<T_grammar::source>;
+			constexpr static auto static_pg_scanned		= U_store_T<T_parser_generator_scanned<static_pg_src>>;
+			constexpr static auto static_pg_parsed		= U_static_pg_parsed<static_pg_scanned, static_grammar>;
+
+			// scanned:
+
+			template<auto st, auto ss>
+			constexpr static auto U_static_scanned		= U_store_T<chord::T_chord_assembly_scanner_parsed<st, ss>>;
+
+			constexpr static auto static_pair		= _static_callable_<callable_source>;
+			constexpr static auto static_src		= _static_car_<static_pair>;
+			constexpr static auto static_scanned		= U_static_scanned<static_pg_parsed, static_src>;
+
+			// parsed:
+
+			template<auto st, auto ss>
+			constexpr static auto U_static_parsed		= U_store_T<chord::T_chord_assembly_parsed<st, ss>>;
+
 			constexpr static auto static_parsed		= U_static_parsed<static_pg_parsed, static_scanned>;
 
 			using parsed_type				= member_type_U<static_parsed>;
@@ -185,11 +264,30 @@ namespace cctmp {
 			{
 				auto & parameter = cycle.parameter;
 
+				printf(" |");
+				print_morphism(cycle.action, spacing);
+
 				for (auto k = parameter.cbegin(); k != parameter.cend(); ++k)
 				{
 					printf(" |");
 					print_morphism(*k, spacing);
 				}
+			}
+
+			template<typename K, typename J, typename CycleType>
+			void print_interval(K k, J j, const CycleType & cycle, gckey_type spacing)
+			{
+				auto lstr = (k->left  == chord::Ival::closed) ? '[' : '(';
+				auto rstr = (k->right == chord::Ival::closed) ? ']' : ')';
+
+				printf(" %c", lstr);
+				print_morphism(*j, spacing);
+				if (k->is_lead)
+				{
+					printf(",");
+					print_morphism(cycle.tonic_iter, spacing);
+				}
+				printf(" %c ", rstr);
 			}
 
 			template<typename CycleType>
@@ -201,19 +299,8 @@ namespace cctmp {
 				auto j = iterator.cbegin();
 
 				for (auto k = interval.cbegin(); k != interval.cend(); ++k, ++j)
-				{
-					auto lstr = (k->left  == chord::Ival::closed) ? '[' : '(';
-					auto rstr = (k->right == chord::Ival::closed) ? ']' : ')';
-
-					printf(" %c", lstr);
-					print_morphism(*j, spacing);
-					if (k->is_lead)
-					{
-						printf(",");
-						print_morphism(*j++, spacing);
-					}
-					printf(" %c ", rstr);
-				}
+					if (k->is_fixed) printf(" { id{env|iter} } ");
+					else print_interval(k, j, cycle, spacing);
 			}
 
 			template<typename MorphType>
@@ -244,13 +331,10 @@ namespace cctmp {
 				switch (cycle.token)
 				{
 					case Token::repeat : { str = "repeat" ; sub = 6; break; }
+					case Token::map    : { str = "map"    ; sub = 3; break; }
 					case Token::fold   : { str = "fold"   ; sub = 4; break; }
 					case Token::find   : { str = "find"   ; sub = 4; break; }
 					case Token::sift   : { str = "sift"   ; sub = 8; break; }
-					case Token::map    : { str = "map"    ; sub = 3; break; }
-					case Token::zip    : { str = "zip"    ; sub = 3; break; }
-					case Token::fasten : { str = "fasten" ; sub = 6; break; }
-					case Token::glide  : { str = "glide"  ; sub = 5; break; }
 				}
 
 				if (spacing > sub) generic_printer::print_spacing(spacing - sub);
@@ -368,7 +452,6 @@ namespace cctmp {
 
 // machine:
 
-/*
 	struct machine_printer
 	{
 		using MN = chord::MN;
@@ -420,13 +503,11 @@ namespace cctmp {
 			return str;
 		}
 	};
-*/
 
 /***********************************************************************************************************************/
 
 // interface:
 
-/*
 	template<auto callable_source>
 	struct chord_assembly_targeted_printer
 	{
@@ -434,8 +515,7 @@ namespace cctmp {
 
 			constexpr static auto static_pair	= _static_callable_<callable_source>;
 			constexpr static auto static_src	= _static_car_<static_pair>;
-			constexpr static auto static_scanned	= U_store_T<chord::T_chord_assembly_scanned<static_src>>;
-			constexpr static auto static_targeted	= U_store_T<chord::T_chord_assembly_targeted<static_scanned>>;
+			constexpr static auto static_targeted	= U_store_T<chord::T_chord_assembly_targeted<static_src>>;
 
 			constexpr static auto & targeted	= member_value_U<static_targeted>;
 			constexpr static auto & contr		= targeted.contr;
@@ -473,7 +553,6 @@ namespace cctmp {
 					print_instr(*k, contr.left_size(k));
 			}
 	};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -484,7 +563,6 @@ namespace cctmp {
 
 // parameter:
 
-/*
 	struct parameter_printer
 	{
 		template<auto f>
@@ -539,7 +617,6 @@ namespace cctmp {
 			else                                                          return "(?)                    ";
 		}
 	};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
