@@ -36,9 +36,9 @@ namespace math {
 
 // integer reshaping:
 
-	//	unsigned long x = (unsigned long) 1 << 32;
+	//	unsigned long x = static_cast<unsigned long>(1) << 32;
 
-	//	unsigned *y = (unsigned*) &x;
+	//	unsigned *y = static_cast<unsigned*>(&x);
 
 	//	printf("%lu, ", x);
 	//	printf("%u, ", y[0]);
@@ -52,9 +52,9 @@ namespace math {
 
 // array reshaping:
 
-	//	unsigned long x[] = { 0, 1, 2, 3, 4, 5, 6, ((unsigned long) 1 << 32) };
+	//	unsigned long x[] = { 0, 1, 2, 3, 4, 5, 6, (static_cast<unsigned long>(1) << 32) };
 
-	//	unsigned *y = (unsigned*) x;
+	//	unsigned *y = static_cast<unsigned*>(x);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -80,7 +80,7 @@ namespace math {
 			using chalf = Half const;
 
 			nik_ces Half half_bit  = HalfBit;
-			nik_ces Full half_base = (Full) 1 << half_bit;
+			nik_ces Full half_base = static_cast<Full>(1) << half_bit;
 			nik_ces Full low_pass  = half_base - 1;
 
 			chalf value;
@@ -204,7 +204,7 @@ namespace math {
 		using div_type  = T_division_half_digit_radix_divisor<full_type, half_type, 10>;
 
 		End found[] = { 0 };
-		div_type div{(half_type) denom};
+		div_type div{static_cast<half_type>(denom)};
 
 		return chord::metapiler_apply<_division_half_digit_v0, null_env, Out>(out, found, &div, in, end);
 	}

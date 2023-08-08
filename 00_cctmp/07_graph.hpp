@@ -158,11 +158,11 @@ namespace cctmp {
 
 		nik_ce auto cguide() const { return cguider{this}; }
 
-		nik_ce type_ref absolute_size () { return (type_ref) base::cref_meta(absolute); }
-		nik_ce type_ref relative_size () { return (type_ref) base::cref_meta(relative); }
+		nik_ce type_ref absolute_size () { return const_cast<type_ref>(base::cref_meta(absolute)); }
+		nik_ce type_ref relative_size () { return const_cast<type_ref>(base::cref_meta(relative)); }
 
-		nik_ce type_ref operator * () { return (type_ref) base::operator * (); }
-		nik_ce type_ref operator ~ () { return (type_ref) base::operator ~ (); }
+		nik_ce type_ref operator * () { return const_cast<type_ref>(base::operator * ()); }
+		nik_ce type_ref operator ~ () { return const_cast<type_ref>(base::operator ~ ()); }
 
 		nik_ce guider & operator -= (csize_type num) { base::current -= num; return *this; }
 		nik_ce guider & operator += (csize_type num) { base::current += num; return *this; }
@@ -176,9 +176,9 @@ namespace cctmp {
 
 		nik_ce guider & operator + () { base::go(); return *this; }
 
-		nik_ce type_ptr begin () { return (type_ptr) base::cbegin(); }
-		nik_ce type_ptr last  () { return (type_ptr) base::clast(); }
-		nik_ce type_ptr end   () { return (type_ptr) base::cend(); }
+		nik_ce type_ptr begin () { return const_cast<type_ptr>(base::cbegin()); }
+		nik_ce type_ptr last  () { return const_cast<type_ptr>(base::clast()); }
+		nik_ce type_ptr end   () { return const_cast<type_ptr>(base::cend()); }
 
 		nik_ce void push(ctype_ref v) { *end() = v; base::upright(); ++relative_size(); }
 		nik_ce type pop() { auto v = *end(); base::downright(); --relative_size(); return v; }
@@ -432,11 +432,11 @@ namespace cctmp {
 				return g;
 			}
 
-			nik_ce type_ref absolute_size () { return (type_ref) base::cref_meta(base::absolute); }
-			nik_ce type_ref relative_size () { return (type_ref) base::cref_meta(base::relative); }
+			nik_ce type_ref absolute_size () { return const_cast<type_ref>(base::cref_meta(base::absolute)); }
+			nik_ce type_ref relative_size () { return const_cast<type_ref>(base::cref_meta(base::relative)); }
 
-			nik_ce type_ref operator * () { return (type_ref) base::operator * (); }
-			nik_ce type_ref operator ~ () { return (type_ref) base::operator ~ (); }
+			nik_ce type_ref operator * () { return const_cast<type_ref>(base::operator * ()); }
+			nik_ce type_ref operator ~ () { return const_cast<type_ref>(base::operator ~ ()); }
 
 			nik_ce navigator & operator -= (csize_type num) { base::current -= num; return *this; }
 			nik_ce navigator & operator += (csize_type num) { base::current += num; return *this; }
@@ -456,9 +456,9 @@ namespace cctmp {
 
 		public:
 
-			nik_ce type_ptr begin () { return (type_ptr) base::cbegin(); }
-			nik_ce type_ptr last  () { return (type_ptr) base::clast(); }
-			nik_ce type_ptr end   () { return (type_ptr) base::cend(); }
+			nik_ce type_ptr begin () { return const_cast<type_ptr>(base::cbegin()); }
+			nik_ce type_ptr last  () { return const_cast<type_ptr>(base::clast()); }
+			nik_ce type_ptr end   () { return const_cast<type_ptr>(base::cend()); }
 
 			nik_ce void push(ctype_ref v) { *end() = v; base::upright(); ++relative_size(); }
 			nik_ce type pop() { auto v = *end(); base::downright(); --relative_size(); return v; }
@@ -489,8 +489,8 @@ namespace cctmp {
 	{
 		protected:
 
-			using base			= T_shape<Size>;
-			using depth_type		= decltype(Depth);
+			using base		= T_shape<Size>;
+			using depth_type	= decltype(Depth);
 
 		public:
 
@@ -510,7 +510,8 @@ namespace cctmp {
 		public:
 
 			template<typename... Ts>
-			nik_ce T_hierarchy(ctype l0, Ts... ls) : base{l0}, max{l0, type(ls)...} { }
+			nik_ce T_hierarchy(ctype l0, Ts... ls) :
+				base{l0}, max{{l0, static_cast<type>(ls)...}} { }
 
 			nik_ce auto origin() const { return base::initial; }
 

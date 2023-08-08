@@ -246,7 +246,7 @@ namespace chord {
 			template<typename Interval, typename... Ts>
 			nik_ces auto right_closed_reversible(Ts... tones)
 			{
-				bool match = true;
+				bool match{true};
 
 				(update<Interval>(match, tones), ...);
 

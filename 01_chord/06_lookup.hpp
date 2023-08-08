@@ -97,7 +97,7 @@ namespace chord {
 
 // env:
 
-	template<auto... Vs> using T_lookup_frame		= T_lookup < LN::env  , LT::frame , Vs... >;
+	template<auto... Vs> using T_lookup_frame		= T_lookup < LN::env , LT::frame , Vs... >;
 
 	template<auto... Vs> nik_ce auto U_lookup_frame		= U_store_T < T_lookup_frame < Vs... > >;
 
@@ -307,7 +307,7 @@ namespace chord {
 				return T_cycle::template result<index, types>(notes);
 			}
 			else if nik_ce (Sign::is_recurse(sign)) return this_f;
-			else return _nop_;
+			else return _nop_; // error
 		}
 
 		template<auto n, auto m, typename... Ts>
@@ -349,7 +349,7 @@ namespace chord {
 			{
 				nik_ce auto pos = T_link::parsed.link_entry_index(n, m);
 
-				return (Type) T_apply_at<_id_, pos>::template result<Ts...>(vs...);
+				return const_cast<Type>(T_apply_at<_id_, pos>::template result<Ts...>(vs...));
 			}
 		};
 
@@ -366,7 +366,7 @@ namespace chord {
 			{
 				nik_ce auto pos = T_link::parsed.link_entry_index(n, m);
 
-				return (Type&) T_ref_at<pos>::template result<Ts...>(vs...);
+				return const_cast<Type&>(T_ref_at<pos>::template result<Ts...>(vs...));
 			}
 		};
 

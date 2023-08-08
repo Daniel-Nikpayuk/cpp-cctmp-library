@@ -117,9 +117,9 @@ namespace chord {
 
 			hierarchy_size = level_0_size + level_1_size + level_2_size;
 
-			total[Total::instr_1] += total[Total::jump];       // instr1: test, void, goto, go into, branch
-			total[Total::instr_2] += (bool) total[Total::pad]; // instr2: pad
-			total[Total::instr_3] += total[Total::pad];        // instr3: assign, apply, return
+			total[Total::instr_1] += total[Total::jump]; // instr1: test, void, goto, go into, branch
+			total[Total::instr_2] += static_cast<bool>(total[Total::pad]); // instr2: pad
+			total[Total::instr_3] += total[Total::pad]; // instr3: assign, apply, return
 
 			target_size	= 1 // to parallel machine contrs.
 					+ ( 1 * total[Total::instr_1] )

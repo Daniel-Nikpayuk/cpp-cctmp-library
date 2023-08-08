@@ -261,15 +261,15 @@ namespace chord {
 	{
 		// unary:
 
-			nik_ces auto id    = strlit_type("id");
-			nik_ces auto deref = strlit_type("dereference");
-			nik_ces auto inc   = strlit_type("increment");
-			nik_ces auto dec   = strlit_type("decrement");
+			nik_ces auto id    = strlit_type{"id"};
+			nik_ces auto deref = strlit_type{"dereference"};
+			nik_ces auto inc   = strlit_type{"increment"};
+			nik_ces auto dec   = strlit_type{"decrement"};
 
 		// binary:
 
-			nik_ces auto appoint   = strlit_type("appoint");
-			nik_ces auto not_equal = strlit_type("not_equal");
+			nik_ces auto appoint   = strlit_type{"appoint"};
+			nik_ces auto not_equal = strlit_type{"not_equal"};
 	};
 
 /***********************************************************************************************************************/
@@ -533,7 +533,7 @@ namespace chord {
 
 		nik_ce T_chord_assembly_ast() :
 
-			hierarchy{scanned.total[Total::line], scanned.capacity[Cap::tree], gindex_type{0}},
+			hierarchy{scanned.total[Total::line], scanned.capacity[Cap::tree], static_cast<gindex_type>(0)},
 			current{hierarchy.origin()},
 			level_0{&entry_level},
 			level_1{&line_level},

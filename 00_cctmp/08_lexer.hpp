@@ -466,7 +466,7 @@ namespace cctmp {
 
 			token_type t = (l.token == T_dfa::accept) ? Token : TokenName::invalid;
 
-			l.token = (token_type) t;
+			l.token = static_cast<token_type>(t);
 		}
 	};
 

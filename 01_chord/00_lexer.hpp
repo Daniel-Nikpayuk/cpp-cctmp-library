@@ -419,7 +419,7 @@ namespace chord {
 				}
 			}
 
-			l.token = (gindex_type) rt;
+			l.token = static_cast<gindex_type>(rt);
 		}
 
 		nik_ces token_type keyword(const cselector<char> & s)

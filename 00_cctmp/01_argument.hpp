@@ -121,7 +121,7 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::overload, ArgOverload::appoint, filler...>
 		{
 			template<typename T1, typename T2>
-			nik_ces auto result(T1 v1, T2 v2) { return *v1 = (decltype(*v1)) v2; }
+			nik_ces auto result(T1 v1, T2 v2) { return *v1 = (decltype(*v1)) v2; } // c style cast
 
 		}; nik_ce auto _appoint_ = U_arg_overload<ArgOverload::appoint>;
 
@@ -154,7 +154,7 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::higher_order, ArgHigherOrder::cast, V>
 		{
 			template<typename T>
-			nik_ces auto result(T v) { return Type(v); }
+			nik_ces auto result(T v) -> Type { return static_cast<Type>(v); }
 
 		}; template<auto V>
 			nik_ce auto _cast_ = U_arg_higher_order<ArgHigherOrder::cast, V>;
@@ -642,7 +642,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			length , match , contains , same , // basis
+			length , match , contains , same , copy , // basis
 			dimension
 		};
 	};
@@ -714,6 +714,16 @@ namespace cctmp {
 
 		}; template<auto f = _equal_>
 			nik_ce auto _subarray_same_ = U_arg_subarray<ArgSubarray::same, f>;
+
+	// copy:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::subarray, ArgSubarray::copy, filler...>
+		{
+			template<typename Out, typename In, typename End>
+			nik_ces void result(Out out, In in, End end) { while (in != end) *out++ = *in++; }
+
+		}; nik_ce auto _subarray_copy_ = U_arg_subarray<ArgSubarray::copy>;
 
 	// syntactic sugar:
 

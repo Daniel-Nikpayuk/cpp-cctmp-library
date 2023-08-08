@@ -143,8 +143,8 @@
 		constexpr Subarray(const Type *s, const Type *f) :
 			base{(Type*) s, (Type*) f} { }
 
-		constexpr Type* begin () { return (Type*) base::start; }
-		constexpr Type* end   () { return (Type*) base::finish; }
+		constexpr Type* begin () { return static_cast<Type*>(base::start); }
+		constexpr Type* end   () { return static_cast<Type*>(base::finish); }
 	};
 
 /***********************************************************************************************************************/

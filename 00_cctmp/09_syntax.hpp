@@ -248,10 +248,10 @@ namespace cctmp {
 
 			nik_ces gindex_type max_size	= _two; // symbol, body.
 
-			using scope_type		= sequence<bool, gindex_type{Scope::dimension}>;
+			using scope_type		= sequence<bool, static_cast<gindex_type>(Scope::dimension)>;
 			using current_type		= sequence<gindex_type, max_size>;
 			using max_type			= sequence<gindex_type, max_size>;
-			using total_type		= sequence<gindex_type, gindex_type{Level::dimension}>;
+			using total_type		= sequence<gindex_type, static_cast<gindex_type>(Level::dimension)>;
 
 			scope_type scope;
 			current_type current;
@@ -595,7 +595,8 @@ namespace cctmp {
 
 		nik_ce T_parser_generator_ast() :
 
-			hierarchy{head_max, body_max, symbol_max, gindex_type{0}}, current{hierarchy.origin()},
+			hierarchy{head_max, body_max, symbol_max, static_cast<gindex_type>(0)},
+			current{hierarchy.origin()},
 			level_0{&symbol_level}, level_1{&body_level}, level_2{&head_level},
 			term_size{}, empty_size{}, nonterm_index{}
 
@@ -699,7 +700,7 @@ namespace cctmp {
 		{
 			auto k = unite_action(l);
 
-			action_type act = grammar_action.lookup(*k, AN::nop);
+			action_type act = grammar_action.slookup(*k, AN::nop);
 
 			assign_action(act);
 		}
@@ -829,7 +830,7 @@ namespace cctmp {
 		{
 			for (auto k = t->symbol_level.begin(); k != t->symbol_level.end(); ++k)
 				if (k->is_terminal())
-					k->index = t->grammar_map.lookup(*k, t->invalid_token);
+					k->index = t->grammar_map.slookup(*k, t->invalid_token);
 
 			t->term_size = t->symbol_size() - t->head_size();
 		}

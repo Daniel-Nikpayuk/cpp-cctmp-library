@@ -397,8 +397,8 @@ namespace chord {
 		template<typename... Ts>
 		nik_ces auto & result(Ts... vs)
 		{
-			nik_ce auto p0  = eval<_par_left_ , n, U_store_T<Ts>...>;
-			nik_ce auto p1  = eval<_par_right_, n, U_store_T<Ts>...>;
+			nik_ce auto p0 = eval<_par_left_ , n, U_store_T<Ts>...>;
+			nik_ce auto p1 = eval<_par_right_, n, U_store_T<Ts>...>;
 
 			return T_ref_at<p0, p1>::template result<Ts...>(vs...);
 		}

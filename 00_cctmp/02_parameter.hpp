@@ -500,7 +500,7 @@ namespace cctmp {
 		nik_ce auto _not_unsigned_ = U_par_number<ParNumber::not_unsigned>;
 
 		template<auto V>
-		nik_ce auto eval<_not_unsigned_, V> = not(eval<_is_unsigned_, V>);
+		nik_ce auto eval<_not_unsigned_, V> = not eval<_is_unsigned_, V>;
 
 	// is signed:
 
@@ -518,7 +518,7 @@ namespace cctmp {
 		nik_ce auto _not_signed_ = U_par_number<ParNumber::not_signed>;
 
 		template<auto V>
-		nik_ce auto eval<_not_signed_, V> = not(eval<_is_signed_, V>);
+		nik_ce auto eval<_not_signed_, V> = not eval<_is_signed_, V>;
 
 	// is integer:
 
@@ -532,7 +532,7 @@ namespace cctmp {
 		nik_ce auto _not_integer_ = U_par_number<ParNumber::not_integer>;
 
 		template<auto V>
-		nik_ce auto eval<_not_integer_, V> = not(eval<_is_integer_, V>);
+		nik_ce auto eval<_not_integer_, V> = not eval<_is_integer_, V>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -902,10 +902,30 @@ namespace cctmp {
 			template<typename T>
 			nik_ces auto _result(nik_avp(T*)) { return U_store_T<T const>; }
 
+		// pointer (recursive):
+
+			template<typename T>
+			using T_add_pointer_const = T*const;
+
+			template<auto U>
+			nik_ces auto add_pointer_const = U_store_T<T_add_pointer_const<T_store_U<U>>>;
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T**)) { return add_pointer_const<_result(U_store_T<T>)>; }
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T*const*)) { return add_pointer_const<_result(U_store_T<T>)>; }
+
 		// reference (recursive):
 
 			template<typename T>
-			nik_ces auto _result(nik_avp(T&)) { return U_store_T<T const &>; }
+			using T_add_reference_const = T&;
+
+			template<auto U>
+			nik_ces auto add_reference_const = U_store_T<T_add_reference_const<T_store_U<U>>>;
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T&)) { return add_reference_const<_result(U_store_T<T>)>; }
 
 		template<auto U>
 		nik_ces auto result = _result(U);
@@ -924,15 +944,32 @@ namespace cctmp {
 			nik_ces auto _result(nik_avp(T*)) { return U_store_T<T>; }
 
 			template<typename T>
-			nik_ces auto _result(nik_avp(T const *)) { return U_store_T<T>; }
+			nik_ces auto _result(nik_avp(T const*)) { return U_store_T<T>; }
+
+		// pointer (recursive):
+
+			template<typename T>
+			using T_add_pointer = T*;
+
+			template<auto U>
+			nik_ces auto add_pointer = U_store_T<T_add_pointer<T_store_U<U>>>;
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T**)) { return add_pointer<_result(U_store_T<T>)>; }
+
+			template<typename T>
+			nik_ces auto _result(nik_avp(T*const*)) { return add_pointer<_result(U_store_T<T>)>; }
 
 		// reference:
 
 			template<typename T>
-			nik_ces auto _result(nik_avp(T&)) { return U_store_T<T&>; }
+			using T_add_reference = T&;
+
+			template<auto U>
+			nik_ces auto add_reference = U_store_T<T_add_reference<T_store_U<U>>>;
 
 			template<typename T>
-			nik_ces auto _result(nik_avp(T const &)) { return U_store_T<T&>; }
+			nik_ces auto _result(nik_avp(T&)) { return add_reference<_result(U_store_T<T>)>; }
 
 		template<auto U>
 		nik_ces auto result = _result(U);

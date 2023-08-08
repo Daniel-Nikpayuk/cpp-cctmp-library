@@ -25,25 +25,6 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-//	template<auto Callable>
-//	nik_ce auto _static_callable_				= cctmp::_static_callable_<Callable>;
-
-//	nik_ce auto _array_length_				= cctmp::_array_length_;
-
-//	template<auto Op, typename T>
-//	using modify_type					= cctmp::modify_type<Op, T>;
-
-//	using sxt_pair						= cctmp::pair<strlit_type, token_type>;
-//	using sxa_pair						= cctmp::pair<strlit_type, action_type>;
-
-//	using symbol_type					= typename cctmp::symbol_type;
-//	using csymbol_type					= typename cctmp::csymbol_type;
-//	nik_ce auto U_symbol_type				= cctmp::U_symbol_type;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // chord assembly:
 
 /***********************************************************************************************************************/

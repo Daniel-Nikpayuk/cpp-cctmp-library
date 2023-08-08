@@ -167,7 +167,7 @@ namespace chord {
 
 			nik_ce void add_instr(gckey_type name, gckey_type note, gckey_type m = Mark::none)
 			{
-				bool marked = (m == Mark::value);
+				bool marked{m == Mark::value};
 
 				increment_value(marked ? _four : _three);
 				increment_value(name);
@@ -461,7 +461,7 @@ namespace chord {
 			<
 				out_type, contr, link, modify_type<_read_only_, Ts>...
 
-			>((modify_type<_read_only_, Ts>) vs...);
+			>((modify_type<_read_only_, Ts>) vs...); // c style cast
 		}
 	};
 

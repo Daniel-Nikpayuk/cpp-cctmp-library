@@ -1421,7 +1421,7 @@ namespace cctmp_program
 	unsigned d = 10;
 
 	unsigned long x0[] = { 1, 1 };
-	unsigned *x1 = (unsigned*) x0;
+	unsigned *x1 = static_cast<unsigned*>(x0);
 	unsigned *i = x1 + 2;
 
 	unsigned q[4];
@@ -1429,7 +1429,7 @@ namespace cctmp_program
 	unsigned *j = q;
 
 	unsigned long r = 0;
-	unsigned *hl = (unsigned*) &r;
+	unsigned *hl = static_cast<unsigned*>(&r);
 
 	unsigned low = 0;
 	unsigned high = 1;
@@ -3399,7 +3399,7 @@ namespace cctmp_program
 
 		while (k != j.cend())
 		{
-			auto i = (gindex_type) j.left_size(k);
+			auto i = static_cast<gindex_type>(j.left_size(k));
 			auto g = cguider{j.cbegin(), i};
 			auto e = k + g.dim() + g.cabsolute_size();
 
@@ -3588,6 +3588,22 @@ namespace cctmp_program
 			"body   -> (symbol : Symbol) <= symbol_max ;"
 			"       -> (action : Action)               ;"
 		)};
+
+/***********************************************************************************************************************/
+
+// const casting:
+
+	template<typename T>
+	constexpr void assign_3(T v) { **v = 3; }
+
+	int const        v[] = { 5 };
+	int const* const w[] = { v };
+
+	int const* const* const x = w;
+
+	assign_3<int**>(const_cast<int**>(x));
+
+	printf("%d\n", **x);
 
 /***********************************************************************************************************************/
 

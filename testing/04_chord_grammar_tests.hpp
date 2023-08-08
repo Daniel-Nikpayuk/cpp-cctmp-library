@@ -91,10 +91,10 @@ namespace chord {
 	// falling factorial:
 
 		constexpr auto fall_val0 = fall_fact_2_v0<true>(7);
-		constexpr auto fall_val1 = fall_fact_2_v1<true>(7); // does not work!
+		constexpr auto fall_val1 = fall_fact_2_v1<true>(7);
 
 		static_assert(fall_val0 == 42);
-		static_assert(fall_val1 == 42); // does not work!
+		static_assert(fall_val1 == 42);
 
 	// void effects:
 

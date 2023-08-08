@@ -147,7 +147,7 @@ namespace chord {
 	{
 		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T0, typename... Ts>
 		nik_ces auto result(T0 v0, Ts... vs) -> T_store_U<s>
-			{ return (T_store_U<s>) v0; }
+			{ return static_cast<T_store_U<s>>((T_store_U<s>) v0); } // c style cast
 	};
 
 /***********************************************************************************************************************/
@@ -179,8 +179,8 @@ namespace chord {
 	template<auto... filler>
 	struct T_machine<MN::jump, MT::branch, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename BoolType, typename... Ts>
-		nik_ces auto result(BoolType v, Ts... vs) -> T_store_U<s>
+		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
 			nik_ce auto ins = MD::instr(c, i);
 			nik_ce auto ni  = ins[MI::pos];

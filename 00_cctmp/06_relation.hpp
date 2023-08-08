@@ -70,12 +70,16 @@ namespace cctmp {
 
 			type initial[Size];
 
-			nik_ce void copy(type_ptr k, ctype_ptr b, ctype_cptr e) { while (b != e) *k++ = *b++; }
-
 		public:
 
-			template<typename... Ts>
-			nik_ce proto_sequence(const Ts &... vs) : initial{type(vs)...} { }
+			nik_ce proto_sequence() : initial{} { }
+
+			template<typename T, auto N>
+			nik_ce proto_sequence(const T (&s)[N]) :
+				initial{} { apply<_subarray_copy_>(initial, s, s + N); }
+
+			nik_ce proto_sequence(const proto_sequence & s) :
+				initial{} { apply<_subarray_copy_>(initial, s.initial, s.initial + Size); }
 
 			// immutable:
 
@@ -140,11 +144,16 @@ namespace cctmp {
 
 		public:
 
-			template<typename... Ts>
-			nik_ce ce_sequence(const Ts &... vs) : base{vs...}, terminal{sizeof...(Ts)} { }
+			nik_ce ce_sequence() : base{}, terminal{} { }
+
+			template<auto N>
+			nik_ce ce_sequence(ctype (&s)[N]) :
+				base{}, terminal{N}
+					{ apply<_subarray_copy_>(base::initial, s, s + N); }
 
 			nik_ce ce_sequence(const ce_sequence & s) :
-				base{}, terminal{s.size()} { base::copy(base::initial, s.cbegin(), s.cend()); }
+				base{}, terminal{s.size()}
+					{ apply<_subarray_copy_>(base::initial, s.cbegin(), s.cend()); }
 
 			// immutable:
 
@@ -243,20 +252,16 @@ namespace cctmp {
 
 		public:
 
-			template<typename... Ts>
-			nik_ce sequence(const Ts &... vs) : base{vs...}, terminal{base::initial + sizeof...(Ts)} { }
+			nik_ce sequence() : base{}, terminal{base::initial} { }
+
+			template<auto N>
+			nik_ce sequence(ctype (&s)[N]) :
+				base{}, terminal{base::initial + N}
+					{ apply<_subarray_copy_>(base::initial, s, s + N); }
 
 			nik_ce sequence(const sequence & s) :
 				base{}, terminal{base::initial + s.size()}
-					{ base::copy(base::initial, s.cbegin(), s.cend()); }
-
-			nik_ce const sequence & operator = (const sequence & s)
-			{
-				base::copy(base::initial, s.cbegin(), s.cend());
-				terminal = base::initial + s.size();
-
-				return *this;
-			}
+					{ apply<_subarray_copy_>(base::initial, s.cbegin(), s.cend()); }
 
 			// immutable:
 
@@ -377,20 +382,11 @@ namespace cctmp {
 		sequence<T0, length> s0;
 		sequence<T1, length> s1;
 
-		nik_ce table(const TU0 &, const TU1 &, const Pairs &... ps) : s0{ps.v0...}, s1{ps.v1...} { }
+		nik_ce table(const TU0 &, const TU1 &, const Pairs &... ps) : s0{{ps.v0...}}, s1{{ps.v1...}} { }
 
 		nik_ce const T1 & lookup(const T0 & v0, const T1 & v1) const
 		{
 			auto i = s0.citerate().find(v0);
-
-			if (i.is_end()) return v1;
-			else return s1[i.left_size()];
-		}
-
-		template<typename T>
-		nik_ce const T1 & lookup(const T & v, const T1 & v1) const
-		{
-			auto i = s0.citerate().template find<T const&>(v);
 
 			if (i.is_end()) return v1;
 			else return s1[i.left_size()];
@@ -405,7 +401,16 @@ namespace cctmp {
 		}
 
 		template<typename T>
-		nik_ce const T0 & rlookup(const T & v, const T0 & v0) const
+		nik_ce const T1 & slookup(const T & v, const T1 & v1) const
+		{
+			auto i = s0.citerate().template find<T const&>(v);
+
+			if (i.is_end()) return v1;
+			else return s1[i.left_size()];
+		}
+
+		template<typename T>
+		nik_ce const T0 & srlookup(const T & v, const T0 & v0) const
 		{
 			auto i = s1.citerate().template find<T const&>(v);
 
@@ -490,7 +495,7 @@ namespace cctmp {
 				using CT = typename remove_reference<decltype(v)>::result;
 				using  T = typename remove_const<CT>::result;
 
-				return (T&) v;
+				return const_cast<T&>(v);
 			}
 	};
 
@@ -552,7 +557,7 @@ namespace cctmp {
 		public:
 
 			nik_ce frame(const CharType &, const Bindings &... bs) :
-				strlit{bs.strlit...}, value{bs.value...} { }
+				strlit{{bs.strlit...}}, value{bs.value...} { }
 
 			template<typename T>
 			nik_ce auto contains(const T & v) const { return strlit.citerate().find(v); }

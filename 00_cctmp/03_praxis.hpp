@@ -269,8 +269,8 @@ namespace cctmp {
 
 // pack:
 
-	nik_ce auto _pack_null_			= U_pack_Vs <       >;
-	nik_ce auto _pack_car_			= U_pack_Vs < _car_ >;
+	nik_ce auto _pack_null_ = U_pack_Vs <       >;
+	nik_ce auto _pack_car_  = U_pack_Vs < _car_ >;
 
 	template<auto Ops>
 	struct T_pack_filter

@@ -125,16 +125,17 @@ namespace cctmp {
 			using csize_type	= typename base::csize_type;
 
 			nik_ce selector() : base{} { }
-			nik_ce selector(type_cptr s, type_cptr f) : base{(ctype_cptr) s, (ctype_cptr) f} { }
+			nik_ce selector(type_cptr s, type_cptr f) :
+				base{const_cast<ctype_cptr>(s), const_cast<ctype_cptr>(f)} { }
 			nik_ce selector(const selector *s) : base{s} { }
 
 			nik_ce auto select(csize_type lnum, csize_type rnum) const
 				{ return selector{base::start + lnum, base::finish - rnum}; }
 			nik_ce auto select() const { return select(0, 0); } // for move semantics and inheritance.
 
-			nik_ce type_ptr begin () { return (type_ptr) base::cbegin(); }
-			nik_ce type_ptr last  () { return (type_ptr) base::clast(); }
-			nik_ce type_ptr end   () { return (type_ptr) base::cend(); }
+			nik_ce type_ptr begin () { return const_cast<type_ptr>(base::cbegin()); }
+			nik_ce type_ptr last  () { return const_cast<type_ptr>(base::clast()); }
+			nik_ce type_ptr end   () { return const_cast<type_ptr>(base::cend()); }
 
 			nik_ce void pushleft(ctype_ref v) { *begin() = v; base::downleft(); }
 			nik_ce void pushright(ctype_ref v) { *end() = v; base::upright(); }
@@ -339,9 +340,10 @@ namespace cctmp {
 			using cselector_ctype_cptr	= cselector_ctype_ptr const;
 
 			nik_ce iterator() : base{} { }
-			nik_ce iterator(type_cptr s, type_cptr f) : base{(ctype_ptr) s, (ctype_ptr) f} { }
+			nik_ce iterator(type_cptr s, type_cptr f) :
+				base{const_cast<ctype_ptr>(s), const_cast<ctype_ptr>(f)} { }
 			nik_ce iterator(type_cptr s, type_cptr f, type_cptr c) :
-				base{(ctype_ptr) s, (ctype_ptr) f, (ctype_ptr) c} { }
+				base{const_cast<ctype_ptr>(s), const_cast<ctype_ptr>(f), const_cast<ctype_ptr>(c)} { }
 			nik_ce iterator(const iterator *i) : base{i} { }
 
 			nik_ce auto iterate(csize_type lnum, csize_type rnum) const
@@ -402,8 +404,8 @@ namespace cctmp {
 			nik_ce auto right_contains(const T & v) const
 				{ iterator i{*this}; return i.template right_find<T const&>(v); }
 
-			nik_ce type_ptr operator -> () { return (type_ptr) base::operator -> (); }
-			nik_ce type_ref operator  * () { return (type_ref) base::operator  * (); }
+			nik_ce type_ptr operator -> () { return const_cast<type_ptr>(base::operator -> ()); }
+			nik_ce type_ref operator  * () { return const_cast<type_ref>(base::operator  * ()); }
 
 			nik_ce iterator & operator -= (csize_type num) { base::operator -= (num); return *this; }
 			nik_ce iterator & operator += (csize_type num) { base::operator += (num); return *this; }
@@ -415,15 +417,16 @@ namespace cctmp {
 			nik_ce iterator operator -- (int) { iterator i{*this}; base::operator -- (); return i; }
 			nik_ce iterator operator ++ (int) { iterator i{*this}; base::operator ++ (); return i; }
 
-			nik_ce type_ptr ptr_at(csize_type pos) { return (type_ptr) base::cptr_at(pos); }
-			nik_ce type_ref ref_at(csize_type pos) { return (type_ref) base::cref_at(pos); }
+			nik_ce type_ptr ptr_at(csize_type pos) { return const_cast<type_ptr>(base::cptr_at(pos)); }
+			nik_ce type_ref ref_at(csize_type pos) { return const_cast<type_ref>(base::cref_at(pos)); }
 
-			nik_ce type_ref value(type_ref v) { return (type_ref) base::cvalue((ctype_ref) v); }
+			nik_ce type_ref value(type_ref v)
+				{ return const_cast<type_ref>(base::cvalue(const_cast<ctype_ref>(v))); }
 
-			nik_ce type_ptr begin   () { return (type_ptr) base::cbegin(); }
-			nik_ce type_ptr current () { return (type_ptr) base::current; }
-			nik_ce type_ptr last    () { return (type_ptr) base::clast(); }
-			nik_ce type_ptr end     () { return (type_ptr) base::cend(); }
+			nik_ce type_ptr begin   () { return const_cast<type_ptr>(base::cbegin()); }
+			nik_ce type_ptr current () { return const_cast<type_ptr>(base::current); }
+			nik_ce type_ptr last    () { return const_cast<type_ptr>(base::clast()); }
+			nik_ce type_ptr end     () { return const_cast<type_ptr>(base::cend()); }
 
 			nik_ce void pushleft(ctype_ref v) { *begin() = v; base::downleft(); }
 			nik_ce void pushright(ctype_ref v) { *end() = v; base::upright(); }
@@ -478,7 +481,8 @@ namespace cctmp {
 		nik_ce literal() : start{empty}, finish{empty} { }
 		nik_ce literal(ctype_cptr s, ctype_cptr f) : start{s}, finish{f} { }
 
-		nik_ce auto size() const { return finish - start; }
+		nik_ce auto      size   () const { return finish - start; }
+		nik_ce ctype_ptr origin () const { return start; }
 
 		nik_ce ctype_ptr cbegin () const { return start; }
 		nik_ce ctype_ptr clast  () const { return finish - 1; }
