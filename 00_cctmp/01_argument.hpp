@@ -49,7 +49,7 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::overload, ArgOverload::id, filler...>
 		{
 			template<typename T>
-			nik_ces auto result(T v) { return v; }
+			nik_ces auto result(T v) -> T { return v; } // type preservation ?
 
 		}; nik_ce auto _id_ = U_arg_overload<ArgOverload::id>;
 
@@ -531,8 +531,8 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			is        , type , length ,	// meta
-			begin     , last , end    ,	// basis
+			is        , type , size ,	// meta
+			begin     , last , end  ,	// basis
 			log_floor ,			// 2^N
 			dimension
 		};
@@ -562,15 +562,15 @@ namespace cctmp {
 
 		}; nik_ce auto _array_type_ = U_arg_array<ArgArray::type>;
 
-	// length:
+	// size:
 
 		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::array, ArgArray::length, filler...>
+		struct T_grammar<Shape::argument, Pattern::array, ArgArray::size, filler...>
 		{
 			template<typename T, auto S>
 			nik_ces auto result(T(&)[S]) { return S; }
 
-		}; nik_ce auto _array_length_ = U_arg_array<ArgArray::length>;
+		}; nik_ce auto _array_size_ = U_arg_array<ArgArray::size>;
 
 /***********************************************************************************************************************/
 
@@ -642,7 +642,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			length , match , contains , same , copy , // basis
+			size , match , same , copy , // basis
 			dimension
 		};
 	};
@@ -651,15 +651,15 @@ namespace cctmp {
 
 // basis:
 
-	// length:
+	// size:
 
 		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::subarray, ArgSubarray::length, filler...>
+		struct T_grammar<Shape::argument, Pattern::subarray, ArgSubarray::size, filler...>
 		{
 			template<typename In, typename End>
 			nik_ces auto result(In in, End end) { return end - in; }
 
-		}; nik_ce auto _subarray_length_ = U_arg_subarray<ArgSubarray::length>;
+		}; nik_ce auto _subarray_size_ = U_arg_subarray<ArgSubarray::size>;
 
 	// match:
 
@@ -715,6 +715,11 @@ namespace cctmp {
 		}; template<auto f = _equal_>
 			nik_ce auto _subarray_same_ = U_arg_subarray<ArgSubarray::same, f>;
 
+		// syntactic sugar:
+
+			template<auto f = _equal_>
+			nik_ce auto _subarray_match_same_ = _subarray_match_<_subarray_same_<f>>;
+
 	// copy:
 
 		template<auto... filler>
@@ -724,11 +729,6 @@ namespace cctmp {
 			nik_ces void result(Out out, In in, End end) { while (in != end) *out++ = *in++; }
 
 		}; nik_ce auto _subarray_copy_ = U_arg_subarray<ArgSubarray::copy>;
-
-	// syntactic sugar:
-
-		template<auto f = _equal_>
-		nik_ce auto _subarray_match_same_ = _subarray_match_<_subarray_same_<f>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -124,7 +124,7 @@ namespace chord {
 				r_fixed     ,
 				comma       ,
 
-				compose     ,
+				argpose     ,
 				subpose     ,
 				curry       ,
 
@@ -347,7 +347,7 @@ namespace chord {
 		nik_ces auto branch_charset     () { return cctmp::dfa_charset("branch"); }
 		nik_ces auto return_charset     () { return cctmp::dfa_charset("return"); }
 
-		nik_ces auto compose_charset    () { return cctmp::dfa_charset("compose"); }
+		nik_ces auto argpose_charset    () { return cctmp::dfa_charset("argpose"); }
 		nik_ces auto subpose_charset    () { return cctmp::dfa_charset("subpose"); }
 		nik_ces auto curry_charset      () { return cctmp::dfa_charset("curry"); }
 
@@ -375,7 +375,7 @@ namespace chord {
 		using T_branch_lexer		= cctmp::T_keyword_lexer< T_dfa::branch_charset , Token::branch  >;
 		using T_return_lexer		= cctmp::T_keyword_lexer< T_dfa::return_charset , Token::re_turn >;
 
-		using T_compose_lexer		= cctmp::T_keyword_lexer< T_dfa::compose_charset , Token::compose >;
+		using T_argpose_lexer		= cctmp::T_keyword_lexer< T_dfa::argpose_charset , Token::argpose >;
 		using T_subpose_lexer		= cctmp::T_keyword_lexer< T_dfa::subpose_charset , Token::subpose >;
 		using T_curry_lexer		= cctmp::T_keyword_lexer< T_dfa::curry_charset   , Token::curry   >;
 
@@ -479,7 +479,7 @@ namespace chord {
 
 		nik_ces token_type keyword_7(const cselector<char> & s)
 		{
-			if      (cctmp::recognizes< T_compose_lexer >(s)) return T_compose_lexer::token;
+			if      (cctmp::recognizes< T_argpose_lexer >(s)) return T_argpose_lexer::token;
 			else if (cctmp::recognizes< T_subpose_lexer >(s)) return T_subpose_lexer::token;
 			else                                              return TokenName::invalid;
 		}

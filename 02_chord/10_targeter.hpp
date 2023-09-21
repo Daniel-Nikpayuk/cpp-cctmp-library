@@ -45,9 +45,6 @@ namespace chord {
 	nik_ce auto _push_					= cctmp::_push_;
 	nik_ce auto _from_const_				= cctmp::_from_const_;
 
-	template<auto H = H_id>
-	nik_ce auto _list_					= cctmp::_list_<H>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -108,6 +105,8 @@ namespace chord {
 		using contr_link_type			= cctmp::subsequence < instr_type  , link_size    >;
 		using contr_jump_type			= cctmp::subsequence < instr_type  , jump_size    >;
 
+		using csize_type			= typename contr_type::csize_type;
+
 		struct Mark { enum : gkey_type { none = 0, value }; };
 
 		label_type label;
@@ -119,12 +118,12 @@ namespace chord {
 
 		nik_ce void translate()
 		{
-			add_size_instr();
+			add_initial_instrs();
 
 			// can check if function calls are redundant and refactor,
 			// but it also might not be necessary if the compiler optimizes.
 
-			if (toc.padding > 0) add_pad_instr(toc.padding);
+			if (toc.padding > 0) add_pad_instrs(toc.padding);
 
 			for (auto k = toc.hierarchy.cguide(); k.not_end(); ++k)
 			{
@@ -132,18 +131,16 @@ namespace chord {
 
 				switch (toc.kind(line_iter))
 				{
-					case Context::assign  : { add_assign_instr (line_iter); break; }
-					case Context::apply   : { add_apply_instr  (line_iter); break; }
-					case Context::vo_id   : { add_void_instr   (line_iter); break; }
-					case Context::test    : { add_test_instr   (line_iter); break; }
-					case Context::label   : { add_label_instr  (line_iter); break; }
-					case Context::branch  : { add_branch_instr (line_iter); break; }
-					case Context::go_to   : { add_goto_instr   (line_iter); break; }
-					case Context::re_turn : { add_return_instr (line_iter); break; }
+					case Context::assign  : { add_assign_instrs (line_iter); break; }
+					case Context::apply   : { add_apply_instrs  (line_iter); break; }
+					case Context::vo_id   : { add_void_instrs   (line_iter); break; }
+					case Context::test    : { add_test_instrs   (line_iter); break; }
+					case Context::label   : { add_label_instrs  (line_iter); break; }
+					case Context::branch  : { add_branch_instrs (line_iter); break; }
+					case Context::go_to   : { add_goto_instrs   (line_iter); break; }
+					case Context::re_turn : { add_return_instrs (line_iter); break; }
 				}
 			}
-
-			set_contr_size(contr.size());
 		}
 
 		nik_ce auto call_name      (const cguider & l) const { return toc.has_paste (l) ? MN::recall : MN::call; }
@@ -156,28 +153,24 @@ namespace chord {
 
 		nik_ce void increment_value (gcindex_type value) { contr.end()->push(value); }
 		nik_ce void set_instr_pos   (gcindex_type value) { contr.end()->operator [] (MI::pos) = value; }
-		nik_ce void set_contr_size  (gcindex_type value) { contr.begin()->push(value); }
 
 		// add:
+
+			nik_ce void add_initial_instrs() { increment_instr(); }
 
 			nik_ce void add_link () { contr_link.push(contr.end()); }
 			nik_ce void add_jump () { contr_jump.push(contr.end()); }
 
-			nik_ce void add_size_instr() { increment_instr(); }
-
 			nik_ce void add_instr(gckey_type name, gckey_type note, gckey_type m = Mark::none)
 			{
-				bool marked{m == Mark::value};
-
-				increment_value(marked ? _four : _three);
 				increment_value(name);
 				increment_value(note);
-				if (marked) increment_value();
+				if (m == Mark::value) increment_value();
 
 				increment_instr();
 			}
 
-			nik_ce void add_pad_instr(gcindex_type pad)
+			nik_ce void add_pad_instrs(gcindex_type pad)
 			{
 				set_instr_pos(pad);
 
@@ -185,7 +178,7 @@ namespace chord {
 				add_instr(MN::pad, MT::id);
 			}
 
-			nik_ce void add_replace_instr(const cguider & l)
+			nik_ce void add_replace_instrs(const cguider & l)
 			{
 				auto sign = first_sign(l);
 
@@ -199,57 +192,57 @@ namespace chord {
 				// else if Sign::is_copy do nothing.
 			}
 
-			nik_ce void add_assign_instr(const cguider & l)
+			nik_ce void add_assign_instrs(const cguider & l)
 			{
 				add_link(); // if (toc.has_link(l)) ?
 				add_instr(call_name(l), MT::id, Mark::value);
-				add_replace_instr(l);
+				add_replace_instrs(l);
 			}
 
-			nik_ce void add_apply_instr(const cguider & l)
+			nik_ce void add_apply_instrs(const cguider & l)
 			{
 				add_link(); // if (toc.has_link(l)) ?
 				add_instr(call_name(l), MT::id, Mark::value);
-				add_replace_instr(l);
+				add_replace_instrs(l);
 			}
 
-			nik_ce void add_void_instr(const cguider & l)
+			nik_ce void add_void_instrs(const cguider & l)
 			{
 				add_link(); // if (toc.has_link(l)) ?
 				add_instr(call_name(l), MT::void_f, Mark::value);
 			}
 
-			nik_ce void add_test_instr(const cguider & l)
+			nik_ce void add_test_instrs(const cguider & l)
 			{
 				add_link(); // if (toc.has_link(l)) ?
 				add_instr(call_name(l), MT::id, Mark::value);
 			}
 
-			nik_ce void add_label_instr(const cguider & l)
+			nik_ce void add_label_instrs(const cguider & l)
 				{ set_label_line(l); }
 
-			nik_ce void add_branch_instr(const cguider & l)
+			nik_ce void add_branch_instrs(const cguider & l)
 			{
 				add_jump();
 
 				add_instr(MN::jump, MT::branch, Mark::value);
 			}
 
-			nik_ce void add_goto_instr(const cguider & l)
+			nik_ce void add_goto_instrs(const cguider & l)
 			{
 				add_jump();
 
 				add_instr(MN::jump, MT::go_to, Mark::value);
 			}
 
-			nik_ce void add_get_link_instr(const cguider & l)
+			nik_ce void add_get_link_instrs(const cguider & l)
 			{
 				add_link();
 
 				add_instr(call_name(l), MT::id, Mark::value);
 			}
 
-			nik_ce void add_get_arg_instr(const cguider & l, gcindex_type index)
+			nik_ce void add_get_arg_instrs(const cguider & l, gcindex_type index)
 			{
 				set_instr_pos(index);
 
@@ -257,12 +250,12 @@ namespace chord {
 				add_instr(MN::right, MT::id);
 			}
 
-			nik_ce void add_return_instr(const cguider & l)
+			nik_ce void add_return_instrs(const cguider & l)
 			{
 				auto sign = first_sign(l);
 
-				if      (Sign::is_env(sign)) add_get_link_instr(l);
-				else if (Sign::is_constant_arg(sign)) add_get_arg_instr(l, first_index(l));
+				if      (Sign::is_env(sign)) add_get_link_instrs(l);
+				else if (Sign::is_constant_arg(sign)) add_get_arg_instrs(l, first_index(l));
 				// else if (Sign::is_quote(sign))
 
 				add_instr(MN::first , MT::id);
@@ -286,6 +279,8 @@ namespace chord {
 					(*k)->operator [] (MI::pos) = label[entry.index];
 				}
 			}
+
+			nik_ce const instr_type & operator [] (csize_type pos) const { return contr[pos]; }
 	};
 
 /***********************************************************************************************************************/
@@ -295,20 +290,8 @@ namespace chord {
 	template<auto static_source>
 	struct T_chord_assembly_targeted
 	{
-		nik_ces auto value		= T_chord_assembly_targeter<static_source>{};
-		using type			= decltype(value);
-
-		// accessors:
-
-			nik_ces auto instr(gcindex_type i) { return value.contr[i].cbegin(); }
-						// cbegin() required due to restrictions on constant expressions.
-						// change cbegin() to origin().
-
-		// navigators:
-
-			nik_ces gkey_type   next_name  (gcindex_type i) { return value.contr[i+1][MI::name]; }
-			nik_ces gkey_type   next_note  (gcindex_type i) { return value.contr[i+1][MI::note]; }
-			nik_ces gindex_type next_index (gcindex_type i) { return i+1; }
+		nik_ces auto value	= T_chord_assembly_targeter<static_source>{};
+		using type		= decltype(value);
 	};
 
 /***********************************************************************************************************************/
@@ -362,7 +345,7 @@ namespace chord {
 
 			cctmp::binding( "is_array"              , cctmp::_is_array_              ),
 			cctmp::binding( "array_type"            , cctmp::_array_type_            ),
-			cctmp::binding( "array_length"          , cctmp::_array_length_          ),
+			cctmp::binding( "array_size"            , cctmp::_array_size_            ),
 			cctmp::binding( "array_begin"           , cctmp::_array_begin_           ),
 			cctmp::binding( "array_last"            , cctmp::_array_last_            ),
 			cctmp::binding( "array_end"             , cctmp::_array_end_             ),
@@ -451,17 +434,18 @@ namespace chord {
 		// function:
 
 		template<typename S, typename... Ts>
-		nik_ces S result(Ts... vs)
+		nik_ces auto result(Ts... vs) -> S
 		{
 			nik_ce auto out_type = U_store_T<S>;
 			nik_ce auto this_f   = _wrap_<result<S, Ts...>>;
 			nik_ce auto link     = U_pack_Vs<this_f, env>;
+			nik_ce auto types    = U_pack_Ts<Ts...>;
 
 			return T_machine_start::template result
 			<
-				out_type, contr, link, modify_type<_read_only_, Ts>...
+				out_type, contr, link, types, modify_type<_read_only_, Ts>...
 
-			>((modify_type<_read_only_, Ts>) vs...); // c style cast
+			>(static_cast<modify_type<_read_only_, Ts>>(vs)...);
 		}
 	};
 

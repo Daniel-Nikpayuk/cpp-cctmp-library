@@ -402,7 +402,7 @@ namespace chord {
 
 		// rules:
 
-			"LValue -> IValue : pad     ;"
+			"LValue -> IValue : pad     ;" // upper bound.
 			"       -> Copy   : instr_1 ;"
 			"RValue -> IValue           ;"
 			"       -> Paste            ;"
@@ -436,7 +436,7 @@ namespace chord {
 
 		// morph:
 
-			"HValue -> compose < MArgs \\> ;"
+			"HValue -> argpose < MArgs \\> ;"
 			"       -> subpose < MArgs \\> ;"
 			"       -> curry   < MArgs \\> ;"
 
@@ -540,7 +540,7 @@ namespace chord {
 			sxt_pair( "|"   , Token::bar         ),
 			sxt_pair( ","   , Token::comma       ),
 
-			sxt_pair( "compose" , Token::compose ),
+			sxt_pair( "argpose" , Token::argpose ),
 			sxt_pair( "subpose" , Token::subpose ),
 			sxt_pair( "curry"   , Token::curry   ),
 

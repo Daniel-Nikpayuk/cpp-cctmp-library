@@ -29,15 +29,14 @@ mawk "$mawk_prog_first" "define_macros.hpp"           >  "single_source/00_cctmp
 mawk "$mawk_prog_rest"  "00_cctmp/00_grammar.hpp"     >> "single_source/00_cctmp.hpp" &&
 mawk "$mawk_prog_rest"  "00_cctmp/01_argument.hpp"    >> "single_source/00_cctmp.hpp" &&
 mawk "$mawk_prog_rest"  "00_cctmp/02_parameter.hpp"   >> "single_source/00_cctmp.hpp" &&
-mawk "$mawk_prog_rest"  "00_cctmp/03_praxis.hpp"      >> "single_source/00_cctmp.hpp" &&
-mawk "$mawk_prog_rest"  "00_cctmp/04_interpreter.hpp" >> "single_source/00_cctmp.hpp" &&
-mawk "$mawk_prog_rest"  "00_cctmp/05_scope.hpp"       >> "single_source/00_cctmp.hpp" &&
-mawk "$mawk_prog_rest"  "00_cctmp/06_relation.hpp"    >> "single_source/00_cctmp.hpp" &&
-mawk "$mawk_prog_rest"  "00_cctmp/07_graph.hpp"       >> "single_source/00_cctmp.hpp" &&
-mawk "$mawk_prog_rest"  "00_cctmp/08_lexer.hpp"       >> "single_source/00_cctmp.hpp" &&
-mawk "$mawk_prog_rest"  "00_cctmp/09_syntax.hpp"      >> "single_source/00_cctmp.hpp" &&
-mawk "$mawk_prog_rest"  "00_cctmp/10_parser.hpp"      >> "single_source/00_cctmp.hpp" &&
-mawk "$mawk_prog_rest"  "00_cctmp/11_generator.hpp"   >> "single_source/00_cctmp.hpp" &&
+mawk "$mawk_prog_rest"  "00_cctmp/03_scope.hpp"       >> "single_source/00_cctmp.hpp" &&
+mawk "$mawk_prog_rest"  "00_cctmp/04_relation.hpp"    >> "single_source/00_cctmp.hpp" &&
+mawk "$mawk_prog_rest"  "00_cctmp/05_praxis.hpp"      >> "single_source/00_cctmp.hpp" &&
+mawk "$mawk_prog_rest"  "00_cctmp/06_algorithm.hpp"   >> "single_source/00_cctmp.hpp" &&
+mawk "$mawk_prog_rest"  "00_cctmp/07_interpreter.hpp" >> "single_source/00_cctmp.hpp" &&
+mawk "$mawk_prog_rest"  "00_cctmp/08_chain.hpp"       >> "single_source/00_cctmp.hpp" &&
+mawk "$mawk_prog_rest"  "00_cctmp/09_action.hpp"      >> "single_source/00_cctmp.hpp" &&
+mawk "$mawk_prog_rest"  "00_cctmp/10_compose.hpp"     >> "single_source/00_cctmp.hpp" &&
 
 mawk "$mawk_prog_rest"  "undef_macros.hpp"            >> "single_source/00_cctmp.hpp"
 

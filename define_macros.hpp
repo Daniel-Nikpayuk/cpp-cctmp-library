@@ -85,6 +85,10 @@
 															\
 		V
 
+	#define NIK_LJ()												\
+															\
+		j
+
 	#define NIK_EVAL()												\
 															\
 		eval
@@ -113,38 +117,53 @@
 															\
 		V ## _n_
 
-	#define NIK_T_V_1(_n_)												\
+	#define NIK_LV_1(_n_)												\
+															\
+		v ## _n_
+
+	#define NIK_T_LV_1(_n_)												\
 															\
 		T ## _n_ v ## _n_
-
-	#define NIK_LFS_1(_n_)												\
-															\
-		fs ## _n_
-
-	#define NIK_BFS_FS_VP_LFS_BFS_FS_1(_n_)										\
-															\
-		template<auto...> typename BFs ## _n_,									\
-		auto... Fs ## _n_, nik_vp(fs ## _n_)(BFs ## _n_<Fs ## _n_...>*)
-
-	#define NIK_EVAL_FS_V_1(_n_)											\
-															\
-		eval<Fs ## _n_, V ## _n_>...
-
-	#define NIK_EVAL_FS_V_PLUS_ID_1(_n_)										\
-															\
-		eval<Fs ## _n_, V + _n_>...
-
-	#define NIK_EVAL_OP_V_V_1(_n_)											\
-															\
-		eval<Op, V ## _n_, V + _n_>
 
 	#define NIK_OP_1(_n_)												\
 															\
 		Op
 
-	#define NIK_CAST_FS_T_V_1(_n_)											\
+	#define NIK_LOP_1(_n_)												\
 															\
-		(T_store_U<Fs ## _n_>) v ## _n_...
+		op ## _n_
+
+	#define NIK_PARAM_BOP_OPS_1(_n_)										\
+															\
+		template<auto...> typename BOp ## _n_, auto... Ops ## _n_
+
+	#define NIK_VP_BOP_OPS_1(_n_)											\
+															\
+		nik_vp(op ## _n_)(BOp ## _n_<Ops ## _n_...>*)
+
+	#define NIK_SIFT_V_OPS_V_1(_n_)											\
+															\
+		(sift<V ## _n_, Ops ## _n_>) V ## _n_...
+
+	#define NIK_SIFT_T_OPS_LV_1(_n_)										\
+															\
+		(sift<T ## _n_, Ops ## _n_>) v ## _n_...
+
+	#define NIK_SIFT_T_OPS_1(_n_)											\
+															\
+		sift<T ## _n_, Ops ## _n_>...
+
+	#define NIK_SIFT_LJ_OPS_V_PLUS_ID_1(_n_)									\
+															\
+		(sift<j, Ops ## _n_>) j + _n_...
+
+	#define NIK_SIFT_IF_OP_V_OP_LJ_1(_n_)										\
+															\
+		if_then_else_<eval<Op0, V ## _n_> && eval<Op1, j + _n_>, _keep_, _drop_>
+
+	#define NIK_SIFT_IF_OP_T_OP_LJ_1(_n_)										\
+															\
+		if_then_else_<eval<Op0, U_store_T<T ## _n_>> && eval<Op1, j + _n_>, _keep_, _drop_>
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -415,15 +434,15 @@
 
 // controls:
 
-	#define NIK_PRAXIS_CONTROLS(_d_, _c_, _i_, _n_)									\
+	#define NIK_PRAXIS_CONTROLS(_d_, _c_, _i_, _j_)									\
 															\
-		auto _d_, auto _c_, auto _i_, auto _n_
+		auto _d_, auto _c_, auto _i_, auto _j_
 
 // params:
 
-	#define NIK_PRAXIS_PARAMS(_d_, _c_, _i_, _n_, _v_)								\
+	#define NIK_PRAXIS_PARAMS(_d_, _c_, _i_, _j_, _v_)								\
 															\
-		NIK_PRAXIS_CONTROLS(_d_, _c_, _i_, _n_), auto... _v_
+		NIK_PRAXIS_CONTROLS(_d_, _c_, _i_, _j_), auto... _v_
 
 /***********************************************************************************************************************/
 
@@ -433,25 +452,25 @@
 															\
 		T_praxis												\
 		<													\
-			PD::next_name(_d_, _c_, _i_),									\
-			PD::next_note(_d_, _c_, _i_)
+			PD<_c_>::next_name(_d_, _i_),									\
+			PD<_c_>::next_note(_d_, _i_)
 
-	#define NIK_PRAXIS_M(_d_, _c_, _i_, _n_)									\
+	#define NIK_PRAXIS_M(_d_, _c_, _i_, _j_)									\
 															\
 		>::template result											\
 		<													\
-			PD::next_depth(_d_),										\
+			PD<_c_>::next_depth(_d_),									\
 			_c_,												\
-			PD::next_index(_d_, _i_),									\
-			_n_
+			PD<_c_>::next_index(_d_, _i_),									\
+			_j_
 
 	#define NIK_PRAXIS_R												\
 															\
 		>
 
-	#define NIK_PRAXIS_BEGIN(_e_, _d_, _c_, _i_, _n_)								\
+	#define NIK_PRAXIS_BEGIN(_d_, _c_, _i_, _j_)									\
 															\
-		NIK_PRAXIS_L(_d_, _c_, _i_), _e_ NIK_PRAXIS_M(_d_, _c_, _i_, _n_)
+		NIK_PRAXIS_L(_d_, _c_, _i_) NIK_PRAXIS_M(_d_, _c_, _i_, _j_)
 
 	#define NIK_PRAXIS_END												\
 															\
@@ -461,13 +480,13 @@
 															\
 		NIK_PRAXIS_L(_d_, _c_, _i_)
 
-	#define NIK_PRAXIS_RESULT(_d_, _c_, _i_, _n_, _v_)								\
+	#define NIK_PRAXIS_RESULT(_d_, _c_, _i_, _j_, _v_)								\
 															\
-		NIK_PRAXIS_M(_d_, _c_, _i_, _n_), _v_... NIK_PRAXIS_R
+		NIK_PRAXIS_M(_d_, _c_, _i_, _j_), _v_... NIK_PRAXIS_R
 
-	#define NIK_PRAXIS(_e_, _d_, _c_, _i_, _n_, _v_)								\
+	#define NIK_PRAXIS(_d_, _c_, _i_, _j_, _v_)									\
 															\
-		NIK_PRAXIS_TEMPLATE(_d_, _c_, _i_), _e_ NIK_PRAXIS_RESULT(_d_, _c_, _i_, _n_, _v_)
+		NIK_PRAXIS_TEMPLATE(_d_, _c_, _i_) NIK_PRAXIS_RESULT(_d_, _c_, _i_, _j_, _v_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -476,16 +495,16 @@
 
 /***********************************************************************************************************************/
 
-// push id:
+// left heap:
 
-	#define NIK_DEFINE_PRAXIS_PUSH_ID_2_N(_e_)									\
+	#define NIK_DEFINE_PRAXIS_LEFT_HEAP_2_N(_e_)									\
 															\
 		template<auto... filler>										\
-		struct T_praxis<PN::push, PT::id, _2_ ## _e_, filler...>						\
+		struct T_praxis<PN::left, PT::heap, filler...>								\
 		{													\
 			template											\
 			<												\
-				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
+				NIK_PRAXIS_CONTROLS(d, c, i, j),							\
 				NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,						\
 				template<auto...> typename B0, auto... Ws, typename... Heaps				\
 			>												\
@@ -493,7 +512,7 @@
 			{												\
 				nik_ce auto nH0 = U_store_T<B0<Ws..., NIK_2_N_VARS(_e_, NIK_V_1)>>;			\
 															\
-				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
+				return NIK_PRAXIS_BEGIN(d, c, i, j),							\
 															\
 					Vs...										\
 															\
@@ -501,54 +520,45 @@
 			}												\
 		};
 
-// left id:
+// segment push:
 
-	#define NIK_DEFINE_PRAXIS_LEFT_ID_2_N(_e_)									\
-															\
-		template<NIK_2_N_VARS(_e_, NIK_BFS_FS_VP_LFS_BFS_FS_1)>							\
-		struct T_praxis<PN::left, PT::id, _2_ ## _e_, NIK_2_N_VARS(_e_, NIK_LFS_1)>				\
-		{													\
-			template											\
-			<												\
-				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
-				NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,						\
-				template<auto...> typename B0, auto... Ws, typename... Heaps				\
-			>												\
-			nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)		 			\
-			{												\
-				nik_ce auto nH0 = U_store_T<B0<Ws..., NIK_2_N_VARS(_e_, NIK_EVAL_FS_V_1)>>;		\
-															\
-				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
-															\
-					Vs...										\
-															\
-				NIK_PRAXIS_END(nH0, Hs...);								\
-			}												\
-		};
-
-// fold id:
-
-	#define NIK_DEFINE_PRAXIS_FOLD_ID_2_N(_e_)									\
+	#define NIK_DEFINE_PRAXIS_SEGMENT_PUSH_2_N(_e_)									\
 															\
 		template<auto... filler>										\
-		struct T_praxis<PN::fold, PT::id, _2_ ## _e_, filler...>						\
+		struct T_praxis<PN::segment, PT::push, filler...>							\
 		{													\
+			template<NIK_PRAXIS_CONTROLS(d, c, i, j), auto... Vs, typename... Heaps>			\
+			nik_ces auto result(Heaps... Hs)				 				\
+			{												\
+				return NIK_PRAXIS_BEGIN(d, c, i, j + _2_ ## _e_),					\
+															\
+					Vs..., NIK_2_N_SEGMENT_VARS(_e_, NIK_LJ)					\
+															\
+				NIK_PRAXIS_END(Hs...);									\
+			}												\
+		};
+
+// segment pull:
+
+	#define NIK_DEFINE_PRAXIS_SEGMENT_PULL_2_N(_e_)									\
+															\
+		template<auto... filler>										\
+		struct T_praxis<PN::segment, PT::pull, filler...>							\
+		{													\
+			template<auto V, bool> using sift = decltype(V);						\
+															\
 			template											\
 			<												\
-				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
-				auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,					\
-				template<auto...> typename B0, auto W0, auto W1, auto... Ws, typename... Heaps		\
+				NIK_PRAXIS_CONTROLS(d, c, i, j), auto... Vs,						\
+				NIK_2_N_VARS(_e_, NIK_PARAM_BOP_OPS_1), typename... Heaps				\
 			>												\
-			nik_ces auto result(nik_vp(H0)(B0<W0, W1, Ws...>*), Heaps... Hs) 				\
+			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_VP_BOP_OPS_1), Heaps... Hs)				\
 			{												\
-				nik_ce auto ins	= PD::instr(c, i);							\
-				nik_ce auto Op  = if_then_else_<ins[PI::pos], W1, W0>;					\
+				return NIK_PRAXIS_BEGIN(d, c, i, j),							\
 															\
-				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
+					Vs..., NIK_2_N_VARS(_e_, NIK_SIFT_LJ_OPS_V_PLUS_ID_1)				\
 															\
-					NIK_2_N_ACTION_FOLDS(_e_, NIK_EVAL, NIK_OP, V), Vs...				\
-															\
-				NIK_PRAXIS_END(H0, Hs...);								\
+				NIK_PRAXIS_END(Hs...);									\
 			}												\
 		};
 
@@ -557,65 +567,41 @@
 	#define NIK_DEFINE_PRAXIS_SEGMENT_ACTION_2_N(_e_)								\
 															\
 		template<auto... filler>										\
-		struct T_praxis<PN::segment, PT::action, _2_ ## _e_, filler...>						\
+		struct T_praxis<PN::segment, PT::action, filler...>							\
 		{													\
-			template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto V, auto... Vs, typename... Heaps>		\
+			template<NIK_PRAXIS_CONTROLS(d, c, i, j), auto... Vs, typename... Heaps>			\
 			nik_ces auto result(Heaps... Hs)				 				\
 			{												\
-				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
+				return NIK_PRAXIS_BEGIN(d, c, i, j + _2_ ## _e_),					\
 															\
-					V + _2_ ## _e_, Vs..., NIK_2_N_SEGMENT_VARS(_e_, NIK_V)				\
+					Vs..., NIK_2_N_SEGMENT_VARS(_e_, NIK_V)						\
 															\
 				NIK_PRAXIS_END(Hs...);									\
 			}												\
 		};
 
-// segment id:
+// fold id:
 
-	#define NIK_DEFINE_PRAXIS_SEGMENT_ID_2_N(_e_)									\
-															\
-		template<NIK_2_N_VARS(_e_, NIK_BFS_FS_VP_LFS_BFS_FS_1)>							\
-		struct T_praxis<PN::segment, PT::id, _2_ ## _e_, NIK_2_N_VARS(_e_, NIK_LFS_1)>				\
-		{													\
-			template<NIK_PRAXIS_CONTROLS(d, c, i, n), auto V, auto... Vs, typename... Heaps>		\
-			nik_ces auto result(Heaps... Hs)				 				\
-			{												\
-				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
-															\
-					V, Vs..., NIK_2_N_VARS(_e_, NIK_EVAL_FS_V_PLUS_ID_1)				\
-															\
-				NIK_PRAXIS_END(Hs...);									\
-			}												\
-		};
-
-// sift action:
-
-	#define NIK_DEFINE_PRAXIS_SIFT_ACTION_2_N(_e_)									\
+	#define NIK_DEFINE_PRAXIS_FOLD_ID_2_N(_e_)									\
 															\
 		template<auto... filler>										\
-		struct T_praxis<PN::sift, PT::action, _2_ ## _e_, filler...>						\
+		struct T_praxis<PN::fold, PT::id, filler...>								\
 		{													\
 			template											\
 			<												\
-				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
+				NIK_PRAXIS_CONTROLS(d, c, i, j),							\
 				auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,					\
-				template<auto...> typename B0, auto W0, auto W1, auto W2, auto... Ws,			\
-				typename... Heaps									\
+				typename Heap0, typename Heap1, typename... Heaps					\
 			>												\
-			nik_ces auto result(nik_vp(H0)(B0<W0, W1, W2, Ws...>*), Heaps... Hs) 				\
+			nik_ces auto result(Heap0 H0, Heap1 H1, Heaps... Hs)		 				\
 			{												\
-				nik_ce auto ins	= PD::instr(c, i);							\
-				nik_ce auto Op  = if_then_else_<ins[PI::pos], W2, W1>;					\
+				nik_ce auto Op = U_restore_T<Heap1>;							\
 															\
-				return NIK_PRAXIS_L(d, c, i),								\
+				return NIK_PRAXIS_BEGIN(d, c, i, j),							\
 															\
-					_2_ ## _e_, NIK_2_N_VARS(_e_, NIK_EVAL_OP_V_V_1)				\
+					NIK_2_N_ACTION_FOLDS(_e_, NIK_EVAL, NIK_OP, V), Vs...				\
 															\
-				NIK_PRAXIS_M(d, c, i, n),								\
-															\
-					V + _2_ ## _e_, NIK_2_N_VARS(_e_, NIK_V_1), Vs...				\
-															\
-				NIK_PRAXIS_R(H0, Hs...);								\
+				NIK_PRAXIS_END(H0, H1, Hs...);								\
 			}												\
 		};
 
@@ -623,20 +609,98 @@
 
 	#define NIK_DEFINE_PRAXIS_SIFT_ID_2_N(_e_)									\
 															\
-		template<NIK_2_N_VARS(_e_, NIK_BFS_FS_VP_LFS_BFS_FS_1)>							\
-		struct T_praxis<PN::sift, PT::id, _2_ ## _e_, NIK_2_N_VARS(_e_, NIK_LFS_1)>				\
+		template<auto... filler>										\
+		struct T_praxis<PN::sift, PT::id, filler...>								\
 		{													\
 			template											\
 			<												\
-				NIK_PRAXIS_CONTROLS(d, c, i, n),							\
-				auto V, NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,					\
-				typename... Heaps									\
+				NIK_PRAXIS_CONTROLS(d, c, i, j),							\
+				NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,						\
+				typename Heap0, template<auto...> typename B1, auto Op0, auto Op1, typename... Heaps	\
 			>												\
-			nik_ces auto result(Heaps... Hs)								\
+			nik_ces auto result(Heap0 H0, nik_vp(H1)(B1<Op0, Op1>*), Heaps... Hs)	 			\
 			{												\
-				return NIK_PRAXIS_BEGIN(_2_ ## _e_, d, c, i, n),					\
+				return NIK_PRAXIS_BEGIN(d, c, i, j + _2_ ## _e_),					\
 															\
-					V, Vs..., NIK_2_N_VARS(_e_, NIK_EVAL_FS_V_1)					\
+					NIK_2_N_VARS(_e_, NIK_V_1), Vs...						\
+															\
+				NIK_PRAXIS_END(NIK_2_N_VARS(_e_, NIK_SIFT_IF_OP_V_OP_LJ_1), H0, H1, Hs...);		\
+			}												\
+		};
+
+// sift heap:
+
+	#define NIK_DEFINE_PRAXIS_SIFT_HEAP_2_N(_e_)									\
+															\
+		template<auto... filler>										\
+		struct T_praxis<PN::sift, PT::heap, filler...>								\
+		{													\
+			template<auto V, bool> using sift = decltype(V);						\
+															\
+			template											\
+			<												\
+				NIK_PRAXIS_CONTROLS(d, c, i, j),							\
+				NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,						\
+				NIK_2_N_VARS(_e_, NIK_PARAM_BOP_OPS_1),							\
+				template<auto...> typename B0, auto... Ws, typename... Heaps				\
+			>												\
+			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_VP_BOP_OPS_1), nik_vp(H0)(B0<Ws...>*), Heaps... Hs)	\
+			{												\
+				nik_ce auto nH0 = U_store_T<B0<Ws..., NIK_2_N_VARS(_e_, NIK_SIFT_V_OPS_V_1)>>;		\
+															\
+				return NIK_PRAXIS_BEGIN(d, c, i, j),							\
+															\
+					NIK_2_N_VARS(_e_, NIK_V_1), Vs...						\
+															\
+				NIK_PRAXIS_END(nH0, Hs...);								\
+			}												\
+		};
+
+// sift pull:
+
+	#define NIK_DEFINE_PRAXIS_SIFT_PULL_2_N(_e_)									\
+															\
+		template<auto... filler>										\
+		struct T_praxis<PN::sift, PT::pull, filler...>								\
+		{													\
+			template<auto V, bool> using sift = decltype(V);						\
+															\
+			template											\
+			<												\
+				NIK_PRAXIS_CONTROLS(d, c, i, j),							\
+				NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,						\
+				NIK_2_N_VARS(_e_, NIK_PARAM_BOP_OPS_1), typename... Heaps				\
+			>												\
+			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_VP_BOP_OPS_1), Heaps... Hs)				\
+			{												\
+				return NIK_PRAXIS_BEGIN(d, c, i, j),							\
+															\
+					NIK_2_N_VARS(_e_, NIK_SIFT_V_OPS_V_1), Vs...					\
+															\
+				NIK_PRAXIS_END(Hs...);									\
+			}												\
+		};
+
+// sift push:
+
+	#define NIK_DEFINE_PRAXIS_SIFT_PUSH_2_N(_e_)									\
+															\
+		template<auto... filler>										\
+		struct T_praxis<PN::sift, PT::push, filler...>								\
+		{													\
+			template<auto V, bool> using sift = decltype(V);						\
+															\
+			template											\
+			<												\
+				NIK_PRAXIS_CONTROLS(d, c, i, j),							\
+				NIK_2_N_AUTO_VARS(_e_, NIK_V_1), auto... Vs,						\
+				NIK_2_N_VARS(_e_, NIK_PARAM_BOP_OPS_1), typename... Heaps				\
+			>												\
+			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_VP_BOP_OPS_1), Heaps... Hs)				\
+			{												\
+				return NIK_PRAXIS_BEGIN(d, c, i, j),							\
+															\
+					Vs..., NIK_2_N_VARS(_e_, NIK_SIFT_V_OPS_V_1)					\
 															\
 				NIK_PRAXIS_END(Hs...);									\
 			}												\
@@ -713,9 +777,9 @@
 
 // params:
 
-	#define NIK_CHAIN_PARAMS(_c_, _i_, _l_)										\
+	#define NIK_CHAIN_PARAMS(_c_, _i_, _j_, _l_, _t_)								\
 															\
-		auto _c_, auto _i_, auto _l_
+		auto _c_, auto _i_, auto _j_, auto _l_, auto _t_
 
 /***********************************************************************************************************************/
 
@@ -725,15 +789,16 @@
 															\
 		T_chain													\
 		<													\
-			CD::next_name(_c_, _i_)
+			CD<c>::next_name(_i_),										\
+			CD<c>::next_note(_i_)
 
-	#define NIK_CHAIN_M(_c_, _i_, _l_)										\
+	#define NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_)									\
 															\
 		>::template result											\
 		<													\
 			_c_,												\
-			CD::next_index(_c_, _i_),									\
-			_l_
+			CD<c>::next_index(_i_),										\
+			_j_, _l_, _t_
 
 	#define NIK_CHAIN_R 												\
 															\
@@ -743,29 +808,45 @@
 															\
 		NIK_CHAIN_L(_c_, _i_)
 
-	#define NIK_CHAIN_RESULT(_c_, _i_, _l_)										\
+	#define NIK_CHAIN_RESULT(_c_, _i_, _j_, _l_, _t_)								\
 															\
-		NIK_CHAIN_M(_c_, _i_, _l_) NIK_CHAIN_R
+		NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_) NIK_CHAIN_R
 
-	#define NIK_CHAIN_RESULT_TS(_c_, _i_, _l_, _t_)									\
+	#define NIK_CHAIN_RESULT_TS(_c_, _i_, _j_, _l_, _t_, _t0_)							\
 															\
-		NIK_CHAIN_M(_c_, _i_, _l_), _t_ NIK_CHAIN_R
+		NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_), _t0_ NIK_CHAIN_R
 
-	#define NIK_CHAIN_RESULT_2TS(_c_, _i_, _l_, _t0_, _t1_)								\
+	#define NIK_CHAIN_RESULT_2TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_)						\
 															\
-		NIK_CHAIN_M(_c_, _i_, _l_), _t0_, _t1_ NIK_CHAIN_R
+		NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_), _t0_, _t1_ NIK_CHAIN_R
 
-	#define NIK_CHAIN(_c_, _i_, _l_)										\
+	#define NIK_CHAIN_RESULT_3TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_)						\
 															\
-		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT(_c_, _i_, _l_)
+		NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_), _t0_, _t1_, _t2_ NIK_CHAIN_R
 
-	#define NIK_CHAIN_TS(_c_, _i_, _l_, _t_)									\
+	#define NIK_CHAIN_RESULT_4TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)					\
 															\
-		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_TS(_c_, _i_, _l_, _t_)
+		NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_), _t0_, _t1_, _t2_, _t3_ NIK_CHAIN_R
 
-	#define NIK_CHAIN_2TS(_c_, _i_, _l_, _t0_, _t1_)								\
+	#define NIK_CHAIN(_c_, _i_, _j_, _l_, _t_)									\
 															\
-		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_2TS(_c_, _i_, _l_, _t0_, _t1_)
+		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT(_c_, _i_, _j_, _l_, _t_)
+
+	#define NIK_CHAIN_TS(_c_, _i_, _j_, _l_, _t_, _t0_)								\
+															\
+		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_TS(_c_, _i_, _j_, _l_, _t_, _t0_)
+
+	#define NIK_CHAIN_2TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_)							\
+															\
+		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_2TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_)
+
+	#define NIK_CHAIN_3TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_)						\
+															\
+		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_3TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_)
+
+	#define NIK_CHAIN_4TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)						\
+															\
+		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_4TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)
 
 /***********************************************************************************************************************/
 
@@ -773,14 +854,46 @@
 
 	#define NIK_DEFINE_CHAIN_SIFT_ID_2_N(_e_)									\
 															\
-		template<NIK_2_N_VARS(_e_, NIK_BFS_FS_VP_LFS_BFS_FS_1)>							\
-		struct T_chain<CN::sift, NIK_2_N_VARS(_e_, NIK_LFS_1)>							\
+		template<auto... filler>										\
+		struct T_chain<CN::sift, CT::id, filler...>								\
 		{													\
-			template<NIK_CHAIN_PARAMS(c, i, l), NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts>	\
-			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_T_V_1), Ts... vs)					\
+			template<NIK_CHAIN_PARAMS(c, i, j, l, t), NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts>	\
+			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs)					\
 			{												\
-				return NIK_CHAIN(c, i, l) /* need to propagate types */					\
-					(vs..., NIK_2_N_VARS(_e_, NIK_CAST_FS_T_V_1));					\
+				nik_ce auto & ins = CD<c>::instr(i);							\
+				nik_ce auto p     = at_<l, ins[CI::pos]>;						\
+				nik_ce auto Op0   = car_<p>;								\
+				nik_ce auto Op1   = cadr_<p>;								\
+															\
+				return NIK_CHAIN_L(c, i),								\
+															\
+					NIK_2_N_VARS(_e_, NIK_SIFT_IF_OP_T_OP_LJ_1)					\
+															\
+				NIK_CHAIN_M(c, i, j + _2_ ## _e_, l, t),						\
+															\
+					NIK_2_N_VARS(_e_, NIK_T_1), Ts...						\
+															\
+				NIK_CHAIN_R(NIK_2_N_VARS(_e_, NIK_LV_1), vs...);					\
+			}												\
+		};
+
+// sift push:
+
+	#define NIK_DEFINE_CHAIN_SIFT_PUSH_2_N(_e_)									\
+															\
+		template<NIK_2_N_VARS(_e_, NIK_PARAM_BOP_OPS_1), NIK_2_N_VARS(_e_, NIK_VP_BOP_OPS_1)>			\
+		struct T_chain<CN::sift, CT::push, NIK_2_N_VARS(_e_, NIK_LOP_1)>					\
+		{													\
+			template<typename T, bool> using sift = T;							\
+															\
+			template<NIK_CHAIN_PARAMS(c, i, j, l, t), NIK_2_N_TYPENAME_VARS(_e_, NIK_T_1), typename... Ts>	\
+			nik_ces auto result(NIK_2_N_VARS(_e_, NIK_T_LV_1), Ts... vs)					\
+			{												\
+				return NIK_CHAIN_L(c, i) NIK_CHAIN_M(c, i, j, l, t),					\
+															\
+					Ts..., NIK_2_N_VARS(_e_, NIK_SIFT_T_OPS_1)					\
+															\
+				NIK_CHAIN_R(vs..., NIK_2_N_VARS(_e_, NIK_SIFT_T_OPS_LV_1));				\
 			}												\
 		};
 
@@ -793,9 +906,9 @@
 
 // params:
 
-	#define NIK_MACHINE_PARAMS(_s_, _c_, _i_, _l_)									\
+	#define NIK_MACHINE_PARAMS(_s_, _c_, _i_, _l_, _t_)								\
 															\
-		auto _s_, auto _c_, auto _i_, auto _l_
+		auto _s_, auto _c_, auto _i_, auto _l_, auto _t_
 
 /***********************************************************************************************************************/
 
@@ -805,16 +918,16 @@
 															\
 		T_machine												\
 		<													\
-			MD::next_name(_c_, _i_),									\
-			MD::next_note(_c_, _i_)
+			MD<_c_>::next_name(_i_),									\
+			MD<_c_>::next_note(_i_)
 
-	#define NIK_MACHINE_M(_s_, _c_, _i_, _l_)									\
+	#define NIK_MACHINE_M(_s_, _c_, _i_, _l_, _t_)									\
 															\
 		>::template result											\
 		<													\
 			_s_, _c_,											\
-			MD::next_index(_c_, _i_),									\
-			_l_
+			MD<_c_>::next_index(_i_),									\
+			_l_, _t_
 
 	#define NIK_MACHINE_R 												\
 															\
@@ -824,37 +937,37 @@
 															\
 		NIK_MACHINE_L(_c_, _i_)
 
-	#define NIK_MACHINE_RESULT(_s_, _c_, _i_, _l_)									\
+	#define NIK_MACHINE_RESULT(_s_, _c_, _i_, _l_, _t_)								\
 															\
-		NIK_MACHINE_M(_s_, _c_, _i_, _l_) NIK_MACHINE_R
+		NIK_MACHINE_M(_s_, _c_, _i_, _l_, _t_) NIK_MACHINE_R
 
-	#define NIK_MACHINE_RESULT_TS(_s_, _c_, _i_, _l_, _t_)								\
+	#define NIK_MACHINE_RESULT_TS(_s_, _c_, _i_, _l_, _t_, _t0_)							\
 															\
-		NIK_MACHINE_M(_s_, _c_, _i_, _l_), _t_ NIK_MACHINE_R
+		NIK_MACHINE_M(_s_, _c_, _i_, _l_, _t_), _t0_ NIK_MACHINE_R
 
-	#define NIK_MACHINE_RESULT_2TS(_s_, _c_, _i_, _l_, _t0_, _t1_)							\
+	#define NIK_MACHINE_RESULT_2TS(_s_, _c_, _i_, _l_, _t_, _t0_, _t1_)						\
 															\
-		NIK_MACHINE_M(_s_, _c_, _i_, _l_), _t0_, _t1_ NIK_MACHINE_R
+		NIK_MACHINE_M(_s_, _c_, _i_, _l_, _t_), _t0_, _t1_ NIK_MACHINE_R
 
-	#define NIK_MACHINE_RESULT_3TS(_s_, _c_, _i_, _l_, _t0_, _t1_, _t2_)						\
+	#define NIK_MACHINE_RESULT_3TS(_s_, _c_, _i_, _l_, _t_, _t0_, _t1_, _t2_)					\
 															\
-		NIK_MACHINE_M(_s_, _c_, _i_, _l_), _t0_, _t1_, _t2_ NIK_MACHINE_R
+		NIK_MACHINE_M(_s_, _c_, _i_, _l_, _t_), _t0_, _t1_, _t2_ NIK_MACHINE_R
 
-	#define NIK_MACHINE(_s_, _c_, _i_, _l_)										\
+	#define NIK_MACHINE(_s_, _c_, _i_, _l_, _t_)									\
 															\
-		NIK_MACHINE_TEMPLATE(_c_, _i_) NIK_MACHINE_RESULT(_s_, _c_, _i_, _l_)
+		NIK_MACHINE_TEMPLATE(_c_, _i_) NIK_MACHINE_RESULT(_s_, _c_, _i_, _l_, _t_)
 
-	#define NIK_MACHINE_TS(_s_, _c_, _i_, _l_, _t_)									\
+	#define NIK_MACHINE_TS(_s_, _c_, _i_, _l_, _t_, _t0_)								\
 															\
-		NIK_MACHINE_TEMPLATE(_c_, _i_) NIK_MACHINE_RESULT_TS(_s_, _c_, _i_, _l_, _t_)
+		NIK_MACHINE_TEMPLATE(_c_, _i_) NIK_MACHINE_RESULT_TS(_s_, _c_, _i_, _l_, _t_, _t0_)
 
-	#define NIK_MACHINE_2TS(_s_, _c_, _i_, _l_, _t0_, _t1_)								\
+	#define NIK_MACHINE_2TS(_s_, _c_, _i_, _l_, _t_, _t0_, _t1_)							\
 															\
-		NIK_MACHINE_TEMPLATE(_c_, _i_) NIK_MACHINE_RESULT_2TS(_s_, _c_, _i_, _l_, _t0_, _t1_)
+		NIK_MACHINE_TEMPLATE(_c_, _i_) NIK_MACHINE_RESULT_2TS(_s_, _c_, _i_, _l_, _t_, _t0_, _t1_)
 
-	#define NIK_MACHINE_3TS(_s_, _c_, _i_, _l_, _t0_, _t1_, _t2_)							\
+	#define NIK_MACHINE_3TS(_s_, _c_, _i_, _l_, _t_, _t0_, _t1_, _t2_)						\
 															\
-		NIK_MACHINE_TEMPLATE(_c_, _i_) NIK_MACHINE_RESULT_3TS(_s_, _c_, _i_, _l_, _t0_, _t1_, _t2_)
+		NIK_MACHINE_TEMPLATE(_c_, _i_) NIK_MACHINE_RESULT_3TS(_s_, _c_, _i_, _l_, _t_, _t0_, _t1_, _t2_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

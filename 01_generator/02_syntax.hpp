@@ -198,7 +198,7 @@ namespace cctmp {
 		nik_ces auto action	= TA<Name>::template result<AST>;
 		using action_type	= void(*)(AST*, clexeme*);
 
-		nik_ces auto segment	= eval<_par_segment_, AN::dimension>;
+		nik_ces auto segment	= segment_<AN::dimension>;
 
 		template<auto... Is>
 		nik_ces void set_entries(nik_avp(T_pack_Vs<Is...>*), action_type (&l)[AN::dimension])

@@ -55,17 +55,17 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
-// compose:
+// argpose:
 
 	template<auto static_parsed, auto this_f, auto env>
-	struct T_morph_dispatch<MorphName::compose, static_parsed, this_f, env>
+	struct T_morph_dispatch<MorphName::argpose, static_parsed, this_f, env>
 	{
 		nik_ces auto & parsed = member_value_U<static_parsed>;
 		using T_link          = T_lookup_morph_link<static_parsed, this_f, env>;
 
 		template<auto index, auto types, auto... Is>
 		nik_ces auto result(nik_avp(T_pack_Vs<Is...>*))
-			{ return _compose_<T_link::template result<index, Is>(types)...>; }
+			{ return _argpose_<T_link::template result<index, Is>(types)...>; }
 	};
 
 /***********************************************************************************************************************/

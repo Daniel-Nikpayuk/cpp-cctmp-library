@@ -101,7 +101,7 @@ namespace chord {
 
 		// morph:
 
-			"HValue -> compose < MorValue MorValue MArgs \\> ;"
+			"HValue -> argpose < MorValue MorValue MArgs \\> ;"
 			"       -> subpose < MorValue MorValue MArgs \\> ;"
 			"       -> curry   < MorValue MorValue MArgs \\> ;"
 

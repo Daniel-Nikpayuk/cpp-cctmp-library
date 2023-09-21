@@ -366,12 +366,22 @@ namespace cctmp {
 
 // syntactic sugar:
 
-	template<auto Op, auto... Vs>                 nik_ce auto listload_ = eval<Op, H_id, Vs...>;
-	template<auto b, auto... Vs>                  nik_ce auto to_list_  = eval<_to_list_, b, Vs...>;
-	template<auto b, auto... Vs>                  nik_ce auto list_     = eval<_to_list_, H_id, Vs...>;
-	template<auto p, auto Op, auto... Vs>         nik_ce auto unpack_   = eval<_b0_unpack_, p, Op, Vs...>;
-	template<auto b, auto Op, auto... Vs>         nik_ce auto map_      = eval<_map_, b, Op, Vs...>;
-	template<auto b, auto Op, auto p, auto... Vs> nik_ce auto zip_      = eval<_zip_, b, Op, p, Vs...>;
+	template<auto V, auto n, auto... Vs>   nik_ce auto pad_      = eval<_pad_, H_id, V, n, Vs...>;
+
+	template<auto b, auto... Vs>           nik_ce auto to_list_  = eval<_to_list_, b, Vs...>;
+	template<auto... Vs>                   nik_ce auto list_     = eval<_to_list_, H_id, Vs...>;
+
+	template<auto p, auto Op, auto... Vs>  nik_ce auto unpack_   = eval<_b0_unpack_, p, Op, Vs...>;
+	template<auto p, auto... Vs>           nik_ce auto car_      = eval<_b0_unpack_, p, _car_, Vs...>;
+	template<auto p, auto... Vs>           nik_ce auto cadr_     = eval<_b0_unpack_, p, _cadr_, Vs...>;
+	template<auto p, auto... Vs>           nik_ce auto cdr_      = eval<_b0_unpack_, p, _cdr_, H_id, Vs...>;
+
+	template<auto Op, auto... Vs>          nik_ce auto map_      = eval<_map_, H_id, Op, Vs...>;
+	template<auto Op, auto p, auto... Vs>  nik_ce auto zip_      = eval<_zip_, H_id, Op, p, Vs...>;
+
+	template<auto p0, auto p1, auto... Vs> nik_ce auto unite_    = eval<_unite_, H_id, p0, p1, Vs...>;
+	template<auto p, auto... Vs>           nik_ce auto cons_     = eval<_unite_, H_id, U_null_Vs, p, Vs...>;
+	template<auto p, auto... Vs>           nik_ce auto push_     = eval<_unite_, H_id, p, U_null_Vs, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -814,12 +824,12 @@ namespace cctmp {
 
 		// syntactic sugar:
 
-			template<auto H = H_id> nik_ce auto _list_	= _alias_<_to_list_, H>;
-			template<auto H = H_id> nik_ce auto _cdr_list_	= _alias_<_cdr_, H>;
-			template<auto U> nik_ce auto _array_		= _alias_<_to_array_, U>;
-			template<auto F, auto G> nik_ce auto _pose_	= _alias_<_eval_, F, G>;
-			template<auto U> nik_ce auto _id_to_cref_	= _pose_<_to_reference_, _to_const_>;
-			template<auto U> nik_ce auto _cref_to_id_	= _pose_<_from_const_, _from_reference_>;
+		//	template<auto H = H_id> nik_ce auto _list_	= _alias_<_to_list_, H>;
+		//	template<auto H = H_id> nik_ce auto _cdr_list_	= _alias_<_cdr_, H>;
+		//	template<auto U> nik_ce auto _array_		= _alias_<_to_array_, U>;
+		//	template<auto F, auto G> nik_ce auto _pose_	= _alias_<_eval_, F, G>;
+		//	template<auto U> nik_ce auto _id_to_cref_	= _pose_<_to_reference_, _to_const_>;
+		//	template<auto U> nik_ce auto _cref_to_id_	= _pose_<_from_const_, _from_reference_>;
 
 	// custom:
 
@@ -883,98 +893,6 @@ namespace cctmp {
 
 		template<auto b, auto a, auto... Vs>
 		nik_ce auto eval<_array_to_list_, b, a, Vs...> = eval<_to_list_, b, a[Vs]...>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// read:
-
-	// Does only/write need to be expanded to handle additional types such as function pointers?
-
-/***********************************************************************************************************************/
-
-// only:
-
-	struct T_read_only
-	{
-		// default:
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T*)) { return U_store_T<T const>; }
-
-		// pointer (recursive):
-
-			template<typename T>
-			using T_add_pointer_const = T*const;
-
-			template<auto U>
-			nik_ces auto add_pointer_const = U_store_T<T_add_pointer_const<T_store_U<U>>>;
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T**)) { return add_pointer_const<_result(U_store_T<T>)>; }
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T*const*)) { return add_pointer_const<_result(U_store_T<T>)>; }
-
-		// reference (recursive):
-
-			template<typename T>
-			using T_add_reference_const = T&;
-
-			template<auto U>
-			nik_ces auto add_reference_const = U_store_T<T_add_reference_const<T_store_U<U>>>;
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T&)) { return add_reference_const<_result(U_store_T<T>)>; }
-
-		template<auto U>
-		nik_ces auto result = _result(U);
-
-	}; nik_ce auto _read_only_ = U_custom_T<T_read_only>;
-
-/***********************************************************************************************************************/
-
-// write:
-
-	struct T_read_write
-	{
-		// default (recursive):
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T*)) { return U_store_T<T>; }
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T const*)) { return U_store_T<T>; }
-
-		// pointer (recursive):
-
-			template<typename T>
-			using T_add_pointer = T*;
-
-			template<auto U>
-			nik_ces auto add_pointer = U_store_T<T_add_pointer<T_store_U<U>>>;
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T**)) { return add_pointer<_result(U_store_T<T>)>; }
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T*const*)) { return add_pointer<_result(U_store_T<T>)>; }
-
-		// reference:
-
-			template<typename T>
-			using T_add_reference = T&;
-
-			template<auto U>
-			nik_ces auto add_reference = U_store_T<T_add_reference<T_store_U<U>>>;
-
-			template<typename T>
-			nik_ces auto _result(nik_avp(T&)) { return add_reference<_result(U_store_T<T>)>; }
-
-		template<auto U>
-		nik_ces auto result = _result(U);
-
-	}; nik_ce auto _read_write_ = U_custom_T<T_read_write>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

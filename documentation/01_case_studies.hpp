@@ -27,6 +27,29 @@ namespace chord {
 
 // prerequisites:
 
+//	#define NIK_UNIT_TEST_SQUARE_V0
+//	#define NIK_UNIT_TEST_SQUARE_V1
+//	#define NIK_UNIT_TEST_SUM_OF_SQUARES_V0
+//	#define NIK_UNIT_TEST_SUM_OF_SQUARES_V1
+	#define NIK_UNIT_TEST_TWICE_V0
+//	#define NIK_UNIT_TEST_X_TO5_PLUS1_V0
+//	#define NIK_UNIT_TEST_REASSIGN_V0
+//	#define NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V0
+//	#define NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V1
+//	#define NIK_UNIT_TEST_BINARY_DISPATCH_V0
+//	#define NIK_UNIT_TEST_BINARY_DISPATCH_V1
+//	#define NIK_UNIT_TEST_FACTORIAL_V0
+//	#define NIK_UNIT_TEST_FACTORIAL_V1
+//	#define NIK_UNIT_TEST_FACTORIAL_V2
+//	#define NIK_UNIT_TEST_FACTORIAL_V3
+//	#define NIK_UNIT_TEST_FACTORIAL_V4
+//	#define NIK_UNIT_TEST_FIBONACCI_V0
+//	#define NIK_UNIT_TEST_FIBONACCI_V1
+//	#define NIK_UNIT_TEST_FALL_FACT_2_V0
+//	#define NIK_UNIT_TEST_FALL_FACT_2_V1
+//	#define NIK_UNIT_TEST_VOID_EFFECTS_V0
+//	#define NIK_UNIT_TEST_SIDE_EFFECTS_V0
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -146,9 +169,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_SQUARE_V0
+
 	template<typename T>
 	constexpr auto square_v0(T v)
 		{ return metapiler_apply<_square_v0, null_env, T>(v); }
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -161,19 +188,23 @@ namespace chord {
 			"square x                         ;"
 
 			"definitions:                     ;"
-			"sq # compose<multiply arg0 arg0> ;"
+			"sq # argpose<multiply arg0 arg0> ;"
 
 			"body:                            ;"
 			". = sq x                         ;"
 			"return _                         ;"
 
-			, cctmp::binding( "arg0" , _arg_at_<0> )
+			, cctmp::binding( "arg0" , 0 )
 		);
 	}
+
+#ifdef NIK_UNIT_TEST_SQUARE_V1
 
 	template<typename T>
 	constexpr auto square_v1(T v)
 		{ return metapiler_apply<_square_v1, null_env, T>(v); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -198,9 +229,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_SUM_OF_SQUARES_V0
+
 	template<typename T>
 	constexpr auto sum_of_squares_v0(T x, T y)
 		{ return metapiler_apply<_sum_of_squares_v0, null_env, T>(x, y); }
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -213,20 +248,24 @@ namespace chord {
 			"f x y                                   ;"
 
 			"definitions:                            ;"
-			"sq        # compose<multiply arg0 arg0> ;"
+			"sq        # argpose<multiply arg0 arg0> ;"
 			"sum_of_sq # subpose<add sq sq>          ;"
 
 			"body:                                   ;"
 			". = sum_of_sq x y                       ;"
 			"return _                                ;"
 
-			, cctmp::binding( "arg0" , _arg_at_<0> )
+			, cctmp::binding( "arg0" , 0 )
 		);
 	}
+
+#ifdef NIK_UNIT_TEST_SUM_OF_SQUARES_V1
 
 	template<typename T>
 	constexpr auto sum_of_squares_v1(T x, T y)
 		{ return metapiler_apply<_sum_of_squares_v1, null_env, T>(x, y); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -254,9 +293,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_TWICE_V0
+
 	template<typename T>
 	constexpr auto twice_v0(T x)
 		{ return metapiler_apply<_twice_v0, null_env, T>(x); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -281,6 +324,8 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_X_TO5_PLUS1_V0
+
 	template<typename T>
 	constexpr auto x_to5_plus1_v0(T x)
 	{
@@ -288,6 +333,8 @@ namespace chord {
 
 		return metapiler_apply<_x_to5_plus1_v0, e0, T>(x, T(0));
 	}
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -310,9 +357,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_REASSIGN_V0
+
 	template<typename T1, typename T2>
 	constexpr auto reassign_v0(T1 x, T2 y)
 		{ return metapiler_apply<_reassign_v0, null_env, T2>(x, y); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -341,6 +392,8 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V0
+
 	constexpr auto semidynamic_typing_v0(const complex_number & c, int n)
 	{
 		constexpr auto c1 = complex_number(1, 0);
@@ -348,6 +401,8 @@ namespace chord {
 
 		return metapiler_apply<_semidynamic_typing_v0, e0, int>(c, c1, n);
 	}
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -371,12 +426,16 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V1
+
 	constexpr auto semidynamic_typing_v1(const complex_number & c, int n)
 	{
 		constexpr auto e0 = env<constant_machine_frame, complex_constant_frame>;
 
 		return metapiler_apply<_semidynamic_typing_v1, e0, int>(c, n);
 	}
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -408,6 +467,8 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_BINARY_DISPATCH_V0
+
 	template<typename G, typename H, typename T>
 	constexpr auto binary_dispatch_v0(int n, G g, H h, T x, T y)
 	{
@@ -415,6 +476,8 @@ namespace chord {
 
 		return metapiler_apply<_binary_dispatch_v0, e0, T>(n, g, h, x, y);
 	}
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -441,6 +504,8 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_BINARY_DISPATCH_V1
+
 	template<typename G, typename H, typename T>
 	constexpr auto binary_dispatch_v1(int n, G g, H h, T x, T y)
 	{
@@ -448,6 +513,8 @@ namespace chord {
 
 		return metapiler_apply<_binary_dispatch_v1, e0, T>(n, g, h, x, y);
 	}
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -477,6 +544,8 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_FACTORIAL_V0
+
 	template<typename T>
 	constexpr auto factorial_v0(T v)
 	{
@@ -484,6 +553,8 @@ namespace chord {
 
 		return metapiler_apply<_factorial_v0, e0, T>(v);
 	}
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -508,9 +579,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_FACTORIAL_V1
+
 	template<typename T>
 	constexpr auto factorial_v1(T v)
 		{ return metapiler_apply<_factorial_v1, null_env, T>(v, T(1)); }
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -535,9 +610,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_FACTORIAL_V2
+
 	template<typename T>
 	constexpr auto factorial_v2(T v)
 		{ return metapiler_apply<_factorial_v2, null_env, T>(T(1), v); }
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -561,9 +640,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_FACTORIAL_V3
+
 	template<typename T>
 	constexpr auto factorial_v3(T v)
 		{ return metapiler_apply<_factorial_v3, null_env, T>(T(1), v); }
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -589,6 +672,8 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_FACTORIAL_V4
+
 	template<typename T>
 	constexpr auto factorial_v4(T v)
 	{
@@ -596,6 +681,8 @@ namespace chord {
 
 		return metapiler_apply<_factorial_v4, e0, T>(v);
 	}
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -610,24 +697,26 @@ namespace chord {
 	{
 		return source
 		(
-			"fibonacci n n1 n2           ;"
+			"fibonacci n n1 n2             ;"
 
-			"body:                       ;"
-			"test equal n zero           ;"
-			"branch done                 ;"
-			"test equal n one            ;"
-			"branch done                 ;"
-			"n1 = decrement n            ;"
-			"n2 = decrement n1           ;"
-			"n1 = fibonacci n1 zero zero ;"
-			"n2 = fibonacci n2 zero zero ;"
-			".  = add n1 n2              ;"
-			"return _                    ;"
+			"body:                         ;"
+			"  test equal n zero           ;"
+			"  branch done                 ;"
+			"  test equal n one            ;"
+			"  branch done                 ;"
+			"  n1 = decrement n            ;"
+			"  n2 = decrement n1           ;"
+			"  n1 = fibonacci n1 zero zero ;"
+			"  n2 = fibonacci n2 zero zero ;"
+			"  .  = add n1 n2              ;"
+			"  return _                    ;"
 
-			"done:                       ;"
-			"return one                  ;"
+			"done:                         ;"
+			"  return one                  ;"
 		);
 	}
+
+#ifdef NIK_UNIT_TEST_FIBONACCI_V0
 
 	template<typename T>
 	constexpr auto fibonacci_v0(T v)
@@ -637,6 +726,8 @@ namespace chord {
 		return metapiler_apply<_fibonacci_v0, e0, T>(v, T(0), T(0));
 	}
 
+#endif
+
 /***********************************************************************************************************************/
 
 // version 1:
@@ -645,24 +736,26 @@ namespace chord {
 	{
 		return source
 		(
-			"fibonacci n       ;"
+			"fibonacci n         ;"
 
-			"body:             ;"
-			"test equal n zero ;"
-			"branch done       ;"
-			"test equal n one  ;"
-			"branch done       ;"
-			"n1 = decrement n  ;"
-			"n2 = decrement n1 ;"
-			"n1 = fibonacci n1 ;"
-			"n2 = fibonacci n2 ;"
-			".  = add n1 n2    ;"
-			"return _          ;"
+			"body:               ;"
+			"  test equal n zero ;"
+			"  branch done       ;"
+			"  test equal n one  ;"
+			"  branch done       ;"
+			"  n1 = decrement n  ;"
+			"  n2 = decrement n1 ;"
+			"  n1 = fibonacci n1 ;"
+			"  n2 = fibonacci n2 ;"
+			"  .  = add n1 n2    ;"
+			"  return _          ;"
 
-			"done:             ;"
-			"return one        ;"
+			"done:               ;"
+			"  return one        ;"
 		);
 	}
+
+#ifdef NIK_UNIT_TEST_FIBONACCI_V1
 
 	template<typename T>
 	constexpr auto fibonacci_v1(T v)
@@ -671,6 +764,8 @@ namespace chord {
 
 		return metapiler_apply<_fibonacci_v1, e0, T>(v);
 	}
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -727,6 +822,8 @@ namespace chord {
 			);
 	}
 
+#ifdef NIK_UNIT_TEST_FALL_FACT_2_V0
+
 	template<bool punct, typename T>
 	constexpr auto fall_fact_2_v0(T x)
 	{
@@ -734,6 +831,8 @@ namespace chord {
 
 		return metapiler_apply<src, null_env, T>(&x);
 	}
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -783,6 +882,8 @@ namespace chord {
 			);
 	}
 
+#ifdef NIK_UNIT_TEST_FALL_FACT_2_V1
+
 	template<bool punct, typename T>
 	constexpr auto fall_fact_2_v1(T x)
 	{
@@ -790,6 +891,8 @@ namespace chord {
 
 		return metapiler_apply<src, null_env, T, T&>(x);
 	}
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -813,9 +916,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_VOID_EFFECTS_V0
+
 	template<typename T>
 	constexpr auto void_effects_v0(T x)
 		{ return metapiler_apply<_void_effects_v0, null_env, T>(x, 2); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -839,9 +946,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_SIDE_EFFECTS_V0
+
 	template<typename T>
 	constexpr auto side_effects_v0(T x)
 		{ return metapiler_apply<_side_effects_v0, null_env, T>(x, 2); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -311,7 +311,7 @@ namespace cctmp {
 
 				switch (morph.token)
 				{
-					case Token::compose : { str = "compose" ; sub = 7; break; }
+					case Token::argpose : { str = "argpose" ; sub = 7; break; }
 					case Token::subpose : { str = "subpose" ; sub = 7; break; }
 					case Token::curry   : { str = "curry"   ; sub = 5; break; }
 				}
@@ -320,6 +320,7 @@ namespace cctmp {
 				printf("%s", str);
 
 				print_morphism(morph.parameter, spacing);
+				printf("\n");
 			}
 
 			template<typename CycleType>
@@ -533,12 +534,9 @@ namespace cctmp {
 				auto note     = instr[MI::note];
 				auto note_str = machine_printer::note(note);
 
-				auto size     = instr.size();
-				auto value    = instr[MI::pos];
-
 				printf("%s%hu|    %s    %s    ", offset, line, name_str, note_str);
 
-				if (size == targeted.instr_length) printf("%d", value);
+				if (instr.size() == targeted.instr_length) printf("%d", instr[MI::pos]);
 
 				printf("\n");
 			}
@@ -563,6 +561,7 @@ namespace cctmp {
 
 // parameter:
 
+/*
 	struct parameter_printer
 	{
 		template<auto f>
@@ -602,13 +601,13 @@ namespace cctmp {
 
 			else if constexpr (eval<_same_, f, _is_array_              >) return "_is_array_             ";
 			else if constexpr (eval<_same_, f, _array_type_            >) return "_array_type_           ";
-			else if constexpr (eval<_same_, f, _array_length_          >) return "_array_length_         ";
+			else if constexpr (eval<_same_, f, _array_size_            >) return "_array_size_           ";
 			else if constexpr (eval<_same_, f, _array_begin_           >) return "_array_begin_          ";
 			else if constexpr (eval<_same_, f, _array_last_            >) return "_array_last_           ";
 			else if constexpr (eval<_same_, f, _array_end_             >) return "_array_end_            ";
 			else if constexpr (eval<_same_, f, _log_floor_             >) return "_log_floor_            ";
 
-			else if constexpr (eval<_same_, f, _subarray_length_       >) return "_subarray_length_      ";
+			else if constexpr (eval<_same_, f, _subarray_size_         >) return "_subarray_size_        ";
 
 			else if constexpr (eval<_same_, f, _is_sequence_           >) return "_is_sequence_          ";
 			else if constexpr (eval<_same_, f, _sequence_type_         >) return "_sequence_type_        ";
@@ -617,6 +616,7 @@ namespace cctmp {
 			else                                                          return "(?)                    ";
 		}
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

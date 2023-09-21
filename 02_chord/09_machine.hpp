@@ -27,6 +27,22 @@ namespace chord {
 
 	nik_ce auto _read_only_					= cctmp::_read_only_;
 
+// refactor to an earlier file:
+
+	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
+
+	template<auto... Vs>
+	using T_pack_Vs						= cctmp::T_pack_Vs<Vs...>;
+
+	template<auto... Vs>
+	nik_ce auto cons_					= cctmp::cons_<Vs...>;
+
+	nik_ce auto _par_left_					= cctmp::_par_left_;
+	nik_ce auto _par_right_					= cctmp::_par_right_;
+
+	template<auto... Vs>
+	nik_ce auto right_					= cctmp::right_<Vs...>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -73,15 +89,7 @@ namespace chord {
 
 // instructions:
 
-	struct MachineInstr
-	{
-		enum : gkey_type
-		{
-			size = 0,
-			name , note , pos ,
-			dimension
-		};
-	};
+	struct MachineInstr { enum : gkey_type { name = 0, note, pos, dimension }; };
 
 	using MI = MachineInstr;
 
@@ -89,36 +97,28 @@ namespace chord {
 
 // dispatch:
 
+	template<auto static_contr, auto _index = 0>
 	struct MachineDispatch
 	{
+		nik_ces auto & contr = member_value_U<static_contr>;
+
 		// defaults:
 
-			nik_ces gindex_type initial_index = _zero;
+			nik_ces gindex_type initial_index = _index;
 
 		// accessors:
 
-			nik_ces auto instr(ccontr_type c, gcindex_type i) { return c[i]; }
-
-			template<typename T>
-			nik_ces auto instr(nik_avp(T*), gcindex_type i) { return T::instr(i); }
+			nik_ces const auto & instr(gcindex_type i) { return contr[i]; }
 
 		// navigators:
 
-			nik_ces gkey_type   next_name  (ccontr_type c, gcindex_type i) { return c[i+1][MI::name]; }
-			nik_ces gkey_type   next_note  (ccontr_type c, gcindex_type i) { return c[i+1][MI::note]; }
-			nik_ces gindex_type next_index (ccontr_type  , gcindex_type i) { return i+1; }
-
-			template<typename T>
-			nik_ces gkey_type next_name(nik_avp(T*), gcindex_type i) { return T::next_name(i); }
-
-			template<typename T>
-			nik_ces gkey_type next_note(nik_avp(T*), gcindex_type i) { return T::next_note(i); }
-
-			template<typename T>
-			nik_ces gindex_type next_index(nik_avp(T*), gcindex_type i) { return T::next_index(i); }
+			nik_ces gkey_type   next_name  (gcindex_type i) { return contr[i+1][MI::name]; }
+			nik_ces gkey_type   next_note  (gcindex_type i) { return contr[i+1][MI::note]; }
+			nik_ces gindex_type next_index (gcindex_type i) { return i+1; }
 	};
 
-	using MD = MachineDispatch;
+	template<auto static_contr, auto _index = 0>
+	using MD = MachineDispatch<static_contr, _index>;
 
 /***********************************************************************************************************************/
 
@@ -126,11 +126,13 @@ namespace chord {
 
 	struct T_machine_start
 	{
-		nik_ces auto i = MD::initial_index;
-
-		template<auto s, auto c, auto l, typename... Ts>
+		template<auto s, auto c, auto l, auto t, typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
-			{ return NIK_MACHINE_TS(s, c, i, l, Ts...)(vs...); }
+		{
+			nik_ce auto i = MD<c>::initial_index;
+
+			return NIK_MACHINE_TS(s, c, i, l, t, Ts...)(vs...);
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -145,9 +147,8 @@ namespace chord {
 	template<auto... filler>
 	struct T_machine<MN::first, MT::id, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T0, typename... Ts>
-		nik_ces auto result(T0 v0, Ts... vs) -> T_store_U<s>
-			{ return static_cast<T_store_U<s>>((T_store_U<s>) v0); } // c style cast
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename T0, typename... Ts>
+		nik_ces auto result(T0 v0, Ts... vs) -> T_store_U<s> { return static_cast<T_store_U<s>>(v0); }
 	};
 
 /***********************************************************************************************************************/
@@ -162,13 +163,13 @@ namespace chord {
 	template<auto... filler>
 	struct T_machine<MN::jump, MT::go_to, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins = MD::instr(c, i);
-			nik_ce auto ni  = ins[MI::pos];
+			nik_ce auto & ins = MD<c>::instr(i);
+			nik_ce auto ni    = ins[MI::pos];
 
-			return NIK_MACHINE_TS(s, c, ni, l, Ts...)(vs...);
+			return NIK_MACHINE_TS(s, c, ni, l, t, Ts...)(vs...);
 		}
 	};
 
@@ -179,14 +180,15 @@ namespace chord {
 	template<auto... filler>
 	struct T_machine<MN::jump, MT::branch, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins = MD::instr(c, i);
-			nik_ce auto ni  = ins[MI::pos];
+			nik_ce auto & ins = MD<c>::instr(i);
+			nik_ce auto ni    = ins[MI::pos];
+			nik_ce auto nt    = right_<t, _one>;
 
-			if (v) return NIK_MACHINE_TS(s, c, ni, l, Ts...)(vs...);
-			else   return NIK_MACHINE_TS(s, c,  i, l, Ts...)(vs...);
+			if (v) return NIK_MACHINE_TS(s, c, ni, l, nt, Ts...)(vs...);
+			else   return NIK_MACHINE_TS(s, c,  i, l, nt, Ts...)(vs...);
 		}
 	};
 
@@ -202,16 +204,16 @@ namespace chord {
 	template<auto... filler>
 	struct T_machine<MN::select, MT::id, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins	= MD::instr(c, i);
-			nik_ce auto n   = ins[MI::pos];
-			nik_ce auto p0  = eval<_par_left_ , n, U_store_T<Ts>...>;
-			nik_ce auto p1  = eval<_par_right_, n, U_store_T<Ts>...>;
+			nik_ce auto & ins = MD<c>::instr(i);
+			nik_ce auto n     = ins[MI::pos];
+			nik_ce auto p0    = eval<_par_left_ , n, U_store_T<Ts>...>;
+			nik_ce auto p1    = eval<_par_right_, n, U_store_T<Ts>...>;
 
 			return NIK_MACHINE_TEMPLATE(c, i), p0, p1
-				NIK_MACHINE_RESULT_TS(s, c, i, l, Ts...)(vs...);
+				NIK_MACHINE_RESULT_TS(s, c, i, l, t, Ts...)(vs...);
 		}
 	};
 
@@ -227,16 +229,16 @@ namespace chord {
 	template<auto... filler>
 	struct T_machine<MN::reselect, MT::id, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins	= MD::instr(c, i);
-			nik_ce auto n   = ins[MI::pos];
-			nik_ce auto p0  = eval<_par_left_ , n, U_store_T<Ts>...>;
-			nik_ce auto p1  = eval<_par_right_, n, U_store_T<Ts>...>;
+			nik_ce auto & ins = MD<c>::instr(i);
+			nik_ce auto n     = ins[MI::pos];
+			nik_ce auto p0    = eval<_par_left_ , n+1, U_store_T<T>, U_store_T<Ts>...>;
+			nik_ce auto p1    = eval<_par_right_, n, U_store_T<Ts>...>;
 
 			return NIK_MACHINE_TEMPLATE(c, i), p0, p1
-				NIK_MACHINE_RESULT_2TS(s, c, i, l, T, Ts...)(v, vs...);
+				NIK_MACHINE_RESULT_2TS(s, c, i, l, t, T, Ts...)(v, vs...);
 		}
 	};
 
@@ -256,13 +258,13 @@ namespace chord {
 	>
 	struct T_machine<MN::right, MT::id, p0, p1>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
-		nik_ces auto right(T_store_U<LUs>... lvs, Ts... vs) -> T_store_U<s>
-			{ return NIK_MACHINE_TS(s, c, i, l, Ts...)(vs...); }
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename... Ts>
+		nik_ces auto result(T_store_U<LUs>... lvs, T_store_U<RUs>... rvs) -> T_store_U<s>
+		{
+			nik_ce auto nt = right_<t, sizeof...(LUs)>;
 
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
-			{ return right<s, c, i, l, T_store_U<RUs>...>(vs...); }
+			return NIK_MACHINE_TS(s, c, i, l, nt, T_store_U<RUs>...)(rvs...);
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -276,18 +278,24 @@ namespace chord {
 
 	template
 	<
-		template<auto...> typename B0, auto... LUs, nik_vp(p0)(B0<LUs...>*),
-		template<auto...> typename B1, auto... RUs, nik_vp(p1)(B1<RUs...>*)
+		template<auto...> typename B0, auto LU, auto... LUs, nik_vp(p0)(B0<LU, LUs...>*),
+		template<auto...> typename B1, auto RU, auto... RUs, nik_vp(p1)(B1<RU, RUs...>*)
 	>
 	struct T_machine<MN::replace, MT::id, p0, p1>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename TN, typename... Ts>
-		nik_ces auto replace(T v, T_store_U<LUs>... lvs, TN vn, Ts... vs) -> T_store_U<s>
-			{ return NIK_MACHINE_3TS(s, c, i, l, T_store_U<LUs>..., T, Ts...)(lvs..., v, vs...); }
+		using LT = T_store_U<LU>;
+		using RT = T_store_U<RU>;
 
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
-			{ return replace<s, c, i, l, T, T_store_U<RUs>...>(v, vs...); }
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename... Ts>
+		nik_ces auto result(LT lv, T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs) -> T_store_U<s>
+		{
+			nik_ce auto t0 = car_<t>;
+			nik_ce auto rt = right_<t, _one>;
+			nik_ce auto nt = replace_<rt, sizeof...(LUs), t0>;
+
+			return NIK_MACHINE_3TS
+				(s, c, i, l, nt, T_store_U<LUs>..., LT, T_store_U<RUs>...)(lvs..., lv, rvs...);
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -302,15 +310,15 @@ namespace chord {
 	template<auto... filler>
 	struct T_machine<MN::pad, MT::segment, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins	= MD::instr(c, i);
-			nik_ce auto n   = ins[MI::pos];
-			nik_ce auto p   = eval<_par_segment_, n>;
+			nik_ce auto & ins = MD<c>::instr(i);
+			nik_ce auto n     = ins[MI::pos];
+			nik_ce auto p     = segment_<n>;
 
 			return NIK_MACHINE_TEMPLATE(c, i), p
-				NIK_MACHINE_RESULT_TS(s, c, i, l, Ts...)(vs...);
+				NIK_MACHINE_RESULT_TS(s, c, i, l, t, Ts...)(vs...);
 		}
 	};
 
@@ -321,18 +329,19 @@ namespace chord {
 	template<template<auto...> typename B, auto... Is, nik_vp(p)(B<Is...>*)>
 	struct T_machine<MN::pad, MT::id, p>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
-			{ return NIK_MACHINE_2TS(s, c, i, l, Ts..., decltype(Is)...)(vs..., Is...); }
+		{
+			nik_ce auto nt = cons_<t, U_store_T<decltype(Is)>...>;
+
+			return NIK_MACHINE_2TS(s, c, i, l, nt, Ts..., decltype(Is)...)(vs..., Is...);
+		}
 	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // call:
-
-	// Although it is tempting to narratively define internal calls using chains, one of the advantages
-	// of these machines is that each has a clarity of purpose---chains would obscure this design.
 
 /***********************************************************************************************************************/
 
@@ -341,16 +350,18 @@ namespace chord {
 	template<auto... filler>
 	struct T_machine<MN::call, MT::id, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins	= MD::instr(c, i);
-			nik_ce auto n	= ins[MI::pos];
+			nik_ce auto & ins = MD<c>::instr(i);
+			nik_ce auto n     = ins[MI::pos];
 
-			auto val	= T_lookup_line<c, l>::template result<n, Ts...>(vs...);
-			using TVal	= modify_type<_read_only_, decltype(val)>;
+			auto val   = T_lookup_line<c, l>::template result<n, t, Ts...>(vs...);
+			using TVal = modify_type<_read_only_, decltype(val)>;
 
-			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)((TVal) val, vs...);
+			nik_ce auto nt = cons_<t, U_store_T<decltype(val)>>;
+
+			return NIK_MACHINE_2TS(s, c, i, l, nt, TVal, Ts...)(static_cast<TVal>(val), vs...);
 		}
 	};
 
@@ -361,15 +372,17 @@ namespace chord {
 	template<auto... filler>
 	struct T_machine<MN::call, MT::void_f, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename... Ts>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins = MD::instr(c, i);
-			nik_ce auto n   = ins[MI::pos];
+			nik_ce auto & ins = MD<c>::instr(i);
+			nik_ce auto n     = ins[MI::pos];
 
-			T_lookup_line<c, l>::template result<n, Ts...>(vs...);
+			T_lookup_line<c, l>::template result<n, t, Ts...>(vs...);
 
-			return NIK_MACHINE_TS(s, c, i, l, Ts...)(vs...);
+			nik_ce auto nt = right_<t, _one>;
+
+			return NIK_MACHINE_TS(s, c, i, l, nt, Ts...)(vs...);
 		}
 	};
 
@@ -385,16 +398,18 @@ namespace chord {
 	template<auto... filler>
 	struct T_machine<MN::recall, MT::id, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins	= MD::instr(c, i);
-			nik_ce auto n	= ins[MI::pos];
+			nik_ce auto & ins = MD<c>::instr(i);
+			nik_ce auto n     = ins[MI::pos];
 
-			auto val	= T_lookup_line<c, l>::template result<n, T, Ts...>(v, vs...);
-			using TVal	= modify_type<_read_only_, decltype(val)>;
+			auto val   = T_lookup_line<c, l>::template result<n, t, T, Ts...>(v, vs...);
+			using TVal = modify_type<_read_only_, decltype(val)>;
 
-			return NIK_MACHINE_2TS(s, c, i, l, TVal, Ts...)((TVal) val, vs...);
+			nik_ce auto nt = cons_<t, U_store_T<decltype(val)>>;
+
+			return NIK_MACHINE_2TS(s, c, i, l, nt, TVal, Ts...)(static_cast<TVal>(val), vs...);
 		}
 	};
 
@@ -405,15 +420,17 @@ namespace chord {
 	template<auto... filler>
 	struct T_machine<MN::recall, MT::void_f, filler...>
 	{
-		template<NIK_MACHINE_PARAMS(s, c, i, l), typename T, typename... Ts>
+		template<NIK_MACHINE_PARAMS(s, c, i, l, t), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto ins = MD::instr(c, i);
-			nik_ce auto n   = ins[MI::pos];
+			nik_ce auto & ins = MD<c>::instr(i);
+			nik_ce auto n     = ins[MI::pos];
 
-			T_lookup_line<c, l>::template result<n, T, Ts...>(v, vs...);
+			T_lookup_line<c, l>::template result<n, t, T, Ts...>(v, vs...);
 
-			return NIK_MACHINE_TS(s, c, i, l, Ts...)(vs...);
+			nik_ce auto nt = right_<t, _one>;
+
+			return NIK_MACHINE_TS(s, c, i, l, nt, Ts...)(vs...);
 		}
 	};
 
