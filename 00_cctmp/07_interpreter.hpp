@@ -235,6 +235,107 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// machine:
+
+/***********************************************************************************************************************/
+
+// default:
+
+	nik_ce auto default_machine_frame_callable()
+	{
+		return frame
+		(
+		 	U_char,
+
+			binding( "id"                    , _id_                    ),
+			binding( "nop"                   , _nop_                   ),
+			binding( "upshift"               , _upshift_               ),
+			binding( "downshift"             , _downshift_             ),
+
+			binding( "dereference"           , _dereference_           ),
+			binding( "appoint"               , _appoint_               ),
+			binding( "to_bool"               , _to_bool_               ),
+
+			binding( "not"                   , _not_                   ),
+			binding( "and"                   , _and_                   ),
+			binding( "or"                    , _or_                    ),
+			binding( "implies"               , _implies_               ),
+			binding( "equivalent"            , _equivalent_            ),
+
+			binding( "equal"                 , _equal_                 ),
+			binding( "is_zero"               , _is_zero_               ),
+			binding( "not_equal"             , _not_equal_             ),
+			binding( "not_zero"              , _not_zero_              ),
+			binding( "less_than"             , _less_than_             ),
+			binding( "less_than_or_equal"    , _less_than_or_equal_    ),
+			binding( "greater_than"          , _greater_than_          ),
+			binding( "greater_than_or_equal" , _greater_than_or_equal_ ),
+
+			binding( "add"                   , _add_                   ),
+			binding( "subtract"              , _subtract_              ),
+			binding( "multiply"              , _multiply_              ),
+			binding( "divide"                , _divide_                ),
+			binding( "modulo"                , _modulo_                ),
+
+			binding( "increment"             , _increment_<1>          ),
+			binding( "decrement"             , _increment_<-1>         ),
+
+			binding( "is_array"              , _is_array_              ),
+			binding( "array_type"            , _array_type_            ),
+			binding( "array_size"            , _array_size_            ),
+			binding( "array_begin"           , _array_begin_           ),
+			binding( "array_last"            , _array_last_            ),
+			binding( "array_end"             , _array_end_             ),
+			binding( "log_floor"             , _log_floor_             ),
+
+			binding( "is_sequence"           , _is_sequence_           ),
+			binding( "sequence_type"         , _sequence_type_         ),
+			binding( "sequence_length"       , _sequence_length_       )
+		);
+	};
+
+	nik_ce auto default_machine_frame = _static_callable_<default_machine_frame_callable>;
+
+/***********************************************************************************************************************/
+
+// constant:
+
+	nik_ce auto constant_machine_frame_callable()
+	{
+		return frame
+		(
+			U_char,
+
+			binding( "zero"  , _zero  ),
+			binding( "one"   , _one   ),
+			binding( "two"   , _two   ),
+			binding( "three" , _three ),
+			binding( "four"  , _four  ),
+			binding( "five"  , _five  ),
+			binding( "six"   , _six   ),
+			binding( "seven" , _seven ),
+			binding( "eight" , _eight ),
+			binding( "nine"  , _nine  ),
+			binding( "ten"   , _ten   )
+		);
+	};
+
+	nik_ce auto constant_machine_frame = _static_callable_<constant_machine_frame_callable>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// environment:
+
+	template<auto... frames>
+	nik_ce auto env = U_pack_Vs<frames...>;
+
+	nik_ce auto null_env = env<>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // space:
 
 /***********************************************************************************************************************/

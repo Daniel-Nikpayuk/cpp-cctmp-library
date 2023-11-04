@@ -95,7 +95,7 @@ namespace cctmp {
 			nik_ce cguider operator -- (int) { cguider g{*this}; --base::current; return g; }
 			nik_ce cguider operator ++ (int) { cguider g{*this}; ++base::current; return g; }
 
-		public:
+		public: // public ?
 
 			nik_ce void reorient(csize_type pos, csize_type offset = 0)
 			{
@@ -153,7 +153,7 @@ namespace cctmp {
 		using csize_type	= typename base::csize_type;
 
 		nik_ce guider() : base{} { }
-		nik_ce guider(ctype_cptr o) : base{o} { }
+		nik_ce guider(ctype_cptr o, csize_type p = 0) : base{o, p} { }
 		nik_ce guider(const guider *g) : base{g} { }
 
 		nik_ce auto cguide() const { return cguider{this}; }
@@ -218,6 +218,9 @@ namespace cctmp {
 			using type_ref		= typename base::type_ref;
 			using ctype_ref		= typename base::ctype_ref;
 
+			using size_type		= typename base::size_type;
+			using csize_type	= typename base::csize_type;
+
 			nik_ce T_shape(ctype l, ctype v = 0) : base{}
 			{
 				guider g{base::initial};
@@ -228,8 +231,8 @@ namespace cctmp {
 				base::upsize(l + g.dim());
 			}
 
-			nik_ce auto cguide() const { return cguider{base::initial}; }
-			nik_ce auto guide() { return guider{base::initial}; }
+			nik_ce auto cguide(csize_type p = 0) const { return cguider{base::initial, p}; }
+			nik_ce auto guide(csize_type p = 0) { return guider{base::initial, p}; }
 
 		protected:
 
@@ -299,7 +302,7 @@ namespace cctmp {
 		public:
 
 			nik_ce cnavigator() : base{} { }
-			nik_ce cnavigator(ctype_cptr o) : base{o} { }
+			nik_ce cnavigator(ctype_cptr o, csize_type p = 0) : base{o, p} { }
 			nik_ce cnavigator(const cnavigator *n) :
 				base{n}, vertex_path{n->vertex_path}, current_path{n->current_path} { }
 
@@ -421,16 +424,11 @@ namespace cctmp {
 		public:
 
 			nik_ce navigator() : base{} { }
-			nik_ce navigator(ctype_cptr o) : base{o} { }
+			nik_ce navigator(ctype_cptr o, csize_type p = 0) : base{o, p} { }
 			nik_ce navigator(const navigator *n) : base{n} { }
 
 			nik_ce auto cnavigate() const { return cnavigator{this}; }
-			nik_ce auto guide() const
-			{
-				guider g{base::origin};
-				g.reorient(base::pos());
-				return g;
-			}
+			nik_ce auto guide() const { return guider{base::origin, base::pos()}; }
 
 			nik_ce type_ref absolute_size () { return const_cast<type_ref>(base::cref_meta(base::absolute)); }
 			nik_ce type_ref relative_size () { return const_cast<type_ref>(base::cref_meta(base::relative)); }
@@ -496,6 +494,10 @@ namespace cctmp {
 
 			using type		= typename base::type;
 			using ctype		= typename base::ctype;
+
+			using size_type		= typename base::size_type;
+			using csize_type	= typename base::csize_type;
+
 			using max_type		= sequence<type, Depth>;
 			using cnavigator_type	= cnavigator<Depth>;
 			using navigator_type	= navigator<Depth>;
@@ -515,11 +517,11 @@ namespace cctmp {
 
 			nik_ce auto origin() const { return base::initial; }
 
-			nik_ce auto cguide() const { return cguider{base::initial}; }
-			nik_ce auto guide() const { return guider{base::initial}; }
+			nik_ce auto cguide(csize_type p = 0) const { return cguider{base::initial, p}; }
+			nik_ce auto guide(csize_type p = 0) const { return guider{base::initial, p}; }
 
-			nik_ce auto cnavigate() const { return cnavigator_type{base::initial}; }
-			nik_ce auto navigate() const { return navigator_type{base::initial}; }
+			nik_ce auto cnavigate(csize_type p = 0) const { return cnavigator_type{base::initial, p}; }
+			nik_ce auto navigate(csize_type p = 0) const { return navigator_type{base::initial, p}; }
 
 			nik_ce bool append(navigator_type & n, ctype v = 0)
 			{

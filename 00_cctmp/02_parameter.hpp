@@ -366,22 +366,23 @@ namespace cctmp {
 
 // syntactic sugar:
 
-	template<auto V, auto n, auto... Vs>   nik_ce auto pad_      = eval<_pad_, H_id, V, n, Vs...>;
+	template<auto V, auto n, auto... Vs>   nik_ce auto pad_     = eval<_pad_, H_id, V, n, Vs...>;
 
-	template<auto b, auto... Vs>           nik_ce auto to_list_  = eval<_to_list_, b, Vs...>;
-	template<auto... Vs>                   nik_ce auto list_     = eval<_to_list_, H_id, Vs...>;
+	template<auto b, auto... Vs>           nik_ce auto to_list_ = eval<_to_list_, b, Vs...>;
+	template<auto... Vs>                   nik_ce auto list_    = eval<_to_list_, H_id, Vs...>;
 
-	template<auto p, auto Op, auto... Vs>  nik_ce auto unpack_   = eval<_b0_unpack_, p, Op, Vs...>;
-	template<auto p, auto... Vs>           nik_ce auto car_      = eval<_b0_unpack_, p, _car_, Vs...>;
-	template<auto p, auto... Vs>           nik_ce auto cadr_     = eval<_b0_unpack_, p, _cadr_, Vs...>;
-	template<auto p, auto... Vs>           nik_ce auto cdr_      = eval<_b0_unpack_, p, _cdr_, H_id, Vs...>;
+	template<auto p, auto Op, auto... Vs>  nik_ce auto unpack_  = eval<_b0_unpack_, p, Op, Vs...>;
+	template<auto p>                       nik_ce auto length_  = eval<_b0_unpack_, p, _length_>;
+	template<auto p, auto... Vs>           nik_ce auto car_     = eval<_b0_unpack_, p, _car_, Vs...>;
+	template<auto p, auto... Vs>           nik_ce auto cadr_    = eval<_b0_unpack_, p, _cadr_, Vs...>;
+	template<auto p, auto... Vs>           nik_ce auto cdr_     = eval<_b0_unpack_, p, _cdr_, H_id, Vs...>;
 
-	template<auto Op, auto... Vs>          nik_ce auto map_      = eval<_map_, H_id, Op, Vs...>;
-	template<auto Op, auto p, auto... Vs>  nik_ce auto zip_      = eval<_zip_, H_id, Op, p, Vs...>;
+	template<auto p, auto Op>              nik_ce auto map_     = eval<_b0_unpack_, p, _map_, H_id, Op>;
+	template<auto p0, auto p1, auto Op>    nik_ce auto zip_     = eval<_b0_unpack_, p0, _zip_, H_id, Op, p1>;
 
-	template<auto p0, auto p1, auto... Vs> nik_ce auto unite_    = eval<_unite_, H_id, p0, p1, Vs...>;
-	template<auto p, auto... Vs>           nik_ce auto cons_     = eval<_unite_, H_id, U_null_Vs, p, Vs...>;
-	template<auto p, auto... Vs>           nik_ce auto push_     = eval<_unite_, H_id, p, U_null_Vs, Vs...>;
+	template<auto p0, auto p1, auto... Vs> nik_ce auto unite_   = eval<_unite_, H_id, p0, p1, Vs...>;
+	template<auto p, auto... Vs>           nik_ce auto cons_    = eval<_unite_, H_id, U_null_Vs, p, Vs...>;
+	template<auto p, auto... Vs>           nik_ce auto push_    = eval<_unite_, H_id, p, U_null_Vs, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

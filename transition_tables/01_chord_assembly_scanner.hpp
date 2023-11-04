@@ -47,14 +47,14 @@
 
 		nik_ces auto prod_size		= cctmp::string_literal("<A|C|B|B>").size();
 
-		nik_ces auto stack_finish	= symbol_type{cctmp::Sign::terminal, Token::prompt};
-		nik_ces auto stack_start	= symbol_type{cctmp::Sign::nonterminal, start_index};
+		nik_ces auto stack_finish	= symbol_type{generator::Sign::terminal, Token::prompt};
+		nik_ces auto stack_start	= symbol_type{generator::Sign::nonterminal, start_index};
 
 		nik_ces auto stack_size		= cctmp::literal("F<A|C|B|B>YPZ{}YPZYP,PZV;HGO").size(); // needs refining.
 							// literal is intentional.
 							// this is the longest possible sentential.
 
-		using prod_type				= cctmp::Production<prod_size>;
+		using prod_type				= generator::Production<prod_size>;
 		using cprod_type			= prod_type const;
 		using list_type				= cctmp::sequence<prod_type, row_size * col_size>;
 

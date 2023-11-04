@@ -246,8 +246,10 @@ namespace cctmp {
 				nik_ce size_type max  () const { return terminal - 1; }
 				nik_ce size_type size () const { return terminal; }
 
-				nik_ce bool is_empty  () const { return (base::initial == cend()); }
-				nik_ce bool not_empty () const { return (base::initial != cend()); }
+			//	nik_ce bool is_empty  () const { return (base::initial == cend()); }
+			//	nik_ce bool not_empty () const { return (base::initial != cend()); }
+				nik_ce bool is_empty  () const { return (terminal == 0); }
+				nik_ce bool not_empty () const { return (terminal != 0); }
 
 				nik_ce auto right_size (ctype_cptr i) const { return cend() - i; }
 
@@ -399,6 +401,17 @@ namespace cctmp {
 				nik_ce void unite(cselector_ctype & s) { unite(s.cbegin(), s.cend()); }
 				nik_ce void unite(citerator_ctype & i) { unite(i.cbegin(), i.cend()); }
 	};
+
+/***********************************************************************************************************************/
+
+// (controller) instructions:
+
+//	struct Instr { enum : gkey_type { name = 0, note, pos, num, dimension }; };
+	struct Instr { enum : gkey_type { name = 0, note, next, pos, num, dimension }; };
+
+	// type:
+
+		using instr_type = sequence<gindex_type, static_cast<gindex_type>(Instr::dimension)>;
 
 /***********************************************************************************************************************/
 

@@ -19,7 +19,9 @@
 
 // chord assembly printers:
 
-namespace cctmp {
+namespace generator {
+
+	using namespace cctmp;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -144,13 +146,13 @@ namespace cctmp {
 			constexpr static auto static_parsed		= U_static_parsed<static_pg_parsed, static_scanned>;
 
 			using parsed_type				= member_type_U<static_parsed>;
-			using cnavigator_type				= typename parsed_type::cnavigator_type;
+			using cnavigator_type				= typename parsed_type::toc_type::cnavigator_type;
 			using pair_type					= pair<bool, gindex_type>;
 			using cpair_type				= pair_type const;
 			using cpair_ref					= cpair_type&;
 
 			constexpr static auto & parsed			= member_value_U<static_parsed>;
-			constexpr static auto & link 			= parsed.link_level;
+		//	constexpr static auto & link 			= parsed.toc.link_level;
 
 			pair_type ind(gindex_type i, bool b = true) { return pair_type{b, i}; }
 
@@ -243,10 +245,11 @@ namespace cctmp {
 					case chord::Context::go_to   : { str = "goto  "; break; }
 				}
 
-				auto str0 = line.has_link  ? "link"  : "    " ;
+			//	auto str0 = line.has_link  ? "link"  : "    " ;
 				auto str1 = line.has_paste ? "paste" : "     ";
 
-				printf("|%s|%s|%s| ", str, str0, str1);
+			//	printf("|%s|%s|%s| ", str, str0, str1);
+				printf("|%s|%s| ", str, str1);
 			}
 
 			template<typename FuncType>
@@ -259,92 +262,92 @@ namespace cctmp {
 				}
 			}
 
-			template<typename CycleType>
-			void print_cycle_parameter(const CycleType & cycle, gckey_type spacing)
-			{
-				auto & parameter = cycle.parameter;
+		//	template<typename CycleType>
+		//	void print_cycle_parameter(const CycleType & cycle, gckey_type spacing)
+		//	{
+		//		auto & parameter = cycle.parameter;
 
-				printf(" |");
-				print_morphism(cycle.action, spacing);
+		//		printf(" |");
+		//		print_morphism(cycle.action, spacing);
 
-				for (auto k = parameter.cbegin(); k != parameter.cend(); ++k)
-				{
-					printf(" |");
-					print_morphism(*k, spacing);
-				}
-			}
+		//		for (auto k = parameter.cbegin(); k != parameter.cend(); ++k)
+		//		{
+		//			printf(" |");
+		//			print_morphism(*k, spacing);
+		//		}
+		//	}
 
-			template<typename K, typename J, typename CycleType>
-			void print_interval(K k, J j, const CycleType & cycle, gckey_type spacing)
-			{
-				auto lstr = (k->left  == chord::Ival::closed) ? '[' : '(';
-				auto rstr = (k->right == chord::Ival::closed) ? ']' : ')';
+		//	template<typename K, typename J, typename CycleType>
+		//	void print_interval(K k, J j, const CycleType & cycle, gckey_type spacing)
+		//	{
+		//		auto lstr = (k->left  == chord::Ival::closed) ? '[' : '(';
+		//		auto rstr = (k->right == chord::Ival::closed) ? ']' : ')';
 
-				printf(" %c", lstr);
-				print_morphism(*j, spacing);
-				if (k->is_lead)
-				{
-					printf(",");
-					print_morphism(cycle.tonic_iter, spacing);
-				}
-				printf(" %c ", rstr);
-			}
+		//		printf(" %c", lstr);
+		//		print_morphism(*j, spacing);
+		//		if (k->is_lead)
+		//		{
+		//			printf(",");
+		//		//	print_morphism(cycle.tonic_iter, spacing); // currently not working.
+		//		}
+		//		printf(" %c ", rstr);
+		//	}
 
-			template<typename CycleType>
-			void print_cycle_interval(const CycleType & cycle, gckey_type spacing)
-			{
-				auto & interval = cycle.interval;
-				auto & iterator = cycle.iterator;
+		//	template<typename CycleType>
+		//	void print_cycle_interval(const CycleType & cycle, gckey_type spacing)
+		//	{
+		//		auto & interval = cycle.interval;
+		//		auto & iterator = cycle.iterator;
 
-				auto j = iterator.cbegin();
+		//		auto j = iterator.cbegin();
 
-				for (auto k = interval.cbegin(); k != interval.cend(); ++k, ++j)
-					if (k->is_fixed) printf(" { id{env|iter} } ");
-					else print_interval(k, j, cycle, spacing);
-			}
+		//		for (auto k = interval.cbegin(); k != interval.cend(); ++k, ++j)
+		//			if (k->is_fixed) printf(" { id{env|iter} } ");
+		//			else print_interval(k, j, cycle, spacing);
+		//	}
 
-			template<typename MorphType>
-			void print_morph_info(const MorphType & morph, gckey_type spacing)
-			{
-				auto str = "";
-				auto sub =  0;
+		//	template<typename MorphType>
+		//	void print_morph_info(const MorphType & morph, gckey_type spacing)
+		//	{
+		//		auto str = "";
+		//		auto sub =  0;
 
-				switch (morph.token)
-				{
-					case Token::argpose : { str = "argpose" ; sub = 7; break; }
-					case Token::subpose : { str = "subpose" ; sub = 7; break; }
-					case Token::curry   : { str = "curry"   ; sub = 5; break; }
-				}
+		//		switch (morph.token)
+		//		{
+		//			case Token::argpose : { str = "argpose" ; sub = 7; break; }
+		//			case Token::subpose : { str = "subpose" ; sub = 7; break; }
+		//			case Token::curry   : { str = "curry"   ; sub = 5; break; }
+		//		}
 
-				if (spacing > sub) generic_printer::print_spacing(spacing - sub);
-				printf("%s", str);
+		//		if (spacing > sub) generic_printer::print_spacing(spacing - sub);
+		//		printf("%s", str);
 
-				print_morphism(morph.parameter, spacing);
-				printf("\n");
-			}
+		//		print_morphism(morph.parameter, spacing);
+		//		printf("\n");
+		//	}
 
-			template<typename CycleType>
-			void print_cycle_info(const CycleType & cycle, gckey_type spacing)
-			{
-				auto str = "";
-				auto sub =  0;
+		//	template<typename CycleType>
+		//	void print_cycle_info(const CycleType & cycle, gckey_type spacing)
+		//	{
+		//		auto str = "";
+		//		auto sub =  0;
 
-				switch (cycle.token)
-				{
-					case Token::repeat : { str = "repeat" ; sub = 6; break; }
-					case Token::map    : { str = "map"    ; sub = 3; break; }
-					case Token::fold   : { str = "fold"   ; sub = 4; break; }
-					case Token::find   : { str = "find"   ; sub = 4; break; }
-					case Token::sift   : { str = "sift"   ; sub = 8; break; }
-				}
+		//		switch (cycle.token)
+		//		{
+		//			case Token::repeat : { str = "repeat" ; sub = 6; break; }
+		//			case Token::map    : { str = "map"    ; sub = 3; break; }
+		//			case Token::fold   : { str = "fold"   ; sub = 4; break; }
+		//			case Token::find   : { str = "find"   ; sub = 4; break; }
+		//			case Token::sift   : { str = "sift"   ; sub = 4; break; }
+		//		}
 
-				if (spacing > sub) generic_printer::print_spacing(spacing - sub);
-				printf("%s", str);
+		//		if (spacing > sub) generic_printer::print_spacing(spacing - sub);
+		//		printf("%s", str);
 
-				print_cycle_parameter (cycle, spacing);
-				printf("\n\t");
-				print_cycle_interval  (cycle, spacing);
-			}
+		//		print_cycle_parameter (cycle, spacing);
+		//		printf("\n\t");
+		//		print_cycle_interval  (cycle, spacing);
+		//	}
 
 		public:
 
@@ -371,7 +374,7 @@ namespace cctmp {
 				for (; line_iter.not_end(); ++line_iter)
 				{
 					auto entry_iter	= line_iter.next();
-					auto & entry	= parsed.entry_at(entry_iter);
+					auto & entry	= parsed.toc.entry_at(entry_iter);
 
 					printf(" ");
 					print_entry_info(entry, spacing);
@@ -384,10 +387,10 @@ namespace cctmp {
 			{
 				printf("\n");
 
-				for (auto origin = parsed.hierarchy.cguide(); origin.not_end(); ++origin)
+				for (auto origin = parsed.toc.hierarchy.cguide(); origin.not_end(); ++origin)
 				{
 					auto line_iter	= origin.next();
-					auto & line	= parsed.line_at(line_iter);
+					auto & line	= parsed.toc.line_at(line_iter);
 
 					print_line_info(line, spacing);
 
@@ -401,46 +404,46 @@ namespace cctmp {
 				print_hierarchy(spacing);
 			}
 
-			void print_link(gckey_type spacing = _zero)
-			{
-				auto & entry_level = parsed.entry_level;
+		//	void print_link(gckey_type spacing = _zero)
+		//	{
+		//		auto & entry_level = parsed.toc.entry_level;
 
-				for (auto k = link.cbegin(); k != link.cend(); ++k)
-				{
-					for (auto e = k->cbegin(); e != k->cend(); ++e)
-					{
-						printf(" ");
-						print_entry_info(entry_level[*e], spacing);
-					}
+		//		for (auto k = link.cbegin(); k != link.cend(); ++k)
+		//		{
+		//			for (auto e = k->cbegin(); e != k->cend(); ++e)
+		//			{
+		//				printf(" ");
+		//				print_entry_info(entry_level[*e], spacing);
+		//			}
 
-					printf("\n");
-				}
+		//			printf("\n");
+		//		}
 
-				printf("\n");
-			}
+		//		printf("\n");
+		//	}
 
 			void print_morph(gckey_type spacing = _zero)
 			{
-				auto & morph = parsed.morph_level;
+			//	auto & morph = parsed.morph_level;
 
-				printf("\n");
+			//	printf("\n");
 
-				for (auto k = morph.cbegin(); k != morph.cend(); ++k)
-					print_morph_info(*k, spacing);
+			//	for (auto k = morph.cbegin(); k != morph.cend(); ++k)
+			//		print_morph_info(*k, spacing);
 
-				printf("\n");
+			//	printf("\n");
 			}
 
 			void print_cycle(gckey_type spacing = _zero)
 			{
-				auto & cycle = parsed.cycle_level;
+			//	auto & cycle = parsed.cycle_level;
 
-				printf("\n");
+			//	printf("\n");
 
-				for (auto k = cycle.cbegin(); k != cycle.cend(); ++k)
-					print_cycle_info(*k, spacing);
+			//	for (auto k = cycle.cbegin(); k != cycle.cend(); ++k)
+			//		print_cycle_info(*k, spacing);
 
-				printf("\n");
+			//	printf("\n");
 			}
 	};
 
@@ -455,8 +458,8 @@ namespace cctmp {
 
 	struct machine_printer
 	{
-		using MN = chord::MN;
-		using MT = chord::MT;
+		using MN = machine::AN;
+		using MT = machine::AT;
 
 		constexpr static auto offset(gcindex_type num)
 		{
@@ -472,7 +475,7 @@ namespace cctmp {
 			switch (name)
 			{
 				case MN::id        : { str = "MN::id       " ; break; }
-				case MN::first     : { str = "MN::first    " ; break; }
+				case MN::halt      : { str = "MN::halt     " ; break; }
 				case MN::jump      : { str = "MN::jump     " ; break; }
 				case MN::select    : { str = "MN::select   " ; break; }
 				case MN::reselect  : { str = "MN::reselect " ; break; }
@@ -494,6 +497,7 @@ namespace cctmp {
 			switch (note)
 			{
 				case MT::id        : { str = "MT::id       " ; break; }
+				case MT::first     : { str = "MT::first    " ; break; }
 				case MT::go_to     : { str = "MT::go_to    " ; break; }
 				case MT::branch    : { str = "MT::branch   " ; break; }
 				case MT::segment   : { str = "MT::segment  " ; break; }
@@ -509,6 +513,7 @@ namespace cctmp {
 
 // interface:
 
+/*
 	template<auto callable_source>
 	struct chord_assembly_targeted_printer
 	{
@@ -521,7 +526,7 @@ namespace cctmp {
 			constexpr static auto & targeted	= member_value_U<static_targeted>;
 			constexpr static auto & contr		= targeted.contr;
 
-			using MI				= chord::MI;
+			using MI				= machine::AI;
 
 			template<typename InstrType>
 			void print_instr(const InstrType & instr, gcindex_type line)
@@ -551,6 +556,7 @@ namespace cctmp {
 					print_instr(*k, contr.left_size(k));
 			}
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -622,5 +628,5 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace cctmp
+} // namespace generator
 

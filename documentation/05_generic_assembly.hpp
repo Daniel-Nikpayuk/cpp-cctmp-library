@@ -27,11 +27,11 @@ namespace chord {
 
 // prerequisites:
 
-//	#define NIK_UNIT_TEST_SQUARE_V0
+	#define NIK_UNIT_TEST_SQUARE_V0
 //	#define NIK_UNIT_TEST_SQUARE_V1
 //	#define NIK_UNIT_TEST_SUM_OF_SQUARES_V0
 //	#define NIK_UNIT_TEST_SUM_OF_SQUARES_V1
-	#define NIK_UNIT_TEST_TWICE_V0
+//	#define NIK_UNIT_TEST_TWICE_V0
 //	#define NIK_UNIT_TEST_X_TO5_PLUS1_V0
 //	#define NIK_UNIT_TEST_REASSIGN_V0
 //	#define NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V0
@@ -104,14 +104,14 @@ namespace chord {
 		);
 	};
 
-	constexpr auto complex_constant_frame = _static_callable_<complex_constant_frame_callable>;
+	constexpr auto complex_constant_frame = cctmp::_static_callable_<complex_constant_frame_callable>;
 
 /***********************************************************************************************************************/
 
 // make:
 
 	constexpr auto make_complex(const float x, const float y) { return complex_number(x, y); }
-	constexpr auto _make_complex_ = _wrap_<make_complex>;
+	constexpr auto _make_complex_ = cctmp::_wrap_<make_complex>;
 
 /***********************************************************************************************************************/
 
@@ -173,7 +173,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto square_v0(T v)
-		{ return metapiler_apply<_square_v0, null_env, T>(v); }
+		{ return chord_apply<_square_v0, null_env, T>(v); }
 
 #endif
 
@@ -202,7 +202,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto square_v1(T v)
-		{ return metapiler_apply<_square_v1, null_env, T>(v); }
+		{ return chord_apply<_square_v1, null_env, T>(v); }
 
 #endif
 
@@ -233,7 +233,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto sum_of_squares_v0(T x, T y)
-		{ return metapiler_apply<_sum_of_squares_v0, null_env, T>(x, y); }
+		{ return chord_apply<_sum_of_squares_v0, null_env, T>(x, y); }
 
 #endif
 
@@ -263,7 +263,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto sum_of_squares_v1(T x, T y)
-		{ return metapiler_apply<_sum_of_squares_v1, null_env, T>(x, y); }
+		{ return chord_apply<_sum_of_squares_v1, null_env, T>(x, y); }
 
 #endif
 
@@ -297,7 +297,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto twice_v0(T x)
-		{ return metapiler_apply<_twice_v0, null_env, T>(x); }
+		{ return chord_apply<_twice_v0, null_env, T>(x); }
 
 #endif
 
@@ -331,7 +331,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return metapiler_apply<_x_to5_plus1_v0, e0, T>(x, T(0));
+		return chord_apply<_x_to5_plus1_v0, e0, T>(x, T(0));
 	}
 
 #endif
@@ -361,7 +361,7 @@ namespace chord {
 
 	template<typename T1, typename T2>
 	constexpr auto reassign_v0(T1 x, T2 y)
-		{ return metapiler_apply<_reassign_v0, null_env, T2>(x, y); }
+		{ return chord_apply<_reassign_v0, null_env, T2>(x, y); }
 
 #endif
 
@@ -399,7 +399,7 @@ namespace chord {
 		constexpr auto c1 = complex_number(1, 0);
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return metapiler_apply<_semidynamic_typing_v0, e0, int>(c, c1, n);
+		return chord_apply<_semidynamic_typing_v0, e0, int>(c, c1, n);
 	}
 
 #endif
@@ -432,7 +432,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame, complex_constant_frame>;
 
-		return metapiler_apply<_semidynamic_typing_v1, e0, int>(c, n);
+		return chord_apply<_semidynamic_typing_v1, e0, int>(c, n);
 	}
 
 #endif
@@ -474,7 +474,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return metapiler_apply<_binary_dispatch_v0, e0, T>(n, g, h, x, y);
+		return chord_apply<_binary_dispatch_v0, e0, T>(n, g, h, x, y);
 	}
 
 #endif
@@ -511,7 +511,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return metapiler_apply<_binary_dispatch_v1, e0, T>(n, g, h, x, y);
+		return chord_apply<_binary_dispatch_v1, e0, T>(n, g, h, x, y);
 	}
 
 #endif
@@ -551,7 +551,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return metapiler_apply<_factorial_v0, e0, T>(v);
+		return chord_apply<_factorial_v0, e0, T>(v);
 	}
 
 #endif
@@ -583,7 +583,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v1(T v)
-		{ return metapiler_apply<_factorial_v1, null_env, T>(v, T(1)); }
+		{ return chord_apply<_factorial_v1, null_env, T>(v, T(1)); }
 
 #endif
 
@@ -614,7 +614,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v2(T v)
-		{ return metapiler_apply<_factorial_v2, null_env, T>(T(1), v); }
+		{ return chord_apply<_factorial_v2, null_env, T>(T(1), v); }
 
 #endif
 
@@ -644,7 +644,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v3(T v)
-		{ return metapiler_apply<_factorial_v3, null_env, T>(T(1), v); }
+		{ return chord_apply<_factorial_v3, null_env, T>(T(1), v); }
 
 #endif
 
@@ -679,7 +679,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return metapiler_apply<_factorial_v4, e0, T>(v);
+		return chord_apply<_factorial_v4, e0, T>(v);
 	}
 
 #endif
@@ -723,7 +723,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return metapiler_apply<_fibonacci_v0, e0, T>(v, T(0), T(0));
+		return chord_apply<_fibonacci_v0, e0, T>(v, T(0), T(0));
 	}
 
 #endif
@@ -762,7 +762,7 @@ namespace chord {
 	{
 		constexpr auto e0 = env<constant_machine_frame>;
 
-		return metapiler_apply<_fibonacci_v1, e0, T>(v);
+		return chord_apply<_fibonacci_v1, e0, T>(v);
 	}
 
 #endif
@@ -829,7 +829,7 @@ namespace chord {
 	{
 		constexpr auto src = _fall_fact_2_v0<punct>;
 
-		return metapiler_apply<src, null_env, T>(&x);
+		return chord_apply<src, null_env, T>(&x);
 	}
 
 #endif
@@ -889,7 +889,7 @@ namespace chord {
 	{
 		constexpr auto src = _fall_fact_2_v1<punct>;
 
-		return metapiler_apply<src, null_env, T, T&>(x);
+		return chord_apply<src, null_env, T, T&>(x);
 	}
 
 #endif
@@ -920,7 +920,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto void_effects_v0(T x)
-		{ return metapiler_apply<_void_effects_v0, null_env, T>(x, 2); }
+		{ return chord_apply<_void_effects_v0, null_env, T>(x, 2); }
 
 #endif
 
@@ -950,7 +950,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto side_effects_v0(T x)
-		{ return metapiler_apply<_side_effects_v0, null_env, T>(x, 2); }
+		{ return chord_apply<_side_effects_v0, null_env, T>(x, 2); }
 
 #endif
 

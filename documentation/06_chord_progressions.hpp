@@ -76,6 +76,23 @@ namespace chord {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// prerequisites:
+
+//	#define NIK_UNIT_TEST_REPEAT_V0
+//	#define NIK_UNIT_TEST_MAP_V0
+//	#define NIK_UNIT_TEST_VEC_SUM_V0
+//	#define NIK_UNIT_TEST_ARRAY_ADD_V0
+	#define NIK_UNIT_TEST_FOLD_V0
+//	#define NIK_UNIT_TEST_DOT_PRODUCT_V0
+//	#define NIK_UNIT_TEST_CONVOLUTION_V0
+//	#define NIK_UNIT_TEST_FIND_V0
+//	#define NIK_UNIT_TEST_SIFT_V0
+//	#define NIK_UNIT_TEST_CHANGE_OF_BASE_PRINTER_V0
+//	#define NIK_UNIT_TEST_ARRAY_PRINTER_V0
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // progressions:
@@ -172,9 +189,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_REPEAT_V0
+
 	template<typename Out, typename End, typename In>
 	constexpr auto repeat_v0(Out out, End end, In in)
-		{ return metapiler_apply<_repeat_v0, null_env, Out>(out, end, in); }
+		{ return chord_apply<_repeat_v0, null_env, Out>(out, end, in); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -202,9 +223,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_MAP_V0
+
 	template<typename Out, typename In, typename End>
 	constexpr auto map_v0(Out out, In in, End end)
-		{ return metapiler_apply<_map_v0, null_env, Out>(out, in, end); }
+		{ return chord_apply<_map_v0, null_env, Out>(out, in, end); }
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -225,9 +250,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_VEC_SUM_V0
+
 	template<typename Out, typename In, typename End, typename In1>
 	constexpr auto vec_sum_v0(Out out, In in, End end, In1 in1)
-		{ return metapiler_apply<_vec_sum_v0, null_env, Out>(out, in, end, in1); }
+		{ return chord_apply<_vec_sum_v0, null_env, Out>(out, in, end, in1); }
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -250,9 +279,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_ARRAY_ADD_V0
+
 	template<typename Out, typename In, typename End, typename In1, typename Aux>
 	constexpr auto array_add_v0(Out out, In in, End end, In1 in1, Aux aux)
-		{ return metapiler_apply<_array_add_v0, null_env, Out>(out, in, end, in1, &aux); }
+		{ return chord_apply<_array_add_v0, null_env, Out>(out, in, end, in1, &aux); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -278,9 +311,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_FOLD_V0
+
 	template<typename Out, typename In, typename End>
 	constexpr auto fold_v0(Out out, In in, End end)
-		{ return (Out) *metapiler_apply<_fold_v0, null_env, Out*>(&out, in, end); }
+		{ return (Out) *chord_apply<_fold_v0, null_env, Out*>(&out, in, end); }
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -301,9 +338,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_DOT_PRODUCT_V0
+
 	template<typename Out, typename In, typename End, typename In1>
 	constexpr auto dot_product_v0(Out out, In in, End end, In1 in1)
-		{ return (Out) *metapiler_apply<_dot_product_v0, null_env, Out*>(&out, in, end, in1); }
+		{ return (Out) *chord_apply<_dot_product_v0, null_env, Out*>(&out, in, end, in1); }
+
+#endif
 
 /***********************************************************************************************************************/
 
@@ -324,9 +365,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_CONVOLUTION_V0
+
 	template<typename Out, typename In, typename End, typename In1>
 	constexpr auto convolution_v0(Out out, In in, End end, In1 in1)
-		{ return (Out) *metapiler_apply<_convolution_v0, null_env, Out*>(&out, in, end, in1); }
+		{ return (Out) *chord_apply<_convolution_v0, null_env, Out*>(&out, in, end, in1); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -354,9 +399,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_FIND_V0
+
 	template<typename Out, typename In, typename End>
 	constexpr auto find_v0(Out out, In in, End end)
-		{ return metapiler_apply<_find_v0, null_env, Out>(out, in, end); }
+		{ return chord_apply<_find_v0, null_env, Out>(out, in, end); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -384,9 +433,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_SIFT_V0
+
 	template<typename Out, typename In, typename End>
 	constexpr auto sift_v0(Out out, In in, End end)
-		{ return metapiler_apply<_sift_v0, null_env, Out>(out, in, end); }
+		{ return chord_apply<_sift_v0, null_env, Out>(out, in, end); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -426,12 +479,16 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_CHANGE_OF_BASE_PRINTER_V0
+
 	template<auto n, typename Out, typename In>
 	constexpr void change_of_base_printer_v0(const char *f, Out out, In in)
 	{
-		metapiler_apply<_change_of_base_printer_v0<n>, null_env, Out>(out, in, f);
+		chord_apply<_change_of_base_printer_v0<n>, null_env, Out>(out, in, f);
 		printf("\n");
 	}
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -462,9 +519,13 @@ namespace chord {
 		);
 	}
 
+#ifdef NIK_UNIT_TEST_ARRAY_PRINTER_V0
+
 	template<typename Out, typename End>
 	constexpr void array_printer_v0(const char *in, Out out, End end)
-		{ metapiler_apply<_array_printer_v0, null_env, Out>(out, end, in); }
+		{ chord_apply<_array_printer_v0, null_env, Out>(out, end, in); }
+
+#endif
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

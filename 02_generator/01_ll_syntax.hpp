@@ -19,7 +19,25 @@
 
 // ll(1) syntax:
 
-namespace cctmp {
+namespace generator {
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+	template<auto... Vs>
+	using T_pack_Vs							= cctmp::T_pack_Vs<Vs...>;
+
+	template<auto U>
+	using member_type_U						= cctmp::member_type_U<U>;
+
+	using gckey_type						= cctmp::gckey_type;
+	using gcindex_type						= cctmp::gcindex_type;
+
+	nik_ce auto _two						= cctmp::_two;
+
+	template<auto... Vs>
+	nik_ce auto segment_						= cctmp::segment_<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -111,7 +129,7 @@ namespace cctmp {
 				nik_ces void result(AST *tree, Level *level)
 				{
 					-tree->current;
-					apply<_level_append_0_action_>(tree, level);
+					cctmp::apply<_level_append_0_action_>(tree, level);
 					++tree->current;
 					+tree->current;
 				}
@@ -127,7 +145,7 @@ namespace cctmp {
 				nik_ces void result(AST *tree, Levels*... levels)
 				{
 					-tree->current;
-					(apply<actions>(tree, levels), ...);
+					(cctmp::apply<actions>(tree, levels), ...);
 					+tree->current;
 				}
 
@@ -155,7 +173,7 @@ namespace cctmp {
 		{
 			template<typename AST>
 			nik_ces void result(AST *tree)
-				{ apply<_level_append_1_action_>(tree, tree->level_1); }
+				{ cctmp::apply<_level_append_1_action_>(tree, tree->level_1); }
 
 		}; nik_ce auto _level_1_append_action_ = U_level_1_action<GAN::append>;
 
@@ -178,7 +196,7 @@ namespace cctmp {
 
 			template<typename AST>
 			nik_ces void result(AST *tree)
-				{ apply<action>(tree, tree->level_2, tree->level_1); }
+				{ cctmp::apply<action>(tree, tree->level_2, tree->level_1); }
 
 		}; nik_ce auto _level_2_append_action_ = U_level_2_action<GAN::append>;
 
@@ -248,10 +266,10 @@ namespace cctmp {
 
 			nik_ces gindex_type max_size	= _two; // symbol, body.
 
-			using scope_type		= sequence<bool, static_cast<gindex_type>(Scope::dimension)>;
-			using current_type		= sequence<gindex_type, max_size>;
-			using max_type			= sequence<gindex_type, max_size>;
-			using total_type		= sequence<gindex_type, static_cast<gindex_type>(Level::dimension)>;
+			using scope_type		= cctmp::sequence<bool, static_cast<gindex_type>(Scope::dimension)>;
+			using current_type		= cctmp::sequence<gindex_type, max_size>;
+			using max_type			= cctmp::sequence<gindex_type, max_size>;
+			using total_type		= cctmp::sequence<gindex_type, static_cast<gindex_type>(Level::dimension)>;
 
 			scope_type scope;
 			current_type current;
@@ -450,11 +468,11 @@ namespace cctmp {
 			}
 
 			nik_ce T_icon & find(ctype_ref v)
-				{ base::start = apply<base::_find_>(base::start, base::finish, v); return *this; }
+				{ base::start = cctmp::apply<base::_find_>(base::start, base::finish, v); return *this; }
 
 			template<typename T>
 			nik_ce T_icon & find(const T & v)
-				{ base::start = apply<base::_find_same_>(base::start, base::finish, v); return *this; }
+				{ base::start = cctmp::apply<base::_find_same_>(base::start, base::finish, v); return *this; }
 
 			nik_ce auto contains(ctype_ref v) const { T_icon i{*this}; return i.find(v); }
 
@@ -463,10 +481,10 @@ namespace cctmp {
 				{ T_icon i{*this}; return i.template find<T const&>(v); }
 
 			nik_ce bool same(const T_lexeme<Type> *l) const
-				{ return apply<_subarray_same_<>>(*this, l->left_cselect()); }
+				{ return cctmp::apply<cctmp::_subarray_same_<>>(*this, l->left_cselect()); }
 
 			nik_ce bool same(const T_icon<Type, SizeType> & i) const
-				{ return apply<_subarray_same_<>>(*this, i); }
+				{ return cctmp::apply<cctmp::_subarray_same_<>>(*this, i); }
 	};
 
 	using icon  = T_icon<gchar_type>;
@@ -563,14 +581,14 @@ namespace cctmp {
 
 		nik_ces gindex_type hierarchy_length	= level_0_size + level_1_size + level_2_size + level_3_size;
 
-		using hierarchy_type			= T_hierarchy < gindex_type{4} , hierarchy_length >;
+		using hierarchy_type			= T_hierarchy<gindex_type{4}, hierarchy_length>;
 		using cnavigator_type			= typename hierarchy_type::cnavigator_type;
 		using navigator_type			= typename hierarchy_type::navigator_type;
 
-		using level_head_type			= sequence < level_head   , head_total    >;
-		using level_body_type			= sequence < level_body   , body_total    >;
-		using level_symbol_type			= sequence < level_symbol , symbol_total  >;
-		using level_action_type			= sequence < level_symbol , action_length >;
+		using level_head_type			= cctmp::sequence < level_head   , head_total    >;
+		using level_body_type			= cctmp::sequence < level_body   , body_total    >;
+		using level_symbol_type			= cctmp::sequence < level_symbol , symbol_total  >;
+		using level_action_type			= cctmp::sequence < level_symbol , action_length >;
 
 		using level_head_ptr			= level_head_type*;
 		using level_body_ptr			= level_body_type*;
@@ -623,8 +641,8 @@ namespace cctmp {
 		nik_ce void set_body_is_empty  () { body_level.last()->is_empty = true; }
 		nik_ce void set_head_has_empty () { head_level.last()->has_empty = true; }
 
-		nik_ce void new_head() { apply<_level_append_0_action_>(this, level_2); }
-		nik_ce void new_body() { apply<_level_append_0_action_>(this, level_1); }
+		nik_ce void new_head() { cctmp::apply<_level_append_0_action_>(this, level_2); }
+		nik_ce void new_body() { cctmp::apply<_level_append_0_action_>(this, level_1); }
 
 		nik_ce void push_nonterminal()
 		{
@@ -646,10 +664,10 @@ namespace cctmp {
 			push_nonterminal();
 		}
 
-		nik_ce void append_body() { apply<_level_1_append_action_>(this); }
+		nik_ce void append_body() { cctmp::apply<_level_1_append_action_>(this); }
 		nik_ce void append_head()
 		{
-			apply<_level_2_append_action_>(this);
+			cctmp::apply<_level_2_append_action_>(this);
 			push_nonterminal();
 		}
 
@@ -863,5 +881,5 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace cctmp
+} // namespace generator
 

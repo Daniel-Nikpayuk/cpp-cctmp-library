@@ -49,7 +49,7 @@
 							// literal is intentional.
 							// this is the longest possible sentential.
 
-		using prod_type				= cctmp::Production<prod_size>;
+		using prod_type				= generator::Production<prod_size>;
 		using cprod_type			= prod_type const;
 		using list_type				= cctmp::sequence<prod_type, row_size * col_size>;
 

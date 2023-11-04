@@ -39,43 +39,52 @@
 #include"00_cctmp/05_praxis.hpp"
 #include"00_cctmp/06_algorithm.hpp"
 #include"00_cctmp/07_interpreter.hpp"
-#include"00_cctmp/08_chain.hpp"
-#include"00_cctmp/09_action.hpp"
-#include"00_cctmp/10_compose.hpp"
+#include"00_cctmp/08_graph.hpp"
 
-#include"01_generator/00_graph.hpp"
-#include"01_generator/01_lexer.hpp"
-#include"01_generator/02_syntax.hpp"
-#include"01_generator/03_parser.hpp"
-#include"01_generator/04_parse_table.hpp"
+#include"01_machine/00_control.hpp"
+#include"01_machine/01_lookup_state.hpp"
+#include"01_machine/02_lookup_action.hpp"
+#include"01_machine/03_chain_state.hpp"
+#include"01_machine/04_chain_action.hpp"
+#include"01_machine/05_cycle_state.hpp"
+#include"01_machine/06_cycle_action.hpp"
+#include"01_machine/07_assembly_state.hpp"
+#include"01_machine/08_assembly_action.hpp"
 
-#include"02_chord/00_lexer.hpp"
-#include"02_chord/01_scanner.hpp"
-#include"02_chord/02_syntax.hpp"
-#include"02_chord/03_action.hpp"
-#include"02_chord/04_parser.hpp"
-#include"02_chord/05_morph.hpp"
-//#include"02_chord/06_cycle.hpp"
-//#include"02_chord/07_progression.hpp"
-#include"02_chord/08_lookup.hpp"
-#include"02_chord/09_machine.hpp"
-#include"02_chord/10_targeter.hpp"
+#include"02_generator/00_ll_lexer.hpp"
+#include"02_generator/01_ll_syntax.hpp"
+#include"02_generator/02_ll_parser.hpp"
+#include"02_generator/03_ll_table.hpp"
 
-//#include"03_math/00_byte_ring.hpp"
-//#include"03_math/01_byte_array_ring.hpp"
-//#include"03_math/02_cryptography.hpp"
-//#include"03_math/03_linear_algebra.hpp"
-//#include"03_math/04_signal_processing.hpp"
+#include"03_chord/00_lexer.hpp"
+#include"03_chord/01_scanner.hpp"
+#include"03_chord/02_morph.hpp"
+#include"03_chord/03_cycle.hpp"
+#include"03_chord/04_assembly.hpp"
+#include"03_chord/05_action.hpp"
+#include"03_chord/06_syntax.hpp"
+#include"03_chord/07_parser.hpp"
+#include"03_chord/08_metapiler.hpp"
+
+//#include"04_math/00_byte_ring.hpp"
+//#include"04_math/01_byte_array_ring.hpp"
+//#include"04_math/02_cryptography.hpp"
+//#include"04_math/03_linear_algebra.hpp"
+//#include"04_math/04_signal_processing.hpp"
 
 #include"undef_macros.hpp"
 
-#include"documentation/01_case_studies.hpp"
-//#include"documentation/02_chord_progressions.hpp"
+//#include"documentation/01_lookup_controllers.hpp"
+//#include"documentation/02_chain_controllers.hpp"
+//#include"documentation/03_cycle_controllers.hpp"
+//#include"documentation/04_assembly_controllers.hpp"
+//#include"documentation/05_generic_assembly.hpp"
+//#include"documentation/06_chord_progressions.hpp"
 
-#include"testing/00_generic_printers.hpp"
-#include"testing/01_parser_generator_printers.hpp"
-#include"testing/02_chord_assembly_printers.hpp"
-#include"testing/04_chord_grammar_tests.hpp"
+//#include"testing/00_generic_printers.hpp"
+//#include"testing/01_parser_generator_printers.hpp"
+//#include"testing/02_chord_assembly_printers.hpp"
+//#include"testing/04_chord_grammar_tests.hpp"
 //#include"testing/05_progression_grammar_tests.hpp"
 
 /***********************************************************************************************************************/
@@ -85,94 +94,58 @@
 
 /***********************************************************************************************************************/
 
-// targeter:
+// square:
 
-	template<auto static_source>
-	struct T_chord_assembly_targeter
+	constexpr auto _square_v0()
 	{
-		using T_grammar					= chord::T_chord_assembly_grammar;
+		return chord::source
+		(
+			"square x         ;"
 
-		constexpr static auto static_grammar		= U_store_T<T_grammar>;
+			"body:            ;"
+			". = multiply x x ;"
+			"return _         ;"
+		);
+	}
 
-		// pg parsed:
-
-		template<auto ss, auto sg>
-		constexpr static auto U_static_pg_parsed	= U_store_T<T_parser_generator_parsed<ss, sg>>;
-
-		constexpr static auto static_pg_src		= _static_callable_<T_grammar::source>;
-		constexpr static auto static_pg_scanned		= U_store_T<T_parser_generator_scanned<static_pg_src>>;
-		constexpr static auto static_pg_parsed		= U_static_pg_parsed<static_pg_scanned, static_grammar>;
-
-		// scanned:
-
-		template<auto st, auto ss>
-		constexpr static auto U_static_scanned		= U_store_T<chord::T_chord_assembly_scanner_parsed<st, ss>>;
-
-		constexpr static auto static_scanned		= U_static_scanned<static_pg_parsed, static_source>;
-
-		// parsed:
-
-		template<auto st, auto ss>
-		constexpr static auto U_static_parsed		= U_store_T<chord::T_chord_assembly_parsed<st, ss>>;
-
-		constexpr static auto static_parsed		= U_static_parsed<static_pg_parsed, static_scanned>;
-	};
+	template<typename T>
+	constexpr auto square_v0(T v)
+		{ return chord::chord_apply<_square_v0, null_env, T>(v); }
 
 /***********************************************************************************************************************/
 
-// targeted:
+// sum of squares:
 
-	template<auto callable_source>
-	struct T_chord_assembly_targeted
+	constexpr auto _sum_of_squares_v0()
 	{
-		constexpr static auto static_pair	= _static_callable_<callable_source>;
-		constexpr static auto static_src	= _static_car_<static_pair>;
-		constexpr static auto value		= T_chord_assembly_targeter<static_src>{};
-		using type				= decltype(value);
-	};
+		return chord::source
+                (
+			"sum_of_squares x y ;"
+
+			"body:              ;"
+			"x = multiply x x   ;"
+			"y = multiply y y   ;"
+			". = add      x y   ;"
+			"return _           ;"
+		);
+	}
+
+	template<typename T>
+	constexpr auto sum_of_squares_v0(T x, T y)
+		{ return chord::chord_apply<_sum_of_squares_v0, null_env, T>(x, y); }
 
 /***********************************************************************************************************************/
 
-	using chord_scanner_grammar		= chord::T_chord_assembly_scanner_grammar;
-	using chord_grammar			= chord::T_chord_assembly_grammar;
-	constexpr auto static_scanner_grammar	= U_store_T<chord_scanner_grammar>;
-	constexpr auto static_grammar		= U_store_T<chord_grammar>;
-//	constexpr auto src			= chord::_square_v0;
-//	constexpr auto src			= chord::_square_v1;
-//	constexpr auto src			= chord::_sum_of_squares_v0;
-//	constexpr auto src			= chord::_sum_of_squares_v1;
-	constexpr auto src			= chord::_twice_v0;
-//	constexpr auto src			= chord::_x_to5_plus1_v0;
-//	constexpr auto src			= chord::_binary_dispatch_v0;
-//	constexpr auto src			= chord::_factorial_v0;
-
-/***********************************************************************************************************************/
-
-//	using targt_type = T_chord_assembly_targeted<src>;
-//	using contr_type = T_chain_comply_contr<U_store_T<targt_type>, 10>;
+//	using chord_grammar			= chord::T_chord_assembly_grammar;
+//	constexpr auto static_grammar		= U_store_T<chord_grammar>;
 
 	int main(int argc, char *argv[])
 	{
-	//	constexpr auto f  = _subpose_<_multiply_, _decrement_<>, _id_, _increment_<>>;
-	//	constexpr auto sq = _argpose_<_multiply_, 0, 0>;
+	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};
+	//	tr_table_printer.print_num_tr_table();
 
-	//	printf("%d\n", apply<sq>(3));
-	//	printf("%d\n", apply<f>(3, 4, 5));
-
-	//	auto parsed_printer = chord_assembly_parsed_printer<static_grammar, src>{};
-	//	parsed_printer.print_tree();
-	//	parsed_printer.print_morph();
-
-	//	auto targeted_printer = chord_assembly_targeted_printer<src>{};
-	//	targeted_printer.print_controller();
-
-	//	printf("%d\n", chord::square_v0(5));
-	//	printf("%d\n", chord::square_v1(7));
-	//	printf("%d\n", chord::sum_of_squares_v1(3, 5));
-		printf("%d\n", chord::twice_v0(3));
-	//	printf("%d\n", chord::factorial_v0(5));
-
-	//	chord::grammar_tests();
+	//	printf("%d\n", square_v0(5));
+	//	printf("%d\n", sum_of_squares_v0(3, 4));
 
 		return 0;
 	}

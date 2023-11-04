@@ -19,7 +19,52 @@
 
 // ll(1) lexer:
 
-namespace cctmp {
+namespace generator {
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+	template<typename T>
+	nik_ce auto U_store_T						= cctmp::U_store_T<T>;
+
+	template<auto U>
+	using T_store_U							= cctmp::T_store_U<U>;
+
+	template<typename T>
+	nik_ce auto & member_value_T					= cctmp::member_value_T<T>;
+
+	template<auto U>
+	nik_ce auto & member_value_U					= cctmp::member_value_U<U>;
+
+	template<auto V>
+	nik_ce auto _static_callable_					= cctmp::_static_callable_<V>;
+
+	using gcbool_type						= cctmp::gcbool_type;
+	using gkey_type							= cctmp::gkey_type;
+	using gindex_type						= cctmp::gindex_type;
+	using gchar_type						= cctmp::gchar_type;
+	using gcchar_type						= cctmp::gcchar_type;
+
+	nik_ce auto U_gkey_type						= cctmp::U_gkey_type;
+	nik_ce auto U_gchar_type					= cctmp::U_gchar_type;
+
+	nik_ce auto _zero						= cctmp::_zero;
+
+	template<typename T, auto S>
+	using sequence							= cctmp::sequence<T, S>;
+
+	template<typename... Ts>
+	using cselector							= cctmp::cselector<Ts...>;
+
+	template<typename... Ts>
+	using citerator							= cctmp::citerator<Ts...>;
+
+	using cguider							= cctmp::cguider;
+	using cguider_ctype_ref						= cctmp::cguider_ctype_ref;
+
+	template<auto... Vs>
+	using T_hierarchy						= cctmp::T_hierarchy<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -219,25 +264,25 @@ namespace cctmp {
 			nik_ce T_lexeme(const cselector<Type> & s) : base{s.cbegin(), s.cend()}, token{} { }
 
 			nik_ce const T_lexeme & find(ctype_ref v)
-				{ base::current = apply<base::_find_>(base::start, base::finish, v); return *this; }
+				{ base::current = cctmp::apply<base::_find_>(base::start, base::finish, v); return *this; }
 
 			template<typename T>
 			nik_ce const T_lexeme & find(const T & v)
-				{ base::current = apply<base::_find_same_>(base::start, base::finish, v); return *this; }
+				{ base::current = cctmp::apply<base::_find_same_>(base::start, base::finish, v); return *this; }
 
 			nik_ce const T_lexeme & left_find(ctype_ref v)
-				{ base::current = apply<base::_find_>(base::start, base::current, v); return *this; }
+				{ base::current = cctmp::apply<base::_find_>(base::start, base::current, v); return *this; }
 
 			template<typename T>
 			nik_ce const T_lexeme & left_find(const T & v)
-				{ base::current = apply<base::_find_same_>(base::start, base::current, v); return *this; }
+				{ base::current = cctmp::apply<base::_find_same_>(base::start, base::current, v); return *this; }
 
 			nik_ce const T_lexeme & right_find(ctype_ref v)
-				{ base::current = apply<base::_find_>(base::current, base::finish, v); return *this; }
+				{ base::current = cctmp::apply<base::_find_>(base::current, base::finish, v); return *this; }
 
 			template<typename T>
 			nik_ce const T_lexeme & right_find(const T & v)
-				{ base::current = apply<base::_find_same_>(base::current, base::finish, v); return *this; }
+				{ base::current = cctmp::apply<base::_find_same_>(base::current, base::finish, v); return *this; }
 
 			nik_ce auto contains(ctype_ref v) const { T_lexeme l{*this}; return l.find(v); }
 
@@ -515,15 +560,15 @@ namespace cctmp {
 				dimension
 			};
 
-			nik_ces auto accept = table
+			nik_ces auto accept = cctmp::table
 			(
 				U_state_type, U_token_type,
 
-				pair( any       , Token::identifier ),
-				pair( rangle    , Token::arrow      ),
-				pair( equal     , Token::equal      ),
-				pair( colon     , Token::colon      ),
-				pair( semicolon , Token::semicolon  )
+				cctmp::pair( any       , Token::identifier ),
+				cctmp::pair( rangle    , Token::arrow      ),
+				cctmp::pair( equal     , Token::equal      ),
+				cctmp::pair( colon     , Token::colon      ),
+				cctmp::pair( semicolon , Token::semicolon  )
 			);
 		};
 
@@ -542,16 +587,16 @@ namespace cctmp {
 				dimension
 			};
 
-			nik_ces auto charmap = table // 00_grammar table
+			nik_ces auto charmap = cctmp::table
 			(
 				U_gchar_type, U_gkey_type,
 
-				pair( '-'  , Charset::dash      ),
-				pair( '>'  , Charset::rangle    ),
-				pair( '='  , Charset::equal     ),
-				pair( ':'  , Charset::colon     ),
-				pair( ';'  , Charset::semicolon ),
-				pair( '\\' , Charset::backslash )
+				cctmp::pair( '-'  , Charset::dash      ),
+				cctmp::pair( '>'  , Charset::rangle    ),
+				cctmp::pair( '='  , Charset::equal     ),
+				cctmp::pair( ':'  , Charset::colon     ),
+				cctmp::pair( ';'  , Charset::semicolon ),
+				cctmp::pair( '\\' , Charset::backslash )
 			);
 
 			nik_ces gkey_type map(gcchar_type c)
@@ -670,5 +715,5 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace cctmp
+} // namespace generator
 

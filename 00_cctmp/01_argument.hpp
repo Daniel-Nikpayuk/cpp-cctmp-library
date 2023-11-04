@@ -203,8 +203,9 @@ namespace cctmp {
 			template<auto f>
 			nik_ce auto _apply_ = _bind_<f>;
 
-			template<auto f, typename... Ts>
+			template<auto f, typename... Ts> // needs fixing: 03_chord/02_syntax
 			nik_ce auto apply(Ts... vs) { return T_store_U<f>::template result<>(vs...); }
+		//	nik_ce auto apply(Ts... vs) { return T_store_U<f>::template result<Ts...>(vs...); }
 
 	// curry:
 
@@ -214,7 +215,8 @@ namespace cctmp {
 			using F = T_store_U<f>;
 
 			template<typename... Ts>
-			nik_ces auto result(Ts... vs) { return F::template result<>(Vs..., vs...); }
+			nik_ces auto result(Ts... vs)
+				{ return F::template result<decltype(Vs)..., Ts...>(Vs..., vs...); }
 
 		}; template<auto f, auto... Vs>
 			nik_ce auto _curry_ = U_arg_higher_order<ArgHigherOrder::curry, f, Vs...>;
@@ -232,7 +234,7 @@ namespace cctmp {
 				auto pos   = 0;
 				bool match = false;
 
-				return ((pos += not(match = (match || P::template result<>(vs)))), ...);
+				return ((pos += not(match = (match || P::template result<Ts>(vs)))), ...);
 			}
 
 		}; template<auto p>

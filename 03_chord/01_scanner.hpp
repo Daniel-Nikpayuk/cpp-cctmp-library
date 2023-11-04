@@ -25,6 +25,8 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// cctmp:
+
 	template<auto U>
 	using T_store_U						= cctmp::T_store_U<U>;
 
@@ -36,16 +38,16 @@ namespace chord {
 	using strlit_type					= cctmp::strlit_type;
 	nik_ce auto U_strlit_type				= cctmp::U_strlit_type;
 
-	using action_type					= cctmp::action_type;
-	nik_ce auto U_action_type				= cctmp::U_action_type;
+// generator:
 
-	using AN						= cctmp::AN;
+	using action_type					= generator::action_type;
+	nik_ce auto U_action_type				= generator::U_action_type;
 
 	using sxt_pair						= cctmp::pair<strlit_type, token_type>;
 	using sxa_pair						= cctmp::pair<strlit_type, action_type>;
 
-	using symbol_type					= typename cctmp::symbol_type;
-	using csymbol_type					= typename cctmp::csymbol_type;
+	using symbol_type					= generator::symbol_type;
+	using csymbol_type					= generator::csymbol_type;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -68,7 +70,8 @@ namespace chord {
        		{
 			enum : gkey_type
 			{
-				line, arg, pad, tree, label, jump, morph, cycle,
+				arg, pad, label, jump, tree, line,
+				morph, morph_line, cycle, cycle_line,
 				instr_1, instr_2, instr_3,
 				dimension
 			};
@@ -87,15 +90,20 @@ namespace chord {
 
 		gindex_type arg_size;
 		gindex_type tag_size;
-		gindex_type hierarchy_size;
+		gindex_type toc_size;
+		gindex_type cycle_size;
+		gindex_type morph_size;
 		gindex_type target_size;
 
-		nik_ce T_chord_assembly_scanner_ast() : arg_size{}, tag_size{}, hierarchy_size{}, target_size{}
-		{
-			total.fullsize();
-			maximum.fullsize();
-			capacity.fullsize();
-		}
+		nik_ce T_chord_assembly_scanner_ast() :
+
+			arg_size{}, tag_size{}, toc_size{}, cycle_size{}, morph_size{}, target_size{}
+
+			{
+				total.fullsize();
+				maximum.fullsize();
+				capacity.fullsize();
+			}
 
 		nik_ce void increment_total   (csize_type pos) { ++total[pos]; }
 		nik_ce void increment_maximum (csize_type pos) { ++maximum[pos]; }
@@ -106,16 +114,23 @@ namespace chord {
 			maximum[pos] = 0;
 		}
 
+		nik_ce auto tree_size(csize_type t_line, csize_type t_tree, csize_type c_tree)
+		{
+			gindex_type level_2_size = total[t_line] + 3;
+			gindex_type level_1_size = total[t_line] * (capacity[c_tree] + 3);
+			gindex_type level_0_size = total[t_tree] * 3;
+
+			return level_0_size + level_1_size + level_2_size;
+		}
+
 		nik_ce void update_accept()
 		{
 			arg_size = total[Total::arg] + total[Total::pad];
 			tag_size = total[Total::label] + total[Total::jump];
 
-			gindex_type level_2_size = total[Total::line] + 3;
-			gindex_type level_1_size = total[Total::line] * (capacity[Cap::tree] + 3);
-			gindex_type level_0_size = total[Total::tree] * 3;
-
-			hierarchy_size = level_0_size + level_1_size + level_2_size;
+			toc_size   = tree_size(Total::line, Total::tree, Cap::tree);
+			cycle_size = tree_size(Total::cycle_line, Total::morph, Cap::morph);
+			morph_size = tree_size(Total::morph_line, Total::morph, Cap::morph);
 
 			total[Total::instr_1] += total[Total::jump]; // instr1: test, void, goto, go into, branch
 			total[Total::instr_2] += static_cast<bool>(total[Total::pad]); // instr2: pad
@@ -143,7 +158,7 @@ namespace chord {
 	{
 		enum : action_type
 		{
-			nop = AN::nop,
+			nop = generator::AN::nop,
 			tree, label, jump, line_end, pad, instr_1, morph, cycle, arg,
 			accept, instr_3, go_into, morph_arg, morph_cap, ival_arg, ival_cap,
 			dimension
@@ -240,7 +255,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->increment_total(AST::Total::morph);
+			t->increment_total(AST::Total::morph_line);
 			t->increment_total(AST::Total::tree);
 			t->increment_maximum(AST::Cap::tree);
 		}
@@ -254,7 +269,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->increment_total(AST::Total::cycle);
+			t->increment_total(AST::Total::cycle_line);
 			t->increment_total(AST::Total::tree);
 			t->increment_maximum(AST::Cap::tree);
 		}
@@ -312,7 +327,10 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->increment_maximum(AST::Cap::morph); }
+		{
+			t->increment_total(AST::Total::morph);
+			t->increment_maximum(AST::Cap::morph);
+		}
 	};
 
 // morph cap:
@@ -332,7 +350,10 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->increment_maximum(AST::Cap::cycle); }
+		{
+			t->increment_total(AST::Total::cycle);
+			t->increment_maximum(AST::Cap::cycle);
+		}
 	};
 
 // ival cap:
@@ -351,7 +372,7 @@ namespace chord {
 
 	template<typename AST>
 	struct T_chord_assembly_scanner_ta :
-		public cctmp::T_generic_translation_action<T_chord_assembly_scanner_translation_action, AST, CASAN>
+		public generator::T_generic_translation_action<T_chord_assembly_scanner_translation_action, AST, CASAN>
 			{ };
 
 	// interface:
@@ -379,7 +400,7 @@ namespace chord {
 		using Token		= typename T_lexer::Token;
 		nik_ces auto size	= Token::dimension;
 
-		nik_ces auto source() { return cctmp::context_free_grammar
+		nik_ces auto source() { return generator::context_free_grammar
 		(
 		// start:
 
@@ -590,17 +611,17 @@ namespace chord {
 #else
 
 	template<typename T_grammar>
-	struct T_chord_assembly_scanner_pda : public cctmp::T_generic_pda<T_grammar>
+	struct T_chord_assembly_scanner_pda : public generator::T_generic_pda<T_grammar>
 	{
-		using base			= cctmp::T_generic_pda<T_grammar>;
+		using base			= generator::T_generic_pda<T_grammar>;
 		using ActName			= typename T_grammar::ActName;
 		using T_lexer			= typename T_grammar::T_lexer;
 		using Token			= typename T_grammar::Token;
 
 		nik_ces auto prod_size		= cctmp::string_literal("<A|C|B|B>").size();
 
-		nik_ces auto stack_start	= symbol_type{cctmp::Sign::nonterminal, base::start_index};
-		nik_ces auto stack_finish	= symbol_type{cctmp::Sign::terminal, Token::prompt};
+		nik_ces auto stack_start	= symbol_type{generator::Sign::nonterminal, base::start_index};
+		nik_ces auto stack_finish	= symbol_type{generator::Sign::terminal, Token::prompt};
 
 		nik_ces auto stack_size		= cctmp::literal("F<A|C|B|B>YPZ{}YPZYP,PZV;HGO").size(); // needs refining.
 							// literal is intentional.
@@ -623,9 +644,9 @@ namespace chord {
 	{
 		using T_ast		= typename T_action::T_ast;
 		using T_pda		= T_chord_assembly_scanner_pda<T_grammar>;
-		using T_parser		= cctmp::T_generic_parser<T_action, T_pda>;
-		using parseme_type	= cctmp::T_parseme<T_ast>;
-		using parsoid_type	= cctmp::T_parsoid<T_pda::stack_size, T_pda::prod_size>;
+		using T_parser		= generator::T_generic_parser<T_action, T_pda>;
+		using parseme_type	= generator::T_parseme<T_ast>;
+		using parsoid_type	= generator::T_parsoid<T_pda::stack_size, T_pda::prod_size>;
 
 		nik_ces auto & pda	= T_parser::pda; static_assert(!pda.ambiguous, "ambiguous cfg!");
 

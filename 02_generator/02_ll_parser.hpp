@@ -19,7 +19,21 @@
 
 // ll(1) parser:
 
-namespace cctmp {
+namespace generator {
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+	template<auto Op, typename T>
+	using modify_type						= cctmp::modify_type<Op, T>;
+
+	nik_ce auto _from_reference_					= cctmp::_from_reference_;
+
+	using strlit_type						= cctmp::strlit_type;
+	using cstrlit_ref						= cctmp::cstrlit_ref;
+
+	nik_ce auto U_strlit_type					= cctmp::U_strlit_type;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -30,7 +44,7 @@ namespace cctmp {
 	template<typename CharType, auto M, auto N>
 	nik_ce auto context_free_grammar(const CharType (&srt)[M], const CharType (&str)[N])
 	{
-		return pair(string_literal(srt), string_literal(str));
+		return cctmp::pair(cctmp::string_literal(srt), cctmp::string_literal(str));
 	}
 
 /***********************************************************************************************************************/
@@ -331,8 +345,8 @@ namespace cctmp {
 		using Token		= typename T_lexer::Token;
 		nik_ces auto size	= Token::dimension;
 
-		using sxt_pair		= pair<strlit_type, token_type>;
-		using sxa_pair		= pair<strlit_type, action_type>;
+		using sxt_pair		= cctmp::pair<strlit_type, token_type>;
+		using sxa_pair		= cctmp::pair<strlit_type, action_type>;
 
 		nik_ces auto source()
 		{
@@ -364,7 +378,7 @@ namespace cctmp {
 			);
 		}
 
-		nik_ces auto map = table
+		nik_ces auto map = cctmp::table
 		(
 			U_strlit_type, U_token_type,
 
@@ -379,7 +393,7 @@ namespace cctmp {
 			sxt_pair(   "s" , Token::semicolon  )
 		);
 
-		nik_ces auto action = table
+		nik_ces auto action = cctmp::table
 		(
 			U_strlit_type, U_action_type,
 
@@ -395,17 +409,17 @@ namespace cctmp {
 
 		struct Terminal
 		{
-			nik_ces auto symbol = table
+			nik_ces auto symbol = cctmp::table
 			(
 				U_gchar_type, U_token_type,
 
-				pair( 'i' , Token::identifier ),
-				pair( 'a' , Token::arrow      ),
-				pair( ';' , Token::semicolon  ),
-				pair( ':' , Token::colon      ),
-				pair( 'm' , Token::empty      ), // empty, not none.
-				pair( '=' , Token::equal      ),
-				pair( '$' , Token::prompt     )
+				cctmp::pair( 'i' , Token::identifier ),
+				cctmp::pair( 'a' , Token::arrow      ),
+				cctmp::pair( ';' , Token::semicolon  ),
+				cctmp::pair( ':' , Token::colon      ),
+				cctmp::pair( 'm' , Token::empty      ), // empty, not none.
+				cctmp::pair( '=' , Token::equal      ),
+				cctmp::pair( '$' , Token::prompt     )
 			);
 
 			nik_ces auto invalid   = Token::invalid;
@@ -435,23 +449,23 @@ namespace cctmp {
 				dimension
 			};
 
-			nik_ces auto symbol = table
+			nik_ces auto symbol = cctmp::table
 			(
 				U_gchar_type, U_token_type,
 
-				pair( 'S' , start         ),
-				pair( 'D' , rec_declare   ),
-				pair( 'F' , front_declare ),
-				pair( 'H' , head_declare  ),
-				pair( 'B' , body_declare  ),
-				pair( 'M' , disp_name     ),
-				pair( 'N' , rec_name      ),
-				pair( 'T' , tok_name      ),
-				pair( 'A' , action        ),
-				pair( 'C' , call          ),
-				pair( 'J' , rec_alias     ),
-				pair( 'I' , tok_alias     ),
-				pair( 'K' , end_alias     )
+				cctmp::pair( 'S' , start         ),
+				cctmp::pair( 'D' , rec_declare   ),
+				cctmp::pair( 'F' , front_declare ),
+				cctmp::pair( 'H' , head_declare  ),
+				cctmp::pair( 'B' , body_declare  ),
+				cctmp::pair( 'M' , disp_name     ),
+				cctmp::pair( 'N' , rec_name      ),
+				cctmp::pair( 'T' , tok_name      ),
+				cctmp::pair( 'A' , action        ),
+				cctmp::pair( 'C' , call          ),
+				cctmp::pair( 'J' , rec_alias     ),
+				cctmp::pair( 'I' , tok_alias     ),
+				cctmp::pair( 'K' , end_alias     )
 			);
 
 			nik_ces auto stack_start = symbol_type{Sign::nonterminal, start};
@@ -508,12 +522,12 @@ namespace cctmp {
 		nik_ces auto row_size			= Nonterminal::dimension;
 		nik_ces auto col_size			= Terminal::dimension;
 
-		nik_ces auto prod_size			= string_literal("aMAsB").size();
+		nik_ces auto prod_size			= cctmp::string_literal("aMAsB").size();
 
 		nik_ces auto & stack_start		= Nonterminal::stack_start;
 		nik_ces auto & stack_finish		= Terminal::stack_finish;
 
-		nik_ces auto stack_size			= literal("TNAsBD").size();
+		nik_ces auto stack_size			= cctmp::literal("TNAsBD").size();
 								// literal is intentional.
 								// this literal is the longest possible sentential.
 
@@ -634,5 +648,5 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace cctmp
+} // namespace generator
 

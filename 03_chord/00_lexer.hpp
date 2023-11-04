@@ -25,6 +25,8 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// cctmp:
+
 	template<auto U>
 	nik_ce auto & member_value_U					= cctmp::member_value_U<U>;
 
@@ -49,28 +51,30 @@ namespace chord {
 	using gchar_type						= cctmp::gchar_type;
 	using gcchar_type						= cctmp::gcchar_type;
 
-	using gstring_type						= cctmp::gstring_type;
-	using gcstring_type						= cctmp::gcstring_type;
-
 	nik_ce auto U_gkey_type						= cctmp::U_gkey_type;
 	nik_ce auto U_gchar_type					= cctmp::U_gchar_type;
-
-	using state_type						= cctmp::state_type;
-	using cstate_type						= cctmp::cstate_type;
-	using token_type						= cctmp::token_type;
-	using ctoken_type						= cctmp::ctoken_type;
-
-	using StateName							= cctmp::StateName;
-	using TokenName							= cctmp::TokenName;
-
-	nik_ce auto U_state_type					= cctmp::U_state_type;
-	nik_ce auto U_token_type					= cctmp::U_token_type;
 
 	template<typename T, typename S = gindex_type>
 	using cselector							= cctmp::cselector<T, S>;
 
-	using lexeme							= cctmp::lexeme;
-	using clexeme							= cctmp::clexeme;
+// generator:
+
+	using gstring_type						= generator::gstring_type;
+	using gcstring_type						= generator::gcstring_type;
+
+	using state_type						= generator::state_type;
+	using cstate_type						= generator::cstate_type;
+	using token_type						= generator::token_type;
+	using ctoken_type						= generator::ctoken_type;
+
+	using StateName							= generator::StateName;
+	using TokenName							= generator::TokenName;
+
+	nik_ce auto U_state_type					= generator::U_state_type;
+	nik_ce auto U_token_type					= generator::U_token_type;
+
+	using lexeme							= generator::lexeme;
+	using clexeme							= generator::clexeme;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -281,9 +285,9 @@ namespace chord {
 
 			nik_ces gkey_type map(gcchar_type c)
 			{
-				if      (cctmp::matches_ula(c))   return Charset::ula;
-				else if (cctmp::matches_digit(c)) return Charset::digit;
-				else                              return charmap.lookup(c, Charset::other);
+				if      (generator::matches_ula(c))   return Charset::ula;
+				else if (generator::matches_digit(c)) return Charset::digit;
+				else                                  return charmap.lookup(c, Charset::other);
 			}
 		};
 
@@ -321,7 +325,7 @@ namespace chord {
 			table[ State::ulan    ][ Charset::digit         ] = State::ulan;
 			table[ State::ulan    ][ Charset::colon         ] = State::colon;
 
-			cctmp::T_generic_lexer_tt::set_backslash_entries<State, Charset>(table);
+			generator::T_generic_lexer_tt::set_backslash_entries<State, Charset>(table);
 		}
 
 		nik_ce cstate_type move(cstate_type s, gcchar_type c) const
@@ -339,23 +343,23 @@ namespace chord {
 		nik_ces auto value		= T_dftt{};
 		nik_ces auto accept		= T_dftt::State::accept;
 
-		nik_ces auto paste_charset      () { return cctmp::dfa_charset("_");      }
-		nik_ces auto void_charset       () { return cctmp::dfa_charset("void");   }
-		nik_ces auto test_charset       () { return cctmp::dfa_charset("test");   }
-		nik_ces auto goto_charset       () { return cctmp::dfa_charset("goto");   }
-		nik_ces auto tail_charset       () { return cctmp::dfa_charset("tail");   }
-		nik_ces auto branch_charset     () { return cctmp::dfa_charset("branch"); }
-		nik_ces auto return_charset     () { return cctmp::dfa_charset("return"); }
+		nik_ces auto paste_charset      () { return generator::dfa_charset("_");      }
+		nik_ces auto void_charset       () { return generator::dfa_charset("void");   }
+		nik_ces auto test_charset       () { return generator::dfa_charset("test");   }
+		nik_ces auto goto_charset       () { return generator::dfa_charset("goto");   }
+		nik_ces auto tail_charset       () { return generator::dfa_charset("tail");   }
+		nik_ces auto branch_charset     () { return generator::dfa_charset("branch"); }
+		nik_ces auto return_charset     () { return generator::dfa_charset("return"); }
 
-		nik_ces auto argpose_charset    () { return cctmp::dfa_charset("argpose"); }
-		nik_ces auto subpose_charset    () { return cctmp::dfa_charset("subpose"); }
-		nik_ces auto curry_charset      () { return cctmp::dfa_charset("curry"); }
+		nik_ces auto argpose_charset    () { return generator::dfa_charset("argpose"); }
+		nik_ces auto subpose_charset    () { return generator::dfa_charset("subpose"); }
+		nik_ces auto curry_charset      () { return generator::dfa_charset("curry"); }
 
-		nik_ces auto repeat_charset     () { return cctmp::dfa_charset("repeat"); }
-		nik_ces auto map_charset        () { return cctmp::dfa_charset("map"); }
-		nik_ces auto fold_charset       () { return cctmp::dfa_charset("fold"); }
-		nik_ces auto find_charset       () { return cctmp::dfa_charset("find"); }
-		nik_ces auto sift_charset       () { return cctmp::dfa_charset("sift"); }
+		nik_ces auto repeat_charset     () { return generator::dfa_charset("repeat"); }
+		nik_ces auto map_charset        () { return generator::dfa_charset("map"); }
+		nik_ces auto fold_charset       () { return generator::dfa_charset("fold"); }
+		nik_ces auto find_charset       () { return generator::dfa_charset("find"); }
+		nik_ces auto sift_charset       () { return generator::dfa_charset("sift"); }
 	};
 
 /***********************************************************************************************************************/
@@ -367,27 +371,27 @@ namespace chord {
 		using T_dfa			= T_chord_assembly_dfa;
 		using Token			= typename T_dfa::Token;
 
-		using T_paste_lexer		= cctmp::T_keyword_lexer< T_dfa::paste_charset  , Token::paste   >;
-		using T_void_lexer		= cctmp::T_keyword_lexer< T_dfa::void_charset   , Token::vo_id   >;
-		using T_test_lexer		= cctmp::T_keyword_lexer< T_dfa::test_charset   , Token::test    >;
-		using T_goto_lexer		= cctmp::T_keyword_lexer< T_dfa::goto_charset   , Token::go_to   >;
-		using T_tail_lexer		= cctmp::T_keyword_lexer< T_dfa::tail_charset   , Token::tail    >;
-		using T_branch_lexer		= cctmp::T_keyword_lexer< T_dfa::branch_charset , Token::branch  >;
-		using T_return_lexer		= cctmp::T_keyword_lexer< T_dfa::return_charset , Token::re_turn >;
+		using T_paste_lexer		= generator::T_keyword_lexer< T_dfa::paste_charset  , Token::paste   >;
+		using T_void_lexer		= generator::T_keyword_lexer< T_dfa::void_charset   , Token::vo_id   >;
+		using T_test_lexer		= generator::T_keyword_lexer< T_dfa::test_charset   , Token::test    >;
+		using T_goto_lexer		= generator::T_keyword_lexer< T_dfa::goto_charset   , Token::go_to   >;
+		using T_tail_lexer		= generator::T_keyword_lexer< T_dfa::tail_charset   , Token::tail    >;
+		using T_branch_lexer		= generator::T_keyword_lexer< T_dfa::branch_charset , Token::branch  >;
+		using T_return_lexer		= generator::T_keyword_lexer< T_dfa::return_charset , Token::re_turn >;
 
-		using T_argpose_lexer		= cctmp::T_keyword_lexer< T_dfa::argpose_charset , Token::argpose >;
-		using T_subpose_lexer		= cctmp::T_keyword_lexer< T_dfa::subpose_charset , Token::subpose >;
-		using T_curry_lexer		= cctmp::T_keyword_lexer< T_dfa::curry_charset   , Token::curry   >;
+		using T_argpose_lexer		= generator::T_keyword_lexer< T_dfa::argpose_charset , Token::argpose >;
+		using T_subpose_lexer		= generator::T_keyword_lexer< T_dfa::subpose_charset , Token::subpose >;
+		using T_curry_lexer		= generator::T_keyword_lexer< T_dfa::curry_charset   , Token::curry   >;
 
-		using T_repeat_lexer		= cctmp::T_keyword_lexer< T_dfa::repeat_charset , Token::repeat >;
-		using T_map_lexer		= cctmp::T_keyword_lexer< T_dfa::map_charset    , Token::map    >;
-		using T_fold_lexer		= cctmp::T_keyword_lexer< T_dfa::fold_charset   , Token::fold   >;
-		using T_find_lexer		= cctmp::T_keyword_lexer< T_dfa::find_charset   , Token::find   >;
-		using T_sift_lexer		= cctmp::T_keyword_lexer< T_dfa::sift_charset   , Token::sift   >;
+		using T_repeat_lexer		= generator::T_keyword_lexer< T_dfa::repeat_charset , Token::repeat >;
+		using T_map_lexer		= generator::T_keyword_lexer< T_dfa::map_charset    , Token::map    >;
+		using T_fold_lexer		= generator::T_keyword_lexer< T_dfa::fold_charset   , Token::fold   >;
+		using T_find_lexer		= generator::T_keyword_lexer< T_dfa::find_charset   , Token::find   >;
+		using T_sift_lexer		= generator::T_keyword_lexer< T_dfa::sift_charset   , Token::sift   >;
 
 		nik_ces void lex(lexeme & l)
 		{
-			cctmp::T_generic_lexer<T_dfa>::lex(l);
+			generator::T_generic_lexer<T_dfa>::lex(l);
 
 			token_type t = T_dfa::accept.lookup(l.token, TokenName::invalid);
 
@@ -441,47 +445,47 @@ namespace chord {
 
 		nik_ces token_type keyword_1(const cselector<char> & s)
 		{
-			if (cctmp::recognizes< T_paste_lexer >(s)) return T_paste_lexer::token;
-			else                                       return TokenName::invalid;
+			if (generator::recognizes< T_paste_lexer >(s)) return T_paste_lexer::token;
+			else                                           return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_3(const cselector<char> & s)
 		{
-			if (cctmp::recognizes< T_map_lexer >(s)) return T_map_lexer::token;
-			else                                     return TokenName::invalid;
+			if (generator::recognizes< T_map_lexer >(s)) return T_map_lexer::token;
+			else                                         return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_4(const cselector<char> & s)
 		{
-			if      (cctmp::recognizes< T_void_lexer >(s)) return T_void_lexer::token;
-			else if (cctmp::recognizes< T_test_lexer >(s)) return T_test_lexer::token;
-			else if (cctmp::recognizes< T_goto_lexer >(s)) return T_goto_lexer::token;
-			else if (cctmp::recognizes< T_tail_lexer >(s)) return T_tail_lexer::token;
-			else if (cctmp::recognizes< T_fold_lexer >(s)) return T_fold_lexer::token;
-			else if (cctmp::recognizes< T_find_lexer >(s)) return T_find_lexer::token;
-			else if (cctmp::recognizes< T_sift_lexer >(s)) return T_sift_lexer::token;
-			else                                           return TokenName::invalid;
+			if      (generator::recognizes< T_void_lexer >(s)) return T_void_lexer::token;
+			else if (generator::recognizes< T_test_lexer >(s)) return T_test_lexer::token;
+			else if (generator::recognizes< T_goto_lexer >(s)) return T_goto_lexer::token;
+			else if (generator::recognizes< T_tail_lexer >(s)) return T_tail_lexer::token;
+			else if (generator::recognizes< T_fold_lexer >(s)) return T_fold_lexer::token;
+			else if (generator::recognizes< T_find_lexer >(s)) return T_find_lexer::token;
+			else if (generator::recognizes< T_sift_lexer >(s)) return T_sift_lexer::token;
+			else                                               return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_5(const cselector<char> & s)
 		{
-			if (cctmp::recognizes< T_curry_lexer >(s)) return T_curry_lexer::token;
-			else                                       return TokenName::invalid;
+			if (generator::recognizes< T_curry_lexer >(s)) return T_curry_lexer::token;
+			else                                           return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_6(const cselector<char> & s)
 		{
-			if      (cctmp::recognizes< T_branch_lexer >(s)) return T_branch_lexer::token;
-			else if (cctmp::recognizes< T_return_lexer >(s)) return T_return_lexer::token;
-			else if (cctmp::recognizes< T_repeat_lexer >(s)) return T_repeat_lexer::token;
-			else                                             return TokenName::invalid;
+			if      (generator::recognizes< T_branch_lexer >(s)) return T_branch_lexer::token;
+			else if (generator::recognizes< T_return_lexer >(s)) return T_return_lexer::token;
+			else if (generator::recognizes< T_repeat_lexer >(s)) return T_repeat_lexer::token;
+			else                                                 return TokenName::invalid;
 		}
 
 		nik_ces token_type keyword_7(const cselector<char> & s)
 		{
-			if      (cctmp::recognizes< T_argpose_lexer >(s)) return T_argpose_lexer::token;
-			else if (cctmp::recognizes< T_subpose_lexer >(s)) return T_subpose_lexer::token;
-			else                                              return TokenName::invalid;
+			if      (generator::recognizes< T_argpose_lexer >(s)) return T_argpose_lexer::token;
+			else if (generator::recognizes< T_subpose_lexer >(s)) return T_subpose_lexer::token;
+			else                                                  return TokenName::invalid;
 		}
 	};
 

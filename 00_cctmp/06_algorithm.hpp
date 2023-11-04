@@ -65,11 +65,39 @@ namespace cctmp {
 
 // offset:
 
-	struct PraxisActionOffset
-	{
-		enum : gindex_type { multiply = 0, add };
+	struct ActionOffset { enum : gindex_type { multiply = 0, add }; };
 
-	}; using PAO = PraxisActionOffset;
+	using PraxisActionOffset = ActionOffset;
+	using PAO                = ActionOffset;
+
+/***********************************************************************************************************************/
+
+// size:
+
+	template<template<auto...> typename T_action, typename _AI, typename _AO>
+	struct T_contr_size
+	{
+		template<auto src, auto n>
+		nik_ces auto action_offset = T_action<src[n][_AI::name], src[n][_AI::note]>::offset;
+
+		nik_ces auto count(gindex_type & mult_size, gindex_type & add_size, gcindex_type *offset)
+		{
+			mult_size += offset[_AO::multiply];
+			add_size  += offset[_AO::add];
+		}
+
+		template<auto roll, auto src, auto... Is>
+		nik_ces auto result(nik_avp(T_pack_Vs<Is...>*))
+		{
+			gindex_type mult_size{}, add_size{};
+
+			(count(mult_size, add_size, action_offset<src, Is>), ...);
+
+			return mult_size * roll + add_size;
+		}
+	};
+
+	using T_praxis_contr_size = T_contr_size<T_praxis_action, PAI, PAO>;
 
 /***********************************************************************************************************************/
 
@@ -382,48 +410,19 @@ namespace cctmp {
 
 // source:
 
-	template<auto... Vs> nik_ce auto praxis_lift = array<gkey_type, Vs... >;
-
-	using praxsrc_type = gckey_type* const;
-
-	template<auto... Vs> nik_ce auto praxis_source = array<praxsrc_type, Vs...>;
-
-/***********************************************************************************************************************/
-
-// size:
-
-	struct T_praxis_contr_size
-	{
-		template<auto src, auto n>
-		nik_ces auto action_offset = T_praxis_action<src[n][PAI::name], src[n][PAI::note]>::offset;
-
-		nik_ces auto count(gindex_type & mult_size, gindex_type & add_size, gcindex_type *offset)
-		{
-			mult_size += offset[PAO::multiply];
-			add_size  += offset[PAO::add];
-		}
-
-		template<auto roll, auto src, auto... Is>
-		nik_ces auto result(nik_avp(T_pack_Vs<Is...>*))
-		{
-			gindex_type mult_size{}, add_size{};
-
-			(count(mult_size, add_size, action_offset<src, Is>), ...);
-
-			return mult_size * roll + add_size;
-		}
-	};
+	template<auto... Vs> nik_ce auto praxis_lift   = array< gkey_type        , Vs... >;
+	template<auto... Vs> nik_ce auto praxis_source = array< gckey_type*const , Vs... >;
 
 /***********************************************************************************************************************/
 
 // interface:
 
-	using instr_type = sequence<gindex_type, static_cast<gindex_type>(PI::dimension)>;
+	using praxis_instr_type = sequence<gindex_type, static_cast<gindex_type>(PI::dimension)>;
 
 	template<auto src, auto length>
-	struct T_praxis_contr : public sequence<instr_type, length>
+	struct T_praxis_contr : public sequence<praxis_instr_type, length>
 	{
-		using base		= sequence<instr_type, length>;
+		using base		= sequence<praxis_instr_type, length>;
 		using record_type	= T_praxis_contr_record;
 
 		template<auto n>
