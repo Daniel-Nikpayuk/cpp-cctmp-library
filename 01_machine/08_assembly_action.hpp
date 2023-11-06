@@ -29,6 +29,12 @@ namespace machine {
 
 	template<gkey_type, gkey_type, auto...> struct T_assembly_action;
 
+	// syntactic sugar:
+
+		template<auto name, auto note, typename... Ts>
+		nik_ce auto assembly_action(Ts... vs) // requires template deduction <>:
+			{ return T_assembly_action<name, note>::template result<>(vs...); }
+
 /***********************************************************************************************************************/
 
 // names:
@@ -38,7 +44,7 @@ namespace machine {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
-			base, pad, replace, assign, apply, jump, re_turn, dimension
+			begin, pad, jump, apply, unit, replace, end, dimension
 		};
 
 	}; using AAN = AssemblyActionName;
@@ -52,7 +58,7 @@ namespace machine {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
-			halting, dimension
+			begin, value, recurse, lookup, end, dimension
 		};
 
 	}; using AAT = AssemblyActionNote;
@@ -83,30 +89,17 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
-// base:
+// begin:
 
 	// id:
 
 		template<auto... filler>
-		struct T_assembly_action<AAN::base, AAT::id, filler...>
+		struct T_assembly_action<AAN::begin, AAT::id, filler...>
 		{
-			nik_ces gindex_type offset[] = {0, 1};
+			nik_ces gindex_type offset = 1;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr) { contr->set_inc_instr(AN::id, AT::id); }
-		};
-
-	// halting:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::base, AAT::halting, filler...>
-		{
-			nik_ces gindex_type offset[] = {0, 1};
-
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note) { contr->set_inc_instr(AN::halt, note); }
 		};
 
 /***********************************************************************************************************************/
@@ -118,122 +111,17 @@ namespace machine {
 		template<auto... filler>
 		struct T_assembly_action<AAN::pad, AAT::id, filler...>
 		{
-			nik_ces gindex_type offset[] = {0, 2};
+			nik_ces gindex_type offset = 2;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex padding)
+			nik_ces void result(Contr *contr, cindex pad_size)
 			{
-				contr->set_instr_pos(padding);
-
-				contr->add_marked_instr(AN::pad, AT::segment);
+				contr->set_inc_instr(AN::pad, AT::segment, 1, pad_size);
 				contr->set_inc_instr(AN::pad, AT::id);
 			}
 		};
-
-/***********************************************************************************************************************/
-
-// replace:
-
-	// id:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::replace, AAT::id, filler...>
-		{
-			nik_ces gindex_type offset[] = {0, 2}; // update
-
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex is_carg, cindex arg_at)
-			{
-				if (is_carg)
-				{
-					contr->set_inc_instr(AN::reselect, AT::id, 1, arg_at);
-					contr->set_inc_instr(AN::replace, AT::id);
-				}
-				// else if Sign::is_copy do nothing.
-			}
-		};
-
-/***********************************************************************************************************************/
-
-// assign:
-
-	// id:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::assign, AAT::id, filler...>
-		{
-			nik_ces gindex_type offset[] = {0, 2}; // update
-
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex )
-			{
-			//	contr->set_inc_instr(AN::select     , AT::extend , 1 , ins[AAI::pos0] , ins[AAI::pos1]);
-			//	contr->set_inc_instr(ins[AAI::pos2] , AT::id     , 1 , ins[AAI::pos3] );
-			}
-		};
-
-/***********************************************************************************************************************/
-
-// apply:
-
-	// id:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::apply, AAT::id, filler...>
-		{
-			nik_ces gindex_type offset[] = {0, 2}; // update
-
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex )
-			{
-			//	contr->set_inc_instr(AN::select     , AT::extend , 1 , ins[AAI::pos0] , ins[AAI::pos1]);
-			//	contr->set_inc_instr(ins[AAI::pos2] , AT::id     , 1 , ins[AAI::pos3] );
-			}
-		};
-
-	// void:
-
-	//	template<auto... filler>
-	//	struct T_assembly_action<AAN::apply, AAT::vo_id, filler...>
-	//	{
-	//		nik_ces gindex_type offset[] = {0, 2}; // update
-
-	//		template<typename Contr>
-	//		nik_ces void result(Contr *contr, cindex )
-	//		{
-	//			auto & iter = contr->line_iter;
-	//			auto name   = contr->call_name(iter);
-
-	//			contr->add_link(); // if (toc.has_link(iter)) ?
-	//			contr->add_marked_instr(name, AT::void_f);
-	//		}
-	//	};
-
-	// test:
-
-	//	template<auto... filler>
-	//	struct T_assembly_action<AAN::apply, AAT::test, filler...>
-	//	{
-	//		nik_ces gindex_type offset[] = {0, 2}; // update
-
-	//		template<typename Contr>
-	//		nik_ces void result(Contr *contr, cindex )
-	//		{
-	//			auto & iter = contr->line_iter;
-	//			auto name   = contr->call_name(iter);
-
-	//			contr->add_link(); // if (toc.has_link(iter)) ?
-	//			contr->add_marked_instr(name, AT::id);
-	//		}
-	//	};
 
 /***********************************************************************************************************************/
 
@@ -244,7 +132,7 @@ namespace machine {
 	//	template<auto... filler>
 	//	struct T_assembly_action<AAN::jump, AAT::id, filler...>
 	//	{
-	//		nik_ces gindex_type offset[] = {0, 2}; // update
+	//		nik_ces gindex_type offset = 2; // update
 
 	//		template<typename Contr>
 	//		nik_ces void result(Contr *contr, cindex )
@@ -260,7 +148,7 @@ namespace machine {
 	//	template<auto... filler>
 	//	struct T_assembly_action<AAN::jump, AAT::branch, filler...>
 	//	{
-	//		nik_ces gindex_type offset[] = {0, 2}; // update
+	//		nik_ces gindex_type offset = 2; // update
 
 	//		template<typename Contr>
 	//		nik_ces void result(Contr *contr, cindex )
@@ -276,7 +164,7 @@ namespace machine {
 	//	template<auto... filler>
 	//	struct T_assembly_action<AAN::jump, AAT::go_to, filler...>
 	//	{
-	//		nik_ces gindex_type offset[] = {0, 2}; // update
+	//		nik_ces gindex_type offset = 2; // update
 
 	//		template<typename Contr>
 	//		nik_ces void result(Contr *contr, cindex )
@@ -289,24 +177,182 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
-// return:
+// apply:
 
-	// id:
+	// begin:
 
 		template<auto... filler>
-		struct T_assembly_action<AAN::re_turn, AAT::id, filler...>
+		struct T_assembly_action<AAN::apply, AAT::begin, filler...>
 		{
-			nik_ces gindex_type offset[] = {0, 3};
+			nik_ces gindex_type offset = 2;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex )
+			nik_ces void result(Contr *contr)
 			{
-			//	contr->set_inc_instr(AN::select     , AT::extend , 1 , ins[AAI::pos0] , ins[AAI::pos1]);
-			//	contr->set_inc_instr(ins[AAI::pos2] , AT::id     , 1 , ins[AAI::pos3] );
-			//	contr->set_inc_instr(AN::halt       , AT::first  );
+				contr->push_machine(AN::chain, AT::call_f);
+				contr->set_inc_instr(CN::id, CT::id);
 			}
+		};
+
+	// end:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::apply, AAT::end, filler...>
+		{
+			nik_ces gindex_type offset = 2; // update
+
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex arg_offset)
+			{
+				chain_action<CAN::end, CAT::id>(contr, arg_offset, CT::apply);
+				contr->pop_machine();
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// test:
+
+	//	template<auto... filler>
+	//	struct T_assembly_action<AAN::apply, AAT::test, filler...>
+	//	{
+	//		nik_ces gindex_type offset = 2; // update
+
+	//		template<typename Contr>
+	//		nik_ces void result(Contr *contr, cindex )
+	//		{
+	//			auto & iter = contr->line_iter;
+	//			auto name   = contr->call_name(iter);
+
+	//			contr->add_link(); // if (toc.has_link(iter)) ?
+	//			contr->add_marked_instr(name, AT::id);
+	//		}
+	//	};
+
+/***********************************************************************************************************************/
+
+// void:
+
+/***********************************************************************************************************************/
+
+// swap:
+
+	//	template<auto... filler>
+	//	struct T_assembly_action<AAN::apply, AAT::vo_id, filler...>
+	//	{
+	//		nik_ces gindex_type offset = 2; // update
+
+	//		template<typename Contr>
+	//		nik_ces void result(Contr *contr, cindex )
+	//		{
+	//			auto & iter = contr->line_iter;
+	//			auto name   = contr->call_name(iter);
+
+	//			contr->add_link(); // if (toc.has_link(iter)) ?
+	//			contr->add_marked_instr(name, AT::void_f);
+	//		}
+	//	};
+
+/***********************************************************************************************************************/
+
+// unit:
+
+	// value:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::unit, AAT::value, filler...>
+		{
+			nik_ces gindex_type offset = 3;
+
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex arg_offset)
+			{
+				contr->push_machine(AN::chain, AT::call_f);
+				contr->set_inc_instr(CN::id, CT::id);
+				chain_action<CAN::end, CAT::id>(contr, arg_offset, CT::first);
+				contr->pop_machine();
+			}
+		};
+
+	// recurse:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::unit, AAT::recurse, filler...>
+		{
+			nik_ces gindex_type offset = 3;
+
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr)
+				{ contr->set_inc_instr(AN::list, AT::recurse, 1, contr->rec_at); }
+		};
+
+	// lookup:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::unit, AAT::lookup, filler...>
+		{
+			nik_ces gindex_type offset = 2 + T_lookup_action<LAN::find, LAT::id>::offset;
+
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex begin, cindex end)
+			{
+				contr->set_inc_instr(AN::list, AT::id, 1, contr->env_at);
+
+				contr->push_machine(AN::lookup, AT::call_f, contr->str_at);
+				lookup_action<LAN::find, LAT::id>(contr, begin, end);
+				contr->pop_machine();
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// replace:
+
+	// id:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::replace, AAT::id, filler...>
+		{
+			nik_ces gindex_type offset = 2; // update
+
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex not_copy, cindex arg_at)
+			{
+				if (not_copy)
+				{
+					contr->set_inc_instr(AN::list, AT::reselect, 1, arg_at);
+					contr->set_inc_instr(AN::replace, AT::id);
+				}
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// end:
+
+	// id:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::end, AAT::id, filler...>
+		{
+			nik_ces gindex_type offset = 1;
+
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex note) { contr->set_inc_instr(AN::halt, note); }
 		};
 
 /***********************************************************************************************************************/

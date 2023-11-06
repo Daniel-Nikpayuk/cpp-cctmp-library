@@ -67,11 +67,10 @@ namespace machine {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			halt   , pad      , jump ,
-			select , reselect ,
-			lookup , 
-			chain  , rechain  ,
-			right  , replace  ,
+			halt  , pad     , jump ,
+			list  , lookup  , 
+			chain , rechain ,
+			right , replace ,
 			dimension
 		};
 	};
@@ -87,7 +86,11 @@ namespace machine {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first, segment, go_to, branch, list, call_f, void_f,
+			first   , segment  ,
+			go_to   , branch   ,
+			recurse , 
+			select  , reselect ,
+			call_f  , void_f   ,
 			dimension
 		};
 	};
@@ -248,14 +251,53 @@ namespace machine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// select:
+// list:
 
 /***********************************************************************************************************************/
 
 // id:
 
 	template<auto... filler>
-	struct T_assembly<AN::select, AT::id, filler...>
+	struct T_assembly<AN::list, AT::id, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto n = AD<c>::pos(i);
+			nik_ce auto p = at_<l, n>;
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i), p
+				NIK_ASSEMBLY_RESULT_TS(s, c, i, j, l, t, Ts...)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// recurse:
+
+	template<auto... filler>
+	struct T_assembly<AN::list, AT::recurse, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto n  = AD<c>::pos(i);
+			nik_ce auto nv = at_<l, n>;
+
+			nik_ce auto nU = U_store_T<decltype(nv)>;
+			nik_ce auto nt = cons_<t, nU>;
+			using nT       = modify_type<_read_only_, decltype(nv)>;
+
+			return NIK_ASSEMBLY_2TS(s, c, i, j, l, nt, nT, Ts...)(nv, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// select:
+
+	template<auto... filler>
+	struct T_assembly<AN::list, AT::select, filler...>
 	{
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
@@ -271,33 +313,10 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
-// list:
-
-	template<auto... filler>
-	struct T_assembly<AN::select, AT::list, filler...>
-	{
-		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto n = AD<c>::pos(i);
-			nik_ce auto p = at_<l, n>;
-
-			return NIK_ASSEMBLY_TEMPLATE(c, i), p
-				NIK_ASSEMBLY_RESULT_TS(s, c, i, j, l, t, Ts...)(vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // reselect:
 
-/***********************************************************************************************************************/
-
-// id:
-
 	template<auto... filler>
-	struct T_assembly<AN::reselect, AT::id, filler...>
+	struct T_assembly<AN::list, AT::reselect, filler...>
 	{
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
@@ -426,34 +445,6 @@ namespace machine {
 			return NIK_ASSEMBLY_TS(s, c, i, j, l, t, Ts...)(vs...);
 		}
 	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// call:
-
-/***********************************************************************************************************************/
-
-// id:
-
-//	template<auto... filler>
-//	struct T_assembly<AN::call, AT::id, filler...>
-//	{
-//		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename... Ts>
-//		nik_ces auto result(Ts... vs) -> T_store_U<s>
-//		{
-//			nik_ce auto n  = AD<c>::pos(i);
-//			nik_ce auto F  = T_store_U<j>::template result<n, l, t>();
-
-//			using f_type   = modify_type<_to_pointer_, decltype(T_store_U<F>::template result<Ts...>)>;
-//			nik_ce auto f  = (f_type) T_store_U<F>::template result<Ts...>; // c style cast.
-//			nik_ce auto OT = eval<_function_out_type_, f>;
-//			nik_ce auto nt = cons_<t, OT>;
-//			using v_type   = modify_type<_read_only_, T_store_U<OT>>;
-
-//			return NIK_ASSEMBLY_2TS(s, c, i, j, l, nt, v_type, Ts...)(f(vs...), vs...);
-//		}
-//	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

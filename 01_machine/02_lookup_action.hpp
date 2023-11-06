@@ -29,6 +29,12 @@ namespace machine {
 
 	template<gkey_type, gkey_type, auto...> struct T_lookup_action;
 
+	// syntactic sugar:
+
+		template<auto name, auto note, typename... Ts>
+		nik_ce auto lookup_action(Ts... vs) // requires template deduction <>:
+			{ return T_lookup_action<name, note>::template result<>(vs...); }
+
 /***********************************************************************************************************************/
 
 // names:
@@ -36,7 +42,7 @@ namespace machine {
 	struct LookupActionName
 	{
 		enum : gkey_type // convenience for default params.
-			{ identity = 0, id = identity, base, loop, halt, dimension };
+			{ identity = 0, id = identity, find, dimension };
 
 	}; using LAN = LookupActionName;
 
@@ -80,57 +86,29 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
-// base:
+// find:
 
 	// id:
 
 		template<auto... filler>
-		struct T_lookup_action<LAN::base, LAT::id, filler...>
+		struct T_lookup_action<LAN::find, LAT::id, filler...>
 		{
-			nik_ces gindex_type offset[] = {0, 1};
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr) { contr->set_inc_instr(LN::id, LT::id); }
-		};
-
-/***********************************************************************************************************************/
-
-// loop:
-
-	// id:
-
-		template<auto... filler>
-		struct T_lookup_action<LAN::loop, LAT::id, filler...>
-		{
-			nik_ces gindex_type offset[] = {0, 3};
+			nik_ces gindex_type offset = 6;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex begin, cindex end, cindex halt, cindex loop)
+			nik_ces void result(Contr *contr, cindex begin, cindex end)
 			{
+				cindex loop = contr->initial;
+				cindex halt = loop + 4;
+
+				contr->set_inc_instr( LN::id       , LT::id    );
 				contr->set_inc_instr( LN::jump     , LT::empty , 1 , halt        );
 				contr->set_inc_instr( LN::contains , LT::id    , 1 , begin , end );
 				contr->set_inc_instr( LN::jump     , LT::loop  , 1 , loop        );
-			}
-		};
-
-/***********************************************************************************************************************/
-
-// halt:
-
-	// id:
-
-		template<auto... filler>
-		struct T_lookup_action<LAN::halt, LAT::id, filler...>
-		{
-			nik_ces gindex_type offset[] = {0, 2};
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr)
-			{
-				contr->set_inc_instr( LN::halt , LT::map   );
-				contr->set_inc_instr( LN::halt , LT::empty );
+				contr->set_inc_instr( LN::halt     , LT::map   );
+				contr->set_inc_instr( LN::halt     , LT::empty );
 			}
 		};
 

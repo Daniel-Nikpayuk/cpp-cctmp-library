@@ -84,6 +84,10 @@ namespace machine {
 		using cindex		= gcindex_type;
 		using stack_type	= T_machine_stack<size>;
 
+		cindex rec_at;
+		cindex str_at;
+		cindex env_at;
+
 		gindex_type initial;
 		gindex_type current;
 		gindex_type free;
@@ -92,9 +96,10 @@ namespace machine {
 		stack_type init_stack; 
 		stack_type curr_stack; 
 
-		nik_ce T_machine_contr(cindex o) :
+		nik_ce T_machine_contr(cindex r, cindex s, cindex e, cindex o) :
 
-			base{}, initial{}, current{}, free{o}, offset{o}, init_stack{}, curr_stack{}
+			base{}, rec_at{r}, str_at{s}, env_at{e},
+			initial{}, current{}, free{o}, offset{o}, init_stack{}, curr_stack{}
 
 			{ base::fullsize(); }
 
@@ -137,91 +142,6 @@ namespace machine {
 				current = curr_stack.pop();
 			}
 	};
-
-/***********************************************************************************************************************/
-
-// base:
-
-/*
-	template<gindex_type length>
-	struct T_chain_subpose_env_contr : public sequence<instr_type, length>
-	{
-		using base		= sequence<instr_type, length>;
-		using cindex		= gcindex_type;
-
-		template<auto name, auto note>
-		nik_ces auto action = chain_action_f<name, note, T_chain_subpose_env_contr>;
-
-		template<auto name, auto note>
-		nik_ces auto lookup_action = lookup_action_f<name, note, T_chain_subpose_env_contr>;
-
-		gcbool_type *is_id;
-		gindex_type arg_size;
-		gindex_type subindex;
-		gindex_type begin;
-		gindex_type end;
-
-		nik_ce T_chain_subpose_env_contr(gcbool_type *ii, cindex s, cindex b = 0, cindex e = 0) :
-			base{}, is_id{ii}, arg_size{s}, subindex{}, begin{b}, end{e}
-			{
-				add_initial_instrs   ();
-				add_composand_instrs ();
-				add_composer_instrs  ();
-				add_halting_instrs   ();
-
-				add_lookup_contr     ();
-			}
-
-		nik_ce void add_instr(cindex name, cindex note, cindex next = 1, cindex pos = 0, cindex num = 0)
-		{
-			base::end()->push(name);
-			base::end()->push(note);
-			base::end()->push(next);
-			base::end()->push(pos);
-			base::end()->push(num);
-
-			base::upsize();
-		}
-
-		nik_ce void add_initial_instrs() { action<CAN::base, CAT::id>(this); }
-
-		nik_ce void add_composand_instrs()
-		{
-			for (gindex_type k = 0; k != arg_size; ++k)
-				if (is_id[k]) add_id_composand_instr(k);
-				else add_not_id_composand_instr(k);
-		}
-
-		nik_ce void add_id_composand_instr    (cindex k) { action<CAN::non, CAT::arg>(this, k); }
-		nik_ce void add_not_id_composand_instr(cindex k) { action<CAN::list, CAT::arg>(this, k, k); }
-
-		nik_ce void add_composer_instrs()
-		{
-			subindex = 1 + 3*arg_size + 2 + 2 + 1;
-			action<CAN::lookup, CAT::non>(this, arg_size + 1, subindex, arg_size);
-		}
-
-		nik_ce void add_halting_instrs()
-		{
-			action<CAN::drop, CAT::halting>(this, arg_size);
-			action<CAN::base, CAT::halting>(this, CT::apply);
-		}
-
-		// lookup:
-
-		nik_ce void add_lookup_contr()
-		{
-			lookup_action<LAN::base, LAN::id>(this);
-
-			cindex halt = subindex + 4;
-			cindex loop = subindex + 0;
-
-			lookup_action<LAN::loop, LAN::id>(this, begin, end, halt, loop);
-
-			lookup_action<LAN::halt, LAN::id>(this);
-		}
-	};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

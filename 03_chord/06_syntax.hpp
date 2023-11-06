@@ -126,14 +126,13 @@ namespace chord {
 		lexeme word;
 
 		nik_ce T_chord_assembly_ast(cindex o = 10) : // o = 10 is temporary.
-			contr{o}, has_copy{}, has_paste{}, left{} { }
+			contr{rec_at, str_at, env_at, o}, has_copy{}, has_paste{}, left{} { }
 
 		// copy/paste:
 
 			nik_ce void set_copy          () { has_copy = true; }
 			nik_ce void update_copy_paste () { has_paste = has_copy; has_copy = false; }
 
-		//	nik_ce bool has_replace() const { return !has_copy && left; }
 			nik_ce cindex paste_offset() const { return has_paste ? _one : _zero; }
 
 		// name:
@@ -163,156 +162,105 @@ namespace chord {
 				else { } // error.
 			}
 
+		// lexeme:
+
+			nik_ce auto lexeme_start  (clexeme *l) const { return l->cbegin() - src.cbegin(); }
+			nik_ce auto lexeme_finish (clexeme *l) const { return src.cend() - l->ccurrent(); }
+
 		// (generic) action:
 
 			template<auto name, auto note, typename... Ts>
-			nik_ce void assembly_action(Ts... vs)
-				{ T_assembly_action<name, note>::template result<>(&contr, vs...); }
+			nik_ce void lookup_action(Ts... vs) { machine::lookup_action<name, note>(&contr, vs...); }
 
 			template<auto name, auto note, typename... Ts>
-			nik_ce void chain_action(Ts... vs)
-				{ T_chain_action<name, note>::template result<>(&contr, vs...); }
+			nik_ce void chain_action(Ts... vs) { machine::chain_action<name, note>(&contr, vs...); }
 
 			template<auto name, auto note, typename... Ts>
-			nik_ce void lookup_action(Ts... vs)
-				{ T_lookup_action<name, note>::template result<>(&contr, vs...); }
+			nik_ce void assembly_action(Ts... vs) { machine::assembly_action<name, note>(&contr, vs...); }
 
-		// (generic) lookup:
+		// op:
 
-			nik_ce void begin_lookup(cindex name0, cindex note0, cindex name1, cindex note1)
+			nik_ce void op_identifier(cindex index)
 			{
-				contr.set_inc_instr(name0, note0, 1, env_at);
-				contr.push_machine(name1, note1, str_at);
+				cindex op_at = index + paste_offset();
 
-				contr.set_inc_instr(LN::id, LT::id);
+				chain_action<CAN::arg, CAT::non>(op_at);
 			}
 
-			nik_ce void end_lookup() { contr.pop_machine(); }
+			nik_ce void op_recurse() { chain_action<CAN::recurse, CAT::non>(); }
 
-			nik_ce void find_lookup(clexeme *l)
+			nik_ce void op_lookup(clexeme *l)
 			{
-				cindex begin = l->cbegin() - src.cbegin();
-				cindex end   = src.cend() - l->ccurrent();
-				cindex halt  = contr.initial + 4; // redesign: read in?
-				cindex loop  = contr.initial + 0; // redesign: read in?
+				cindex start  = lexeme_start(l);
+				cindex finish = lexeme_finish(l);
 
-				lookup_action< LAN::loop , LAT::id >(begin, end, halt, loop);
-				lookup_action< LAN::halt , LAT::id >();
+				chain_action<CAN::lookup, CAT::non>(start, finish);
 			}
 
-		// (generic) chain:
-
-			nik_ce void begin_chain(cindex name, cindex note)
+			nik_ce void op_action()
 			{
-				contr.push_machine(name, note);
+				clexeme *l = &word;
+				auto k = match_arguments(l);
 
-				contr.set_inc_instr(CN::id, CT::id);
+				if      (k.not_end())   op_identifier(k.left_size());
+				else if (match_name(l)) op_recurse();
+				else                    op_lookup(l);
 			}
 
-			nik_ce void end_chain() { contr.pop_machine(); }
+		// value:
 
-			nik_ce void pull_chain(cindex index)
+			nik_ce void value_identifier(cindex index)
 			{
-				cindex arg_at = index + paste_offset();
+				cindex value_at = index + paste_offset();
 
-				chain_action<CAN::arg, CAT::non>(arg_at);
+				chain_action<CAN::non, CAT::arg>(value_at);
 			}
 
-			nik_ce void push_chain(cindex index)
-			{
-				cindex arg_at = index + paste_offset();
+			nik_ce void value_recurse() { chain_action<CAN::non, CAT::recurse>(); }
 
-				chain_action<CAN::non, CAT::arg>(arg_at);
+			nik_ce void value_lookup(clexeme *l)
+			{
+				cindex start  = lexeme_start(l);
+				cindex finish = lexeme_finish(l);
+
+				chain_action<CAN::non, CAT::lookup>(start, finish);
 			}
 
-			nik_ce void arg_chain(cindex index)
+			nik_ce void value_action(clexeme *l)
 			{
-				push_chain(index);
+				auto k = match_arguments(l);
 
-				chain_action< CAN::drop , CAT::halting >(arg_offset());
-				chain_action< CAN::base , CAT::halting >(CT::first);
+				if      (k.not_end())   value_identifier(k.left_size());
+				else if (match_name(l)) value_recurse();
+				else                    value_lookup(l);
 			}
 
-			nik_ce void name_chain()
+		// unit:
+
+			nik_ce void unit_identifier(cindex index)
 			{
-				chain_action< CAN::list , CAT::non     >(rec_at);
-				chain_action< CAN::base , CAT::halting >(CT::front);
+				cindex unit_at = index + paste_offset();
+
+				assembly_action<AAN::unit, AAT::value>(unit_at);
 			}
 
-		// (generic) assembly:
+			nik_ce void unit_recurse() { assembly_action<AAN::unit, AAT::recurse>(); }
 
-			nik_ce void origin_assembly() { contr.set_inc_instr(AN::id, AT::id); }
-
-			nik_ce void begin_assembly_chain() { begin_chain(AN::chain, AT::call_f); }
-			nik_ce void end_assembly_chain() { end_chain(); }
-
-		// chain:
-
-			nik_ce void begin_chain_lookup (cindex note) { begin_lookup(CN::list, CT::select, CN::lookup, note); }
-			nik_ce void end_chain_lookup   () { end_lookup(); }
-
-			nik_ce void find_chain_lookup(clexeme *l) { find_lookup(l); }
-
-			nik_ce void cons_chain_lookup(clexeme *l, cindex note)
+			nik_ce void unit_lookup(clexeme *l)
 			{
-				begin_chain_lookup(note);
-				find_chain_lookup(l);
-				end_chain_lookup();
+				cindex start  = lexeme_start(l);
+				cindex finish = lexeme_finish(l);
+
+				assembly_action<AAN::unit, AAT::lookup>(start, finish);
 			}
 
-			nik_ce void identifier_chain(cindex index) { push_chain(index); }
-			nik_ce void recurse_chain() { name_chain(); }
-
-			nik_ce void maybe_chain_chain_lookup(clexeme *l, cindex note)
+			nik_ce void unit_action(clexeme *l)
 			{
-				if (match_name(l)) recurse_chain();
-				else cons_chain_lookup(l, note);
-			}
+				auto k = match_arguments(l);
 
-		// assembly:
-
-			nik_ce void begin_assembly_lookup () { begin_lookup(AN::select, AT::list, AN::lookup, AT::call_f); }
-			nik_ce void end_assembly_lookup   () { end_lookup(); }
-
-			nik_ce void find_assembly_lookup (clexeme *l) { find_lookup(l); }
-			nik_ce void arg_assembly_chain   (cindex index) { arg_chain(index); }
-			nik_ce void name_assembly_chain  () { name_chain(); }
-
-			nik_ce void cons_assembly_lookup(clexeme *l)
-			{
-				begin_assembly_lookup();
-				find_assembly_lookup(l);
-				end_assembly_lookup();
-			}
-
-			nik_ce void identifier_assembly_chain(cindex index)
-			{
-				begin_assembly_chain();
-				arg_assembly_chain(index);
-				end_assembly_chain();
-			}
-
-			nik_ce void recurse_assembly_chain()
-			{
-				begin_assembly_chain();
-				name_assembly_chain();
-				end_assembly_chain();
-			}
-
-			nik_ce void maybe_assembly_chain_lookup(clexeme *l)
-			{
-				if (match_name(l)) recurse_assembly_chain();
-				else cons_assembly_lookup(l);
-			}
-
-			nik_ce void replace_assembly_arg()
-			{
-			//	if (has_replace())
-				if (!has_copy)
-				{
-					contr.set_inc_instr(AN::reselect, AT::id, 1, left);
-					contr.set_inc_instr(AN::replace, AT::id);
-				}
+				if      (k.not_end())   unit_identifier(k.left_size());
+				else if (match_name(l)) unit_recurse();
+				else                    unit_lookup(l);
 			}
 	};
 

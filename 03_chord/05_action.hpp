@@ -183,7 +183,7 @@ namespace chord {
 		nik_ces void result(AST *t, clexeme *l)
 		{
 			t->append_name(l);
-			t->origin_assembly();
+			t->template assembly_action<AAN::begin, AAT::id>();
 		}
 	};
 
@@ -200,10 +200,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->contr.set_inc_instr(AN::pad, AT::segment, 1, t->padding);
-			t->contr.set_inc_instr(AN::pad, AT::id);
-		}
+			{ t->template assembly_action<AAN::pad, AAT::id>(t->padding); }
 	};
 
 // label:
@@ -242,7 +239,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->template assembly_action<AAN::base, AAT::halting>(AT::first);
+			t->template assembly_action<AAN::end, AAT::id>(AT::first);
 
 			t->update_copy_paste();
 		}
@@ -448,7 +445,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->begin_assembly_chain(); }
+			{ t->template assembly_action<AAN::apply, AAT::begin>(); }
 	};
 
 	template<auto... filler>
@@ -457,15 +454,10 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			auto k = t->match_arguments(&t->word);
-			if (k.not_end()) t->pull_chain(k.left_size());
-			else t->maybe_chain_chain_lookup(&t->word, CT::pull);
+			t->op_action();
 
-			t->template chain_action< CAN::drop , CAT::halting >(t->arg_offset());
-			t->template chain_action< CAN::base , CAT::halting >(CT::apply);
-
-			t->end_assembly_chain();
-			t->replace_assembly_arg();
+			t->template assembly_action< AAN::apply   , AAT::end >(t->arg_offset());
+			t->template assembly_action< AAN::replace , AAT::id  >(!t->has_copy, t->left);
 
 			t->update_copy_paste();
 		}
@@ -524,11 +516,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			auto k = t->match_arguments(l);
-			if (k.not_end()) t->identifier_chain(k.left_size());
-			else t->maybe_chain_chain_lookup(l, CT::push);
-		}
+			{ t->value_action(l); }
 	};
 
 	template<auto... filler>
@@ -537,7 +525,6 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 			{ t->template chain_action<CAN::non, CAT::arg>(_zero); }
-		//	{ t->identifier_chain(_zero); }
 	};
 
 	template<auto... filler>
@@ -585,11 +572,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			auto k = t->match_arguments(l);
-			if (k.not_end()) t->identifier_assembly_chain(k.left_size());
-			else t->maybe_assembly_chain_lookup(l);
-		}
+			{ t->unit_action(l); }
 	};
 
 	template<auto... filler>

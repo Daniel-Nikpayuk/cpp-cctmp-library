@@ -29,6 +29,12 @@ namespace machine {
 
 	template<gkey_type, gkey_type, auto...> struct T_cycle_action;
 
+	// syntactic sugar:
+
+		template<auto name, auto note, typename... Ts>
+		nik_ce auto cycle_action(Ts... vs) // requires template deduction <>:
+			{ return T_cycle_action<name, note>::template result<>(vs...); }
+
 /***********************************************************************************************************************/
 
 // names:
