@@ -27,20 +27,14 @@ namespace chord {
 
 // cctmp:
 
-	template<auto U>
-	using T_store_U						= cctmp::T_store_U<U>;
-
-	nik_ce auto _from_reference_				= cctmp::_from_reference_;
-
-	template<auto Op, typename T>
-	using modify_type					= cctmp::modify_type<Op, T>;
-
 	using strlit_type					= cctmp::strlit_type;
 	nik_ce auto U_strlit_type				= cctmp::U_strlit_type;
 
+	template<typename T, auto S>
+	using sequence						= cctmp::sequence<T, S>;
+
 // generator:
 
-	using action_type					= generator::action_type;
 	nik_ce auto U_action_type				= generator::U_action_type;
 
 	using sxt_pair						= cctmp::pair<strlit_type, token_type>;
@@ -48,6 +42,26 @@ namespace chord {
 
 	using symbol_type					= generator::symbol_type;
 	using csymbol_type					= generator::csymbol_type;
+
+// machine:
+
+	template<auto... Vs>
+	using T_lookup_action					= machine::T_lookup_action<Vs...>;
+
+	template<auto... Vs>
+	using T_chain_action					= machine::T_chain_action<Vs...>;
+
+	template<auto... Vs>
+	nik_ce auto chain_offset				= machine::chain_offset<Vs...>;
+
+	template<auto... Vs>
+	using T_cycle_action					= machine::T_cycle_action<Vs...>;
+
+	template<auto... Vs>
+	using T_assembly_action					= machine::T_assembly_action<Vs...>;
+
+	template<auto... Vs>
+	nik_ce auto assembly_offset				= machine::assembly_offset<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -66,80 +80,56 @@ namespace chord {
 
 	struct T_chord_assembly_scanner_ast
 	{
-		struct Total
-       		{
-			enum : gkey_type
-			{
-				arg, pad, label, jump, tree, line,
-				morph, morph_line, cycle, cycle_line,
-				instr_1, instr_2, instr_3,
-				dimension
-			};
+		struct Local { enum : gkey_type { offset, dimension }; };
+
+		struct Global
+		{
+			enum : gkey_type { arg, pad, tag, jump, label, assembly, call, offset, total, dimension };
 		};
 
-		struct Cap { enum : gkey_type { tree, morph, cycle, dimension }; };
+		using local_seq  = sequence<gindex_type, gindex_type{Local::dimension}>;
+		using global_seq = sequence<gindex_type, gindex_type{Global::dimension}>;
+		using csize_type = typename global_seq::csize_type;
 
-		using total_type    = cctmp::sequence<gindex_type, gindex_type{Total::dimension}>;
-		using maximum_type  = cctmp::sequence<gindex_type, gindex_type{  Cap::dimension}>;
-		using capacity_type = cctmp::sequence<gindex_type, gindex_type{  Cap::dimension}>;
-		using csize_type    = typename total_type::csize_type;
+		local_seq local;
+		global_seq global;
 
-		total_type total;
-		maximum_type maximum;
-		capacity_type capacity;
-
-		gindex_type arg_size;
-		gindex_type tag_size;
-		gindex_type toc_size;
-		gindex_type cycle_size;
-		gindex_type morph_size;
-		gindex_type target_size;
-
-		nik_ce T_chord_assembly_scanner_ast() :
-
-			arg_size{}, tag_size{}, toc_size{}, cycle_size{}, morph_size{}, target_size{}
-
-			{
-				total.fullsize();
-				maximum.fullsize();
-				capacity.fullsize();
-			}
-
-		nik_ce void increment_total   (csize_type pos) { ++total[pos]; }
-		nik_ce void increment_maximum (csize_type pos) { ++maximum[pos]; }
-
-		nik_ce void update_capacity(csize_type pos)
+		nik_ce T_chord_assembly_scanner_ast()
 		{
-			if (maximum[pos] > capacity[pos]) capacity[pos] = maximum[pos];
-			maximum[pos] = 0;
+			local.fullsize();
+			global.fullsize();
 		}
 
-		nik_ce auto tree_size(csize_type t_line, csize_type t_tree, csize_type c_tree)
-		{
-			gindex_type level_2_size = total[t_line] + 3;
-			gindex_type level_1_size = total[t_line] * (capacity[c_tree] + 3);
-			gindex_type level_0_size = total[t_tree] * 3;
+		nik_ce auto max_call_size    () const { return 2; }
+		nik_ce auto max_replace_size () const { return assembly_offset<AAN::replace, AAT::id>; }
+		nik_ce auto max_value_size   () const { return chain_offset<CAN::non, CAT::lookup>; }
 
-			return level_0_size + level_1_size + level_2_size;
+		nik_ce void increment_local  (csize_type pos, csize_type num = 1) { local  [pos] += num; }
+		nik_ce void increment_global (csize_type pos, csize_type num = 1) { global [pos] += num; }
+
+		nik_ce void update_offset()
+		{
+			gindex_type & loffset = local[Local::offset];
+			gindex_type & goffset = global[Global::offset];
+
+			if (loffset > goffset) goffset = loffset;
+			loffset = 0;
 		}
 
 		nik_ce void update_accept()
 		{
-			arg_size = total[Total::arg] + total[Total::pad];
-			tag_size = total[Total::label] + total[Total::jump];
+			global[Global::arg     ] += global[Global::pad];
+			global[Global::tag     ]  = global[Global::label] + global[Global::jump];
 
-			toc_size   = tree_size(Total::line, Total::tree, Cap::tree);
-			cycle_size = tree_size(Total::cycle_line, Total::morph, Cap::morph);
-			morph_size = tree_size(Total::morph_line, Total::morph, Cap::morph);
+			global[Global::offset  ] += chain_offset< CAN::begin, CAT::id >;
+			global[Global::offset  ] += chain_offset< CAN::end  , CAT::id >;
 
-			total[Total::instr_1] += total[Total::jump]; // instr1: test, void, goto, go into, branch
-			total[Total::instr_2] += static_cast<bool>(total[Total::pad]); // instr2: pad
-			total[Total::instr_3] += total[Total::pad]; // instr3: assign, apply, return
+			global[Global::assembly] += assembly_offset< AAN::begin , AAT::id >;
+			global[Global::assembly] += assembly_offset< AAN::pad   , AAT::id >;
+			global[Global::assembly] += assembly_offset< AAN::end   , AAT::id >;
 
-			target_size	= 1 // to parallel machine contrs.
-					+ ( 1 * total[Total::instr_1] )
-					+ ( 2 * total[Total::instr_2] )
-					+ ( 3 * total[Total::instr_3] );
+			global[Global::total   ]  = global[Global::assembly];
+			global[Global::total   ] += global[Global::call] * global[Global::offset];
 		}
 	};
 
@@ -159,16 +149,32 @@ namespace chord {
 		enum : action_type
 		{
 			nop = generator::AN::nop,
-			tree, label, jump, line_end, pad, instr_1, morph, cycle, arg,
-			accept, instr_3, go_into, morph_arg, morph_cap, ival_arg, ival_cap,
-			dimension
+
+			// asm:
+
+				asm_accept,
+				asm_func_arg,
+				asm_label, asm_label_goto,
+				asm_unit,
+				asm_jump,
+				asm_left,
+				asm_swap,
+				asm_apply,
+				asm_sub_value, asm_sub_paste, asm_sub_quote, asm_sub_morph, asm_sub_cycle, asm_sub_end,
+
+			// dimension:
+
+				dimension
 		};
 
 	}; using CASAN = ChordAssemblyScannerActionName;
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // nop:
+
+/***********************************************************************************************************************/
 
 	template<auto... filler>
 	struct T_chord_assembly_scanner_translation_action<CASAN::nop, filler...>
@@ -177,195 +183,187 @@ namespace chord {
 		nik_ces void result(AST *t, clexeme *l) { }
 	};
 
-// tree:
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::tree, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->increment_total(AST::Total::tree);
-			t->increment_maximum(AST::Cap::tree);
-		}
-	};
+// asm:
 
-// label:
-
-	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::label, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->increment_total(AST::Total::label);
-			t->increment_total(AST::Total::tree);
-			// increment maximum tree is optimized out.
-		}
-	};
-
-// jump:
-
-	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::jump, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->increment_total(AST::Total::jump); }
-	};
-
-// line end:
-
-	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::line_end, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->increment_total(AST::Total::line);
-			t->update_capacity(AST::Cap::tree);
-		}
-	};
-
-// pad:
-
-	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::pad, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->increment_total(AST::Total::pad); }
-	};
-
-// instr 1:
-
-	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::instr_1, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->increment_total(AST::Total::instr_1); }
-	};
-
-// morph:
-
-	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::morph, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->increment_total(AST::Total::morph_line);
-			t->increment_total(AST::Total::tree);
-			t->increment_maximum(AST::Cap::tree);
-		}
-	};
-
-// cycle:
-
-	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::cycle, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->increment_total(AST::Total::cycle_line);
-			t->increment_total(AST::Total::tree);
-			t->increment_maximum(AST::Cap::tree);
-		}
-	};
-
-// arg:
-
-	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::arg, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->increment_total(AST::Total::arg); }
-	};
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // accept:
 
 	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::accept, filler...>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_accept, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 			{ t->update_accept(); }
 	};
 
-// instr 3:
+// function:
 
 	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::instr_3, filler...>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_func_arg, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->increment_total(AST::Total::instr_3); }
+			{ t->increment_global(AST::Global::arg); }
 	};
 
-// go into:
+// label:
 
 	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::go_into, filler...>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_label, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->increment_total(AST::Total::line);
-			t->increment_total(AST::Total::tree);
-			t->increment_total(AST::Total::jump);
-			// increment maximum tree is optimized out.
-		}
+			{ t->increment_global(AST::Global::label); }
 	};
 
-// morph arg:
-
 	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::morph_arg, filler...>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_label_goto, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->increment_total(AST::Total::morph);
-			t->increment_maximum(AST::Cap::morph);
+			t->increment_global(AST::Global::jump);
+			t->increment_global(AST::Global::assembly);
+
+			t->increment_global(AST::Global::label);
 		}
 	};
 
-// morph cap:
+// unit:
 
 	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::morph_cap, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->update_capacity(AST::Cap::morph); }
-	};
-
-// ival arg:
-
-	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::ival_arg, filler...>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_unit, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->increment_total(AST::Total::cycle);
-			t->increment_maximum(AST::Cap::cycle);
+			t->increment_global(AST::Global::call);
+			t->increment_global(AST::Global::assembly, t->max_call_size());
+
+			t->increment_global(AST::Global::call);
+			t->increment_local(AST::Local::offset, t->max_value_size());
+			t->update_offset();
 		}
 	};
 
-// ival cap:
+// jump:
 
 	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::ival_cap, filler...>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_jump, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->update_capacity(AST::Cap::cycle); }
+		{
+			t->increment_global(AST::Global::jump);
+			t->increment_global(AST::Global::assembly);
+		}
 	};
 
+// left:
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_left, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			t->increment_global(AST::Global::pad);
+			t->increment_global(AST::Global::assembly, t->max_replace_size());
+		}
+	};
+
+// swap:
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_swap, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			t->increment_global(AST::Global::call);
+			t->increment_global(AST::Global::assembly, t->max_call_size());
+
+			t->increment_global(AST::Global::call);
+			t->increment_local(AST::Local::offset, t->max_value_size());
+		}
+	};
+
+// apply:
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_apply, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			t->increment_global(AST::Global::call);
+			t->increment_global(AST::Global::assembly, t->max_call_size());
+		}
+	};
+
+// sub:
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_sub_value, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			t->increment_global(AST::Global::call);
+			t->increment_local(AST::Local::offset, t->max_value_size());
+		}
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_sub_paste, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l) // refine ?
+		{
+			t->increment_global(AST::Global::call);
+			t->increment_local(AST::Local::offset, t->max_value_size());
+		}
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_sub_quote, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_sub_morph, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_sub_cycle, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::asm_sub_end, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->update_offset(); }
+	};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // interface:
@@ -406,120 +404,128 @@ namespace chord {
 
 			"Start",
 
-		// atomics:
+		// assembly:
 
-			"IValue -> identifier : tree ;"
-			"Copy   -> .          : tree ;"
-			"Paste  -> _          : tree ;"
-			"Test   -> test       : tree ;"
-			"Quote  -> quote      : tree ;"
+			"Start      -> FuncBeg FuncArgs FuncEnd Block RecBlock                     ;"
+			"FuncArgs   -> FuncArg FuncArgs                                            ;"
+			"           -> empty                                                       ;"
+			"Block      -> LabelBeg LabelEnd Instrs                                    ;"
+			"RecBlock   -> Block RecBlock                                              ;"
+			"           -> empty                                          : asm_accept ;"
+			"Instrs     -> Instr RecInstr LastInstr                                    ;"
+			"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
+			"RecInstr   -> Instr RecInstr                                              ;"
+			"           -> empty                                                       ;"
+			"LastInstr  -> GotoBeg GotoVal GotoEnd                                     ;"
+			"           -> TailBeg TailVal TailEnd                                     ;"
+			"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
+			"           -> LabelGotoBeg LabelEnd Instr RecInstr LastInstr              ;"
+			"Instr      -> LeftVal RightInstr                                          ;"
+			"           -> ! SwapBeg \\= OpVal ArgVals SwapEnd                         ;"
+			"           -> TestBeg OpVal ArgVals TestEnd BranchBeg BranchVal BranchEnd ;"
+			"           -> VoidBeg OpVal ArgVals VoidEnd                               ;"
+			"RightInstr -> ApplyBeg OpVal ArgVals ApplyEnd                             ;"
+			"           -> AssignBeg UnitVal AssignEnd                                 ;"
 
-			"Label  -> label  : label ;"
-			"Branch -> branch : jump  ;"
-			"Goto   -> goto   : jump  ;"
-			"Tail   -> tail   : jump  ;"
+			// function:
 
-			"LineEnd -> \\; : line_end ;"
+				"FuncBeg -> identifier                ;"
+				"FuncArg -> identifier : asm_func_arg ;"
+				"FuncEnd -> \\;                       ;"
 
-		// rules:
+			// label:
 
-			"LValue -> IValue : pad     ;" // upper bound.
-			"       -> Copy   : instr_1 ;"
-			"RValue -> IValue           ;"
-			"       -> Paste            ;"
-			"       -> Quote            ;"
-			"       -> HValue : morph   ;"
-			"       -> CValue : cycle   ;"
+				"LabelBeg     -> label : asm_label      ;"
+				"LabelGotoBeg -> label : asm_label_goto ;"
+				"LabelEnd     -> \\;                    ;"
 
-			"Start     -> identifier DArgs \\; Block RecBlock                      ;"
-			"DArgs     -> identifier DArgs                               : arg     ;"
-			"          -> empty                                                    ;"
-			"Block     -> Label LineEnd Instrs                                     ;"
-			"RecBlock  -> Block RecBlock                                           ;"
-			"          -> empty                                          : accept  ;"
-			"Instrs    -> Instr LineEnd RecInstr LastInstr                         ;"
-			"          -> return RValue LineEnd                          : instr_3 ;"
-			"RecInstr  -> Instr LineEnd RecInstr                                   ;"
-			"          -> empty                                                    ;"
-			"LastInstr -> Goto IValue LineEnd                                      ;"
-			"          -> Tail IValue LineEnd                                      ;"
-			"          -> return RValue LineEnd                          : instr_3 ;"
-			"          -> Label LineEnd Instr LineEnd RecInstr LastInstr : go_into ;"
-			"Instr     -> LValue Disp                                              ;"
-			"          -> ! IValue \\= Vars                              : instr_1 ;"
-			"          -> Test RValue Vars LineEnd Branch IValue         : instr_1 ;"
-			"          -> void RValue Vars                               : instr_1 ;"
-			"Disp      -> # RValue                                                 ;"
-			"          -> \\= RValue Vars                                          ;"
-			"Vars      -> RValue Vars                                              ;"
-			"          -> ! IValue Vars                                            ;"
-			"          -> empty                                                    ;"
+			// return:
 
-		// morph:
+				"ReturnBeg -> return : asm_unit ;"
+				"ReturnEnd -> \\;               ;"
 
-			"HValue -> argpose < MArgs \\> ;"
-			"       -> subpose < MArgs \\> ;"
-			"       -> curry   < MArgs \\> ;"
+			// goto:
 
-			"MArgs    -> MorValue MArgs : morph_arg ;"
-			"         -> empty          : morph_cap ;"
-			"MorValue -> identifier                 ;"
-			"         -> @                          ;"
-			"         -> *                          ;"
-			"         -> +                          ;"
-			"         -> \\-                        ;"
+				"GotoBeg -> goto       : asm_jump ;"
+				"GotoVal -> identifier            ;"
+				"GotoEnd -> \\;                   ;"
 
-		// cycle:
+			// tail:
 
-			"CValue -> repeat  AMLOpt        LMRIval Ivals ;"
-			"       -> map     AMLOpt LRIval LMRIval Ivals ;"
-			"       -> fold   ACMLOpt  FIval LMRIval Ivals ;"
-			"       -> find    AMLOpt LRIval LMRIval Ivals ;"
-			"       -> sift    AMLOpt LRIval LMRIval Ivals ;"
+				"TailBeg -> tail       : asm_jump ;"
+				"TailVal -> identifier            ;"
+				"TailEnd -> \\;                   ;"
 
-		    // parameter:
+			// left:
 
-			"AMLOpt  -> < PArgs |           Binary | Binary \\> ;"
-			"ACMLOpt -> < PArgs | Combine | Binary | Binary \\> ;"
+				"LeftVal -> identifier : asm_left ;"
+				"        -> .                     ;"
 
-			"PArgs    -> ParValue PArgs    ;"
-			"         -> empty             ;"
-			"Combine  -> identifier P2Args ;"
-			"Binary   -> identifier P2Args ;"
-			"         -> empty             ;"
-			"P2Args   -> ParValue P1Arg    ;"
-			"         -> empty             ;"
-			"P1Arg    -> ParValue          ;"
-			"         -> empty             ;"
-			"ParValue -> identifier        ;"
-			"         -> @                 ;"
-			"         -> *                 ;"
+			// swap:
 
-		    // interval:
+				"SwapBeg -> identifier : asm_swap ;"
+				"SwapEnd -> \\;                   ;"
 
-			"Ivals   -> Ival Ivals                      : ival_arg ;"
-			"        -> empty                           : ival_cap ;"
-			"Ival    -> LRIval                                     ;"
-			"        ->  FIval                                     ;"
-			"LRIval  -> LIval PairIter            RIval            ;"
-			"LMRIval -> LIval PairIter , PairIter RIval : ival_arg ;"
-			"FIval   -> { }                                        ;"
+			// test:
 
-			"LIval -> [ ;"
-			"      -> ( ;"
-			"RIval -> ] ;"
-			"      -> ) ;"
+				"TestBeg -> test : asm_apply ;"
+				"TestEnd -> \\;              ;"
 
-		    // iterator:
+			// branch:
 
-			"PairIter  ->   + | \\-            ;"
-			"          -> \\- |   +            ;"
-			"          -> IterValue | PrevIter ;"
-			"          -> empty                ;"
-			"PrevIter  -> IterValue            ;"
-			"          -> ~                    ;"
-			"IterValue -> identifier           ;"
-			"          -> ^ identifier         ;"
+				"BranchBeg -> branch     : asm_jump ;"
+				"BranchVal -> identifier            ;"
+				"BranchEnd -> \\;                   ;"
+
+			// void:
+
+				"VoidBeg -> void : asm_apply ;"
+				"VoidEnd -> \\;              ;"
+
+			// apply:
+
+				"ApplyBeg -> \\= : asm_apply ;"
+				"ApplyEnd -> \\;             ;"
+
+			// assign:
+
+				"AssignBeg -> #   : asm_unit ;"
+				"AssignEnd -> \\;            ;"
+
+			// op value:
+
+				"OpVal -> identifier : asm_sub_value ;"
+				"      -> _          : asm_sub_paste ;"
+				"      -> quote      : asm_sub_quote ;"
+			//	"      -> Morph      : asm_sub_morph ;"
+			//	"      -> Cycle      : asm_sub_cycle ;"
+
+			// arg values:
+
+				"ArgVals -> ArgVal ArgVals                 ;"
+				"        -> ! MutVal ArgVals               ;"
+				"        -> empty            : asm_sub_end ;"
+
+			// arg value:
+
+				"ArgVal -> identifier : asm_sub_value ;"
+				"       -> _          : asm_sub_paste ;"
+				"       -> quote      : asm_sub_quote ;"
+			//	"       -> Morph      : asm_sub_morph ;"
+			//	"       -> Cycle      : asm_sub_cycle ;"
+
+			// mut value:
+
+				"MutVal -> identifier : asm_sub_value ;"
+
+			// unit value:
+
+				"UnitVal -> identifier ;"
+				"        -> _          ;"
+				"        -> quote      ;"
+			//	"        -> Morph      ;"
+			//	"        -> Cycle      ;"
+
 		);}
 
 		nik_ces auto map = cctmp::table
@@ -578,22 +584,25 @@ namespace chord {
 		(
 			U_strlit_type, U_action_type,
 
-			sxa_pair( "tree"       , ActName::tree       ),
-			sxa_pair( "label"      , ActName::label      ),
-			sxa_pair( "jump"       , ActName::jump       ),
-			sxa_pair( "line_end"   , ActName::line_end   ),
-			sxa_pair( "pad"        , ActName::pad        ),
-			sxa_pair( "instr_1"    , ActName::instr_1    ),
-			sxa_pair( "morph"      , ActName::morph      ),
-			sxa_pair( "cycle"      , ActName::cycle      ),
-			sxa_pair( "arg"        , ActName::arg        ),
-			sxa_pair( "accept"     , ActName::accept     ),
-			sxa_pair( "instr_3"    , ActName::instr_3    ),
-			sxa_pair( "go_into"    , ActName::go_into    ),
-			sxa_pair( "morph_arg"  , ActName::morph_arg  ),
-			sxa_pair( "morph_cap"  , ActName::morph_cap  ),
-			sxa_pair( "ival_arg"   , ActName::ival_arg   ),
-			sxa_pair( "ival_cap"   , ActName::ival_cap   )
+			// asm:
+
+				sxa_pair( "asm_accept"     , ActName::asm_accept     ),
+
+				sxa_pair( "asm_func_arg"   , ActName::asm_func_arg   ),
+				sxa_pair( "asm_label"      , ActName::asm_label      ),
+				sxa_pair( "asm_label_goto" , ActName::asm_label_goto ),
+				sxa_pair( "asm_unit"       , ActName::asm_unit       ),
+				sxa_pair( "asm_jump"       , ActName::asm_jump       ),
+				sxa_pair( "asm_left"       , ActName::asm_left       ),
+				sxa_pair( "asm_swap"       , ActName::asm_swap       ),
+				sxa_pair( "asm_apply"      , ActName::asm_apply      ),
+
+				sxa_pair( "asm_sub_value"  , ActName::asm_sub_value  ),
+				sxa_pair( "asm_sub_paste"  , ActName::asm_sub_paste  ),
+				sxa_pair( "asm_sub_quote"  , ActName::asm_sub_quote  ),
+				sxa_pair( "asm_sub_morph"  , ActName::asm_sub_morph  ),
+				sxa_pair( "asm_sub_cycle"  , ActName::asm_sub_cycle  ),
+				sxa_pair( "asm_sub_end"    , ActName::asm_sub_end    )//,
 		);
 	};
 
@@ -618,7 +627,7 @@ namespace chord {
 		using T_lexer			= typename T_grammar::T_lexer;
 		using Token			= typename T_grammar::Token;
 
-		nik_ces auto prod_size		= cctmp::string_literal("<A|C|B|B>").size();
+		nik_ces auto prod_size		= 7;//cctmp::string_literal("<A|C|B|B>").size();
 
 		nik_ces auto stack_start	= symbol_type{generator::Sign::nonterminal, base::start_index};
 		nik_ces auto stack_finish	= symbol_type{generator::Sign::terminal, Token::prompt};

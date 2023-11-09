@@ -35,6 +35,9 @@ namespace machine {
 		nik_ce auto cycle_action(Ts... vs) // requires template deduction <>:
 			{ return T_cycle_action<name, note>::template result<>(vs...); }
 
+		template<auto name, auto note>
+		nik_ce auto cycle_offset = T_cycle_action<name, note>::offset;
+
 /***********************************************************************************************************************/
 
 // names:
@@ -93,10 +96,11 @@ namespace machine {
 		template<auto... filler>
 		struct T_cycle_action<YAN::base, YAT::id, filler...>
 		{
-			nik_ces gindex_type offset[] = {0, 1};
+			nik_ces gindex_type offset = machine_offset<MAN::set, MAT::inc>;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr) { contr->set_inc_instr(YN::id, YT::id); }
+			nik_ces void result(Contr *contr)
+				{ machine_action<MAN::set, MAT::inc>(contr, YN::id, YT::id); }
 		};
 
 	// halting:
@@ -104,12 +108,13 @@ namespace machine {
 		template<auto... filler>
 		struct T_cycle_action<YAN::base, YAT::halting, filler...>
 		{
-			nik_ces gindex_type offset[] = {0, 1};
+			nik_ces gindex_type offset = machine_offset<MAN::set, MAT::inc>;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note) { contr->set_inc_instr(YN::halt, note); }
+			nik_ces void result(Contr *contr, cindex note)
+				{ machine_action<MAN::set, MAT::inc>(contr, YN::halt, note); }
 		};
 
 /***********************************************************************************************************************/
@@ -121,17 +126,17 @@ namespace machine {
 		template<auto... filler>
 		struct T_cycle_action<YAN::next, YAT::sarg, filler...>
 		{
-			nik_ces gindex_type offset[] = {0, 4};
+			nik_ces gindex_type offset = 4 * machine_offset<MAN::set, MAT::inc>;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex func_at, cindex arg_at, cindex note)
 			{
-				contr->set_inc_instr( YN::next , YT::select , 1 , func_at );
-				contr->set_inc_instr( YN::next , YT::car    , 1 );
-				contr->set_inc_instr( YN::next , YT::select , 1 , arg_at );
-				contr->set_inc_instr( YN::next , note       , 1 ); // YT::effect, YT::assign.
+				machine_action<MAN::set, MAT::inc>(contr, YN::next , YT::select , 1 , func_at );
+				machine_action<MAN::set, MAT::inc>(contr, YN::next , YT::car    , 1 );
+				machine_action<MAN::set, MAT::inc>(contr, YN::next , YT::select , 1 , arg_at );
+				machine_action<MAN::set, MAT::inc>(contr, YN::next , note       , 1 ); // YT::effect, YT::assign.
 			}
 		};
 
@@ -140,17 +145,17 @@ namespace machine {
 		template<auto... filler>
 		struct T_cycle_action<YAN::next, YAT::env, filler...>
 		{
-			nik_ces gindex_type offset[] = {0, 4};
+			nik_ces gindex_type offset = 4 * machine_offset<MAN::set, MAT::inc>;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex subindex, cindex list_str, cindex arg_at, cindex note)
 			{
-				contr->set_inc_instr( YN::lookup , YT::car    , 1 , subindex , list_str );
-				contr->set_inc_instr( YN::next   , YT::car    , 1 );
-				contr->set_inc_instr( YN::next   , YT::select , 1 , arg_at );
-				contr->set_inc_instr( YN::next   , note       , 1 ); // YT::effect, YT::assign.
+				machine_action<MAN::set, MAT::inc>(contr, YN::lookup , YT::car    , 1 , subindex , list_str );
+				machine_action<MAN::set, MAT::inc>(contr, YN::next   , YT::car    , 1 );
+				machine_action<MAN::set, MAT::inc>(contr, YN::next   , YT::select , 1 , arg_at );
+				machine_action<MAN::set, MAT::inc>(contr, YN::next   , note       , 1 ); // YT::effect, YT::assign.
 			}
 		};
 
@@ -163,16 +168,16 @@ namespace machine {
 		template<auto... filler>
 		struct T_cycle_action<YAN::loop, YAT::id, filler...>
 		{
-			nik_ces gindex_type offset[] = {0, 4};
+			nik_ces gindex_type offset = 3 * machine_offset<MAN::set, MAT::inc>;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex car_start, cindex cdr_start, cindex list_str)
 			{
-				contr->set_inc_instr( YN::lookup , YT::car    , 1 , car_start , list_str );
-				contr->set_inc_instr( YN::lookup , YT::cdr    , 1 , cdr_start , list_str );
-				contr->set_inc_instr( YN::loop   , YT::effect , 1 );
+				machine_action<MAN::set, MAT::inc>(contr, YN::lookup , YT::car    , 1 , car_start , list_str );
+				machine_action<MAN::set, MAT::inc>(contr, YN::lookup , YT::cdr    , 1 , cdr_start , list_str );
+				machine_action<MAN::set, MAT::inc>(contr, YN::loop   , YT::effect , 1 );
 			}
 		};
 

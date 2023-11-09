@@ -39,15 +39,6 @@ namespace machine {
 	template<auto U>
 	nik_ce auto & member_value_U			= cctmp::member_value_U<U>;
 
-	using gkey_type					= cctmp::gkey_type;
-	using gindex_type				= cctmp::gindex_type;
-	using gcindex_type				= cctmp::gcindex_type;
-
-	template<typename T, auto S>
-	using sequence					= cctmp::sequence<T, S>;
-
-	using instr_type				= cctmp::instr_type;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

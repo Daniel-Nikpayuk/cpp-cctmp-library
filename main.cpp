@@ -18,6 +18,7 @@
 ************************************************************************************************************************/
 
 #include<cstdio>
+#include<cstdlib>
 
 #define NIK_PARSER_GENERATOR_PARSER_OBJ       "../transition_tables/00_parser_generator_parser.hpp"
 #define NIK_CHORD_ASSEMBLY_SCANNER_PARSER_OBJ "../transition_tables/01_chord_assembly_scanner.hpp"
@@ -57,11 +58,11 @@
 #include"02_generator/03_ll_table.hpp"
 
 #include"03_chord/00_lexer.hpp"
-#include"03_chord/01_scanner.hpp"
-#include"03_chord/02_morph.hpp"
-#include"03_chord/03_cycle.hpp"
-#include"03_chord/04_assembly.hpp"
-#include"03_chord/05_action.hpp"
+#include"03_chord/01_morph.hpp"
+#include"03_chord/02_cycle.hpp"
+#include"03_chord/03_assembly.hpp"
+#include"03_chord/04_action.hpp"
+#include"03_chord/05_scanner.hpp"
 #include"03_chord/06_syntax.hpp"
 #include"03_chord/07_parser.hpp"
 #include"03_chord/08_metapiler.hpp"
@@ -137,15 +138,39 @@
 /***********************************************************************************************************************/
 
 //	using chord_grammar			= chord::T_chord_assembly_grammar;
+//	using chord_grammar			= chord::T_chord_assembly_scanner_grammar;
 //	constexpr auto static_grammar		= U_store_T<chord_grammar>;
+
+	int main_at(int n, int argc, char *argv[], int def = 0)
+	{
+		auto pos = n + 1;
+
+		if (pos < argc) return atoi(argv[pos]);
+		else            return def;
+	}
+
+	int main_sum(int argc, char *argv[])
+	{
+		auto sum = 0;
+
+		for (int k = 0; k != argc; ++k)
+			sum += atoi(argv[k]);
+
+		return sum;
+	}
 
 	int main(int argc, char *argv[])
 	{
+	//	printf("%d\n", main_sum(argc, argv));
+
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};
 	//	tr_table_printer.print_num_tr_table();
 
 	//	printf("%d\n", square_v0(5));
 	//	printf("%d\n", sum_of_squares_v0(3, 4));
+
+	//	printf("%d\n", square_v0(main_at(0, argc, argv)));
+	//	printf("%d\n", sum_of_squares_v0(main_at(0, argc, argv), main_at(1, argc, argv)));
 
 		return 0;
 	}

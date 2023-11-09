@@ -35,6 +35,9 @@ namespace machine {
 		nik_ce auto chain_action(Ts... vs) // requires template deduction <>:
 			{ return T_chain_action<name, note>::template result<>(vs...); }
 
+		template<auto name, auto note>
+		nik_ce auto chain_offset = T_chain_action<name, note>::offset;
+
 /***********************************************************************************************************************/
 
 // names:
@@ -97,15 +100,15 @@ namespace machine {
 		template<auto... filler>
 		struct T_chain_action<CAN::generic, CAT::arg, filler...>
 		{
-			nik_ces gindex_type offset = 2;
+			nik_ces gindex_type offset = 2 * machine_offset<MAN::set, MAT::inc>;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex arg_at)
 			{
-				contr->set_inc_instr(CN::copy, CT::select, 1, arg_at);
-				contr->set_inc_instr(CN::copy, note);
+				machine_action<MAN::set, MAT::inc>(contr, CN::copy, CT::select, 1, arg_at);
+				machine_action<MAN::set, MAT::inc>(contr, CN::copy, note);
 			}
 
 		}; template<typename... Ts>
@@ -117,13 +120,13 @@ namespace machine {
 		template<auto... filler>
 		struct T_chain_action<CAN::generic, CAT::list, filler...>
 		{
-			nik_ces gindex_type offset = 1;
+			nik_ces gindex_type offset = machine_offset<MAN::set, MAT::inc>;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex list_at)
-				{ contr->set_inc_instr(CN::list, note, 1, list_at); }
+				{ machine_action<MAN::set, MAT::inc>(contr, CN::list, note, 1, list_at); }
 
 		}; template<typename... Ts>
 			nik_ce auto chain_action_list(Ts... vs)
@@ -134,13 +137,13 @@ namespace machine {
 		template<auto... filler>
 		struct T_chain_action<CAN::generic, CAT::recurse, filler...>
 		{
-			nik_ces gindex_type offset = 1;
+			nik_ces gindex_type offset = machine_offset<MAN::set, MAT::inc>;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note)
-				{ contr->set_inc_instr(CN::list, note, 1, contr->rec_at); }
+				{ machine_action<MAN::set, MAT::inc>(contr, CN::list, note, 1, contr->rec_at); }
 
 		}; template<typename... Ts>
 			nik_ce auto chain_action_recurse(Ts... vs)
@@ -151,18 +154,20 @@ namespace machine {
 		template<auto... filler>
 		struct T_chain_action<CAN::generic, CAT::lookup, filler...>
 		{
-			nik_ces gindex_type offset = 2 + T_lookup_action<LAN::find, LAT::id>::offset;
+			nik_ces gindex_type offset =	machine_offset< MAN::set  , MAT::inc > +
+							machine_offset< MAN::push , MAT::id  > +
+							 lookup_offset< LAN::find , LAT::id  > +
+							machine_offset< MAN::pop  , MAT::id  > ;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex begin, cindex end)
 			{
-				contr->set_inc_instr(CN::list, CT::select, 1, contr->env_at);
-
-				contr->push_machine(CN::lookup, note, contr->str_at);
-				lookup_action<LAN::find, LAT::id>(contr, begin, end);
-				contr->pop_machine();
+				machine_action< MAN::set  , MAT::inc >(contr, CN::list, CT::select, 1, contr->env_at);
+				machine_action< MAN::push , MAT::id  >(contr, CN::lookup, note, contr->str_at);
+				 lookup_action< LAN::find , LAT::id  >(contr, begin, end);
+				machine_action< MAN::pop  , MAT::id  >(contr);
 			}
 
 		}; template<typename... Ts>
@@ -183,10 +188,11 @@ namespace machine {
 		template<auto... filler>
 		struct T_chain_action<CAN::begin, CAT::id, filler...>
 		{
-			nik_ces gindex_type offset = 1;
+			nik_ces gindex_type offset = machine_offset<MAN::set, MAT::inc>;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr) { contr->set_inc_instr(CN::id, CT::id); }
+			nik_ces void result(Contr *contr)
+				{ machine_action<MAN::set, MAT::inc>(contr, CN::id, CT::id); }
 		};
 
 /***********************************************************************************************************************/
@@ -605,7 +611,8 @@ namespace machine {
 		template<auto... filler>
 		struct T_chain_action<CAN::end, CAT::id, filler...>
 		{
-			nik_ces gindex_type offset = chain_action_offset<CAT::arg> + 1;
+			nik_ces gindex_type offset =	chain_action_offset< CAT::arg            > +
+							     machine_offset< MAN::set , MAT::inc > ;
 
 			using cindex = gcindex_type;
 
@@ -614,7 +621,7 @@ namespace machine {
 			{
 				chain_action_arg(contr, CT::drop, arg_end);
 
-				contr->set_inc_instr(CN::halt, note);
+				machine_action<MAN::set, MAT::inc>(contr, CN::halt, note);
 			}
 		};
 

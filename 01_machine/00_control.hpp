@@ -27,6 +27,7 @@ namespace machine {
 
 // cctmp:
 
+	using gkey_type						= cctmp::gkey_type;
 	using gindex_type					= cctmp::gindex_type;
 	using gcindex_type					= cctmp::gcindex_type;
 
@@ -96,10 +97,10 @@ namespace machine {
 		stack_type init_stack; 
 		stack_type curr_stack; 
 
-		nik_ce T_machine_contr(cindex r, cindex s, cindex e, cindex o) :
+		nik_ce T_machine_contr(cindex r, cindex s, cindex e, cindex f, cindex o) :
 
 			base{}, rec_at{r}, str_at{s}, env_at{e},
-			initial{}, current{}, free{o}, offset{o}, init_stack{}, curr_stack{}
+			initial{}, current{}, free{f}, offset{o}, init_stack{}, curr_stack{}
 
 			{ base::fullsize(); }
 
@@ -116,18 +117,10 @@ namespace machine {
 				base::operator [] (current)[Instr::num ] = num ;
 			}
 
-			nik_ce void set_inc_instr(cindex name, cindex note, cindex next = 1, cindex pos = 0, cindex num = 0)
-			{
-				set_instr(name, note, next, pos, num);
-				inc_instr();
-			}
-
 		// machine:
 
-			nik_ce void push_machine(cindex name, cindex note, cindex num = 0)
+			nik_ce void push_machine()
 			{
-				set_inc_instr(name, note, 1, free, num);
-
 				init_stack.push(initial);
 				curr_stack.push(current);
 
@@ -142,6 +135,132 @@ namespace machine {
 				current = curr_stack.pop();
 			}
 	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// action:
+
+	template<gkey_type, gkey_type, auto...> struct T_machine_action;
+
+	// syntactic sugar:
+
+		template<auto name, auto note, typename... Ts>
+		nik_ce auto machine_action(Ts... vs) // requires template deduction <>:
+			{ return T_machine_action<name, note>::template result<>(vs...); }
+
+		template<auto name, auto note>
+		nik_ce auto machine_offset = T_machine_action<name, note>::offset;
+
+/***********************************************************************************************************************/
+
+// names:
+
+	struct MachineActionName
+	{
+		enum : gkey_type // convenience for default params.
+			{ identity = 0, id = identity, set, push, pop, dimension };
+
+	}; using MAN = MachineActionName;
+
+/***********************************************************************************************************************/
+
+// notes:
+
+	struct MachineActionNote
+	{
+		enum : gkey_type
+		{
+			identity = 0, id = identity, // convenience for default params.
+			inc, dimension
+		};
+
+	}; using MAT = MachineActionNote;
+
+/***********************************************************************************************************************/
+
+// instructions:
+
+//	struct MachineActionInstr
+//	{
+//		enum : gkey_type { pos0 = 0, pos1, pos2, pos3, dimension };
+//		enum : gkey_type { name = 0, note };
+
+//	}; using MAI = MachineActionInstr;
+
+/***********************************************************************************************************************/
+
+// offset:
+
+//	using MachineActionOffset = cctmp::ActionOffset;
+//	using MAO                 = cctmp::ActionOffset;
+
+/***********************************************************************************************************************/
+
+// size:
+
+//	using T_machine_contr_size = cctmp::T_contr_size<T_machine_action, LAI, LAO>;
+
+/***********************************************************************************************************************/
+
+// set:
+
+	// inc:
+
+		template<auto... filler>
+		struct T_machine_action<MAN::set, MAT::inc, filler...>
+		{
+			nik_ces gindex_type offset = 1;
+
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr,
+				cindex name, cindex note, cindex next = 1, cindex pos = 0, cindex num = 0)
+			{
+				contr->set_instr(name, note, next, pos, num);
+				contr->inc_instr();
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// push:
+
+	// id:
+
+		template<auto... filler>
+		struct T_machine_action<MAN::push, MAT::id, filler...>
+		{
+			nik_ces gindex_type offset = 1;
+
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex name, cindex note, cindex num = 0)
+			{
+				contr->set_instr(name, note, 1, contr->free, num);
+				contr->inc_instr();
+				contr->push_machine();
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// pop:
+
+	// id:
+
+		template<auto... filler>
+		struct T_machine_action<MAN::pop, MAT::id, filler...>
+		{
+			nik_ces gindex_type offset = 0;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr)
+				{ contr->pop_machine(); }
+		};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

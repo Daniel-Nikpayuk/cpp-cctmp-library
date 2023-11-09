@@ -294,6 +294,28 @@
 
 #undef NIK_INTERPRETER
 
+#undef NIK_LOOKUP_PARAMS
+
+#undef NIK_LOOKUP_L
+
+#undef NIK_LOOKUP_M
+
+#undef NIK_LOOKUP_R
+
+#undef NIK_LOOKUP_TEMPLATE
+
+#undef NIK_LOOKUP_RESULT
+
+#undef NIK_LOOKUP_RESULT_TS
+
+#undef NIK_LOOKUP_RESULT_2TS
+
+#undef NIK_LOOKUP
+
+#undef NIK_LOOKUP_TS
+
+#undef NIK_LOOKUP_2TS
+
 #undef NIK_CHAIN_PARAMS
 
 #undef NIK_CHAIN_L
@@ -328,31 +350,57 @@
 
 #undef NIK_DEFINE_CHAIN_SIFT_PUSH_2_N
 
-#undef NIK_MACHINE_PARAMS
+#undef NIK_CYCLE_PARAMS
 
-#undef NIK_MACHINE_L
+#undef NIK_CYCLE_L
 
-#undef NIK_MACHINE_M
+#undef NIK_CYCLE_M
 
-#undef NIK_MACHINE_R
+#undef NIK_CYCLE_R
 
-#undef NIK_MACHINE_TEMPLATE
+#undef NIK_CYCLE_TEMPLATE
 
-#undef NIK_MACHINE_RESULT
+#undef NIK_CYCLE_RESULT
 
-#undef NIK_MACHINE_RESULT_TS
+#undef NIK_CYCLE_RESULT_TS
 
-#undef NIK_MACHINE_RESULT_2TS
+#undef NIK_CYCLE_RESULT_2TS
 
-#undef NIK_MACHINE_RESULT_3TS
+#undef NIK_CYCLE_RESULT_3TS
 
-#undef NIK_MACHINE
+#undef NIK_CYCLE
 
-#undef NIK_MACHINE_TS
+#undef NIK_CYCLE_TS
 
-#undef NIK_MACHINE_2TS
+#undef NIK_CYCLE_2TS
 
-#undef NIK_MACHINE_3TS
+#undef NIK_CYCLE_3TS
+
+#undef NIK_ASSEMBLY_PARAMS
+
+#undef NIK_ASSEMBLY_L
+
+#undef NIK_ASSEMBLY_M
+
+#undef NIK_ASSEMBLY_R
+
+#undef NIK_ASSEMBLY_TEMPLATE
+
+#undef NIK_ASSEMBLY_RESULT
+
+#undef NIK_ASSEMBLY_RESULT_TS
+
+#undef NIK_ASSEMBLY_RESULT_2TS
+
+#undef NIK_ASSEMBLY_RESULT_3TS
+
+#undef NIK_ASSEMBLY
+
+#undef NIK_ASSEMBLY_TS
+
+#undef NIK_ASSEMBLY_2TS
+
+#undef NIK_ASSEMBLY_3TS
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

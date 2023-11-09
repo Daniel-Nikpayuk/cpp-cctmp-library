@@ -1,0 +1,91 @@
+#!/bin/bash
+
+####################################################################################################
+
+mawk_prog_first='BEGIN { skip = 0; re_str = "^\/\*+\/$"; }
+{
+	if (skip)
+	{
+		if (!match($0, re_str)) skip = 0;
+	}
+	else if (match($0, re_str)) skip = 1;
+	else print $0;
+}'
+
+mawk_prog_rest='BEGIN { line = 0; skip = 0; re_str = "^\/\*+\/$"; }
+{
+	if (line < 19) ++line;
+	else
+	{
+		if (skip)
+		{
+			if (!match($0, re_str)) skip = 0;
+		}
+		else if (match($0, re_str)) skip = 1;
+		else print $0;
+	}
+}'
+
+####################################################################################################
+
+# define macros:
+
+mawk "$mawk_prog_first" "define_macros.hpp" > "single_source/cpp_cctmp_library.hpp"
+
+####################################################################################################
+
+# cctmp:
+
+mawk "$mawk_prog_rest" "00_cctmp/00_grammar.hpp"     >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "00_cctmp/01_argument.hpp"    >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "00_cctmp/02_parameter.hpp"   >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "00_cctmp/03_scope.hpp"       >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "00_cctmp/04_relation.hpp"    >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "00_cctmp/05_praxis.hpp"      >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "00_cctmp/06_algorithm.hpp"   >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "00_cctmp/07_interpreter.hpp" >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "00_cctmp/08_graph.hpp"       >> "single_source/cpp_cctmp_library.hpp"
+
+####################################################################################################
+
+# machine
+
+mawk "$mawk_prog_rest" "01_machine/00_control.hpp"         >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "01_machine/01_lookup_state.hpp"    >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "01_machine/02_lookup_action.hpp"   >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "01_machine/03_chain_state.hpp"     >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "01_machine/04_chain_action.hpp"    >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "01_machine/05_cycle_state.hpp"     >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "01_machine/06_cycle_action.hpp"    >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "01_machine/07_assembly_state.hpp"  >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "01_machine/08_assembly_action.hpp" >> "single_source/cpp_cctmp_library.hpp"
+
+####################################################################################################
+
+# generator:
+
+mawk "$mawk_prog_rest" "02_generator/00_ll_lexer.hpp"  >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "02_generator/01_ll_syntax.hpp" >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "02_generator/02_ll_parser.hpp" >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "02_generator/03_ll_table.hpp"  >> "single_source/cpp_cctmp_library.hpp"
+
+####################################################################################################
+
+# chord:
+
+mawk "$mawk_prog_rest" "03_chord/00_lexer.hpp"     >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/01_morph.hpp"     >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/02_cycle.hpp"     >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/03_assembly.hpp"  >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/04_action.hpp"    >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/05_scanner.hpp"   >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/06_syntax.hpp"    >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/07_parser.hpp"    >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/08_metapiler.hpp" >> "single_source/cpp_cctmp_library.hpp"
+
+####################################################################################################
+
+# undef macros:
+
+mawk "$mawk_prog_rest" "undef_macros.hpp" >> "single_source/cpp_cctmp_library.hpp"
+

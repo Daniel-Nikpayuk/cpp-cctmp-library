@@ -27,8 +27,16 @@ namespace chord {
 
 // cctmp:
 
+	template<auto U>
+	using T_store_U						= cctmp::T_store_U<U>;
+
 	template<typename T>
 	nik_ce auto U_store_T					= cctmp::U_store_T<T>;
+
+	nik_ce auto _from_reference_				= cctmp::_from_reference_;
+
+	template<auto Op, typename T>
+	using modify_type					= cctmp::modify_type<Op, T>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

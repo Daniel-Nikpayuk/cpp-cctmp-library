@@ -35,6 +35,9 @@ namespace machine {
 		nik_ce auto lookup_action(Ts... vs) // requires template deduction <>:
 			{ return T_lookup_action<name, note>::template result<>(vs...); }
 
+		template<auto name, auto note>
+		nik_ce auto lookup_offset = T_lookup_action<name, note>::offset;
+
 /***********************************************************************************************************************/
 
 // names:
@@ -93,7 +96,7 @@ namespace machine {
 		template<auto... filler>
 		struct T_lookup_action<LAN::find, LAT::id, filler...>
 		{
-			nik_ces gindex_type offset = 6;
+			nik_ces gindex_type offset = 6 * machine_offset<MAN::set, MAT::inc>;
 
 			using cindex = gcindex_type;
 
@@ -103,12 +106,12 @@ namespace machine {
 				cindex loop = contr->initial;
 				cindex halt = loop + 4;
 
-				contr->set_inc_instr( LN::id       , LT::id    );
-				contr->set_inc_instr( LN::jump     , LT::empty , 1 , halt        );
-				contr->set_inc_instr( LN::contains , LT::id    , 1 , begin , end );
-				contr->set_inc_instr( LN::jump     , LT::loop  , 1 , loop        );
-				contr->set_inc_instr( LN::halt     , LT::map   );
-				contr->set_inc_instr( LN::halt     , LT::empty );
+				machine_action<MAN::set, MAT::inc>(contr, LN::id       , LT::id    );
+				machine_action<MAN::set, MAT::inc>(contr, LN::jump     , LT::empty , 1 , halt        );
+				machine_action<MAN::set, MAT::inc>(contr, LN::contains , LT::id    , 1 , begin , end );
+				machine_action<MAN::set, MAT::inc>(contr, LN::jump     , LT::loop  , 1 , loop        );
+				machine_action<MAN::set, MAT::inc>(contr, LN::halt     , LT::map   );
+				machine_action<MAN::set, MAT::inc>(contr, LN::halt     , LT::empty );
 			}
 		};
 

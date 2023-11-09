@@ -38,18 +38,6 @@ namespace chord {
 	template<auto... Vs>
 	using T_machine_contr					= machine::T_machine_contr<Vs...>;
 
-	template<auto... Vs>
-	using T_lookup_action					= machine::T_lookup_action<Vs...>;
-
-	template<auto... Vs>
-	using T_chain_action					= machine::T_chain_action<Vs...>;
-
-	template<auto... Vs>
-	using T_cycle_action					= machine::T_cycle_action<Vs...>;
-
-	template<auto... Vs>
-	using T_assembly_action					= machine::T_assembly_action<Vs...>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -93,18 +81,20 @@ namespace chord {
 		using Token			= typename T_lexer::Token;
 
 		using scanned_type		= member_type_U<static_scanned>;
-		using Total			= typename scanned_type::Total;
-		using Cap			= typename scanned_type::Cap;
+		using Global			= typename scanned_type::Global;
+		using Local			= typename scanned_type::Local;
 
 		nik_ces auto & src		= T_store_U<static_scanned>::src;
 		nik_ces auto & scanned		= member_value_U<static_scanned>;
-		nik_ces auto padding		= scanned.total[Total::pad];
-		nik_ces auto stack_size		= 2;
+		nik_ces auto padding		= scanned.global[Global::pad];
+		nik_ces auto initial		= scanned.global[Global::assembly];
+		nik_ces auto offset		= scanned.global[Global::offset];
+		nik_ces auto substack		= 2;
 
-		using contr_type		= T_machine_contr<100, stack_size>; // 100: debugging.
+		using contr_type		= T_machine_contr<scanned.global[Global::total], substack>;
 		using cindex			= typename contr_type::cindex;
 
-		using arg_seq			= sequence<arg_entry, scanned.arg_size>;
+		using arg_seq			= sequence<arg_entry, scanned.global[Global::arg]>;
 
 		enum : gkey_type
 		{
@@ -125,8 +115,10 @@ namespace chord {
 		gindex_type left;
 		lexeme word;
 
-		nik_ce T_chord_assembly_ast(cindex o = 10) : // o = 10 is temporary.
-			contr{rec_at, str_at, env_at, o}, has_copy{}, has_paste{}, left{} { }
+		nik_ce T_chord_assembly_ast() :
+
+			contr{rec_at, str_at, env_at, initial, offset},
+			has_copy{}, has_paste{}, left{} { }
 
 		// copy/paste:
 

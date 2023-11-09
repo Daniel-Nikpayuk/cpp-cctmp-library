@@ -67,8 +67,8 @@ namespace machine {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			halt  , pad     , jump ,
-			list  , lookup  , 
+			halt  , pad     , jump   ,
+			arg   , list    , lookup , 
 			chain , rechain ,
 			right , replace ,
 			dimension
@@ -251,6 +251,49 @@ namespace machine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// arg:
+
+/***********************************************************************************************************************/
+
+// select:
+
+	template<auto... filler>
+	struct T_assembly<AN::arg, AT::select, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto n  = AD<c>::pos(i);
+			nik_ce auto p0 = eval<_par_left_ , n, U_store_T<Ts>...>;
+			nik_ce auto p1 = eval<_par_right_, n, U_store_T<Ts>...>;
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i), p0, p1
+				NIK_ASSEMBLY_RESULT_TS(s, c, i, j, l, t, Ts...)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// reselect:
+
+	template<auto... filler>
+	struct T_assembly<AN::arg, AT::reselect, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto n  = AD<c>::pos(i);
+			nik_ce auto p0 = eval<_par_left_ , n+1, U_store_T<T>, U_store_T<Ts>...>;
+			nik_ce auto p1 = eval<_par_right_, n, U_store_T<Ts>...>;
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i), p0, p1
+				NIK_ASSEMBLY_RESULT_2TS(s, c, i, j, l, t, T, Ts...)(v, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // list:
 
 /***********************************************************************************************************************/
@@ -289,44 +332,6 @@ namespace machine {
 			using nT       = modify_type<_read_only_, decltype(nv)>;
 
 			return NIK_ASSEMBLY_2TS(s, c, i, j, l, nt, nT, Ts...)(nv, vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// select:
-
-	template<auto... filler>
-	struct T_assembly<AN::list, AT::select, filler...>
-	{
-		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename... Ts>
-		nik_ces auto result(Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto n  = AD<c>::pos(i);
-			nik_ce auto p0 = eval<_par_left_ , n, U_store_T<Ts>...>;
-			nik_ce auto p1 = eval<_par_right_, n, U_store_T<Ts>...>;
-
-			return NIK_ASSEMBLY_TEMPLATE(c, i), p0, p1
-				NIK_ASSEMBLY_RESULT_TS(s, c, i, j, l, t, Ts...)(vs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// reselect:
-
-	template<auto... filler>
-	struct T_assembly<AN::list, AT::reselect, filler...>
-	{
-		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename T, typename... Ts>
-		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
-		{
-			nik_ce auto n  = AD<c>::pos(i);
-			nik_ce auto p0 = eval<_par_left_ , n+1, U_store_T<T>, U_store_T<Ts>...>;
-			nik_ce auto p1 = eval<_par_right_, n, U_store_T<Ts>...>;
-
-			return NIK_ASSEMBLY_TEMPLATE(c, i), p0, p1
-				NIK_ASSEMBLY_RESULT_2TS(s, c, i, j, l, t, T, Ts...)(v, vs...);
 		}
 	};
 
