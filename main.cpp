@@ -58,14 +58,13 @@
 #include"02_generator/03_ll_table.hpp"
 
 #include"03_chord/00_lexer.hpp"
-#include"03_chord/01_morph.hpp"
-#include"03_chord/02_cycle.hpp"
-#include"03_chord/03_assembly.hpp"
-#include"03_chord/04_action.hpp"
-#include"03_chord/05_scanner.hpp"
-#include"03_chord/06_syntax.hpp"
-#include"03_chord/07_parser.hpp"
-#include"03_chord/08_metapiler.hpp"
+#include"03_chord/01_assembly_action.hpp"
+#include"03_chord/02_morph_action.hpp"
+#include"03_chord/03_cycle_action.hpp"
+#include"03_chord/04_scanner.hpp"
+#include"03_chord/05_syntax.hpp"
+#include"03_chord/06_parser.hpp"
+#include"03_chord/07_metapiler.hpp"
 
 //#include"04_math/00_byte_ring.hpp"
 //#include"04_math/01_byte_array_ring.hpp"
@@ -95,52 +94,6 @@
 
 /***********************************************************************************************************************/
 
-// square:
-
-	constexpr auto _square_v0()
-	{
-		return chord::source
-		(
-			"square x         ;"
-
-			"body:            ;"
-			". = multiply x x ;"
-			"return _         ;"
-		);
-	}
-
-	template<typename T>
-	constexpr auto square_v0(T v)
-		{ return chord::chord_apply<_square_v0, null_env, T>(v); }
-
-/***********************************************************************************************************************/
-
-// sum of squares:
-
-	constexpr auto _sum_of_squares_v0()
-	{
-		return chord::source
-                (
-			"sum_of_squares x y ;"
-
-			"body:              ;"
-			"x = multiply x x   ;"
-			"y = multiply y y   ;"
-			". = add      x y   ;"
-			"return _           ;"
-		);
-	}
-
-	template<typename T>
-	constexpr auto sum_of_squares_v0(T x, T y)
-		{ return chord::chord_apply<_sum_of_squares_v0, null_env, T>(x, y); }
-
-/***********************************************************************************************************************/
-
-//	using chord_grammar			= chord::T_chord_assembly_grammar;
-//	using chord_grammar			= chord::T_chord_assembly_scanner_grammar;
-//	constexpr auto static_grammar		= U_store_T<chord_grammar>;
-
 	int main_at(int n, int argc, char *argv[], int def = 0)
 	{
 		auto pos = n + 1;
@@ -159,6 +112,152 @@
 		return sum;
 	}
 
+/***********************************************************************************************************************/
+
+// square:
+
+	// version 0:
+
+		constexpr auto _square_v0()
+		{
+			return chord::source
+			(
+				"square x         ;"
+
+				"body:            ;"
+				". = multiply x x ;"
+				"return _         ;"
+			);
+		}
+
+		template<typename T>
+		constexpr auto square_v0(T v)
+			{ return chord::chord_apply<_square_v0, null_env, T>(v); }
+
+	// version 1:
+
+		constexpr auto _square_v1()
+		{
+			return chord::source
+			(
+				"square x                      ;"
+
+				"definitions:                  ;"
+				"sq # argpose[1]{multiply 0 0} ;"
+
+				"body:                         ;"
+				". = sq x                      ;"
+				"return _                      ;"
+			);
+		}
+
+		template<typename T>
+		constexpr auto square_v1(T v)
+			{ return chord::chord_apply<_square_v1, null_env, T>(v); }
+
+/***********************************************************************************************************************/
+
+// sum of squares:
+
+	// version 0:
+
+		constexpr auto _sum_of_squares_v0()
+		{
+			return chord::source
+		        (
+				"sum_of_squares x y ;"
+
+				"body:              ;"
+				"x = multiply x x   ;"
+				"y = multiply y y   ;"
+				". = add      x y   ;"
+				"return _           ;"
+			);
+		}
+
+		template<typename T>
+		constexpr auto sum_of_squares_v0(T x, T y)
+			{ return chord::chord_apply<_sum_of_squares_v0, null_env, T>(x, y); }
+
+	// version 1:
+
+/*
+		constexpr auto _sum_of_squares_v1()
+		{
+			return chord::source
+		        (
+				"f x y                                ;"
+
+				"definitions:                         ;"
+				"sq        # argpose[1]{multiply 0 0} ;"
+				"sum_of_sq # subpose[2]{add sq sq}    ;"
+
+				"body:                                ;"
+				". = sum_of_sq x y                    ;"
+				"return _                             ;"
+			);
+		}
+
+		template<typename T>
+		constexpr auto sum_of_squares_v1(T x, T y)
+			{ return chord::chord_apply<_sum_of_squares_v1, null_env, T>(x, y); }
+*/
+
+/***********************************************************************************************************************/
+
+// two_x_sqd:
+
+	// version 0:
+
+		constexpr auto _two_x_sqd_v0()
+		{
+			return chord::source
+		        (
+				"f x                                   ;"
+
+				"definitions:                          ;"
+				"sq        # argpose[1]{multiply 0 0}  ;"
+				"sum_of_sq # subpose[2]{add sq sq}     ;"
+				"two_x_sqd # argpose[1]{sum_of_sq 0 0} ;"
+
+				"body:                                 ;"
+				". = two_x_sqd x                       ;"
+				"return _                              ;"
+			);
+		}
+
+		template<typename T>
+		constexpr auto two_x_sqd_v0(T x)
+			{ return chord::chord_apply<_two_x_sqd_v0, null_env, T>(x); }
+
+/***********************************************************************************************************************/
+
+		constexpr auto _sum_of_squares_v1()
+		{
+			return chord::source
+		        (
+				"f x y                                ;"
+
+				"definitions:                         ;"
+				"sq        # argpose[1]{multiply 0 0} ;"
+				"sum_of_sq # subpose[2]{add sq sq}    ;"
+
+				"body:                                ;"
+				". = sum_of_sq x y                    ;"
+				"return _                             ;"
+			);
+		}
+
+		template<typename T>
+		constexpr auto sum_of_squares_v1(T x, T y)
+			{ return chord::chord_apply<_sum_of_squares_v1, null_env, T>(x, y); }
+
+/***********************************************************************************************************************/
+
+//	using chord_grammar			= chord::T_chord_assembly_scanner_grammar;
+//	using chord_grammar			= chord::T_chord_assembly_grammar;
+//	constexpr auto static_grammar		= U_store_T<chord_grammar>;
+
 	int main(int argc, char *argv[])
 	{
 	//	printf("%d\n", main_sum(argc, argv));
@@ -167,7 +266,9 @@
 	//	tr_table_printer.print_num_tr_table();
 
 	//	printf("%d\n", square_v0(5));
+	//	printf("%d\n", square_v1(5));
 	//	printf("%d\n", sum_of_squares_v0(3, 4));
+	//	printf("%d\n", sum_of_squares_v1(3, 4));
 
 	//	printf("%d\n", square_v0(main_at(0, argc, argv)));
 	//	printf("%d\n", sum_of_squares_v0(main_at(0, argc, argv), main_at(1, argc, argv)));

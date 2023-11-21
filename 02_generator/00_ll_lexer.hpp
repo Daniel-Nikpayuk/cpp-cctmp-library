@@ -321,6 +321,20 @@ namespace generator {
 
 				pullback();
 			}
+
+			nik_ce csize_type to_number() const
+			{
+				size_type num = 0;
+				auto k        = base::current;
+
+				for (size_type dig = 0, exp = 1; k != base::start; exp *= 10)
+				{
+					dig  = (*--k) - '0';
+					num += dig * exp;
+				}
+
+				return num;
+			}
 	};
 
 	using lexeme  = T_lexeme<gchar_type>;

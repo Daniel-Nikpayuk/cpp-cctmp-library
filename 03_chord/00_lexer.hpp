@@ -96,6 +96,7 @@ namespace chord {
 				empty       = TokenName::dimension,
 				prompt      ,
 				identifier  ,
+				number      ,
 				copy        ,
 				paste       ,
 				quote       ,
@@ -151,6 +152,7 @@ namespace chord {
 				empty         = StateName::empty,
 				initial       = StateName::initial,
 				ulan          , // underscore latin alphanumeric
+				numeral       ,
 				semicolon     ,
 				octothorpe    ,
 				equal         ,
@@ -187,6 +189,7 @@ namespace chord {
 				U_state_type, U_token_type,
 
 				cctmp::pair( ulan          , Token::identifier  ),
+				cctmp::pair( numeral       , Token::number      ),
 				cctmp::pair( semicolon     , Token::statement   ),
 				cctmp::pair( octothorpe    , Token::assign      ),
 				cctmp::pair( equal         , Token::apply       ),
@@ -296,6 +299,7 @@ namespace chord {
 		nik_ce T_chord_assembly_dftt() : table{}
 		{
 			table[ State::initial ][ Charset::ula           ] = State::ulan;
+			table[ State::initial ][ Charset::digit         ] = State::numeral;
 			table[ State::initial ][ Charset::semicolon     ] = State::semicolon;
 			table[ State::initial ][ Charset::octothorpe    ] = State::octothorpe;
 			table[ State::initial ][ Charset::equal         ] = State::equal;
@@ -324,6 +328,8 @@ namespace chord {
 			table[ State::ulan    ][ Charset::ula           ] = State::ulan;
 			table[ State::ulan    ][ Charset::digit         ] = State::ulan;
 			table[ State::ulan    ][ Charset::colon         ] = State::colon;
+
+			table[ State::numeral ][ Charset::digit         ] = State::numeral;
 
 			generator::T_generic_lexer_tt::set_backslash_entries<State, Charset>(table);
 		}

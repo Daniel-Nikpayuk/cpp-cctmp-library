@@ -36,9 +36,6 @@ namespace machine {
 	template<auto... Vs>
 	using T_pack_Vs					= cctmp::T_pack_Vs<Vs...>;
 
-	template<auto U>
-	nik_ce auto & member_value_U			= cctmp::member_value_U<U>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -90,36 +87,35 @@ namespace machine {
 // dispatch:
 
 	template<auto static_contr, auto _index = 0, auto _match = false, auto _key = 0>
-	struct LookupDispatch
+	struct LookupDispatch : public MachineDispatch<static_contr, LI, _index>
 	{
-		nik_ces auto & contr = member_value_U<static_contr>;
-		using cindex         = gcindex_type;
-
 		// defaults:
 
-			nik_ces gindex_type initial_index = _index;
 			nik_ces gindex_type initial_match = _match;
 			nik_ces gindex_type initial_key   = _key;
-
-		// accessors:
-
-			nik_ces const auto & instr (cindex i) { return contr[i]; }
-			nik_ces gindex_type value  (cindex i, cindex n) { return contr[i][n]; }
-
-			nik_ces gindex_type pos (cindex i) { return value(i, LI::pos); }
-			nik_ces gindex_type num (cindex i) { return value(i, LI::num); }
-
-		// navigators:
-
-			nik_ces gindex_type next_offset (cindex i) { return value(i, LI::next); }
-			nik_ces gindex_type next_index  (cindex i) { return i + next_offset(i); }
-
-			nik_ces gkey_type next_name (cindex i) { return value(next_index(i), LI::name); }
-			nik_ces gkey_type next_note (cindex i) { return value(next_index(i), LI::note); }
 	};
 
 	template<auto static_contr, auto _index = 0, auto _match = false, auto _key = 0>
 	using LD = LookupDispatch<static_contr, _index, _match, _key>;
+
+/***********************************************************************************************************************/
+
+// cons:
+
+	template<auto c, auto i, auto s>
+	struct T_lookup_cons
+	{
+		template<typename... Fs>
+		nik_ces auto result(Fs... fs)
+		{
+			nik_ce auto m = LD<c>::initial_match;
+			nik_ce auto k = LD<c>::initial_key;
+
+			return NIK_LOOKUP_TS(c, i, s, m, k, Fs...)(fs...);
+		}
+
+	}; template<auto c, auto i, auto s>
+		nik_ce auto U_lookup_cons = U_store_T<T_lookup_cons<c, i, s>>;
 
 /***********************************************************************************************************************/
 

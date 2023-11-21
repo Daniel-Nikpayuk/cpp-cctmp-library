@@ -47,7 +47,7 @@ namespace machine {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
-			begin, pad, jump, apply, unit, replace, end, dimension
+			begin, pad, jump, apply, unit, morph, replace, end, dimension
 		};
 
 	}; using AAN = AssemblyActionName;
@@ -61,34 +61,10 @@ namespace machine {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
-			begin, value, recurse, lookup, end, dimension
+			begin, value, recurse, lookup, cons, end, dimension
 		};
 
 	}; using AAT = AssemblyActionNote;
-
-/***********************************************************************************************************************/
-
-// instructions:
-
-//	struct AssemblyActionInstr
-//	{
-//		enum : gkey_type { pos0 = 0, pos1, pos2, pos3, dimension };
-//		enum : gkey_type { name = 0, note };
-
-//	}; using AAI = AssemblyActionInstr;
-
-/***********************************************************************************************************************/
-
-// offset:
-
-//	using AssemblyActionOffset = cctmp::ActionOffset;
-//	using AAO                  = cctmp::ActionOffset;
-
-/***********************************************************************************************************************/
-
-// size:
-
-//	using T_assembly_contr_size = cctmp::T_contr_size<T_assembly_action, AAI, AAO>;
 
 /***********************************************************************************************************************/
 
@@ -191,10 +167,12 @@ namespace machine {
 			nik_ces gindex_type offset =	machine_offset< MAN::push , MAT::id  > +
 							machine_offset< MAN::set  , MAT::inc > ;
 
+			using cindex = gcindex_type;
+
 			template<typename Contr>
-			nik_ces void result(Contr *contr)
+			nik_ces void result(Contr *contr, cindex note)
 			{
-				machine_action< MAN::push , MAT::id  >(contr, AN::chain, AT::call_f);
+				machine_action< MAN::push , MAT::id  >(contr, AN::chain, note);
 				machine_action< MAN::set  , MAT::inc >(contr, CN::id, CT::id);
 			}
 		};
@@ -210,9 +188,9 @@ namespace machine {
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex arg_offset)
+			nik_ces void result(Contr *contr, cindex arg_drop, cindex note)
 			{
-				  chain_action< CAN::end , CAT::id >(contr, arg_offset, CT::apply);
+				  chain_action< CAN::end , CAT::id >(contr, arg_drop, note);
 				machine_action< MAN::pop , MAT::id >(contr);
 			}
 		};
@@ -278,11 +256,11 @@ namespace machine {
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex arg_offset)
+			nik_ces void result(Contr *contr, cindex arg_drop)
 			{
 				machine_action< MAN::push , MAT::id  >(contr, AN::chain, AT::call_f);
 				machine_action< MAN::set  , MAT::inc >(contr, CN::id, CT::id);
-				  chain_action< CAN::end  , CAT::id  >(contr, arg_offset, CT::first);
+				  chain_action< CAN::end  , CAT::id  >(contr, arg_drop, CT::first);
 				machine_action< MAN::pop  , MAT::id  >(contr);
 			}
 		};
@@ -335,13 +313,10 @@ namespace machine {
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex not_copy, cindex arg_at)
+			nik_ces void result(Contr *contr, cindex arg_at)
 			{
-				if (not_copy)
-				{
-					machine_action<MAN::set, MAT::inc>(contr, AN::arg, AT::reselect, 1, arg_at);
-					machine_action<MAN::set, MAT::inc>(contr, AN::replace, AT::id);
-				}
+				machine_action<MAN::set, MAT::inc>(contr, AN::arg, AT::reselect, 1, arg_at);
+				machine_action<MAN::set, MAT::inc>(contr, AN::replace, AT::id);
 			}
 		};
 

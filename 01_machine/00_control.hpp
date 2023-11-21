@@ -27,6 +27,12 @@ namespace machine {
 
 // cctmp:
 
+	template<auto U>
+	using T_store_U						= cctmp::T_store_U<U>;
+
+	template<auto U>
+	nik_ce auto & member_value_U				= cctmp::member_value_U<U>;
+
 	using gkey_type						= cctmp::gkey_type;
 	using gindex_type					= cctmp::gindex_type;
 	using gcindex_type					= cctmp::gcindex_type;
@@ -137,6 +143,39 @@ namespace machine {
 	};
 
 /***********************************************************************************************************************/
+
+// dispatch:
+
+	template<auto static_contr, typename MI, auto _index = 0>
+	struct MachineDispatch
+	{
+		nik_ces auto & contr	= member_value_U<static_contr>;
+		using cindex		= gcindex_type;
+
+		// defaults:
+
+			nik_ces gindex_type initial_index = _index;
+
+		// accessors:
+
+			nik_ces const auto & instr (cindex i) { return contr[i]; }
+			nik_ces gindex_type value  (cindex i, cindex n) { return contr[i][n]; }
+
+			nik_ces gindex_type pos (cindex i) { return value(i, MI::pos); }
+			nik_ces gindex_type num (cindex i) { return value(i, MI::num); }
+
+		// navigators:
+
+			nik_ces gindex_type next_offset (cindex i) { return value(i, MI::next); }
+			nik_ces gindex_type next_index  (cindex i) { return i + next_offset(i); }
+
+			nik_ces gkey_type next_name (cindex i) { return value(next_index(i), MI::name); }
+			nik_ces gkey_type next_note (cindex i) { return value(next_index(i), MI::note); }
+	};
+
+	template<auto static_contr, typename MI, auto _index = 0>
+	using MD = MachineDispatch<static_contr, MI, _index>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -177,30 +216,6 @@ namespace machine {
 		};
 
 	}; using MAT = MachineActionNote;
-
-/***********************************************************************************************************************/
-
-// instructions:
-
-//	struct MachineActionInstr
-//	{
-//		enum : gkey_type { pos0 = 0, pos1, pos2, pos3, dimension };
-//		enum : gkey_type { name = 0, note };
-
-//	}; using MAI = MachineActionInstr;
-
-/***********************************************************************************************************************/
-
-// offset:
-
-//	using MachineActionOffset = cctmp::ActionOffset;
-//	using MAO                 = cctmp::ActionOffset;
-
-/***********************************************************************************************************************/
-
-// size:
-
-//	using T_machine_contr_size = cctmp::T_contr_size<T_machine_action, LAI, LAO>;
 
 /***********************************************************************************************************************/
 

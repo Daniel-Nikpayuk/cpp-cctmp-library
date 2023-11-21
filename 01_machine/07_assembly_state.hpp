@@ -88,9 +88,10 @@ namespace machine {
 			id = 0, identity = id, // convenience for default params.
 			first   , segment  ,
 			go_to   , branch   ,
-			recurse , 
+			recurse ,
 			select  , reselect ,
 			call_f  , void_f   ,
+			cons_f  ,
 			dimension
 		};
 	};
@@ -108,35 +109,33 @@ namespace machine {
 // dispatch:
 
 	template<auto static_contr, auto _index = 0, auto _count = 0>
-	struct AssemblyDispatch
+	struct AssemblyDispatch : public MachineDispatch<static_contr, AI, _index>
 	{
-		nik_ces auto & contr = member_value_U<static_contr>;
-		using cindex         = gcindex_type;
-
 		// defaults:
 
-			nik_ces gindex_type initial_index = _index;
 			nik_ces gindex_type initial_count = _count;
-
-		// accessors:
-
-			nik_ces const auto & instr(cindex i) { return contr[i]; }
-			nik_ces gindex_type value(cindex i, cindex n) { return contr[i][n]; }
-
-			nik_ces gindex_type pos (cindex i) { return value(i, AI::pos); }
-			nik_ces gindex_type num (cindex i) { return value(i, AI::num); }
-
-		// navigators:
-
-			nik_ces gindex_type next_offset (cindex i) { return value(i, AI::next); }
-			nik_ces gindex_type next_index  (cindex i) { return i + next_offset(i); }
-
-			nik_ces gkey_type next_name (cindex i) { return value(next_index(i), AI::name); }
-			nik_ces gkey_type next_note (cindex i) { return value(next_index(i), AI::note); }
 	};
 
 	template<auto static_contr, auto _index = 0, auto _count = 0>
 	using AD = AssemblyDispatch<static_contr, _index, _count>;
+
+/***********************************************************************************************************************/
+
+// cons:
+
+	template<auto s, auto c, auto i>
+	struct T_assembly_cons
+	{
+		template<auto l, auto t, typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto j = AD<c>::initial_count;
+
+			return NIK_ASSEMBLY_TS(s, c, i, j, l, t, Ts...)(vs...);
+		}
+
+	}; template<auto s, auto c, auto i>
+		nik_ce auto U_assembly_cons = U_store_T<T_assembly_cons<s, c, i>>;
 
 /***********************************************************************************************************************/
 
@@ -404,6 +403,27 @@ namespace machine {
 			T_chain_istart::template result<c, ni, l, t>(vs...);
 
 			return NIK_ASSEMBLY_TS(s, c, i, j, l, t, Ts...)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// cons_f:
+
+	template<auto... filler>
+	struct T_assembly<AN::chain, AT::cons_f, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto ni = AD<c>::pos(i);
+			nik_ce auto nv = U_chain_cons<c, ni>;
+
+			nik_ce auto nU = U_store_T<decltype(nv)>;
+			nik_ce auto nt = cons_<t, nU>;
+			using nT       = modify_type<_read_only_, decltype(nv)>;
+
+			return NIK_ASSEMBLY_2TS(s, c, i, j, l, nt, nT, Ts...)(nv, vs...);
 		}
 	};
 

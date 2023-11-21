@@ -841,9 +841,9 @@
 
 // params:
 
-	#define NIK_CHAIN_PARAMS(_c_, _i_, _j_, _l_, _t_)								\
+	#define NIK_CHAIN_PARAMS(_c_, _i_, _j_, _k_, _l_, _t_)								\
 															\
-		auto _c_, auto _i_, auto _j_, auto _l_, auto _t_
+		auto _c_, auto _i_, auto _j_, auto _k_, auto _l_, auto _t_
 
 /***********************************************************************************************************************/
 
@@ -856,13 +856,13 @@
 			CD<c>::next_name(_i_),										\
 			CD<c>::next_note(_i_)
 
-	#define NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_)									\
+	#define NIK_CHAIN_M(_c_, _i_, _j_, _k_, _l_, _t_)								\
 															\
 		>::template result											\
 		<													\
 			_c_,												\
 			CD<c>::next_index(_i_),										\
-			_j_, _l_, _t_
+			_j_, _k_, _l_, _t_
 
 	#define NIK_CHAIN_R 												\
 															\
@@ -872,45 +872,45 @@
 															\
 		NIK_CHAIN_L(_c_, _i_)
 
-	#define NIK_CHAIN_RESULT(_c_, _i_, _j_, _l_, _t_)								\
+	#define NIK_CHAIN_RESULT(_c_, _i_, _j_, _k_, _l_, _t_)								\
 															\
-		NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_) NIK_CHAIN_R
+		NIK_CHAIN_M(_c_, _i_, _j_, _k_, _l_, _t_) NIK_CHAIN_R
 
-	#define NIK_CHAIN_RESULT_TS(_c_, _i_, _j_, _l_, _t_, _t0_)							\
+	#define NIK_CHAIN_RESULT_TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_)							\
 															\
-		NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_), _t0_ NIK_CHAIN_R
+		NIK_CHAIN_M(_c_, _i_, _j_, _k_, _l_, _t_), _t0_ NIK_CHAIN_R
 
-	#define NIK_CHAIN_RESULT_2TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_)						\
+	#define NIK_CHAIN_RESULT_2TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_, _t1_)						\
 															\
-		NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_), _t0_, _t1_ NIK_CHAIN_R
+		NIK_CHAIN_M(_c_, _i_, _j_, _k_, _l_, _t_), _t0_, _t1_ NIK_CHAIN_R
 
-	#define NIK_CHAIN_RESULT_3TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_)						\
+	#define NIK_CHAIN_RESULT_3TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_, _t1_, _t2_)					\
 															\
-		NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_), _t0_, _t1_, _t2_ NIK_CHAIN_R
+		NIK_CHAIN_M(_c_, _i_, _j_, _k_, _l_, _t_), _t0_, _t1_, _t2_ NIK_CHAIN_R
 
-	#define NIK_CHAIN_RESULT_4TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)					\
+	#define NIK_CHAIN_RESULT_4TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)				\
 															\
-		NIK_CHAIN_M(_c_, _i_, _j_, _l_, _t_), _t0_, _t1_, _t2_, _t3_ NIK_CHAIN_R
+		NIK_CHAIN_M(_c_, _i_, _j_, _k_, _l_, _t_), _t0_, _t1_, _t2_, _t3_ NIK_CHAIN_R
 
-	#define NIK_CHAIN(_c_, _i_, _j_, _l_, _t_)									\
+	#define NIK_CHAIN(_c_, _i_, _j_, _k_, _l_, _t_)									\
 															\
-		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT(_c_, _i_, _j_, _l_, _t_)
+		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT(_c_, _i_, _j_, _k_, _l_, _t_)
 
-	#define NIK_CHAIN_TS(_c_, _i_, _j_, _l_, _t_, _t0_)								\
+	#define NIK_CHAIN_TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_)							\
 															\
-		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_TS(_c_, _i_, _j_, _l_, _t_, _t0_)
+		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_)
 
-	#define NIK_CHAIN_2TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_)							\
+	#define NIK_CHAIN_2TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_, _t1_)							\
 															\
-		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_2TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_)
+		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_2TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_, _t1_)
 
-	#define NIK_CHAIN_3TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_)						\
+	#define NIK_CHAIN_3TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_, _t1_, _t2_)						\
 															\
-		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_3TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_)
+		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_3TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_, _t1_, _t2_)
 
-	#define NIK_CHAIN_4TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)						\
+	#define NIK_CHAIN_4TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)					\
 															\
-		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_4TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)
+		NIK_CHAIN_TEMPLATE(_c_, _i_) NIK_CHAIN_RESULT_4TS(_c_, _i_, _j_, _k_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)
 
 /***********************************************************************************************************************/
 

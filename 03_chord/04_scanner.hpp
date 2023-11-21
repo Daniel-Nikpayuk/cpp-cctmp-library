@@ -27,6 +27,11 @@ namespace chord {
 
 // cctmp:
 
+	template<auto Op, typename T>
+	using modify_type					= cctmp::modify_type<Op, T>;
+
+	nik_ce auto _from_reference_				= cctmp::_from_reference_;
+
 	using strlit_type					= cctmp::strlit_type;
 	nik_ce auto U_strlit_type				= cctmp::U_strlit_type;
 
@@ -160,7 +165,26 @@ namespace chord {
 				asm_left,
 				asm_swap,
 				asm_apply,
-				asm_sub_value, asm_sub_paste, asm_sub_quote, asm_sub_morph, asm_sub_cycle, asm_sub_end,
+				asm_sub_value, asm_sub_paste, asm_sub_quote, asm_sub_end,
+
+			// morph:
+
+				// op value:
+
+					mor_op_arity, mor_op_value, mor_op_id, mor_op_deref, mor_op_inc, mor_op_dec,
+
+				// argpose:
+
+					mor_argpose_begin, mor_argpose_end, mor_argpose_value,
+
+				// subpose:
+
+					mor_subpose_begin, mor_subpose_end, mor_subpose_value,
+					mor_subpose_id, mor_subpose_deref, mor_subpose_inc, mor_subpose_dec,
+
+				// curry:
+
+					mor_curry_begin, mor_curry_end, mor_curry_value,
 
 			// dimension:
 
@@ -189,7 +213,6 @@ namespace chord {
 
 // asm:
 
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // accept:
@@ -340,27 +363,178 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::asm_sub_morph, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ } // nothing yet.
-	};
-
-	template<auto... filler>
-	struct T_chord_assembly_scanner_translation_action<CASAN::asm_sub_cycle, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ } // nothing yet.
-	};
-
-	template<auto... filler>
 	struct T_chord_assembly_scanner_translation_action<CASAN::asm_sub_end, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 			{ t->update_offset(); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// morph:
+
+/***********************************************************************************************************************/
+
+// op:
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_op_arity, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_op_value, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_op_id, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_op_deref, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_op_inc, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_op_dec, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+// argpose:
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_argpose_begin, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_argpose_end, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_argpose_value, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+// subpose:
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_subpose_begin, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_subpose_end, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_subpose_value, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_subpose_id, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_subpose_deref, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_subpose_inc, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_subpose_dec, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+// curry:
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_curry_begin, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_curry_end, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
+	};
+
+	template<auto... filler>
+	struct T_chord_assembly_scanner_translation_action<CASAN::mor_curry_value, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ } // nothing yet.
 	};
 
 /***********************************************************************************************************************/
@@ -400,132 +574,178 @@ namespace chord {
 
 		nik_ces auto source() { return generator::context_free_grammar
 		(
-		// start:
+			// start:
 
-			"Start",
+				"Start",
 
-		// assembly:
+			// assembly:
 
-			"Start      -> FuncBeg FuncArgs FuncEnd Block RecBlock                     ;"
-			"FuncArgs   -> FuncArg FuncArgs                                            ;"
-			"           -> empty                                                       ;"
-			"Block      -> LabelBeg LabelEnd Instrs                                    ;"
-			"RecBlock   -> Block RecBlock                                              ;"
-			"           -> empty                                          : asm_accept ;"
-			"Instrs     -> Instr RecInstr LastInstr                                    ;"
-			"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
-			"RecInstr   -> Instr RecInstr                                              ;"
-			"           -> empty                                                       ;"
-			"LastInstr  -> GotoBeg GotoVal GotoEnd                                     ;"
-			"           -> TailBeg TailVal TailEnd                                     ;"
-			"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
-			"           -> LabelGotoBeg LabelEnd Instr RecInstr LastInstr              ;"
-			"Instr      -> LeftVal RightInstr                                          ;"
-			"           -> ! SwapBeg \\= OpVal ArgVals SwapEnd                         ;"
-			"           -> TestBeg OpVal ArgVals TestEnd BranchBeg BranchVal BranchEnd ;"
-			"           -> VoidBeg OpVal ArgVals VoidEnd                               ;"
-			"RightInstr -> ApplyBeg OpVal ArgVals ApplyEnd                             ;"
-			"           -> AssignBeg UnitVal AssignEnd                                 ;"
+				"Start      -> FuncBeg FuncArgs FuncEnd Block RecBlock                     ;"
+				"FuncArgs   -> FuncArg FuncArgs                                            ;"
+				"           -> empty                                                       ;"
+				"Block      -> LabelBeg LabelEnd Instrs                                    ;"
+				"RecBlock   -> Block RecBlock                                              ;"
+				"           -> empty                                          : asm_accept ;"
+				"Instrs     -> Instr RecInstr LastInstr                                    ;"
+				"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
+				"RecInstr   -> Instr RecInstr                                              ;"
+				"           -> empty                                                       ;"
+				"LastInstr  -> GotoBeg GotoVal GotoEnd                                     ;"
+				"           -> TailBeg TailVal TailEnd                                     ;"
+				"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
+				"           -> LabelGotoBeg LabelEnd Instr RecInstr LastInstr              ;"
+				"Instr      -> LeftVal RightInstr                                          ;"
+				"           -> ! SwapBeg \\= OpVal ArgVals SwapEnd                         ;"
+				"           -> TestBeg OpVal ArgVals TestEnd BranchBeg BranchVal BranchEnd ;"
+				"           -> VoidBeg OpVal ArgVals VoidEnd                               ;"
+				"RightInstr -> ApplyBeg OpVal ArgVals ApplyEnd                             ;"
+				"           -> AssignBeg UnitVal AssignEnd                                 ;"
 
-			// function:
+				// function:
 
-				"FuncBeg -> identifier                ;"
-				"FuncArg -> identifier : asm_func_arg ;"
-				"FuncEnd -> \\;                       ;"
+					"FuncBeg -> identifier                ;"
+					"FuncArg -> identifier : asm_func_arg ;"
+					"FuncEnd -> \\;                       ;"
 
-			// label:
+				// label:
 
-				"LabelBeg     -> label : asm_label      ;"
-				"LabelGotoBeg -> label : asm_label_goto ;"
-				"LabelEnd     -> \\;                    ;"
+					"LabelBeg     -> label : asm_label      ;"
+					"LabelGotoBeg -> label : asm_label_goto ;"
+					"LabelEnd     -> \\;                    ;"
 
-			// return:
+				// return:
 
-				"ReturnBeg -> return : asm_unit ;"
-				"ReturnEnd -> \\;               ;"
+					"ReturnBeg -> return : asm_unit ;"
+					"ReturnEnd -> \\;               ;"
 
-			// goto:
+				// goto:
 
-				"GotoBeg -> goto       : asm_jump ;"
-				"GotoVal -> identifier            ;"
-				"GotoEnd -> \\;                   ;"
+					"GotoBeg -> goto       : asm_jump ;"
+					"GotoVal -> identifier            ;"
+					"GotoEnd -> \\;                   ;"
 
-			// tail:
+				// tail:
 
-				"TailBeg -> tail       : asm_jump ;"
-				"TailVal -> identifier            ;"
-				"TailEnd -> \\;                   ;"
+					"TailBeg -> tail       : asm_jump ;"
+					"TailVal -> identifier            ;"
+					"TailEnd -> \\;                   ;"
 
-			// left:
+				// left:
 
-				"LeftVal -> identifier : asm_left ;"
-				"        -> .                     ;"
+					"LeftVal -> identifier : asm_left ;"
+					"        -> .                     ;"
 
-			// swap:
+				// swap:
 
-				"SwapBeg -> identifier : asm_swap ;"
-				"SwapEnd -> \\;                   ;"
+					"SwapBeg -> identifier : asm_swap ;"
+					"SwapEnd -> \\;                   ;"
 
-			// test:
+				// test:
 
-				"TestBeg -> test : asm_apply ;"
-				"TestEnd -> \\;              ;"
+					"TestBeg -> test : asm_apply ;"
+					"TestEnd -> \\;              ;"
 
-			// branch:
+				// branch:
 
-				"BranchBeg -> branch     : asm_jump ;"
-				"BranchVal -> identifier            ;"
-				"BranchEnd -> \\;                   ;"
+					"BranchBeg -> branch     : asm_jump ;"
+					"BranchVal -> identifier            ;"
+					"BranchEnd -> \\;                   ;"
 
-			// void:
+				// void:
 
-				"VoidBeg -> void : asm_apply ;"
-				"VoidEnd -> \\;              ;"
+					"VoidBeg -> void : asm_apply ;"
+					"VoidEnd -> \\;              ;"
 
-			// apply:
+				// apply:
 
-				"ApplyBeg -> \\= : asm_apply ;"
-				"ApplyEnd -> \\;             ;"
+					"ApplyBeg -> \\= : asm_apply ;"
+					"ApplyEnd -> \\;             ;"
 
-			// assign:
+				// assign:
 
-				"AssignBeg -> #   : asm_unit ;"
-				"AssignEnd -> \\;            ;"
+					"AssignBeg -> #   : asm_unit ;"
+					"AssignEnd -> \\;            ;"
 
-			// op value:
+				// op value:
 
-				"OpVal -> identifier : asm_sub_value ;"
-				"      -> _          : asm_sub_paste ;"
-				"      -> quote      : asm_sub_quote ;"
-			//	"      -> Morph      : asm_sub_morph ;"
-			//	"      -> Cycle      : asm_sub_cycle ;"
+					"OpVal -> identifier : asm_sub_value ;"
+					"      -> _          : asm_sub_paste ;"
+					"      -> quote      : asm_sub_quote ;"
 
-			// arg values:
+				// arg values:
 
-				"ArgVals -> ArgVal ArgVals                 ;"
-				"        -> ! MutVal ArgVals               ;"
-				"        -> empty            : asm_sub_end ;"
+					"ArgVals -> ArgVal ArgVals                 ;"
+					"        -> ! MutVal ArgVals               ;"
+					"        -> empty            : asm_sub_end ;"
 
-			// arg value:
+				// arg value:
 
-				"ArgVal -> identifier : asm_sub_value ;"
-				"       -> _          : asm_sub_paste ;"
-				"       -> quote      : asm_sub_quote ;"
-			//	"       -> Morph      : asm_sub_morph ;"
-			//	"       -> Cycle      : asm_sub_cycle ;"
+					"ArgVal -> identifier : asm_sub_value ;"
+					"       -> _          : asm_sub_paste ;"
+					"       -> quote      : asm_sub_quote ;"
 
-			// mut value:
+				// mut value:
 
-				"MutVal -> identifier : asm_sub_value ;"
+					"MutVal -> identifier : asm_sub_value ;"
 
-			// unit value:
+				// unit value:
 
-				"UnitVal -> identifier ;"
-				"        -> _          ;"
-				"        -> quote      ;"
-			//	"        -> Morph      ;"
-			//	"        -> Cycle      ;"
+					"UnitVal -> identifier ;"
+					"        -> _          ;"
+					"        -> quote      ;"
+					"        -> Morph      ;"
+				//	"        -> Cycle      ;"
 
+			// morph:
+
+				"Morph -> argpose [ MorOpArity ] ArgposeBeg MorOpVal ArgposeVals ArgposeEnd ;"
+				"      -> subpose [ MorOpArity ] SubposeBeg MorOpVal SubposeVals SubposeEnd ;"
+				"      ->   curry [ MorOpArity ]   CurryBeg MorOpVal   CurryVals   CurryEnd ;"
+
+				// op:
+
+					"MorOpArity -> number     : mor_op_arity ;"
+					"MorOpVal   -> identifier : mor_op_value ;"
+					"           -> @          : mor_op_id    ;"
+					"           -> *          : mor_op_deref ;"
+					"           -> +          : mor_op_inc   ;"
+					"           -> \\-        : mor_op_dec   ;"
+
+				// argpose:
+
+					"ArgposeBeg -> { : mor_argpose_begin ;"
+					"ArgposeEnd -> } : mor_argpose_end   ;"
+
+					"ArgposeVals -> ArgposeVal ArgposeVals ;"
+					"            -> empty                  ;"
+
+					"ArgposeVal -> number : mor_argpose_value ;"
+
+				// subpose:
+
+					"SubposeBeg -> { : mor_subpose_begin ;"
+					"SubposeEnd -> } : mor_subpose_end   ;"
+
+					"SubposeVals -> SubposeVal SubposeVals ;"
+					"            -> empty                  ;"
+
+					"SubposeVal -> identifier : mor_subpose_value ;"
+					"           -> @          : mor_subpose_id    ;"
+					"           -> *          : mor_subpose_deref ;"
+					"           -> +          : mor_subpose_inc   ;"
+					"           -> \\-        : mor_subpose_dec   ;"
+
+				// curry:
+
+					"CurryBeg -> { : mor_curry_begin ;"
+					"CurryEnd -> } : mor_curry_end   ;"
+
+					"CurryVals -> CurryVal CurryVals ;"
+					"          -> empty              ;"
+
+					"CurryVal -> identifier : mor_curry_value ;"
+
+			// cycle:
 		);}
 
 		nik_ces auto map = cctmp::table
@@ -535,6 +755,7 @@ namespace chord {
 			sxt_pair( " "          , Token::invalid    ),
 			sxt_pair( "$"          , Token::prompt     ),
 			sxt_pair( "identifier" , Token::identifier ),
+			sxt_pair( "number"     , Token::number     ),
 			sxt_pair( "."          , Token::copy       ),
 			sxt_pair( "_"          , Token::paste      ),
 			sxt_pair( "quote"      , Token::quote      ),
@@ -600,9 +821,43 @@ namespace chord {
 				sxa_pair( "asm_sub_value"  , ActName::asm_sub_value  ),
 				sxa_pair( "asm_sub_paste"  , ActName::asm_sub_paste  ),
 				sxa_pair( "asm_sub_quote"  , ActName::asm_sub_quote  ),
-				sxa_pair( "asm_sub_morph"  , ActName::asm_sub_morph  ),
-				sxa_pair( "asm_sub_cycle"  , ActName::asm_sub_cycle  ),
-				sxa_pair( "asm_sub_end"    , ActName::asm_sub_end    )//,
+				sxa_pair( "asm_sub_end"    , ActName::asm_sub_end    ),
+
+			// morph:
+
+				// op:
+
+					sxt_pair( "mor_op_arity" , ActName::mor_op_arity ),
+					sxt_pair( "mor_op_value" , ActName::mor_op_value ),
+					sxt_pair( "mor_op_id"    , ActName::mor_op_id    ),
+					sxt_pair( "mor_op_deref" , ActName::mor_op_deref ),
+					sxt_pair( "mor_op_inc"   , ActName::mor_op_inc   ),
+					sxt_pair( "mor_op_dec"   , ActName::mor_op_dec   ),
+
+				// argpose:
+
+					sxt_pair( "mor_argpose_begin" , ActName::mor_argpose_begin ),
+					sxt_pair( "mor_argpose_end"   , ActName::mor_argpose_end   ),
+
+					sxt_pair( "mor_argpose_value" , ActName::mor_argpose_value ),
+
+				// subpose:
+
+					sxt_pair( "mor_subpose_begin" , ActName::mor_subpose_begin ),
+					sxt_pair( "mor_subpose_end"   , ActName::mor_subpose_end   ),
+
+					sxt_pair( "mor_subpose_value" , ActName::mor_subpose_value ),
+					sxt_pair( "mor_subpose_id"    , ActName::mor_subpose_id    ),
+					sxt_pair( "mor_subpose_deref" , ActName::mor_subpose_deref ),
+					sxt_pair( "mor_subpose_inc"   , ActName::mor_subpose_inc   ),
+					sxt_pair( "mor_subpose_dec"   , ActName::mor_subpose_dec   ),
+
+				// curry:
+
+					sxt_pair( "mor_curry_begin" , ActName::mor_curry_begin ),
+					sxt_pair( "mor_curry_end"   , ActName::mor_curry_end   ),
+
+					sxt_pair( "mor_curry_value" , ActName::mor_curry_value )//,
 		);
 	};
 
@@ -627,7 +882,7 @@ namespace chord {
 		using T_lexer			= typename T_grammar::T_lexer;
 		using Token			= typename T_grammar::Token;
 
-		nik_ces auto prod_size		= 7;//cctmp::string_literal("<A|C|B|B>").size();
+		nik_ces auto prod_size		= 8;//cctmp::string_literal("<A|C|B|B>").size();
 
 		nik_ces auto stack_start	= symbol_type{generator::Sign::nonterminal, base::start_index};
 		nik_ces auto stack_finish	= symbol_type{generator::Sign::terminal, Token::prompt};

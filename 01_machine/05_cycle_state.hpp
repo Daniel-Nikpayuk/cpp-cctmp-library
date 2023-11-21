@@ -80,36 +80,35 @@ namespace machine {
 // dispatch:
 
 	template<auto static_contr, auto _index = 0, auto _carop = _id_, auto _cdrop = _id_>
-	struct CycleDispatch
+	struct CycleDispatch : public MachineDispatch<static_contr, YI, _index>
 	{
-		nik_ces auto & contr = member_value_U<static_contr>;
-		using cindex         = gcindex_type;
-
 		// defaults:
 
-			nik_ces gindex_type initial_index = _index;
 			nik_ces gindex_type initial_carop = _carop;
 			nik_ces gindex_type initial_cdrop = _cdrop;
-
-		// accessors:
-
-			nik_ces const auto & instr (cindex i) { return contr[i]; }
-			nik_ces gindex_type value  (cindex i, cindex n) { return contr[i][n]; }
-
-			nik_ces gindex_type pos (cindex i) { return value(i, YI::pos); }
-			nik_ces gindex_type num (cindex i) { return value(i, YI::num); }
-
-		// navigators:
-
-			nik_ces gindex_type next_offset (cindex i) { return value(i, YI::next); }
-			nik_ces gindex_type next_index  (cindex i) { return i + next_offset(i); }
-
-			nik_ces gkey_type next_name (cindex i) { return value(next_index(i), YI::name); }
-			nik_ces gkey_type next_note (cindex i) { return value(next_index(i), YI::note); }
 	};
 
 	template<auto static_contr, auto _index = 0, auto _carop = _id_, auto _cdrop = _id_>
 	using YD = CycleDispatch<static_contr, _index, _carop, _cdrop>;
+
+/***********************************************************************************************************************/
+
+// cons:
+
+	template<auto c, auto i>
+	struct T_cycle_cons
+	{
+		template<auto l, auto t, typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			nik_ce auto f = YD<c>::initial_carop;
+			nik_ce auto g = YD<c>::initial_cdrop;
+
+			return NIK_CYCLE_TS(c, i, f, g, l, t, Ts...)(vs...);
+		}
+
+	}; template<auto c, auto i>
+		nik_ce auto U_cycle_cons = U_store_T<T_cycle_cons<c, i>>;
 
 /***********************************************************************************************************************/
 

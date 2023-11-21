@@ -65,30 +65,6 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
-// instructions:
-
-//	struct LookupActionInstr
-//	{
-//		enum : gkey_type { pos0 = 0, pos1, pos2, pos3, dimension };
-//		enum : gkey_type { name = 0, note };
-
-//	}; using LAI = LookupActionInstr;
-
-/***********************************************************************************************************************/
-
-// offset:
-
-//	using LookupActionOffset = cctmp::ActionOffset;
-//	using LAO                = cctmp::ActionOffset;
-
-/***********************************************************************************************************************/
-
-// size:
-
-//	using T_lookup_contr_size = cctmp::T_contr_size<T_lookup_action, LAI, LAO>;
-
-/***********************************************************************************************************************/
-
 // find:
 
 	// id:
