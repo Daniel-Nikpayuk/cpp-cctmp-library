@@ -461,6 +461,12 @@ namespace generator {
 			nik_ce T_icon() : base{} { }
 			nik_ce T_icon(ctype_cptr s, ctype_cptr f) : base{s, f} { }
 
+			nik_ce bool operator == (const T_icon<Type, SizeType> & i) const
+				{ return cctmp::apply<cctmp::_subarray_same_<>>(*this, i); }
+
+			nik_ce bool operator != (const T_icon<Type, SizeType> & i) const
+				{ return !cctmp::apply<cctmp::_subarray_same_<>>(*this, i); }
+
 			nik_ce void copy(const T_lexeme<Type> *l)
 			{
 				base::start  = l->cbegin();

@@ -366,8 +366,8 @@ namespace chord {
 		{
 			auto k = t->vars.match(l);
 
-			if (k.not_end()) t->line.set_arg(k.left_size());
-			else t->line.set_unknown(l);
+			if (k.not_end()) t->line.left.set_sign(k.left_size());
+			else t->line.set_left_unknown(l);
 		}
 	};
 
@@ -376,7 +376,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->line.set_arg(t->vars.anon_at()); }
+			{ t->line.left.set_sign(_zero); }
 	};
 
 // apply:
@@ -387,7 +387,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			if (t->line.left_unknown()) { } // error.
+			if (t->line.left.is_unknown()) { } // error.
 		}
 	};
 
@@ -399,8 +399,8 @@ namespace chord {
 		{
 			t->op_capture_action();
 
-			t->template assembly_action<AAN::apply, AAT::end>(t->vars.dropsize(), t->line.op_note());
-			t->template assembly_action<AAN::replace, AAT::id>(t->line.arg_at());
+			t->template assembly_action<AAN::apply, AAT::end>(t->vars.dropsize(), t->op_note());
+			t->non_zero_replace(t->line.left.arg_at());
 		}
 	};
 
@@ -412,7 +412,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			if (t->line.left_unknown()) { } // error.
+			if (t->line.left.is_unknown()) { } // error.
 		}
 	};
 
@@ -473,7 +473,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			if (t->line.left_unknown()) t->vars.append(t->line.left_ptr());
+			if (t->line.left.is_unknown()) t->assign_unknown();
 			else { } // error.
 		}
 	};
@@ -484,9 +484,9 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->template assembly_action<AAN::replace, AAT::id>(t->vars.max());
+			t->template assembly_action<AAN::replace, AAT::id>(t->line.left.arg_at());
 
-			t->line.reset();
+			t->line.left.reset();
 		}
 	};
 
@@ -527,7 +527,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->template chain_action<CAN::arg, CAT::non>(t->vars.anon_at()); }
+			{ t->template chain_action<CAN::arg, CAT::non>(_zero); }
 	};
 
 	template<auto... filler>
@@ -557,7 +557,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->template chain_action<CAN::non, CAT::arg>(t->vars.anon_at()); }
+			{ t->template chain_action<CAN::non, CAT::arg>(_zero); }
 	};
 
 	template<auto... filler>
@@ -598,7 +598,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->template assembly_action<AAN::unit, AAT::value>(t->vars.anon_at()); }
+			{ } // do nothing given return end, assign end.
 	};
 
 	template<auto... filler>
@@ -618,7 +618,7 @@ namespace chord {
 			auto current = t->vars.last();
 
 			current->set_compound();
-			current->set_proc(t->proc.add());
+			current->set_proc(t->proc.allocate());
 		}
 	};
 

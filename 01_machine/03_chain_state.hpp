@@ -64,7 +64,7 @@ namespace machine {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			halt, arg, list, lookup, conduct,
+			halt, arg, list, lookup, subchain, conduct,
 			dimension
 		};
 	};
@@ -158,6 +158,16 @@ namespace machine {
 
 			return NIK_CHAIN_TS(c, i, j, k, l, t, Ts...)(vs...);
 		}
+	};
+
+/***********************************************************************************************************************/
+
+// substart:
+
+	struct T_chain_substart
+	{
+		template<auto c, auto i, auto j, auto k, auto l, auto t, typename... Ts>
+		nik_ces auto result(Ts... vs) { return NIK_CHAIN_TS(c, i, j, k, l, t, Ts...)(vs...); }
 	};
 
 /***********************************************************************************************************************/
@@ -308,32 +318,6 @@ namespace machine {
 	};
 
 /***********************************************************************************************************************/
-
-// apply:
-
-	template
-	<
-		template<auto...> typename B0,          auto... LUs, nik_vp(p0)(B0<    LUs...>*),
-		template<auto...> typename B1, auto RU, auto... RUs, nik_vp(p1)(B1<RU, RUs...>*)
-	>
-	struct T_chain<CN::arg, CT::apply, p0, p1>
-	{
-		using RT = T_store_U<RU>;
-
-		template<NIK_CHAIN_PARAMS(c, i, j, k, l, t), typename... Ts> // equals sizeof...(Ts).
-		nik_ces auto result(T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs)
-		{
-			using f_type  = modify_type<_to_pointer_, decltype(T_store_U<k>::template result<RT>)>;
-			nik_ce auto f = (f_type) T_store_U<k>::template result<RT>;
-			nik_ce auto F = eval<_function_out_type_, f>;
-
-			return NIK_CHAIN_4TS
-				(c, i, j, k, l, t, T_store_U<LUs>..., RT, T_store_U<RUs>..., T_store_U<F>)
-					(lvs..., rv, rvs..., f(rv));
-		}
-	};
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // list:
@@ -366,10 +350,10 @@ namespace machine {
 		template<NIK_CHAIN_PARAMS(c, i, j, k, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto n = CD<c>::pos(i);
-			nik_ce auto v = at_<l, n>;
+			nik_ce auto n  = CD<c>::pos(i);
+			nik_ce auto nv = at_<l, n>;
 
-			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., decltype(v))(vs..., v);
+			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., decltype(nv))(vs..., nv);
 		}
 	};
 
@@ -391,25 +375,6 @@ namespace machine {
 	};
 
 /***********************************************************************************************************************/
-
-// apply:
-
-	template<auto... filler>
-	struct T_chain<CN::list, CT::apply, filler...>
-	{
-		template<NIK_CHAIN_PARAMS(c, i, j, k, l, t), typename... Ts>
-		nik_ces auto result(Ts... vs)
-		{
-			nik_ce auto n = CD<c>::pos(i);
-			nik_ce auto v = at_<l, n>;
-			nik_ce auto f = T_store_U<k>::template result<decltype(v)>;
-			nik_ce auto F = eval<_function_out_type_, f>;
-
-			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., T_store_U<F>)(vs..., f(v));
-		}
-	};
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // lookup:
@@ -427,9 +392,9 @@ namespace machine {
 			nik_ce auto ni  = CD<c>::pos(i);
 			nik_ce auto n   = CD<c>::num(i);
 			nik_ce auto str = at_<l, n>;
-			nik_ce auto v   = T_lookup_istart::template result<c, ni, str>(fs...);
+			nik_ce auto nv  = T_lookup_istart::template result<c, ni, str>(fs...);
 
-			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., decltype(v))(vs..., v);
+			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., decltype(nv))(vs..., nv);
 		}
 	};
 
@@ -453,24 +418,24 @@ namespace machine {
 	};
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// apply:
+// subchain:
 
-	template<template<auto...> typename B, auto... fs, nik_vp(env)(B<fs...>*)>
-	struct T_chain<CN::lookup, CT::apply, env>
+/***********************************************************************************************************************/
+
+// push:
+
+	template<auto... filler>
+	struct T_chain<CN::subchain, CT::push, filler...>
 	{
 		template<NIK_CHAIN_PARAMS(c, i, j, k, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto ni  = CD<c>::pos(i);
-			nik_ce auto n   = CD<c>::num(i);
-			nik_ce auto str = at_<l, n>;
-			nik_ce auto v   = T_lookup_istart::template result<c, ni, str>(fs...);
+			nik_ce auto ni = CD<c>::pos(i);
+			       auto nv = T_chain_substart::template result<c, ni, j, k, l, t>(vs...);
 
-			nik_ce auto f   = T_store_U<k>::template result<decltype(v)>;
-			nik_ce auto F   = eval<_function_out_type_, f>;
-
-			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., T_store_U<F>)(vs..., f(v));
+			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., decltype(nv))(vs..., nv);
 		}
 	};
 
@@ -490,9 +455,9 @@ namespace machine {
 		nik_ces auto result(Ts... vs)
 		{
 			nik_ce auto ni = CD<c>::pos(i);
-			nik_ce auto v  = U_chain_cons<c, ni>;
+			nik_ce auto nv = U_chain_cons<c, ni>;
 
-			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., decltype(v))(vs..., v);
+			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., decltype(nv))(vs..., nv);
 		}
 	};
 

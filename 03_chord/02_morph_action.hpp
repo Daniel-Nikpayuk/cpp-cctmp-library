@@ -47,8 +47,8 @@ namespace chord {
 		{
 			t->set_op(l);
 
-			if (t->op_is_compound())
-				t->proc.last()->push(t->line.op.arg_at());
+			if (t->op_is_sign()) // move into op_action(s).
+				t->proc.last()->append(l, t->line.op.arg_at());
 		}
 	};
 
@@ -101,11 +101,12 @@ namespace chord {
 		nik_ces void result(AST *t, clexeme *l)
 		{
 			auto arity    = t->proc.last()->arity();
-			auto dropsize = arity + t->proc.last()->size();
+			auto cap_size = t->proc.last()->size();
+			auto dropsize = arity + cap_size;
 
-			t->def_op_action(arity);
+			t->def_op_action(arity); // arity is the first position following the args.
 
-			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->line.op_note());
+			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->op_note());
 		}
 	};
 
@@ -125,7 +126,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->line.set_sub(0);
+			t->line.set_sub(_zero);
 
 			t->template assembly_action<AAN::apply, AAT::begin>(AT::cons_f);
 		}
@@ -138,9 +139,12 @@ namespace chord {
 		nik_ces void result(AST *t, clexeme *l)
 		{
 			auto arity    = t->proc.last()->arity();
-			auto dropsize = arity + t->proc.last()->size();
+			auto cap_size = t->proc.last()->size();
+			auto dropsize = arity + cap_size;
 
-			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->line.op_note());
+			t->def_op_action(arity); // arity is the first position following the args.
+
+			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->op_note());
 		}
 	};
 
@@ -151,7 +155,8 @@ namespace chord {
 		nik_ces void result(AST *t, clexeme *l)
 		{
 			t->set_val(l);
-			t->subop_action();
+
+			t->subop_capture_action();
 		}
 	};
 
@@ -204,9 +209,15 @@ namespace chord {
 		nik_ces void result(AST *t, clexeme *l)
 		{
 			auto arity    = t->proc.last()->arity();
-			auto dropsize = arity + t->proc.last()->size();
+			auto cap_size = t->proc.last()->size();
+			auto dropsize = arity + cap_size;
 
-			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->line.op_note());
+			for (auto k = 0; k != arity; ++k)
+				t->template chain_action<CAN::non, CAT::arg>(k);
+
+			t->def_op_action(arity); // arity is the first position following the args.
+
+			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->op_note());
 		}
 	};
 
@@ -215,7 +226,11 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ } // nothing yet.
+		{
+			t->set_val(l);
+
+			t->subval_capture_action();
+		}
 	};
 
 /***********************************************************************************************************************/

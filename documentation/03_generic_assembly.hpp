@@ -185,16 +185,14 @@ namespace chord {
 	{
 		return source
 		(
-			"square x                         ;"
+			"square x                      ;"
 
-			"definitions:                     ;"
-			"sq # argpose<multiply arg0 arg0> ;"
+			"definitions:                  ;"
+			"sq # argpose[1]{multiply 0 0} ;"
 
-			"body:                            ;"
-			". = sq x                         ;"
-			"return _                         ;"
-
-			, cctmp::binding( "arg0" , 0 )
+			"body:                         ;"
+			". = sq x                      ;"
+			"return _                      ;"
 		);
 	}
 
@@ -244,18 +242,16 @@ namespace chord {
 	constexpr auto _sum_of_squares_v1()
 	{
 		return source
-                (
-			"f x y                                   ;"
+	        (
+			"f x y                                ;"
 
-			"definitions:                            ;"
-			"sq        # argpose<multiply arg0 arg0> ;"
-			"sum_of_sq # subpose<add sq sq>          ;"
+			"definitions:                         ;"
+			"sq        # argpose[1]{multiply 0 0} ;"
+			"sum_of_sq # subpose[2]{add sq sq}    ;"
 
-			"body:                                   ;"
-			". = sum_of_sq x y                       ;"
-			"return _                                ;"
-
-			, cctmp::binding( "arg0" , 0 )
+			"body:                                ;"
+			". = sum_of_sq x y                    ;"
+			"return _                             ;"
 		);
 	}
 
@@ -279,14 +275,14 @@ namespace chord {
 	constexpr auto _twice_v0()
 	{
 		return source
-                (
-			"f x                         ;"
+		(
+			"twice x                     ;"
 
 			"definitions:                ;"
-			"twice # curry<multiply two> ;"
+			"tw # curry[1]{multiply two} ;"
 
 			"body:                       ;"
-			". = twice x                 ;"
+			". = tw x                    ;"
 			"return _                    ;"
 
 			, cctmp::binding( "two" , 2 )

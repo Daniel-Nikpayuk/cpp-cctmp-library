@@ -586,14 +586,13 @@ namespace chord {
 				"Block      -> LabelBeg LabelEnd Instrs                                    ;"
 				"RecBlock   -> Block RecBlock                                              ;"
 				"           -> empty                                          : asm_accept ;"
-				"Instrs     -> Instr RecInstr LastInstr                                    ;"
+				"Instrs     -> Instr RecInstr                                              ;"
 				"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
 				"RecInstr   -> Instr RecInstr                                              ;"
-				"           -> empty                                                       ;"
-				"LastInstr  -> GotoBeg GotoVal GotoEnd                                     ;"
+				"           -> GotoBeg GotoVal GotoEnd                                     ;"
 				"           -> TailBeg TailVal TailEnd                                     ;"
 				"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
-				"           -> LabelGotoBeg LabelEnd Instr RecInstr LastInstr              ;"
+				"           -> empty                                                       ;"
 				"Instr      -> LeftVal RightInstr                                          ;"
 				"           -> ! SwapBeg \\= OpVal ArgVals SwapEnd                         ;"
 				"           -> TestBeg OpVal ArgVals TestEnd BranchBeg BranchVal BranchEnd ;"
@@ -609,9 +608,8 @@ namespace chord {
 
 				// label:
 
-					"LabelBeg     -> label : asm_label      ;"
-					"LabelGotoBeg -> label : asm_label_goto ;"
-					"LabelEnd     -> \\;                    ;"
+					"LabelBeg     -> label : asm_label ;"
+					"LabelEnd     -> \\;               ;"
 
 				// return:
 
@@ -945,6 +943,8 @@ namespace chord {
 		using T_parser			= T_chord_assembly_scanner_parser<static_pg_parsed, T_action, T_grammar>;
 
 		nik_ces auto & src		= member_value_U<static_source>;
+		using src_type			= modify_type<_from_reference_, decltype(src)>;
+
 		nik_ces auto parser		= T_parser{src.cselect()};
 		nik_ces auto & value		= parser.parseme.tree;
 		using type			= modify_type<_from_reference_, decltype(value)>;

@@ -164,8 +164,8 @@ namespace machine {
 		template<auto... filler>
 		struct T_assembly_action<AAN::apply, AAT::begin, filler...>
 		{
-			nik_ces gindex_type offset =	machine_offset< MAN::push , MAT::id  > +
-							machine_offset< MAN::set  , MAT::inc > ;
+			nik_ces gindex_type offset	= machine_offset< MAN::push , MAT::id  >
+							+ machine_offset< MAN::set  , MAT::inc > ;
 
 			using cindex = gcindex_type;
 
@@ -182,8 +182,8 @@ namespace machine {
 		template<auto... filler>
 		struct T_assembly_action<AAN::apply, AAT::end, filler...>
 		{
-			nik_ces gindex_type offset =	  chain_offset< CAN::end , CAT::id > +
-							machine_offset< MAN::pop , MAT::id > ;
+			nik_ces gindex_type offset	=   chain_offset< CAN::end , CAT::id >
+							+ machine_offset< MAN::pop , MAT::id > ;
 
 			using cindex = gcindex_type;
 
@@ -248,10 +248,10 @@ namespace machine {
 		template<auto... filler>
 		struct T_assembly_action<AAN::unit, AAT::value, filler...>
 		{
-			nik_ces gindex_type offset =	machine_offset< MAN::push , MAT::id  > +
-							machine_offset< MAN::set  , MAT::inc > +
-							  chain_offset< CAN::end  , CAT::id  > +
-							machine_offset< MAN::pop  , MAT::id  > ;
+			nik_ces gindex_type offset	= machine_offset< MAN::push , MAT::id  >
+							+ machine_offset< MAN::set  , MAT::inc >
+							+   chain_offset< CAN::end  , CAT::id  >
+							+ machine_offset< MAN::pop  , MAT::id  > ;
 
 			using cindex = gcindex_type;
 
@@ -282,10 +282,10 @@ namespace machine {
 		template<auto... filler>
 		struct T_assembly_action<AAN::unit, AAT::lookup, filler...>
 		{
-			nik_ces gindex_type offset =	machine_offset< MAN::set  , MAT::inc > +
-							machine_offset< MAN::push , MAT::id  > +
-							 lookup_offset< LAN::find , LAT::id  > +
-							machine_offset< MAN::pop  , MAT::id  > ;
+			nik_ces gindex_type offset	= machine_offset< MAN::set  , MAT::inc >
+							+ machine_offset< MAN::push , MAT::id  >
+							+  lookup_offset< LAN::find , LAT::id  >
+							+ machine_offset< MAN::pop  , MAT::id  > ;
 
 			using cindex = gcindex_type;
 
@@ -315,7 +315,7 @@ namespace machine {
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex arg_at)
 			{
-				machine_action<MAN::set, MAT::inc>(contr, AN::arg, AT::reselect, 1, arg_at);
+				machine_action<MAN::set, MAT::inc>(contr, AN::arg, AT::select, 1, arg_at);
 				machine_action<MAN::set, MAT::inc>(contr, AN::replace, AT::id);
 			}
 		};

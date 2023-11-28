@@ -55,14 +55,13 @@ namespace chord {
 				"Block      -> LabelBeg LabelEnd Instrs                                    ;"
 				"RecBlock   -> Block RecBlock                                              ;"
 				"           -> empty                                                       ;"
-				"Instrs     -> Instr RecInstr LastInstr                                    ;"
+				"Instrs     -> Instr RecInstr                                              ;"
 				"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
 				"RecInstr   -> Instr RecInstr                                              ;"
-				"           -> empty                                                       ;"
-				"LastInstr  -> GotoBeg GotoVal GotoEnd                                     ;"
+				"           -> GotoBeg GotoVal GotoEnd                                     ;"
 				"           -> TailBeg TailVal TailEnd                                     ;"
 				"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
-				"           -> LabelGotoBeg LabelEnd Instr RecInstr LastInstr              ;"
+				"           -> empty                                : asm_label_goto_begin ;"
 				"Instr      -> LeftVal RightInstr                                          ;"
 				"           -> ! SwapBeg \\= OpVal ArgVals SwapEnd                         ;"
 				"           -> TestBeg OpVal ArgVals TestEnd BranchBeg BranchVal BranchEnd ;"
@@ -78,9 +77,8 @@ namespace chord {
 
 				// label:
 
-					"LabelBeg     -> label : asm_label_begin      ;"
-					"LabelGotoBeg -> label : asm_label_goto_begin ;"
-					"LabelEnd     -> \\;                          ;"
+					"LabelBeg     -> label : asm_label_begin ;"
+					"LabelEnd     -> \\;                     ;"
 
 				// return:
 
@@ -560,30 +558,6 @@ namespace chord {
 		nik_ces auto & value		= parser.parseme.tree;
 		using type			= modify_type<_from_reference_, decltype(value)>;
 	};
-
-/***********************************************************************************************************************/
-
-// morph:
-
-//	template<auto static_parsed>
-//	struct T_chord_assembly_morph
-//	{
-//		nik_ces auto & parsed		= member_value_U<static_parsed>;
-//		nik_ces auto & value		= parsed.morph_level;
-//		using type			= modify_type<_from_reference_, decltype(value)>;
-//	};
-
-/***********************************************************************************************************************/
-
-// cycle:
-
-//	template<auto static_parsed>
-//	struct T_chord_assembly_cycle
-//	{
-//		nik_ces auto & parsed		= member_value_U<static_parsed>;
-//		nik_ces auto & value		= parsed.cycle_level;
-//		using type			= modify_type<_from_reference_, decltype(value)>;
-//	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
