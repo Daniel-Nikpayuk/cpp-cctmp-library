@@ -467,10 +467,17 @@ namespace generator {
 			nik_ce bool operator != (const T_icon<Type, SizeType> & i) const
 				{ return !cctmp::apply<cctmp::_subarray_same_<>>(*this, i); }
 
+				// deprecate in the long run.
 			nik_ce void copy(const T_lexeme<Type> *l)
 			{
 				base::start  = l->cbegin();
 				base::finish = l->ccurrent();
+			}
+
+			nik_ce void copy(const cselector<Type, SizeType> & s)
+			{
+				base::start  = s.cbegin();
+				base::finish = s.cend();
 			}
 
 			nik_ce T_icon & find(ctype_ref v)
@@ -486,8 +493,12 @@ namespace generator {
 			nik_ce auto contains(const T & v) const
 				{ T_icon i{*this}; return i.template find<T const&>(v); }
 
+				// deprecate in the long run.
 			nik_ce bool same(const T_lexeme<Type> *l) const
 				{ return cctmp::apply<cctmp::_subarray_same_<>>(*this, l->left_cselect()); }
+
+			nik_ce bool same(const cselector<Type, SizeType> & s) const
+				{ return cctmp::apply<cctmp::_subarray_same_<>>(*this, s); }
 
 			nik_ce bool same(const T_icon<Type, SizeType> & i) const
 				{ return cctmp::apply<cctmp::_subarray_same_<>>(*this, i); }

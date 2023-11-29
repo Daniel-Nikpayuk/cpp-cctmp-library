@@ -90,6 +90,7 @@ namespace chord {
 		using entry			= T_signature_entry<CharType>;
 		using base			= sequence<entry, length>;
 		using cbase			= base const;
+		using cselect			= cselector<CharType, gindex_type>;
 
 		gcindex_type pad;
 		entry name;
@@ -98,28 +99,26 @@ namespace chord {
 
 		// name:
 
-			nik_ce auto match_name (clexeme *l) const { return name.same(l); }
-			nik_ce void push_name  (clexeme *l) { name.copy(l); }
+			nik_ce auto match_name (const cselect & s) const { return name.same(s); }
+			nik_ce void push_name  (const cselect & s) { name.copy(s); }
 
 		// arg:
 
 			nik_ce auto padding  () const { return pad + 1; }
 			nik_ce auto dropsize () const { return length; }
 
-			nik_ce auto match(clexeme *l) const
-				{ return base::citerate().find(l->left_cselect()); }
+			nik_ce auto match(const cselect & s) const
+				{ return base::citerate().find(s); }
 
-			nik_ce void push(clexeme *l)
+			nik_ce void push(const cselect & s)
 			{
-				base::end()->copy(l);
+				base::end()->copy(s);
 				base::upsize();
 			}
 
-			nik_ce void push(clexeme & l) { push(&l); }
-
-			nik_ce void append(clexeme *l)
+			nik_ce void append(const cselect & s)
 			{
-				if (match(l).is_end()) push(l);
+				if (match(s).is_end()) push(s);
 				else { } // error.
 			}
 	};
@@ -142,7 +141,7 @@ namespace chord {
 		using base	= generator::T_icon<CharType>;
 		using cbase	= base const;
 
-		gindex_type sign_pos;
+		gindex_type sign_pos; // required when creating a function application.
 
 		nik_ce T_capture_entry() : base{}, sign_pos{} { }
 
@@ -159,9 +158,10 @@ namespace chord {
 	template<typename CharType, gindex_type Size>
 	struct T_capture : public sequence<T_capture_entry<CharType>, Size>
 	{
-		using entry	= T_capture_entry<CharType>;
-		using base	= sequence<entry, Size>;
-		using cbase	= base const;
+		using entry		= T_capture_entry<CharType>;
+		using base		= sequence<entry, Size>;
+		using cbase		= base const;
+		using cselect		= cselector<CharType, gindex_type>;
 
 		gindex_type arg_size;
 
@@ -174,18 +174,18 @@ namespace chord {
 
 		// arg:
 
-			nik_ce auto match(clexeme *l) const
-				{ return base::citerate().find(l->left_cselect()); }
+			nik_ce auto match(const cselect & s) const
+				{ return base::citerate().find(s); }
 
-			nik_ce void push(clexeme *l, gcindex_type n)
+			nik_ce void push(const cselect & s, gcindex_type n)
 			{
-				base::end()->copy(l);
+				base::end()->copy(s);
 				base::end()->set_sign(n);
 				base::upsize();
 			}
 
-			nik_ce void append(clexeme *l, gcindex_type n)
-				{ if (match(l).is_end()) push(l, n); }
+			nik_ce void append(const cselect & s, gcindex_type n)
+				{ if (match(s).is_end()) push(s, n); }
 
 			nik_ce void unite(const T_capture & c)
 				{ base::unite(c.cbegin(), c.cend()); }
@@ -285,20 +285,20 @@ namespace chord {
 
 // interface:
 
-	template<typename Type, typename SrcType>
+	template<typename CharType, typename Type, typename SrcType>
 	struct T_clipboard
 	{
-		using cindex   = Type;
-		using src_type = SrcType;
-		using val_type = T_value<Type>;
-		using Kind     = typename val_type::Kind;
+		using cindex		= Type;
+		using src_type		= SrcType;
+		using val_type		= T_value<Type>;
+		using Kind		= typename val_type::Kind;
+		using cselect		= cselector<CharType, gindex_type>;
 
 		const src_type & src;
 
 		val_type op;
 		val_type val;
 		val_type left;
-		lexeme word;
 
 		gindex_type sub_pos;
 
@@ -306,37 +306,26 @@ namespace chord {
 
 		// src:
 
-			nik_ce auto start  (clexeme *l) const { return l->cbegin() - src.cbegin(); }
-			nik_ce auto finish (clexeme *l) const { return src.cend() - l->ccurrent(); }
+			nik_ce auto start  (const cselect & s) const { return s.cbegin() - src.cbegin(); }
+			nik_ce auto finish (const cselect & s) const { return src.cend() - s.cend(); }
 
-			nik_ce auto as_lexeme(const val_type & v) const
-			{
-				auto s = src.cselect(v.start(), v.finish());
-
-				return lexeme{s} + s.size();
-			}
+			nik_ce auto as_cselect(const val_type & v) const
+				{ return src.cselect(v.start(), v.finish()); }
 
 		// op:
 
-			nik_ce auto op_lexeme() const { return as_lexeme(op); }
-
-			nik_ce void set_op_lookup(clexeme *l) { op.set_lookup(start(l), finish(l)); }
+			nik_ce auto op_cselect() const { return as_cselect(op); }
+			nik_ce void set_op_lookup(const cselect & s) { op.set_lookup(start(s), finish(s)); }
 
 		// val:
 
-			nik_ce auto val_lexeme() const { return as_lexeme(val); }
-
-			nik_ce void set_val_lookup(clexeme *l) { val.set_lookup(start(l), finish(l)); }
+			nik_ce auto val_cselect() const { return as_cselect(val); }
+			nik_ce void set_val_lookup(const cselect & s) { val.set_lookup(start(s), finish(s)); }
 
 		// left:
 
-			nik_ce auto left_lexeme() const { return as_lexeme(left); }
-
-			nik_ce void set_left_unknown(clexeme *l)
-			{
-				word = *l;
-				left.set_unknown(start(l), finish(l));
-			}
+			nik_ce auto left_cselect() const { return as_cselect(left); }
+			nik_ce void set_left_unknown(const cselect & s) { left.set_unknown(start(s), finish(s)); }
 
 		// subarg:
 
@@ -345,6 +334,9 @@ namespace chord {
 			nik_ce void set_sub (cindex n)     { sub_pos  = n; }
 			nik_ce void inc_sub (cindex n = 1) { sub_pos += n; }
 	};
+
+	template<typename Type, typename SrcType>
+	using clipboard = T_clipboard<gchar_type, Type, SrcType>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -377,8 +369,10 @@ namespace chord {
 
 		using signature_type		= signature<scanned.global[Global::arg]>;
 		using procedure_type		= procedure<5, 5>; // 5, 5 for prototyping.
-		using clipboard_type		= T_clipboard<cindex, src_type>;
+		using drop_tag_type		= sequence<gindex_type, 5>; // 5 for prototyping.
+		using clipboard_type		= clipboard<cindex, src_type>;
 		using val_type			= typename clipboard_type::val_type;
+		using cselect			= typename clipboard_type::cselect;
 		using Kind			= typename clipboard_type::Kind;
 
 		enum : gkey_type
@@ -392,9 +386,10 @@ namespace chord {
 
 		contr_type contr;
 
-		clipboard_type line;
 		signature_type vars;
 		procedure_type proc;
+		drop_tag_type drop;
+		clipboard_type line;
 
 		nik_ce T_chord_assembly_ast() :
 
@@ -413,6 +408,14 @@ namespace chord {
 			template<auto name, auto note, typename... Ts>
 			nik_ce void assembly_action(Ts... vs) { machine::assembly_action<name, note>(&contr, vs...); }
 
+		// update:
+
+			nik_ce void update_contr_arg_drops(cindex cap_size)
+			{
+				for (auto k = drop.cbegin(); k != drop.cend(); ++k)
+					contr[*k][machine::CI::pos] += cap_size;
+			}
+
 		// replace:
 
 			nik_ce void non_zero_replace(cindex n)
@@ -420,28 +423,36 @@ namespace chord {
 
 		// vars:
 
-			nik_ce bool is_compound(cindex n) const { return vars[n].is_compound(); }
+			nik_ce const auto & sign_entry(const val_type & v) const { return vars[v.arg_at()]; }
 
 			nik_ce void assign_unknown()
 			{
-				vars.push(line.left_lexeme());
+				vars.push(line.left_cselect());
 				line.left.set_sign(vars.max());
 			}
 
 		// val:
 
-			nik_ce bool is_sign     (const val_type & v) const { return (v.kind() == Kind::sign); }
-			nik_ce bool is_compound (const val_type & v) const { return is_sign(v) && is_compound(v.arg_at()); }
+			nik_ce bool is_sign(const val_type & v) const
+				{ return (v.kind() == Kind::sign); }
+
+			nik_ce bool is_compound(const val_type & v) const
+				{ return is_sign(v) && sign_entry(v).is_compound(); }
+
+		// capture:
+
+			nik_ce const auto & capture_at(const val_type & v) const
+				{ return proc[sign_entry(v).proc_at()]; }
 
 		// op:
 
-			nik_ce void set_op(clexeme *l)
+			nik_ce void set_op(const cselect & s)
 			{
-				auto k = vars.match(l);
+				auto k = vars.match(s);
 
 				if      (k.not_end())        line.op.set_sign(k.left_size());
-				else if (vars.match_name(l)) line.op.set_recurse();
-				else                         line.set_op_lookup(l);
+				else if (vars.match_name(s)) line.op.set_recurse();
+				else                         line.set_op_lookup(s);
 			}
 
 			nik_ce void def_op_action(cindex n)
@@ -473,8 +484,7 @@ namespace chord {
 			{
 				if (op_is_compound())
 				{
-					const auto & sign_ent = vars[line.op.arg_at()];
-					const auto & capture  = proc[sign_ent.proc_at()];
+					const auto & capture  = capture_at(line.op);
 
 					for (auto k = capture.cbegin(); k != capture.cend(); ++k)
 						chain_action<CAN::non, CAT::arg>(k->sign_at());
@@ -485,13 +495,13 @@ namespace chord {
 
 		// value:
 
-			nik_ce void set_val(clexeme *l)
+			nik_ce void set_val(const cselect & s)
 			{
-				auto k = vars.match(l);
+				auto k = vars.match(s);
 
 				if      (k.not_end())        line.val.set_sign(k.left_size());
-				else if (vars.match_name(l)) line.val.set_recurse();
-				else                         line.set_val_lookup(l);
+				else if (vars.match_name(s)) line.val.set_recurse();
+				else                         line.set_val_lookup(s);
 			}
 
 			nik_ce void val_action()
@@ -504,11 +514,11 @@ namespace chord {
 				}
 			}
 
-			nik_ce auto val_capture_action()		// be mindful that a reconstructed
-			{						// lexeme differs from its original.
-				auto val_lexeme = line.val_lexeme();
-				proc.last()->append(&val_lexeme, line.val.arg_at());
-				auto k = proc.last()->match(&val_lexeme);
+			nik_ce auto val_capture_action()
+			{
+				auto val_cselect = line.val_cselect();
+				proc.last()->append(val_cselect, line.val.arg_at());
+				auto k = proc.last()->match(val_cselect);
 
 				return k.left_size();
 			}
@@ -548,67 +558,98 @@ namespace chord {
 
 		// subop:
 
-			nik_ce void subop_capture_action()
+			nik_ce void proc_capture_op()
 			{
-				proc_capture_val();
-				subop_action();
-			}
-
-			nik_ce void proc_capture_val()
-			{
-				if (val_is_compound())
+				if (op_is_sign())
 				{
-					const auto & sign_ent = vars[line.val.arg_at()];
+					auto op_cselect = line.op_cselect();
+					proc.last()->append(op_cselect, line.op.arg_at());
 
-					proc.last()->unite(proc[sign_ent.proc_at()]);
+					if (op_is_compound())
+						proc.last()->unite(capture_at(line.op));
 				}
 			}
 
-			nik_ce void subop_action()
+			nik_ce void subop_capture_action(cindex arity) // |x sum_of_sq sq| y sq
+			{
+				if (op_is_compound())
+				{
+					const auto & capture = capture_at(line.op);
+
+					for (auto j = capture.cbegin(); j != capture.cend(); ++j)
+					{
+						auto k = proc.last()->match(*j);
+						auto cap_at = arity + k.left_size();
+
+						chain_action<CAN::non, CAT::arg>(cap_at);
+					}
+				}
+
+				def_op_action(arity); // optimization: arity is the first position following the args.
+
+			//	alternate?
+			//	auto op_cselect = line.op_cselect();
+			//	auto k = proc.last()->match(op_cselect);
+			//	auto op_at = arity + k.left_size();
+			//	def_op_action(op_at);
+			}
+
+		// argop:
+
+			nik_ce void argop_capture_action()
+			{
+				proc_capture_val();
+				argop_action();
+			}
+
+			nik_ce void proc_capture_val()
+				{ if (val_is_compound()) proc.last()->unite(capture_at(line.val)); }
+
+			nik_ce void argop_action()
 			{
 				switch (line.val.kind())
 				{
-					case Kind::sign    : { subop_action_sign   (); break; }
-					case Kind::recurse : { subop_action_recurse(); break; }
-					case Kind::lookup  : { subop_action_lookup (); break; }
+					case Kind::sign    : { argop_action_sign   (); break; }
+					case Kind::recurse : { argop_action_recurse(); break; }
+					case Kind::lookup  : { argop_action_lookup (); break; }
 				}
 
 				line.inc_sub();
 			}
 
-			nik_ce void subop_action_sign() // (x y sq ...)
+			nik_ce void argop_action_sign()
 			{
-				auto subop_at = proc.last()->arity() + val_capture_action();
+				auto argop_at = subval_capture_at();
 
 				chain_action<CAN::begin, CAT::sub>(CT::push);
 
-				if (val_is_compound()) subop_compound_action_sign(subop_at);
-				else subop_atomic_action_sign(subop_at);
+				if (val_is_compound()) argop_compound_action_sign(argop_at);
+				else argop_atomic_action_sign(argop_at);
 
-				auto cap_size = 1; // we need to know (the final) last size in advance.
+				drop.push(contr.instr_at()); // defers arg_drop.
+
 				auto note = val_is_compound() ? CT::bind : CT::apply;
-				auto arg_drop = proc.last()->arity() + cap_size + line.sub_at();
-				chain_action<CAN::end, CAT::sub>(arg_drop, note);
+				auto init_arg_drop = proc.last()->arity() + line.sub_at();
+				chain_action<CAN::end, CAT::sub>(init_arg_drop, note);
 			}
 
-				nik_ce void subop_compound_action_sign(cindex subop_at)
+				nik_ce void argop_compound_action_sign(cindex argop_at)
 				{
-					chain_action<CAN::arg, CAT::arg>(subop_at, line.sub_at());
+					chain_action<CAN::arg, CAT::arg>(argop_at, line.sub_at());
 
-					const auto & sign_ent = vars[line.val.arg_at()]; // refactor (start)
-					const auto & capture  = proc[sign_ent.proc_at()];
+					const auto & capture = capture_at(line.val);
 
 					for (auto k = capture.cbegin(); k != capture.cend(); ++k)
-						chain_action<CAN::non, CAT::arg>(k->sign_at()); // refactor (end)
+						chain_action<CAN::non, CAT::arg>(k->sign_at());
 				}
 
-				nik_ce void subop_atomic_action_sign(cindex subop_at)
-					{ chain_action<CAN::arg, CAT::arg>(subop_at, line.sub_at()); }
+				nik_ce void argop_atomic_action_sign(cindex argop_at)
+					{ chain_action<CAN::arg, CAT::arg>(argop_at, line.sub_at()); }
 
-			nik_ce void subop_action_recurse()
+			nik_ce void argop_action_recurse()
 				{ chain_action<CAN::recurse, CAT::arg>(line.sub_at()); }
 
-			nik_ce void subop_action_lookup()
+			nik_ce void argop_action_lookup()
 			{
 				auto s = line.val.start();
 				auto f = line.val.finish();
@@ -618,6 +659,8 @@ namespace chord {
 			}
 
 		// subval:
+
+			nik_ce auto subval_capture_at() { return proc.last()->arity() + val_capture_action(); }
 
 			nik_ce void subval_capture_action()
 			{
@@ -630,11 +673,7 @@ namespace chord {
 			}
 
 			nik_ce void subval_action_sign()
-			{
-				auto subval_at = proc.last()->arity() + val_capture_action();
-
-				chain_action<CAN::non, CAT::arg>(subval_at);
-			}
+				{ chain_action<CAN::non, CAT::arg>(subval_capture_at()); }
 	};
 
 /***********************************************************************************************************************/

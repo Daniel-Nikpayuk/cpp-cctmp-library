@@ -45,10 +45,9 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->set_op(l);
+			t->set_op(l->left_cselect());
 
-			if (t->op_is_sign()) // move into op_action(s).
-				t->proc.last()->append(l, t->line.op.arg_at());
+			t->proc_capture_op();
 		}
 	};
 
@@ -104,7 +103,7 @@ namespace chord {
 			auto cap_size = t->proc.last()->size();
 			auto dropsize = arity + cap_size;
 
-			t->def_op_action(arity); // arity is the first position following the args.
+			t->subop_capture_action(arity);
 
 			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->op_note());
 		}
@@ -127,6 +126,7 @@ namespace chord {
 		nik_ces void result(AST *t, clexeme *l)
 		{
 			t->line.set_sub(_zero);
+			t->drop.clear();
 
 			t->template assembly_action<AAN::apply, AAT::begin>(AT::cons_f);
 		}
@@ -142,7 +142,8 @@ namespace chord {
 			auto cap_size = t->proc.last()->size();
 			auto dropsize = arity + cap_size;
 
-			t->def_op_action(arity); // arity is the first position following the args.
+			t->update_contr_arg_drops(cap_size);
+			t->subop_capture_action(arity);
 
 			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->op_note());
 		}
@@ -154,9 +155,9 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->set_val(l);
+			t->set_val(l->left_cselect());
 
-			t->subop_capture_action();
+			t->argop_capture_action();
 		}
 	};
 
@@ -212,10 +213,10 @@ namespace chord {
 			auto cap_size = t->proc.last()->size();
 			auto dropsize = arity + cap_size;
 
-			for (auto k = 0; k != arity; ++k)
+			for (auto k = 0; k != arity; ++k) // variadic.
 				t->template chain_action<CAN::non, CAT::arg>(k);
 
-			t->def_op_action(arity); // arity is the first position following the args.
+			t->subop_capture_action(arity);
 
 			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->op_note());
 		}
@@ -227,7 +228,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->set_val(l);
+			t->set_val(l->left_cselect());
 
 			t->subval_capture_action();
 		}

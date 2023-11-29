@@ -394,6 +394,8 @@
 
 #undef NIK_ASSEMBLY_RESULT_3TS
 
+#undef NIK_ASSEMBLY_RESULT_4TS
+
 #undef NIK_ASSEMBLY
 
 #undef NIK_ASSEMBLY_TS
@@ -401,6 +403,8 @@
 #undef NIK_ASSEMBLY_2TS
 
 #undef NIK_ASSEMBLY_3TS
+
+#undef NIK_ASSEMBLY_4TS
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
