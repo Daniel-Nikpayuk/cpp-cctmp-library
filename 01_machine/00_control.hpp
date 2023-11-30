@@ -112,7 +112,9 @@ namespace machine {
 
 		// instr:
 
-			nik_ce auto instr_at() const { return current; }
+			nik_ce auto instr_at   () const { return current; }
+			nik_ce auto instr_prev () const { return current - 1; }
+
 			nik_ce void inc_instr() { ++current; }
 
 			nik_ce void set_instr(cindex name, cindex note, cindex next = 1, cindex pos = 0, cindex num = 0)

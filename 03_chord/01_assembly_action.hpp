@@ -80,13 +80,15 @@ namespace chord {
 
 			// asm:
 
+				asm_accept,
+
 				// function:
 
 					asm_func_begin, asm_func_arg, asm_func_end,
 
 				// label:
 
-					asm_label_begin, asm_label_goto_begin,
+					asm_label_begin,
 
 				// return:
 
@@ -220,6 +222,16 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// accept:
+
+	template<auto... filler>
+	struct T_chord_assembly_translation_action<CAAN::asm_accept, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->tag_label_jumps(); }
+	};
+
 // function:
 
 	template<auto... filler>
@@ -257,15 +269,9 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-		}
-	};
+			auto sans_colon = l->left_cselect(0, 1);
 
-	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::asm_label_goto_begin, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
+			t->label.append(sans_colon, t->contr.instr_prev());
 		}
 	};
 
@@ -276,8 +282,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
+			{ t->template assembly_action<AAN::jump, AAT::branch>(); }
 	};
 
 	template<auto... filler>
@@ -285,8 +290,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
+			{ t->jump.push(l->left_cselect(), t->contr.instr_prev()); }
 	};
 
 	template<auto... filler>
@@ -294,8 +298,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
+			{ } // nothing yet.
 	};
 
 // goto:
@@ -305,8 +308,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
+			{ t->template assembly_action<AAN::jump, AAT::go_to>(); }
 	};
 
 	template<auto... filler>
@@ -314,8 +316,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
+			{ t->jump.append(l->left_cselect(), t->contr.instr_prev()); }
 	};
 
 	template<auto... filler>
@@ -323,8 +324,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
+			{ } // nothing yet.
 	};
 
 // tail:
@@ -334,8 +334,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
+			{ } // nothing yet.
 	};
 
 	template<auto... filler>
@@ -343,8 +342,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
+			{ } // nothing yet.
 	};
 
 	template<auto... filler>
@@ -352,8 +350,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
+			{ } // nothing yet.
 	};
 
 // left:
@@ -389,6 +386,7 @@ namespace chord {
 		nik_ces void result(AST *t, clexeme *l)
 		{
 			if (t->line.left.is_unknown()) { } // error.
+			else t->template assembly_action<AAN::apply, AAT::begin>(AT::call_f);
 		}
 	};
 
@@ -412,9 +410,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			if (t->line.left.is_unknown()) { } // error.
-		}
+			{ t->template assembly_action<AAN::apply, AAT::begin>(AT::call_f); }
 	};
 
 	template<auto... filler>
@@ -423,6 +419,9 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
+			t->op_capture_action();
+
+			t->template assembly_action<AAN::apply, AAT::end>(t->vars.dropsize(), t->op_note());
 		}
 	};
 
@@ -516,11 +515,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->set_op(l->left_cselect());
-
-			t->template assembly_action<AAN::apply, AAT::begin>(AT::call_f);
-		}
+			{ t->set_op(l->left_cselect()); }
 	};
 
 	template<auto... filler>

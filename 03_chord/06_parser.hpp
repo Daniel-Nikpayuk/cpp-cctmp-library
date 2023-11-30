@@ -54,14 +54,14 @@ namespace chord {
 				"           -> empty                                                       ;"
 				"Block      -> LabelBeg LabelEnd Instrs                                    ;"
 				"RecBlock   -> Block RecBlock                                              ;"
-				"           -> empty                                                       ;"
+				"           -> empty                                          : asm_accept ;"
 				"Instrs     -> Instr RecInstr                                              ;"
 				"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
 				"RecInstr   -> Instr RecInstr                                              ;"
 				"           -> GotoBeg GotoVal GotoEnd                                     ;"
 				"           -> TailBeg TailVal TailEnd                                     ;"
 				"           -> ReturnBeg UnitVal ReturnEnd                                 ;"
-				"           -> empty                                : asm_label_goto_begin ;"
+				"           -> empty                                                       ;"
 				"Instr      -> LeftVal RightInstr                                          ;"
 				"           -> ! SwapBeg \\= OpVal ArgVals SwapEnd                         ;"
 				"           -> TestBeg OpVal ArgVals TestEnd BranchBeg BranchVal BranchEnd ;"
@@ -297,6 +297,8 @@ namespace chord {
 
 			// asm:
 
+				sxa_pair( "asm_accept" , ActName::asm_accept ),
+
 				// function:
 
 					sxa_pair( "asm_func_begin" , ActName::asm_func_begin ),
@@ -305,8 +307,7 @@ namespace chord {
 
 				// label:
 
-					sxa_pair( "asm_label_begin"      , ActName::asm_label_begin      ),
-					sxa_pair( "asm_label_goto_begin" , ActName::asm_label_goto_begin ),
+					sxa_pair( "asm_label_begin" , ActName::asm_label_begin ),
 
 				// return:
 

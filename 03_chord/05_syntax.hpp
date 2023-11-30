@@ -41,6 +41,8 @@ namespace chord {
 	template<auto... Vs>
 	using T_machine_contr					= machine::T_machine_contr<Vs...>;
 
+	using CI						= machine::CI;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -341,6 +343,64 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// enclosure:
+
+/***********************************************************************************************************************/
+
+// entry:
+
+	template<typename CharType>
+	struct T_enclosure_entry : public generator::T_icon<CharType>
+	{
+		using base	= generator::T_icon<CharType>;
+		using cbase	= base const;
+
+		gindex_type line_pos;
+
+		nik_ce T_enclosure_entry() : base{}, line_pos{} { }
+
+		// line:
+
+			nik_ce gcindex_type line_at() const { return line_pos; }
+			nik_ce void set_line(gcindex_type n) { line_pos = n; }
+	};
+
+/***********************************************************************************************************************/
+
+// enclosure:
+
+	template<typename CharType, gindex_type Size>
+	struct T_enclosure : public sequence<T_enclosure_entry<CharType>, Size>
+	{
+		using entry		= T_enclosure_entry<CharType>;
+		using base		= sequence<entry, Size>;
+		using cbase		= base const;
+		using cselect		= cselector<CharType, gindex_type>;
+
+		nik_ce T_enclosure() : base{} { }
+
+		// enclosure:
+
+			nik_ce auto match(const cselect & s) const
+				{ return base::citerate().find(s); }
+
+			nik_ce void push(const cselect & s, gcindex_type n)
+			{
+				base::end()->copy(s);
+				base::end()->set_line(n);
+				base::upsize();
+			}
+
+			nik_ce void append(const cselect & s, gcindex_type n)
+				{ if (match(s).is_end()) push(s, n); }
+	};
+
+	template<auto Size>
+	using enclosure = T_enclosure<gchar_type, Size>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // tree:
 
 /***********************************************************************************************************************/
@@ -368,8 +428,12 @@ namespace chord {
 		using cindex			= typename contr_type::cindex;
 
 		using signature_type		= signature<scanned.global[Global::arg]>;
+
 		using procedure_type		= procedure<5, 5>; // 5, 5 for prototyping.
 		using drop_tag_type		= sequence<gindex_type, 5>; // 5 for prototyping.
+
+		using enclosure_type		= enclosure<5>; // 5 for prototyping.
+
 		using clipboard_type		= clipboard<cindex, src_type>;
 		using val_type			= typename clipboard_type::val_type;
 		using cselect			= typename clipboard_type::cselect;
@@ -385,10 +449,11 @@ namespace chord {
 		};
 
 		contr_type contr;
-
 		signature_type vars;
 		procedure_type proc;
 		drop_tag_type drop;
+		enclosure_type label;
+		enclosure_type jump;
 		clipboard_type line;
 
 		nik_ce T_chord_assembly_ast() :
@@ -408,12 +473,23 @@ namespace chord {
 			template<auto name, auto note, typename... Ts>
 			nik_ce void assembly_action(Ts... vs) { machine::assembly_action<name, note>(&contr, vs...); }
 
-		// update:
+		// tag:
 
-			nik_ce void update_contr_arg_drops(cindex cap_size)
+			nik_ce void tag_arg_drops(cindex cap_size)
 			{
 				for (auto k = drop.cbegin(); k != drop.cend(); ++k)
-					contr[*k][machine::CI::pos] += cap_size;
+					contr[*k][CI::pos] += cap_size;
+			}
+
+			nik_ce void tag_label_jumps()
+			{
+				for (auto j = jump.cbegin(); j != jump.cend(); ++j)
+				{
+					auto k = label.match(*j);
+
+					if (k.not_end()) contr[j->line_at()][CI::pos] = k->line_at();
+					else { } // error.
+				}
 			}
 
 		// replace:

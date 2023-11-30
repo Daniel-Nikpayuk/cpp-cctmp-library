@@ -142,7 +142,7 @@ namespace chord {
 			auto cap_size = t->proc.last()->size();
 			auto dropsize = arity + cap_size;
 
-			t->update_contr_arg_drops(cap_size);
+			t->tag_arg_drops(cap_size);
 			t->subop_capture_action(arity);
 
 			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->op_note());

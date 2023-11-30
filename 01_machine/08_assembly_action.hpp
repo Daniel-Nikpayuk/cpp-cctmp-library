@@ -61,7 +61,7 @@ namespace machine {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
-			begin, value, recurse, lookup, cons, end, dimension
+			begin, branch, go_to, value, recurse, lookup, cons, end, dimension
 		};
 
 	}; using AAT = AssemblyActionNote;
@@ -107,53 +107,29 @@ namespace machine {
 
 // jump:
 
-	// id:
-
-	//	template<auto... filler>
-	//	struct T_assembly_action<AAN::jump, AAT::id, filler...>
-	//	{
-	//		nik_ces gindex_type offset = 2; // update
-
-	//		template<typename Contr>
-	//		nik_ces void result(Contr *contr, cindex )
-	//		{
-	//			auto & iter = contr->line_iter;
-
-	//			contr->set_label_line(iter);
-	//		}
-	//	};
-
 	// bran:
 
-	//	template<auto... filler>
-	//	struct T_assembly_action<AAN::jump, AAT::branch, filler...>
-	//	{
-	//		nik_ces gindex_type offset = 2; // update
+		template<auto... filler>
+		struct T_assembly_action<AAN::jump, AAT::branch, filler...>
+		{
+			nik_ces gindex_type offset = machine_offset<MAN::set, MAT::inc>;
 
-	//		template<typename Contr>
-	//		nik_ces void result(Contr *contr, cindex )
-	//		{
-	//			contr->add_jump();
-
-	//			contr->add_marked_instr(AN::jump, AT::branch);
-	//		}
-	//	};
+			template<typename Contr>
+			nik_ces void result(Contr *contr)
+				{ machine_action<MAN::set, MAT::inc>(contr, AN::jump, AT::branch); }
+		};
 
 	// goto:
 
-	//	template<auto... filler>
-	//	struct T_assembly_action<AAN::jump, AAT::go_to, filler...>
-	//	{
-	//		nik_ces gindex_type offset = 2; // update
+		template<auto... filler>
+		struct T_assembly_action<AAN::jump, AAT::go_to, filler...>
+		{
+			nik_ces gindex_type offset = machine_offset<MAN::set, MAT::inc>;
 
-	//		template<typename Contr>
-	//		nik_ces void result(Contr *contr, cindex )
-	//		{
-	//			contr->add_jump();
-
-	//			contr->add_marked_instr(AN::jump, AT::go_to);
-	//		}
-	//	};
+			template<typename Contr>
+			nik_ces void result(Contr *contr)
+				{ machine_action<MAN::set, MAT::inc>(contr, AN::jump, AT::go_to); }
+		};
 
 /***********************************************************************************************************************/
 
@@ -194,26 +170,6 @@ namespace machine {
 				machine_action< MAN::pop , MAT::id >(contr);
 			}
 		};
-
-/***********************************************************************************************************************/
-
-// test:
-
-	//	template<auto... filler>
-	//	struct T_assembly_action<AAN::apply, AAT::test, filler...>
-	//	{
-	//		nik_ces gindex_type offset = 2; // update
-
-	//		template<typename Contr>
-	//		nik_ces void result(Contr *contr, cindex )
-	//		{
-	//			auto & iter = contr->line_iter;
-	//			auto name   = contr->call_name(iter);
-
-	//			contr->add_link(); // if (toc.has_link(iter)) ?
-	//			contr->add_marked_instr(name, AT::id);
-	//		}
-	//	};
 
 /***********************************************************************************************************************/
 

@@ -27,11 +27,21 @@ namespace chord {
 
 // prerequisites:
 
-	#define NIK_UNIT_TEST_SQUARE_V0
+	constexpr auto constant_machine_frame			= cctmp::constant_machine_frame; 
+
+/***********************************************************************************************************************/
+
+// definitions:
+
+//	#define NIK_UNIT_TEST_SQUARE_V0
 //	#define NIK_UNIT_TEST_SQUARE_V1
 //	#define NIK_UNIT_TEST_SUM_OF_SQUARES_V0
 //	#define NIK_UNIT_TEST_SUM_OF_SQUARES_V1
 //	#define NIK_UNIT_TEST_TWICE_V0
+//	#define NIK_UNIT_TEST_PLUS_N_V0
+//	#define NIK_UNIT_TEST_TWO_X_SQD_V0
+//	#define NIK_UNIT_TEST_X_SQD_PLUS_Y4_V0
+
 //	#define NIK_UNIT_TEST_X_TO5_PLUS1_V0
 //	#define NIK_UNIT_TEST_REASSIGN_V0
 //	#define NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V0
@@ -173,7 +183,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto square_v0(T v)
-		{ return chord_apply<_square_v0, null_env, T>(v); }
+		{ return chord_apply<_square_v0, cctmp::null_env, T>(v); }
 
 #endif
 
@@ -200,7 +210,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto square_v1(T v)
-		{ return chord_apply<_square_v1, null_env, T>(v); }
+		{ return chord_apply<_square_v1, cctmp::null_env, T>(v); }
 
 #endif
 
@@ -231,7 +241,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto sum_of_squares_v0(T x, T y)
-		{ return chord_apply<_sum_of_squares_v0, null_env, T>(x, y); }
+		{ return chord_apply<_sum_of_squares_v0, cctmp::null_env, T>(x, y); }
 
 #endif
 
@@ -259,7 +269,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto sum_of_squares_v1(T x, T y)
-		{ return chord_apply<_sum_of_squares_v1, null_env, T>(x, y); }
+		{ return chord_apply<_sum_of_squares_v1, cctmp::null_env, T>(x, y); }
 
 #endif
 
@@ -293,7 +303,108 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto twice_v0(T x)
-		{ return chord_apply<_twice_v0, null_env, T>(x); }
+		{ return chord_apply<_twice_v0, cctmp::null_env, T>(x); }
+
+#endif
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// plus n:
+
+/***********************************************************************************************************************/
+
+// version 0:
+
+	constexpr auto _plus_n_v0()
+	{
+		return source
+		(
+			"plus_n m n              ;"
+
+			"definitions:            ;"
+			"add_n # curry[1]{add n} ;"
+
+			"body:                   ;"
+			". = add_n m             ;"
+			"return _                ;"
+		);
+	}
+
+#ifdef NIK_UNIT_TEST_PLUS_N_V0
+
+	template<typename T>
+	constexpr auto plus_n_v0(T m, T n)
+		{ return chord_apply<_plus_n_v0, cctmp::null_env, T>(m, n); }
+
+#endif
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// two_x_sqd:
+
+/***********************************************************************************************************************/
+
+// version 0:
+
+	constexpr auto _two_x_sqd_v0()
+	{
+		return source
+	        (
+			"f x                                   ;"
+
+			"definitions:                          ;"
+			"sq        # argpose[1]{multiply 0 0}  ;"
+			"sum_of_sq # subpose[2]{add sq sq}     ;"
+			"two_x_sqd # argpose[1]{sum_of_sq 0 0} ;"
+
+			"body:                                 ;"
+			". = two_x_sqd x                       ;"
+			"return _                              ;"
+		);
+	}
+
+#ifdef NIK_UNIT_TEST_TWO_X_SQD_V0
+
+	template<typename T>
+	constexpr auto two_x_sqd_v0(T x)
+		{ return chord_apply<_two_x_sqd_v0, cctmp::null_env, T>(x); }
+
+#endif
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// x_sqd_plus_y4:
+
+/***********************************************************************************************************************/
+
+// version 0:
+
+	constexpr auto _x_sqd_plus_y4_v0()
+	{
+		return source
+	        (
+			"f x y                                    ;"
+
+			"definitions:                             ;"
+			"           sq # argpose[1]{multiply 0 0} ;"
+			"    sum_of_sq # subpose[2]{add sq sq}    ;"
+			"            y = sq y                     ;"
+			"y4_plus_x_sqd # curry[1]{sum_of_sq y}    ;"
+
+			"body:                                    ;"
+			". = y4_plus_x_sqd x                      ;"
+			"return _                                 ;"
+		);
+	}
+
+#ifdef NIK_UNIT_TEST_X_SQD_PLUS_Y4_V0
+
+	template<typename T>
+	constexpr auto x_sqd_plus_y4_v0(T x, T y)
+		{ return chord_apply<_x_sqd_plus_y4_v0, cctmp::null_env, T>(x, y); }
 
 #endif
 
@@ -325,7 +436,7 @@ namespace chord {
 	template<typename T>
 	constexpr auto x_to5_plus1_v0(T x)
 	{
-		constexpr auto e0 = env<constant_machine_frame>;
+		constexpr auto e0 = cctmp::env<constant_machine_frame>;
 
 		return chord_apply<_x_to5_plus1_v0, e0, T>(x, T(0));
 	}
@@ -357,7 +468,7 @@ namespace chord {
 
 	template<typename T1, typename T2>
 	constexpr auto reassign_v0(T1 x, T2 y)
-		{ return chord_apply<_reassign_v0, null_env, T2>(x, y); }
+		{ return chord_apply<_reassign_v0, cctmp::null_env, T2>(x, y); }
 
 #endif
 
@@ -393,7 +504,7 @@ namespace chord {
 	constexpr auto semidynamic_typing_v0(const complex_number & c, int n)
 	{
 		constexpr auto c1 = complex_number(1, 0);
-		constexpr auto e0 = env<constant_machine_frame>;
+		constexpr auto e0 = cctmp::env<constant_machine_frame>;
 
 		return chord_apply<_semidynamic_typing_v0, e0, int>(c, c1, n);
 	}
@@ -426,7 +537,7 @@ namespace chord {
 
 	constexpr auto semidynamic_typing_v1(const complex_number & c, int n)
 	{
-		constexpr auto e0 = env<constant_machine_frame, complex_constant_frame>;
+		constexpr auto e0 = cctmp::env<constant_machine_frame, complex_constant_frame>;
 
 		return chord_apply<_semidynamic_typing_v1, e0, int>(c, n);
 	}
@@ -468,7 +579,7 @@ namespace chord {
 	template<typename G, typename H, typename T>
 	constexpr auto binary_dispatch_v0(int n, G g, H h, T x, T y)
 	{
-		constexpr auto e0 = env<constant_machine_frame>;
+		constexpr auto e0 = cctmp::env<constant_machine_frame>;
 
 		return chord_apply<_binary_dispatch_v0, e0, T>(n, g, h, x, y);
 	}
@@ -505,7 +616,7 @@ namespace chord {
 	template<typename G, typename H, typename T>
 	constexpr auto binary_dispatch_v1(int n, G g, H h, T x, T y)
 	{
-		constexpr auto e0 = env<constant_machine_frame>;
+		constexpr auto e0 = cctmp::env<constant_machine_frame>;
 
 		return chord_apply<_binary_dispatch_v1, e0, T>(n, g, h, x, y);
 	}
@@ -545,7 +656,7 @@ namespace chord {
 	template<typename T>
 	constexpr auto factorial_v0(T v)
 	{
-		constexpr auto e0 = env<constant_machine_frame>;
+		constexpr auto e0 = cctmp::env<constant_machine_frame>;
 
 		return chord_apply<_factorial_v0, e0, T>(v);
 	}
@@ -579,7 +690,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v1(T v)
-		{ return chord_apply<_factorial_v1, null_env, T>(v, T(1)); }
+		{ return chord_apply<_factorial_v1, cctmp::null_env, T>(v, T(1)); }
 
 #endif
 
@@ -610,7 +721,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v2(T v)
-		{ return chord_apply<_factorial_v2, null_env, T>(T(1), v); }
+		{ return chord_apply<_factorial_v2, cctmp::null_env, T>(T(1), v); }
 
 #endif
 
@@ -640,7 +751,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto factorial_v3(T v)
-		{ return chord_apply<_factorial_v3, null_env, T>(T(1), v); }
+		{ return chord_apply<_factorial_v3, cctmp::null_env, T>(T(1), v); }
 
 #endif
 
@@ -673,7 +784,7 @@ namespace chord {
 	template<typename T>
 	constexpr auto factorial_v4(T v)
 	{
-		constexpr auto e0 = env<constant_machine_frame>;
+		constexpr auto e0 = cctmp::env<constant_machine_frame>;
 
 		return chord_apply<_factorial_v4, e0, T>(v);
 	}
@@ -717,7 +828,7 @@ namespace chord {
 	template<typename T>
 	constexpr auto fibonacci_v0(T v)
 	{
-		constexpr auto e0 = env<constant_machine_frame>;
+		constexpr auto e0 = cctmp::env<constant_machine_frame>;
 
 		return chord_apply<_fibonacci_v0, e0, T>(v, T(0), T(0));
 	}
@@ -733,6 +844,10 @@ namespace chord {
 		return source
 		(
 			"fibonacci n         ;"
+
+			"definitions:        ;"
+			"  n1 # zero         ;"
+			"  n2 # zero         ;"
 
 			"body:               ;"
 			"  test equal n zero ;"
@@ -756,7 +871,7 @@ namespace chord {
 	template<typename T>
 	constexpr auto fibonacci_v1(T v)
 	{
-		constexpr auto e0 = env<constant_machine_frame>;
+		constexpr auto e0 = cctmp::env<constant_machine_frame>;
 
 		return chord_apply<_fibonacci_v1, e0, T>(v);
 	}
@@ -825,7 +940,7 @@ namespace chord {
 	{
 		constexpr auto src = _fall_fact_2_v0<punct>;
 
-		return chord_apply<src, null_env, T>(&x);
+		return chord_apply<src, cctmp::null_env, T>(&x);
 	}
 
 #endif
@@ -885,7 +1000,7 @@ namespace chord {
 	{
 		constexpr auto src = _fall_fact_2_v1<punct>;
 
-		return chord_apply<src, null_env, T, T&>(x);
+		return chord_apply<src, cctmp::null_env, T, T&>(x);
 	}
 
 #endif
@@ -916,7 +1031,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto void_effects_v0(T x)
-		{ return chord_apply<_void_effects_v0, null_env, T>(x, 2); }
+		{ return chord_apply<_void_effects_v0, cctmp::null_env, T>(x, 2); }
 
 #endif
 
@@ -946,7 +1061,7 @@ namespace chord {
 
 	template<typename T>
 	constexpr auto side_effects_v0(T x)
-		{ return chord_apply<_side_effects_v0, null_env, T>(x, 2); }
+		{ return chord_apply<_side_effects_v0, cctmp::null_env, T>(x, 2); }
 
 #endif
 

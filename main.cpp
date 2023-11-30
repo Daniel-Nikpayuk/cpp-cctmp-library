@@ -74,12 +74,9 @@
 
 #include"undef_macros.hpp"
 
-//#include"documentation/01_lookup_controllers.hpp"
-//#include"documentation/02_chain_controllers.hpp"
-//#include"documentation/03_cycle_controllers.hpp"
-//#include"documentation/04_assembly_controllers.hpp"
-//#include"documentation/05_generic_assembly.hpp"
-//#include"documentation/06_chord_progressions.hpp"
+//#include"documentation/02_controllers.hpp"
+//#include"documentation/03_generic_assembly.hpp"
+//#include"documentation/04_chord_progressions.hpp"
 
 //#include"testing/00_generic_printers.hpp"
 //#include"testing/01_parser_generator_printers.hpp"
@@ -114,187 +111,21 @@
 
 /***********************************************************************************************************************/
 
-// square:
-
-	constexpr auto _square()
-	{
-		return chord::source
-		(
-			"f x                         ;"
-
-			"definitions:                ;"
-			"mult # multiply             ;"
-			"sq   # argpose[1]{mult 0 0} ;"
-
-			"body:                       ;"
-			". = sq x                    ;"
-			"return _                    ;"
-		);
-	}
-
-	template<typename T>
-	constexpr auto square(T x)
-		{ return chord::chord_apply<_square, null_env, T>(x); }
-
-/***********************************************************************************************************************/
-
-// sum of squares:
-
-	// version 1:
-
-		constexpr auto _sum_of_squares_v1()
-		{
-			return chord::source
-		        (
-				"f x y                                ;"
-
-				"definitions:                         ;"
-				"sq        # argpose[1]{multiply 0 0} ;"
-				"sum_of_sq # subpose[2]{add sq sq}    ;"
-
-				"body:                                ;"
-				". = sum_of_sq x y                    ;"
-				"return _                             ;"
-			);
-		}
-
-		template<typename T>
-		constexpr auto sum_of_squares_v1(T x, T y)
-			{ return chord::chord_apply<_sum_of_squares_v1, null_env, T>(x, y); }
-
-/***********************************************************************************************************************/
-
-// twice:
-
-	// version 0:
-
-		constexpr auto _twice_v0()
-		{
-			return chord::source
-			(
-				"twice x                     ;"
-
-				"definitions:                ;"
-				"tw # curry[1]{multiply two} ;"
-
-				"body:                       ;"
-				". = tw x                    ;"
-				"return _                    ;"
-
-				, binding( "two" , 2 )
-			);
-		}
-
-		template<typename T>
-		constexpr auto twice_v0(T x)
-			{ return chord::chord_apply<_twice_v0, null_env, T>(x); }
-
-/***********************************************************************************************************************/
-
-// plus n:
-
-	// version 0:
-
-		constexpr auto _plus_n_v0()
-		{
-			return chord::source
-			(
-				"plus_n m n              ;"
-
-				"definitions:            ;"
-				"add_n # curry[1]{add n} ;"
-
-				"body:                   ;"
-				". = add_n m             ;"
-				"return _                ;"
-			);
-		}
-
-		template<typename T>
-		constexpr auto plus_n_v0(T m, T n)
-			{ return chord::chord_apply<_plus_n_v0, null_env, T>(m, n); }
-
-/***********************************************************************************************************************/
-
-// two_x_sqd:
-
-	// version 0:
-
-		constexpr auto _two_x_sqd_v0()
-		{
-			return chord::source
-		        (
-				"f x                                   ;"
-
-				"definitions:                          ;"
-				"sq        # argpose[1]{multiply 0 0}  ;"
-				"sum_of_sq # subpose[2]{add sq sq}     ;"
-				"two_x_sqd # argpose[1]{sum_of_sq 0 0} ;"
-
-				"body:                                 ;"
-				". = two_x_sqd x                       ;"
-				"return _                              ;"
-			);
-		}
-
-		template<typename T>
-		constexpr auto two_x_sqd_v0(T x)
-			{ return chord::chord_apply<_two_x_sqd_v0, null_env, T>(x); }
-
-/***********************************************************************************************************************/
-
-// x_sqd_plus_y_to_4:
-
-	// version 0:
-
-		constexpr auto _x_sqd_plus_y_to_4_v0()
-		{
-			return chord::source
-		        (
-				"f x y                                        ;"
-
-				"definitions:                                 ;"
-				"               sq # argpose[1]{multiply 0 0} ;"
-				"        sum_of_sq # subpose[2]{add sq sq}    ;"
-				"                y = sq y                     ;"
-				"y_to_4_plus_x_sqd # curry[1]{sum_of_sq y}    ;"
-
-				"body:                                        ;"
-				". = y_to_4_plus_x_sqd x                      ;"
-				"return _                                     ;"
-			);
-		}
-
-		template<typename T>
-		constexpr auto x_sqd_plus_y_to_4_v0(T x, T y)
-			{ return chord::chord_apply<_x_sqd_plus_y_to_4_v0, null_env, T>(x, y); }
-
-/***********************************************************************************************************************/
-
 //	using chord_grammar			= chord::T_chord_assembly_scanner_grammar;
 //	using chord_grammar			= chord::T_chord_assembly_grammar;
 //	constexpr auto static_grammar		= U_store_T<chord_grammar>;
 
 	int main(int argc, char *argv[])
 	{
+	//	printf("%d\n", chord::fibonacci_v1(5));
+
 	//	auto m = main_at(0, argc, argv);
 	//	auto n = main_at(1, argc, argv);
 
 	//	printf("%d\n", plus_n_v0(m, n));
 
-	//	printf("%d\n", twice_v0(5));
-	//	printf("%d\n", square(5));
-	//	printf("%d\n", sum_of_squares_v1(3, 4));
-	//	printf("%d\n", two_x_sqd_v0(5));
-	//	printf("%d\n", x_sqd_plus_y_to_4_v0(3, 4));
-
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};
 	//	tr_table_printer.print_num_tr_table();
-
-	//	printf("%d\n", main_sum(argc, argv));
-
-	//	printf("%d\n", square_v0(main_at(0, argc, argv)));
-	//	printf("%d\n", sum_of_squares_v0(main_at(0, argc, argv), main_at(1, argc, argv)));
 
 		return 0;
 	}

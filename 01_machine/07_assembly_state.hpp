@@ -246,8 +246,8 @@ namespace machine {
 		{
 			nik_ce auto ni = AD<c>::pos(i);
 
-			if (v) return NIK_ASSEMBLY_TS(s, c, ni, j, l, t, Ts...)(v, vs...);
-			else   return NIK_ASSEMBLY_TS(s, c,  i, j, l, t, Ts...)(v, vs...);
+			if (v) return NIK_ASSEMBLY_2TS(s, c, ni, j, l, t, T, Ts...)(v, vs...);
+			else   return NIK_ASSEMBLY_2TS(s, c,  i, j, l, t, T, Ts...)(v, vs...);
 		}
 	};
 

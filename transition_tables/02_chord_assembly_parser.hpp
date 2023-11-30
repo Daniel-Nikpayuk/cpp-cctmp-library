@@ -190,7 +190,7 @@
 			list[51].valid = true; list[51].action = 0;
 			list[95].push({true, 11}); list[95].push({true, 12}); list[95].push({true, 4});
 			list[95].valid = true; list[95].action = 0;
-			list[131].valid = true; list[131].action = 0;
+			list[131].valid = true; list[131].action = 1;
 			list[138].push({true, 2}); list[138].push({true, 3}); list[138].valid = true; list[138].action = 0;
 			list[175].push({true, 6}); list[175].push({true, 5}); list[175].valid = true; list[175].action = 0;
 			list[177].push({true, 6}); list[177].push({true, 5}); list[177].valid = true; list[177].action = 0;
@@ -199,10 +199,10 @@
 			list[185].push({true, 6}); list[185].push({true, 5}); list[185].valid = true; list[185].action = 0;
 			list[187].push({true, 6}); list[187].push({true, 5}); list[187].valid = true; list[187].action = 0;
 			list[189].push({true, 6}); list[189].push({true, 5}); list[189].valid = true; list[189].action = 0;
-			list[217].valid = true; list[217].action = 5;
+			list[217].valid = true; list[217].action = 0;
 			list[218].push({true, 6}); list[218].push({true, 5}); list[218].valid = true; list[218].action = 0;
 			list[220].push({true, 6}); list[220].push({true, 5}); list[220].valid = true; list[220].action = 0;
-			list[224].valid = true; list[224].action = 5;
+			list[224].valid = true; list[224].action = 0;
 			list[225].push({true, 13}); list[225].push({true, 39}); list[225].push({true, 14});
 			list[225].valid = true; list[225].action = 0;
 			list[226].push({true, 15}); list[226].push({true, 16}); list[226].push({true, 17});
@@ -226,10 +226,10 @@
 			list[315].push({true, 32}); list[315].valid = true; list[315].action = 0;
 			list[319].push({true, 33}); list[319].push({true, 39}); list[319].push({true, 34});
 			list[319].valid = true; list[319].action = 0;
-			list[347].push({false, 3}); list[347].valid = true; list[347].action = 1;
-			list[390].push({false, 3}); list[390].valid = true; list[390].action = 2;
-			list[438].push({false, 8}); list[438].valid = true; list[438].action = 3;
-			list[482].push({false, 9}); list[482].valid = true; list[482].action = 4;
+			list[347].push({false, 3}); list[347].valid = true; list[347].action = 2;
+			list[390].push({false, 3}); list[390].valid = true; list[390].action = 3;
+			list[438].push({false, 8}); list[438].valid = true; list[438].action = 4;
+			list[482].push({false, 9}); list[482].valid = true; list[482].action = 5;
 			list[524].push({false, 8}); list[524].valid = true; list[524].action = 0;
 			list[569].push({false, 10}); list[569].valid = true; list[569].action = 6;
 			list[610].push({false, 8}); list[610].valid = true; list[610].action = 7;
