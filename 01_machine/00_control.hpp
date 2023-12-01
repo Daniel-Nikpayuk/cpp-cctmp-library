@@ -33,9 +33,18 @@ namespace machine {
 	template<auto U>
 	nik_ce auto & member_value_U				= cctmp::member_value_U<U>;
 
+	using gcbool_type					= cctmp::gcbool_type;
 	using gkey_type						= cctmp::gkey_type;
 	using gindex_type					= cctmp::gindex_type;
 	using gcindex_type					= cctmp::gcindex_type;
+
+	template<auto... Vs>
+	nik_ce auto eval					= cctmp::eval<Vs...>;
+
+	template<auto... Vs>
+	nik_ce auto if_then_else_				= cctmp::if_then_else_<Vs...>;
+
+	nik_ce auto _read_only_					= cctmp::_read_only_;
 
 	template<typename Type, auto Size>
 	using sequence						= cctmp::sequence<Type, Size>;
@@ -48,6 +57,16 @@ namespace machine {
 /***********************************************************************************************************************/
 
 // space:
+
+/***********************************************************************************************************************/
+
+// type:
+
+	template<auto U>
+	using read_only = T_store_U<eval<_read_only_, U>>;
+
+	template<bool p, auto U0, auto U1>
+	using retype = T_store_U<if_then_else_<p, U0, U1>>;
 
 /***********************************************************************************************************************/
 

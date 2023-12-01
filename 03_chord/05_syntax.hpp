@@ -507,7 +507,7 @@ namespace chord {
 				line.left.set_sign(vars.max());
 			}
 
-		// val:
+		// value:
 
 			nik_ce bool is_sign(const val_type & v) const
 				{ return (v.kind() == Kind::sign); }
@@ -569,7 +569,7 @@ namespace chord {
 				op_action();
 			}
 
-		// value:
+		// val:
 
 			nik_ce void set_val(const cselect & s)
 			{
@@ -599,8 +599,8 @@ namespace chord {
 				return k.left_size();
 			}
 
-			nik_ce void val_action_sign()
-				{ chain_action<CAN::non, CAT::arg>(line.val.arg_at()); }
+			nik_ce void val_action_sign(const bool mutate = false)
+				{ chain_action<CAN::non, CAT::arg>(line.val.arg_at(), mutate); }
 
 			nik_ce void val_action_recurse()
 				{ chain_action<CAN::non, CAT::recurse>(); }
@@ -610,6 +610,14 @@ namespace chord {
 
 			nik_ce bool val_is_sign     () const { return is_sign(line.val); }
 			nik_ce bool val_is_compound () const { return is_compound(line.val); }
+
+		// mutation:
+
+			nik_ce void mut_action()
+			{
+				if (line.val.kind() == Kind::sign) val_action_sign(true);
+				else { } // error.
+			}
 
 		// unit:
 

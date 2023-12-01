@@ -40,18 +40,10 @@ namespace machine {
 	nik_ce auto cons_					= cctmp::cons_<Vs...>;
 
 	template<auto... Vs>
-	nik_ce auto push_					= cctmp::push_<Vs...>;
-
-	template<auto... Vs>
-	nik_ce auto right_					= cctmp::right_<Vs...>;
-
-	template<auto... Vs>
 	nik_ce auto replace_					= cctmp::replace_<Vs...>;
 
 	template<auto... Vs>
 	nik_ce auto segment_					= cctmp::segment_<Vs...>;
-
-	nik_ce auto _read_only_					= cctmp::_read_only_;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -168,7 +160,7 @@ namespace machine {
 	struct T_assembly<AN::halt, AT::first, filler...>
 	{
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename T0, typename... Ts>
-		nik_ces auto result(T0 v0, Ts... vs) -> T_store_U<s> { return v0; }
+		nik_ces auto result(T0 v0, Ts... vs) -> T_store_U<s> { return (T_store_U<s>) v0; } // c style cast.
 	};
 
 /***********************************************************************************************************************/
@@ -313,7 +305,7 @@ namespace machine {
 
 			nik_ce auto nU = U_store_T<decltype(nv)>;
 			nik_ce auto nt = cons_<t, nU>;
-			using nT       = modify_type<_read_only_, decltype(nv)>;
+			using nT       = read_only<nU>;
 
 			return NIK_ASSEMBLY_2TS(s, c, i, j, l, nt, nT, Ts...)(nv, vs...);
 		}
@@ -341,7 +333,7 @@ namespace machine {
 
 			nik_ce auto nU  = U_store_T<decltype(nv)>;
 			nik_ce auto nt  = replace_<t, _zero, nU>;
-			using nT        = modify_type<_read_only_, decltype(nv)>;
+			using nT        = read_only<nU>;
 
 			return NIK_ASSEMBLY_2TS(s, c, i, j, l, nt, nT, Ts...)(nv, vs...);
 		}
@@ -363,11 +355,11 @@ namespace machine {
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
 			nik_ce auto ni = AD<c>::pos(i);
-			       auto nv = T_chain_istart::template result<c, ni, l, t>(v, vs...);
+			       auto nv = T_chain_istart::template result<c, ni, l, t, T, Ts...>(v, vs...);
 
 			nik_ce auto nU = U_store_T<decltype(nv)>;
 			nik_ce auto nt = replace_<t, _zero, nU>;
-			using nT       = modify_type<_read_only_, decltype(nv)>;
+			using nT       = read_only<nU>;
 
 			return NIK_ASSEMBLY_2TS(s, c, i, j, l, nt, nT, Ts...)(nv, vs...);
 		}
@@ -385,7 +377,7 @@ namespace machine {
 		{
 			nik_ce auto ni = AD<c>::pos(i);
 
-			T_chain_istart::template result<c, ni, l, t>(vs...);
+			T_chain_istart::template result<c, ni, l, t, Ts...>(vs...);
 
 			return NIK_ASSEMBLY_TS(s, c, i, j, l, t, Ts...)(vs...);
 		}
@@ -406,7 +398,7 @@ namespace machine {
 
 			nik_ce auto nU = U_store_T<decltype(nv)>;
 			nik_ce auto nt = replace_<t, _zero, nU>;
-			using nT       = modify_type<_read_only_, decltype(nv)>;
+			using nT       = read_only<nU>;
 
 			return NIK_ASSEMBLY_2TS(s, c, i, j, l, nt, nT, Ts...)(nv, vs...);
 		}

@@ -29,17 +29,14 @@ namespace machine {
 
 // cctmp:
 
-	template<auto U>
-	using T_store_U							= cctmp::T_store_U<U>;
-
-	template<auto... Vs>
-	nik_ce auto eval						= cctmp::eval<Vs...>;
-
 	nik_ce auto _to_pointer_					= cctmp::_to_pointer_;
 	nik_ce auto _function_out_type_					= cctmp::_function_out_type_;
 
-	template<auto Op, typename T>
-	using modify_type						= cctmp::modify_type<Op, T>;
+	template<auto... Vs>
+	nik_ce auto push_						= cctmp::push_<Vs...>;
+
+	template<auto... Vs>
+	nik_ce auto right_						= cctmp::right_<Vs...>;
 
 	template<auto... Vs>
 	nik_ce auto at_							= cctmp::at_<Vs...>;
@@ -269,7 +266,11 @@ namespace machine {
 	{
 		template<NIK_CHAIN_PARAMS(c, i, j, k, l, t), typename... Ts>
 		nik_ces auto result(T_store_U<LUs>... lvs, T_store_U<RUs>... rvs)
-			{ return NIK_CHAIN_TS(c, i, j, k, l, t, T_store_U<RUs>...)(rvs...); }
+		{
+			nik_ce auto nt = right_<t, sizeof...(LUs)>;
+
+			return NIK_CHAIN_TS(c, i, j, k, l, nt, T_store_U<RUs>...)(rvs...);
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -288,9 +289,15 @@ namespace machine {
 		template<NIK_CHAIN_PARAMS(c, i, j, k, l, t), typename... Ts>
 		nik_ces auto result(T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs)
 		{
+			nik_ce auto nU = at_<t, sizeof...(LUs)>;
+			nik_ce auto nt = push_<t, nU>;
+
+			nik_ce auto p  = CD<c>::pos(i);
+			using nT       = retype<p, nU, RU>;
+
 			return NIK_CHAIN_4TS
-				(c, i, j, k, l, t, T_store_U<LUs>..., RT, T_store_U<RUs>..., RT)
-					(lvs..., rv, rvs..., rv);
+				(c, i, j, k, l, nt, T_store_U<LUs>..., RT, T_store_U<RUs>..., nT)
+					(lvs..., rv, rvs..., (nT) rv); // c style cast.
 		}
 	};
 
@@ -353,7 +360,9 @@ namespace machine {
 			nik_ce auto n  = CD<c>::pos(i);
 			nik_ce auto nv = at_<l, n>;
 
-			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., decltype(nv))(vs..., nv);
+			nik_ce auto nt = push_<t, U_store_T<decltype(nv)>>;
+
+			return NIK_CHAIN_2TS(c, i, j, k, l, nt, Ts..., decltype(nv))(vs..., nv);
 		}
 	};
 
@@ -394,7 +403,9 @@ namespace machine {
 			nik_ce auto str = at_<l, n>;
 			nik_ce auto nv  = T_lookup_istart::template result<c, ni, str>(fs...);
 
-			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., decltype(nv))(vs..., nv);
+			nik_ce auto nt = push_<t, U_store_T<decltype(nv)>>;
+
+			return NIK_CHAIN_2TS(c, i, j, k, l, nt, Ts..., decltype(nv))(vs..., nv);
 		}
 	};
 
@@ -433,9 +444,13 @@ namespace machine {
 		nik_ces auto result(Ts... vs)
 		{
 			nik_ce auto ni = CD<c>::pos(i);
-			       auto nv = T_chain_substart::template result<c, ni, j, k, l, t>(vs...);
+			       auto nv = T_chain_substart::template result<c, ni, j, k, l, t, Ts...>(vs...);
 
-			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., decltype(nv))(vs..., nv);
+			nik_ce auto nU = U_store_T<decltype(nv)>;
+			nik_ce auto nt = push_<t, nU>;
+			using nT       = read_only<nU>;
+
+			return NIK_CHAIN_2TS(c, i, j, k, l, nt, Ts..., nT)(vs..., nv);
 		}
 	};
 
@@ -457,7 +472,9 @@ namespace machine {
 			nik_ce auto ni = CD<c>::pos(i);
 			nik_ce auto nv = U_chain_cons<c, ni>;
 
-			return NIK_CHAIN_2TS(c, i, j, k, l, t, Ts..., decltype(nv))(vs..., nv);
+			nik_ce auto nt = push_<t, U_store_T<decltype(nv)>>;
+
+			return NIK_CHAIN_2TS(c, i, j, k, l, nt, Ts..., decltype(nv))(vs..., nv);
 		}
 	};
 

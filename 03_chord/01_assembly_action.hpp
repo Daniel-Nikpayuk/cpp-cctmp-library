@@ -433,6 +433,10 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
+			t->template assembly_action<AAN::apply, AAT::begin>(AT::void_f);
+
+			t->set_val(l->left_cselect());
+			t->mut_action();
 		}
 	};
 
@@ -442,6 +446,9 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
+			t->op_capture_action();
+
+			t->template assembly_action<AAN::apply, AAT::end>(t->vars.dropsize(), t->op_note());
 		}
 	};
 
@@ -452,8 +459,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
+			{ t->template assembly_action<AAN::apply, AAT::begin>(AT::void_f); }
 	};
 
 	template<auto... filler>
@@ -462,6 +468,9 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
+			t->op_capture_action();
+
+			t->template assembly_action<AAN::apply, AAT::end>(t->vars.dropsize(), t->op_note());
 		}
 	};
 
@@ -573,6 +582,8 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
+			t->set_val(l->left_cselect());
+			t->mut_action();
 		}
 	};
 

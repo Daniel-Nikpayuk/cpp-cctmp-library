@@ -910,6 +910,9 @@ namespace chord {
 			(
 				"fall_fact_2 x       ;"
 
+				"definitions:        ;"
+				"  v # zero          ;"
+
 				"body:               ;"
 				"  v = side_dec !x   ;" // works!
 				"  . = dereference x ;"
@@ -922,6 +925,9 @@ namespace chord {
 			return source
 			(
 				"fall_fact_2 x       ;"
+
+				"definitions:        ;"
+				"  v # zero          ;"
 
 				"body:               ;"
 				"  v = side_dec x    ;" // error: read only.
@@ -940,7 +946,7 @@ namespace chord {
 	{
 		constexpr auto src = _fall_fact_2_v0<punct>;
 
-		return chord_apply<src, cctmp::null_env, T>(&x);
+		return chord_apply<src, cctmp::env<constant_machine_frame>, T>(&x);
 	}
 
 #endif
@@ -972,6 +978,9 @@ namespace chord {
 			(
 				"fall_fact_2 x       ;"
 
+				"definitions:        ;"
+				"  v # zero          ;"
+
 				"body:               ;"
 				"  v = side_dec !x   ;" // works!
 				"  . = multiply v x  ;"
@@ -983,6 +992,9 @@ namespace chord {
 			return source
 			(
 				"fall_fact_2 x       ;"
+
+				"definitions:        ;"
+				"  v # zero          ;"
 
 				"body:               ;"
 				"  v = side_dec x    ;" // error: read only.
@@ -1000,7 +1012,7 @@ namespace chord {
 	{
 		constexpr auto src = _fall_fact_2_v1<punct>;
 
-		return chord_apply<src, cctmp::null_env, T, T&>(x);
+		return chord_apply<src, cctmp::env<constant_machine_frame>, T, T&>(x);
 	}
 
 #endif

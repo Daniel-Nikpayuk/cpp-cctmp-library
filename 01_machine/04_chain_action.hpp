@@ -115,12 +115,13 @@ namespace machine {
 			nik_ces gindex_type offset = 2 * machine_offset<MAN::set, MAT::inc>;
 
 			using cindex = gcindex_type;
+			using cbool  = gcbool_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note, cindex arg_at)
+			nik_ces void result(Contr *contr, cindex note, cindex arg_at, cbool mutate = false)
 			{
 				machine_action<MAN::set, MAT::inc>(contr, CN::arg, CT::select, 1, arg_at);
-				machine_action<MAN::set, MAT::inc>(contr, CN::arg, note);
+				machine_action<MAN::set, MAT::inc>(contr, CN::arg, note, 1, mutate);
 			}
 		};
 

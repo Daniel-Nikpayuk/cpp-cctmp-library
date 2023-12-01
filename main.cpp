@@ -117,12 +117,8 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	printf("%d\n", chord::fibonacci_v1(5));
-
 	//	auto m = main_at(0, argc, argv);
 	//	auto n = main_at(1, argc, argv);
-
-	//	printf("%d\n", plus_n_v0(m, n));
 
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};
 	//	tr_table_printer.print_num_tr_table();
