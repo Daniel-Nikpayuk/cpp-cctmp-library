@@ -25,19 +25,68 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// subsource:
+
+	using T_def_subsrc = cctmp::T_default_subsource;
+
+/***********************************************************************************************************************/
+
+// subpose:
+
+	// begin:
+
+		struct T_subpose_begin
+		{
+			template<typename AST>
+			nik_ces void result(AST *t)
+			{
+				t->line.set_sub(_zero);
+				t->drop.clear();
+			}
+		};
+
+	// end:
+
+		struct T_subpose_end
+		{
+			template<typename AST, typename RecordType>
+			nik_ces void result(AST *t, const RecordType & record)
+			{
+				t->tag_arg_drops(record.cap_size);
+				t->paste_compound_subop(record.arity);
+			}
+
+			template<typename AST>
+			nik_ces void result(AST *t) { result(t, t->pound.clast()->record()); }
+		};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // morph:
 
 /***********************************************************************************************************************/
 
-// op:
+// arity:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::mor_op_arity, filler...>
+	struct T_chord_assembly_translation_action<CAAN::mor_arity_id, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->proc.last()->set_arity(l->to_number()); }
+			{ t->pound.last()->set_arity(_zero); }
 	};
+
+	template<auto... filler>
+	struct T_chord_assembly_translation_action<CAAN::mor_arity_value, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->pound.last()->set_arity(l->to_number()); }
+	};
+
+// op:
 
 	template<auto... filler>
 	struct T_chord_assembly_translation_action<CAAN::mor_op_value, filler...>
@@ -45,9 +94,9 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->set_op(l->left_cselect());
+			t->copy_op(l->left_cselect());
 
-			t->proc_capture_op();
+			t->capture_op();
 		}
 	};
 
@@ -99,13 +148,11 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			auto arity    = t->proc.last()->arity();
-			auto cap_size = t->proc.last()->size();
-			auto dropsize = arity + cap_size;
+			auto record = t->pound.clast()->record();
 
-			t->subop_capture_action(arity);
+			t->paste_compound_subop(record.arity);
 
-			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->op_note());
+			t->template assembly_action<AAN::apply, AAT::end>(record.dropsize, t->op_note());
 		}
 	};
 
@@ -125,10 +172,9 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->line.set_sub(_zero);
-			t->drop.clear();
-
 			t->template assembly_action<AAN::apply, AAT::begin>(AT::cons_f);
+
+			T_subpose_begin::template result<AST>(t);
 		}
 	};
 
@@ -138,14 +184,11 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			auto arity    = t->proc.last()->arity();
-			auto cap_size = t->proc.last()->size();
-			auto dropsize = arity + cap_size;
+			auto record = t->pound.clast()->record();
 
-			t->tag_arg_drops(cap_size);
-			t->subop_capture_action(arity);
+			T_subpose_end::template result<AST>(t, record);
 
-			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->op_note());
+			t->template assembly_action<AAN::apply, AAT::end>(record.dropsize, t->op_note());
 		}
 	};
 
@@ -155,9 +198,10 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->set_val(l->left_cselect());
+			t->copy_val(l->left_cselect());
 
-			t->argop_capture_action();
+			t->capture_argop();
+			t->paste_argop();
 		}
 	};
 
@@ -209,16 +253,14 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			auto arity    = t->proc.last()->arity();
-			auto cap_size = t->proc.last()->size();
-			auto dropsize = arity + cap_size;
+			auto record = t->pound.clast()->record();
 
-			for (auto k = 0; k != arity; ++k) // variadic.
+			for (auto k = 0; k != record.arity; ++k) // variadic.
 				t->template chain_action<CAN::non, CAT::arg>(k);
 
-			t->subop_capture_action(arity);
+			t->paste_compound_subop(record.arity);
 
-			t->template assembly_action<AAN::apply, AAT::end>(dropsize, t->op_note());
+			t->template assembly_action<AAN::apply, AAT::end>(record.dropsize, t->op_note());
 		}
 	};
 
@@ -228,9 +270,9 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->set_val(l->left_cselect());
+			t->copy_val(l->left_cselect());
 
-			t->subval_capture_action();
+			t->paste_subval();
 		}
 	};
 

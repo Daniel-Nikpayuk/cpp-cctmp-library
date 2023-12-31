@@ -49,7 +49,8 @@ namespace machine {
 			identity = 0, id = identity,
 			generic, non_x_catN, catN_x_non,
 			cat0_x_catN, cat1_x_catN, cat2_x_catN,
-			begin, non, recurse, arg, list, lookup, end,
+			begin, end, non, recurse, arg, list,
+			boolean, number, character, string,
 			dimension
 		};
 
@@ -64,7 +65,8 @@ namespace machine {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
-			sub, non, recurse, arg, list, lookup,
+			sub, non, recurse, arg, list,
+			literal, boolean, number, character, string,
 			dimension
 		};
 
@@ -84,13 +86,13 @@ namespace machine {
 		template<auto... filler>
 		struct T_chain_action<CAN::generic, CAT::recurse, filler...>
 		{
-			nik_ces gindex_type offset = machine_offset<MAN::set, MAT::inc>;
+			nik_ces gindex_type offset = machine_offset<MAN::push, MAT::instr>;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note)
-				{ machine_action<MAN::set, MAT::inc>(contr, CN::list, note, 1, contr->rec_at); }
+				{ machine_action<MAN::push, MAT::instr>(contr, CN::list, note, contr->rec_at); }
 		};
 
 	// list:
@@ -98,13 +100,13 @@ namespace machine {
 		template<auto... filler>
 		struct T_chain_action<CAN::generic, CAT::list, filler...>
 		{
-			nik_ces gindex_type offset = machine_offset<MAN::set, MAT::inc>;
+			nik_ces gindex_type offset = machine_offset<MAN::push, MAT::instr>;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex list_at)
-				{ machine_action<MAN::set, MAT::inc>(contr, CN::list, note, 1, list_at); }
+				{ machine_action<MAN::push, MAT::instr>(contr, CN::list, note, list_at); }
 		};
 
 	// arg:
@@ -112,7 +114,7 @@ namespace machine {
 		template<auto... filler>
 		struct T_chain_action<CAN::generic, CAT::arg, filler...>
 		{
-			nik_ces gindex_type offset = 2 * machine_offset<MAN::set, MAT::inc>;
+			nik_ces gindex_type offset = 2 * machine_offset<MAN::push, MAT::instr>;
 
 			using cindex = gcindex_type;
 			using cbool  = gcbool_type;
@@ -120,32 +122,52 @@ namespace machine {
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex arg_at, cbool mutate = false)
 			{
-				machine_action<MAN::set, MAT::inc>(contr, CN::arg, CT::select, 1, arg_at);
-				machine_action<MAN::set, MAT::inc>(contr, CN::arg, note, 1, mutate);
+				machine_action<MAN::push, MAT::instr>(contr, CN::arg, CT::select, arg_at);
+				machine_action<MAN::push, MAT::instr>(contr, CN::arg, note, mutate);
 			}
 		};
 
-	// lookup:
+	// literal:
 
-		template<auto... filler>
-		struct T_chain_action<CAN::generic, CAT::lookup, filler...>
+		template<gkey_type note1, auto... filler>
+		struct T_chain_action<CAN::generic, CAT::literal, note1, filler...>
 		{
-			nik_ces gindex_type offset	= machine_offset< MAN::set  , MAT::inc >
-							+ machine_offset< MAN::push , MAT::id  >
-							+  lookup_offset< LAN::find , LAT::id  >
-							+ machine_offset< MAN::pop  , MAT::id  > ;
+			nik_ces gindex_type offset	= machine_offset< MAN::delay   , MAT::call >
+							+ literal_offset< LAN::resolve , LAT::id   >
+							+ machine_offset< MAN::force   , MAT::call > ;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note, cindex begin, cindex end)
+			nik_ces void result(Contr *contr, cindex note0, cindex str_at, cindex begin, cindex end)
 			{
-				machine_action< MAN::set  , MAT::inc >(contr, CN::list, CT::select, 1, contr->env_at);
-				machine_action< MAN::push , MAT::id  >(contr, CN::lookup, note, contr->str_at);
-				 lookup_action< LAN::find , LAT::id  >(contr, begin, end);
-				machine_action< MAN::pop  , MAT::id  >(contr);
+				machine_action< MAN::delay   , MAT::call >(contr, CN::literal, note0, str_at);
+				literal_action< LAN::resolve , LAT::id   >(contr, note1, begin, end);
+				machine_action< MAN::force   , MAT::call >(contr);
 			}
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex note0, cindex begin, cindex end)
+				{ result(contr, note0, contr->src_at, begin, end); }
 		};
+
+		// boolean, number, character, string:
+
+			template<auto... filler>
+			struct T_chain_action<CAN::generic, CAT::boolean, filler...> :
+				public T_chain_action<CAN::generic, CAT::literal, LT::boolean, filler...> { };
+
+			template<auto... filler>
+			struct T_chain_action<CAN::generic, CAT::number, filler...> :
+				public T_chain_action<CAN::generic, CAT::literal, LT::number, filler...> { };
+
+			template<auto... filler>
+			struct T_chain_action<CAN::generic, CAT::character, filler...> :
+				public T_chain_action<CAN::generic, CAT::literal, LT::character, filler...> { };
+
+			template<auto... filler>
+			struct T_chain_action<CAN::generic, CAT::string, filler...> :
+				public T_chain_action<CAN::generic, CAT::literal, LT::string, filler...> { };
 
 	// offset:
 
@@ -244,11 +266,11 @@ namespace machine {
 		template<auto... filler>
 		struct T_chain_action<CAN::begin, CAT::id, filler...>
 		{
-			nik_ces gindex_type offset = machine_offset<MAN::set, MAT::inc>;
+			nik_ces gindex_type offset = machine_offset<MAN::push, MAT::instr>;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr)
-				{ machine_action<MAN::set, MAT::inc>(contr, CN::id, CT::id); }
+				{ machine_action<MAN::push, MAT::instr>(contr, CN::id, CT::id); }
 		};
 
 	// sub:
@@ -256,8 +278,8 @@ namespace machine {
 		template<auto... filler>
 		struct T_chain_action<CAN::begin, CAT::sub, filler...>
 		{
-			nik_ces gindex_type offset	= machine_offset< MAN::push , MAT::id  >
-							+ machine_offset< MAN::set  , MAT::inc > ;
+			nik_ces gindex_type offset	= machine_offset< MAN::delay , MAT::call  >
+							+ machine_offset< MAN::push  , MAT::instr > ;
 
 			using cindex = gcindex_type;
 
@@ -265,8 +287,48 @@ namespace machine {
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note)
 			{
-				machine_action< MAN::push , MAT::id  >(contr, CN::subchain, note);
-				machine_action< MAN::set  , MAT::inc >(contr, CN::id, CT::id);
+				machine_action<MAN::delay , MAT::call  >(contr, CN::subchain, note);
+				machine_action<MAN::push  , MAT::instr >(contr, CN::id, CT::id);
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// end:
+
+	// id:
+
+		template<auto... filler>
+		struct T_chain_action<CAN::end, CAT::id, filler...>
+		{
+			nik_ces gindex_type offset	= chain_action_offset<CAT::arg>
+							+ machine_offset<MAN::push, MAT::instr> ;
+
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex arg_drop, cindex note)
+			{
+				  chain_action< CAN::generic , CAT::arg   >(contr, CT::drop, arg_drop);
+				machine_action< MAN::push    , MAT::instr >(contr, CN::halt, note);
+			}
+		};
+
+	// sub:
+
+		template<auto... filler>
+		struct T_chain_action<CAN::end, CAT::sub, filler...>
+		{
+			nik_ces gindex_type offset	= chain_offset<CAN::end, CAT::id>
+							+ machine_offset<MAN::force, MAT::call> ;
+
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex arg_drop, cindex note)
+			{
+				  chain_action< CAN::end   , CAT::id   >(contr, arg_drop, note);
+				machine_action< MAN::force , MAT::call >(contr);
 			}
 		};
 
@@ -274,7 +336,7 @@ namespace machine {
 
 // recurse:
 
-	// recurse, list, arg, lookup:
+	// recurse, list, arg, boolean, number, character, string:
 
 		template<gkey_type note, auto... filler>
 		struct T_chain_action<CAN::recurse, note, filler...> :
@@ -290,7 +352,7 @@ namespace machine {
 
 // list:
 
-	// recurse, list, arg, lookup:
+	// recurse, list, arg, boolean, number, character, string:
 
 		template<gkey_type note, auto... filler>
 		struct T_chain_action<CAN::list, note, filler...> :
@@ -306,7 +368,7 @@ namespace machine {
 
 // arg:
 
-	// recurse, list, arg, lookup:
+	// recurse, list, arg, boolean, number, character, string:
 
 		template<gkey_type note, auto... filler>
 		struct T_chain_action<CAN::arg, note, filler...> :
@@ -320,71 +382,80 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
-// lookup:
+// boolean:
 
-	// recurse, list, arg, lookup:
+	// recurse, list, arg, boolean, number, character, string:
 
 		template<gkey_type note, auto... filler>
-		struct T_chain_action<CAN::lookup, note, filler...> :
-			public T_chain_action<CAN::cat2_x_catN, CAT::lookup, note, filler...> { };
+		struct T_chain_action<CAN::boolean, note, filler...> :
+			public T_chain_action<CAN::cat2_x_catN, CAT::boolean, note, filler...> { };
 
 	// non: (composer only, add this instr at contr end)
 
 		template<auto... filler>
-		struct T_chain_action<CAN::lookup, CAT::non, filler...> :
-			public T_chain_action<CAN::catN_x_non, CAT::lookup, filler...> { };
+		struct T_chain_action<CAN::boolean, CAT::non, filler...> :
+			public T_chain_action<CAN::catN_x_non, CAT::boolean, filler...> { };
+
+/***********************************************************************************************************************/
+
+// number:
+
+	// recurse, list, arg, boolean, number, character, string:
+
+		template<gkey_type note, auto... filler>
+		struct T_chain_action<CAN::number, note, filler...> :
+			public T_chain_action<CAN::cat2_x_catN, CAT::number, note, filler...> { };
+
+	// non: (composer only, add this instr at contr end)
+
+		template<auto... filler>
+		struct T_chain_action<CAN::number, CAT::non, filler...> :
+			public T_chain_action<CAN::catN_x_non, CAT::number, filler...> { };
+
+/***********************************************************************************************************************/
+
+// character:
+
+	// recurse, list, arg, boolean, number, character, string:
+
+		template<gkey_type note, auto... filler>
+		struct T_chain_action<CAN::character, note, filler...> :
+			public T_chain_action<CAN::cat2_x_catN, CAT::character, note, filler...> { };
+
+	// non: (composer only, add this instr at contr end)
+
+		template<auto... filler>
+		struct T_chain_action<CAN::character, CAT::non, filler...> :
+			public T_chain_action<CAN::catN_x_non, CAT::character, filler...> { };
+
+/***********************************************************************************************************************/
+
+// string:
+
+	// recurse, list, arg, boolean, number, character, string:
+
+		template<gkey_type note, auto... filler>
+		struct T_chain_action<CAN::string, note, filler...> :
+			public T_chain_action<CAN::cat2_x_catN, CAT::string, note, filler...> { };
+
+	// non: (composer only, add this instr at contr end)
+
+		template<auto... filler>
+		struct T_chain_action<CAN::string, CAT::non, filler...> :
+			public T_chain_action<CAN::catN_x_non, CAT::string, filler...> { };
 
 /***********************************************************************************************************************/
 
 // non:
 
-	// recurse, list, arg, lookup: (id *; allows the user to conceptualize composition before application)
+	// recurse, list, arg, boolean, number, character, string:
+	// (id *; allows the user to conceptualize composition before application)
 
 		template<gkey_type note, auto... filler>
 		struct T_chain_action<CAN::non, note, filler...> :
 			public T_chain_action<CAN::non_x_catN, note, filler...> { };
 
 	// non: (not applicable)
-
-/***********************************************************************************************************************/
-
-// end:
-
-	// id:
-
-		template<auto... filler>
-		struct T_chain_action<CAN::end, CAT::id, filler...>
-		{
-			nik_ces gindex_type offset	= chain_action_offset<CAT::arg>
-							+ machine_offset<MAN::set, MAT::inc> ;
-
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex arg_drop, cindex note)
-			{
-				  chain_action<CAN::generic, CAT::arg>(contr, CT::drop, arg_drop);
-				machine_action<MAN::set, MAT::inc>(contr, CN::halt, note);
-			}
-		};
-
-	// sub:
-
-		template<auto... filler>
-		struct T_chain_action<CAN::end, CAT::sub, filler...>
-		{
-			nik_ces gindex_type offset	= chain_offset<CAN::end, CAT::id>
-							+ machine_offset<MAN::pop, MAT::id> ;
-
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex arg_drop, cindex note)
-			{
-				  chain_action<CAN::end, CAT::id>(contr, arg_drop, note);
-				machine_action<MAN::pop, MAT::id>(contr);
-			}
-		};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

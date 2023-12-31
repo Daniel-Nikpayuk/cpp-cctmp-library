@@ -61,7 +61,7 @@ namespace machine {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			halt, arg, list, lookup, subchain, conduct,
+			halt, arg, list, lookup, literal, subchain, conduct,
 			dimension
 		};
 	};
@@ -390,10 +390,19 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
+// :
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// literal:
+
+/***********************************************************************************************************************/
+
 // push:
 
-	template<template<auto...> typename B, auto... fs, nik_vp(env)(B<fs...>*)>
-	struct T_chain<CN::lookup, CT::push, env>
+	template<auto... filler>
+	struct T_chain<CN::literal, CT::push, filler...>
 	{
 		template<NIK_CHAIN_PARAMS(c, i, j, k, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs)
@@ -401,7 +410,7 @@ namespace machine {
 			nik_ce auto ni  = CD<c>::pos(i);
 			nik_ce auto n   = CD<c>::num(i);
 			nik_ce auto str = at_<l, n>;
-			nik_ce auto nv  = T_lookup_istart::template result<c, ni, str>(fs...);
+			nik_ce auto nv  = T_literal_istart::template result<str, c, ni>();
 
 			nik_ce auto nt = push_<t, U_store_T<decltype(nv)>>;
 
@@ -413,8 +422,8 @@ namespace machine {
 
 // pull:
 
-	template<template<auto...> typename B, auto... fs, nik_vp(env)(B<fs...>*)>
-	struct T_chain<CN::lookup, CT::pull, env>
+	template<auto... filler>
+	struct T_chain<CN::literal, CT::pull, filler...>
 	{
 		template<NIK_CHAIN_PARAMS(c, i, j, k, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs)
@@ -422,7 +431,7 @@ namespace machine {
 			nik_ce auto ni  = CD<c>::pos(i);
 			nik_ce auto n   = CD<c>::num(i);
 			nik_ce auto str = at_<l, n>;
-			nik_ce auto nk  = T_lookup_istart::template result<c, ni, str>(fs...);
+			nik_ce auto nk  = T_literal_istart::template result<str, c, ni>();
 
 			return NIK_CHAIN_TS(c, i, j, nk, l, t, Ts...)(vs...);
 		}

@@ -333,6 +333,42 @@ namespace cctmp {
 	nik_ce auto null_env = env<>;
 
 /***********************************************************************************************************************/
+
+// source:
+
+	template<typename CharType, auto N, typename... Bindings>
+	nik_ce auto source(const CharType (&s)[N], const Bindings &... bs)
+	{
+		nik_ce auto U_char_type   = U_store_T<CharType>;
+		nik_ce auto empty_binding = binding("", _na_);
+
+		return pair{string_literal{s}, frame{U_char_type, bs..., empty_binding}};
+	}
+
+/***********************************************************************************************************************/
+
+// subsource:
+
+	struct T_default_subsource
+	{
+		nik_ces auto value			= string_literal{"id dereference appoint equal"};
+		using type				= decltype(value);
+
+		nik_ces gindex_type id_start		=  0;
+		nik_ces gindex_type id_finish		= 26; // 28 - 2
+
+		nik_ces gindex_type deref_start		=  3;
+		nik_ces gindex_type deref_finish	= 14; // 28 - 14
+
+		nik_ces gindex_type appoint_start	= 15;
+		nik_ces gindex_type appoint_finish	=  6; // 28 - 22
+
+		nik_ces gindex_type equal_start		= 23;
+		nik_ces gindex_type equal_finish	=  0; // 28 - 28
+
+	}; nik_ce auto _default_subsource_ = U_store_T<T_default_subsource>;
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 

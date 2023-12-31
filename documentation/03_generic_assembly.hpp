@@ -33,32 +33,32 @@ namespace chord {
 
 // definitions:
 
-//	#define NIK_UNIT_TEST_SQUARE_V0
-//	#define NIK_UNIT_TEST_SQUARE_V1
-//	#define NIK_UNIT_TEST_SUM_OF_SQUARES_V0
-//	#define NIK_UNIT_TEST_SUM_OF_SQUARES_V1
-//	#define NIK_UNIT_TEST_TWICE_V0
+	#define NIK_UNIT_TEST_SQUARE_V0
+	#define NIK_UNIT_TEST_SQUARE_V1
+	#define NIK_UNIT_TEST_SUM_OF_SQUARES_V0
+	#define NIK_UNIT_TEST_SUM_OF_SQUARES_V1
+	#define NIK_UNIT_TEST_TWICE_V0
 //	#define NIK_UNIT_TEST_PLUS_N_V0
 //	#define NIK_UNIT_TEST_TWO_X_SQD_V0
 //	#define NIK_UNIT_TEST_X_SQD_PLUS_Y4_V0
 
-//	#define NIK_UNIT_TEST_X_TO5_PLUS1_V0
-//	#define NIK_UNIT_TEST_REASSIGN_V0
-//	#define NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V0
-//	#define NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V1
-//	#define NIK_UNIT_TEST_BINARY_DISPATCH_V0
-//	#define NIK_UNIT_TEST_BINARY_DISPATCH_V1
-//	#define NIK_UNIT_TEST_FACTORIAL_V0
-//	#define NIK_UNIT_TEST_FACTORIAL_V1
-//	#define NIK_UNIT_TEST_FACTORIAL_V2
-//	#define NIK_UNIT_TEST_FACTORIAL_V3
-//	#define NIK_UNIT_TEST_FACTORIAL_V4
-//	#define NIK_UNIT_TEST_FIBONACCI_V0
-//	#define NIK_UNIT_TEST_FIBONACCI_V1
-//	#define NIK_UNIT_TEST_FALL_FACT_2_V0
-//	#define NIK_UNIT_TEST_FALL_FACT_2_V1
-//	#define NIK_UNIT_TEST_VOID_EFFECTS_V0
-//	#define NIK_UNIT_TEST_SIDE_EFFECTS_V0
+	#define NIK_UNIT_TEST_X_TO5_PLUS1_V0
+	#define NIK_UNIT_TEST_REASSIGN_V0
+	#define NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V0
+	#define NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V1
+	#define NIK_UNIT_TEST_BINARY_DISPATCH_V0
+	#define NIK_UNIT_TEST_BINARY_DISPATCH_V1
+	#define NIK_UNIT_TEST_FACTORIAL_V0
+	#define NIK_UNIT_TEST_FACTORIAL_V1
+	#define NIK_UNIT_TEST_FACTORIAL_V2
+	#define NIK_UNIT_TEST_FACTORIAL_V3
+	#define NIK_UNIT_TEST_FACTORIAL_V4
+	#define NIK_UNIT_TEST_FIBONACCI_V0
+	#define NIK_UNIT_TEST_FIBONACCI_V1
+	#define NIK_UNIT_TEST_FALL_FACT_2_V0
+	#define NIK_UNIT_TEST_FALL_FACT_2_V1
+	#define NIK_UNIT_TEST_VOID_EFFECTS_V0
+	#define NIK_UNIT_TEST_SIDE_EFFECTS_V0
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -790,6 +790,40 @@ namespace chord {
 	}
 
 #endif
+
+/***********************************************************************************************************************/
+
+/*
+	constexpr auto _factorial_v5()
+	{
+		return source
+		(
+			"factorial n      ;"
+
+			"body:            ;"
+			"test is_zero n   ;"
+			"branch done      ;"
+			"goto cont        ;"
+
+			"done:            ;"
+			"return one       ;"
+
+			"cont:            ;"
+			". = decrement n  ;"
+			". = factorial _  ;"
+			". = multiply n _ ;"
+			"return _         ;"
+		);
+	}
+
+	template<typename T>
+	constexpr auto factorial_v5(T v)
+	{
+		constexpr auto e0 = env<constant_machine_frame>;
+
+		return chord::chord_apply<_factorial_v5, e0, T>(v);
+	}
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

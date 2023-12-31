@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// lookup state:
+// literal state:
 
 namespace machine {
 
@@ -42,39 +42,39 @@ namespace machine {
 
 // space:
 
-	template<gkey_type, gkey_type, auto...> struct T_lookup;
+	template<gkey_type, gkey_type, auto...> struct T_literal;
 
 /***********************************************************************************************************************/
 
 // names:
 
-	struct LookupName
+	struct LiteralName
 	{
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			halt, jump, contains,
+			halt, resolve,
 			dimension
 		};
 	};
 
-	using LN = LookupName;
+	using LN = LiteralName;
 
 /***********************************************************************************************************************/
 
 // notes:
 
-	struct LookupNote
+	struct LiteralNote
 	{
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			empty, map, loop,
+			first, boolean, number, character, string,
 			dimension
 		};
 	};
 
-	using LT = LookupNote;
+	using LT = LiteralNote;
 
 /***********************************************************************************************************************/
 
@@ -86,51 +86,37 @@ namespace machine {
 
 // dispatch:
 
-	template<auto static_contr, auto _index = 0, auto _match = false, auto _key = 0>
-	struct LookupDispatch : public MachineDispatch<static_contr, LI, _index>
-	{
-		// defaults:
+	template<auto static_contr, auto _index = 0>
+	struct LiteralDispatch : public MachineDispatch<static_contr, LI, _index> { };
 
-			nik_ces gindex_type initial_match = _match;
-			nik_ces gindex_type initial_key   = _key;
-	};
-
-	template<auto static_contr, auto _index = 0, auto _match = false, auto _key = 0>
-	using LD = LookupDispatch<static_contr, _index, _match, _key>;
+	template<auto static_contr, auto _index = 0>
+	using LD = LiteralDispatch<static_contr, _index>;
 
 /***********************************************************************************************************************/
 
 // cons:
 
-	template<auto c, auto i, auto s>
-	struct T_lookup_cons
+	template<auto s, auto c, auto i>
+	struct T_literal_cons
 	{
-		template<typename... Fs>
-		nik_ces auto result(Fs... fs)
-		{
-			nik_ce auto m = LD<c>::initial_match;
-			nik_ce auto k = LD<c>::initial_key;
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) { return NIK_LITERAL_TS(s, c, i, Ts...)(vs...); }
 
-			return NIK_LOOKUP_TS(c, i, s, m, k, Fs...)(fs...);
-		}
-
-	}; template<auto c, auto i, auto s>
-		nik_ce auto U_lookup_cons = U_store_T<T_lookup_cons<c, i, s>>;
+	}; template<auto s, auto c, auto i>
+		nik_ce auto U_literal_cons = U_store_T<T_literal_cons<s, c, i>>;
 
 /***********************************************************************************************************************/
 
 // start:
 
-	struct T_lookup_start
+	struct T_literal_start
 	{
-		template<auto c, auto s, typename... Fs>
-		nik_ces auto result(Fs... fs)
+		template<auto s, auto c, typename... Ts>
+		nik_ces auto result(Ts... vs)
 		{
 			nik_ce auto i = LD<c>::initial_index;
-			nik_ce auto m = LD<c>::initial_match;
-			nik_ce auto k = LD<c>::initial_key;
 
-			return NIK_LOOKUP_TS(c, i, s, m, k, Fs...)(fs...);
+			return NIK_LITERAL_TS(s, c, i, Ts...)(vs...);
 		}
 	};
 
@@ -138,23 +124,11 @@ namespace machine {
 
 // istart:
 
-	struct T_lookup_istart
+	struct T_literal_istart
 	{
-		template<auto c, auto i, auto s, typename... Fs>
-		nik_ces auto result(Fs... fs)
-		{
-			nik_ce auto m = LD<c>::initial_match;
-			nik_ce auto k = LD<c>::initial_key;
-
-			return NIK_LOOKUP_TS(c, i, s, m, k, Fs...)(fs...);
-		}
+		template<auto s, auto c, auto i, typename... Ts>
+		nik_ces auto result(Ts... vs) { return NIK_LITERAL_TS(s, c, i, Ts...)(vs...); }
 	};
-
-/***********************************************************************************************************************/
-
-// default:
-
-	nik_ce void _not_found_() { }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -163,88 +137,108 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
-// empty:
+// first:
 
 	template<auto... filler>
-	struct T_lookup<LN::halt, LT::empty, filler...>
+	struct T_literal<LN::halt, LT::first, filler...>
 	{
-		template<NIK_LOOKUP_PARAMS(c, i, s, m, k), typename... Fs>
-		nik_ces auto result(Fs... fs) { return _not_found_; }
-	};
-
-/***********************************************************************************************************************/
-
-// map:
-
-	template<auto... filler>
-	struct T_lookup<LN::halt, LT::map, filler...>
-	{
-		template<NIK_LOOKUP_PARAMS(c, i, s, m, k), typename F, typename... Fs>
-		nik_ces auto result(F f, Fs... fs) { return member_value_U<U_restore_T<F>>.template map<k>(); }
+		template<NIK_LITERAL_PARAMS(s, c, i), typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs) { return v; }
 	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// jump:
+// literal:
 
 /***********************************************************************************************************************/
 
-// empty:
+// boolean:
 
 	template<auto... filler>
-	struct T_lookup<LN::jump, LT::empty, filler...>
+	struct T_literal<LN::resolve, LT::boolean, filler...>
 	{
-		template<NIK_LOOKUP_PARAMS(c, i, s, m, k), typename... Fs>
-		nik_ces auto result(Fs... fs)
+		using cbool = gcbool_type;
+
+		template<NIK_LITERAL_PARAMS(s, c, i), typename... Ts>
+		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto empty = (sizeof...(Fs) == 0);
-			nik_ce auto ni    = empty ? LD<c>::pos(i) : i;
+			auto  k = member_value_U<s>.cbegin() + LD<c>::pos(i) + 1;
+			cbool v = (*k == 'r') || (*k == 't');
 
-			return NIK_LOOKUP_TS(c, ni, s, m, k, Fs...)(fs...);
+			return NIK_LITERAL_2TS(s, c, i, cbool, Ts...)(v, vs...);
 		}
 	};
 
 /***********************************************************************************************************************/
 
-// loop:
+// number:
 
 	template<auto... filler>
-	struct T_lookup<LN::jump, LT::loop, filler...>
+	struct T_literal<LN::resolve, LT::number, filler...>
 	{
-		template<NIK_LOOKUP_PARAMS(c, i, s, m, k), typename F, typename... Fs>
-		nik_ces auto result(F f, Fs... fs)
-		{
-			nik_ce auto ni = LD<c>::pos(i);
+		using size_type  = gindex_type;
+		using csize_type = size_type const;
 
-			if nik_ce (m) return NIK_LOOKUP_2TS(c, i, s, m, k, F, Fs...)(f, fs...);
-			else          return NIK_LOOKUP_TS(c, ni, s, m, k, Fs...)(fs...);
+		template<NIK_LITERAL_PARAMS(s, c, i), typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			auto b = member_value_U<s>.cbegin() + LD<c>::pos(i);
+			auto e = member_value_U<s>.cbegin() + LD<c>::num(i);
+
+			size_type num = 0;
+
+			for (size_type dig = 0, exp = 1; e != b; exp *= 10)
+			{
+				dig  = (*--e) - '0';
+				num += dig * exp;
+			}
+
+			return NIK_LITERAL_2TS(s, c, i, csize_type, Ts...)(static_cast<csize_type>(num), vs...);
 		}
 	};
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
-// contains:
-
-/***********************************************************************************************************************/
-
-// id:
+// character:
 
 	template<auto... filler>
-	struct T_lookup<LN::contains, LT::id, filler...>
+	struct T_literal<LN::resolve, LT::character, filler...>
 	{
-		template<NIK_LOOKUP_PARAMS(c, i, s, m, k), typename F, typename... Fs>
-		nik_ces auto result(F f, Fs... fs)
-		{
-			nik_ce auto pos   = LD<c>::pos(i);
-			nik_ce auto num   = LD<c>::num(i);
-			nik_ce auto j     = member_value_U<s>.cselect(pos, num);
-			nik_ce auto iter  = member_value_U<U_restore_T<F>>.contains(j);
-			nik_ce auto nm    = iter.not_end();
-			nik_ce auto nk    = iter.left_size();
+		using cchar = gcchar_type;
 
-			return NIK_LOOKUP_2TS(c, i, s, nm, nk, F, Fs...)(f, fs...);
+		template<NIK_LITERAL_PARAMS(s, c, i), typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			auto  b = member_value_U<s>.cbegin() + LD<c>::pos(i) + 1;
+			cchar v = *b;
+
+			return NIK_LITERAL_2TS(s, c, i, cchar, Ts...)(v, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// string:
+
+	template<auto... filler>
+	struct T_literal<LN::resolve, LT::string, filler...>
+	{
+		using size_type = gindex_type;
+
+		template<NIK_LITERAL_PARAMS(s, c, i), typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			nik_ce auto b = member_value_U<s>.cbegin() + LD<c>::pos(i);
+			nik_ce auto e = member_value_U<s>.cbegin() + LD<c>::num(i);
+
+			using seq_type  = sequence<char, (e - b)>;
+			using cseq_type = seq_type const;
+
+			seq_type v;
+			for (auto k = b; k != e; ++k) v.push(*k);
+
+			return NIK_LITERAL_2TS(s, c, i, cseq_type, Ts...)(static_cast<cseq_type>(v), vs...);
 		}
 	};
 

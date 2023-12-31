@@ -111,6 +111,280 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// list model:
+
+/***********************************************************************************************************************/
+
+// entry:
+
+	template<typename SizeType, SizeType Size>
+	class T_list_model_entry
+	{
+		public:
+
+			using size_type			= SizeType;
+			using csize_type		= size_type const;
+
+			nik_ces size_type length	= Size;
+
+			struct Entry { enum : size_type { type, dimension }; };
+
+		protected:
+
+			size_type array[length];
+
+		public:
+
+			nik_ce T_list_model_entry() : array{} { }
+			nik_ce T_list_model_entry(csize_type t) : array{} { array[Entry::type] = t; }
+
+			nik_ce auto cbegin () const { return array; }
+			nik_ce auto cend   () const { return array + length; }
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename SizeType, SizeType Size>
+	class T_list_model
+	{
+		public:
+
+			using size_type			= SizeType;
+			using list_type			= size_type;
+
+			using csize_type		= size_type const;
+			using clist_type		= list_type const;
+
+		protected:
+
+			nik_ces size_type length	= Size;
+			nik_ces list_type null		= length;
+
+			struct Pair { enum : size_type { car, cdr, dimension }; };
+
+			size_type array[length];
+			size_type free;
+
+		public:
+
+			nik_ce T_list_model() : array{}, free{length} { }
+
+		protected:
+
+			// array:
+
+				nik_ce auto get_value(csize_type p, csize_type n) const { return *(array + p + n); }
+				nik_ce void set_value(csize_type p, csize_type n, csize_type v) { *(array + p + n) = v; }
+
+			// free:
+
+				nik_ce auto allocate(csize_type s) { return (free -= s); }
+
+		public:
+
+			// list:
+
+				nik_ce bool is_null  (clist_type l) const { return (l == null); }
+				nik_ce bool not_null (clist_type l) const { return (l != null); }
+
+				nik_ce bool is_model  (clist_type l) const { return (l == 0); }
+				nik_ce bool not_model (clist_type l) const { return (l != 0); }
+
+				nik_ce auto null_list() const { return null; }
+
+				nik_ce auto car(clist_type l) const { return get_value(l, Pair::car); }
+				nik_ce auto cdr(clist_type l) const { return get_value(l, Pair::cdr); }
+
+				nik_ce auto cons(csize_type v, clist_type l)
+				{
+					auto nl = allocate(Pair::dimension);
+
+					set_value(nl, Pair::car, v);
+					set_value(nl, Pair::cdr, l);
+
+					return nl;
+				}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// stack:
+
+/***********************************************************************************************************************/
+
+// generic:
+
+	template<typename SizeType, SizeType Size>
+	class T_stack : public T_list_model<SizeType, Size>
+	{
+		public:
+
+			using base		= T_list_model<SizeType, Size>;
+			using size_type		= typename base::size_type;
+			using csize_type	= typename base::csize_type;
+			using Pair		= typename base::Pair;
+
+		protected:
+
+			size_type current;
+
+		public:
+
+			nik_ce T_stack() : base{}, current{base::null} { }
+
+		protected:
+
+			nik_ce auto release(csize_type s) { return (base::free += s); }
+
+		public:
+
+			nik_ce bool is_empty  () const { return base::is_null(current); }
+			nik_ce bool not_empty () const { return base::not_null(current); }
+
+			nik_ce bool is_full   () const { return base::is_model(current); }
+			nik_ce bool not_full  () const { return base::not_model(current); }
+
+			nik_ce csize_type content() const { return base::car(current); }
+
+			nik_ce csize_type push(csize_type s)
+			{
+				csize_type value = base::allocate(s);
+				current = base::cons(value, current);
+
+				return value;
+			}
+
+			nik_ce void pop(csize_type s)
+			{
+				current = base::cdr(current);
+				release(Pair::dimension + s);
+			}
+	};
+
+/***********************************************************************************************************************/
+
+// unit:
+
+	template<typename SizeType, SizeType Size>
+	class unit_stack : public T_stack<SizeType, 2 * Size>
+	{
+		nik_ces auto entry_size		= 2;
+		nik_ces auto length		= entry_size * Size;
+
+		public:
+
+			using base		= T_stack<SizeType, length>;
+			using size_type		= typename base::size_type;
+			using csize_type	= typename base::csize_type;
+			using Pair		= typename base::Pair;
+
+			using pop_type		= size_type;
+			using cpop_type		= pop_type const;
+
+			struct Unit { enum : size_type { point, dimension }; };
+
+			nik_ce unit_stack() : base{} { }
+
+			// push:
+
+				nik_ce void fast_push(csize_type v)
+				{
+					csize_type value = base::push(Unit::dimension);
+					base::set_value(value, Unit::point, v);
+				}
+
+				nik_ce bool push(csize_type v)
+				{
+					bool success = base::not_full();
+
+					if (success) fast_push(v);
+
+					return success;
+				}
+
+			// pop:
+
+				nik_ce cpop_type fast_pop()
+				{
+					csize_type value = base::content();
+					cpop_type v = base::get_value(value, Unit::point);
+					base::pop(Unit::dimension);
+
+					return v;
+				}
+
+				nik_ce cpop_type pop()
+				{
+					if (base::not_empty()) return fast_pop();
+					else                   return 0;
+				}
+	};
+
+/***********************************************************************************************************************/
+
+// pair:
+
+	template<typename SizeType, SizeType Size>
+	class pair_stack : public T_stack<SizeType, 4 * Size>
+	{
+		nik_ces auto entry_size		= 4;
+		nik_ces auto length		= entry_size * Size;
+
+		public:
+
+			using base		= T_stack<SizeType, length>;
+			using size_type		= typename base::size_type;
+			using csize_type	= typename base::csize_type;
+			using Pair		= typename base::Pair;
+
+			using pop_type		= pair<size_type, size_type>;
+			using cpop_type		= pop_type const;
+
+			nik_ce pair_stack() : base{} { }
+
+			// push:
+
+				nik_ce void fast_push(csize_type v0, csize_type v1)
+				{
+					csize_type value = base::push(Pair::dimension);
+					base::set_value(value, Pair::car, v0);
+					base::set_value(value, Pair::cdr, v1);
+				}
+
+				nik_ce bool push(csize_type v0, csize_type v1)
+				{
+					bool success = base::not_full();
+
+					if (success) fast_push(v0, v1);
+
+					return success;
+				}
+
+			// pop:
+
+				nik_ce cpop_type fast_pop()
+				{
+					csize_type value = base::content();
+					csize_type v0 = base::get_value(value, Pair::car);
+					csize_type v1 = base::get_value(value, Pair::cdr);
+					base::pop(Pair::dimension);
+
+					return pop_type{v0, v1};
+				}
+
+				nik_ce cpop_type pop()
+				{
+					if (base::not_empty()) return fast_pop();
+					else                   return pop_type{0, 0};
+				}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // sequence:
 
 	// some methods might seem redundant given selectors and iterators,
@@ -171,7 +445,7 @@ namespace cctmp {
 
 				nik_ce size_type length () const { return Size; }
 
-				nik_ce auto left_size  (ctype_cptr i) const { return i - initial; }
+				nik_ce auto left_size (ctype_cptr i) const { return i - initial; }
 
 				nik_ce ctype_ptr cbegin () const { return initial; }
 
@@ -406,8 +680,7 @@ namespace cctmp {
 
 // (controller) instructions:
 
-//	struct Instr { enum : gkey_type { name = 0, note, pos, num, dimension }; };
-	struct Instr { enum : gkey_type { name = 0, note, next, pos, num, dimension }; };
+	struct Instr { enum : gkey_type { name = 0, note, pos, num, next, dimension }; };
 
 	// type:
 

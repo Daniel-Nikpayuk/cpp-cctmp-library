@@ -112,8 +112,8 @@ namespace chord {
 				vo_id       ,
 				assign      ,
 
-				l_option    ,
-				r_option    ,
+				l_scope     ,
+				r_scope     ,
 				bar         ,
 				identity    ,
 				dereference ,
@@ -197,8 +197,8 @@ namespace chord {
 				cctmp::pair( period        , Token::copy        ),
 				cctmp::pair( colon         , Token::label       ),
 
-				cctmp::pair( l_angle       , Token::l_option    ),
-				cctmp::pair( r_angle       , Token::r_option    ),
+				cctmp::pair( l_brace       , Token::l_scope     ),
+				cctmp::pair( r_brace       , Token::r_scope     ),
 				cctmp::pair( bar           , Token::bar         ),
 				cctmp::pair( at            , Token::identity    ),
 				cctmp::pair( star          , Token::dereference ),
@@ -210,8 +210,8 @@ namespace chord {
 				cctmp::pair( r_bracket     , Token::r_closed    ),
 				cctmp::pair( l_parenthesis , Token::l_open      ),
 				cctmp::pair( r_parenthesis , Token::r_open      ),
-				cctmp::pair( l_brace       , Token::l_fixed     ),
-				cctmp::pair( r_brace       , Token::r_fixed     ),
+				cctmp::pair( l_angle       , Token::l_fixed     ),
+				cctmp::pair( r_angle       , Token::r_fixed     ),
 				cctmp::pair( comma         , Token::comma       ),
 
 				cctmp::pair( r_quote       , Token::quote       )
@@ -415,7 +415,7 @@ namespace chord {
 				case Token::identifier:
 				{
 					ctoken_type t0 = keyword(csel);
-					rt = (t0 == TokenName::invalid) ? t : t0;
+					if (t0 != TokenName::invalid) rt = t0;
 					break;
 				}
 				case Token::label:
@@ -424,7 +424,7 @@ namespace chord {
 					ctoken_type t0 = keyword(csel);
 				//	ctoken_type t1 = Token::keyword_label_error;
 				//	rt = (t0 == TokenName::invalid) ? t : t1;
-					rt = (t0 == TokenName::invalid) ? t : t0;
+					if (t0 != TokenName::invalid) rt = t0;
 					break;
 				}
 			}

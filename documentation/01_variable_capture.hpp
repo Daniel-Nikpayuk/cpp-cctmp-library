@@ -211,4 +211,82 @@
 	// this is to say: each constructed function application is intended to be unique.
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// scheme:
+
+/***********************************************************************************************************************/
+
+	// recursive call:
+
+		// (define (f0 ...)						// line 0
+		//  (define (f1 ...)						// line 1
+		//   ...
+		//    (define (fk ...)						// line k
+		//     ...
+		//      (define (fn-1 ...)					// line n-1
+		//       (define (fn ...) ... (fk ...) ...))...)		// line n
+		//
+		//    (fk ...)...))
+		//
+		// ...
+		//
+		// (f0 ...)
+
+	// 1. If a function is defined at a given nested context, we can assume it will be called at that nesting level.
+	// 2. A defined function cannot be called from an external nesting level as it does not exist.
+	// 3. If a function is called from an internal nesting level, it is a recursive call.
+
+	// When calling fk within fn, we first look for fk in the existing
+	// captured variables. If not there, we add it relative to fn1.
+	// To determine its index we then search fn-1. If there, fine.
+	// Otherwise we add it to fn1 relative to fn2. This way
+	// the capture propogates until we arrive back at fk itself.
+
+	// But if fk+1 is defined within fk, it is in practice expected
+	// to be called within fk, and so now fk requires fk+1 and
+	// fk+1 requires fk ?
+
+	// In this case it's a recursive call, which doesn't require
+	// a variable on the stack, it only needs reference the compound
+	// function which is known by its registry?
+
+/***********************************************************************************************************************/
+
+	// variable capture:
+
+		// (define (f0 ...)						// line 0
+		//  (define (f1 ...)						// line 1
+		//   ...
+		//    (define (fk ...)						// line k
+		//      (define (v ...))					// line k+1
+		//       ...
+		//        (define (fn-1 ...)					// line n-1
+		//         (define (fn ...) ... (... v ...) ...))...)		// line n
+		//
+		//    (fk ...)...))
+		//
+		// ...
+		//
+		// (f0 ...)
+
+	// 1. If a function is defined at a given nested context, we can assume it will be called at that nesting level.
+	// 2. When a function is called, we must sift and pass the required environment (variable capture).
+	// 3. When we index a variable, we first check the current function definition's bindings, then its arg list.
+	//    Otherwise we add it to the function definition's environment, indexing it accordingly.
+	//    As the environment of this function definition is updated, any call to the function must also be updated
+	//    to pass the captured variable. Thus, this updated environment requires us to propogate further updates
+	//    across the function definition's external nesting levels.
+	// 4. If we reach the top nesting level without a match, we then check the registered lookup functions.
+
+	// How best to do this without performing the actual propogation? What if it's a lookup variable,
+	// in which case optimizing to call the lookup directly would be preferred.
+
+	// It seems I have to first search the compound registry to figure out if it's a compound variable or a lookup
+	// or an error. If it's an error, add to the error message and return. If it's a lookup I can optimize
+	// for it there. Otherwise I need to propogate the variable upward.
+
+	// It's potentially expensive processing.
+
+/***********************************************************************************************************************/
 

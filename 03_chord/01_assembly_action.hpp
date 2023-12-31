@@ -27,33 +27,31 @@ namespace chord {
 
 // machine:
 
-	// lookup:
+	// machine (temporary?):
 
-		using LN						= machine::LN;
-		using LT						= machine::LT;
-		using LAN						= machine::LAN;
-		using LAT						= machine::LAT;
+		using MAN					= machine::MAN;
+		using MAT					= machine::MAT;
+
+	// literal:
+
+		using LN					= machine::LN;
+		using LT					= machine::LT;
+		using LAN					= machine::LAN;
+		using LAT					= machine::LAT;
 
 	// chain:
 
-		using CN						= machine::CN;
-		using CT						= machine::CT;
-		using CAN						= machine::CAN;
-		using CAT						= machine::CAT;
-
-	// cycle:
-
-		using YN						= machine::YN;
-		using YT						= machine::YT;
-		using YAN						= machine::YAN;
-		using YAT						= machine::YAT;
+		using CN					= machine::CN;
+		using CT					= machine::CT;
+		using CAN					= machine::CAN;
+		using CAT					= machine::CAT;
 
 	// assembly:
 
-		using AN						= machine::AN;
-		using AT						= machine::AT;
-		using AAN						= machine::AAN;
-		using AAT						= machine::AAT;
+		using AN					= machine::AN;
+		using AT					= machine::AT;
+		using AAN					= machine::AAN;
+		using AAT					= machine::AAT;
 
 // generator:
 
@@ -82,9 +80,9 @@ namespace chord {
 
 				asm_accept,
 
-				// function:
+				// define:
 
-					asm_func_begin, asm_func_arg, asm_func_end,
+					asm_define_begin, asm_define_arg, asm_define_end,
 
 				// label:
 
@@ -130,17 +128,17 @@ namespace chord {
 
 					asm_apply_begin, asm_apply_end,
 
-				// op value:
+				// sub op:
 
-					asm_op_value, asm_op_paste, asm_op_quote,
+					asm_subop_value, asm_subop_paste, asm_subop_quote,
 
-				// arg value:
+				// sub arg:
 
-					asm_arg_value, asm_arg_paste, asm_arg_quote,
+					asm_subarg_value, asm_subarg_paste, asm_subarg_quote,
 
-				// mut value:
+				// sub mut:
 
-					asm_mut_value,
+					asm_mutarg_value,
 
 				// unit value:
 
@@ -148,9 +146,13 @@ namespace chord {
 
 			// morph:
 
+				// arity:
+
+					mor_arity_id, mor_arity_value,
+
 				// op:
 
-					mor_op_arity, mor_op_value, mor_op_id, mor_op_deref, mor_op_inc, mor_op_dec,
+					mor_op_value, mor_op_id, mor_op_deref, mor_op_inc, mor_op_dec,
 
 				// argpose:
 
@@ -166,6 +168,50 @@ namespace chord {
 					mor_curry_begin, mor_curry_end, mor_curry_value,
 
 			// cycle:
+
+				// option:
+
+					cyc_option_amp, cyc_option_cont, cyc_option_begin, cyc_option_end,
+
+				// op, val:
+
+					cyc_op_value, cyc_value, cyc_id, cyc_deref,
+
+				// combine:
+
+					cyc_combine_rest2, cyc_combine_rest1,
+
+				// action:
+
+					cyc_action_defs, cyc_action_rest,
+					cyc_action_op_value, cyc_action_op_id, cyc_action_op_deref,
+
+				// mutate:
+
+					cyc_mutate_defs, cyc_mutate_rest2, cyc_mutate_rest1,
+
+				// predicate:
+
+					cyc_predicate_defs, cyc_predicate_rest2, cyc_predicate_rest1,
+
+				// interval:
+
+					cyc_ival_left_closed, cyc_ival_left_open,
+					cyc_ival_right_closed, cyc_ival_right_open, cyc_ival_fixed,
+
+				// iterator:
+
+					cyc_iter_inc_dec, cyc_iter_dec_inc, cyc_iter_upsize,
+					cyc_iter_pair, cyc_iter_none, cyc_iter_value, cyc_iter_void,
+
+				// tonic:
+
+					cyc_tonic_inc_dec, cyc_tonic_dec_inc, cyc_tonic_pair,
+					cyc_tonic_none, cyc_tonic_value, cyc_tonic_void,
+
+				// (accept):
+
+					cyc_repeat, cyc_map, cyc_fold, cyc_find, cyc_sift,
 
 			// dimension:
 
@@ -235,7 +281,7 @@ namespace chord {
 // function:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::asm_func_begin, filler...>
+	struct T_chord_assembly_translation_action<CAAN::asm_define_begin, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -246,7 +292,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::asm_func_arg, filler...>
+	struct T_chord_assembly_translation_action<CAAN::asm_define_arg, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -254,7 +300,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::asm_func_end, filler...>
+	struct T_chord_assembly_translation_action<CAAN::asm_define_end, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -396,7 +442,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->op_capture_action();
+			t->paste_compound_op();
 
 			t->template assembly_action<AAN::apply, AAT::end>(t->vars.dropsize(), t->op_note());
 			t->non_zero_replace(t->line.left.arg_at());
@@ -419,7 +465,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->op_capture_action();
+			t->paste_compound_op();
 
 			t->template assembly_action<AAN::apply, AAT::end>(t->vars.dropsize(), t->op_note());
 		}
@@ -435,8 +481,8 @@ namespace chord {
 		{
 			t->template assembly_action<AAN::apply, AAT::begin>(AT::void_f);
 
-			t->set_val(l->left_cselect());
-			t->mut_action();
+			t->copy_val(l->left_cselect());
+			t->paste_val_mut();
 		}
 	};
 
@@ -446,7 +492,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->op_capture_action();
+			t->paste_compound_op();
 
 			t->template assembly_action<AAN::apply, AAT::end>(t->vars.dropsize(), t->op_note());
 		}
@@ -468,7 +514,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->op_capture_action();
+			t->paste_compound_op();
 
 			t->template assembly_action<AAN::apply, AAT::end>(t->vars.dropsize(), t->op_note());
 		}
@@ -517,18 +563,18 @@ namespace chord {
 			{ t->template assembly_action<AAN::end, AAT::id>(AT::first); }
 	};
 
-// op value:
+// sub op:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::asm_op_value, filler...>
+	struct T_chord_assembly_translation_action<CAAN::asm_subop_value, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->set_op(l->left_cselect()); }
+			{ t->copy_op(l->left_cselect()); }
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::asm_op_paste, filler...>
+	struct T_chord_assembly_translation_action<CAAN::asm_subop_paste, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -536,7 +582,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::asm_op_quote, filler...>
+	struct T_chord_assembly_translation_action<CAAN::asm_subop_quote, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -544,21 +590,21 @@ namespace chord {
 		}
 	};
 
-// arg value:
+// sub arg:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::asm_arg_value, filler...>
+	struct T_chord_assembly_translation_action<CAAN::asm_subarg_value, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->set_val(l->left_cselect());
-			t->val_action();
+			t->copy_val(l->left_cselect());
+			t->paste_val();
 		}
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::asm_arg_paste, filler...>
+	struct T_chord_assembly_translation_action<CAAN::asm_subarg_paste, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -566,7 +612,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::asm_arg_quote, filler...>
+	struct T_chord_assembly_translation_action<CAAN::asm_subarg_quote, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -574,16 +620,16 @@ namespace chord {
 		}
 	};
 
-// mut value:
+// mut arg:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::asm_mut_value, filler...>
+	struct T_chord_assembly_translation_action<CAAN::asm_mutarg_value, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->set_val(l->left_cselect());
-			t->mut_action();
+			t->copy_val(l->left_cselect());
+			t->paste_val_mut();
 		}
 	};
 
@@ -595,8 +641,8 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->set_val(l->left_cselect());
-			t->unit_action();
+			t->copy_val(l->left_cselect());
+			t->paste_val_unit();
 		}
 	};
 
@@ -621,12 +667,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			auto current = t->vars.last();
-
-			current->set_compound();
-			current->set_proc(t->proc.allocate());
-		}
+			{ t->push_compound(); }
 	};
 
 	template<auto... filler>
@@ -634,7 +675,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ } // nothing yet.
+			{ t->push_cycle(); }
 	};
 
 /***********************************************************************************************************************/

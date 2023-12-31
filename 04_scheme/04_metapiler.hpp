@@ -19,7 +19,7 @@
 
 // metapiler:
 
-namespace chord {
+namespace scheme {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -65,6 +65,7 @@ namespace chord {
 	nik_ce auto _read_only_					= cctmp::_read_only_;
 
 	nik_ce auto default_machine_frame			= cctmp::default_machine_frame;
+	nik_ce auto _default_subsource_				= cctmp::_default_subsource_;
 
 // machine:
 
@@ -74,39 +75,17 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// morph:
-
-/***********************************************************************************************************************/
-
-// function:
-
-	template<auto... Vs>
-	struct T_morph_function
-	{
-	};
-
-	nik_ce auto _static_morph_ = U_store_B<T_morph_function>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// cycle:
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // space:
 
 /***********************************************************************************************************************/
 
 // p(arser )g(enerator):
 
-	template<auto static_source>
-	struct T_chord_pg_static_space
+	struct T_scheme_pg_static_space
 	{
 		// grammar:
 
-			using T_grammar			= T_chord_assembly_grammar;
+			using T_grammar			= T_scheme_grammar;
 			nik_ces auto grammar		= U_store_T<T_grammar>;
 			nik_ces auto source		= _static_callable_<T_grammar::source>;
 
@@ -125,29 +104,30 @@ namespace chord {
 
 // interface:
 
-	template<auto static_source>
-	struct T_chord_static_space
+	template<auto static_source, auto contr_size, auto stack_size, auto model_size>
+	struct T_scheme_static_space
 	{
 		// pg:
 
-			using T_pg_static_space		= T_chord_pg_static_space<static_source>;
-			nik_ces auto pg_parsed		= T_pg_static_space::parsed;
-
-		// scanned:
-
-			using T_scanned			= T_chord_assembly_scanner_parsed<pg_parsed, static_source>;
-			nik_ces auto scanned		= U_store_T<T_scanned>;
+			nik_ces auto pg_parsed		= T_scheme_pg_static_space::parsed;
 
 		// parsed:
 
-			using T_parsed			= T_chord_assembly_parsed<pg_parsed, scanned>;
+			using T_parsed			= T_scheme_parsed
+							<
+								pg_parsed, static_source,
+								contr_size, stack_size, model_size
+							>;
 			nik_ces auto parsed		= U_store_T<T_parsed>;
 	};
 
 	// syntactic sugar:
 
-		template<auto static_source>
-		nik_ce auto U_chord_static_space = U_store_T<T_chord_static_space<static_source>>;
+		template<auto static_source, auto contr_size, auto stack_size, auto model_size>
+		nik_ce auto U_scheme_static_space = U_store_T
+		<
+			T_scheme_static_space<static_source, contr_size, stack_size, model_size>
+		>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -159,7 +139,7 @@ namespace chord {
 // contr:
 
 	template<auto space>
-	struct T_chord_function_static_contr
+	struct T_scheme_function_static_contr
 	{
 		nik_ces auto static_parsed	= T_store_U<space>::parsed;
 		nik_ces auto & parsed		= member_value_U<static_parsed>;
@@ -168,18 +148,18 @@ namespace chord {
 		using type			= modify_type<_from_reference_, decltype(value)>;
 
 	}; template<auto space>
-		nik_ce auto _chord_function_contr_ = U_store_T<T_chord_function_static_contr<space>>;
+		nik_ce auto _scheme_function_contr_ = U_store_T<T_scheme_function_static_contr<space>>;
 
 /***********************************************************************************************************************/
 
 // interface:
 
-	template<auto...> struct T_chord_function;
+	template<auto...> struct T_scheme_function;
 
 	template<auto space, auto links, auto out_type, auto... Us, nik_vp(cin_types)(T_pack_Vs<Us...>*)>
-	struct T_chord_function<space, links, out_type, cin_types>
+	struct T_scheme_function<space, links, out_type, cin_types>
 	{
-		nik_ces auto contr = _chord_function_contr_<space>;
+		nik_ces auto contr = _scheme_function_contr_<space>;
 		using S            = T_store_U<out_type>;
 
 		template<typename... Ts>
@@ -199,36 +179,30 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
-// source:
-
-	template<typename CharType, auto N, typename... Bindings>
-	nik_ce auto source(const CharType (&s)[N], const Bindings &... bs)
-	{
-		nik_ce auto U_char_type   = U_store_T<CharType>;
-		nik_ce auto empty_binding = cctmp::binding("", cctmp::_na_);
-
-		return cctmp::pair{cctmp::string_literal{s}, cctmp::frame{U_char_type, bs..., empty_binding}};
-	}
-
-/***********************************************************************************************************************/
-
 // apply:
 
 	template<auto callable_source, auto initial_env, typename S, typename... Ts>
-	nik_ce auto chord_apply(Ts... vs)
+	nik_ce auto scheme_apply(Ts... vs)
 	{
 		nik_ce auto static_pair		= _static_callable_<callable_source>;
 		nik_ce auto static_source	= _static_car_<static_pair>;
 		nik_ce auto static_frame	= _static_cdr_<static_pair>;
 		nik_ce auto static_env		= cons_<initial_env, static_frame, default_machine_frame>;
 
-		nik_ce auto links		= U_pack_Vs<static_source, static_env, _static_morph_>;
+		nik_ce auto links		= U_pack_Vs<static_source, static_env, _default_subsource_>;
 		nik_ce auto out_type		= U_store_T<S>;
 		nik_ce auto in_types		= U_pack_Ts<Ts...>;
 		nik_ce auto cin_types		= map_<in_types, _read_only_>;
 
-		nik_ce auto space		= U_chord_static_space<static_source>;
-		using T_function		= T_chord_function<space, links, out_type, cin_types>;
+		nik_ce auto contr_size		= 512;
+		nik_ce auto stack_size		= 64;
+		nik_ce auto model_size		= 1024;
+
+		nik_ce auto space		= U_scheme_static_space
+						<
+							static_source, contr_size, stack_size, model_size
+						>;
+		using T_function		= T_scheme_function<space, links, out_type, cin_types>;
 
 		return T_function::template result<Ts...>(vs...);
 	}
@@ -237,5 +211,5 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace chord
+} // namespace scheme
 

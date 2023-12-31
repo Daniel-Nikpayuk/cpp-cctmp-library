@@ -158,6 +158,10 @@ namespace generator {
 
 		nik_ce bool matches_digit(gcchar_type c) { return ('0' <= c) && (c <= '9'); }
 
+	// underscore:
+
+		nik_ce bool matches_underscore(gcchar_type c) { return (c == '_'); }
+
 	// latin lowercase:
 
 		nik_ce bool matches_latin_lowercase(gcchar_type c) { return matches_charset(c, latin_lowercase); }
@@ -170,15 +174,22 @@ namespace generator {
 
 // matches identifier:
 
-	nik_ce bool matches_ula(gcchar_type c) // underscore latin alphabet
-	{
-		return (c == '_') || matches_latin_lowercase(c) || matches_latin_uppercase(c);
-	}
+	// latin alphabet:
 
-	nik_ce bool matches_ulan(gcchar_type c) // underscore latin alphanumeric
-	{
-		return matches_digit(c) || matches_ula(c);
-	}
+		nik_ce bool matches_la(gcchar_type c)
+			{ return matches_latin_lowercase(c) || matches_latin_uppercase(c); }
+
+	// latin alphanumeric:
+
+		nik_ce bool matches_lan(gcchar_type c) { return matches_digit(c) || matches_la(c); }
+
+	// underscore latin alphabet:
+
+		nik_ce bool matches_ula(gcchar_type c) { return matches_underscore(c) || matches_la(c); }
+
+	// underscore latin alphanumeric:
+
+		nik_ce bool matches_ulan(gcchar_type c) { return matches_digit(c) || matches_ula(c); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

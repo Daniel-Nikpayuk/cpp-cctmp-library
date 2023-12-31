@@ -77,10 +77,11 @@ mawk "$mawk_prog_rest" "03_chord/00_lexer.hpp"           >> "single_source/cpp_c
 mawk "$mawk_prog_rest" "03_chord/01_assembly_action.hpp" >> "single_source/cpp_cctmp_library.hpp"
 mawk "$mawk_prog_rest" "03_chord/02_morph_action.hpp"    >> "single_source/cpp_cctmp_library.hpp"
 mawk "$mawk_prog_rest" "03_chord/03_cycle_action.hpp"    >> "single_source/cpp_cctmp_library.hpp"
-mawk "$mawk_prog_rest" "03_chord/04_scanner.hpp"         >> "single_source/cpp_cctmp_library.hpp"
-mawk "$mawk_prog_rest" "03_chord/05_syntax.hpp"          >> "single_source/cpp_cctmp_library.hpp"
-mawk "$mawk_prog_rest" "03_chord/06_parser.hpp"          >> "single_source/cpp_cctmp_library.hpp"
-mawk "$mawk_prog_rest" "03_chord/07_metapiler.hpp"       >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/04_scanner_action.hpp"  >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/05_scanner_parser.hpp"  >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/06_syntax.hpp"          >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/07_parser.hpp"          >> "single_source/cpp_cctmp_library.hpp"
+mawk "$mawk_prog_rest" "03_chord/08_metapiler.hpp"       >> "single_source/cpp_cctmp_library.hpp"
 
 ####################################################################################################
 

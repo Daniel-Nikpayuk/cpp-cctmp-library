@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// lookup action:
+// literal action:
 
 namespace machine {
 
@@ -27,33 +27,33 @@ namespace machine {
 
 // space:
 
-	template<gkey_type, gkey_type, auto...> struct T_lookup_action;
+	template<gkey_type, gkey_type, auto...> struct T_literal_action;
 
 	// syntactic sugar:
 
 		template<auto name, auto note, typename... Ts>
-		nik_ce auto lookup_action(Ts... vs) // requires template deduction <>:
-			{ return T_lookup_action<name, note>::template result<>(vs...); }
+		nik_ce auto literal_action(Ts... vs) // requires template deduction <>:
+			{ return T_literal_action<name, note>::template result<>(vs...); }
 
 		template<auto name, auto note>
-		nik_ce auto lookup_offset = T_lookup_action<name, note>::offset;
+		nik_ce auto literal_offset = T_literal_action<name, note>::offset;
 
 /***********************************************************************************************************************/
 
 // names:
 
-	struct LookupActionName
+	struct LiteralActionName
 	{
 		enum : gkey_type // convenience for default params.
-			{ identity = 0, id = identity, find, dimension };
+			{ identity = 0, id = identity, resolve, dimension };
 
-	}; using LAN = LookupActionName;
+	}; using LAN = LiteralActionName;
 
 /***********************************************************************************************************************/
 
 // notes:
 
-	struct LookupActionNote
+	struct LiteralActionNote
 	{
 		enum : gkey_type
 		{
@@ -61,33 +61,27 @@ namespace machine {
 			dimension
 		};
 
-	}; using LAT = LookupActionNote;
+	}; using LAT = LiteralActionNote;
 
 /***********************************************************************************************************************/
 
-// find:
+// resolve:
 
 	// id:
 
 		template<auto... filler>
-		struct T_lookup_action<LAN::find, LAT::id, filler...>
+		struct T_literal_action<LAN::resolve, LAT::id, filler...>
 		{
-			nik_ces gindex_type offset = 6 * machine_offset<MAN::set, MAT::inc>;
+			nik_ces gindex_type offset = 3 * machine_offset<MAN::push, MAT::instr>;
 
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex begin, cindex end)
+			nik_ces void result(Contr *contr, cindex note, cindex begin, cindex end)
 			{
-				cindex loop = contr->initial;
-				cindex halt = loop + 4;
-
-				machine_action<MAN::set, MAT::inc>(contr, LN::id       , LT::id    );
-				machine_action<MAN::set, MAT::inc>(contr, LN::jump     , LT::empty , 1 , halt        );
-				machine_action<MAN::set, MAT::inc>(contr, LN::contains , LT::id    , 1 , begin , end );
-				machine_action<MAN::set, MAT::inc>(contr, LN::jump     , LT::loop  , 1 , loop        );
-				machine_action<MAN::set, MAT::inc>(contr, LN::halt     , LT::map   );
-				machine_action<MAN::set, MAT::inc>(contr, LN::halt     , LT::empty );
+				machine_action<MAN::push, MAT::instr>(contr, LN::id, LT::id);
+				machine_action<MAN::push, MAT::instr>(contr, LN::resolve, note, begin, end);
+				machine_action<MAN::push, MAT::instr>(contr, LN::halt, LT::first);
 			}
 		};
 

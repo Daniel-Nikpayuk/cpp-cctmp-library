@@ -62,9 +62,11 @@ namespace machine {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			halt  , pad   , jump    ,
-			arg   , list  , lookup  , 
-			chain , right , replace ,
+			halt   , pad     , jump ,
+			arg    , list    ,
+			lookup , literal ,
+			chain  , sub_asm ,
+			right  , replace ,
 			dimension
 		};
 	};
@@ -80,12 +82,11 @@ namespace machine {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first   , segment  ,
-			go_to   , branch   ,
+			first   , segment ,
+			go_to   , branch  , invert ,
 			recurse ,
 			select  ,
-			call_f  , void_f   ,
-			cons_f  ,
+			call_f  , void_f  ,
 			dimension
 		};
 	};
@@ -141,6 +142,21 @@ namespace machine {
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
 			nik_ce auto i = AD<c>::initial_index;
+			nik_ce auto j = AD<c>::initial_count;
+
+			return NIK_ASSEMBLY_TS(s, c, i, j, l, t, Ts...)(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// istart:
+
+	struct T_assembly_istart
+	{
+		template<auto s, auto c, auto i, auto l, auto t, typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
 			nik_ce auto j = AD<c>::initial_count;
 
 			return NIK_ASSEMBLY_TS(s, c, i, j, l, t, Ts...)(vs...);
@@ -244,6 +260,23 @@ namespace machine {
 	};
 
 /***********************************************************************************************************************/
+
+// invert:
+
+	template<auto... filler>
+	struct T_assembly<AN::jump, AT::invert, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto ni = AD<c>::pos(i);
+
+			if (v) return NIK_ASSEMBLY_2TS(s, c,  i, j, l, t, T, Ts...)(v, vs...);
+			else   return NIK_ASSEMBLY_2TS(s, c, ni, j, l, t, T, Ts...)(v, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // arg:
@@ -318,10 +351,46 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
+// default:
+
+	nik_ce void _not_found_() { }
+
+	// halt, map:
+
+	//	return member_value_U<U_restore_T<F>>.template map<k>();
+
+	// contains, id:
+
+	//	nik_ce auto pos   = LD<c>::pos(i);
+	//	nik_ce auto num   = LD<c>::num(i);
+	//	nik_ce auto j     = member_value_U<s>.cselect(pos, num);
+	//	nik_ce auto iter  = member_value_U<U_restore_T<F>>.contains(j);
+	//	nik_ce auto nm    = iter.not_end();
+	//	nik_ce auto nk    = iter.left_size();
+
+	// find, id:
+
+	//	cindex loop = contr->initial;
+	//	cindex halt = loop + 4;
+
+	//	machine_action<MAN::set, MAT::inc>(contr, LN::id       , LT::id    );
+	//	machine_action<MAN::set, MAT::inc>(contr, LN::jump     , LT::empty , halt  );
+	//	machine_action<MAN::set, MAT::inc>(contr, LN::contains , LT::id    , begin , end );
+	//	machine_action<MAN::set, MAT::inc>(contr, LN::jump     , LT::loop  , loop  );
+	//	machine_action<MAN::set, MAT::inc>(contr, LN::halt     , LT::map   );
+	//	machine_action<MAN::set, MAT::inc>(contr, LN::halt     , LT::empty );
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// literal:
+
+/***********************************************************************************************************************/
+
 // call_f:
 
-	template<template<auto...> typename B, auto... fs, nik_vp(env)(B<fs...>*)>
-	struct T_assembly<AN::lookup, AT::call_f, env>
+	template<auto... filler>
+	struct T_assembly<AN::literal, AT::call_f, filler...>
 	{
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
@@ -329,7 +398,7 @@ namespace machine {
 			nik_ce auto ni  = AD<c>::pos(i);
 			nik_ce auto n   = AD<c>::num(i);
 			nik_ce auto str = at_<l, n>;
-			nik_ce auto nv  = T_lookup_istart::template result<c, ni, str>(fs...);
+			nik_ce auto nv  = T_literal_istart::template result<str, c, ni>();
 
 			nik_ce auto nU  = U_store_T<decltype(nv)>;
 			nik_ce auto nt  = replace_<t, _zero, nU>;
@@ -384,23 +453,46 @@ namespace machine {
 	};
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// cons_f:
+// sub as(se)m(bly):
+
+/***********************************************************************************************************************/
+
+// call_f:
 
 	template<auto... filler>
-	struct T_assembly<AN::chain, AT::cons_f, filler...>
+	struct T_assembly<AN::sub_asm, AT::call_f, filler...>
 	{
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs) -> T_store_U<s>
 		{
 			nik_ce auto ni = AD<c>::pos(i);
-			nik_ce auto nv = U_chain_cons<c, ni>;
+			       auto nv = T_assembly_istart::template result<s, c, ni, l, t, T, Ts...>(v, vs...);
 
 			nik_ce auto nU = U_store_T<decltype(nv)>;
 			nik_ce auto nt = replace_<t, _zero, nU>;
 			using nT       = read_only<nU>;
 
 			return NIK_ASSEMBLY_2TS(s, c, i, j, l, nt, nT, Ts...)(nv, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// void_f:
+
+	template<auto... filler>
+	struct T_assembly<AN::sub_asm, AT::void_f, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto ni = AD<c>::pos(i);
+
+			T_assembly_istart::template result<s, c, ni, l, t, Ts...>(vs...);
+
+			return NIK_ASSEMBLY_TS(s, c, i, j, l, t, Ts...)(vs...);
 		}
 	};
 

@@ -350,6 +350,105 @@ namespace chord {
 
 // convolution:
 
+	// convolution (generic assembly equivalent):
+
+	//	return source
+	//	(
+	//		"conv out in end in1                  ;"
+
+	//		"definitions:                         ;"
+	//		" action   # subpose[2]{multiply * *} ;"
+	//		" combine  # subpose[2]{add * @}      ;"
+	//		" mutate   # subpose[2]{appoint @ @}  ;"
+	//		" pred     # subpose[2]{equal @ @}    ;"
+	//		" in_next  # decrement                ;"
+	//		" in1_next # increment                ;"
+
+	//		"precycle:                            ;"
+	//		" in = in_next in                     ;"
+
+	//		"cycle:                               ;"
+	//		" test pred in end                    ;"
+	//		" branch postcycle                    ;"
+	//		" . = action in in1                   ;"
+	//		" . = combine out _                   ;"
+	//		" void mutate out _                   ;"
+	//		" in  = in_next in                    ;"
+	//		" in1 = in1_next in1                  ;"
+	//		" goto cycle                          ;"
+
+	//		"postcycle:                           ;"
+	//		" . = action in in1                   ;"
+	//		" . = combine out _                   ;"
+	//		" void mutate out _                   ;"
+	//		" return out                          ;"
+	//	);
+
+	// functions required:
+
+		// preiterate: in_next
+		// pred: subpose
+		// primary: action, combine, mutate
+		// iterate: in_next, in1_next
+		// postiterate: nop
+
+		// iterate requires side effects because we're calling it within a loop.
+		// with the exception of pred, we can make all of these to be void functions
+		// that we call within a constructed fold function.
+
+		// we can create all iterate functions and hold them in a list for reference.
+		// actually we don't need to hold the constructed functions in a list,
+		// we can record keep the respective subpose locations during parsing.
+
+		// when we pass variadic args to these functions, do we turn them all into
+		// pointers? or const references?
+
+	//	return source
+	//	(
+	//		"conv out in end in1                  ;"
+
+	//		"definitions:                         ;"
+	//		" action   # subpose[2]{multiply * *} ;"
+	//		" combine  # subpose[2]{add * @}      ;"
+	//		" mutate   # subpose[2]{appoint @ @}  ;"
+	//		" pred     # subpose[2]{equal @ @}    ;"
+	//		" in_next  # decrement                ;"
+	//		" in1_next # increment                ;"
+
+	//		"precycle:                            ;"
+	//		" void preiterate in                  ;" // AN::cycle, AT::void_f
+
+	//		"cycle:                               ;"
+	//		" test pred in end                    ;" // AN::loop, AT::cycle
+	//		" branch postcycle                    ;"
+	//		" void primary out in in1             ;" // from: AN::cycle, AT::cons_f		// one cons_f
+	//		" void iterate in in1                 ;" // from: AN::cycle, AT::cons_f		// or two?
+	//		" goto cycle                          ;"
+
+	//		"postcycle:                           ;"
+	//		" void primary out in in1             ;" // AN::cycle, AT::void_f
+	//		" return out                          ;"
+	//	);
+
+		// it makes sense to add AN::cycle to the assembly machines
+		// as we are going to design for tail call optimizations anyway.
+		// or do we want to add it to cycle machines, and then have
+		// other cycle machines to call cycle machines?
+		// but then if cycle machines can create iterate(s),
+		// we can just streamline pre/post-iterate without calling,
+		// which would be acceptable.
+
+		// sometimes we call the cycle machine, sometimes we cons it.
+
+		// we should be creating subcontrollers and referencing them
+		// when we can rather than creating cons_f objects.
+		// only make cons_f objects when you're required
+		// to store them within the main variadic args.
+
+/***********************************************************************************************************************/
+
+// convolution:
+
 	constexpr auto _convolution_v0()
 	{
 		return source
@@ -372,6 +471,32 @@ namespace chord {
 		{ return (Out) *chord_apply<_convolution_v0, null_env, Out*>(&out, in, end, in1); }
 
 #endif
+
+/*
+		//	" mult_atoi # subpose[2]{multiply atoi atoi}         ;"
+		//	" conv      # fold[2]{mult_atoi|add * @||}<>(-|+,][] ;"
+
+		//	, binding("atoi", _atoi_)
+
+	constexpr auto _convolution_v0()
+	{
+		return source
+		(
+			"f out in end in1                              ;"
+
+			"definitions:                                  ;"
+			" conv # fold[1]{add * @|multiply||}<>(-|+,][] ;"
+
+			"body:                                         ;"
+			" . = conv !out end in in1                     ;"
+			" return _                                     ;"
+		);
+	}
+
+	template<typename Out, typename In, typename End, typename In1>
+	constexpr auto convolution_v0(Out out, In in, End end, In1 in1)
+		{ return (Out) *chord::chord_apply<_convolution_v0, null_env, Out*>(&out, in, end, in1); }
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -771,66 +771,65 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// lookup:
+// literal:
 
 /***********************************************************************************************************************/
 
 // params:
 
-	#define NIK_LOOKUP_PARAMS(_c_, _i_, _s_, _m_, _k_)								\
+	#define NIK_LITERAL_PARAMS(_s_, _c_, _i_)									\
 															\
-		auto _c_, auto _i_, auto _s_, auto _m_, auto _k_
+		auto _s_, auto _c_, auto _i_
 
 /***********************************************************************************************************************/
 
 // space:
 
-	#define NIK_LOOKUP_L(_c_, _i_)											\
+	#define NIK_LITERAL_L(_c_, _i_)											\
 															\
-		T_lookup												\
+		T_literal												\
 		<													\
 			LD<c>::next_name(_i_),										\
 			LD<c>::next_note(_i_)
 
-	#define NIK_LOOKUP_M(_c_, _i_, _s_, _m_, _k_)									\
+	#define NIK_LITERAL_M(_s_, _c_, _i_)										\
 															\
 		>::template result											\
 		<													\
-			_c_,												\
-			LD<c>::next_index(_i_),										\
-			_s_, _m_, _k_
+			_s_, _c_,											\
+			LD<c>::next_index(_i_)
 
-	#define NIK_LOOKUP_R 												\
+	#define NIK_LITERAL_R 												\
 															\
 		>
 
-	#define NIK_LOOKUP_TEMPLATE(_c_, _i_)										\
+	#define NIK_LITERAL_TEMPLATE(_c_, _i_)										\
 															\
-		NIK_LOOKUP_L(_c_, _i_)
+		NIK_LITERAL_L(_c_, _i_)
 
-	#define NIK_LOOKUP_RESULT(_c_, _i_, _s_, _m_, _k_)								\
+	#define NIK_LITERAL_RESULT(_s_, _c_, _i_)									\
 															\
-		NIK_LOOKUP_M(_c_, _i_, _s_, _m_, _k_) NIK_LOOKUP_R
+		NIK_LITERAL_M(_s_, _c_, _i_) NIK_LITERAL_R
 
-	#define NIK_LOOKUP_RESULT_TS(_c_, _i_, _s_, _m_, _k_, _t0_)							\
+	#define NIK_LITERAL_RESULT_TS(_s_, _c_, _i_, _t0_)								\
 															\
-		NIK_LOOKUP_M(_c_, _i_, _s_, _m_, _k_), _t0_ NIK_LOOKUP_R
+		NIK_LITERAL_M(_s_, _c_, _i_), _t0_ NIK_LITERAL_R
 
-	#define NIK_LOOKUP_RESULT_2TS(_c_, _i_, _s_, _m_, _k_, _t0_, _t1_)						\
+	#define NIK_LITERAL_RESULT_2TS(_s_, _c_, _i_, _t0_, _t1_)							\
 															\
-		NIK_LOOKUP_M(_c_, _i_, _s_, _m_, _k_), _t0_, _t1_ NIK_LOOKUP_R
+		NIK_LITERAL_M(_s_, _c_, _i_), _t0_, _t1_ NIK_LITERAL_R
 
-	#define NIK_LOOKUP(_c_, _i_, _s_, _m_, _k_)									\
+	#define NIK_LITERAL(_s_, _c_, _i_)										\
 															\
-		NIK_LOOKUP_TEMPLATE(_c_, _i_) NIK_LOOKUP_RESULT(_c_, _i_, _s_, _m_, _k_)
+		NIK_LITERAL_TEMPLATE(_c_, _i_) NIK_LITERAL_RESULT(_s_, _c_, _i_)
 
-	#define NIK_LOOKUP_TS(_c_, _i_, _s_, _m_, _k_, _t0_)								\
+	#define NIK_LITERAL_TS(_s_, _c_, _i_, _t0_)									\
 															\
-		NIK_LOOKUP_TEMPLATE(_c_, _i_) NIK_LOOKUP_RESULT_TS(_c_, _i_, _s_, _m_, _k_, _t0_)
+		NIK_LITERAL_TEMPLATE(_c_, _i_) NIK_LITERAL_RESULT_TS(_s_, _c_, _i_, _t0_)
 
-	#define NIK_LOOKUP_2TS(_c_, _i_, _s_, _m_, _k_, _t0_, _t1_)							\
+	#define NIK_LITERAL_2TS(_s_, _c_, _i_, _t0_, _t1_)								\
 															\
-		NIK_LOOKUP_TEMPLATE(_c_, _i_) NIK_LOOKUP_RESULT_2TS(_c_, _i_, _s_, _m_, _k_, _t0_, _t1_)
+		NIK_LITERAL_TEMPLATE(_c_, _i_) NIK_LITERAL_RESULT_2TS(_s_, _c_, _i_, _t0_, _t1_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -960,78 +959,6 @@
 				NIK_CHAIN_R(vs..., NIK_2_N_VARS(_e_, NIK_SIFT_T_OPS_LV_1));				\
 			}												\
 		};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// cycle:
-
-/***********************************************************************************************************************/
-
-// params:
-
-	#define NIK_CYCLE_PARAMS(_c_, _i_, _f_, _g_, _l_, _t_)								\
-															\
-		auto _c_, auto _i_, auto _f_, auto _g_, auto _l_, auto _t_
-
-/***********************************************************************************************************************/
-
-// space:
-
-	#define NIK_CYCLE_L(_c_, _i_)											\
-															\
-		T_cycle													\
-		<													\
-			YD<_c_>::next_name(_i_),									\
-			YD<_c_>::next_note(_i_)
-
-	#define NIK_CYCLE_M(_c_, _i_, _f_, _g_, _l_, _t_)								\
-															\
-		>::template result											\
-		<													\
-			_c_,												\
-			YD<_c_>::next_index(_i_),									\
-			_f_, _g_, _l_, _t_
-
-	#define NIK_CYCLE_R 												\
-															\
-		>
-
-	#define NIK_CYCLE_TEMPLATE(_c_, _i_)										\
-															\
-		NIK_CYCLE_L(_c_, _i_)
-
-	#define NIK_CYCLE_RESULT(_c_, _i_, _f_, _g_, _l_, _t_)								\
-															\
-		NIK_CYCLE_M(_c_, _i_, _f_, _g_, _l_, _t_) NIK_CYCLE_R
-
-	#define NIK_CYCLE_RESULT_TS(_c_, _i_, _f_, _g_, _l_, _t_, _t0_)							\
-															\
-		NIK_CYCLE_M(_c_, _i_, _f_, _g_, _l_, _t_), _t0_ NIK_CYCLE_R
-
-	#define NIK_CYCLE_RESULT_2TS(_c_, _i_, _f_, _g_, _l_, _t_, _t0_, _t1_)						\
-															\
-		NIK_CYCLE_M(_c_, _i_, _f_, _g_, _l_, _t_), _t0_, _t1_ NIK_CYCLE_R
-
-	#define NIK_CYCLE_RESULT_3TS(_c_, _i_, _f_, _g_, _l_, _t_, _t0_, _t1_, _t2_)					\
-															\
-		NIK_CYCLE_M(_c_, _i_, _f_, _g_, _l_, _t_), _t0_, _t1_, _t2_ NIK_CYCLE_R
-
-	#define NIK_CYCLE(_c_, _i_, _f_, _g_, _l_, _t_)									\
-															\
-		NIK_CYCLE_TEMPLATE(_c_, _i_) NIK_CYCLE_RESULT(_c_, _i_, _f_, _g_, _l_, _t_)
-
-	#define NIK_CYCLE_TS(_c_, _i_, _f_, _g_, _l_, _t_, _t0_)							\
-															\
-		NIK_CYCLE_TEMPLATE(_c_, _i_) NIK_CYCLE_RESULT_TS(_c_, _i_, _f_, _g_, _l_, _t_, _t0_)
-
-	#define NIK_CYCLE_2TS(_c_, _i_, _f_, _g_, _l_, _t_, _t0_, _t1_)							\
-															\
-		NIK_CYCLE_TEMPLATE(_c_, _i_) NIK_CYCLE_RESULT_2TS(_c_, _i_, _f_, _g_, _l_, _t_, _t0_, _t1_)
-
-	#define NIK_CYCLE_3TS(_c_, _i_, _f_, _g_, _l_, _t_, _t0_, _t1_, _t2_)						\
-															\
-		NIK_CYCLE_TEMPLATE(_c_, _i_) NIK_CYCLE_RESULT_3TS(_c_, _i_, _f_, _g_, _l_, _t_, _t0_, _t1_, _t2_)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
