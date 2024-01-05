@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -121,15 +121,15 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// binding:
+// environment:
 
 /***********************************************************************************************************************/
+
+// binding:
 
 	template<typename KeyType, typename ValueType>
 	class binding
 	{
-		template<typename, typename...> friend class frame;
-
 		public:
 
 			using strlit_type	= string_literal<KeyType>;
@@ -152,183 +152,224 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
 // frame:
 
-/***********************************************************************************************************************/
+		// would be implemented as a sequence, but gcc won't constexpr compile.
 
 	template<typename CharType, typename... Bindings>
 	class frame
 	{
+		protected:
+
+			nik_ces auto length	= sizeof...(Bindings);
+
 		public:
 
 			using char_type		= T_restore_T<CharType>;
 			using strlit_type	= string_literal<char_type>;
-			using sequence_type	= ce_sequence<strlit_type, sizeof...(Bindings)>;
+			using base		= sequence<strlit_type, length>;
 			using tuple_type	= tuple<typename Bindings::value_type...>;
 
 		protected:
 
-			sequence_type strlit;
-			tuple_type value;
+			strlit_type variables[length];
+			tuple_type values;
 
 		public:
 
 			nik_ce frame(const CharType &, const Bindings &... bs) :
-				strlit{{bs.strlit...}}, value{bs.value...} { }
+				variables{bs.key()...}, values{bs.map()...} { }
 
-			template<typename T>
-			nik_ce auto contains(const T & v) const { return strlit.citerate().find(v); }
+			nik_ce bool is_empty  () const { return (length == 0); }
+			nik_ce bool not_empty () const { return (length != 0); }
 
-			template<auto key>
-			nik_ce auto map() const { return value.template cvalue<key>(); }
+			nik_ce const auto & keys() const { return variables; }
+			nik_ce const auto & maps() const { return values; }
 	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// lookup:
-
-/***********************************************************************************************************************/
-
-	template<auto> struct T_lookup;
-
-	template<template<auto...> typename B, auto... static_frames, nik_vp(env)(B<static_frames...>*)>
-	struct T_lookup<env>
-	{
-		using pair_type  = pair<gindex_type, gindex_type>;
-		using citer_type = citerator<strlit_type>;
-
-		nik_ces void update_frame(pair_type & pos, bool & match, citer_type k)
-		{
-			if (!match)
-			{
-				match   = k.not_end();
-				pos.v0 += not match;
-				pos.v1  = k.left_size();
-			}
-		}
-
-		template<typename EntryType>
-		nik_ces auto find_frame(const EntryType & entry)
-		{
-			pair_type pos;
-			bool match{false};
-
-			(update_frame(pos, match, member_value_U<static_frames>.contains(entry)), ...);
-
-			return pos;
-		}
-
-		template<auto pos, auto key>
-		nik_ces auto map()
-		{
-			nik_ce auto static_frame = eval<_par_at_, pos, static_frames...>;
-			nik_ce auto & frame      = member_value_U<static_frame>;
-
-			return frame.template map<key>();
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// machine:
-
-/***********************************************************************************************************************/
-
-// default:
-
-	nik_ce auto default_machine_frame_callable()
-	{
-		return frame
-		(
-		 	U_char,
-
-			binding( "id"                    , _id_                    ),
-			binding( "nop"                   , _nop_                   ),
-			binding( "upshift"               , _upshift_               ),
-			binding( "downshift"             , _downshift_             ),
-
-			binding( "dereference"           , _dereference_           ),
-			binding( "appoint"               , _appoint_               ),
-			binding( "to_bool"               , _to_bool_               ),
-
-			binding( "not"                   , _not_                   ),
-			binding( "and"                   , _and_                   ),
-			binding( "or"                    , _or_                    ),
-			binding( "implies"               , _implies_               ),
-			binding( "equivalent"            , _equivalent_            ),
-
-			binding( "equal"                 , _equal_                 ),
-			binding( "is_zero"               , _is_zero_               ),
-			binding( "not_equal"             , _not_equal_             ),
-			binding( "not_zero"              , _not_zero_              ),
-			binding( "less_than"             , _less_than_             ),
-			binding( "less_than_or_equal"    , _less_than_or_equal_    ),
-			binding( "greater_than"          , _greater_than_          ),
-			binding( "greater_than_or_equal" , _greater_than_or_equal_ ),
-
-			binding( "add"                   , _add_                   ),
-			binding( "subtract"              , _subtract_              ),
-			binding( "multiply"              , _multiply_              ),
-			binding( "divide"                , _divide_                ),
-			binding( "modulo"                , _modulo_                ),
-
-			binding( "increment"             , _increment_<1>          ),
-			binding( "decrement"             , _increment_<-1>         ),
-
-			binding( "is_array"              , _is_array_              ),
-			binding( "array_type"            , _array_type_            ),
-			binding( "array_size"            , _array_size_            ),
-			binding( "array_begin"           , _array_begin_           ),
-			binding( "array_last"            , _array_last_            ),
-			binding( "array_end"             , _array_end_             ),
-			binding( "log_floor"             , _log_floor_             ),
-
-			binding( "is_sequence"           , _is_sequence_           ),
-			binding( "sequence_type"         , _sequence_type_         ),
-			binding( "sequence_length"       , _sequence_length_       )
-		);
-	};
-
-	nik_ce auto default_machine_frame = _static_callable_<default_machine_frame_callable>;
 
 /***********************************************************************************************************************/
 
 // constant:
 
-	nik_ce auto constant_machine_frame_callable()
-	{
-		return frame
-		(
-			U_char,
+	// null:
 
-			binding( "zero"  , _zero  ),
-			binding( "one"   , _one   ),
-			binding( "two"   , _two   ),
-			binding( "three" , _three ),
-			binding( "four"  , _four  ),
-			binding( "five"  , _five  ),
-			binding( "six"   , _six   ),
-			binding( "seven" , _seven ),
-			binding( "eight" , _eight ),
-			binding( "nine"  , _nine  ),
-			binding( "ten"   , _ten   )
-		);
-	};
+		nik_ce auto null_frame_callable()
+			{ return frame(U_gchar_type); }
 
-	nik_ce auto constant_machine_frame = _static_callable_<constant_machine_frame_callable>;
+		nik_ce auto null_frame = _static_callable_<null_frame_callable>;
+
+	// number:
+
+		nik_ce auto number_frame_callable()
+		{
+			return frame
+			(
+				U_gchar_type,
+
+				binding( "zero"  , _zero  ),
+				binding( "one"   , _one   ),
+				binding( "two"   , _two   ),
+				binding( "three" , _three ),
+				binding( "four"  , _four  ),
+				binding( "five"  , _five  ),
+				binding( "six"   , _six   ),
+				binding( "seven" , _seven ),
+				binding( "eight" , _eight ),
+				binding( "nine"  , _nine  ),
+				binding( "ten"   , _ten   )
+			);
+		};
+
+		nik_ce auto number_frame = _static_callable_<number_frame_callable>;
+
+	// operator:
+
+		nik_ce auto operator_frame_callable()
+		{
+			return frame
+			(
+			 	U_gchar_type,
+
+				binding( "id"                    , _id_                    ),
+				binding( "nop"                   , _nop_                   ),
+				binding( "upshift"               , _upshift_               ),
+				binding( "downshift"             , _downshift_             ),
+
+				binding( "dereference"           , _dereference_           ),
+				binding( "appoint"               , _appoint_               ),
+				binding( "to_bool"               , _to_bool_               ),
+
+				binding( "not"                   , _not_                   ),
+				binding( "and"                   , _and_                   ),
+				binding( "or"                    , _or_                    ),
+				binding( "implies"               , _implies_               ),
+				binding( "equivalent"            , _equivalent_            ),
+
+				binding( "equal"                 , _equal_                 ),
+				binding( "is_zero"               , _is_zero_               ),
+				binding( "not_equal"             , _not_equal_             ),
+				binding( "not_zero"              , _not_zero_              ),
+				binding( "less_than"             , _less_than_             ),
+				binding( "less_than_or_equal"    , _less_than_or_equal_    ),
+				binding( "greater_than"          , _greater_than_          ),
+				binding( "greater_than_or_equal" , _greater_than_or_equal_ ),
+
+				binding( "add"                   , _add_                   ),
+				binding( "subtract"              , _subtract_              ),
+				binding( "multiply"              , _multiply_              ),
+				binding( "divide"                , _divide_                ),
+				binding( "modulo"                , _modulo_                ),
+
+				binding( "increment"             , _increment_<1>          ),
+				binding( "decrement"             , _increment_<-1>         ),
+
+				binding( "is_array"              , _is_array_              ),
+				binding( "array_type"            , _array_type_            ),
+				binding( "array_size"            , _array_size_            ),
+				binding( "array_begin"           , _array_begin_           ),
+				binding( "array_last"            , _array_last_            ),
+				binding( "array_end"             , _array_end_             ),
+				binding( "log_floor"             , _log_floor_             ),
+
+				binding( "is_sequence"           , _is_sequence_           ),
+				binding( "sequence_type"         , _sequence_type_         ),
+				binding( "sequence_length"       , _sequence_length_       )
+			);
+		};
+
+		nik_ce auto operator_frame = _static_callable_<operator_frame_callable>;
 
 /***********************************************************************************************************************/
+
+// lookup:
+
+	template<typename LiteralType, gindex_type Size> // SizeType ?
+	struct T_lookup : public sequence<LiteralType, Size>
+	{
+		public:
+
+			using base			= sequence<LiteralType, Size>;
+			using literal_type		= typename base::type;
+			using cliteral_type		= typename base::ctype;
+			using cliteral_ref		= typename base::ctype_ref;
+			using size_type			= typename base::size_type;
+
+			using strlit_type		= typename literal_type::type;
+			using cstrlit_type		= typename literal_type::ctype;
+			using cstrlit_ref		= typename literal_type::ctype_ref;
+
+			using char_type			= typename strlit_type::type;
+			using literal_citerate		= citerator<literal_type, size_type>;
+			using strlit_citerate		= citerator<strlit_type, size_type>;
+			using str_cselect		= cselector<char_type, size_type>;
+			using path_type			= pair<size_type, size_type>;
+			using record_type		= pair<bool, path_type>;
+
+			template<typename... Frames>
+			nik_ce T_lookup(const Frames &... fs) : base{} { (base::push(fs.keys()), ...); }
+
+		public:
+
+			nik_ce auto match_variable(const str_cselect & s) const
+			{
+				bool match{false};
+				path_type path{0, 0};
+
+				for (auto k = base::citerate(); k.not_end(); ++k)
+				{
+					auto j = k->citerate().find(s);
+					match = j.not_end();
+
+					if (match)
+					{
+						path.v0 = k.left_size();
+						path.v1 = j.left_size();
+						break;
+					}
+				}
+
+				return record_type{match, path};
+			}
+	};
+
+/***********************************************************************************************************************/
+
+// env lookup:
+
+	template<auto... static_frames>
+	struct T_env_lookup
+	{
+		using char_type		= gchar_type;
+		using size_type		= gindex_type;
+
+		using strlit_type	= string_literal<char_type, size_type>;
+		using literal_type	= literal<strlit_type, size_type>;
+		using look_type		= T_lookup<literal_type, static_cast<size_type>(sizeof...(static_frames))>;
+
+		nik_ces auto value	= look_type{member_value_U<static_frames>...};
+		using type		= decltype(value);
+
+	}; nik_ce auto H_env_lookup = U_store_B<T_env_lookup>;
+
+/***********************************************************************************************************************/
+
+// env tuple:
+
+	template<auto... static_frames>
+	struct T_env_tuple
+	{
+		nik_ces auto value	= tuple{member_value_U<static_frames>.maps()...};
+		using type		= decltype(value);
+
+	}; nik_ce auto H_env_tuple = U_store_B<T_env_tuple>;
+
 /***********************************************************************************************************************/
 
 // environment:
 
-	template<auto... frames>
-	nik_ce auto env = U_pack_Vs<frames...>;
+	template<auto... static_frames>
+	nik_ce auto env = U_pack_Vs<static_frames...>;
 
 	nik_ce auto null_env = env<>;
 
@@ -339,10 +380,9 @@ namespace cctmp {
 	template<typename CharType, auto N, typename... Bindings>
 	nik_ce auto source(const CharType (&s)[N], const Bindings &... bs)
 	{
-		nik_ce auto U_char_type   = U_store_T<CharType>;
-		nik_ce auto empty_binding = binding("", _na_);
+		nik_ce auto U_char_type = U_store_T<CharType>;
 
-		return pair{string_literal{s}, frame{U_char_type, bs..., empty_binding}};
+		return pair{string_literal{s}, frame(U_char_type, bs...)};
 	}
 
 /***********************************************************************************************************************/

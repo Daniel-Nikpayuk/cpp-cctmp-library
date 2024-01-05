@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **

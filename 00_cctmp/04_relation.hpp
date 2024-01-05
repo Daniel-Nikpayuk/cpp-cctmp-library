@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -140,6 +140,8 @@ namespace cctmp {
 
 			nik_ce auto cbegin () const { return array; }
 			nik_ce auto cend   () const { return array + length; }
+
+			nik_ce auto operator [] (csize_type n) const { return array[n]; }
 	};
 
 /***********************************************************************************************************************/

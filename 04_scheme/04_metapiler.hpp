@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -34,9 +34,6 @@ namespace scheme {
 	nik_ce auto U_store_B					= cctmp::U_store_B<B>;
 
 	template<auto... Vs>
-	using T_pack_Vs						= cctmp::T_pack_Vs<Vs...>;
-
-	template<auto... Vs>
 	nik_ce auto U_pack_Vs					= cctmp::U_pack_Vs<Vs...>;
 
 	template<typename... Ts>
@@ -54,17 +51,37 @@ namespace scheme {
 	template<auto f>
 	nik_ce auto _wrap_					= cctmp::_wrap_<f>;
 
+	nik_ce auto H_id					= cctmp::H_id;
 	nik_ce auto _from_const_				= cctmp::_from_const_;
+	nik_ce auto _to_list_					= cctmp::_to_list_;
+	nik_ce auto _cons_					= cctmp::_cons_;
+
+	template<auto... Vs>
+	nik_ce auto car_					= cctmp::car_<Vs...>;
+
+	template<auto... Vs>
+	nik_ce auto cdr_					= cctmp::cdr_<Vs...>;
 
 	template<auto... Vs>
 	nik_ce auto cons_					= cctmp::cons_<Vs...>;
 
 	template<auto... Vs>
+	nik_ce auto push_					= cctmp::push_<Vs...>;
+
+	template<auto... Vs>
+	nik_ce auto unpack_					= cctmp::unpack_<Vs...>;
+
+	template<auto... Vs>
 	nik_ce auto map_					= cctmp::map_<Vs...>;
+
+	template<auto... Vs>
+	nik_ce auto stem_					= cctmp::stem_<Vs...>;
 
 	nik_ce auto _read_only_					= cctmp::_read_only_;
 
-	nik_ce auto default_machine_frame			= cctmp::default_machine_frame;
+	nik_ce auto operator_frame				= cctmp::operator_frame;
+	nik_ce auto H_env_lookup				= cctmp::H_env_lookup;
+	nik_ce auto H_env_tuple					= cctmp::H_env_tuple;
 	nik_ce auto _default_subsource_				= cctmp::_default_subsource_;
 
 // machine:
@@ -104,7 +121,7 @@ namespace scheme {
 
 // interface:
 
-	template<auto static_source, auto contr_size, auto stack_size, auto model_size>
+	template<auto static_source, auto env_lookup, auto contr_size, auto stack_size, auto model_size>
 	struct T_scheme_static_space
 	{
 		// pg:
@@ -115,7 +132,7 @@ namespace scheme {
 
 			using T_parsed			= T_scheme_parsed
 							<
-								pg_parsed, static_source,
+								pg_parsed, static_source, env_lookup,
 								contr_size, stack_size, model_size
 							>;
 			nik_ces auto parsed		= U_store_T<T_parsed>;
@@ -123,10 +140,10 @@ namespace scheme {
 
 	// syntactic sugar:
 
-		template<auto static_source, auto contr_size, auto stack_size, auto model_size>
+		template<auto static_source, auto env_lookup, auto contr_size, auto stack_size, auto model_size>
 		nik_ce auto U_scheme_static_space = U_store_T
 		<
-			T_scheme_static_space<static_source, contr_size, stack_size, model_size>
+			T_scheme_static_space<static_source, env_lookup, contr_size, stack_size, model_size>
 		>;
 
 /***********************************************************************************************************************/
@@ -187,9 +204,14 @@ namespace scheme {
 		nik_ce auto static_pair		= _static_callable_<callable_source>;
 		nik_ce auto static_source	= _static_car_<static_pair>;
 		nik_ce auto static_frame	= _static_cdr_<static_pair>;
-		nik_ce auto static_env		= cons_<initial_env, static_frame, default_machine_frame>;
 
-		nik_ce auto links		= U_pack_Vs<static_source, static_env, _default_subsource_>;
+		nik_ce auto op_env		= push_<initial_env, operator_frame>;
+		nik_ce bool sf_is_empty		= member_value_U<static_frame>.is_empty();
+		nik_ce auto static_env		= stem_<sf_is_empty, op_env, _cons_, H_id, op_env, static_frame>;
+		nik_ce auto static_env_lookup	= unpack_<static_env, _to_list_, H_env_lookup>;
+		nik_ce auto static_env_tuple	= unpack_<static_env, _to_list_, H_env_tuple>;
+
+		nik_ce auto links		= U_pack_Vs<static_source, _default_subsource_, static_env_tuple>;
 		nik_ce auto out_type		= U_store_T<S>;
 		nik_ce auto in_types		= U_pack_Ts<Ts...>;
 		nik_ce auto cin_types		= map_<in_types, _read_only_>;
@@ -200,7 +222,8 @@ namespace scheme {
 
 		nik_ce auto space		= U_scheme_static_space
 						<
-							static_source, contr_size, stack_size, model_size
+							static_source, static_env_lookup,
+							contr_size, stack_size, model_size
 						>;
 		using T_function		= T_scheme_function<space, links, out_type, cin_types>;
 

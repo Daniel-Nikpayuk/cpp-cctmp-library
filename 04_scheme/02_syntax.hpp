@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -30,6 +30,9 @@ namespace scheme {
 	template<auto U>
 	using T_store_U						= cctmp::T_store_U<U>;
 
+	template<auto... Vs>
+	using T_pack_Vs						= cctmp::T_pack_Vs<Vs...>;
+
 	template<auto U>
 	using member_type_U					= cctmp::member_type_U<U>;
 
@@ -53,26 +56,30 @@ namespace scheme {
 
 // interface:
 
-	template<auto static_source, auto contr_size, auto stack_size, auto model_size>
+	template<auto static_source, auto static_env_lookup, auto contr_size, auto stack_size, auto model_size>
 	struct T_scheme_ast
 	{
-		nik_ces auto & src	= member_value_U<static_source>;
-		using src_ptr		= typename member_type_U<static_source>::ctype_cptr;
+		nik_ces auto & src		= member_value_U<static_source>;
+		using src_ptr			= typename member_type_U<static_source>::ctype_cptr;
 
-		using contr_type	= T_machine_contr<contr_size, stack_size>;
-		using cindex		= typename contr_type::cindex;
+		nik_ces auto & lookup		= member_value_U<static_env_lookup>;
 
-		using model_type	= machine::T_env_model<gchar_type, gindex_type, model_size>;
-		using size_type		= typename model_type::size_type;
-		using env_type		= typename model_type::list_type;
-		using variadic		= typename model_type::variadic_type;
+		using contr_type		= T_machine_contr<contr_size, stack_size>;
+		using cindex			= typename contr_type::cindex;
+
+		using model_type		= machine::T_env_model<gchar_type, gindex_type, model_size>;
+		using size_type			= typename model_type::size_type;
+		using env_type			= typename model_type::list_type;
+		using look_var_type		= typename model_type::constant_type;
+		using arg_var_type		= typename model_type::variadic_type;
+		using pound_var_type		= typename model_type::compound_type;
 
 		enum : gkey_type
 		{
 			rec_at = 0,
 			src_at,
-			env_at,
 			str_at,
+			env_at,
 
 			dimension
 		};
@@ -84,10 +91,13 @@ namespace scheme {
 
 		nik_ce T_scheme_ast() :
 
-			contr{rec_at, src_at, env_at, str_at},
-			model{member_value_U<static_source>}, arg_size{1}, env{model.null_env()}
+			contr{rec_at, src_at, str_at, env_at},
+			model{src}, arg_size{1}, env{model.null_env()}
 
-			{ }
+			{ initialize(); }
+
+		nik_ce void initialize() // t->model.extend_environment(t->env) ?
+			{ env = model.cons(model.null_frame(), env); }
 
 		// (generic) action:
 

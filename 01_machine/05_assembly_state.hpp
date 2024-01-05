@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -315,11 +315,10 @@ namespace machine {
 		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename... Ts>
 		nik_ces auto result(Ts... vs) -> T_store_U<s>
 		{
-			nik_ce auto n = AD<c>::pos(i);
-			nik_ce auto p = at_<l, n>;
+			nik_ce auto n  = AD<c>::pos(i);
+			nik_ce auto nj = at_<l, n>;
 
-			return NIK_ASSEMBLY_TEMPLATE(c, i), p
-				NIK_ASSEMBLY_RESULT_TS(s, c, i, j, l, t, Ts...)(vs...);
+			return NIK_ASSEMBLY_TS(s, c, i, nj, l, t, Ts...)(vs...);
 		}
 	};
 
@@ -351,34 +350,27 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
-// default:
+// id:
 
-	nik_ce void _not_found_() { }
+	template<auto... filler>
+	struct T_assembly<AN::lookup, AT::id, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(s, c, i, j, l, t), typename... Ts>
+		nik_ces auto result(Ts... vs) -> T_store_U<s>
+		{
+			nik_ce auto   n  = AD<c>::pos(i);
+			nik_ce auto   m  = AD<c>::num(i);
+			nik_ce auto & t0 = member_value_U<j>;
+			nik_ce auto & t1 = t0.template cvalue<n>();
+			nik_ce auto   nv = t1.template cvalue<m>();
 
-	// halt, map:
+			nik_ce auto   nU = U_store_T<decltype(nv)>;
+			nik_ce auto   nt = cons_<t, nU>;
+			using nT         = read_only<nU>;
 
-	//	return member_value_U<U_restore_T<F>>.template map<k>();
-
-	// contains, id:
-
-	//	nik_ce auto pos   = LD<c>::pos(i);
-	//	nik_ce auto num   = LD<c>::num(i);
-	//	nik_ce auto j     = member_value_U<s>.cselect(pos, num);
-	//	nik_ce auto iter  = member_value_U<U_restore_T<F>>.contains(j);
-	//	nik_ce auto nm    = iter.not_end();
-	//	nik_ce auto nk    = iter.left_size();
-
-	// find, id:
-
-	//	cindex loop = contr->initial;
-	//	cindex halt = loop + 4;
-
-	//	machine_action<MAN::set, MAT::inc>(contr, LN::id       , LT::id    );
-	//	machine_action<MAN::set, MAT::inc>(contr, LN::jump     , LT::empty , halt  );
-	//	machine_action<MAN::set, MAT::inc>(contr, LN::contains , LT::id    , begin , end );
-	//	machine_action<MAN::set, MAT::inc>(contr, LN::jump     , LT::loop  , loop  );
-	//	machine_action<MAN::set, MAT::inc>(contr, LN::halt     , LT::map   );
-	//	machine_action<MAN::set, MAT::inc>(contr, LN::halt     , LT::empty );
+			return NIK_ASSEMBLY_2TS(s, c, i, j, l, nt, nT, Ts...)(nv, vs...);
+		}
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

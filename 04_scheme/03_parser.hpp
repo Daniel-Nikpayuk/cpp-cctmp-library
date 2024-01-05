@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -273,10 +273,18 @@ namespace scheme {
 
 // interface:
 
-	template<auto static_pg_parsed, auto static_source, auto contr_size, auto stack_size, auto model_size>
+	template
+	<
+		auto static_pg_parsed, auto static_source, auto static_env_lookup,
+		auto contr_size, auto stack_size, auto model_size
+	>
 	struct T_scheme_parsed
 	{
-		using T_ast			= T_scheme_ast<static_source, contr_size, stack_size, model_size>;
+		using T_ast			= T_scheme_ast
+						<
+							static_source, static_env_lookup,
+							contr_size, stack_size, model_size
+						>;
 		using T_action			= T_scheme_action<T_ast>;
 		using T_grammar			= T_scheme_grammar;
 		using T_parser			= T_scheme_parser<static_pg_parsed, T_action, T_grammar>;

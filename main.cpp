@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -131,9 +131,11 @@
 	{
 		return source
 	        (
-			"(define (main x y z)          "
-			" (if x (if y 4 5) (if z 6 7)) "
-			")                             "
+			"(define (main x) "
+			" two             "
+			")                "
+
+			, binding("two", 2)
 		);
 	}
 
@@ -149,33 +151,15 @@
 
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", scheme_test_func<int>( true  , true  , true  ));
-		printf("%d\n", scheme_test_func<int>( true  , true  , false ));
-		printf("%d\n", scheme_test_func<int>( true  , false , true  ));
-		printf("%d\n", scheme_test_func<int>( true  , false , false ));
-		printf("%d\n", scheme_test_func<int>( false , true  , true  ));
-		printf("%d\n", scheme_test_func<int>( false , true  , false ));
-		printf("%d\n", scheme_test_func<int>( false , false , true  ));
-		printf("%d\n", scheme_test_func<int>( false , false , false ));
+		printf("%d\n", scheme_test_func<int>(5));
+
+	//	constexpr auto k = member_value_U<static_strs>.citerate().find(strlit_type{"two"});
+	//	constexpr auto n = k.left_size();
+
+	//	printf("%d\n", member_value_U<static_vals>.template cvalue<n>());
 
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};
 	//	tr_table_printer.print_num_tr_table();
-
-	//	using stack_type = pair_stack<gindex_type, 3>;
-
-	//	stack_type stack;
-
-	//	stack.push(15, 5);
-	//	stack.push(17, 1);
-	//	stack.push(11, 12);
-
-	//	auto p2 = stack.pop();
-	//	auto p1 = stack.pop();
-	//	auto p0 = stack.pop();
-
-	//	printf("(%d, %d)\n", p0.v0, p0.v1);
-	//	printf("(%d, %d)\n", p1.v0, p1.v1);
-	//	printf("(%d, %d)\n", p2.v0, p2.v1);
 
 		return 0;
 	}

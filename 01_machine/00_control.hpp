@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -54,6 +54,9 @@ namespace machine {
 	using cselector						= cctmp::cselector<T, S>;
 
 	template<typename T, typename S>
+	using literal						= cctmp::literal<T, S>;
+
+	template<typename T, typename S>
 	using string_literal					= cctmp::string_literal<T, S>;
 
 	template<typename T0, typename T1>
@@ -72,6 +75,12 @@ namespace machine {
 /***********************************************************************************************************************/
 
 // env(ironment) model:
+
+/***********************************************************************************************************************/
+
+// msg:
+
+	nik_ce void _not_found_() { }
 
 /***********************************************************************************************************************/
 
@@ -185,17 +194,21 @@ namespace machine {
 			using EntryType				= typename entry_type::Type;
 
 			using constant_type			= T_env_model_constant<SizeType>;
-			using constant				= typename constant_type::Constant;
+			using cconstant_type			= constant_type const;
+			using cconstant_ref			= cconstant_type &;
+			using Constant				= typename constant_type::Constant;
 
 			using variadic_type			= T_env_model_variadic<SizeType>;
+			using cvariadic_type			= variadic_type const;
+			using cvariadic_ref			= cvariadic_type &;
 			using Variadic				= typename variadic_type::Variadic;
 
 			using compound_type			= T_env_model_compound<SizeType>;
+			using ccompound_type			= compound_type const;
+			using ccompound_ref			= ccompound_type &;
 			using Compound				= typename compound_type::Compound;
 
 		protected:
-
-			struct Variable { enum : size_type { start, finish, dimension }; };
 
 			cstrlit_type src;
 
@@ -225,8 +238,8 @@ namespace machine {
 				nik_ce bool lookup_binding(ccselect_ref var, csize_type binding, size_type_ref entry) const
 				{
 					auto variable = base::car(binding);
-					auto start    = base::get_value(variable, Variable::start);
-					auto finish   = base::get_value(variable, Variable::finish);
+					auto start    = base::get_value(variable, Pair::car);
+					auto finish   = base::get_value(variable, Pair::cdr);
 
 					auto src_cselect = src.cselect(start, finish);
 
@@ -239,19 +252,44 @@ namespace machine {
 
 			// binding:
 
-				nik_ce void set_binding_variable(csize_type variable, ccselect_ref var)
+				nik_ce auto set_binding_variable(ccselect_ref var)
 				{
-					base::set_value(variable, Variable::start , start(var));
-					base::set_value(variable, Variable::finish , finish(var));
+					csize_type variable = base::allocate(Pair::dimension);
+					
+					base::set_value(variable, Pair::car , start(var));
+					base::set_value(variable, Pair::cdr , finish(var));
+
+					return variable;
 				}
 
-				template<typename Entry>
-				nik_ce void set_binding_value(csize_type value, const Entry & val)
-				{
-					size_type j = 0;
+				nik_ce auto allocate_binding_value()
+					{ return base::allocate(entry_type::length); }
 
-					for (auto k = val.cbegin(); k != val.cend(); ++j, ++k)
-						base::set_value(value, j, *k);
+				nik_ce auto set_variadic_value(cvariadic_ref val)
+				{
+					csize_type value = allocate_binding_value();
+
+					base::set_value(value, Variadic::pos, val[Variadic::pos]);
+
+					return value;
+				}
+
+				nik_ce auto set_compound_value(ccompound_ref val)
+				{
+					csize_type value = allocate_binding_value();
+
+					base::set_value(value, Compound::pos, val[Compound::pos]);
+
+					return value;
+				}
+
+				nik_ce void set_binding_entry(csize_type variable, csize_type value, clist_type env)
+				{
+					auto frame   = base::car(env);
+					auto binding = base::cons(variable, value);
+					auto nframe  = base::cons(binding, frame);
+
+					base::set_value(env, Pair::car, nframe);
 				}
 
 		public:
@@ -275,18 +313,20 @@ namespace machine {
 					return record_type{!no_match, entry};
 				}
 
-				template<typename Entry>
-				nik_ce void define_variable(ccselect_ref var, const Entry & val, clist_type env)
+				nik_ce void define_variable(ccselect_ref var, cvariadic_ref val, clist_type env)
 				{
-					auto frame    = base::car(env);
-					auto variable = base::allocate(Variable::dimension);
-					auto value    = base::allocate(Entry::length); // disjoint union.
-					auto binding  = base::cons(variable, value);
-					auto nframe   = base::cons(binding, frame);
+					auto variable = set_binding_variable(var);
+					auto value    = set_variadic_value(val);
 
-					set_binding_variable(variable, var);
-					set_binding_value(value, val);
-					base::set_value(env, Pair::car, nframe);
+					set_binding_entry(variable, value, env);
+				}
+
+				nik_ce void define_compound(ccselect_ref var, ccompound_ref val, clist_type env)
+				{
+					auto variable = set_binding_variable(var);
+					auto value    = set_compound_value(val);
+
+					set_binding_entry(variable, value, env);
 				}
 
 				template<typename Entry>

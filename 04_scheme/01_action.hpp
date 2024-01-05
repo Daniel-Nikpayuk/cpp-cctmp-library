@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -165,9 +165,6 @@ namespace scheme {
 			{
 				t->template assembly_action<AAN::begin, AAT::id>();
 				t->template assembly_action<AAN::pad, AAT::id>(t->arg_size);
-
-				auto frame = t->model.cons(t->model.null_binding(), t->model.null_frame());
-				t->env     = t->model.cons(frame, t->env); // t->model.extend_environment(t->env) ?
 			}
 		};
 
@@ -179,9 +176,9 @@ namespace scheme {
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				using variadic = typename AST::variadic;
+				using arg_var_type = typename AST::arg_var_type;
 
-				auto val = variadic{t->arg_size++};
+				auto val = arg_var_type{t->arg_size++};
 				t->model.define_variable(l->left_cselect(), val, t->env);
 			}
 		};
@@ -258,15 +255,36 @@ namespace scheme {
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				auto rec = t->model.lookup_variable(l->left_cselect(), t->env);
+				auto mod_rec = t->model.lookup_variable(l->left_cselect(), t->env);
 
-				if (rec.v0)
+				if (mod_rec.v0)
 				{
-					auto pos = t->model.variadic_pos(rec.v1);
+					auto pos = t->model.variadic_pos(mod_rec.v1);
 
 					t->template assembly_action<AAN::lookup, AAT::id>(pos);
 				}
-				// else error.
+				else
+				{
+					auto look_rec = t->lookup.match_variable(l->left_cselect());
+
+					if (look_rec.v0)
+					{
+						auto name0 = AN::list;
+						auto note0 = AT::id;
+						auto env   = t->env_at;
+
+						auto name1 = AN::lookup;
+						auto note1 = AT::id;
+						auto pos   = look_rec.v1.v0;
+						auto num   = look_rec.v1.v1;
+
+						t->template assembly_action< AAN::eval , AAT::begin >(AT::call_f);
+						t->template  machine_action< MAN::push , MAT::instr >(name0, note0, env);
+						t->template  machine_action< MAN::push , MAT::instr >(name1, note1, pos, num);
+						t->template assembly_action< AAN::eval , AAT::end   >(AT::first);
+					}
+					// else error.
+				}
 			}
 		};
 

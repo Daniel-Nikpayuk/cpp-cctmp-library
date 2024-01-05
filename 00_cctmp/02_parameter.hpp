@@ -1,6 +1,6 @@
 /************************************************************************************************************************
 **
-** Copyright 2022-2023 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
 ** This file is part of cpp_cctmp_library.
 **
@@ -41,6 +41,11 @@ namespace cctmp {
 
 	template<auto Key, auto Op, auto... Ws, nik_vp(op)(T_argument<Key, Op, Ws...>*), auto... Vs>
 	nik_ce auto eval<op, Vs...> = T_argument<Key, Op, Ws...>::template result<decltype(Vs)...>(Vs...);
+
+// array:
+
+	template<typename Type, auto Op, auto... Vs>
+	nik_ce Type eval_array[] = { eval<Op, Vs>... };
 
 // modify type:
 
