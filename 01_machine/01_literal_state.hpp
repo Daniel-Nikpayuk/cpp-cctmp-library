@@ -28,9 +28,6 @@ namespace machine {
 // cctmp:
 
 	template<typename T>
-	nik_ce auto U_store_T				= cctmp::U_store_T<T>;
-
-	template<typename T>
 	nik_ce auto U_restore_T				= cctmp::U_restore_T<T>;
 
 	template<auto... Vs>
@@ -94,40 +91,21 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
-// cons:
+// compound:
 
-	template<auto s, auto c, auto i>
-	struct T_literal_cons
+	template<auto s, auto c>
+	struct T_literal_compound<s, c>
 	{
-		template<typename... Ts>
+		template<auto i, typename... Ts>
 		nik_ces auto result(Ts... vs) { return NIK_LITERAL_TS(s, c, i, Ts...)(vs...); }
 
-	}; template<auto s, auto c, auto i>
-		nik_ce auto U_literal_cons = U_store_T<T_literal_cons<s, c, i>>;
-
-/***********************************************************************************************************************/
-
-// start:
-
-	struct T_literal_start
-	{
-		template<auto s, auto c, typename... Ts>
+		template<typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
 			nik_ce auto i = LD<c>::initial_index;
 
-			return NIK_LITERAL_TS(s, c, i, Ts...)(vs...);
+			return result<i, Ts...>(vs...);
 		}
-	};
-
-/***********************************************************************************************************************/
-
-// istart:
-
-	struct T_literal_istart
-	{
-		template<auto s, auto c, auto i, typename... Ts>
-		nik_ces auto result(Ts... vs) { return NIK_LITERAL_TS(s, c, i, Ts...)(vs...); }
 	};
 
 /***********************************************************************************************************************/

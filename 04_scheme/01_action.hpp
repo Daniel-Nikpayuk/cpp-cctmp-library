@@ -78,15 +78,10 @@ namespace scheme {
 
 			// define:
 
-				define_name, define_arg,
-
-			// continue:
-
-				continue_boolean,
-				continue_number,
-				continue_character,
-				continue_string,
-				continue_lookup,
+				define_begin,
+				define_end,
+				define_name,
+				define_arg,
 
 			// return:
 
@@ -98,13 +93,20 @@ namespace scheme {
 
 			// if:
 
-				if_pred,
 				if_ante,
 				if_conse,
+				if_end,
 
 			// op:
 
+				op_begin,
+				op_end,
 				op_lookup,
+				op_add,
+				op_multiply,
+				op_subtract,
+				op_divide,
+				op_arg,
 
 			// dimension:
 
@@ -155,6 +157,31 @@ namespace scheme {
 
 // define:
 
+	// begin:
+
+		template<auto... filler>
+		struct T_scheme_translation_action<SAAN::define_begin, filler...>
+		{
+			nik_ces auto pad_size = 1;
+
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				t->template assembly_action<AAN::id, AAT::begin>();
+				t->template assembly_action<AAN::pad, AAT::id>(pad_size, AT::front);
+			}
+		};
+
+	// end:
+
+		template<auto... filler>
+		struct T_scheme_translation_action<SAAN::define_end, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->template assembly_action<AAN::id, AAT::end>(AT::first); }
+		};
+
 	// name:
 
 		template<auto... filler>
@@ -162,10 +189,7 @@ namespace scheme {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-			{
-				t->template assembly_action<AAN::begin, AAT::id>();
-				t->template assembly_action<AAN::pad, AAT::id>(t->arg_size);
-			}
+				{ } // nothing yet.
 		};
 
 	// arg:
@@ -179,18 +203,18 @@ namespace scheme {
 				using arg_var_type = typename AST::arg_var_type;
 
 				auto val = arg_var_type{t->arg_size++};
-				t->model.define_variable(l->left_cselect(), val, t->env);
+				t->model.define_variable(l->left_cselect(), val, t->cur_env);
 			}
 		};
 
 /***********************************************************************************************************************/
 
-// continue:
+// return:
 
 	// boolean:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::continue_boolean, filler...>
+		struct T_scheme_translation_action<SAAN::return_boolean, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
@@ -205,7 +229,7 @@ namespace scheme {
 	// number:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::continue_number, filler...>
+		struct T_scheme_translation_action<SAAN::return_number, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
@@ -220,7 +244,7 @@ namespace scheme {
 	// character:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::continue_character, filler...>
+		struct T_scheme_translation_action<SAAN::return_character, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
@@ -235,7 +259,7 @@ namespace scheme {
 	// string:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::continue_string, filler...>
+		struct T_scheme_translation_action<SAAN::return_string, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
@@ -250,136 +274,16 @@ namespace scheme {
 	// lookup:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::continue_lookup, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-			{
-				auto mod_rec = t->model.lookup_variable(l->left_cselect(), t->env);
-
-				if (mod_rec.v0)
-				{
-					auto pos = t->model.variadic_pos(mod_rec.v1);
-
-					t->template assembly_action<AAN::lookup, AAT::id>(pos);
-				}
-				else
-				{
-					auto look_rec = t->lookup.match_variable(l->left_cselect());
-
-					if (look_rec.v0)
-					{
-						auto name0 = AN::list;
-						auto note0 = AT::id;
-						auto env   = t->env_at;
-
-						auto name1 = AN::lookup;
-						auto note1 = AT::id;
-						auto pos   = look_rec.v1.v0;
-						auto num   = look_rec.v1.v1;
-
-						t->template assembly_action< AAN::eval , AAT::begin >(AT::call_f);
-						t->template  machine_action< MAN::push , MAT::instr >(name0, note0, env);
-						t->template  machine_action< MAN::push , MAT::instr >(name1, note1, pos, num);
-						t->template assembly_action< AAN::eval , AAT::end   >(AT::first);
-					}
-					// else error.
-				}
-			}
-		};
-
-/***********************************************************************************************************************/
-
-// return:
-
-	// boolean:
-
-		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::return_boolean, filler...>
-		{
-			using literal_action = T_scheme_translation_action<SAAN::continue_boolean, filler...>;
-
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-			{
-				literal_action::template result<AST>(t, l);
-				t->template assembly_action<AAN::end, AAT::id>(AT::first);
-			}
-		};
-
-	// number:
-
-		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::return_number, filler...>
-		{
-			using literal_action = T_scheme_translation_action<SAAN::continue_number, filler...>;
-
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-			{
-				literal_action::template result<AST>(t, l);
-				t->template assembly_action<AAN::end, AAT::id>(AT::first);
-			}
-		};
-
-	// character:
-
-		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::return_character, filler...>
-		{
-			using literal_action = T_scheme_translation_action<SAAN::continue_character, filler...>;
-
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-			{
-				literal_action::template result<AST>(t, l);
-				t->template assembly_action<AAN::end, AAT::id>(AT::first);
-			}
-		};
-
-	// string:
-
-		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::return_string, filler...>
-		{
-			using literal_action = T_scheme_translation_action<SAAN::continue_string, filler...>;
-
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-			{
-				literal_action::template result<AST>(t, l);
-				t->template assembly_action<AAN::end, AAT::id>(AT::first);
-			}
-		};
-
-	// lookup:
-
-		template<auto... filler>
 		struct T_scheme_translation_action<SAAN::return_lookup, filler...>
 		{
-			using lookup_action = T_scheme_translation_action<SAAN::continue_lookup, filler...>;
-
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-			{
-				lookup_action::template result<AST>(t, l);
-				t->template assembly_action<AAN::end, AAT::id>(AT::first);
-			}
+				{ t->asm_lookup_variable(l->left_cselect()); }
 		};
 
 /***********************************************************************************************************************/
 
 // if:
-
-	// pred:
-
-		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::if_pred, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-				{ } // nothing yet.
-		};
 
 	// ante:
 
@@ -396,19 +300,103 @@ namespace scheme {
 		template<auto... filler>
 		struct T_scheme_translation_action<SAAN::if_conse, filler...>
 		{
+			nik_ces auto offset = 1;
+
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->template assembly_action<AAN::invert, AAT::end>(); }
+			{
+				t->template assembly_action< AAN::invert , AAT::end   >(offset);
+				t->template assembly_action< AAN::go_to  , AAT::begin >();
+			}
+		};
+
+	// end:
+
+		template<auto... filler>
+		struct T_scheme_translation_action<SAAN::if_end, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				using Instr  = cctmp::Instr;
+				using Policy = typename AST::contr_type::Policy;
+				t->template assembly_action<AAN::go_to, AAT::end>();
+			}
 		};
 
 /***********************************************************************************************************************/
 
 // op:
 
+	// begin:
+
+		template<auto... filler>
+		struct T_scheme_translation_action<SAAN::op_begin, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ }//t->template chain_action<AAN::eval, AAT::begin>(); }
+		};
+
+	// end:
+
+		template<auto... filler>
+		struct T_scheme_translation_action<SAAN::op_end, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ }//t->template chain_action<AAN::eval, AAT::end>(); }
+		};
+
 	// lookup:
 
 		template<auto... filler>
 		struct T_scheme_translation_action<SAAN::op_lookup, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l) { }
+		};
+
+	// add:
+
+		template<auto... filler>
+		struct T_scheme_translation_action<SAAN::op_add, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l) { }
+		};
+
+	// multiply:
+
+		template<auto... filler>
+		struct T_scheme_translation_action<SAAN::op_multiply, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l) { }
+		};
+
+	// subtract:
+
+		template<auto... filler>
+		struct T_scheme_translation_action<SAAN::op_subtract, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l) { }
+		};
+
+	// divide:
+
+		template<auto... filler>
+		struct T_scheme_translation_action<SAAN::op_divide, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l) { }
+		};
+
+	// arg:
+
+		template<auto... filler>
+		struct T_scheme_translation_action<SAAN::op_arg, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l) { }

@@ -127,13 +127,41 @@
 
 // scheme:
 
+	// line  0 -  0  0  0  0  1
+	// line  1 -  2  2  1  0  1
+	// line  2 -  2  3  0  0  1
+	// line  3 -  6 12  4  0  7
+	// line  4 -  0  0  0  0  1
+	// line  5 -  5  1  6  0  4
+	// line  6 -  0  0  0  0  1
+	// line  7 -  2  2 29 31  1
+	// line  8 -  1  1  0  0  1
+	// line  9 -  1  1  0  0  1
+	// line 10 -  5 11 18  0  1 // invert
+	// line 11 -  6 12 12  0  7 // ante
+	// line 12 -  0  0  0  0  1
+	// line 13 -  5  1 14  0  4
+	// line 14 -  0  0  0  0  1
+	// line 15 -  2  3 32 33  1
+	// line 16 -  1  1  0  0  1
+	// line 17 -  1  1  0  0  1
+	// line 18 -  5  9 25  0  1 // goto
+	// line 19 -  6 12 20  0  7 // conse
+	// line 20 -  0  0  0  0  1
+	// line 21 -  5  1 22  0  4
+	// line 22 -  0  0  0  0  1
+	// line 23 -  2  3 34 35  1
+	// line 24 -  1  1  0  0  1
+	// line 25 -  1  1  0  0  1
+	// line 26 -  1  1  0  0  1
+
 	constexpr auto _scheme_test_func()
 	{
 		return source
 	        (
-			"(define (main x) "
-			" two             "
-			")                "
+			"(define (main x)         "
+			" (if #t (if #t x 7) two) "
+			")                        "
 
 			, binding("two", 2)
 		);
@@ -151,7 +179,25 @@
 
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", scheme_test_func<int>(5));
+	//	printf("%d\n", scheme_test_func<int>(5));
+
+	//	auto & contr = member_value_U<scheme_test_func<int>()>;
+
+	//	for (auto k = 0; k != contr.size(); ++k)
+	//	{
+	//		auto s = (k < 10) ? " " : "";
+	//		printf("line %s%d -", s, k);
+
+	//		for (auto j = 0; j != Instr::dimension; ++j)
+	//		{
+	//			auto v = contr[k][j];
+	//			auto t = (v < 10) ? " " : "";
+
+	//			printf(" %s%d", t, v);
+	//		}
+
+	//		printf("\n");
+	//	}
 
 	//	constexpr auto k = member_value_U<static_strs>.citerate().find(strlit_type{"two"});
 	//	constexpr auto n = k.left_size();

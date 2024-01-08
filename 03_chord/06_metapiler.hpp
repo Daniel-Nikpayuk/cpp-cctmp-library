@@ -65,7 +65,6 @@ namespace chord {
 	nik_ce auto _read_only_					= cctmp::_read_only_;
 
 	nik_ce auto default_machine_frame			= cctmp::default_machine_frame;
-	nik_ce auto _default_subsource_				= cctmp::_default_subsource_;
 
 // machine:
 
@@ -136,6 +135,35 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
+// subsource:
+
+	struct T_chord_subsource
+	{
+		nik_ces auto value			= string_literal
+							{
+								"id"		//  2
+								"dereference"	// 11
+								"appoint"	//  7
+								"equal"		//  5
+							};			// 25
+		using type				= decltype(value);
+
+		nik_ces gindex_type id_start		=  0;
+		nik_ces gindex_type id_finish		= 23; // 25 - ( 0 +  2)
+
+		nik_ces gindex_type deref_start		=  2;
+		nik_ces gindex_type deref_finish	= 12; // 25 - ( 2 + 11)
+
+		nik_ces gindex_type appoint_start	= 13;
+		nik_ces gindex_type appoint_finish	=  5; // 25 - (13 +  7)
+
+		nik_ces gindex_type equal_start		= 20;
+		nik_ces gindex_type equal_finish	=  0; // 25 - (20 +  5)
+
+	}; nik_ce auto _chord_subsource_ = U_store_T<T_chord_subsource>;
+
+/***********************************************************************************************************************/
+
 // contr:
 
 	template<auto space>
@@ -189,7 +217,7 @@ namespace chord {
 		nik_ce auto static_frame	= _static_cdr_<static_pair>;
 		nik_ce auto static_env		= cons_<initial_env, static_frame, default_machine_frame>;
 
-		nik_ce auto links		= U_pack_Vs<static_source, static_env, _default_subsource_>;
+		nik_ce auto links		= U_pack_Vs<static_source, static_env, _chord_subsource_>;
 		nik_ce auto out_type		= U_store_T<S>;
 		nik_ce auto in_types		= U_pack_Ts<Ts...>;
 		nik_ce auto cin_types		= map_<in_types, _read_only_>;

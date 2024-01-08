@@ -386,29 +386,6 @@ namespace cctmp {
 	}
 
 /***********************************************************************************************************************/
-
-// subsource:
-
-	struct T_default_subsource
-	{
-		nik_ces auto value			= string_literal{"id dereference appoint equal"};
-		using type				= decltype(value);
-
-		nik_ces gindex_type id_start		=  0;
-		nik_ces gindex_type id_finish		= 26; // 28 - 2
-
-		nik_ces gindex_type deref_start		=  3;
-		nik_ces gindex_type deref_finish	= 14; // 28 - 14
-
-		nik_ces gindex_type appoint_start	= 15;
-		nik_ces gindex_type appoint_finish	=  6; // 28 - 22
-
-		nik_ces gindex_type equal_start		= 23;
-		nik_ces gindex_type equal_finish	=  0; // 28 - 28
-
-	}; nik_ce auto _default_subsource_ = U_store_T<T_default_subsource>;
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 

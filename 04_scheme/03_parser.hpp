@@ -67,61 +67,56 @@ namespace scheme {
 
 			// scheme:
 
-				"Start -> ( define ( DefName DefArgs ) Expr0 ) ;"
+				"Start -> DefBeg define ( DefName DefArgs ) Expr0 DefEnd ;"
 
-				"DefName -> identifier     : define_name ;"
-				"DefArgs -> DefArg DefArgs               ;"
-				"        -> empty                        ;"
-				"DefArg  -> identifier     : define_arg  ;"
+				"DefBeg  -> (              : define_begin ;"
+				"DefEnd  -> )              : define_end   ;"
+				"DefName -> identifier     : define_name  ;"
+				"DefArgs -> DefArg DefArgs                ;"
+				"        -> empty                         ;"
+				"DefArg  -> identifier     : define_arg   ;"
 
-				"Const0 -> boolean   : return_boolean   ;"
-				"       -> number    : return_number    ;"
-				"       -> character : return_character ;"
-				"       -> string    : return_string    ;"
+				"Const -> boolean   : return_boolean   ;"
+				"      -> number    : return_number    ;"
+				"      -> character : return_character ;"
+				"      -> string    : return_string    ;"
 
-				"Const1 -> boolean   : continue_boolean   ;"
-				"       -> number    : continue_number    ;"
-				"       -> character : continue_character ;"
-				"       -> string    : continue_string    ;"
-
-				"Expr0 -> Const0                     ;"
+				"Expr0 -> Const                      ;"
 				"      -> identifier : return_lookup ;"
-				"      -> ( Expr2 )                  ;"
+				"      -> ( Expr1 )                  ;"
 
-				"Expr1 -> Const1                       ;"
-				"      -> identifier : continue_lookup ;"
-				"      -> ( Expr2 )                    ;"
+				"Expr1 -> Const                         ;"
+				"      -> IfBeg Pred Ante Conse IfEnd   ;"
+				"      -> define Var Val                ;"
+				"      -> quote Expr0                   ;"
+				"      -> begin Exprs                   ;"
+				"      -> lambda LArgs LBody            ;"
+				"      -> set! Var Val                  ;"
+				"      -> Op OpArgs          : op_begin ;"
 
-				"Expr2 -> Const0              ;"
-				"      -> if Pred Ante Conse  ;"
-				"      -> define Var Val      ;"
-				"      -> quote Expr0         ;"
-				"      -> begin Exprs         ;"
-				"      -> lambda Formals Body ;"
-				"      -> set! Var Val        ;"
-				"      -> Operator Operands   ;" // is expected to handle lookups.
-
-				"Exprs -> Expr1 Exprs ;"
+				"Exprs -> Expr0 Exprs ;"
 				"      -> empty       ;"
 
-				"Pred   -> Expr1 : if_pred  ;"
-				"Ante   -> Expr0 : if_ante  ;"
-				"Conse  -> Expr0 : if_conse ;"
+				"IfBeg -> if               ;"
+				"IfEnd -> empty : if_end   ;"
+				"Pred  -> Expr0            ;"
+				"Ante  -> Expr0 : if_ante  ;"
+				"Conse -> Expr0 : if_conse ;"
 
 				"Var -> identifier ;"
-				"Val -> Expr1      ;"
+				"Val -> Expr0      ;"
 
-		//	formals -> (variable*)
-		//	        -> variable
-		//		-> <(variable1 ... variableN variable)
+				"LArgs -> Expr0 ;"
+				"LBody -> Expr0 ;"
 
-				"Formals -> Expr0 ;"
-				"Body    -> Expr0 ;"
-
-				"Operator -> identifier       : op_lookup   ;"
-				"Operands -> Operand Operands               ;"
-				"         -> empty                          ;"
-				"Operand  -> Expr0                          ;"
+				"Op     -> identifier   : op_lookup   ;"
+				"       -> +            : op_add      ;"
+				"       -> *            : op_multiply ;"
+				"       -> \\-          : op_subtract ;"
+				"       -> /            : op_divide   ;"
+				"OpArgs -> OpArg OpArgs               ;"
+				"       -> empty        : op_end      ;"
+				"OpArg  -> Expr0        : op_arg      ;"
 		);}
 
 		nik_ces auto map = cctmp::table
@@ -166,8 +161,10 @@ namespace scheme {
 
 			// define:
 
-				sxa_pair( "define_name" , ActName::define_name ),
-				sxa_pair( "define_arg"  , ActName::define_arg  ),
+				sxa_pair( "define_begin" , ActName::define_begin ),
+				sxa_pair( "define_end"   , ActName::define_end   ),
+				sxa_pair( "define_name"  , ActName::define_name  ),
+				sxa_pair( "define_arg"   , ActName::define_arg   ),
 
 			// return:
 
@@ -177,23 +174,22 @@ namespace scheme {
 				sxa_pair( "return_string"    , ActName::return_string    ),
 				sxa_pair( "return_lookup"    , ActName::return_lookup    ),
 
-			// continue:
-
-				sxa_pair( "continue_boolean"   , ActName::continue_boolean   ),
-				sxa_pair( "continue_number"    , ActName::continue_number    ),
-				sxa_pair( "continue_character" , ActName::continue_character ),
-				sxa_pair( "continue_string"    , ActName::continue_string    ),
-				sxa_pair( "continue_lookup"    , ActName::continue_lookup    ),
-
 			// if:
 
-				sxa_pair( "if_pred"  , ActName::if_pred  ),
 				sxa_pair( "if_ante"  , ActName::if_ante  ),
 				sxa_pair( "if_conse" , ActName::if_conse ),
+				sxa_pair( "if_end"   , ActName::if_end   ),
 
 			// op:
 
-				sxa_pair( "op_lookup" , ActName::op_lookup )
+				sxa_pair( "op_begin"    , ActName::op_begin    ),
+				sxa_pair( "op_end"      , ActName::op_end      ),
+				sxa_pair( "op_lookup"   , ActName::op_lookup   ),
+				sxa_pair( "op_add"      , ActName::op_add      ),
+				sxa_pair( "op_multiply" , ActName::op_multiply ),
+				sxa_pair( "op_subtract" , ActName::op_subtract ),
+				sxa_pair( "op_divide"   , ActName::op_divide   ),
+				sxa_pair( "op_arg"      , ActName::op_arg      )
 		);
 	};
 

@@ -63,6 +63,9 @@ namespace scheme {
 	nik_ce auto cdr_					= cctmp::cdr_<Vs...>;
 
 	template<auto... Vs>
+	nik_ce auto cons_					= cctmp::cons_<Vs...>;
+
+	template<auto... Vs>
 	nik_ce auto push_					= cctmp::push_<Vs...>;
 
 	template<auto... Vs>
@@ -82,8 +85,7 @@ namespace scheme {
 
 // machine:
 
-	template<auto... Vs>
-	using T_assembly_compound				= machine::T_assembly_compound<Vs...>;
+	using T_assembly_start					= machine::T_assembly_start;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -156,33 +158,24 @@ namespace scheme {
 	{
 		nik_ces auto value			= cctmp::string_literal
 							{
-								"equal"
-								"add"
-								"multiply"
-								"subtract"
-								"divide"
-							};
+								"add"		//  3
+								"multiply"	//  8
+								"subtract"	//  8
+								"divide"	//  6
+							};			// 25
 		using type				= decltype(value);
 
-		nik_ces gindex_type equal_start		= 0;
-		nik_ces gindex_type equal_size		= 5;
-		nik_ces gindex_type equal_finish	= value.size() - (equal_start + equal_size);
+		nik_ces gindex_type add_start		=  0;
+		nik_ces gindex_type add_finish		= 22; // 25 - ( 0 +  3)
 
-		nik_ces gindex_type add_start		= equal_start + equal_size;
-		nik_ces gindex_type add_size		= 3;
-		nik_ces gindex_type add_finish		= value.size() - (add_start + add_size);
+		nik_ces gindex_type multiply_start	=  3;
+		nik_ces gindex_type multiply_finish	= 14; // 25 - ( 3 +  8)
 
-		nik_ces gindex_type multiply_start	= add_start + add_size;
-		nik_ces gindex_type multiply_size	= 8;
-		nik_ces gindex_type multiply_finish	= value.size() - (multiply_start + multiply_size);
+		nik_ces gindex_type subtract_start	= 11;
+		nik_ces gindex_type subtract_finish	=  6; // 25 - (11 +  8)
 
-		nik_ces gindex_type subtract_start	= multiply_start + multiply_size;
-		nik_ces gindex_type subtract_size	= 8;
-		nik_ces gindex_type subtract_finish	= value.size() - (subtract_start + subtract_size);
-
-		nik_ces gindex_type divide_start	= subtract_start + subtract_size;
-		nik_ces gindex_type divide_size		= 6;
-		nik_ces gindex_type divide_finish	= value.size() - (divide_start + divide_size);
+		nik_ces gindex_type divide_start	= 19;
+		nik_ces gindex_type divide_finish	=  0; // 25 - (19 +  6)
 
 	}; nik_ce auto _scheme_subsource_ = U_store_T<T_scheme_subsource>;
 
@@ -215,13 +208,15 @@ namespace scheme {
 		using S            = T_store_U<out_type>;
 
 		template<typename... Ts>
-		nik_ces auto result(Ts... vs)
+		nik_ces auto result(Ts... vs) -> S
 		{
 			nik_ce auto in_types = U_pack_Ts<Ts...>;
+			nik_ce auto this_f   = _wrap_<result<Ts...>>;
+			nik_ce auto nlinks   = cons_<links, this_f>;
 
-			return T_assembly_compound<contr>::template result
+			return T_assembly_start::template result
 			<
-				out_type, links, in_types, T_store_U<Us>...
+				out_type, contr, nlinks, in_types, T_store_U<Us>...
 
 			>(vs...);
 		}
@@ -244,9 +239,8 @@ namespace scheme {
 		nik_ce auto static_env_lookup	= unpack_<static_env, _to_list_, H_env_lookup>;
 		nik_ce auto static_env_tuple	= unpack_<static_env, _to_list_, H_env_tuple>;
 
+		nik_ce auto links		= U_pack_Vs<static_source, _scheme_subsource_, static_env_tuple>;
 		nik_ce auto out_type		= U_store_T<S>;
-		nik_ce auto rec_types		= U_pack_Vs<out_type>;
-		nik_ce auto links		= U_pack_Vs<static_source, _scheme_subsource_, static_env_tuple, rec_types>;
 		nik_ce auto in_types		= U_pack_Ts<Ts...>;
 		nik_ce auto cin_types		= map_<in_types, _read_only_>;
 

@@ -61,8 +61,10 @@ namespace scheme {
 	{
 		nik_ces auto & src		= member_value_U<static_source>;
 		using src_ptr			= typename member_type_U<static_source>::ctype_cptr;
+		using cselect			= typename member_type_U<static_source>::cselector_type;
 
-		nik_ces auto & lookup		= member_value_U<static_env_lookup>;
+		nik_ces auto & cmodel		= member_value_U<static_env_lookup>;
+		using path_type			= typename member_type_U<static_env_lookup>::path_type;
 
 		using contr_type		= T_machine_contr<contr_size, stack_size>;
 		using cindex			= typename contr_type::cindex;
@@ -76,8 +78,7 @@ namespace scheme {
 
 		enum : gkey_type
 		{
-			rec_at = 0,
-			src_at,
+			src_at = 0,
 			str_at,
 			env_at,
 
@@ -87,17 +88,17 @@ namespace scheme {
 		contr_type contr;
 		model_type model;
 		size_type arg_size;
-		env_type env;
+		env_type cur_env;
 
 		nik_ce T_scheme_ast() :
 
-			contr{rec_at, src_at, str_at, env_at},
-			model{src}, arg_size{1}, env{model.null_env()}
+			contr{src_at, str_at, env_at},
+			model{src}, arg_size{1}, cur_env{model.null_env()}
 
 			{ initialize(); }
 
 		nik_ce void initialize() // t->model.extend_environment(t->env) ?
-			{ env = model.cons(model.null_frame(), env); }
+			{ cur_env = model.cons(model.null_frame(), cur_env); }
 
 		// (generic) action:
 
@@ -116,6 +117,100 @@ namespace scheme {
 		// source:
 
 			nik_ce auto left_size(src_ptr i) const { return i - src.origin(); }
+
+		// lookup:
+
+			// chain:
+
+				nik_ce void chain_lookup_variable(const cselect & s)
+				{
+					auto record = model.lookup_variable(s, cur_env);
+
+					if (record.v0) chain_lookup_model(record.v1);
+					else chain_lookup_cmodel(s);
+				}
+
+					nik_ce void chain_lookup_model(cindex entry)
+					{
+						if (model.is_compound(entry)) chain_lookup_compound(entry);
+						else chain_lookup_variadic(entry);
+					}
+
+						nik_ce void chain_lookup_compound(cindex entry)
+						{
+						}
+
+						nik_ce void chain_lookup_variadic(cindex entry)
+						{
+							auto pos = model.variadic_pos(entry);
+
+						//	chain_action<CAN::lookup, CAT::variable>(pos);
+						}
+
+					nik_ce void chain_lookup_cmodel(const cselect & s)
+					{
+						auto record = cmodel.match_variable(s);
+
+						if (record.v0) chain_lookup_match(record.v1);
+						else chain_lookup_error(s);
+					}
+
+						nik_ce void chain_lookup_match(const path_type & p)
+						{
+							auto pos = p.v0;
+							auto num = p.v1;
+
+						//	chain_action<CAN::lookup, CAT::parameter>(pos, num);
+						}
+
+						nik_ce void chain_lookup_error(const cselect & s)
+							{ } // nothing yet.
+
+			// asm:
+
+				nik_ce void asm_lookup_variable(const cselect & s)
+				{
+					auto record = model.lookup_variable(s, cur_env);
+
+					if (record.v0) asm_lookup_model(record.v1);
+					else asm_lookup_cmodel(s);
+				}
+
+					nik_ce void asm_lookup_model(cindex entry)
+					{
+						if (model.is_compound(entry)) asm_lookup_compound(entry);
+						else asm_lookup_variadic(entry);
+					}
+
+						nik_ce void asm_lookup_compound(cindex entry)
+						{
+						}
+
+						nik_ce void asm_lookup_variadic(cindex entry)
+						{
+							auto pos = model.variadic_pos(entry);
+
+							assembly_action<AAN::lookup, AAT::variable>(pos);
+						}
+
+					nik_ce void asm_lookup_cmodel(const cselect & s)
+					{
+						auto record = cmodel.match_variable(s);
+
+						if (record.v0) asm_lookup_match(record.v1);
+						else asm_lookup_error(s);
+					}
+
+						nik_ce void asm_lookup_match(const path_type & p)
+						{
+							auto pos = p.v0;
+							auto num = p.v1;
+
+							assembly_action<AAN::lookup, AAT::parameter>(pos, num);
+						}
+
+						nik_ce void asm_lookup_error(const cselect & s)
+							{ } // nothing yet.
 	};
 
 /***********************************************************************************************************************/

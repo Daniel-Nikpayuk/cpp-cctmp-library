@@ -86,8 +86,8 @@ namespace cctmp {
 		template<auto... filler>
 		struct T_grammar<Shape::argument, Pattern::overload, ArgOverload::upshift, filler...>
 		{
-			template<typename T1, typename T2>
-			nik_ces auto result(T1 v1, T2 v2) { return (v1 << v2); }
+			template<typename... Ts>
+			nik_ces auto result(Ts... vs) { return (... << vs); }
 
 		}; nik_ce auto _upshift_ = U_arg_overload<ArgOverload::upshift>;
 
@@ -96,8 +96,8 @@ namespace cctmp {
 		template<auto... filler>
 		struct T_grammar<Shape::argument, Pattern::overload, ArgOverload::downshift, filler...>
 		{
-			template<typename T1, typename T2>
-			nik_ces auto result(T1 v1, T2 v2) { return (v1 >> v2); }
+			template<typename... Ts>
+			nik_ces auto result(Ts... vs) { return (... >> vs); }
 
 		}; nik_ce auto _downshift_ = U_arg_overload<ArgOverload::downshift>;
 

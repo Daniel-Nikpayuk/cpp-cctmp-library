@@ -27,6 +27,9 @@ namespace machine {
 
 // cctmp:
 
+	template<typename T>
+	nik_ce auto U_store_T					= cctmp::U_store_T<T>;
+
 	template<auto U>
 	using T_store_U						= cctmp::T_store_U<U>;
 
@@ -269,7 +272,8 @@ namespace machine {
 				{
 					csize_type value = allocate_binding_value();
 
-					base::set_value(value, Variadic::pos, val[Variadic::pos]);
+					base::set_value(value, Variadic::type , val[Variadic::type]);
+					base::set_value(value, Variadic::pos  , val[Variadic::pos]);
 
 					return value;
 				}
@@ -278,7 +282,8 @@ namespace machine {
 				{
 					csize_type value = allocate_binding_value();
 
-					base::set_value(value, Compound::pos, val[Compound::pos]);
+					base::set_value(value, Compound::type , val[Compound::type]);
+					base::set_value(value, Compound::pos  , val[Compound::pos]);
 
 					return value;
 				}
@@ -342,8 +347,11 @@ namespace machine {
 
 			// binding:
 
-				nik_ce auto variadic_pos(csize_type value) const
-					{ return base::get_value(value, Variadic::pos); }
+				nik_ce bool is_compound(csize_type entry) const
+					{ return (base::get_value(entry, Compound::type) == EntryType::compound); }
+
+				nik_ce auto variadic_pos(csize_type entry) const
+					{ return base::get_value(entry, Variadic::pos); }
 	};
 
 /***********************************************************************************************************************/
@@ -376,20 +384,18 @@ namespace machine {
 
 		struct Policy { enum : size_type { absolute = 0, relative, dimension }; };
 
-		cindex rec_at; // required any more ?
 		cindex src_at;
 		cindex str_at;
 		cindex env_at;
 
 		stack_type stack; 
 
-		nik_ce T_machine_contr(cindex rec, cindex src, cindex str, cindex env) :
-			base{}, rec_at{rec}, src_at{src}, str_at{str}, env_at{env} { }
+		nik_ce T_machine_contr(cindex src, cindex str, cindex env) :
+			base{}, src_at{src}, str_at{str}, env_at{env} { }
 
 		// instr:
 
-			nik_ce auto current () const { return base::max(); }
-			nik_ce auto next    () const { return base::size(); }
+			nik_ce auto current(csize_type offset = 0) const { return base::max() + offset; }
 
 			nik_ce void set_instr_value(cindex contr_pos, cindex instr_pos, cindex value)
 				{ base::operator[](contr_pos)[instr_pos] = value; }
@@ -397,6 +403,7 @@ namespace machine {
 			nik_ce void push_instr(cindex name, cindex note, cindex pos = 0, cindex num = 0, cindex next = 1)
 			{
 				base::upsize();
+				base::end()->fullsize();
 
 				set_instr_value( current() , Instr::name , name );
 				set_instr_value( current() , Instr::note , note );
@@ -405,12 +412,12 @@ namespace machine {
 				set_instr_value( current() , Instr::next , next );
 			}
 
-			nik_ce void delay_instr_value() { stack.push(current()); }
+			nik_ce void delay_instr_value(csize_type offset = 0) { stack.push(current(offset)); }
 
-			nik_ce void force_instr_value(cindex instr_pos, csize_type relative)
+			nik_ce void force_instr_value(cindex instr_pos, csize_type relative, csize_type offset = 0)
 			{
 				cindex contr_pos = stack.pop();
-				size_type value  = current();
+				size_type value  = current(offset);
 
 				if (relative) value -= (contr_pos - 1);
 
@@ -453,11 +460,13 @@ namespace machine {
 	using MD = MachineDispatch<static_contr, MI, _index>;
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
 // action:
 
 	template<gkey_type, gkey_type, auto...> struct T_machine_action;
+	template<gkey_type, gkey_type, auto...> struct T_literal_action;
+	template<gkey_type, gkey_type, auto...> struct T_chain_action;
+	template<gkey_type, gkey_type, auto...> struct T_assembly_action;
 
 	// syntactic sugar:
 
@@ -465,8 +474,17 @@ namespace machine {
 		nik_ce auto machine_action(Ts... vs) // requires template deduction <>:
 			{ return T_machine_action<name, note>::template result<>(vs...); }
 
-		template<auto name, auto note>
-		nik_ce auto machine_offset = T_machine_action<name, note>::offset;
+		template<auto name, auto note, typename... Ts>
+		nik_ce auto literal_action(Ts... vs) // requires template deduction <>:
+			{ return T_literal_action<name, note>::template result<>(vs...); }
+
+		template<auto name, auto note, typename... Ts>
+		nik_ce auto chain_action(Ts... vs) // requires template deduction <>:
+			{ return T_chain_action<name, note>::template result<>(vs...); }
+
+		template<auto name, auto note, typename... Ts>
+		nik_ce auto assembly_action(Ts... vs) // requires template deduction <>:
+			{ return T_assembly_action<name, note>::template result<>(vs...); }
 
 /***********************************************************************************************************************/
 
@@ -479,6 +497,47 @@ namespace machine {
 
 	}; using MAN = MachineActionName;
 
+	// literal:
+
+		struct LiteralActionName
+		{
+			enum : gkey_type // convenience for default params.
+				{ identity = 0, id = identity, resolve, dimension };
+
+		}; using LAN = LiteralActionName;
+
+	// chain:
+
+		struct ChainActionName
+		{
+			enum : gkey_type
+			{
+				identity = 0, id = identity, // convenience for default params.
+				generic, catN,
+				cat0_x_catN, cat1_x_catN, cat2_x_catN,
+				pull, push, back,
+				arg, list, literal, lookup,
+				apply, eval,
+				dimension
+			};
+
+		}; using CAN = ChainActionName;
+
+	// assembly:
+
+		struct AssemblyActionName
+		{
+			enum : gkey_type
+			{
+				identity = 0, id = identity, // convenience for default params.
+				pad, arg, go_to, branch, invert,
+				apply, eval,
+				literal, lookup,
+				dimension
+			};
+
+		}; using AAN = AssemblyActionName;
+
 /***********************************************************************************************************************/
 
 // notes:
@@ -490,6 +549,59 @@ namespace machine {
 
 	}; using MAT = MachineActionNote;
 
+	// literal:
+
+		struct LiteralActionNote
+		{
+			enum : gkey_type
+			{
+				identity = 0, id = identity, // convenience for default params.
+				dimension
+			};
+
+		}; using LAT = LiteralActionNote;
+
+	// chain:
+
+		struct ChainActionNote
+		{
+			enum : gkey_type
+			{
+				identity = 0, id = identity, // convenience for default params.
+				arg, list, literal, lookup,
+				begin, end,
+				dimension
+			};
+
+		}; using CAT = ChainActionNote;
+
+	// assembly:
+
+		struct AssemblyActionNote
+		{
+			enum : gkey_type
+			{
+				identity = 0, id = identity, // convenience for default params.
+				replace,
+				begin, end,
+				variable, parameter,
+				dimension
+			};
+
+		}; using AAT = AssemblyActionNote;
+
+/***********************************************************************************************************************/
+
+// compound:
+
+	template<auto...> struct T_literal_compound;
+	template<auto...> struct T_chain_compound;
+	template<auto...> struct T_assembly_compound;
+
+	template<auto... Vs> nik_ce auto U_literal_compound  = U_store_T< T_literal_compound  <Vs...> >;
+	template<auto... Vs> nik_ce auto U_chain_compound    = U_store_T< T_chain_compound    <Vs...> >;
+	template<auto... Vs> nik_ce auto U_assembly_compound = U_store_T< T_assembly_compound <Vs...> >;
+
 /***********************************************************************************************************************/
 
 // push:
@@ -499,8 +611,6 @@ namespace machine {
 		template<auto... filler>
 		struct T_machine_action<MAN::push, MAT::instr, filler...>
 		{
-			nik_ces gindex_type offset = 1;
-
 			using cindex = gcindex_type;
 
 			template<typename Contr>
@@ -518,8 +628,6 @@ namespace machine {
 		template<auto... filler>
 		struct T_machine_action<MAN::delay, MAT::jump, filler...>
 		{
-			nik_ces gindex_type offset = 1;
-
 			using cindex = gcindex_type;
 
 			template<typename Contr>
@@ -535,15 +643,13 @@ namespace machine {
 		template<auto... filler>
 		struct T_machine_action<MAN::delay, MAT::call, filler...>
 		{
-			nik_ces gindex_type offset = 1;
-
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex name, cindex note, cindex num = 0, cindex next = 1)
+			nik_ces void result(Contr *contr, cindex name, cindex note, cindex num = 0)
 			{
-				cindex pos = contr->next() + 1;
-				contr->push_instr(name, note, pos, num, next);
+				cindex pos = contr->current(2);
+				contr->push_instr(name, note, pos, num, 0);
 				contr->delay_instr_value();
 			}
 		};
@@ -557,13 +663,13 @@ namespace machine {
 		template<auto... filler>
 		struct T_machine_action<MAN::force, MAT::jump, filler...>
 		{
-			nik_ces gindex_type offset = 0;
+			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr)
+			nik_ces void result(Contr *contr, cindex offset = 0)
 			{
 				using Policy = typename Contr::Policy;
-				contr->force_instr_value(Instr::pos, Policy::absolute);
+				contr->force_instr_value(Instr::pos, Policy::absolute, offset);
 			}
 		};
 
@@ -572,13 +678,13 @@ namespace machine {
 		template<auto... filler>
 		struct T_machine_action<MAN::force, MAT::call, filler...>
 		{
-			nik_ces gindex_type offset = 0;
+			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr)
+			nik_ces void result(Contr *contr, cindex offset = 0)
 			{
 				using Policy = typename Contr::Policy;
-				contr->force_instr_value(Instr::next, Policy::relative);
+				contr->force_instr_value(Instr::next, Policy::relative, offset);
 			}
 		};
 
