@@ -359,7 +359,8 @@ namespace cctmp {
 	template<auto... static_frames>
 	struct T_env_tuple
 	{
-		nik_ces auto value	= tuple{member_value_U<static_frames>.maps()...};
+		using tuple_type	= tuple<typename member_type_U<static_frames>::tuple_type...>;
+		nik_ces auto value	= tuple_type{member_value_U<static_frames>.maps()...};
 		using type		= decltype(value);
 
 	}; nik_ce auto H_env_tuple = U_store_B<T_env_tuple>;

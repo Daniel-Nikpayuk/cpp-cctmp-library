@@ -132,13 +132,11 @@
 		return source
 	        (
 			"(define (factorial n)         "
-			"  (if (= n zero)              "
+			"  (if (= n 0)                 "
 			"    1                         "
 			"    (* n (factorial (- n 1))) "
 			"  )                           "
 			")                             "
-
-			, binding("zero", 0)
 		);
 	}
 
@@ -151,7 +149,7 @@
 //	using chord_grammar			= chord::T_chord_assembly_scanner_grammar;
 //	using chord_grammar			= chord::T_chord_assembly_grammar;
 //	constexpr auto static_grammar		= U_store_T<chord_grammar>;
-	constexpr auto static_contr		= scheme::metapile<_scheme_test_func, null_env>;
+//	constexpr auto static_contr		= scheme::metapile<_scheme_test_func, null_env>;
 
 	int main(int argc, char *argv[])
 	{
