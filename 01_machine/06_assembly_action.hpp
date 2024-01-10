@@ -264,16 +264,17 @@ namespace machine {
 			nik_ces cindex arg_drop = 0;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex str_at, cindex note, cindex begin, cindex end)
+			nik_ces void result(Contr *contr,
+				cindex note0, cindex str_at, cindex note1, cindex begin, cindex end)
 			{
-				assembly_action< AAN::apply   , AAT::begin   >(contr, AT::call_f);
-				   chain_action< CAN::generic , CAT::literal >(contr, CT::first, str_at, note, begin, end);
+				assembly_action< AAN::apply   , AAT::begin   >(contr, note0);
+				   chain_action< CAN::generic , CAT::literal >(contr, CT::first, str_at, note1, begin, end);
 				assembly_action< AAN::apply   , AAT::end     >(contr, arg_drop, CT::first);
 			}
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note, cindex begin, cindex end)
-				{ result(contr, contr->src_at, note, begin, end); }
+			nik_ces void result(Contr *contr, cindex note0, cindex note1, cindex begin, cindex end)
+				{ result(contr, note0, contr->src_at, note1, begin, end); }
 		};
 
 /***********************************************************************************************************************/
@@ -290,9 +291,9 @@ namespace machine {
 			nik_ces cindex arg_drop = 0;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex arg_at)
+			nik_ces void result(Contr *contr, cindex note, cindex arg_at)
 			{
-				assembly_action< AAN::apply   , AAT::begin >(contr, AT::call_f);
+				assembly_action< AAN::apply   , AAT::begin >(contr, note);
 				   chain_action< CAN::generic , CAT::arg   >(contr, CT::drop, arg_at);
 				assembly_action< AAN::apply   , AAT::end   >(contr, arg_drop, CT::first);
 			}
@@ -308,9 +309,9 @@ namespace machine {
 			nik_ces cindex arg_drop = 0;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex pos, cindex num)
+			nik_ces void result(Contr *contr, cindex note, cindex pos, cindex num)
 			{
-				assembly_action< AAN::apply   , AAT::begin  >(contr, AT::call_f);
+				assembly_action< AAN::apply   , AAT::begin  >(contr, note);
 				   chain_action< CAN::generic , CAT::lookup >(contr, CT::first, pos, num);
 				assembly_action< AAN::apply   , AAT::end    >(contr, arg_drop, CT::first);
 			}

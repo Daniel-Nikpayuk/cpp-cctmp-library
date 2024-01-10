@@ -158,7 +158,8 @@ namespace machine {
 		using Type		= typename base::Type;
 		using Compound		= typename base::Compound;
 
-		nik_ce T_env_model_compound() : base{Type::compound} { }
+		nik_ce T_env_model_compound(csize_type p) : base{Type::compound}
+			{ base::array[Compound::pos] = p; }
 
 		nik_ce auto size() const { return Compound::dimension; }
 		nik_ce auto cend() const { return base::array + size(); }

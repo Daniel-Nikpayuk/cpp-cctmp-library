@@ -27,9 +27,6 @@ namespace scheme {
 
 // cctmp:
 
-	template<typename T>
-	nik_ce auto U_store_T					= cctmp::U_store_T<T>;
-
 	template<template<auto...> typename B>
 	nik_ce auto U_store_B					= cctmp::U_store_B<B>;
 
@@ -76,7 +73,6 @@ namespace scheme {
 
 	nik_ce auto _read_only_					= cctmp::_read_only_;
 
-	nik_ce auto operator_frame				= cctmp::operator_frame;
 	nik_ce auto H_env_lookup				= cctmp::H_env_lookup;
 	nik_ce auto H_env_tuple					= cctmp::H_env_tuple;
 
@@ -86,6 +82,43 @@ namespace scheme {
 	using T_assembly_compound				= machine::T_assembly_compound<Vs...>;
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// frame:
+
+/***********************************************************************************************************************/
+
+// operator:
+
+	nik_ce auto scheme_operator_frame_callable()
+	{
+		return cctmp::frame
+		(
+		 	U_gchar_type,
+
+			cctmp::binding( "not"        , cctmp::_not_                   ),
+			cctmp::binding( "and"        , cctmp::_and_                   ),
+			cctmp::binding( "or"         , cctmp::_or_                    ),
+			cctmp::binding( "implies"    , cctmp::_implies_               ),
+			cctmp::binding( "equivalent" , cctmp::_equivalent_            ),
+
+			cctmp::binding( "="          , cctmp::_equal_                 ),
+			cctmp::binding( "<"          , cctmp::_less_than_             ),
+			cctmp::binding( "<="         , cctmp::_less_than_or_equal_    ),
+			cctmp::binding( ">"          , cctmp::_greater_than_          ),
+			cctmp::binding( ">="         , cctmp::_greater_than_or_equal_ ),
+
+			cctmp::binding( "+"          , cctmp::_add_                   ),
+			cctmp::binding( "-"          , cctmp::_subtract_              ),
+			cctmp::binding( "*"          , cctmp::_multiply_              ),
+			cctmp::binding( "/"          , cctmp::_divide_                ),
+			cctmp::binding( "%"          , cctmp::_modulo_                )
+		);
+	};
+
+	nik_ce auto scheme_operator_frame = _static_callable_<scheme_operator_frame_callable>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -150,44 +183,6 @@ namespace scheme {
 
 /***********************************************************************************************************************/
 
-// subsource:
-
-	struct T_scheme_subsource
-	{
-		nik_ces auto value			= cctmp::string_literal
-							{
-								"equal"
-								"add"
-								"multiply"
-								"subtract"
-								"divide"
-							};
-		using type				= decltype(value);
-
-		nik_ces gindex_type equal_start		= 0;
-		nik_ces gindex_type equal_size		= 5;
-		nik_ces gindex_type equal_finish	= value.size() - (equal_start + equal_size);
-
-		nik_ces gindex_type add_start		= equal_start + equal_size;
-		nik_ces gindex_type add_size		= 3;
-		nik_ces gindex_type add_finish		= value.size() - (add_start + add_size);
-
-		nik_ces gindex_type multiply_start	= add_start + add_size;
-		nik_ces gindex_type multiply_size	= 8;
-		nik_ces gindex_type multiply_finish	= value.size() - (multiply_start + multiply_size);
-
-		nik_ces gindex_type subtract_start	= multiply_start + multiply_size;
-		nik_ces gindex_type subtract_size	= 8;
-		nik_ces gindex_type subtract_finish	= value.size() - (subtract_start + subtract_size);
-
-		nik_ces gindex_type divide_start	= subtract_start + subtract_size;
-		nik_ces gindex_type divide_size		= 6;
-		nik_ces gindex_type divide_finish	= value.size() - (divide_start + divide_size);
-
-	}; nik_ce auto _scheme_subsource_ = U_store_T<T_scheme_subsource>;
-
-/***********************************************************************************************************************/
-
 // contr:
 
 	template<auto space>
@@ -219,7 +214,7 @@ namespace scheme {
 		{
 			nik_ce auto in_types = U_pack_Ts<Ts...>;
 
-			return T_assembly_compound<contr>::template result
+			return T_assembly_compound<contr, gindex_type{0}>::template result
 			<
 				out_type, links, in_types, T_store_U<Us>...
 
@@ -229,37 +224,77 @@ namespace scheme {
 
 /***********************************************************************************************************************/
 
+// metapile:
+
+	template
+	<
+		auto callable_source,
+		auto initial_env,
+
+		auto contr_size =  512,
+		auto stack_size =  128,
+		auto model_size = 1024
+	>
+	struct scheme_metapile
+	{
+		nik_ces auto static_pair		= _static_callable_<callable_source>;
+		nik_ces auto static_source		= _static_car_<static_pair>;
+		nik_ces auto static_frame		= _static_cdr_<static_pair>;
+
+		nik_ces auto op_env			= push_<initial_env, scheme_operator_frame>;
+		nik_ces bool sf_is_empty		= member_value_U<static_frame>.is_empty();
+		nik_ces auto static_env			= stem_<sf_is_empty, op_env, _cons_, H_id, op_env, static_frame>;
+		nik_ces auto static_env_lookup		= unpack_<static_env, _to_list_, H_env_lookup>;
+		nik_ces auto static_env_tuple		= unpack_<static_env, _to_list_, H_env_tuple>;
+
+		nik_ces auto static_space		= U_scheme_static_space
+							<
+								static_source, static_env_lookup,
+								contr_size, stack_size, model_size
+							>;
+		nik_ces auto static_contr		= _scheme_function_contr_<static_space>;
+	};
+
+	// syntactic sugar:
+
+		template
+		<
+			auto callable_source,
+			auto initial_env,
+
+			auto contr_size =  512,
+			auto stack_size =  128,
+			auto model_size = 1024
+		>
+		nik_ce auto metapile = scheme_metapile
+		<
+			callable_source, initial_env, contr_size, stack_size, model_size
+
+		>::static_contr;
+
+/***********************************************************************************************************************/
+
 // apply:
 
 	template<auto callable_source, auto initial_env, typename S, typename... Ts>
 	nik_ce auto scheme_apply(Ts... vs)
 	{
-		nik_ce auto static_pair		= _static_callable_<callable_source>;
-		nik_ce auto static_source	= _static_car_<static_pair>;
-		nik_ce auto static_frame	= _static_cdr_<static_pair>;
-
-		nik_ce auto op_env		= push_<initial_env, operator_frame>;
-		nik_ce bool sf_is_empty		= member_value_U<static_frame>.is_empty();
-		nik_ce auto static_env		= stem_<sf_is_empty, op_env, _cons_, H_id, op_env, static_frame>;
-		nik_ce auto static_env_lookup	= unpack_<static_env, _to_list_, H_env_lookup>;
-		nik_ce auto static_env_tuple	= unpack_<static_env, _to_list_, H_env_tuple>;
+		using metapile			= scheme_metapile<callable_source, initial_env>;
 
 		nik_ce auto out_type		= U_store_T<S>;
 		nik_ce auto rec_types		= U_pack_Vs<out_type>;
-		nik_ce auto links		= U_pack_Vs<static_source, _scheme_subsource_, static_env_tuple, rec_types>;
+		nik_ce auto links		= U_pack_Vs
+						<
+							metapile::static_source, _scheme_subsource_,
+							metapile::static_env_tuple, rec_types
+						>;
 		nik_ce auto in_types		= U_pack_Ts<Ts...>;
 		nik_ce auto cin_types		= map_<in_types, _read_only_>;
 
-		nik_ce auto contr_size		= 512;
-		nik_ce auto stack_size		= 64;
-		nik_ce auto model_size		= 1024;
-
-		nik_ce auto space		= U_scheme_static_space
+		using T_function		= T_scheme_function
 						<
-							static_source, static_env_lookup,
-							contr_size, stack_size, model_size
+							metapile::static_space, links, out_type, cin_types
 						>;
-		using T_function		= T_scheme_function<space, links, out_type, cin_types>;
 
 		return T_function::template result<Ts...>(vs...);
 	}

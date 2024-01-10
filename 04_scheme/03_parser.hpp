@@ -85,21 +85,21 @@ namespace scheme {
 				"      -> identifier : return_lookup ;"
 				"      -> ( Expr1 )                  ;"
 
-				"Expr1 -> Const                         ;"
-				"      -> IfBeg Pred Ante Conse IfEnd   ;"
-				"      -> define Var Val                ;"
-				"      -> quote Expr0                   ;"
-				"      -> begin Exprs                   ;"
-				"      -> lambda LArgs LBody            ;"
-				"      -> set! Var Val                  ;"
-				"      -> Op OpArgs          : op_begin ;"
+				"Expr1 -> Const                       ;"
+				"      -> IfBeg Pred Ante Conse IfEnd ;"
+				"      -> define Var Val              ;"
+				"      -> quote Expr0                 ;"
+				"      -> begin Exprs                 ;"
+				"      -> lambda LArgs LBody          ;"
+				"      -> set! Var Val                ;"
+				"      -> Op OpArgs                   ;"
 
 				"Exprs -> Expr0 Exprs ;"
 				"      -> empty       ;"
 
 				"IfBeg -> if               ;"
 				"IfEnd -> empty : if_end   ;"
-				"Pred  -> Expr0            ;"
+				"Pred  -> Expr0 : if_pred  ;"
 				"Ante  -> Expr0 : if_ante  ;"
 				"Conse -> Expr0 : if_conse ;"
 
@@ -109,14 +109,15 @@ namespace scheme {
 				"LArgs -> Expr0 ;"
 				"LBody -> Expr0 ;"
 
-				"Op     -> identifier   : op_lookup   ;"
-				"       -> +            : op_add      ;"
-				"       -> *            : op_multiply ;"
-				"       -> \\-          : op_subtract ;"
-				"       -> /            : op_divide   ;"
-				"OpArgs -> OpArg OpArgs               ;"
-				"       -> empty        : op_end      ;"
-				"OpArg  -> Expr0        : op_arg      ;"
+				"Op -> identifier : op_lookup ;"
+				"   -> \\=        : op_lookup ;"
+				"   -> +          : op_lookup ;"
+				"   -> *          : op_lookup ;"
+				"   -> \\-        : op_lookup ;"
+				"   -> /          : op_lookup ;"
+
+				"OpArgs -> Expr0 OpArgs             ;"
+				"       -> empty        : op_return ;"
 		);}
 
 		nik_ces auto map = cctmp::table
@@ -147,6 +148,7 @@ namespace scheme {
 
 			sxt_pair( "("   , Token::l_expr   ),
 			sxt_pair( ")"   , Token::r_expr   ),
+			sxt_pair( "\\=" , Token::equal    ),
 			sxt_pair( "+"   , Token::add      ),
 			sxt_pair( "*"   , Token::multiply ),
 			sxt_pair( "\\-" , Token::subtract ),
@@ -176,20 +178,15 @@ namespace scheme {
 
 			// if:
 
+				sxa_pair( "if_pred"  , ActName::if_pred  ),
 				sxa_pair( "if_ante"  , ActName::if_ante  ),
 				sxa_pair( "if_conse" , ActName::if_conse ),
 				sxa_pair( "if_end"   , ActName::if_end   ),
 
 			// op:
 
-				sxa_pair( "op_begin"    , ActName::op_begin    ),
-				sxa_pair( "op_end"      , ActName::op_end      ),
-				sxa_pair( "op_lookup"   , ActName::op_lookup   ),
-				sxa_pair( "op_add"      , ActName::op_add      ),
-				sxa_pair( "op_multiply" , ActName::op_multiply ),
-				sxa_pair( "op_subtract" , ActName::op_subtract ),
-				sxa_pair( "op_divide"   , ActName::op_divide   ),
-				sxa_pair( "op_arg"      , ActName::op_arg      )
+				sxa_pair( "op_lookup" , ActName::op_lookup ),
+				sxa_pair( "op_return" , ActName::op_return )
 		);
 	};
 

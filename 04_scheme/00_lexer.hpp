@@ -120,6 +120,7 @@ namespace scheme {
 
 				l_expr     ,
 				r_expr     ,
+				equal      ,
 				add        ,
 				multiply   ,
 				subtract   ,
@@ -148,6 +149,7 @@ namespace scheme {
 
 				l_paren     ,
 				r_paren     ,
+				equal       ,
 				plus        ,
 				star        ,
 				minus       ,
@@ -171,6 +173,7 @@ namespace scheme {
 
 				cctmp::pair( l_paren       , Token::l_expr      ),
 				cctmp::pair( r_paren       , Token::r_expr      ),
+				cctmp::pair( equal         , Token::equal       ),
 				cctmp::pair( plus          , Token::add         ),
 				cctmp::pair( star          , Token::multiply    ),
 				cctmp::pair( minus         , Token::subtract    ),
@@ -192,6 +195,7 @@ namespace scheme {
 
 				l_paren     ,
 				r_paren     ,
+				equal       ,
 				plus        ,
 				star        ,
 				minus       ,
@@ -212,6 +216,7 @@ namespace scheme {
 
 				cctmp::pair( '('  , Charset::l_paren     ),
 				cctmp::pair( ')'  , Charset::r_paren     ),
+				cctmp::pair( '='  , Charset::equal       ),
 				cctmp::pair( '+'  , Charset::plus        ),
 				cctmp::pair( '*'  , Charset::star        ),
 				cctmp::pair( '-'  , Charset::minus       ),
@@ -238,6 +243,7 @@ namespace scheme {
 			table[ State::initial   ][ Charset::quote       ] = State::l_quote;
 			table[ State::initial   ][ Charset::l_paren     ] = State::l_paren;
 			table[ State::initial   ][ Charset::r_paren     ] = State::r_paren;
+			table[ State::initial   ][ Charset::equal       ] = State::equal;
 			table[ State::initial   ][ Charset::plus        ] = State::plus;
 			table[ State::initial   ][ Charset::star        ] = State::star;
 			table[ State::initial   ][ Charset::minus       ] = State::minus;
