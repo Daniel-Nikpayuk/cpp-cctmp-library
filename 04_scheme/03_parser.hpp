@@ -69,21 +69,22 @@ namespace scheme {
 
 				"Start -> DefBeg define ( DefName DefArgs ) Expr0 DefEnd ;"
 
-				"DefBeg  -> (              : define_begin ;"
-				"DefEnd  -> )              : define_end   ;"
-				"DefName -> identifier     : define_name  ;"
-				"DefArgs -> DefArg DefArgs                ;"
-				"        -> empty                         ;"
-				"DefArg  -> identifier     : define_arg   ;"
+				"DefBeg  -> (          : define_begin ;"
+				"DefEnd  -> )          : define_end   ;"
+				"DefName -> identifier : define_name  ;"
+				"DefArgs -> DefArg DefArgs            ;"
+				"        -> empty                     ;"
+				"DefArg  -> identifier : define_arg   ;"
 
-				"Const -> boolean   : return_boolean   ;"
-				"      -> number    : return_number    ;"
-				"      -> character : return_character ;"
-				"      -> string    : return_string    ;"
+				"Const  -> boolean    : return_boolean   ;"
+				"       -> number     : return_number    ;"
+				"       -> character  : return_character ;"
+				"       -> string     : return_string    ;"
+				"Lookup -> identifier : return_lookup    ;"
 
-				"Expr0 -> Const                      ;"
-				"      -> identifier : return_lookup ;"
-				"      -> ( Expr1 )                  ;"
+				"Expr0 -> Const     ;"
+				"      -> Lookup    ;"
+				"      -> ( Expr1 ) ;"
 
 				"Expr1 -> Const                       ;"
 				"      -> IfBeg Pred Ante Conse IfEnd ;"
@@ -97,11 +98,15 @@ namespace scheme {
 				"Exprs -> Expr0 Exprs ;"
 				"      -> empty       ;"
 
-				"IfBeg -> if               ;"
-				"IfEnd -> empty : if_end   ;"
-				"Pred  -> Expr0 : if_pred  ;"
-				"Ante  -> Expr0 : if_ante  ;"
-				"Conse -> Expr0 : if_conse ;"
+				"IfBeg   -> if                    ;"
+				"IfEnd   -> empty : if_end        ;"
+				"Pred    -> Const                 ;"
+				"        -> Lookup                ;"
+				"        -> PredBeg Expr1 PredEnd ;"
+				"PredBeg -> (                     ;"
+				"PredEnd -> )     : pred_end      ;"
+				"Ante    -> Expr0 : if_ante       ;"
+				"Conse   -> Expr0 : if_conse      ;"
 
 				"Var -> identifier ;"
 				"Val -> Expr0      ;"
@@ -111,13 +116,17 @@ namespace scheme {
 
 				"Op -> identifier : op_lookup ;"
 				"   -> \\=        : op_lookup ;"
+				"   -> <          : op_lookup ;"
+				"   -> <\\=       : op_lookup ;"
+				"   -> \\>        : op_lookup ;"
+				"   -> \\>\\=     : op_lookup ;"
 				"   -> +          : op_lookup ;"
 				"   -> *          : op_lookup ;"
 				"   -> \\-        : op_lookup ;"
 				"   -> /          : op_lookup ;"
 
-				"OpArgs -> Expr0 OpArgs             ;"
-				"       -> empty        : op_return ;"
+				"OpArgs -> Expr0 OpArgs      ;"
+				"       -> empty : op_return ;"
 		);}
 
 		nik_ces auto map = cctmp::table
@@ -146,13 +155,17 @@ namespace scheme {
 			sxt_pair( "eq?"    , Token::eq_      ),
 			sxt_pair( "set!"   , Token::mu_table ),
 
-			sxt_pair( "("   , Token::l_expr   ),
-			sxt_pair( ")"   , Token::r_expr   ),
-			sxt_pair( "\\=" , Token::equal    ),
-			sxt_pair( "+"   , Token::add      ),
-			sxt_pair( "*"   , Token::multiply ),
-			sxt_pair( "\\-" , Token::subtract ),
-			sxt_pair( "/"   , Token::divide   ),
+			sxt_pair( "("      , Token::l_expr     ),
+			sxt_pair( ")"      , Token::r_expr     ),
+			sxt_pair( "\\="    , Token::equal      ),
+			sxt_pair( "<"      , Token::compare_lt ),
+			sxt_pair( "<\\="   , Token::compare_le ),
+			sxt_pair( "\\>"    , Token::compare_gt ),
+			sxt_pair( "\\>\\=" , Token::compare_ge ),
+			sxt_pair( "+"      , Token::add        ),
+			sxt_pair( "*"      , Token::multiply   ),
+			sxt_pair( "\\-"    , Token::subtract   ),
+			sxt_pair( "/"      , Token::divide     ),
 
 			sxt_pair( "empty" , Token::empty )
 		);
@@ -178,10 +191,13 @@ namespace scheme {
 
 			// if:
 
-				sxa_pair( "if_pred"  , ActName::if_pred  ),
 				sxa_pair( "if_ante"  , ActName::if_ante  ),
 				sxa_pair( "if_conse" , ActName::if_conse ),
 				sxa_pair( "if_end"   , ActName::if_end   ),
+
+			// pred:
+
+				sxa_pair( "pred_end" , ActName::pred_end ),
 
 			// op:
 

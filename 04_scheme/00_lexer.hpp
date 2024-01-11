@@ -121,6 +121,10 @@ namespace scheme {
 				l_expr     ,
 				r_expr     ,
 				equal      ,
+				compare_lt ,
+				compare_le ,
+				compare_gt ,
+				compare_ge ,
 				add        ,
 				multiply   ,
 				subtract   ,
@@ -150,6 +154,10 @@ namespace scheme {
 				l_paren     ,
 				r_paren     ,
 				equal       ,
+				compare_lt  ,
+				compare_le  ,
+				compare_gt  ,
+				compare_ge  ,
 				plus        ,
 				star        ,
 				minus       ,
@@ -174,6 +182,10 @@ namespace scheme {
 				cctmp::pair( l_paren       , Token::l_expr      ),
 				cctmp::pair( r_paren       , Token::r_expr      ),
 				cctmp::pair( equal         , Token::equal       ),
+				cctmp::pair( compare_lt    , Token::compare_lt  ),
+				cctmp::pair( compare_le    , Token::compare_le  ),
+				cctmp::pair( compare_gt    , Token::compare_gt  ),
+				cctmp::pair( compare_ge    , Token::compare_ge  ),
 				cctmp::pair( plus          , Token::add         ),
 				cctmp::pair( star          , Token::multiply    ),
 				cctmp::pair( minus         , Token::subtract    ),
@@ -196,6 +208,8 @@ namespace scheme {
 				l_paren     ,
 				r_paren     ,
 				equal       ,
+				l_angle     ,
+				r_angle     ,
 				plus        ,
 				star        ,
 				minus       ,
@@ -217,6 +231,8 @@ namespace scheme {
 				cctmp::pair( '('  , Charset::l_paren     ),
 				cctmp::pair( ')'  , Charset::r_paren     ),
 				cctmp::pair( '='  , Charset::equal       ),
+				cctmp::pair( '<'  , Charset::l_angle     ),
+				cctmp::pair( '>'  , Charset::r_angle     ),
 				cctmp::pair( '+'  , Charset::plus        ),
 				cctmp::pair( '*'  , Charset::star        ),
 				cctmp::pair( '-'  , Charset::minus       ),
@@ -237,33 +253,39 @@ namespace scheme {
 
 		nik_ce T_scheme_dftt() : table{}
 		{
-			table[ State::initial   ][ Charset::ula         ] = State::ulan;
-			table[ State::initial   ][ Charset::octothorpe  ] = State::hash;
-			table[ State::initial   ][ Charset::digit       ] = State::numeral;
-			table[ State::initial   ][ Charset::quote       ] = State::l_quote;
-			table[ State::initial   ][ Charset::l_paren     ] = State::l_paren;
-			table[ State::initial   ][ Charset::r_paren     ] = State::r_paren;
-			table[ State::initial   ][ Charset::equal       ] = State::equal;
-			table[ State::initial   ][ Charset::plus        ] = State::plus;
-			table[ State::initial   ][ Charset::star        ] = State::star;
-			table[ State::initial   ][ Charset::minus       ] = State::minus;
-			table[ State::initial   ][ Charset::slash       ] = State::slash;
+			table[ State::initial    ][ Charset::ula         ] = State::ulan;
+			table[ State::initial    ][ Charset::octothorpe  ] = State::hash;
+			table[ State::initial    ][ Charset::digit       ] = State::numeral;
+			table[ State::initial    ][ Charset::quote       ] = State::l_quote;
+			table[ State::initial    ][ Charset::l_paren     ] = State::l_paren;
+			table[ State::initial    ][ Charset::r_paren     ] = State::r_paren;
+			table[ State::initial    ][ Charset::equal       ] = State::equal;
+			table[ State::initial    ][ Charset::l_angle     ] = State::compare_lt;
+			table[ State::initial    ][ Charset::r_angle     ] = State::compare_gt;
+			table[ State::initial    ][ Charset::plus        ] = State::plus;
+			table[ State::initial    ][ Charset::star        ] = State::star;
+			table[ State::initial    ][ Charset::minus       ] = State::minus;
+			table[ State::initial    ][ Charset::slash       ] = State::slash;
 
-			table[ State::ulan      ][ Charset::ula         ] = State::ulan;
-			table[ State::ulan      ][ Charset::digit       ] = State::ulan;
-			table[ State::ulan      ][ Charset::minus       ] = State::ulan;
-			table[ State::ulan      ][ Charset::question    ] = State::question;
-			table[ State::ulan      ][ Charset::punctuation ] = State::punctuation;
+			table[ State::ulan       ][ Charset::ula         ] = State::ulan;
+			table[ State::ulan       ][ Charset::digit       ] = State::ulan;
+			table[ State::ulan       ][ Charset::minus       ] = State::ulan;
+			table[ State::ulan       ][ Charset::question    ] = State::question;
+			table[ State::ulan       ][ Charset::punctuation ] = State::punctuation;
 
-			table[ State::hash      ][ Charset::ula         ] = State::boolean;
+			table[ State::hash       ][ Charset::ula         ] = State::boolean;
 
-			table[ State::numeral   ][ Charset::digit       ] = State::numeral;
+			table[ State::numeral    ][ Charset::digit       ] = State::numeral;
 
-			table[ State::l_quote   ][ Charset::ula         ] = State::character;
+			table[ State::l_quote    ][ Charset::ula         ] = State::character;
 
-			table[ State::character ][ Charset::ula         ] = State::string;
+			table[ State::character  ][ Charset::ula         ] = State::string;
 
-			table[ State::string    ][ Charset::ula         ] = State::string;
+			table[ State::string     ][ Charset::ula         ] = State::string;
+
+			table[ State::compare_lt ][ Charset::equal       ] = State::compare_le;
+
+			table[ State::compare_gt ][ Charset::equal       ] = State::compare_ge;
 
 			// generator::T_generic_lexer_tt::set_backslash_entries<State, Charset>(table);
 		}

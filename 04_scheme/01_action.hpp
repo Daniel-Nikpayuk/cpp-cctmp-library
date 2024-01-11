@@ -142,10 +142,13 @@ namespace scheme {
 
 			// if:
 
-				if_pred,
 				if_ante,
 				if_conse,
 				if_end,
+
+			// pred:
+
+				pred_end,
 
 			// op:
 
@@ -317,16 +320,6 @@ namespace scheme {
 
 // if:
 
-	// pred:
-
-		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::if_pred, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-				{ t->is_test = true; }
-		};
-
 	// ante:
 
 		template<auto... filler>
@@ -334,10 +327,7 @@ namespace scheme {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-			{
-				t->is_test = false;
-				t->template assembly_action<AAN::invert, AAT::begin>();
-			}
+				{ t->template assembly_action<AAN::invert, AAT::begin>(); }
 		};
 
 	// conse:
@@ -371,6 +361,29 @@ namespace scheme {
 
 /***********************************************************************************************************************/
 
+// pred:
+
+	// end:
+
+		template<auto... filler>
+		struct T_scheme_translation_action<SAAN::pred_end, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				if (t->ret_policy == AT::back)
+				{
+					auto contr_pos = t->contr.current();
+					auto instr_pos = cctmp::Instr::note;
+					auto value     = AT::first;
+
+					t->contr.set_instr_value(contr_pos, instr_pos, value);
+				}
+			}
+		};
+
+/***********************************************************************************************************************/
+
 // op:
 
 	// lookup:
@@ -384,7 +397,6 @@ namespace scheme {
 				auto str    = l->left_cselect();
 				auto record = t->lookup_variable(str);
 				auto pound  = (record.v0 && t->model.is_compound(record.v1));
-			//	auto pound  = cctmp::apply<cctmp::_subarray_same_<>>(str, cctmp::strlit_type{"factorial"});
 				auto policy = t->ret_policy;
 
 				t->ret_policy = AT::back;
@@ -406,10 +418,9 @@ namespace scheme {
 				auto pop    = t->call.pop();
 				auto name   = pop[0] ? AN::bind : AN::apply;
 				auto drop   = pop[1];
-				auto revert = pop[2];
-				auto policy = t->is_test ? AT::first : revert;
+				auto policy = pop[2];
 
-				t->ret_policy = revert;
+				t->ret_policy = policy;
 				t->arg_size   = drop + (policy == AT::back);
 				t->template machine_action<MAN::push, MAT::instr>(AN::arg , AT::select, drop);
 				t->template machine_action<MAN::push, MAT::instr>(name    , policy);

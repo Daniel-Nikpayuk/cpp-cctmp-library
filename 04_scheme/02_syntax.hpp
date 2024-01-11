@@ -98,14 +98,12 @@ namespace scheme {
 		size_type arg_size;
 		size_type ret_policy;
 		bool is_pound;
-		bool is_test;
 
 		nik_ce T_scheme_ast() :
 
 			contr{src_at, str_at, env_at},
 			model{src}, cur_env{model.null_env()},
-			arg_size{1}, ret_policy{AT::first},
-			is_pound{false}, is_test{false}
+			arg_size{1}, ret_policy{AT::first}, is_pound{false}
 
 			{ initialize(); }
 

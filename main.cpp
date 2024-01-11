@@ -131,18 +131,25 @@
 	{
 		return source
 	        (
-			"(define (factorial n)         "
-			"  (if (= n 0)                 "
-			"    1                         "
-			"    (* n (factorial (- n 1))) "
-			"  )                           "
-			")                             "
+			"(define (fib n)                     "
+			"  (if (< n 2)                       "
+			"    1                               "
+			"    (+ (fib (- n 1)) (fib (- n 2))) "
+			"  )                                 "
+			")                                   "
 		);
 	}
 
 	template<typename T, typename... Ts>
 	constexpr auto scheme_test_func(Ts... vs)
 		{ return scheme::scheme_apply<_scheme_test_func, null_env, T>(vs...); }
+
+		//	"(define (factorial n)         "
+		//	"  (if (= n 0)                 "
+		//	"    1                         "
+		//	"    (* n (factorial (- n 1))) "
+		//	"  )                           "
+		//	")                             "
 
 /***********************************************************************************************************************/
 
