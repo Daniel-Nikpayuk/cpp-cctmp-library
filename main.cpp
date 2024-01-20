@@ -23,12 +23,12 @@
 #define NIK_PARSER_GENERATOR_PARSER_OBJ       "../object/00_parser_generator_parser.hpp"
 #define NIK_CHORD_ASSEMBLY_SCANNER_PARSER_OBJ "../object/01_chord_assembly_scanner.hpp"
 #define NIK_CHORD_ASSEMBLY_PARSER_OBJ         "../object/02_chord_assembly_parser.hpp"
-#define NIK_SCHEME_PARSER_OBJ                 "../object/03_scheme_parser.hpp"
+#define NIK_HUSTLE_PARSER_OBJ                 "../object/03_hustle_parser.hpp"
 
 //#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
 //#define NIK_CHORD_ASSEMBLY_SCANNER_PARSER
 //#define NIK_CHORD_ASSEMBLY_PARSER
-//#define NIK_SCHEME_PARSER
+//#define NIK_HUSTLE_PARSER
 
 /***********************************************************************************************************************/
 
@@ -47,10 +47,8 @@
 #include"01_machine/00_control.hpp"
 #include"01_machine/01_literal_state.hpp"
 #include"01_machine/02_literal_action.hpp"
-#include"01_machine/03_chain_state.hpp"
-#include"01_machine/04_chain_action.hpp"
-#include"01_machine/05_assembly_state.hpp"
-#include"01_machine/06_assembly_action.hpp"
+#include"01_machine/03_assembly_state.hpp"
+#include"01_machine/04_assembly_action.hpp"
 
 #include"02_generator/00_ll_lexer.hpp"
 #include"02_generator/01_ll_syntax.hpp"
@@ -65,11 +63,11 @@
 //#include"03_chord/05_parser.hpp"
 //#include"03_chord/06_metapiler.hpp"
 
-#include"04_scheme/00_lexer.hpp"
-#include"04_scheme/01_action.hpp"
-#include"04_scheme/02_syntax.hpp"
-#include"04_scheme/03_parser.hpp"
-#include"04_scheme/04_metapiler.hpp"
+#include"04_hustle/00_lexer.hpp"
+#include"04_hustle/01_action.hpp"
+#include"04_hustle/02_syntax.hpp"
+#include"04_hustle/03_parser.hpp"
+#include"04_hustle/04_metapiler.hpp"
 
 //#include"05_math/00_byte_ring.hpp"
 //#include"05_math/01_byte_array_ring.hpp"
@@ -125,47 +123,82 @@
 
 /***********************************************************************************************************************/
 
-// scheme:
+		//	"(define (factorial (type 0) n) "
+		//	"  (if (= n 0)                  "
+		//	"    1                          "
+		//	"    (* n (factorial (- n 1)))  "
+		//	"  )                            "
+		//	")                              "
 
-	constexpr auto _scheme_test_func()
+		//	"(define (fib (type 0) n)            "
+		//	"  (if (< n 2)                       "
+		//	"    1                               "
+		//	"    (+ (fib (- n 1)) (fib (- n 2))) "
+		//	"  )                                 "
+		//	")                                   "
+
+		//	"(define (main n)                 "
+		//	"  (define (sq (type 0) m) * m m) "
+		//	"  (sq n)                         "
+		//	")                                "
+
+/***********************************************************************************************************************/
+
+// hustle:
+
+	constexpr auto _hustle_test_func()
 	{
 		return source
 	        (
-			"(define (fib n)                     "
-			"  (if (< n 2)                       "
-			"    1                               "
-			"    (+ (fib (- n 1)) (fib (- n 2))) "
-			"  )                                 "
-			")                                   "
+			"(define (factorial (type 0) n) "
+			"  (if (= n 0)                  "
+			"    1                          "
+			"    (* n (factorial (- n 1)))  "
+			"  )                            "
+			")                              "
 		);
 	}
 
-	template<typename T, typename... Ts>
-	constexpr auto scheme_test_func(Ts... vs)
-		{ return scheme::scheme_apply<_scheme_test_func, null_env, T>(vs...); }
+	template<typename... OutTs>
+	struct hustle_test_op
+	{
+		constexpr static auto OutUs = U_pack_Ts<OutTs...>;
 
-		//	"(define (factorial n)         "
-		//	"  (if (= n 0)                 "
-		//	"    1                         "
-		//	"    (* n (factorial (- n 1))) "
-		//	"  )                           "
-		//	")                             "
+		template<typename... Ts>
+		constexpr static auto result(Ts... vs)
+			{ return hustle::hustle_apply<_hustle_test_func, null_env, OutUs>(vs...); }
+	};
 
 /***********************************************************************************************************************/
 
 //	using chord_grammar			= chord::T_chord_assembly_scanner_grammar;
 //	using chord_grammar			= chord::T_chord_assembly_grammar;
 //	constexpr auto static_grammar		= U_store_T<chord_grammar>;
-//	constexpr auto static_contr		= scheme::metapile<_scheme_test_func, null_env>;
+//	constexpr auto static_contr		= hustle::metapile<_hustle_test_func, null_env>;
+
+/***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		printf("%d\n", scheme_test_func<int>(main_at(0, argc, argv)));
+	//	printf("%d\n", hustle_test_op<gindex_type>::result(gindex_type{5}));//main_at(0, argc, argv)));
 
-	//	constexpr auto k = member_value_U<static_strs>.citerate().find(strlit_type{"two"});
-	//	constexpr auto n = k.left_size();
+	//	auto & contr = member_value_U<static_contr>;
 
-	//	printf("%d\n", member_value_U<static_vals>.template cvalue<n>());
+	//	for (auto k = 0; k != contr.size(); ++k)
+	//	{
+	//		auto s = (k < 10) ? "  " : (k < 100) ? " " : "";
+	//		printf("line %s%d -", s, k);
+
+	//		for (auto j = 0; j != Instr::dimension; ++j)
+	//		{
+	//			auto v = contr[k][j];
+	//			auto t = (v < 10) ? "  " : (v < 100) ? " " : "";
+
+	//			printf(" %s%d", t, v);
+	//		}
+
+	//		printf("\n");
+	//	}
 
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};
 	//	tr_table_printer.print_num_tr_table();

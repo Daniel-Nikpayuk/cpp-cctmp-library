@@ -267,6 +267,10 @@ namespace generator {
 			using cselector_ctype_ptr	= cselector_ctype*;
 			using cselector_ctype_cptr	= cselector_ctype_ptr const;
 
+		protected:
+
+			nik_ces auto _to_number_	= cctmp::_string_to_number_<U_store_T<size_type>>;
+
 		public:
 
 			token_type token;
@@ -334,18 +338,7 @@ namespace generator {
 			}
 
 			nik_ce csize_type to_number() const
-			{
-				size_type num = 0;
-				auto k        = base::current;
-
-				for (size_type dig = 0, exp = 1; k != base::start; exp *= 10)
-				{
-					dig  = (*--k) - '0';
-					num += dig * exp;
-				}
-
-				return num;
-			}
+				{ return cctmp::apply<_to_number_>(base::start, base::current); }
 	};
 
 	using lexeme  = T_lexeme<gchar_type>;

@@ -19,7 +19,7 @@
 
 // assembly action:
 
-namespace scheme {
+namespace hustle {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -44,13 +44,6 @@ namespace scheme {
 		using LAN					= machine::LAN;
 		using LAT					= machine::LAT;
 
-	// chain:
-
-		using CN					= machine::CN;
-		using CT					= machine::CT;
-		using CAN					= machine::CAN;
-		using CAT					= machine::CAT;
-
 	// assembly:
 
 		using AN					= machine::AN;
@@ -68,7 +61,7 @@ namespace scheme {
 
 // subsource:
 
-	struct T_scheme_subsource
+	struct T_hustle_subsource
 	{
 		nik_ces auto value			= cctmp::string_literal
 							{
@@ -105,21 +98,21 @@ namespace scheme {
 		nik_ces gindex_type divide_finish	= value.size() - (divide_start + divide_size);
 		nik_ces auto divide_cselect		= value.cselect(divide_start, divide_finish);
 
-	}; nik_ce auto _scheme_subsource_ = U_store_T<T_scheme_subsource>;
+	}; nik_ce auto _hustle_subsource_ = U_store_T<T_hustle_subsource>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // translation action:
 
-	template<action_type, auto...> struct T_scheme_translation_action;
+	template<action_type, auto...> struct T_hustle_translation_action;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // name:
 
-	struct SchemeAssemblyActionName
+	struct HustleAssemblyActionName
 	{
 		enum : action_type
 		{
@@ -131,6 +124,11 @@ namespace scheme {
 				define_end,
 				define_name,
 				define_arg,
+
+			// type:
+
+				type_number,
+				type_zero,
 
 			// return:
 
@@ -160,7 +158,7 @@ namespace scheme {
 				dimension
 		};
 
-	}; using SAAN = SchemeAssemblyActionName;
+	}; using HAAN = HustleAssemblyActionName;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -172,18 +170,18 @@ namespace scheme {
 // interface:
 
 	template<typename AST>
-	struct T_scheme_ta :
-		public generator::T_generic_translation_action<T_scheme_translation_action, AST, SAAN>
+	struct T_hustle_ta :
+		public generator::T_generic_translation_action<T_hustle_translation_action, AST, HAAN>
 			{ };
 
 	// interface:
 
 		template<typename AST>
-		struct T_scheme_action
+		struct T_hustle_action
 		{
 			using T_ast		= AST;
 
-			nik_ces auto value	= T_scheme_ta<AST>{};
+			nik_ces auto value	= T_hustle_ta<AST>{};
 			using type		= decltype(value);
 		};
 
@@ -193,7 +191,7 @@ namespace scheme {
 // nop:
 
 	template<auto... filler>
-	struct T_scheme_translation_action<SAAN::nop, filler...>
+	struct T_hustle_translation_action<HAAN::nop, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l) { }
@@ -207,22 +205,23 @@ namespace scheme {
 	// begin:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::define_begin, filler...>
+		struct T_hustle_translation_action<HAAN::define_begin, filler...>
 		{
 			nik_ces auto pad_size = 1;
 
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->template assembly_action<AAN::id, AAT::begin>();
-				t->template assembly_action<AAN::pad, AAT::id>(pad_size, AT::front);
+				t->template assembly_action< AAN::id   , AAT::begin >();
+				t->template  machine_action< MAN::push , MAT::instr >(AN::arg, AT::push);
+				t->template assembly_action< AAN::pad  , AAT::id    >(pad_size, AT::front);
 			}
 		};
 
 	// end:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::define_end, filler...>
+		struct T_hustle_translation_action<HAAN::define_end, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
@@ -232,22 +231,24 @@ namespace scheme {
 	// name:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::define_name, filler...>
+		struct T_hustle_translation_action<HAAN::define_name, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
 				using pound_var_type = typename AST::pound_var_type;
 
-				auto val = pound_var_type{0};
-				t->model.define_compound(l->left_cselect(), val, t->cur_env);
+				auto ins  = 0;
+				auto left = t->arg_size;
+				auto val  = pound_var_type(ins, left);
+				t->entry  = t->model.define_compound(l->left_cselect(), val, t->cur_env);
 			}
 		};
 
 	// arg:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::define_arg, filler...>
+		struct T_hustle_translation_action<HAAN::define_arg, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
@@ -256,6 +257,38 @@ namespace scheme {
 
 				auto val = arg_var_type{t->arg_size++};
 				t->model.define_variable(l->left_cselect(), val, t->cur_env);
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// type:
+
+	// number:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::type_number, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				using Compound = typename AST::pound_var_type::Compound;
+
+				t->model.set_value(t->entry, Compound::typ_at, l->to_number());
+			}
+		};
+
+	// zero:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::type_zero, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				using Compound = typename AST::pound_var_type::Compound;
+
+				t->model.set_value(t->entry, Compound::typ_at, 0);
 			}
 		};
 
@@ -282,31 +315,31 @@ namespace scheme {
 	// boolean:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::return_boolean, filler...> :
+		struct T_hustle_translation_action<HAAN::return_boolean, filler...> :
 			public T_literal_return_action<LT::boolean> { };
 
 	// number:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::return_number, filler...> :
+		struct T_hustle_translation_action<HAAN::return_number, filler...> :
 			public T_literal_return_action<LT::number> { };
 
 	// character:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::return_character, filler...> :
+		struct T_hustle_translation_action<HAAN::return_character, filler...> :
 			public T_literal_return_action<LT::character> { };
 
 	// string:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::return_string, filler...> :
+		struct T_hustle_translation_action<HAAN::return_string, filler...> :
 			public T_literal_return_action<LT::string> { };
 
 	// lookup:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::return_lookup, filler...>
+		struct T_hustle_translation_action<HAAN::return_lookup, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
@@ -323,7 +356,7 @@ namespace scheme {
 	// ante:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::if_ante, filler...>
+		struct T_hustle_translation_action<HAAN::if_ante, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
@@ -333,7 +366,7 @@ namespace scheme {
 	// conse:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::if_conse, filler...>
+		struct T_hustle_translation_action<HAAN::if_conse, filler...>
 		{
 			nik_ces auto offset = 1;
 
@@ -348,15 +381,11 @@ namespace scheme {
 	// end:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::if_end, filler...>
+		struct T_hustle_translation_action<HAAN::if_end, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-			{
-				using Instr  = cctmp::Instr;
-				using Policy = typename AST::contr_type::Policy;
-				t->template assembly_action<AAN::go_to, AAT::end>();
-			}
+				{ t->template assembly_action<AAN::go_to, AAT::end>(); }
 		};
 
 /***********************************************************************************************************************/
@@ -366,19 +395,16 @@ namespace scheme {
 	// end:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::pred_end, filler...>
+		struct T_hustle_translation_action<HAAN::pred_end, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				if (t->ret_policy == AT::back)
-				{
-					auto contr_pos = t->contr.current();
-					auto instr_pos = cctmp::Instr::note;
-					auto value     = AT::first;
+				auto contr_pos = t->contr.current();
+				auto instr_pos = cctmp::Instr::note;
+				auto value     = AT::first;
 
-					t->contr.set_instr_value(contr_pos, instr_pos, value);
-				}
+				t->contr.set_instr_value(contr_pos, instr_pos, value);
 			}
 		};
 
@@ -389,16 +415,19 @@ namespace scheme {
 	// lookup:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::op_lookup, filler...>
+		struct T_hustle_translation_action<HAAN::op_lookup, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
 				auto str    = l->left_cselect();
 				auto record = t->lookup_variable(str);
-				auto pound  = (record.v0 && t->model.is_compound(record.v1));
+				auto match  = record.v0;
+				auto entry  = record.v1;
+				auto pound  = (match && t->model.is_compound(entry));
 				auto policy = t->ret_policy;
 
+				t->entry      = entry;
 				t->ret_policy = AT::back;
 				t->call.push(pound, t->arg_size++, policy);
 				t->lookup_variable_action(str, record, t->ret_policy);
@@ -408,22 +437,26 @@ namespace scheme {
 	// return:
 
 		template<auto... filler>
-		struct T_scheme_translation_action<SAAN::op_return, filler...>
+		struct T_hustle_translation_action<HAAN::op_return, filler...>
 		{
 			using cindex = gindex_type;
 
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
+				using Compound = typename AST::pound_var_type::Compound;
+
 				auto pop    = t->call.pop();
 				auto name   = pop[0] ? AN::bind : AN::apply;
 				auto drop   = pop[1];
 				auto policy = pop[2];
+				auto pos    = t->model.get_value(t->entry, Compound::typ_at);
+				auto num    = 0;
 
 				t->ret_policy = policy;
 				t->arg_size   = drop + (policy == AT::back);
-				t->template machine_action<MAN::push, MAT::instr>(AN::arg , AT::select, drop);
-				t->template machine_action<MAN::push, MAT::instr>(name    , policy);
+				t->template machine_action<MAN::push, MAT::instr>(AN::arg, AT::select, drop);
+				t->template machine_action<MAN::push, MAT::instr>(name, policy, pos, num);
 			}
 		};
 
@@ -431,5 +464,5 @@ namespace scheme {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace scheme
+} // namespace hustle
 

@@ -84,14 +84,16 @@ namespace machine {
 // dispatch:
 
 	template<auto static_contr, auto _index = 0>
-	struct LiteralDispatch : public MachineDispatch<static_contr, LI, _index> { };
-
-	template<auto static_contr, auto _index = 0>
-	using LD = LiteralDispatch<static_contr, _index>;
+	using LD = MachineDispatch<static_contr, LI, _index>;
 
 /***********************************************************************************************************************/
 
 // compound:
+
+	template<auto...> struct T_literal_compound;
+
+	template<auto... Vs>
+	nik_ce auto U_literal_compound = U_store_T<T_literal_compound<Vs...>>;
 
 	template<auto s, auto c>
 	struct T_literal_compound<s, c>
@@ -155,24 +157,19 @@ namespace machine {
 	template<auto... filler>
 	struct T_literal<LN::resolve, LT::number, filler...>
 	{
-		using size_type  = gindex_type;
-		using csize_type = size_type const;
+		using size_type			= gindex_type;
+		using csize_type		= size_type const;
+		nik_ces auto U_size_type	= U_store_T<size_type>;
+		nik_ces auto _to_number_	= cctmp::_string_to_number_<U_size_type>;
 
 		template<NIK_LITERAL_PARAMS(s, c, i), typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
 			auto b = member_value_U<s>.cbegin() + LD<c>::pos(i);
 			auto e = member_value_U<s>.cbegin() + LD<c>::num(i);
+			auto v = cctmp::apply<_to_number_>(b, e);
 
-			size_type num = 0;
-
-			for (size_type dig = 0, exp = 1; e != b; exp *= 10)
-			{
-				dig  = (*--e) - '0';
-				num += dig * exp;
-			}
-
-			return NIK_LITERAL_2TS(s, c, i, csize_type, Ts...)(static_cast<csize_type>(num), vs...);
+			return NIK_LITERAL_2TS(s, c, i, csize_type, Ts...)(v, vs...);
 		}
 	};
 

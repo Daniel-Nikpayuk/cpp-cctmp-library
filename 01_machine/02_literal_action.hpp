@@ -25,6 +25,44 @@ namespace machine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// action:
+
+	template<gkey_type, gkey_type, auto...> struct T_literal_action;
+
+	// syntactic sugar:
+
+		template<auto name, auto note, typename... Ts>
+		nik_ce auto literal_action(Ts... vs) // requires template deduction <>:
+			{ return T_literal_action<name, note>::template result<>(vs...); }
+
+/***********************************************************************************************************************/
+
+// names:
+
+	struct LiteralActionName
+	{
+		enum : gkey_type // convenience for default params.
+			{ identity = 0, id = identity, resolve, dimension };
+
+	}; using LAN = LiteralActionName;
+
+/***********************************************************************************************************************/
+
+// notes:
+
+	struct LiteralActionNote
+	{
+		enum : gkey_type
+		{
+			identity = 0, id = identity, // convenience for default params.
+			dimension
+		};
+
+	}; using LAT = LiteralActionNote;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // space:
 
 /***********************************************************************************************************************/

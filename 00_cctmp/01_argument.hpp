@@ -327,10 +327,12 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			equal          , not_equal             ,	// comparison
-			less_than      , less_than_or_equal    ,
-			greater_than   , greater_than_or_equal ,
-			add , subtract , multiply , divide , modulo ,	// arithmetic
+			equal        , not_equal             ,	// comparison
+			less_than    , less_than_or_equal    ,
+			greater_than , greater_than_or_equal ,
+			add          , subtract              ,
+			multiply     , divide                ,
+			modulo       , from_string           ,	// arithmetic
 			dimension
 		};
 	};
@@ -498,6 +500,31 @@ namespace cctmp {
 			nik_ces auto result(Ts... vs) { return (... % vs); }
 
 		}; nik_ce auto _modulo_ = U_arg_number<ArgNumber::modulo>;
+
+	// from string:
+
+		template<auto U_size_type>
+		struct T_grammar<Shape::argument, Pattern::number, ArgNumber::from_string, U_size_type>
+		{
+			using size_type  = T_store_U<U_size_type>;
+			using csize_type = size_type const;
+
+			template<typename In, typename End>
+			nik_ces size_type result(In in, End end)
+			{
+				size_type num = 0;
+
+				for (size_type dig = 0, exp = 1; end != in; exp *= 10)
+				{
+					dig  = (*--end) - '0';
+					num += dig * exp;
+				}
+
+				return num;
+			}
+
+		}; template<auto U_size_type = U_gindex_type>
+			nik_ce auto _string_to_number_ = U_arg_number<ArgNumber::from_string, U_size_type>;
 
 	// syntactic sugar:
 

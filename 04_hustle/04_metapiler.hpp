@@ -19,7 +19,7 @@
 
 // metapiler:
 
-namespace scheme {
+namespace hustle {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -91,7 +91,7 @@ namespace scheme {
 
 // operator:
 
-	nik_ce auto scheme_operator_frame_callable()
+	nik_ce auto hustle_operator_frame_callable()
 	{
 		return cctmp::frame
 		(
@@ -117,7 +117,7 @@ namespace scheme {
 		);
 	};
 
-	nik_ce auto scheme_operator_frame = _static_callable_<scheme_operator_frame_callable>;
+	nik_ce auto hustle_operator_frame = _static_callable_<hustle_operator_frame_callable>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -128,11 +128,11 @@ namespace scheme {
 
 // p(arser )g(enerator):
 
-	struct T_scheme_pg_static_space
+	struct T_hustle_pg_static_space
 	{
 		// grammar:
 
-			using T_grammar			= T_scheme_grammar;
+			using T_grammar			= T_hustle_grammar;
 			nik_ces auto grammar		= U_store_T<T_grammar>;
 			nik_ces auto source		= _static_callable_<T_grammar::source>;
 
@@ -152,15 +152,15 @@ namespace scheme {
 // interface:
 
 	template<auto static_source, auto env_lookup, auto contr_size, auto stack_size, auto model_size>
-	struct T_scheme_static_space
+	struct T_hustle_static_space
 	{
 		// pg:
 
-			nik_ces auto pg_parsed		= T_scheme_pg_static_space::parsed;
+			nik_ces auto pg_parsed		= T_hustle_pg_static_space::parsed;
 
 		// parsed:
 
-			using T_parsed			= T_scheme_parsed
+			using T_parsed			= T_hustle_parsed
 							<
 								pg_parsed, static_source, env_lookup,
 								contr_size, stack_size, model_size
@@ -171,9 +171,9 @@ namespace scheme {
 	// syntactic sugar:
 
 		template<auto static_source, auto env_lookup, auto contr_size, auto stack_size, auto model_size>
-		nik_ce auto U_scheme_static_space = U_store_T
+		nik_ce auto U_hustle_static_space = U_store_T
 		<
-			T_scheme_static_space<static_source, env_lookup, contr_size, stack_size, model_size>
+			T_hustle_static_space<static_source, env_lookup, contr_size, stack_size, model_size>
 		>;
 
 /***********************************************************************************************************************/
@@ -186,7 +186,7 @@ namespace scheme {
 // contr:
 
 	template<auto space>
-	struct T_scheme_function_static_contr
+	struct T_hustle_function_static_contr
 	{
 		nik_ces auto static_parsed	= T_store_U<space>::parsed;
 		nik_ces auto & parsed		= member_value_U<static_parsed>;
@@ -195,32 +195,7 @@ namespace scheme {
 		using type			= modify_type<_from_reference_, decltype(value)>;
 
 	}; template<auto space>
-		nik_ce auto _scheme_function_contr_ = U_store_T<T_scheme_function_static_contr<space>>;
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<auto...> struct T_scheme_function;
-
-	template<auto space, auto links, auto out_type, auto... Us, nik_vp(cin_types)(T_pack_Vs<Us...>*)>
-	struct T_scheme_function<space, links, out_type, cin_types>
-	{
-		nik_ces auto contr = _scheme_function_contr_<space>;
-		using S            = T_store_U<out_type>;
-
-		template<typename... Ts>
-		nik_ces auto result(Ts... vs)
-		{
-			nik_ce auto in_types = U_pack_Ts<Ts...>;
-
-			return T_assembly_compound<contr, gindex_type{0}>::template result
-			<
-				out_type, links, in_types, T_store_U<Us>...
-
-			>(vs...);
-		}
-	};
+		nik_ce auto _hustle_function_contr_ = U_store_T<T_hustle_function_static_contr<space>>;
 
 /***********************************************************************************************************************/
 
@@ -235,24 +210,24 @@ namespace scheme {
 		auto stack_size =  128,
 		auto model_size = 1024
 	>
-	struct scheme_metapile
+	struct hustle_metapile
 	{
 		nik_ces auto static_pair		= _static_callable_<callable_source>;
 		nik_ces auto static_source		= _static_car_<static_pair>;
 		nik_ces auto static_frame		= _static_cdr_<static_pair>;
 
-		nik_ces auto op_env			= push_<initial_env, scheme_operator_frame>;
+		nik_ces auto op_env			= push_<initial_env, hustle_operator_frame>;
 		nik_ces bool sf_is_empty		= member_value_U<static_frame>.is_empty();
 		nik_ces auto static_env			= stem_<sf_is_empty, op_env, _cons_, H_id, op_env, static_frame>;
 		nik_ces auto static_env_lookup		= unpack_<static_env, _to_list_, H_env_lookup>;
 		nik_ces auto static_env_tuple		= unpack_<static_env, _to_list_, H_env_tuple>;
 
-		nik_ces auto static_space		= U_scheme_static_space
+		nik_ces auto static_space		= U_hustle_static_space
 							<
 								static_source, static_env_lookup,
 								contr_size, stack_size, model_size
 							>;
-		nik_ces auto static_contr		= _scheme_function_contr_<static_space>;
+		nik_ces auto static_contr		= _hustle_function_contr_<static_space>;
 	};
 
 	// syntactic sugar:
@@ -266,7 +241,7 @@ namespace scheme {
 			auto stack_size =  128,
 			auto model_size = 1024
 		>
-		nik_ce auto metapile = scheme_metapile
+		nik_ce auto metapile = hustle_metapile
 		<
 			callable_source, initial_env, contr_size, stack_size, model_size
 
@@ -276,32 +251,22 @@ namespace scheme {
 
 // apply:
 
-	template<auto callable_source, auto initial_env, typename S, typename... Ts>
-	nik_ce auto scheme_apply(Ts... vs)
+	template<auto callable_source, auto initial_env, auto out_types, typename... Ts>
+	nik_ce auto hustle_apply(Ts... vs)
 	{
-		using metapile			= scheme_metapile<callable_source, initial_env>;
+		using metapile		= hustle_metapile<callable_source, initial_env>;
+		nik_ce auto contr	= _hustle_function_contr_<metapile::static_space>;
+		       auto pound	= T_assembly_compound<contr>{};
 
-		nik_ce auto out_type		= U_store_T<S>;
-		nik_ce auto rec_types		= U_pack_Vs<out_type>;
-		nik_ce auto links		= U_pack_Vs
-						<
-							metapile::static_source, _scheme_subsource_,
-							metapile::static_env_tuple, rec_types
-						>;
-		nik_ce auto in_types		= U_pack_Ts<Ts...>;
-		nik_ce auto cin_types		= map_<in_types, _read_only_>;
+		nik_ce auto list	= U_pack_Vs<metapile::static_source, _hustle_subsource_>;
+		nik_ce auto lookup	= metapile::static_env_tuple;
 
-		using T_function		= T_scheme_function
-						<
-							metapile::static_space, links, out_type, cin_types
-						>;
-
-		return T_function::template result<Ts...>(vs...);
+		return pound.template result<list, lookup, out_types, Ts...>(vs...);
 	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace scheme
+} // namespace hustle
 

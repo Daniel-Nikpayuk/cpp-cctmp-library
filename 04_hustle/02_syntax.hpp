@@ -19,7 +19,7 @@
 
 // syntax:
 
-namespace scheme {
+namespace hustle {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -47,8 +47,6 @@ namespace scheme {
 	template<auto... Vs>
 	using T_machine_contr					= machine::T_machine_contr<Vs...>;
 
-	using CI						= machine::CI;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -60,7 +58,7 @@ namespace scheme {
 // interface:
 
 	template<auto static_source, auto static_env_lookup, auto contr_size, auto stack_size, auto model_size>
-	struct T_scheme_ast
+	struct T_hustle_ast
 	{
 		nik_ces auto & src		= member_value_U<static_source>;
 		using src_ptr			= typename member_type_U<static_source>::ctype_cptr;
@@ -86,7 +84,6 @@ namespace scheme {
 		{
 			src_at = 0,
 			str_at,
-			env_at,
 
 			dimension
 		};
@@ -95,15 +92,16 @@ namespace scheme {
 		model_type model;
 		stack_type call; 
 		env_type cur_env;
+		size_type entry;
 		size_type arg_size;
 		size_type ret_policy;
 		bool is_pound;
 
-		nik_ce T_scheme_ast() :
+		nik_ce T_hustle_ast() :
 
-			contr{src_at, str_at, env_at},
+			contr{src_at, str_at},
 			model{src}, cur_env{model.null_env()},
-			arg_size{1}, ret_policy{AT::first}, is_pound{false}
+			entry{}, arg_size{}, ret_policy{AT::first}, is_pound{false}
 
 			{ initialize(); }
 
@@ -117,9 +115,6 @@ namespace scheme {
 
 			template<auto name, auto note, typename... Ts>
 			nik_ce void literal_action(Ts... vs) { machine::literal_action<name, note>(&contr, vs...); }
-
-			template<auto name, auto note, typename... Ts>
-			nik_ce void chain_action(Ts... vs) { machine::chain_action<name, note>(&contr, vs...); }
 
 			template<auto name, auto note, typename... Ts>
 			nik_ce void assembly_action(Ts... vs) { machine::assembly_action<name, note>(&contr, vs...); }
@@ -186,5 +181,5 @@ namespace scheme {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace scheme
+} // namespace hustle
 

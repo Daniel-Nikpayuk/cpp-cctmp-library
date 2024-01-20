@@ -89,7 +89,7 @@ namespace machine {
 
 // entry:
 
-	template<typename SizeType, SizeType Size = 3>
+	template<typename SizeType, SizeType Size = 5>
 	struct T_env_model_entry : public cctmp::T_list_model_entry<SizeType, Size>
 	{
 		using base		= cctmp::T_list_model_entry<SizeType, Size>;
@@ -100,7 +100,7 @@ namespace machine {
 		struct Type     { enum : size_type { constant, variadic, compound, dimension }; };
 		struct Constant { enum : size_type { type = Entry::type, pos, dimension }; };
 		struct Variadic { enum : size_type { type = Entry::type, pos, dimension }; };
-		struct Compound { enum : size_type { type = Entry::type, arity, pos, dimension }; };
+		struct Compound { enum : size_type { type = Entry::type, arity, left, ins_at, typ_at, dimension }; };
 
 		nik_ce T_env_model_entry(csize_type t) : base{t} { }
 	};
@@ -158,8 +158,11 @@ namespace machine {
 		using Type		= typename base::Type;
 		using Compound		= typename base::Compound;
 
-		nik_ce T_env_model_compound(csize_type p) : base{Type::compound}
-			{ base::array[Compound::pos] = p; }
+		nik_ce T_env_model_compound(csize_type p0, csize_type p1) : base{Type::compound}
+		{
+			base::array[Compound::ins_at] = p0;
+			base::array[Compound::left  ] = p1;
+		}
 
 		nik_ce auto size() const { return Compound::dimension; }
 		nik_ce auto cend() const { return base::array + size(); }
@@ -219,6 +222,9 @@ namespace machine {
 		public:
 
 			nik_ce T_env_model(cstrlit_ref s) : base{}, src{s} { }
+
+			nik_ce auto get_value(csize_type p, csize_type n) const { return base::get_value(p, n); }
+			nik_ce void set_value(csize_type p, csize_type n, csize_type v) { base::set_value(p, n, v); }
 
 		protected:
 
@@ -283,8 +289,9 @@ namespace machine {
 				{
 					csize_type value = allocate_binding_value();
 
-					base::set_value(value, Compound::type , val[Compound::type]);
-					base::set_value(value, Compound::pos  , val[Compound::pos]);
+					base::set_value(value, Compound::type   , val[Compound::type]);
+					base::set_value(value, Compound::ins_at , val[Compound::ins_at]);
+					base::set_value(value, Compound::left   , val[Compound::left]);
 
 					return value;
 				}
@@ -327,12 +334,14 @@ namespace machine {
 					set_binding_entry(variable, value, env);
 				}
 
-				nik_ce void define_compound(ccselect_ref var, ccompound_ref val, clist_type env)
+				nik_ce auto define_compound(ccselect_ref var, ccompound_ref val, clist_type env)
 				{
 					auto variable = set_binding_variable(var);
 					auto value    = set_compound_value(val);
 
 					set_binding_entry(variable, value, env);
+
+					return value;
 				}
 
 				template<typename Entry>
@@ -387,12 +396,11 @@ namespace machine {
 
 		cindex src_at;
 		cindex str_at;
-		cindex env_at;
 
 		stack_type stack; 
 
-		nik_ce T_machine_contr(cindex src, cindex str, cindex env) :
-			base{}, src_at{src}, str_at{str}, env_at{env} { }
+		nik_ce T_machine_contr(cindex src, cindex str) :
+			base{}, src_at{src}, str_at{str} { }
 
 		// instr:
 
@@ -465,27 +473,12 @@ namespace machine {
 // action:
 
 	template<gkey_type, gkey_type, auto...> struct T_machine_action;
-	template<gkey_type, gkey_type, auto...> struct T_literal_action;
-	template<gkey_type, gkey_type, auto...> struct T_chain_action;
-	template<gkey_type, gkey_type, auto...> struct T_assembly_action;
 
 	// syntactic sugar:
 
 		template<auto name, auto note, typename... Ts>
 		nik_ce auto machine_action(Ts... vs) // requires template deduction <>:
 			{ return T_machine_action<name, note>::template result<>(vs...); }
-
-		template<auto name, auto note, typename... Ts>
-		nik_ce auto literal_action(Ts... vs) // requires template deduction <>:
-			{ return T_literal_action<name, note>::template result<>(vs...); }
-
-		template<auto name, auto note, typename... Ts>
-		nik_ce auto chain_action(Ts... vs) // requires template deduction <>:
-			{ return T_chain_action<name, note>::template result<>(vs...); }
-
-		template<auto name, auto note, typename... Ts>
-		nik_ce auto assembly_action(Ts... vs) // requires template deduction <>:
-			{ return T_assembly_action<name, note>::template result<>(vs...); }
 
 /***********************************************************************************************************************/
 
@@ -498,47 +491,6 @@ namespace machine {
 
 	}; using MAN = MachineActionName;
 
-	// literal:
-
-		struct LiteralActionName
-		{
-			enum : gkey_type // convenience for default params.
-				{ identity = 0, id = identity, resolve, dimension };
-
-		}; using LAN = LiteralActionName;
-
-	// chain:
-
-		struct ChainActionName
-		{
-			enum : gkey_type
-			{
-				identity = 0, id = identity, // convenience for default params.
-				generic, catN,
-				cat0_x_catN, cat1_x_catN, cat2_x_catN,
-				pull, push, back,
-				arg, list, literal, lookup,
-				apply, eval,
-				dimension
-			};
-
-		}; using CAN = ChainActionName;
-
-	// assembly:
-
-		struct AssemblyActionName
-		{
-			enum : gkey_type
-			{
-				identity = 0, id = identity, // convenience for default params.
-				pad, arg, go_to, branch, invert,
-				apply, eval,
-				literal, lookup,
-				dimension
-			};
-
-		}; using AAN = AssemblyActionName;
-
 /***********************************************************************************************************************/
 
 // notes:
@@ -549,59 +501,6 @@ namespace machine {
 			{ identity = 0, id = identity, instr, jump, call, dimension };
 
 	}; using MAT = MachineActionNote;
-
-	// literal:
-
-		struct LiteralActionNote
-		{
-			enum : gkey_type
-			{
-				identity = 0, id = identity, // convenience for default params.
-				dimension
-			};
-
-		}; using LAT = LiteralActionNote;
-
-	// chain:
-
-		struct ChainActionNote
-		{
-			enum : gkey_type
-			{
-				identity = 0, id = identity, // convenience for default params.
-				arg, list, literal, lookup,
-				begin, end,
-				dimension
-			};
-
-		}; using CAT = ChainActionNote;
-
-	// assembly:
-
-		struct AssemblyActionNote
-		{
-			enum : gkey_type
-			{
-				identity = 0, id = identity, // convenience for default params.
-				replace,
-				begin, end,
-				variable, parameter,
-				dimension
-			};
-
-		}; using AAT = AssemblyActionNote;
-
-/***********************************************************************************************************************/
-
-// compound:
-
-	template<auto...> struct T_literal_compound;
-	template<auto...> struct T_chain_compound;
-	template<auto...> struct T_assembly_compound;
-
-	template<auto... Vs> nik_ce auto U_literal_compound  = U_store_T< T_literal_compound  <Vs...> >;
-	template<auto... Vs> nik_ce auto U_chain_compound    = U_store_T< T_chain_compound    <Vs...> >;
-	template<auto... Vs> nik_ce auto U_assembly_compound = U_store_T< T_assembly_compound <Vs...> >;
 
 /***********************************************************************************************************************/
 

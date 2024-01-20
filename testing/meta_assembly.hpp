@@ -109,3 +109,39 @@
 	// line  64 -   9   1   0   0   1 // apply , first
 	// line  65 -   1   1   0   0   1 // halt  , first
 
+/***********************************************************************************************************************/
+
+	struct T_arg
+	{
+		using CN		= machine::CN;
+		using CT		= machine::CT;
+		using ninstr_type	= gindex_type[5];
+
+		constexpr static ninstr_type value[] =
+		{
+			{ CN::id   , CT::id     , 0 , 0 , 1 },
+			{ CN::arg  , CT::select , 1 , 0 , 1 },
+			{ CN::arg  , CT::drop   , 0 , 0 , 1 },
+			{ CN::halt , CT::first  , 0 , 0 , 1 }
+		};
+
+	}; constexpr auto U_arg = U_store_T<T_arg>;
+
+/***********************************************************************************************************************/
+
+	struct T_val
+	{
+		using CN		= machine::CN;
+		using CT		= machine::CT;
+		using ninstr_type	= gindex_type[5];
+
+		constexpr static ninstr_type value[] =
+		{
+			{ CN::id   , CT::id     , 0 , 0 , 1 },
+			{ CN::list , CT::push   , 9 , 0 , 1 },
+			{ CN::list , CT::select , 0 , 0 , 1 },
+			{ CN::halt , CT::first  , 0 , 0 , 1 }
+		};
+
+	}; constexpr auto U_val = U_store_T<T_val>;
+

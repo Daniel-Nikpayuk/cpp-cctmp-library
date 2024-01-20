@@ -80,6 +80,10 @@ namespace cctmp {
 
 				return static_cast<BasePtr>(this)->v;
 			}
+
+			template<typename... Types>
+			nik_ce auto push(Types... vs) const
+				{ return tuple<Ts..., Types...>{value<Is>()..., vs...}; }
 	};
 
 /***********************************************************************************************************************/
@@ -97,6 +101,8 @@ namespace cctmp {
 
 		public:
 
+			nik_ces auto length() { return sizeof...(Ts); }
+
 			nik_ce tuple() { }
 			nik_ce tuple(Ts... vs) : mi{vs...} { }
 
@@ -112,11 +118,39 @@ namespace cctmp {
 
 				return const_cast<T&>(v);
 			}
+
+			template<typename... Types>
+			nik_ce auto push(Types... vs) const
+				{ return mi.template push<Types...>(vs...); }
 	};
 
 	// 0-tuple:
 
-		template<> class tuple<> { };
+		template<>
+		class tuple<>
+		{
+			public:
+
+				nik_ces auto length() { return 0; }
+
+				template<typename... Types>
+				nik_ce auto push(Types... vs) const
+					{ return tuple<Types...>{vs...}; }
+		};
+
+	// left:
+
+		template<typename... Ts, auto... Us, auto... Is>
+		nik_ce auto tuple_left(const tuple<Ts...> & t, nik_avp(T_pack_Vs<Us...>*), nik_avp(T_pack_Vs<Is...>*))
+		{
+			using tuple_type = tuple<T_store_U<Us>...>;
+
+			return tuple_type{t.template cvalue<Is>()...};
+		}
+
+		template<auto n, typename... Ts>
+		nik_ce auto tuple_left(const tuple<Ts...> & t)
+			{ return tuple_left(t, eval<_par_left_, n, U_store_T<Ts>...>, segment_<n>); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

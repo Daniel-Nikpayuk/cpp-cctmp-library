@@ -19,7 +19,7 @@
 
 // lexer:
 
-namespace scheme {
+namespace hustle {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -83,13 +83,13 @@ namespace scheme {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// scheme assembly:
+// hustle assembly:
 
 /***********************************************************************************************************************/
 
 // transition table:
 
-	struct T_scheme_dftt
+	struct T_hustle_dftt
 	{
 		struct Token
 		{
@@ -110,6 +110,7 @@ namespace scheme {
 				let        ,
 				car        ,
 				cdr        ,
+				type       ,
 				cons       ,
 				list       ,
 				begin      ,
@@ -251,7 +252,7 @@ namespace scheme {
 
 		state_type table[State::dimension][Charset::dimension];
 
-		nik_ce T_scheme_dftt() : table{}
+		nik_ce T_hustle_dftt() : table{}
 		{
 			table[ State::initial    ][ Charset::ula         ] = State::ulan;
 			table[ State::initial    ][ Charset::octothorpe  ] = State::hash;
@@ -298,9 +299,9 @@ namespace scheme {
 
 // automaton:
 
-	struct T_scheme_dfa
+	struct T_hustle_dfa
 	{
-		using T_dftt			= T_scheme_dftt;
+		using T_dftt			= T_hustle_dftt;
 		using Token			= typename T_dftt::Token;
 		nik_ces auto value		= T_dftt{};
 		nik_ces auto accept		= T_dftt::State::accept;
@@ -309,6 +310,7 @@ namespace scheme {
 		nik_ces auto let_charset        () { return generator::dfa_charset("let");    }
 		nik_ces auto car_charset        () { return generator::dfa_charset("car");    }
 		nik_ces auto cdr_charset        () { return generator::dfa_charset("cdr");    }
+		nik_ces auto type_charset       () { return generator::dfa_charset("type");   }
 		nik_ces auto cons_charset       () { return generator::dfa_charset("cons");   }
 		nik_ces auto list_charset       () { return generator::dfa_charset("list");   }
 		nik_ces auto true_charset       () { return generator::dfa_charset("true");   }
@@ -323,15 +325,16 @@ namespace scheme {
 
 // interface:
 
-	struct T_scheme_lexer
+	struct T_hustle_lexer
 	{
-		using T_dfa			= T_scheme_dfa;
+		using T_dfa			= T_hustle_dfa;
 		using Token			= typename T_dfa::Token;
 
 		using T_if_lexer		= generator::T_keyword_lexer< T_dfa::if_charset     , Token::if_     >;
 		using T_let_lexer		= generator::T_keyword_lexer< T_dfa::let_charset    , Token::let     >;
 		using T_car_lexer		= generator::T_keyword_lexer< T_dfa::car_charset    , Token::car     >;
 		using T_cdr_lexer		= generator::T_keyword_lexer< T_dfa::cdr_charset    , Token::cdr     >;
+		using T_type_lexer		= generator::T_keyword_lexer< T_dfa::type_charset   , Token::type    >;
 		using T_cons_lexer		= generator::T_keyword_lexer< T_dfa::cons_charset   , Token::cons    >;
 		using T_list_lexer		= generator::T_keyword_lexer< T_dfa::list_charset   , Token::list    >;
 		using T_true_lexer		= generator::T_keyword_lexer< T_dfa::true_charset   , Token::boolean >;
@@ -423,7 +426,8 @@ namespace scheme {
 
 		nik_ces token_type keyword_4(const cselector<char> & s)
 		{
-			if      (generator::recognizes< T_cons_lexer >(s)) return T_cons_lexer::token;
+			if      (generator::recognizes< T_type_lexer >(s)) return T_type_lexer::token;
+			else if (generator::recognizes< T_cons_lexer >(s)) return T_cons_lexer::token;
 			else if (generator::recognizes< T_list_lexer >(s)) return T_list_lexer::token;
 			else if (generator::recognizes< T_true_lexer >(s)) return T_true_lexer::token;
 			else                                               return TokenName::invalid;
@@ -449,5 +453,5 @@ namespace scheme {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace scheme
+} // namespace hustle
 

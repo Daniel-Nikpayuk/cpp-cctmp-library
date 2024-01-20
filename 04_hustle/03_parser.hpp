@@ -19,7 +19,7 @@
 
 // parser:
 
-namespace scheme {
+namespace hustle {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -52,10 +52,10 @@ namespace scheme {
 
 /***********************************************************************************************************************/
 
-	struct T_scheme_grammar
+	struct T_hustle_grammar
 	{
-		using ActName		= SAAN;
-		using T_lexer		= T_scheme_lexer;
+		using ActName		= HAAN;
+		using T_lexer		= T_hustle_lexer;
 		using Token		= typename T_lexer::Token;
 		nik_ces auto size	= Token::dimension;
 
@@ -65,22 +65,29 @@ namespace scheme {
 
 				"Start",
 
-			// scheme:
+			// hustle:
 
-				"Start -> DefBeg define ( DefName DefArgs ) Expr0 DefEnd ;"
+				"Start -> DefBeg define ( DefName DefType DefArgs ) Expr0 Exprs DefEnd ;"
 
-				"DefBeg  -> (          : define_begin ;"
-				"DefEnd  -> )          : define_end   ;"
-				"DefName -> identifier : define_name  ;"
-				"DefArgs -> DefArg DefArgs            ;"
-				"        -> empty                     ;"
-				"DefArg  -> identifier : define_arg   ;"
+				"DefBeg  -> (              : define_begin ;"
+				"DefEnd  -> )              : define_end   ;"
+				"DefName -> identifier     : define_name  ;"
+				"DefType -> ( type Type )                 ;"
+				"        -> empty          : type_zero    ;"
+				"DefArgs -> DefArg DefArgs                ;"
+				"        -> empty                         ;"
+				"DefArg  -> identifier     : define_arg   ;"
+
+				"Type -> number : type_number ;"
 
 				"Const  -> boolean    : return_boolean   ;"
 				"       -> number     : return_number    ;"
 				"       -> character  : return_character ;"
 				"       -> string     : return_string    ;"
 				"Lookup -> identifier : return_lookup    ;"
+
+				"Exprs -> Expr0 Exprs ;"
+				"      -> empty       ;"
 
 				"Expr0 -> Const     ;"
 				"      -> Lookup    ;"
@@ -94,9 +101,6 @@ namespace scheme {
 				"      -> lambda LArgs LBody          ;"
 				"      -> set! Var Val                ;"
 				"      -> Op OpArgs                   ;"
-
-				"Exprs -> Expr0 Exprs ;"
-				"      -> empty       ;"
 
 				"IfBeg   -> if                    ;"
 				"IfEnd   -> empty : if_end        ;"
@@ -145,6 +149,7 @@ namespace scheme {
 			sxt_pair( "let"    , Token::let    ),
 			sxt_pair( "car"    , Token::car    ),
 			sxt_pair( "cdr"    , Token::cdr    ),
+			sxt_pair( "type"   , Token::type   ),
 			sxt_pair( "cons"   , Token::cons   ),
 			sxt_pair( "list"   , Token::list   ),
 			sxt_pair( "begin"  , Token::begin  ),
@@ -181,6 +186,11 @@ namespace scheme {
 				sxa_pair( "define_name"  , ActName::define_name  ),
 				sxa_pair( "define_arg"   , ActName::define_arg   ),
 
+			// type:
+
+				sxa_pair( "type_number" , ActName::type_number ),
+				sxa_pair( "type_zero"   , ActName::type_zero   ),
+
 			// return:
 
 				sxa_pair( "return_boolean"   , ActName::return_boolean   ),
@@ -215,19 +225,19 @@ namespace scheme {
 
 // interface:
 
-#ifdef NIK_SCHEME_PARSER
-#include NIK_SCHEME_OBJ
+#ifdef NIK_HUSTLE_PARSER
+#include NIK_HUSTLE_OBJ
 #else
 
 	template<typename T_grammar>
-	struct T_scheme_pda : public generator::T_generic_pda<T_grammar>
+	struct T_hustle_pda : public generator::T_generic_pda<T_grammar>
 	{
 		using base			= generator::T_generic_pda<T_grammar>;
 		using ActName			= typename T_grammar::ActName;
 		using T_lexer			= typename T_grammar::T_lexer;
 		using Token			= typename T_grammar::Token;
 
-		nik_ces auto prod_size		= cctmp::string_literal("(d(NA)B)").size(); // needs refining.
+		nik_ces auto prod_size		= cctmp::string_literal("(d(NTA)EB)").size(); // needs refining.
 
 		nik_ces auto stack_start	= symbol_type{generator::Sign::nonterminal, base::start_index};
 		nik_ces auto stack_finish	= symbol_type{generator::Sign::terminal, Token::prompt};
@@ -250,10 +260,10 @@ namespace scheme {
 // interface:
 
 	template<auto static_pg_parsed, typename T_action, typename T_grammar>
-	struct T_scheme_parser
+	struct T_hustle_parser
 	{
 		using T_ast		= typename T_action::T_ast;
-		using T_pda		= T_scheme_pda<T_grammar>;
+		using T_pda		= T_hustle_pda<T_grammar>;
 		using T_parser		= generator::T_generic_parser<T_action, T_pda>;
 		using parseme_type	= generator::T_parseme<T_ast>;
 		using parsoid_type	= generator::T_parsoid<T_pda::stack_size, T_pda::prod_size>;
@@ -263,7 +273,7 @@ namespace scheme {
 		parseme_type parseme;
 		parsoid_type parsoid;
 
-		nik_ce T_scheme_parser(const cselector<char> & s) :
+		nik_ce T_hustle_parser(const cselector<char> & s) :
 
 			parseme(s), parsoid{T_pda::stack_start, T_pda::stack_finish}
 
@@ -287,16 +297,16 @@ namespace scheme {
 		auto static_pg_parsed, auto static_source, auto static_env_lookup,
 		auto contr_size, auto stack_size, auto model_size
 	>
-	struct T_scheme_parsed
+	struct T_hustle_parsed
 	{
-		using T_ast			= T_scheme_ast
+		using T_ast			= T_hustle_ast
 						<
 							static_source, static_env_lookup,
 							contr_size, stack_size, model_size
 						>;
-		using T_action			= T_scheme_action<T_ast>;
-		using T_grammar			= T_scheme_grammar;
-		using T_parser			= T_scheme_parser<static_pg_parsed, T_action, T_grammar>;
+		using T_action			= T_hustle_action<T_ast>;
+		using T_grammar			= T_hustle_grammar;
+		using T_parser			= T_hustle_parser<static_pg_parsed, T_action, T_grammar>;
 
 		nik_ces auto & src		= member_value_U<static_source>;
 		nik_ces auto parser		= T_parser{src.cselect()};
@@ -308,5 +318,5 @@ namespace scheme {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace scheme
+} // namespace hustle
 
