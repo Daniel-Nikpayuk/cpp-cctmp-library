@@ -123,39 +123,23 @@
 
 /***********************************************************************************************************************/
 
-		//	"(define (factorial (type 0) n) "
-		//	"  (if (= n 0)                  "
-		//	"    1                          "
-		//	"    (* n (factorial (- n 1)))  "
-		//	"  )                            "
-		//	")                              "
-
-		//	"(define (fib (type 0) n)            "
-		//	"  (if (< n 2)                       "
-		//	"    1                               "
-		//	"    (+ (fib (- n 1)) (fib (- n 2))) "
-		//	"  )                                 "
-		//	")                                   "
-
-		//	"(define (main n)                 "
-		//	"  (define (sq (type 0) m) * m m) "
-		//	"  (sq n)                         "
-		//	")                                "
-
-/***********************************************************************************************************************/
-
 // hustle:
 
 	constexpr auto _hustle_test_func()
 	{
 		return source
 	        (
-			"(define (factorial (type 0) n) "
-			"  (if (= n 0)                  "
-			"    1                          "
-			"    (* n (factorial (- n 1)))  "
-			"  )                            "
-			")                              "
+			"(define (main n)                "
+
+			"  (define (factorial k)         "
+			"    (if (= k 0)                 "
+			"      1                         "
+			"      (* k (factorial (- k 1))) "
+			"    )                           "
+			"  )                             "
+
+			"  (factorial n)                 "
+			")                               "
 		);
 	}
 
@@ -171,34 +155,17 @@
 
 /***********************************************************************************************************************/
 
-//	using chord_grammar			= chord::T_chord_assembly_scanner_grammar;
 //	using chord_grammar			= chord::T_chord_assembly_grammar;
 //	constexpr auto static_grammar		= U_store_T<chord_grammar>;
-//	constexpr auto static_contr		= hustle::metapile<_hustle_test_func, null_env>;
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-	//	printf("%d\n", hustle_test_op<gindex_type>::result(gindex_type{5}));//main_at(0, argc, argv)));
+		gindex_type val = hustle_test_op<gindex_type>::result((gindex_type) main_at(0, argc, argv));
+		printf("%hu\n", val);
 
-	//	auto & contr = member_value_U<static_contr>;
-
-	//	for (auto k = 0; k != contr.size(); ++k)
-	//	{
-	//		auto s = (k < 10) ? "  " : (k < 100) ? " " : "";
-	//		printf("line %s%d -", s, k);
-
-	//		for (auto j = 0; j != Instr::dimension; ++j)
-	//		{
-	//			auto v = contr[k][j];
-	//			auto t = (v < 10) ? "  " : (v < 100) ? " " : "";
-
-	//			printf(" %s%d", t, v);
-	//		}
-
-	//		printf("\n");
-	//	}
+	//	print_controller();
 
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};
 	//	tr_table_printer.print_num_tr_table();

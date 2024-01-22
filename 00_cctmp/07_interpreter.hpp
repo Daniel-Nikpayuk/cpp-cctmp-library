@@ -84,6 +84,10 @@ namespace cctmp {
 			template<typename... Types>
 			nik_ce auto push(Types... vs) const
 				{ return tuple<Ts..., Types...>{value<Is>()..., vs...}; }
+
+			template<auto... Us, auto... Js>
+			nik_ce auto left(nik_avp(T_pack_Vs<Us...>*), nik_avp(T_pack_Vs<Js...>*)) const
+				{ return tuple<T_store_U<Us>...>{value<Js>()...}; }
 	};
 
 /***********************************************************************************************************************/
@@ -122,6 +126,10 @@ namespace cctmp {
 			template<typename... Types>
 			nik_ce auto push(Types... vs) const
 				{ return mi.template push<Types...>(vs...); }
+
+			template<auto n>
+			nik_ce auto left() const
+				{ return mi.left(eval<_par_left_, n, U_store_T<Ts>...>, segment_<n>); }
 	};
 
 	// 0-tuple:
@@ -136,21 +144,25 @@ namespace cctmp {
 				template<typename... Types>
 				nik_ce auto push(Types... vs) const
 					{ return tuple<Types...>{vs...}; }
+
+				template<auto n>
+				nik_ce auto left() const
+					{ return *this; }
 		};
 
 	// left:
 
-		template<typename... Ts, auto... Us, auto... Is>
-		nik_ce auto tuple_left(const tuple<Ts...> & t, nik_avp(T_pack_Vs<Us...>*), nik_avp(T_pack_Vs<Is...>*))
-		{
-			using tuple_type = tuple<T_store_U<Us>...>;
+	//	template<typename... Ts, auto... Us, auto... Is>
+	//	nik_ce auto tuple_left(const tuple<Ts...> & t, nik_avp(T_pack_Vs<Us...>*), nik_avp(T_pack_Vs<Is...>*))
+	//	{
+	//		using tuple_type = tuple<T_store_U<Us>...>;
 
-			return tuple_type{t.template cvalue<Is>()...};
-		}
+	//		return tuple_type{t.template cvalue<Is>()...};
+	//	}
 
-		template<auto n, typename... Ts>
-		nik_ce auto tuple_left(const tuple<Ts...> & t)
-			{ return tuple_left(t, eval<_par_left_, n, U_store_T<Ts>...>, segment_<n>); }
+	//	template<auto n, typename... Ts>
+	//	nik_ce auto tuple_left(const tuple<Ts...> & t)
+	//		{ return tuple_left(t, eval<_par_left_, n, U_store_T<Ts>...>, segment_<n>); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

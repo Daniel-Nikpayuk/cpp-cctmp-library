@@ -256,12 +256,13 @@ namespace hustle {
 	{
 		using metapile		= hustle_metapile<callable_source, initial_env>;
 		nik_ce auto contr	= _hustle_function_contr_<metapile::static_space>;
-		       auto pound	= T_assembly_compound<contr>{};
+		       auto pound	= T_assembly_compound<contr, gindex_type{0}>{};
 
+		nik_ce auto out_type	= car_<out_types>;
 		nik_ce auto list	= U_pack_Vs<metapile::static_source, _hustle_subsource_>;
 		nik_ce auto lookup	= metapile::static_env_tuple;
 
-		return pound.template result<list, lookup, out_types, Ts...>(vs...);
+		return pound.template result<out_type, list, lookup, out_types, Ts...>(vs...);
 	}
 
 /***********************************************************************************************************************/

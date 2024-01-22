@@ -118,17 +118,24 @@ namespace hustle {
 		{
 			nop = generator::AN::nop,
 
+			// main:
+
+				main_begin,
+				main_end,
+				main_name,
+				main_arg,
+
 			// define:
 
-				define_begin,
-				define_end,
 				define_name,
 				define_arg,
+				define_body,
+				define_end,
 
 			// type:
 
 				type_number,
-				type_zero,
+			//	type_zero,
 
 			// return:
 
@@ -200,12 +207,12 @@ namespace hustle {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// define:
+// main:
 
 	// begin:
 
 		template<auto... filler>
-		struct T_hustle_translation_action<HAAN::define_begin, filler...>
+		struct T_hustle_translation_action<HAAN::main_begin, filler...>
 		{
 			nik_ces auto pad_size = 1;
 
@@ -215,18 +222,56 @@ namespace hustle {
 				t->template assembly_action< AAN::id   , AAT::begin >();
 				t->template  machine_action< MAN::push , MAT::instr >(AN::arg, AT::push);
 				t->template assembly_action< AAN::pad  , AAT::id    >(pad_size, AT::front);
+
+				t->arg_size += pad_size;
 			}
 		};
 
 	// end:
 
 		template<auto... filler>
-		struct T_hustle_translation_action<HAAN::define_end, filler...>
+		struct T_hustle_translation_action<HAAN::main_end, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 				{ t->template assembly_action<AAN::id, AAT::end>(AT::first); }
 		};
+
+	// name:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::main_name, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				using pound_var_type = typename AST::pound_var_type;
+
+				auto ins  = 0;
+				auto left = t->verse_size;
+				auto val  = pound_var_type(ins, left, t->cur_env);
+				t->entry  = t->model.define_compound(l->left_cselect(), val, t->cur_env);
+			}
+		};
+
+	// arg:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::main_arg, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				using arg_var_type = typename AST::arg_var_type;
+
+				auto val = arg_var_type{t->verse_size++};
+				t->model.define_variable(l->left_cselect(), val, t->cur_env);
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// define:
 
 	// name:
 
@@ -238,10 +283,15 @@ namespace hustle {
 			{
 				using pound_var_type = typename AST::pound_var_type;
 
-				auto ins  = 0;
-				auto left = t->arg_size;
-				auto val  = pound_var_type(ins, left);
-				t->entry  = t->model.define_compound(l->left_cselect(), val, t->cur_env);
+				auto ins   = t->contr.current(2);
+				auto args  = t->arg_size;
+				auto left  = t->verse_size;
+				auto val   = pound_var_type(ins, left, t->cur_env);
+				auto env   = t->extend_env();
+
+				t->arg_size = 0;
+				t->model.define_compound(l->left_cselect(), val, env);
+				t->pound.push(args, left, env);
 			}
 		};
 
@@ -255,8 +305,51 @@ namespace hustle {
 			{
 				using arg_var_type = typename AST::arg_var_type;
 
-				auto val = arg_var_type{t->arg_size++};
+				auto val = arg_var_type{t->verse_size++};
 				t->model.define_variable(l->left_cselect(), val, t->cur_env);
+			}
+		};
+
+	// body:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::define_body, filler...>
+		{
+			nik_ces auto pad_size = 1;
+
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+			//	t->contr.delay_instr_value();
+
+				t->template assembly_action< AAN::go_to , AAT::begin >();
+				t->template assembly_action< AAN::id    , AAT::begin >();
+				t->template  machine_action< MAN::push  , MAT::instr >(AN::arg, AT::push);
+				t->template assembly_action< AAN::pad   , AAT::id    >(pad_size, AT::front);
+
+				t->arg_size += pad_size;
+			}
+		};
+
+	// end:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::define_end, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				using Policy = typename AST::contr_type::Policy;
+
+				auto pop      = t->pound.pop();
+				t->arg_size   = pop[0];
+				t->verse_size = pop[1];
+				t->cur_env    = pop[2];
+
+				t->template assembly_action< AAN::id    , AAT::end >(AT::first);
+				t->template assembly_action< AAN::go_to , AAT::end >();
+
+			//	t->contr.force_instr_value(cctmp::Instr::next, Policy::relative);
 			}
 		};
 
@@ -280,17 +373,17 @@ namespace hustle {
 
 	// zero:
 
-		template<auto... filler>
-		struct T_hustle_translation_action<HAAN::type_zero, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-			{
-				using Compound = typename AST::pound_var_type::Compound;
+	//	template<auto... filler>
+	//	struct T_hustle_translation_action<HAAN::type_zero, filler...>
+	//	{
+	//		template<typename AST>
+	//		nik_ces void result(AST *t, clexeme *l)
+	//		{
+	//			using Compound = typename AST::pound_var_type::Compound;
 
-				t->model.set_value(t->entry, Compound::typ_at, 0);
-			}
-		};
+	//			t->model.set_value(t->entry, Compound::typ_at, 0);
+	//		}
+	//	};
 
 /***********************************************************************************************************************/
 
@@ -420,16 +513,17 @@ namespace hustle {
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				auto str    = l->left_cselect();
-				auto record = t->lookup_variable(str);
-				auto match  = record.v0;
-				auto entry  = record.v1;
-				auto pound  = (match && t->model.is_compound(entry));
-				auto policy = t->ret_policy;
+				auto str      = l->left_cselect();
+				auto record   = t->lookup_variable(str);
+				auto match    = record.v0;
+				auto entry    = record.v1;
+				auto is_pound = (match && t->model.is_compound(entry));
+				auto policy   = t->ret_policy;
 
-				t->entry      = entry;
+				t->ent.push(t->entry); // temporary.
+				t->entry      = entry; // push/pop ?
 				t->ret_policy = AT::back;
-				t->call.push(pound, t->arg_size++, policy);
+				t->call.push(is_pound, t->arg_size++, policy);
 				t->lookup_variable_action(str, record, t->ret_policy);
 			}
 		};
@@ -451,8 +545,9 @@ namespace hustle {
 				auto drop   = pop[1];
 				auto policy = pop[2];
 				auto pos    = t->model.get_value(t->entry, Compound::typ_at);
-				auto num    = 0;
+				auto num    = t->model.get_value(t->entry, Compound::left);
 
+				t->entry    = t->ent.pop(); // temporary.
 				t->ret_policy = policy;
 				t->arg_size   = drop + (policy == AT::back);
 				t->template machine_action<MAN::push, MAT::instr>(AN::arg, AT::select, drop);

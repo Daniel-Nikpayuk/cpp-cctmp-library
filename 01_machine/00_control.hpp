@@ -100,7 +100,7 @@ namespace machine {
 		struct Type     { enum : size_type { constant, variadic, compound, dimension }; };
 		struct Constant { enum : size_type { type = Entry::type, pos, dimension }; };
 		struct Variadic { enum : size_type { type = Entry::type, pos, dimension }; };
-		struct Compound { enum : size_type { type = Entry::type, arity, left, ins_at, typ_at, dimension }; };
+		struct Compound { enum : size_type { type = Entry::type, left, ins_at, typ_at, env_at, dimension }; };
 
 		nik_ce T_env_model_entry(csize_type t) : base{t} { }
 	};
@@ -158,10 +158,11 @@ namespace machine {
 		using Type		= typename base::Type;
 		using Compound		= typename base::Compound;
 
-		nik_ce T_env_model_compound(csize_type p0, csize_type p1) : base{Type::compound}
+		nik_ce T_env_model_compound(csize_type p0, csize_type p1, csize_type p2) : base{Type::compound}
 		{
 			base::array[Compound::ins_at] = p0;
 			base::array[Compound::left  ] = p1;
+			base::array[Compound::env_at] = p2;
 		}
 
 		nik_ce auto size() const { return Compound::dimension; }
@@ -353,12 +354,18 @@ namespace machine {
 				}
 
 				nik_ce auto extend_environment(clist_type env)
-					{ return base::cons(base::null_list(), env); }
+					{ return base::cons(null_frame(), env); }
 
 			// binding:
 
 				nik_ce bool is_compound(csize_type entry) const
 					{ return (base::get_value(entry, Compound::type) == EntryType::compound); }
+
+				nik_ce auto compound_origin(csize_type entry) const
+					{ return base::get_value(entry, Compound::ins_at); }
+
+				nik_ce auto compound_left(csize_type entry) const
+					{ return base::get_value(entry, Compound::left); }
 
 				nik_ce auto variadic_pos(csize_type entry) const
 					{ return base::get_value(entry, Variadic::pos); }

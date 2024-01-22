@@ -67,18 +67,21 @@ namespace hustle {
 
 			// hustle:
 
-				"Start -> DefBeg define ( DefName DefType DefArgs ) Expr0 Exprs DefEnd ;"
+				"Start -> MainBeg MainType ( MainSign ) MainBody MainEnd ;"
 
-				"DefBeg  -> (              : define_begin ;"
-				"DefEnd  -> )              : define_end   ;"
-				"DefName -> identifier     : define_name  ;"
-				"DefType -> ( type Type )                 ;"
-				"        -> empty          : type_zero    ;"
-				"DefArgs -> DefArg DefArgs                ;"
-				"        -> empty                         ;"
-				"DefArg  -> identifier     : define_arg   ;"
+				"MainBeg  -> (                   : main_begin ;"
+				"MainEnd  -> )                   : main_end   ;"
+				"MainType -> define                           ;"
+				"         -> type Type                        ;"
+				"MainSign -> identifier MainArgs : main_name  ;"
+				"MainArgs -> MainArg MainArgs                 ;"
+				"         -> empty                            ;"
+				"MainArg  -> identifier          : main_arg   ;"
+				"MainBody -> Expr0 Exprs                      ;"
 
-				"Type -> number : type_number ;"
+				"Type  -> number : type_number ;"
+				"Exprs -> Expr0 Exprs          ;"
+				"      -> empty                ;"
 
 				"Const  -> boolean    : return_boolean   ;"
 				"       -> number     : return_number    ;"
@@ -86,21 +89,19 @@ namespace hustle {
 				"       -> string     : return_string    ;"
 				"Lookup -> identifier : return_lookup    ;"
 
-				"Exprs -> Expr0 Exprs ;"
-				"      -> empty       ;"
-
 				"Expr0 -> Const     ;"
 				"      -> Lookup    ;"
 				"      -> ( Expr1 ) ;"
 
-				"Expr1 -> Const                       ;"
-				"      -> IfBeg Pred Ante Conse IfEnd ;"
-				"      -> define Var Val              ;"
-				"      -> quote Expr0                 ;"
-				"      -> begin Exprs                 ;"
-				"      -> lambda LArgs LBody          ;"
-				"      -> set! Var Val                ;"
-				"      -> Op OpArgs                   ;"
+				"Expr1 -> Const                         ;"
+				"      -> IfBeg Pred Ante Conse IfEnd   ;"
+				"      -> define DefDisp                ;"
+				"      -> type Type ( DefSign ) DefBody ;"
+				"      -> quote Expr0                   ;"
+				"      -> begin Exprs                   ;"
+				"      -> lambda LArgs LBody            ;"
+				"      -> set! Var Val                  ;"
+				"      -> Op OpArgs                     ;"
 
 				"IfBeg   -> if                    ;"
 				"IfEnd   -> empty : if_end        ;"
@@ -111,6 +112,16 @@ namespace hustle {
 				"PredEnd -> )     : pred_end      ;"
 				"Ante    -> Expr0 : if_ante       ;"
 				"Conse   -> Expr0 : if_conse      ;"
+
+				"DefDisp  -> Var Val                           ;"
+				"         -> ( DefSign ) DefBody               ;"
+				"DefSign  -> identifier DefArgs  : define_name ;"
+				"DefArgs  -> DefArg DefArgs                    ;"
+				"         -> empty                             ;"
+				"DefArg   -> identifier          : define_arg  ;"
+				"DefBody  -> Expr0 DefExprs      : define_body ;"
+				"DefExprs -> Expr0 DefExprs                    ;"
+				"         -> empty               : define_end  ;"
 
 				"Var -> identifier ;"
 				"Val -> Expr0      ;"
@@ -179,17 +190,24 @@ namespace hustle {
 		(
 			U_strlit_type, U_action_type,
 
+			// main:
+
+				sxa_pair( "main_begin" , ActName::main_begin ),
+				sxa_pair( "main_end"   , ActName::main_end   ),
+				sxa_pair( "main_name"  , ActName::main_name  ),
+				sxa_pair( "main_arg"   , ActName::main_arg   ),
+
 			// define:
 
-				sxa_pair( "define_begin" , ActName::define_begin ),
-				sxa_pair( "define_end"   , ActName::define_end   ),
-				sxa_pair( "define_name"  , ActName::define_name  ),
-				sxa_pair( "define_arg"   , ActName::define_arg   ),
+				sxa_pair( "define_name" , ActName::define_name ),
+				sxa_pair( "define_arg"  , ActName::define_arg  ),
+				sxa_pair( "define_body" , ActName::define_body ),
+				sxa_pair( "define_end"  , ActName::define_end  ),
 
 			// type:
 
 				sxa_pair( "type_number" , ActName::type_number ),
-				sxa_pair( "type_zero"   , ActName::type_zero   ),
+			//	sxa_pair( "type_zero"   , ActName::type_zero   ),
 
 			// return:
 
@@ -237,7 +255,7 @@ namespace hustle {
 		using T_lexer			= typename T_grammar::T_lexer;
 		using Token			= typename T_grammar::Token;
 
-		nik_ces auto prod_size		= cctmp::string_literal("(d(NTA)EB)").size(); // needs refining.
+		nik_ces auto prod_size		= cctmp::string_literal("(T(S)B)").size(); // needs refining.
 
 		nik_ces auto stack_start	= symbol_type{generator::Sign::nonterminal, base::start_index};
 		nik_ces auto stack_finish	= symbol_type{generator::Sign::terminal, Token::prompt};

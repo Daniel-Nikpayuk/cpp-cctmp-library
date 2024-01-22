@@ -37,6 +37,9 @@ namespace hustle {
 	using member_type_U					= cctmp::member_type_U<U>;
 
 	template<typename T, auto S>
+	using unit_stack					= cctmp::unit_stack<T, S>; // temporary.
+
+	template<typename T, auto S>
 	using triple_stack					= cctmp::triple_stack<T, S>;
 
 	template<typename Type, auto Size>
@@ -78,7 +81,9 @@ namespace hustle {
 		using arg_var_type		= typename model_type::variadic_type;
 		using pound_var_type		= typename model_type::compound_type;
 
-		using stack_type		= triple_stack<size_type, stack_size>;
+		using pound_stack		= triple_stack <size_type, stack_size>; // make stack sizes
+		using call_stack		= triple_stack <size_type, stack_size>; // independent?
+		using entry_stack		= unit_stack <size_type, stack_size>; // temporary.
 
 		enum : gkey_type
 		{
@@ -90,9 +95,12 @@ namespace hustle {
 
 		contr_type contr;
 		model_type model;
-		stack_type call; 
+		pound_stack pound; 
+		call_stack call; 
+		entry_stack ent; // temporary.
 		env_type cur_env;
 		size_type entry;
+		size_type verse_size;
 		size_type arg_size;
 		size_type ret_policy;
 		bool is_pound;
@@ -100,13 +108,18 @@ namespace hustle {
 		nik_ce T_hustle_ast() :
 
 			contr{src_at, str_at},
-			model{src}, cur_env{model.null_env()},
-			entry{}, arg_size{}, ret_policy{AT::first}, is_pound{false}
+			model{src}, cur_env{model.extend_environment(model.null_env())},
+			entry{}, verse_size{}, arg_size{}, ret_policy{AT::first}, is_pound{false}
 
-			{ initialize(); }
+			{ }
 
-		nik_ce void initialize() // t->model.extend_environment(t->env) ?
-			{ cur_env = model.cons(model.null_frame(), cur_env); }
+		nik_ce auto extend_env()
+		{
+			auto env = cur_env;
+			cur_env  = model.extend_environment(cur_env);
+
+			return env;
+		}
 
 		// (generic) action:
 
@@ -145,9 +158,10 @@ namespace hustle {
 
 				nik_ce void lookup_compound_action(cindex entry)
 				{
-					auto pos = model.variadic_pos(entry);
+					auto origin = model.compound_origin(entry);
+					auto left   = model.compound_left(entry);
 
-					machine_action<MAN::push, MAT::instr>(AN::pound, AT::back, pos);
+					machine_action<MAN::push, MAT::instr>(AN::pound, AT::back, origin, left);
 				}
 
 				nik_ce void lookup_variadic_action(cindex entry, cindex note)

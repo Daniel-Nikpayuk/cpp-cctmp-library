@@ -30,11 +30,19 @@ namespace machine {
 	template<typename T>
 	using T_restore_T					= cctmp::T_restore_T<T>;
 
+	template<template<auto...> typename B>
+	nik_ce auto U_store_B					= cctmp::U_store_B<B>;
+
 	nik_ce auto _zero					= cctmp::_zero;
 	nik_ce auto _one					= cctmp::_one;
 
+	nik_ce auto _to_list_					= cctmp::_to_list_;
+
 	template<auto... Vs>
 	nik_ce auto to_list_					= cctmp::to_list_<Vs...>;
+
+	template<auto... Vs>
+	nik_ce auto unpack_					= cctmp::unpack_<Vs...>;
 
 	template<auto... Vs>
 	nik_ce auto car_					= cctmp::car_<Vs...>;
@@ -120,10 +128,8 @@ namespace machine {
 
 // compound:
 
-	template<auto...> struct T_assembly_compound;
-
-	template<auto c, auto... Us>
-	struct T_assembly_compound<c, Us...>
+	template<auto c, auto i, auto... Us>
+	struct T_assembly_compound
 	{
 		using tuple_type  = tuple<T_store_U<Us>...>;
 		using ctuple_type = tuple_type const;
@@ -133,33 +139,13 @@ namespace machine {
 		nik_ce T_assembly_compound() : verse{} { }
 		nik_ce T_assembly_compound(const tuple<T_store_U<Us>...> & t) : verse{t} { }
 
-		template<auto i, auto j, auto l, auto t, typename... Ts>
+		template<auto j, auto l, auto t, typename... Ts>
 		nik_ce auto result(Ts... vs)
 		{
 			return NIK_ASSEMBLY_TEMPLATE_US(c, i, Us...){verse}
 				.NIK_ASSEMBLY_RESULT_TS(c, i, j, l, t, Ts...)
 					(vs...);
 		}
-
-		template<auto j, auto l, auto t, typename... Ts>
-		nik_ce auto result(Ts... vs)
-		{
-			nik_ce auto i = AD<c>::initial_index;
-
-			return result<i, j, l, t, Ts...>(vs...);
-		}
-	};
-
-	template<auto c, gindex_type i, auto... Us>
-	struct T_assembly_compound<c, i, Us...>
-	{
-		using tuple_type  = tuple<T_store_U<Us>...>;
-		using ctuple_type = tuple_type const;
-
-		ctuple_type verse;
-
-		nik_ce T_assembly_compound() : verse{} { }
-		nik_ce T_assembly_compound(const tuple<T_store_U<Us>...> & t) : verse{t} { }
 
 			// temporary.
 		template<auto s, auto j, auto l, auto t, typename... Ts>
@@ -170,17 +156,12 @@ namespace machine {
 					(vs...);
 		}
 
-	//	template<auto j, auto l, auto t, typename... Ts>
-	//	nik_ce auto result(Ts... vs)
-	//	{
-	//		return NIK_ASSEMBLY_TEMPLATE_US(c, i, Us...){verse}
-	//			.NIK_ASSEMBLY_RESULT_TS(c, i, j, l, t, Ts...)
-	//				(vs...);
-	//	}
-	};
+	}; template<auto... Vs>
+		nik_ce auto U_assembly_compound = U_store_T<T_assembly_compound<Vs...>>;
 
-	template<auto... Vs>
-	nik_ce auto U_assembly_compound = U_store_T<T_assembly_compound<Vs...>>;
+	// syntactic sugar:
+
+		nik_ce auto H_assembly_compound = U_store_B<T_assembly_compound>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -338,6 +319,7 @@ namespace machine {
 
 // id:
 
+/*
 	template<auto... Us>
 	struct T_assembly<AN::invert, AT::id, Us...>
 	{
@@ -357,14 +339,14 @@ namespace machine {
 					(v, vs...);
 		}
 	};
+*/
 
 /***********************************************************************************************************************/
 
 // :
 
-/*
 	template<auto... Us>
-	struct T_assembly<AN::invert, AT::, Us...>
+	struct T_assembly<AN::invert, AT::id, Us...>
 	{
 		NIK_ASSEMBLY_CONS(verse) { }
 
@@ -373,19 +355,25 @@ namespace machine {
 		{
 			nik_ce auto ni = AD<c>::pos(i);
 
-			auto ante = NIK_ASSEMBLY_TEMPLATE_US(c,  i, Us...){verse}
+			if (v) return NIK_ASSEMBLY_TEMPLATE_US(c,  i, Us...){verse}
 					.NIK_ASSEMBLY_RESULT_2TS(c,  i, j, l, t, T, Ts...)(v, vs...);
+			else
+			{
+				using ante_type = decltype
+				(
+					NIK_ASSEMBLY_TEMPLATE_US(c,  i, Us...){verse}
+						.NIK_ASSEMBLY_RESULT_2TS(c,  i, j, l, t, T, Ts...)(v, vs...)
+				);
 
-			if (v) return ante;
-			else   return static_cast<decltype(ante)>
-			(
-				NIK_ASSEMBLY_TEMPLATE_US(c, ni, Us...){verse}
-				.NIK_ASSEMBLY_RESULT_2TS(c, ni, j, l, t, T, Ts...)
-					(v, vs...)
-			);
+				return static_cast<ante_type>
+				(
+					NIK_ASSEMBLY_TEMPLATE_US(c, ni, Us...){verse}
+					.NIK_ASSEMBLY_RESULT_2TS(c, ni, j, l, t, T, Ts...)
+						(v, vs...)
+				);
+			}
 		}
 	};
-*/
 
 /***********************************************************************************************************************/
 
@@ -681,8 +669,9 @@ namespace machine {
 		nik_ce auto result(Ts... vs)
 		{
 			nik_ce auto ni = AD<c>::pos(i);
-		//	nik_ce auto n  = AD<c>::num(i);
-			nik_ce auto nv = U_assembly_compound<c, ni>;//, Us...>; // temporary.
+			nik_ce auto n  = AD<c>::num(i);
+			nik_ce auto p  = eval<_par_left_, n, Us...>;
+			nik_ce auto nv = unpack_<p, _to_list_, H_assembly_compound, c, ni>;
 
 			return NIK_ASSEMBLY_TEMPLATE_US(c, i, Us...){verse}
 				.NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, Ts..., decltype(nv))
@@ -800,6 +789,7 @@ namespace machine {
 	>
 	struct T_assembly<AN::bind, AT::first, p0, p1, Us...>
 	{
+		using LT = T_store_U<LU>;
 		using RT = T_store_U<RU>;
 
 		NIK_ASSEMBLY_CONS(verse) { }
@@ -807,8 +797,9 @@ namespace machine {
 		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t), typename... Ts>
 		nik_ce auto result(LT lv, T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs)
 		{
-						// {} temporary.
-			       auto nv = T_restore_T<RT>{}.template result<j, l, t, T_store_U<RUs>...>(rvs...);
+			nik_ce auto n  = AD<c>::num(i);
+			       auto le = verse.template left<n>();
+			       auto nv = T_restore_T<RT>{le}.template result<j, l, t, T_store_U<RUs>...>(rvs...);
 
 			nik_ce auto nU = U_store_T<decltype(nv)>;
 			using nT       = read_only<nU>;
@@ -838,9 +829,10 @@ namespace machine {
 		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t), typename... Ts>
 		nik_ce auto result(T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs)
 		{
-						// {} temporary, car_<t> temporary.
-			       auto nv = T_restore_T<RT>{}.template result<car_<t>, j, l, t, T_store_U<RUs>...>(rvs...);
-		//	       auto nv = T_restore_T<RT>{}.template result<j, l, t, T_store_U<RUs>...>(rvs...);
+			nik_ce auto n  = AD<c>::num(i);
+			       auto le = verse.template left<n>();
+			       auto nv = T_restore_T<RT>{le}.template result<cctmp::U_gindex_type, j, l, t, T_store_U<RUs>...>(rvs...);
+		//	       auto nv = T_restore_T<RT>{le}.template result<j, l, t, T_store_U<RUs>...>(rvs...);
 
 			nik_ce auto nU = U_store_T<decltype(nv)>;
 			using nT       = read_only<nU>;
@@ -870,8 +862,10 @@ namespace machine {
 		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t), typename... Ts>
 		nik_ce auto result(T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs)
 		{
-				// {} temporary.
-			T_restore_T<RT>{}.template result<j, l, t, T_store_U<RUs>...>(rvs...);
+			nik_ce auto n  = AD<c>::num(i);
+			       auto le = verse.template left<n>();
+
+			T_restore_T<RT>{le}.template result<j, l, t, T_store_U<RUs>...>(rvs...);
 
 			return NIK_ASSEMBLY_TEMPLATE_US(c, i, Us...){verse}
 				.NIK_ASSEMBLY_RESULT_TS(c, i, j, l, t, T_store_U<LUs>...)
