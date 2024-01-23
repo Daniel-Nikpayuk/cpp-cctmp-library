@@ -129,17 +129,15 @@
 	{
 		return source
 	        (
-			"(define (main n)                "
-
-			"  (define (factorial k)         "
-			"    (if (= k 0)                 "
-			"      1                         "
-			"      (* k (factorial (- k 1))) "
-			"    )                           "
-			"  )                             "
-
-			"  (factorial n)                 "
-			")                               "
+			"(define (main n)                  "
+			"  (define (factorial k p)         "
+			"    (if (= k 0)                   "
+			"      p                           "
+			"      (factorial (- k 1) (* k p)) "
+			"    )                             "
+			"  )                               "
+			"  (factorial n 1)                 "
+			")                                 "
 		);
 	}
 
@@ -162,8 +160,8 @@
 
 	int main(int argc, char *argv[])
 	{
-		gindex_type val = hustle_test_op<gindex_type>::result((gindex_type) main_at(0, argc, argv));
-		printf("%hu\n", val);
+	//	gindex_type val = hustle_test_op<gindex_type>::result((gindex_type) main_at(0, argc, argv));
+	//	printf("%hu\n", val);
 
 	//	print_controller();
 

@@ -194,6 +194,26 @@
 		//	"  (sum-of-squares m n)                            "
 		//	")                                                 "
 
+		//	"(define (main n)                "
+		//	"  (define (factorial k)         "
+		//	"    (if (= k 0)                 "
+		//	"      1                         "
+		//	"      (* k (factorial (- k 1))) "
+		//	"    )                           "
+		//	"  )                             "
+		//	"  (factorial n)                 "
+		//	")                               "
+
+		//	"(define (main n)                  "
+		//	"  (define (factorial k p)         "
+		//	"    (if (= k 0)                   "
+		//	"      p                           "
+		//	"      (factorial (- k 1) (* k p)) "
+		//	"    )                             "
+		//	"  )                               "
+		//	"  (factorial n 1)                 "
+		//	")                                 "
+
 /***********************************************************************************************************************/
 
 	struct T_arg

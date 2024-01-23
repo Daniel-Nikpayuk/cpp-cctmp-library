@@ -846,20 +846,6 @@
 
 /***********************************************************************************************************************/
 
-// cons(tructor):
-
-	#define NIK_ASSEMBLY_CONS(_verse_)										\
-															\
-		using tuple_type  = tuple<T_store_U<Us>...>;								\
-		using ctuple_type = tuple_type const;									\
-		using ctuple_ref  = ctuple_type &;									\
-															\
-		ctuple_ref _verse_;											\
-															\
-		nik_ce T_assembly(ctuple_ref v) : _verse_{v}
-
-/***********************************************************************************************************************/
-
 // template:
 
 	#define NIK_ASSEMBLY_TEMPLATE_BEGIN(_c_, _i_)									\
@@ -890,17 +876,17 @@
 		NIK_ASSEMBLY_TEMPLATE_BEGIN(_c_, _i_)									\
 		NIK_ASSEMBLY_TEMPLATE_END
 
-	#define NIK_ASSEMBLY_TEMPLATE_US(_c_, _i_, _u0_)								\
+	#define NIK_ASSEMBLY_TEMPLATE_WS(_c_, _i_, _u0_)								\
 															\
 		NIK_ASSEMBLY_TEMPLATE_BEGIN_1(_c_, _i_, _u0_)								\
 		NIK_ASSEMBLY_TEMPLATE_END
 
-	#define NIK_ASSEMBLY_TEMPLATE_2US(_c_, _i_, _u0_, _u1_)								\
+	#define NIK_ASSEMBLY_TEMPLATE_2WS(_c_, _i_, _u0_, _u1_)								\
 															\
 		NIK_ASSEMBLY_TEMPLATE_BEGIN_2(_c_, _i_, _u0_, _u1_)							\
 		NIK_ASSEMBLY_TEMPLATE_END
 
-	#define NIK_ASSEMBLY_TEMPLATE_3US(_c_, _i_, _u0_, _u1_, _u2_)							\
+	#define NIK_ASSEMBLY_TEMPLATE_3WS(_c_, _i_, _u0_, _u1_, _u2_)							\
 															\
 		NIK_ASSEMBLY_TEMPLATE_BEGIN_3(_c_, _i_, _u0_, _u1_, _u2_)						\
 		NIK_ASSEMBLY_TEMPLATE_END

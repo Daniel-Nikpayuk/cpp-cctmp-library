@@ -348,8 +348,10 @@ namespace cctmp {
 
 		nik_ce unit_stack() : base{} { }
 
-		nik_ce bool push(csize_type v) { return base::push({v}); }
 		nik_ce csize_type pop() { return base::pop()[0]; }
+
+		nik_ce bool push(csize_type v)
+			{ return base::push({v}); }
 	};
 
 /***********************************************************************************************************************/
@@ -364,7 +366,8 @@ namespace cctmp {
 
 		nik_ce pair_stack() : base{} { }
 
-		nik_ce bool push(csize_type v0, csize_type v1) { return base::push({v0, v1}); }
+		nik_ce bool push(csize_type v0, csize_type v1)
+			{ return base::push({v0, v1}); }
 	};
 
 /***********************************************************************************************************************/
@@ -379,7 +382,24 @@ namespace cctmp {
 
 		nik_ce triple_stack() : base{} { }
 
-		nik_ce bool push(csize_type v0, csize_type v1, csize_type v2) { return base::push({v0, v1, v2}); }
+		nik_ce bool push(csize_type v0, csize_type v1, csize_type v2)
+			{ return base::push({v0, v1, v2}); }
+	};
+
+/***********************************************************************************************************************/
+
+// quad(ruple):
+
+	template<typename SizeType, SizeType Size>
+	struct quad_stack : public generic_stack<SizeType, 4, Size>
+	{
+		using base       = generic_stack<SizeType, 4, Size>;
+		using csize_type = typename base::csize_type;
+
+		nik_ce quad_stack() : base{} { }
+
+		nik_ce bool push(csize_type v0, csize_type v1, csize_type v2, csize_type v3)
+			{ return base::push({v0, v1, v2, v3}); }
 	};
 
 /***********************************************************************************************************************/

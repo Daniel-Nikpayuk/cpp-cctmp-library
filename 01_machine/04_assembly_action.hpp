@@ -453,7 +453,10 @@ namespace machine {
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex pos)
-				{ machine_action<MAN::push, MAT::instr>(contr, AN::verse, note, pos); }
+			{
+				assembly_action< AAN::eval , AAT::begin >(contr, note);
+				assembly_action< AAN::eval , AAT::end   >(contr, pos, AT::first);
+			}
 		};
 
 	// parameter:
