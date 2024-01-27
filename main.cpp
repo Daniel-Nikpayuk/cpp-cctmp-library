@@ -41,14 +41,14 @@
 #include"00_cctmp/04_relation.hpp"
 #include"00_cctmp/05_praxis.hpp"
 #include"00_cctmp/06_algorithm.hpp"
-#include"00_cctmp/07_interpreter.hpp"
+#include"00_cctmp/07_machine.hpp"
 #include"00_cctmp/08_graph.hpp"
 
-#include"01_machine/00_control.hpp"
-#include"01_machine/01_literal_state.hpp"
-#include"01_machine/02_literal_action.hpp"
-#include"01_machine/03_assembly_state.hpp"
-#include"01_machine/04_assembly_action.hpp"
+#include"01_assembly/00_space.hpp"
+#include"01_assembly/01_constant.hpp"
+#include"01_assembly/02_application.hpp"
+#include"01_assembly/03_conditional.hpp"
+#include"01_assembly/04_action.hpp"
 
 #include"02_generator/00_ll_lexer.hpp"
 #include"02_generator/01_ll_syntax.hpp"
@@ -103,7 +103,7 @@
 
 /***********************************************************************************************************************/
 
-	int main_at(int n, int argc, char *argv[], int def = 0)
+	unsigned long main_at(unsigned long n, int argc, char *argv[], unsigned long def = 0)
 	{
 		auto pos = n + 1;
 
@@ -111,7 +111,7 @@
 		else            return def;
 	}
 
-	int main_sum(int argc, char *argv[])
+	unsigned long main_sum(int argc, char *argv[])
 	{
 		auto sum = 0;
 
@@ -129,15 +129,20 @@
 	{
 		return source
 	        (
-			"(define (main n)                  "
-			"  (define (factorial k p)         "
-			"    (if (= k 0)                   "
-			"      p                           "
-			"      (factorial (- k 1) (* k p)) "
-			"    )                             "
-			"  )                               "
-			"  (factorial n 1)                 "
-			")                                 "
+			"(define (main n)                    "
+
+			"  (define (factorial k p) -> fact_t "
+			"    (if (= k 0)                     "
+			"      p                             "
+			"      (factorial (- k 1) (* k p))   "
+			"    )                               "
+			"  )                                 "
+
+			"  (factorial n 1)                   "
+			")                                   "
+
+			, binding("fact_t", 0)	// translation: the type is
+						// at (deferred) location 0.
 		);
 	}
 
@@ -149,7 +154,9 @@
 		template<typename... Ts>
 		constexpr static auto result(Ts... vs)
 			{ return hustle::hustle_apply<_hustle_test_func, null_env, OutUs>(vs...); }
-	};
+
+	}; template<typename... OutTs>
+		constexpr auto _hustle_test_op_ = U_store_T<hustle_test_op<OutTs...>>;
 
 /***********************************************************************************************************************/
 
@@ -160,8 +167,10 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	gindex_type val = hustle_test_op<gindex_type>::result((gindex_type) main_at(0, argc, argv));
-	//	printf("%hu\n", val);
+	//	using size_type = unsigned long;
+
+	//	size_type val = hustle_test_op<size_type>::result(main_at(0, argc, argv));
+	//	printf("%lu\n", val);
 
 	//	print_controller();
 

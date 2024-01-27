@@ -98,9 +98,13 @@ namespace hustle {
 				invalid    = TokenName::invalid,
 				empty      = TokenName::dimension,
 				prompt     ,
+				arrow      ,
+
 				identifier ,
 				octothorpe ,
 				boolean    ,
+				bool_f     , // specialization
+				bool_t     , // specialization
 				number     ,
 				character  ,
 				string     ,
@@ -110,7 +114,6 @@ namespace hustle {
 				let        ,
 				car        ,
 				cdr        ,
-				type       ,
 				cons       ,
 				list       ,
 				begin      ,
@@ -143,6 +146,8 @@ namespace hustle {
 			{
 				empty       = StateName::empty,
 				initial     = StateName::initial,
+				arrow       ,
+
 				ulan        , // underscore latin alphanumeric
 				hash        , // # (boolean)
 				boolean     ,
@@ -171,6 +176,8 @@ namespace hustle {
 			nik_ces auto accept = cctmp::table
 			(
 				U_state_type, U_token_type,
+
+				cctmp::pair( arrow         , Token::arrow       ),
 
 				cctmp::pair( ulan          , Token::identifier  ),
 				cctmp::pair( boolean       , Token::boolean     ),
@@ -288,6 +295,8 @@ namespace hustle {
 
 			table[ State::compare_gt ][ Charset::equal       ] = State::compare_ge;
 
+			table[ State::minus      ][ Charset::r_angle     ] = State::arrow;
+
 			// generator::T_generic_lexer_tt::set_backslash_entries<State, Charset>(table);
 		}
 
@@ -310,11 +319,8 @@ namespace hustle {
 		nik_ces auto let_charset        () { return generator::dfa_charset("let");    }
 		nik_ces auto car_charset        () { return generator::dfa_charset("car");    }
 		nik_ces auto cdr_charset        () { return generator::dfa_charset("cdr");    }
-		nik_ces auto type_charset       () { return generator::dfa_charset("type");   }
 		nik_ces auto cons_charset       () { return generator::dfa_charset("cons");   }
 		nik_ces auto list_charset       () { return generator::dfa_charset("list");   }
-		nik_ces auto true_charset       () { return generator::dfa_charset("true");   }
-		nik_ces auto false_charset      () { return generator::dfa_charset("false");  }
 		nik_ces auto begin_charset      () { return generator::dfa_charset("begin");  }
 		nik_ces auto quote_charset      () { return generator::dfa_charset("quote");  }
 		nik_ces auto define_charset     () { return generator::dfa_charset("define"); }
@@ -334,11 +340,8 @@ namespace hustle {
 		using T_let_lexer		= generator::T_keyword_lexer< T_dfa::let_charset    , Token::let     >;
 		using T_car_lexer		= generator::T_keyword_lexer< T_dfa::car_charset    , Token::car     >;
 		using T_cdr_lexer		= generator::T_keyword_lexer< T_dfa::cdr_charset    , Token::cdr     >;
-		using T_type_lexer		= generator::T_keyword_lexer< T_dfa::type_charset   , Token::type    >;
 		using T_cons_lexer		= generator::T_keyword_lexer< T_dfa::cons_charset   , Token::cons    >;
 		using T_list_lexer		= generator::T_keyword_lexer< T_dfa::list_charset   , Token::list    >;
-		using T_true_lexer		= generator::T_keyword_lexer< T_dfa::true_charset   , Token::boolean >;
-		using T_false_lexer		= generator::T_keyword_lexer< T_dfa::false_charset  , Token::boolean >;
 		using T_begin_lexer		= generator::T_keyword_lexer< T_dfa::begin_charset  , Token::begin   >;
 		using T_quote_lexer		= generator::T_keyword_lexer< T_dfa::quote_charset  , Token::quote   >;
 		using T_define_lexer		= generator::T_keyword_lexer< T_dfa::define_charset , Token::define  >;
@@ -348,7 +351,7 @@ namespace hustle {
 		{
 			generator::T_generic_lexer<T_dfa>::lex(l);
 
-			token_type t = T_dfa::accept.lookup(l.token, TokenName::invalid);
+			token_type t = T_dfa::accept.lookup(l.token, Token::invalid);
 
 			return keyword_check(l, t);
 		}
@@ -364,13 +367,14 @@ namespace hustle {
 				case Token::identifier:
 				{
 					ctoken_type t0 = keyword(csel);
-					if (t0 != TokenName::invalid) rt = t0;
+					if (t0 != Token::invalid) rt = t0;
 					break;
 				}
 				case Token::boolean:
 				{
 					auto c = *csel.clast();
-					if (c != 'f' && c != 't') rt = TokenName::invalid;
+					rt = (c == 'f') ? Token::bool_f :
+					     (c == 't') ? Token::bool_t : Token::invalid ;
 					break;
 				}
 				case Token::eq_:
@@ -378,7 +382,7 @@ namespace hustle {
 					csel.downright();
 					auto eq    = cctmp::string_literal{"eq"};
 					bool is_eq = cctmp::apply<_subarray_same_<>>(csel, eq);
-					if (!is_eq) rt = TokenName::invalid;
+					if (!is_eq) rt = Token::invalid;
 					break;
 				}
 				case Token::mu_table:
@@ -386,7 +390,7 @@ namespace hustle {
 					csel.downright();
 					auto set    = cctmp::string_literal{"set"};
 					bool is_set = cctmp::apply<_subarray_same_<>>(csel, set);
-					if (!is_set) rt = TokenName::invalid;
+					if (!is_set) rt = Token::invalid;
 					break;
 				}
 			}
@@ -396,7 +400,7 @@ namespace hustle {
 
 		nik_ces token_type keyword(const cselector<char> & s)
 		{
-			token_type val = TokenName::invalid;
+			token_type val = Token::invalid;
 
 			switch (s.size())
 			{
@@ -413,7 +417,7 @@ namespace hustle {
 		nik_ces token_type keyword_2(const cselector<char> & s)
 		{
 			if (generator::recognizes< T_if_lexer >(s)) return T_if_lexer::token;
-			else                                        return TokenName::invalid;
+			else                                        return Token::invalid;
 		}
 
 		nik_ces token_type keyword_3(const cselector<char> & s)
@@ -421,31 +425,28 @@ namespace hustle {
 			if      (generator::recognizes< T_let_lexer >(s)) return T_let_lexer::token;
 			else if (generator::recognizes< T_car_lexer >(s)) return T_car_lexer::token;
 			else if (generator::recognizes< T_cdr_lexer >(s)) return T_cdr_lexer::token;
-			else                                              return TokenName::invalid;
+			else                                              return Token::invalid;
 		}
 
 		nik_ces token_type keyword_4(const cselector<char> & s)
 		{
-			if      (generator::recognizes< T_type_lexer >(s)) return T_type_lexer::token;
-			else if (generator::recognizes< T_cons_lexer >(s)) return T_cons_lexer::token;
+			if      (generator::recognizes< T_cons_lexer >(s)) return T_cons_lexer::token;
 			else if (generator::recognizes< T_list_lexer >(s)) return T_list_lexer::token;
-			else if (generator::recognizes< T_true_lexer >(s)) return T_true_lexer::token;
-			else                                               return TokenName::invalid;
+			else                                               return Token::invalid;
 		}
 
 		nik_ces token_type keyword_5(const cselector<char> & s)
 		{
-			if      (generator::recognizes< T_false_lexer >(s)) return T_false_lexer::token;
-			else if (generator::recognizes< T_begin_lexer >(s)) return T_begin_lexer::token;
+			if      (generator::recognizes< T_begin_lexer >(s)) return T_begin_lexer::token;
 			else if (generator::recognizes< T_quote_lexer >(s)) return T_quote_lexer::token;
-			else                                                return TokenName::invalid;
+			else                                                return Token::invalid;
 		}
 
 		nik_ces token_type keyword_6(const cselector<char> & s)
 		{
 			if      (generator::recognizes< T_define_lexer >(s)) return T_define_lexer::token;
 			else if (generator::recognizes< T_lambda_lexer >(s)) return T_lambda_lexer::token;
-			else                                                 return TokenName::invalid;
+			else                                                 return Token::invalid;
 		}
 	};
 

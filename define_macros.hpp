@@ -771,78 +771,15 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// literal:
-
-/***********************************************************************************************************************/
-
-// params:
-
-	#define NIK_LITERAL_PARAMS(_s_, _c_, _i_)									\
-															\
-		auto _s_, auto _c_, auto _i_
-
-/***********************************************************************************************************************/
-
-// space:
-
-	#define NIK_LITERAL_L(_c_, _i_)											\
-															\
-		T_literal												\
-		<													\
-			LD<_c_>::next_name(_i_),									\
-			LD<_c_>::next_note(_i_)
-
-	#define NIK_LITERAL_M(_s_, _c_, _i_)										\
-															\
-		>::template result											\
-		<													\
-			_s_, _c_,											\
-			LD<_c_>::next_index(_i_)
-
-	#define NIK_LITERAL_R 												\
-															\
-		>
-
-	#define NIK_LITERAL_TEMPLATE(_c_, _i_)										\
-															\
-		NIK_LITERAL_L(_c_, _i_)
-
-	#define NIK_LITERAL_RESULT(_s_, _c_, _i_)									\
-															\
-		NIK_LITERAL_M(_s_, _c_, _i_) NIK_LITERAL_R
-
-	#define NIK_LITERAL_RESULT_TS(_s_, _c_, _i_, _t0_)								\
-															\
-		NIK_LITERAL_M(_s_, _c_, _i_), _t0_ NIK_LITERAL_R
-
-	#define NIK_LITERAL_RESULT_2TS(_s_, _c_, _i_, _t0_, _t1_)							\
-															\
-		NIK_LITERAL_M(_s_, _c_, _i_), _t0_, _t1_ NIK_LITERAL_R
-
-	#define NIK_LITERAL(_s_, _c_, _i_)										\
-															\
-		NIK_LITERAL_TEMPLATE(_c_, _i_) NIK_LITERAL_RESULT(_s_, _c_, _i_)
-
-	#define NIK_LITERAL_TS(_s_, _c_, _i_, _t0_)									\
-															\
-		NIK_LITERAL_TEMPLATE(_c_, _i_) NIK_LITERAL_RESULT_TS(_s_, _c_, _i_, _t0_)
-
-	#define NIK_LITERAL_2TS(_s_, _c_, _i_, _t0_, _t1_)								\
-															\
-		NIK_LITERAL_TEMPLATE(_c_, _i_) NIK_LITERAL_RESULT_2TS(_s_, _c_, _i_, _t0_, _t1_)
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // assembly:
 
 /***********************************************************************************************************************/
 
 // params:
 
-	#define NIK_ASSEMBLY_PARAMS(_c_, _i_, _j_, _l_, _t_)								\
+	#define NIK_ASSEMBLY_PARAMS(_c_, _i_, _j_, _l_, _t_, _r_)							\
 															\
-		auto _c_, auto _i_, auto _j_, auto _l_, auto _t_
+		auto _c_, auto _i_, auto _j_, auto _l_, auto _t_, auto _r_
 
 /***********************************************************************************************************************/
 
@@ -895,57 +832,57 @@
 
 // result:
 
-	#define NIK_ASSEMBLY_RESULT_BEGIN(_c_, _i_, _j_, _l_, _t_)							\
+	#define NIK_ASSEMBLY_RESULT_BEGIN(_c_, _i_, _j_, _l_, _t_, _r_)							\
 															\
 		template result												\
 		<													\
 			_c_,												\
 			AD<_c_>::next_index(_i_),									\
-			_j_, _l_, _t_
+			_j_, _l_, _t_, _r_
 
-	#define NIK_ASSEMBLY_RESULT_BEGIN_1(_c_, _i_, _j_, _l_, _t_, _t0_)						\
+	#define NIK_ASSEMBLY_RESULT_BEGIN_1(_c_, _i_, _j_, _l_, _t_, _r_, _t0_)						\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN(_c_, _i_, _j_, _l_, _t_), _t0_
+		NIK_ASSEMBLY_RESULT_BEGIN(_c_, _i_, _j_, _l_, _t_, _r_), _t0_
 
-	#define NIK_ASSEMBLY_RESULT_BEGIN_2(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_)					\
+	#define NIK_ASSEMBLY_RESULT_BEGIN_2(_c_, _i_, _j_, _l_, _t_, _r_, _t0_, _t1_)					\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN_1(_c_, _i_, _j_, _l_, _t_, _t0_), _t1_
+		NIK_ASSEMBLY_RESULT_BEGIN_1(_c_, _i_, _j_, _l_, _t_, _r_, _t0_), _t1_
 
-	#define NIK_ASSEMBLY_RESULT_BEGIN_3(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_)					\
+	#define NIK_ASSEMBLY_RESULT_BEGIN_3(_c_, _i_, _j_, _l_, _t_, _r_, _t0_, _t1_, _t2_)				\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN_2(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_), _t2_
+		NIK_ASSEMBLY_RESULT_BEGIN_2(_c_, _i_, _j_, _l_, _t_, _r_, _t0_, _t1_), _t2_
 
-	#define NIK_ASSEMBLY_RESULT_BEGIN_4(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)				\
+	#define NIK_ASSEMBLY_RESULT_BEGIN_4(_c_, _i_, _j_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_)			\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN_3(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_), _t3_
+		NIK_ASSEMBLY_RESULT_BEGIN_3(_c_, _i_, _j_, _l_, _t_, _r_, _t0_, _t1_, _t2_), _t3_
 
 	#define NIK_ASSEMBLY_RESULT_END 										\
 															\
 		>
 
-	#define NIK_ASSEMBLY_RESULT(_c_, _i_, _j_, _l_, _t_)								\
+	#define NIK_ASSEMBLY_RESULT(_c_, _i_, _j_, _l_, _t_, _r_)							\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN(_c_, _i_, _j_, _l_, _t_)							\
+		NIK_ASSEMBLY_RESULT_BEGIN(_c_, _i_, _j_, _l_, _t_, _r_)							\
 		NIK_ASSEMBLY_RESULT_END
 
-	#define NIK_ASSEMBLY_RESULT_TS(_c_, _i_, _j_, _l_, _t_, _t0_)							\
+	#define NIK_ASSEMBLY_RESULT_TS(_c_, _i_, _j_, _l_, _t_, _r_, _t0_)						\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN_1(_c_, _i_, _j_, _l_, _t_, _t0_)						\
+		NIK_ASSEMBLY_RESULT_BEGIN_1(_c_, _i_, _j_, _l_, _t_, _r_, _t0_)						\
 		NIK_ASSEMBLY_RESULT_END
 
-	#define NIK_ASSEMBLY_RESULT_2TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_)						\
+	#define NIK_ASSEMBLY_RESULT_2TS(_c_, _i_, _j_, _l_, _t_, _r_, _t0_, _t1_)					\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN_2(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_)					\
+		NIK_ASSEMBLY_RESULT_BEGIN_2(_c_, _i_, _j_, _l_, _t_, _r_, _t0_, _t1_)					\
 		NIK_ASSEMBLY_RESULT_END
 
-	#define NIK_ASSEMBLY_RESULT_3TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_)					\
+	#define NIK_ASSEMBLY_RESULT_3TS(_c_, _i_, _j_, _l_, _t_, _r_, _t0_, _t1_, _t2_)					\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN_3(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_)					\
+		NIK_ASSEMBLY_RESULT_BEGIN_3(_c_, _i_, _j_, _l_, _t_, _r_, _t0_, _t1_, _t2_)				\
 		NIK_ASSEMBLY_RESULT_END
 
-	#define NIK_ASSEMBLY_RESULT_4TS(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)				\
+	#define NIK_ASSEMBLY_RESULT_4TS(_c_, _i_, _j_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_)				\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN_4(_c_, _i_, _j_, _l_, _t_, _t0_, _t1_, _t2_, _t3_)				\
+		NIK_ASSEMBLY_RESULT_BEGIN_4(_c_, _i_, _j_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_)			\
 		NIK_ASSEMBLY_RESULT_END
 
 /***********************************************************************************************************************/

@@ -17,15 +17,15 @@
 **
 ************************************************************************************************************************/
 
-// assembly action:
-
-namespace machine {
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // action:
+
+namespace assembly {
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// space:
 
 	template<gkey_type, gkey_type, auto...> struct T_assembly_action;
 
@@ -45,14 +45,12 @@ namespace machine {
 		{
 			identity = 0, id = identity, // convenience for default params.
 
-			generic,
+			push, delay, force, generic,
 			aatN, aat0_x_aatN, aat1_x_aatN, aat2_x_aatN,
 			list, arg, lookup, literal,
-			back,
-
-			pad,
+			solve, resolve,
+			pad, eval, back,
 			go_to, branch, invert,
-			eval,
 
 			dimension
 		};
@@ -68,9 +66,9 @@ namespace machine {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
+			instr, jump, call,
 			list, arg, lookup, literal,
-			replace,
-			begin, end,
+			replace, begin, end,
 			variable, parameter,
 			dimension
 		};
@@ -78,9 +76,46 @@ namespace machine {
 	}; using AAT = AssemblyActionNote;
 
 /***********************************************************************************************************************/
+
+// push:
+
+	// instr:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::push, AAT::instr, filler...> :
+			public T_machine_action<MAN::push, MAT::instr> { };
+
 /***********************************************************************************************************************/
 
-// space:
+// delay:
+
+	// jump:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::delay, AAT::jump, filler...> :
+			public T_machine_action<MAN::delay, MAT::jump> { };
+
+	// call:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::delay, AAT::call, filler...> :
+			public T_machine_action<MAN::delay, MAT::call> { };
+
+/***********************************************************************************************************************/
+
+// force:
+
+	// jump:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::force, AAT::jump, filler...> :
+			public T_machine_action<MAN::force, MAT::jump> { };
+
+	// call:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::force, AAT::call, filler...> :
+			public T_machine_action<MAN::force, MAT::call> { };
 
 /***********************************************************************************************************************/
 
@@ -95,7 +130,7 @@ namespace machine {
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex list_at)
-				{ machine_action<MAN::push, MAT::instr>(contr, AN::list, note, list_at); }
+				{ assembly_action<AAN::push, AAT::instr>(contr, AN::list, note, list_at); }
 		};
 
 	// arg:
@@ -109,8 +144,8 @@ namespace machine {
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex arg_at, cbool mutate = false)
 			{
-				machine_action<MAN::push, MAT::instr>(contr, AN::arg, AT::select, arg_at);
-				machine_action<MAN::push, MAT::instr>(contr, AN::arg, note, mutate);
+				assembly_action<AAN::push, AAT::instr>(contr, AN::arg, AT::select, arg_at);
+				assembly_action<AAN::push, AAT::instr>(contr, AN::arg, note, mutate);
 			}
 		};
 
@@ -123,7 +158,7 @@ namespace machine {
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex pos, cindex num)
-				{ machine_action<MAN::push, MAT::instr>(contr, AN::lookup, note, pos, num); }
+				{ assembly_action<AAN::push, AAT::instr>(contr, AN::lookup, note, pos, num); }
 		};
 
 	// literal:
@@ -134,16 +169,16 @@ namespace machine {
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note0, cindex str_at, cindex note1, cindex begin, cindex end)
+			nik_ces void result(Contr *contr, cindex note, cindex str_at, cindex name, cindex begin, cindex end)
 			{
-				machine_action< MAN::delay   , MAT::call >(contr, AN::literal, note0, str_at);
-				literal_action< LAN::resolve , LAT::id   >(contr, note1, begin, end);
-				machine_action< MAN::force   , MAT::call >(contr);
+				assembly_action< AAN::delay , AAT::call >(contr, AN::literal, note, str_at);
+				assembly_action< AAN::solve , AAT::id   >(contr, name, begin, end);
+				assembly_action< AAN::force , AAT::call >(contr);
 			}
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note0, cindex note1, cindex begin, cindex end)
-				{ result(contr, note0, contr->src_at, note1, begin, end); }
+			nik_ces void result(Contr *contr, cindex note, cindex name, cindex begin, cindex end)
+				{ result(contr, note, contr->src_at, name, begin, end); }
 		};
 
 /***********************************************************************************************************************/
@@ -245,6 +280,38 @@ namespace machine {
 
 /***********************************************************************************************************************/
 
+// solve:
+
+	// id:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::solve, AAT::id, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex name, cindex begin, cindex end)
+				{ assembly_action<AAN::push, AAT::instr>(contr, name, AT::id, begin, end); }
+		};
+
+/***********************************************************************************************************************/
+
+// resolve:
+
+	// id:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::resolve, AAT::id, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex name, cindex begin, cindex end)
+				{ assembly_action<AAN::push, AAT::instr>(contr, name, AT::port, begin, end); }
+		};
+
+/***********************************************************************************************************************/
+
 // pad:
 
 	// id:
@@ -257,97 +324,9 @@ namespace machine {
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex pad_size, cindex note)
 			{
-				machine_action<MAN::push, MAT::instr>(contr, AN::pad, AT::select, pad_size);
-				machine_action<MAN::push, MAT::instr>(contr, AN::pad, note);
+				assembly_action<AAN::push, AAT::instr>(contr, AN::pad, AT::select, pad_size);
+				assembly_action<AAN::push, AAT::instr>(contr, AN::pad, note);
 			}
-		};
-
-/***********************************************************************************************************************/
-
-// goto:
-
-	// id:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::go_to, AAT::id, filler...>
-		{
-			template<typename Contr>
-			nik_ces void result(Contr *contr)
-				{ machine_action<MAN::push, MAT::instr>(contr, AN::go_to, AT::id); }
-		};
-
-	// begin:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::go_to, AAT::begin, filler...>
-		{
-			template<typename Contr>
-			nik_ces void result(Contr *contr)
-				{ machine_action<MAN::delay, MAT::jump>(contr, AN::go_to, AT::id); }
-		};
-
-	// end:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::go_to, AAT::end, filler...>
-		{
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex offset = 0)
-				{ machine_action<MAN::force, MAT::jump>(contr, offset); }
-		};
-
-/***********************************************************************************************************************/
-
-// branch:
-
-	// begin:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::branch, AAT::begin, filler...>
-		{
-			template<typename Contr>
-			nik_ces void result(Contr *contr)
-				{ machine_action<MAN::delay, MAT::jump>(contr, AN::branch, AT::id); }
-		};
-
-	// end:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::branch, AAT::end, filler...>
-		{
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex offset = 0)
-				{ machine_action<MAN::force, MAT::jump>(contr, offset); }
-		};
-
-/***********************************************************************************************************************/
-
-// invert:
-
-	// begin:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::invert, AAT::begin, filler...>
-		{
-			template<typename Contr>
-			nik_ces void result(Contr *contr)
-				{ machine_action<MAN::delay, MAT::jump>(contr, AN::invert, AT::id); }
-		};
-
-	// end:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::invert, AAT::end, filler...>
-		{
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex offset = 0)
-				{ machine_action<MAN::force, MAT::jump>(contr, offset); }
 		};
 
 /***********************************************************************************************************************/
@@ -361,7 +340,7 @@ namespace machine {
 		{
 			template<typename Contr>
 			nik_ces void result(Contr *contr)
-				{ machine_action<MAN::push, MAT::instr>(contr, AN::id, AT::id); }
+				{ assembly_action<AAN::push, AAT::instr>(contr, AN::id, AT::id); }
 		};
 
 	// end:
@@ -373,24 +352,24 @@ namespace machine {
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note)
-				{ machine_action<MAN::push, MAT::instr>(contr, AN::halt, note); }
+				{ assembly_action<AAN::push, AAT::instr>(contr, AN::halt, note); }
 		};
 
 /***********************************************************************************************************************/
 
-// eval:
+// literal:
 
 	// begin:
 
 		template<auto... filler>
-		struct T_assembly_action<AAN::eval, AAT::begin, filler...>
+		struct T_assembly_action<AAN::literal, AAT::begin, filler...>
 		{
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note)
+			nik_ces void result(Contr *contr, cindex note, cindex str_at)
 			{
-				 machine_action< MAN::delay , MAT::call  >(contr, AN::eval, note);
+				assembly_action< AAN::delay , AAT::call  >(contr, AN::literal, note, str_at);
 				assembly_action< AAN::id    , AAT::begin >(contr);
 			}
 		};
@@ -398,7 +377,7 @@ namespace machine {
 	// end:
 
 		template<auto... filler>
-		struct T_assembly_action<AAN::eval, AAT::end, filler...>
+		struct T_assembly_action<AAN::literal, AAT::end, filler...>
 		{
 			using cindex = gcindex_type;
 
@@ -409,7 +388,7 @@ namespace machine {
 				assembly_action< AAN::generic , AAT::arg  >(contr, AT::drop, arg_drop);
 
 				assembly_action< AAN::id      , AAT::end  >(contr, note);
-				 machine_action< MAN::force   , MAT::call >(contr);
+				assembly_action< AAN::force   , AAT::call >(contr);
 			}
 		};
 
@@ -428,16 +407,53 @@ namespace machine {
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr,
-				cindex note0, cindex str_at, cindex note1, cindex begin, cindex end)
+				cindex note, cindex str_at, cindex name, cindex begin, cindex end)
 			{
-				assembly_action< AAN::eval    , AAT::begin   >(contr, note0);
-				assembly_action< AAN::generic , AAT::literal >(contr, AT::first, str_at, note1, begin, end);
-				assembly_action< AAN::eval    , AAT::end     >(contr, arg_drop, AT::first);
+				assembly_action< AAN::literal , AAT::begin >(contr, note, str_at);
+				assembly_action< AAN::solve   , AAT::id    >(contr, name, begin, end);
+				assembly_action< AAN::literal , AAT::end   >(contr, arg_drop, AT::first);
 			}
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note0, cindex note1, cindex begin, cindex end)
-				{ result(contr, note0, contr->src_at, note1, begin, end); }
+			nik_ces void result(Contr *contr, cindex note, cindex name, cindex begin, cindex end)
+				{ result(contr, note, contr->src_at, name, begin, end); }
+		};
+
+/***********************************************************************************************************************/
+
+// eval:
+
+	// begin:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::eval, AAT::begin, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex note)
+			{
+				assembly_action< AAN::delay , AAT::call  >(contr, AN::eval, note);
+				assembly_action< AAN::id    , AAT::begin >(contr);
+			}
+		};
+
+	// end:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::eval, AAT::end, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex arg_drop, cindex note)
+			{
+				if (arg_drop)
+				assembly_action< AAN::generic , AAT::arg  >(contr, AT::drop, arg_drop);
+
+				assembly_action< AAN::id      , AAT::end  >(contr, note);
+				assembly_action< AAN::force   , AAT::call >(contr);
+			}
 		};
 
 /***********************************************************************************************************************/
@@ -478,8 +494,130 @@ namespace machine {
 		};
 
 /***********************************************************************************************************************/
+
+// goto:
+
+	// id:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::go_to, AAT::id, filler...>
+		{
+			template<typename Contr>
+			nik_ces void result(Contr *contr)
+				{ assembly_action<AAN::push, AAT::instr>(contr, AN::go_to, AT::id); }
+		};
+
+	// begin:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::go_to, AAT::begin, filler...>
+		{
+			template<typename Contr>
+			nik_ces void result(Contr *contr)
+				{ assembly_action<AAN::delay, AAT::jump>(contr, AN::go_to, AT::id); }
+		};
+
+	// end:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::go_to, AAT::end, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex offset = 0)
+				{ assembly_action<AAN::force, AAT::jump>(contr, offset); }
+		};
+
+/***********************************************************************************************************************/
+
+// branch:
+
+	// begin:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::branch, AAT::begin, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex note, cindex num = 0)
+				{ assembly_action<AAN::delay, AAT::jump>(contr, AN::branch, note); }
+		};
+
+	// lookup:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::branch, AAT::lookup, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex pos, cindex num)
+			{
+				assembly_action< AAN::generic , AAT::lookup >(contr, AT::push, pos, num);
+				assembly_action< AAN::branch  , AAT::begin  >(contr, AT::pull);
+			}
+		};
+
+	// end:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::branch, AAT::end, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex offset = 0)
+				{ assembly_action<AAN::force, AAT::jump>(contr, offset); }
+		};
+
+/***********************************************************************************************************************/
+
+// invert:
+
+	// begin:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::invert, AAT::begin, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex note, cindex num = 0)
+				{ assembly_action<AAN::delay, AAT::jump>(contr, AN::invert, note); }
+		};
+
+	// lookup:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::invert, AAT::lookup, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex pos, cindex num)
+			{
+				assembly_action< AAN::generic , AAT::lookup >(contr, AT::push, pos, num);
+				assembly_action< AAN::invert  , AAT::begin  >(contr, AT::pull);
+			}
+		};
+
+	// end:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::invert, AAT::end, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex offset = 0)
+				{ assembly_action<AAN::force, AAT::jump>(contr, offset); }
+		};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace machine
+} // namespace assembly
 

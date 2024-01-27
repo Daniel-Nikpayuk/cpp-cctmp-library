@@ -30,26 +30,12 @@ namespace hustle {
 	template<typename T>
 	nik_ce auto U_store_T					= cctmp::U_store_T<T>;
 
-// machine:
+// assembly:
 
-	// machine (temporary?):
-
-		using MAN					= machine::MAN;
-		using MAT					= machine::MAT;
-
-	// literal:
-
-		using LN					= machine::LN;
-		using LT					= machine::LT;
-		using LAN					= machine::LAN;
-		using LAT					= machine::LAT;
-
-	// assembly:
-
-		using AN					= machine::AN;
-		using AT					= machine::AT;
-		using AAN					= machine::AAN;
-		using AAT					= machine::AAT;
+	using AN						= assembly::AN;
+	using AT						= assembly::AT;
+	using AAN						= assembly::AAN;
+	using AAT						= assembly::AAT;
 
 // generator:
 
@@ -65,38 +51,20 @@ namespace hustle {
 	{
 		nik_ces auto value			= cctmp::string_literal
 							{
-								"equal"
-								"add"
-								"multiply"
-								"subtract"
-								"divide"
+								"false"
+								"true"
 							};
 		using type				= decltype(value);
 
-		nik_ces gindex_type equal_start		= 0;
-		nik_ces gindex_type equal_size		= 5;
-		nik_ces gindex_type equal_finish	= value.size() - (equal_start + equal_size);
-		nik_ces auto equal_cselect		= value.cselect(equal_start, equal_finish);
+		nik_ces gindex_type false_start		= 0;
+		nik_ces gindex_type false_size		= 5;
+		nik_ces gindex_type false_finish	= value.size() - (false_start + false_size);
+		nik_ces auto false_cselect		= value.cselect(false_start, false_finish);
 
-		nik_ces gindex_type add_start		= equal_start + equal_size;
-		nik_ces gindex_type add_size		= 3;
-		nik_ces gindex_type add_finish		= value.size() - (add_start + add_size);
-		nik_ces auto add_cselect		= value.cselect(add_start, add_finish);
-
-		nik_ces gindex_type multiply_start	= add_start + add_size;
-		nik_ces gindex_type multiply_size	= 8;
-		nik_ces gindex_type multiply_finish	= value.size() - (multiply_start + multiply_size);
-		nik_ces auto multiply_cselect		= value.cselect(multiply_start, multiply_finish);
-
-		nik_ces gindex_type subtract_start	= multiply_start + multiply_size;
-		nik_ces gindex_type subtract_size	= 8;
-		nik_ces gindex_type subtract_finish	= value.size() - (subtract_start + subtract_size);
-		nik_ces auto subtract_cselect		= value.cselect(subtract_start, subtract_finish);
-
-		nik_ces gindex_type divide_start	= subtract_start + subtract_size;
-		nik_ces gindex_type divide_size		= 6;
-		nik_ces gindex_type divide_finish	= value.size() - (divide_start + divide_size);
-		nik_ces auto divide_cselect		= value.cselect(divide_start, divide_finish);
+		nik_ces gindex_type true_start		= false_start + false_size;
+		nik_ces gindex_type true_size		= 4;
+		nik_ces gindex_type true_finish		= value.size() - (true_start + true_size);
+		nik_ces auto true_cselect		= value.cselect(true_start, true_finish);
 
 	}; nik_ce auto _hustle_subsource_ = U_store_T<T_hustle_subsource>;
 
@@ -124,7 +92,6 @@ namespace hustle {
 				main_end,
 				main_name,
 				main_arg,
-
 			// define:
 
 				define_name,
@@ -132,28 +99,32 @@ namespace hustle {
 				define_body,
 				define_end,
 
-			// type:
+			// port:
 
-				type_number,
-			//	type_zero,
+				port_lookup,
+				port_number,
 
 			// return:
 
-				return_boolean,
 				return_number,
 				return_character,
 				return_string,
+				return_false,
+				return_true,
 				return_lookup,
-
-			// if:
-
-				if_ante,
-				if_conse,
-				if_end,
 
 			// pred:
 
 				pred_end,
+
+			// if:
+
+				if_deduce,
+				if_lookup,
+				if_number,
+				if_ante,
+				if_conse,
+				if_end,
 
 			// op:
 
@@ -222,8 +193,7 @@ namespace hustle {
 				t->template assembly_action< AAN::id  , AAT::begin >();
 				t->template assembly_action< AAN::pad , AAT::id    >(pad_size, AT::front);
 
-				t->verse_size += pad_size;
-				t->arg_size   += pad_size;
+				t->inc_verse(pad_size);
 			}
 		};
 
@@ -247,9 +217,9 @@ namespace hustle {
 			{
 				using pound_var_type = typename AST::pound_var_type;
 
+				auto left = 0;
 				auto ins  = 0;
-				auto left = t->verse_size;
-				auto val  = pound_var_type(ins, left, t->cur_env);
+				auto val  = pound_var_type(left, ins, t->cur_env);
 				t->entry  = t->model.define_compound(l->left_cselect(), val, t->cur_env);
 			}
 		};
@@ -264,9 +234,8 @@ namespace hustle {
 			{
 				using arg_var_type = typename AST::arg_var_type;
 
-				auto val = arg_var_type{t->verse_size++};
+				auto val = arg_var_type{t->push_verse()};
 				t->model.define_variable(l->left_cselect(), val, t->cur_env);
-				++t->arg_size;
 			}
 		};
 
@@ -284,14 +253,14 @@ namespace hustle {
 			{
 				using pound_var_type = typename AST::pound_var_type;
 
-				auto ins   = t->contr.current(2);
-				auto left  = t->verse_size;
-				auto args  = t->arg_size;
-				auto val   = pound_var_type(ins, left, t->cur_env);
-				auto env   = t->extend_env();
+				auto left = t->verse_size;
+				auto ins  = t->contr.current(2);
+				auto args = t->arg_size;
+				auto val  = pound_var_type(left, ins, t->cur_env);
+				auto env  = t->extend_env();
+				t->entry  = t->model.define_compound(l->left_cselect(), val, env);
 
-				t->arg_size = t->verse_size;
-				t->model.define_compound(l->left_cselect(), val, env);
+				t->reset_args();
 				t->pound.push(args, left, env);
 			}
 		};
@@ -306,9 +275,8 @@ namespace hustle {
 			{
 				using arg_var_type = typename AST::arg_var_type;
 
-				auto val = arg_var_type{t->verse_size++};
+				auto val = arg_var_type{t->push_verse()};
 				t->model.define_variable(l->left_cselect(), val, t->cur_env);
-				++t->arg_size;
 			}
 		};
 
@@ -347,41 +315,51 @@ namespace hustle {
 
 /***********************************************************************************************************************/
 
-// type:
+// port:
+
+	// lookup:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::port_lookup, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				using Compound = typename AST::pound_var_type::Compound;
+				auto record    = t->cmodel.match_variable(l->left_cselect());
+
+				if (t->cmrec_match(record))
+				{
+					auto path = t->cmrec_entry(record);
+
+					t->model.set_value(t->entry, Compound::kind, 1); // magic number.
+					t->model.set_value(t->entry, Compound::port, path.v0);
+					t->model.set_value(t->entry, Compound::aux , path.v1);
+				}
+				else { } // error.
+			}
+		};
 
 	// number:
 
 		template<auto... filler>
-		struct T_hustle_translation_action<HAAN::type_number, filler...>
+		struct T_hustle_translation_action<HAAN::port_number, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
 				using Compound = typename AST::pound_var_type::Compound;
 
-				t->model.set_value(t->entry, Compound::typ_at, l->to_number());
+				t->model.set_value(t->entry, Compound::kind, 2); // magic number.
+				t->model.set_value(t->entry, Compound::port, l->to_number());
 			}
 		};
-
-	// zero:
-
-	//	template<auto... filler>
-	//	struct T_hustle_translation_action<HAAN::type_zero, filler...>
-	//	{
-	//		template<typename AST>
-	//		nik_ces void result(AST *t, clexeme *l)
-	//		{
-	//			using Compound = typename AST::pound_var_type::Compound;
-
-	//			t->model.set_value(t->entry, Compound::typ_at, 0);
-	//		}
-	//	};
 
 /***********************************************************************************************************************/
 
 // return:
 
-	template<auto note, auto... filler>
+	template<auto lit_name, auto... filler>
 	struct T_literal_return_action
 	{
 		using cindex = gindex_type;
@@ -392,34 +370,58 @@ namespace hustle {
 			auto b = t->left_size(l->cbegin());
 			auto e = t->left_size(l->ccurrent());
 
-			t->template assembly_action<AAN::literal, AAT::id>(t->ret_policy, note, b, e);
-			if (t->ret_policy == AT::back) ++t->arg_size;
+			t->template assembly_action<AAN::literal, AAT::id>(t->ret_note, lit_name, b, e);
+			t->inc_args_if();
 		}
 	};
-
-	// boolean:
-
-		template<auto... filler>
-		struct T_hustle_translation_action<HAAN::return_boolean, filler...> :
-			public T_literal_return_action<LT::boolean> { };
 
 	// number:
 
 		template<auto... filler>
 		struct T_hustle_translation_action<HAAN::return_number, filler...> :
-			public T_literal_return_action<LT::number> { };
+			public T_literal_return_action<AN::number> { };
 
 	// character:
 
 		template<auto... filler>
 		struct T_hustle_translation_action<HAAN::return_character, filler...> :
-			public T_literal_return_action<LT::character> { };
+			public T_literal_return_action<AN::character> { };
 
 	// string:
 
 		template<auto... filler>
 		struct T_hustle_translation_action<HAAN::return_string, filler...> :
-			public T_literal_return_action<LT::string> { };
+			public T_literal_return_action<AN::string> { };
+
+	// false:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::return_false, filler...>
+		{
+			using cindex = gindex_type;
+
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				t->template assembly_action<AAN::push, AAT::instr>(AN::boolean, t->ret_note, false);
+				t->inc_args_if();
+			}
+		};
+
+	// true:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::return_true, filler...>
+		{
+			using cindex = gindex_type;
+
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				t->template assembly_action<AAN::push, AAT::instr>(AN::boolean, t->ret_note, true);
+				t->inc_args_if();
+			}
+		};
 
 	// lookup:
 
@@ -429,8 +431,28 @@ namespace hustle {
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->lookup_variable_action(l->left_cselect(), t->ret_policy);
-				if (t->ret_policy == AT::back) ++t->arg_size;
+				t->lookup_variable_action(l->left_cselect(), t->ret_note);
+				t->inc_args_if();
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// pred:
+
+	// end:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::pred_end, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				auto contr_pos = t->contr.current();
+				auto instr_pos = cctmp::Instr::note;
+				auto value     = AT::first;
+
+				t->contr.set_instr_value(contr_pos, instr_pos, value);
 			}
 		};
 
@@ -438,14 +460,70 @@ namespace hustle {
 
 // if:
 
+	// deduce:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::if_deduce, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->asm_note = AT::id; }
+		};
+
+	// lookup:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::if_lookup, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				auto record = t->cmodel.match_variable(l->left_cselect());
+				auto path   = t->cmrec_entry(record);
+
+				t->asm_note = AT::pull;
+				t->asm_pos  = path.v0;
+				t->asm_num  = path.v1;
+			}
+		};
+
+	// number:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::if_number, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				t->asm_note = AT::port;
+				t->asm_num  = l->to_number();
+			}
+		};
+
 	// ante:
 
 		template<auto... filler>
 		struct T_hustle_translation_action<HAAN::if_ante, filler...>
 		{
 			template<typename AST>
+			nik_ces void lookup(AST *t)
+				{ t->template assembly_action<AAN::invert, AAT::lookup>(t->asm_pos, t->asm_num); }
+
+			template<typename AST>
+			nik_ces void number(AST *t)
+				{ t->template assembly_action<AAN::invert, AAT::begin>(AT::port, t->asm_num); }
+
+			template<typename AST>
+			nik_ces void deduce(AST *t)
+				{ t->template assembly_action<AAN::invert, AAT::begin>(AT::id); }
+
+			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->template assembly_action<AAN::invert, AAT::begin>(); }
+			{
+				if      (t->asm_note == AT::pull) lookup(t);
+				else if (t->asm_note == AT::port) number(t);
+				else                              deduce(t);
+			}
 		};
 
 	// conse:
@@ -475,26 +553,6 @@ namespace hustle {
 
 /***********************************************************************************************************************/
 
-// pred:
-
-	// end:
-
-		template<auto... filler>
-		struct T_hustle_translation_action<HAAN::pred_end, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-			{
-				auto contr_pos = t->contr.current();
-				auto instr_pos = cctmp::Instr::note;
-				auto value     = AT::first;
-
-				t->contr.set_instr_value(contr_pos, instr_pos, value);
-			}
-		};
-
-/***********************************************************************************************************************/
-
 // op:
 
 	// lookup:
@@ -505,18 +563,16 @@ namespace hustle {
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				auto str      = l->left_cselect();
-				auto record   = t->lookup_variable(str);
-				auto match    = record.v0;
-				auto entry    = record.v1;
-				auto is_pound = (match && t->model.is_compound(entry));
-				auto policy   = t->ret_policy;
+				auto str       = l->left_cselect();
+				auto record    = t->lookup_variable(str);
+				auto is_pound  = t->is_compound(record);
+				auto cret_note = t->ret_note;
+				auto centry    = t->entry;
 
-				t->ent.push(t->entry); // temporary.
-				t->entry      = entry; // push/pop ?
-				t->ret_policy = AT::back;
-				t->call.push(is_pound, t->arg_size++, policy);
-				t->lookup_variable_action(str, record, t->ret_policy);
+				t->ret_note    = AT::back;
+				t->entry       = t->mrec_entry(record);
+				t->call.push(is_pound, t->push_args(), cret_note, centry);
+				t->lookup_variable_action(str, record, t->ret_note);
 			}
 		};
 
@@ -532,22 +588,22 @@ namespace hustle {
 			{
 				using Compound = typename AST::pound_var_type::Compound;
 
-				auto pop    = t->call.pop();
-				auto note   = pop[0] ? AT::verse : AT::select;
-				auto name   = pop[0] ? AN::bind : AN::apply;
-				auto drop   = pop[1];
-				auto policy = pop[2];
-				auto type   = t->model.get_value(t->entry, Compound::typ_at);
-				auto left   = t->model.get_value(t->entry, Compound::left);
+				auto pop      = t->call.pop();
+				auto note     = pop[0] ? AT::verse : AT::select;
+				auto name     = pop[0] ? AN::bind : AN::apply;
+				auto drop     = pop[1];
+				auto ret_note = pop[2];
 
-				auto pos    = pop[0] ? left : drop;
-				auto num    = pop[0] ? drop : 0;
+				auto left     = t->model.get_value(t->entry, Compound::left);
+				auto pos      = pop[0] ? left : drop;
+				auto num      = pop[0] ? drop : 0;
 
-				t->entry    = t->ent.pop(); // temporary.
-				t->ret_policy = policy;
-				t->arg_size   = drop + (policy == AT::back);
-				t->template machine_action<MAN::push, MAT::instr>(AN::arg, note, pos, num);
-				t->template machine_action<MAN::push, MAT::instr>(name, policy, type);
+				t->ret_note   = ret_note;
+				t->entry      = pop[3];
+				t->arg_size   = drop + (ret_note == AT::back);
+
+				t->template assembly_action<AAN::push, AAT::instr>(AN::arg, note, pos, num);
+				t->template assembly_action<AAN::push, AAT::instr>(name, ret_note);
 			}
 		};
 

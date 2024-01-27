@@ -71,15 +71,13 @@ namespace hustle {
 	template<auto... Vs>
 	nik_ce auto stem_					= cctmp::stem_<Vs...>;
 
-	nik_ce auto _read_only_					= cctmp::_read_only_;
-
 	nik_ce auto H_env_lookup				= cctmp::H_env_lookup;
 	nik_ce auto H_env_tuple					= cctmp::H_env_tuple;
 
-// machine:
+// assembly:
 
 	template<auto... Vs>
-	using T_assembly_compound				= machine::T_assembly_compound<Vs...>;
+	using T_assembly_compound				= assembly::T_assembly_compound<Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -89,13 +87,16 @@ namespace hustle {
 
 /***********************************************************************************************************************/
 
-// operator:
+// default:
 
-	nik_ce auto hustle_operator_frame_callable()
+	nik_ce auto hustle_default_frame_callable()
 	{
 		return cctmp::frame
 		(
 		 	U_gchar_type,
+
+			cctmp::binding( "false"      , false                          ),
+			cctmp::binding( "true"       , true                           ),
 
 			cctmp::binding( "not"        , cctmp::_not_                   ),
 			cctmp::binding( "and"        , cctmp::_and_                   ),
@@ -117,7 +118,7 @@ namespace hustle {
 		);
 	};
 
-	nik_ce auto hustle_operator_frame = _static_callable_<hustle_operator_frame_callable>;
+	nik_ce auto hustle_default_frame = _static_callable_<hustle_default_frame_callable>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -216,7 +217,7 @@ namespace hustle {
 		nik_ces auto static_source		= _static_car_<static_pair>;
 		nik_ces auto static_frame		= _static_cdr_<static_pair>;
 
-		nik_ces auto op_env			= push_<initial_env, hustle_operator_frame>;
+		nik_ces auto op_env			= push_<initial_env, hustle_default_frame>;
 		nik_ces bool sf_is_empty		= member_value_U<static_frame>.is_empty();
 		nik_ces auto static_env			= stem_<sf_is_empty, op_env, _cons_, H_id, op_env, static_frame>;
 		nik_ces auto static_env_lookup		= unpack_<static_env, _to_list_, H_env_lookup>;
@@ -255,14 +256,15 @@ namespace hustle {
 	nik_ce auto hustle_apply(Ts... vs)
 	{
 		using metapile		= hustle_metapile<callable_source, initial_env>;
-		nik_ce auto contr	= _hustle_function_contr_<metapile::static_space>;
-		       auto pound	= T_assembly_compound<contr, gindex_type{0}>{};
 
-		nik_ce auto out_type	= car_<out_types>;
+		nik_ce auto contr	= _hustle_function_contr_<metapile::static_space>;
+		nik_ce auto zero	= gindex_type{0};
+		using pound		= T_assembly_compound<contr, zero>;
+
 		nik_ce auto list	= U_pack_Vs<metapile::static_source, _hustle_subsource_>;
 		nik_ce auto lookup	= metapile::static_env_tuple;
 
-		return pound.template result<out_type, list, lookup, out_types, Ts...>(vs...);
+		return pound::template result<list, lookup, out_types, zero, Ts...>(vs...);
 	}
 
 /***********************************************************************************************************************/
