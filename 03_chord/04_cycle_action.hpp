@@ -87,7 +87,7 @@ namespace chord {
 // option:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_option_amp, filler...>
+	struct T_chord_translation_action<CAAN::cyc_option_amp, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l) // ast alignment with camp:
@@ -98,7 +98,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_option_cont, filler...>
+	struct T_chord_translation_action<CAAN::cyc_option_cont, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -109,7 +109,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_option_begin, filler...>
+	struct T_chord_translation_action<CAAN::cyc_option_begin, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -117,7 +117,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_option_end, filler...>
+	struct T_chord_translation_action<CAAN::cyc_option_end, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -127,7 +127,7 @@ namespace chord {
 // op, val:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_op_value, filler...>
+	struct T_chord_translation_action<CAAN::cyc_op_value, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -139,7 +139,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_value, filler...>
+	struct T_chord_translation_action<CAAN::cyc_value, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -152,7 +152,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_id, filler...>
+	struct T_chord_translation_action<CAAN::cyc_id, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -160,7 +160,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_deref, filler...>
+	struct T_chord_translation_action<CAAN::cyc_deref, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -170,9 +170,9 @@ namespace chord {
 // combine:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_combine_rest2, filler...>
+	struct T_chord_translation_action<CAAN::cyc_combine_rest2, filler...>
 	{
-		using T_cyc_combine_rest1 = T_chord_assembly_translation_action<CAAN::cyc_combine_rest1, filler...>;
+		using T_cyc_combine_rest1 = T_chord_translation_action<CAAN::cyc_combine_rest1, filler...>;
 
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -183,7 +183,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_combine_rest1, filler...>
+	struct T_chord_translation_action<CAAN::cyc_combine_rest1, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -193,9 +193,9 @@ namespace chord {
 // action:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_action_defs, filler...>
+	struct T_chord_translation_action<CAAN::cyc_action_defs, filler...>
 	{
-		using T_cyc_action_rest = T_chord_assembly_translation_action<CAAN::cyc_action_rest, filler...>;
+		using T_cyc_action_rest = T_chord_translation_action<CAAN::cyc_action_rest, filler...>;
 
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -206,7 +206,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_action_rest, filler...>
+	struct T_chord_translation_action<CAAN::cyc_action_rest, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -220,7 +220,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_action_op_value, filler...>
+	struct T_chord_translation_action<CAAN::cyc_action_op_value, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -232,7 +232,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_action_op_id, filler...>
+	struct T_chord_translation_action<CAAN::cyc_action_op_id, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -240,7 +240,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_action_op_deref, filler...>
+	struct T_chord_translation_action<CAAN::cyc_action_op_deref, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -250,9 +250,9 @@ namespace chord {
 // mutate:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_mutate_defs, filler...>
+	struct T_chord_translation_action<CAAN::cyc_mutate_defs, filler...>
 	{
-		using T_cyc_mutate_rest2 = T_chord_assembly_translation_action<CAAN::cyc_mutate_rest2, filler...>;
+		using T_cyc_mutate_rest2 = T_chord_translation_action<CAAN::cyc_mutate_rest2, filler...>;
 
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -263,9 +263,9 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_mutate_rest2, filler...>
+	struct T_chord_translation_action<CAAN::cyc_mutate_rest2, filler...>
 	{
-		using T_cyc_mutate_rest1 = T_chord_assembly_translation_action<CAAN::cyc_mutate_rest1, filler...>;
+		using T_cyc_mutate_rest1 = T_chord_translation_action<CAAN::cyc_mutate_rest1, filler...>;
 
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -276,7 +276,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_mutate_rest1, filler...>
+	struct T_chord_translation_action<CAAN::cyc_mutate_rest1, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -286,9 +286,9 @@ namespace chord {
 // predicate:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_predicate_defs, filler...>
+	struct T_chord_translation_action<CAAN::cyc_predicate_defs, filler...>
 	{
-		using T_cyc_predicate_rest2 = T_chord_assembly_translation_action<CAAN::cyc_predicate_rest2, filler...>;
+		using T_cyc_predicate_rest2 = T_chord_translation_action<CAAN::cyc_predicate_rest2, filler...>;
 
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -299,9 +299,9 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_predicate_rest2, filler...>
+	struct T_chord_translation_action<CAAN::cyc_predicate_rest2, filler...>
 	{
-		using T_cyc_predicate_rest1 = T_chord_assembly_translation_action<CAAN::cyc_predicate_rest1, filler...>;
+		using T_cyc_predicate_rest1 = T_chord_translation_action<CAAN::cyc_predicate_rest1, filler...>;
 
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -312,7 +312,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_predicate_rest1, filler...>
+	struct T_chord_translation_action<CAAN::cyc_predicate_rest1, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -322,7 +322,7 @@ namespace chord {
 // interval:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_ival_left_closed, filler...>
+	struct T_chord_translation_action<CAAN::cyc_ival_left_closed, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -330,7 +330,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_ival_left_open, filler...>
+	struct T_chord_translation_action<CAAN::cyc_ival_left_open, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -338,7 +338,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_ival_right_closed, filler...>
+	struct T_chord_translation_action<CAAN::cyc_ival_right_closed, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -346,7 +346,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_ival_right_open, filler...>
+	struct T_chord_translation_action<CAAN::cyc_ival_right_open, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -354,7 +354,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_ival_fixed, filler...>
+	struct T_chord_translation_action<CAAN::cyc_ival_fixed, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -364,7 +364,7 @@ namespace chord {
 // iterator:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_iter_inc_dec, filler...>
+	struct T_chord_translation_action<CAAN::cyc_iter_inc_dec, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -372,7 +372,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_iter_dec_inc, filler...>
+	struct T_chord_translation_action<CAAN::cyc_iter_dec_inc, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -380,7 +380,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_iter_upsize, filler...>
+	struct T_chord_translation_action<CAAN::cyc_iter_upsize, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -388,7 +388,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_iter_pair, filler...>
+	struct T_chord_translation_action<CAAN::cyc_iter_pair, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -396,7 +396,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_iter_none, filler...>
+	struct T_chord_translation_action<CAAN::cyc_iter_none, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -404,7 +404,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_iter_value, filler...>
+	struct T_chord_translation_action<CAAN::cyc_iter_value, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -412,7 +412,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_iter_void, filler...>
+	struct T_chord_translation_action<CAAN::cyc_iter_void, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -422,7 +422,7 @@ namespace chord {
 // tonic:
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_tonic_inc_dec, filler...>
+	struct T_chord_translation_action<CAAN::cyc_tonic_inc_dec, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -430,7 +430,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_tonic_dec_inc, filler...>
+	struct T_chord_translation_action<CAAN::cyc_tonic_dec_inc, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -438,7 +438,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_tonic_pair, filler...>
+	struct T_chord_translation_action<CAAN::cyc_tonic_pair, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -446,7 +446,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_tonic_none, filler...>
+	struct T_chord_translation_action<CAAN::cyc_tonic_none, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -454,7 +454,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_tonic_value, filler...>
+	struct T_chord_translation_action<CAAN::cyc_tonic_value, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -462,7 +462,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_tonic_void, filler...>
+	struct T_chord_translation_action<CAAN::cyc_tonic_void, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -472,7 +472,7 @@ namespace chord {
 // (accept):
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_repeat, filler...>
+	struct T_chord_translation_action<CAAN::cyc_repeat, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -480,7 +480,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_map, filler...>
+	struct T_chord_translation_action<CAAN::cyc_map, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -488,7 +488,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_fold, filler...>
+	struct T_chord_translation_action<CAAN::cyc_fold, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -499,7 +499,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_find, filler...>
+	struct T_chord_translation_action<CAAN::cyc_find, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -507,7 +507,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_assembly_translation_action<CAAN::cyc_sift, filler...>
+	struct T_chord_translation_action<CAAN::cyc_sift, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)

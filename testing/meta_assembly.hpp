@@ -22,44 +22,35 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// names:
+// names:		// notes:
 
-	//	id      00
-	//	halt    01
-	//	pad     02
-	//	goto    03
-	//	branch  04
-	//	invert  05
-	//	literal 06
-	//	list    07
-	//	lookup  08
-	//	verse   09
-	//	arg     10
-	//	pound   11
-	//	apply   12
-	//	bind    13
-	//	eval    14
-
-/***********************************************************************************************************************/
-
-// notes:
-
-	//	id     00
-	//	first  01
-	//	select 02
-	//	front  03
-	//	back   04
-	//	push   05
-	//	drop   06
-	//	side   07
+	//	id        00	//	id       00
+	//	halt      01	//	first    01
+	//	boolean   02	//	first_rw 02
+	//	n_number  03	//	port     03
+	//	r_number  04	//	select   04
+	//	character 05	//	read     05
+	//	string    06	//	front    06
+	//	literal   07	//	back     07
+	//	list      08	//	back_ro  08
+	//	lookup    09	//	back_rw  09
+	//	arg       10	//	ante     10
+	//	pad       11	//	conse    11
+	//	pound     12	//	push     12
+	//	apply     13	//	pull     13
+	//	bind      14	//	drop     14
+	//	eval      15	//	verse    15
+	//	goto      16	//	side     16
+	//	branch    17	//	replace  17
+	//	invert    18
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+	template<auto static_contr>
 	void print_controller()
 	{
-		constexpr auto static_contr = hustle::metapile<_hustle_test_func, null_env>;
-		constexpr auto & contr      = member_value_U<static_contr>;
+		constexpr auto & contr = member_value_U<static_contr>;
 
 		for (auto k = 0; k != contr.size(); ++k)
 		{
@@ -156,20 +147,6 @@
 
 /***********************************************************************************************************************/
 
-		//	"(define (factorial (type 0) n) "
-		//	"  (if (= n 0)                  "
-		//	"    1                          "
-		//	"    (* n (factorial (- n 1)))  "
-		//	"  )                            "
-		//	")                              "
-
-		//	"(define (fib (type 0) n)            "
-		//	"  (if (< n 2)                       "
-		//	"    1                               "
-		//	"    (+ (fib (- n 1)) (fib (- n 2))) "
-		//	"  )                                 "
-		//	")                                   "
-
 		//	"(define (main n)                 "
 		//	"  (define (sq (type 0) m) * m m) "
 		//	"  (sq n)                         "
@@ -194,25 +171,102 @@
 		//	"  (sum-of-squares m n)                            "
 		//	")                                                 "
 
-		//	"(define (main n)                "
-		//	"  (define (factorial k)         "
-		//	"    (if (= k 0)                 "
-		//	"      1                         "
-		//	"      (* k (factorial (- k 1))) "
-		//	"    )                           "
+		//	"(define (factorial n) -> fact_t "
+		//	"  (if (= n 0)                   "
+		//	"    1                           "
+		//	"    (* n (factorial (- n 1)))   "
 		//	"  )                             "
-		//	"  (factorial n)                 "
 		//	")                               "
 
+		//	"(define (fib n) -> fib_t            "
+		//	"  (if (< n 2)                       "
+		//	"    1                               "
+		//	"    (+ (fib (- n 1)) (fib (- n 2))) "
+		//	"  )                                 "
+		//	")                                   "
+
 		//	"(define (main n)                  "
-		//	"  (define (factorial k p)         "
+		//	"  (define (factorial k) -> fact_t "
 		//	"    (if (= k 0)                   "
-		//	"      p                           "
-		//	"      (factorial (- k 1) (* k p)) "
+		//	"      1                           "
+		//	"      (* k (factorial (- k 1)))   "
 		//	"    )                             "
 		//	"  )                               "
-		//	"  (factorial n 1)                 "
+		//	"  (factorial n)                   "
 		//	")                                 "
+
+		//	"(define (main n)                    "
+		//	"  (define (factorial k p) -> fact_t "
+		//	"    (if (= k 0)                     "
+		//	"      p                             "
+		//	"      (factorial (- k 1) (* k p))   "
+		//	"    )                               "
+		//	"  )                                 "
+		//	"  (factorial n 1)                   "
+		//	")                                   "
+
+		//	"(define (sqrt x)                             "
+		//	"  (define (square y) (* y y))                "
+		//	"  (define (abs y) (if (< y zero) (- y) y))   "
+		//	"  (define (good-enough? guess y)             "
+		//	"    (< (abs (- (square guess) y)) tolerance) "
+		//	"  )                                          "
+		//	"  (define (average y z) (/ (+ y z) two))     "
+		//	"  (define (improve guess y)                  "
+		//	"    (average guess (/ y guess))              "
+		//	"  )                                          "
+		//	"  (define (sqrt-iter guess y) -> sqrt_t      "
+		//	"    (if (good-enough? guess y)               "
+		//	"      guess                                  "
+		//	"      (sqrt-iter (improve guess y) y)        "
+		//	"    )                                        "
+		//	"  )                                          "
+		//	"  (sqrt-iter one x)                          "
+		//	")                                            "
+
+		//	"(define (sqrt x)                             "
+		//	"  (define (square y) (* y y))                "
+		//	"  (define (abs y) (if (< y 0.0) (- y) y))    "
+		//	"  (define (good-enough? guess)               "
+		//	"    (< (abs (- (square guess) x)) tolerance) "
+		//	"  )                                          "
+		//	"  (define (average y z) (/ (+ y z) 2.0))     "
+		//	"  (define (improve guess)                    "
+		//	"    (average guess (/ x guess))              "
+		//	"  )                                          "
+		//	"  (define (sqrt-iter guess) -> sqrt_t        "
+		//	"    (if (good-enough? guess)                 "
+		//	"      guess                                  "
+		//	"      (sqrt-iter (improve guess))            "
+		//	"    )                                        "
+		//	"  )                                          "
+		//	"  (sqrt-iter 1.0)                            "
+		//	")                                            "
+
+/***********************************************************************************************************************/
+
+// hustle:
+
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+
+			, binding("fact_t", 0)
+		);
+	}
+
+	template<typename... OutTs>
+	struct hustle_test_op
+	{
+		constexpr static auto OutUs = U_pack_Ts<OutTs...>;
+
+		template<typename... Ts>
+		constexpr static auto result(Ts... vs)
+			{ return hustle::hustle_apply<_hustle_test_func, null_env, OutUs>(vs...); }
+
+	}; template<typename... OutTs>
+		constexpr auto _hustle_test_op_ = U_store_T<hustle_test_op<OutTs...>>;
 
 /***********************************************************************************************************************/
 

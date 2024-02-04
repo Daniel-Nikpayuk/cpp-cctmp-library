@@ -43,9 +43,13 @@ namespace cctmp {
 
 	template<typename T> struct store_match				{ using result = T; };
 	template<typename T> struct store_match<void(*)(T&)>		{ using result = T&; };
+	template<typename T> struct store_match<void(*&)(T&)>		{ using result = T&; };
 	template<typename T> struct store_match<void(*const)(T&)>	{ using result = T&; };
+	template<typename T> struct store_match<void(*const&)(T&)>	{ using result = T&; };
 	template<typename T> struct store_match<void(*)(T*)>		{ using result = T; };
+	template<typename T> struct store_match<void(*&)(T*)>		{ using result = T; };
 	template<typename T> struct store_match<void(*const)(T*)>	{ using result = T; };
+	template<typename T> struct store_match<void(*const&)(T*)>	{ using result = T; };
 
 	template<typename T>
 	using T_restore_T = typename store_match<T>::result;

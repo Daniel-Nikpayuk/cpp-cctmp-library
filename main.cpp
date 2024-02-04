@@ -49,25 +49,24 @@
 #include"01_assembly/02_application.hpp"
 #include"01_assembly/03_conditional.hpp"
 #include"01_assembly/04_action.hpp"
+#include"01_assembly/05_syntax.hpp"
 
 #include"02_generator/00_ll_lexer.hpp"
 #include"02_generator/01_ll_syntax.hpp"
 #include"02_generator/02_ll_parser.hpp"
 #include"02_generator/03_ll_table.hpp"
 
-//#include"03_chord/00_lexer.hpp"
-//#include"03_chord/01_assembly_action.hpp"
-//#include"03_chord/02_morph_action.hpp"
-//#include"03_chord/03_cycle_action.hpp"
-//#include"03_chord/04_syntax.hpp"
-//#include"03_chord/05_parser.hpp"
-//#include"03_chord/06_metapiler.hpp"
+#include"03_chord/00_lexer.hpp"
+#include"03_chord/01_parser.hpp"
+#include"03_chord/02_generic_action.hpp"
+#include"03_chord/03_morph_action.hpp"
+//#include"03_chord/04_cycle_action.hpp"
+#include"03_chord/05_metapiler.hpp"
 
 #include"04_hustle/00_lexer.hpp"
-#include"04_hustle/01_action.hpp"
-#include"04_hustle/02_syntax.hpp"
-#include"04_hustle/03_parser.hpp"
-#include"04_hustle/04_metapiler.hpp"
+#include"04_hustle/01_parser.hpp"
+#include"04_hustle/02_action.hpp"
+#include"04_hustle/03_metapiler.hpp"
 
 //#include"05_math/00_byte_ring.hpp"
 //#include"05_math/01_byte_array_ring.hpp"
@@ -129,34 +128,55 @@
 	{
 		return source
 	        (
-			"(define (main n)                    "
+			"(define (sqrt x)                             "
 
-			"  (define (factorial k p) -> fact_t "
-			"    (if (= k 0)                     "
-			"      p                             "
-			"      (factorial (- k 1) (* k p))   "
-			"    )                               "
-			"  )                                 "
+			"  (define (square y) (* y y))                "
+			"  (define (abs y) (if (< y 0.0) (- y) y))    "
+			"  (define (good-enough? guess)               "
+			"    (< (abs (- (square guess) x)) tolerance) "
+			"  )                                          "
 
-			"  (factorial n 1)                   "
-			")                                   "
+			"  (define (average y z) (/ (+ y z) 2.0))     "
+			"  (define (improve guess)                    "
+			"    (average guess (/ x guess))              "
+			"  )                                          "
 
-			, binding("fact_t", 0)	// translation: the type is
-						// at (deferred) location 0.
+			"  (define (sqrt-iter guess) -> sqrt_t        "
+			"    (if (good-enough? guess)                 "
+			"      guess                                  "
+			"      (sqrt-iter (improve guess))            "
+			"    )                                        "
+			"  )                                          "
+
+			"  (sqrt-iter 1.0)                            "
+			")                                            "
+
+			, binding( "tolerance" , 0.00000000001 )
+			, binding( "sqrt_t"    , 0             )
 		);
 	}
 
-	template<typename... OutTs>
-	struct hustle_test_op
+/***********************************************************************************************************************/
+
+// chord:
+
+	constexpr auto _chord_test_func()
 	{
-		constexpr static auto OutUs = U_pack_Ts<OutTs...>;
+		return source
+	        (
+			"main x                        ;"
 
-		template<typename... Ts>
-		constexpr static auto result(Ts... vs)
-			{ return hustle::hustle_apply<_hustle_test_func, null_env, OutUs>(vs...); }
+			"vars:                         ;"
+			"declare sq                    ;"
 
-	}; template<typename... OutTs>
-		constexpr auto _hustle_test_op_ = U_store_T<hustle_test_op<OutTs...>>;
+			"defs:                         ;"
+			"sq # argpose[1]{multiply 0 0} ;"
+
+			"body:                         ;"
+			". = sq x                      ;"
+			"return _                      ;"
+		);
+	}
 
 /***********************************************************************************************************************/
 
@@ -167,12 +187,24 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	using size_type = unsigned long;
+	//	using chord_size_type = unsigned long;
+	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
 
-	//	size_type val = hustle_test_op<size_type>::result(main_at(0, argc, argv));
+	//	chord_size_type val = T_chord_apply::result(chord_size_type(5));//main_at(0, argc, argv)));
 	//	printf("%lu\n", val);
 
-	//	print_controller();
+		//
+
+	//	using hustle_size_type = double;
+	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
+
+	//	hustle_size_type val = T_hustle_apply::result(hustle_size_type(main_at(0, argc, argv)));
+	//	printf("%1.11f\n", val);
+
+		//
+
+	//	print_controller<chord::metapile<_chord_test_func, null_env>>();
+	//	print_controller<hustle::metapile<_hustle_test_func, null_env>>();
 
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};
 	//	tr_table_printer.print_num_tr_table();

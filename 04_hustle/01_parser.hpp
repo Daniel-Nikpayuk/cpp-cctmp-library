@@ -25,32 +25,77 @@ namespace hustle {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// cctmp:
-
-	template<auto Op, typename T>
-	using modify_type					= cctmp::modify_type<Op, T>;
-
-	nik_ce auto _from_reference_				= cctmp::_from_reference_;
-
-	using strlit_type					= cctmp::strlit_type;
-	nik_ce auto U_strlit_type				= cctmp::U_strlit_type;
-
-// generator:
-
-	nik_ce auto U_action_type				= generator::U_action_type;
-
-	using sxt_pair						= cctmp::pair<strlit_type, token_type>;
-	using sxa_pair						= cctmp::pair<strlit_type, action_type>;
-
-	using symbol_type					= generator::symbol_type;
-	using csymbol_type					= generator::csymbol_type;
+// action:
 
 /***********************************************************************************************************************/
+
+// name:
+
+	struct HustleAssemblyActionName
+	{
+		enum : action_type
+		{
+			nop = generator::AN::nop,
+
+			// main:
+
+				main_begin,
+				main_end,
+				main_name,
+				main_arg,
+
+			// define:
+
+				define_name,
+				define_arg,
+				define_body,
+				define_end,
+
+			// port:
+
+				port_lookup,
+				port_number,
+
+			// return:
+
+				return_false,
+				return_true,
+				return_n_number,
+				return_r_number,
+				return_character,
+				return_string,
+				return_lookup,
+
+			// if:
+
+				if_begin,
+				if_deduce,
+				if_lookup,
+				if_number,
+				if_ante,
+				if_conse,
+				if_end,
+
+			// op:
+
+				op_lookup,
+				op_return,
+
+			// dimension:
+
+				dimension
+		};
+
+	}; using HAAN = HustleAssemblyActionName;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// space:
+
 /***********************************************************************************************************************/
 
 // grammar:
-
-/***********************************************************************************************************************/
 
 	struct T_hustle_grammar
 	{
@@ -69,84 +114,101 @@ namespace hustle {
 
 				"Start -> MainBeg define ( MainSign ) Type MainBody MainEnd ;"
 
-				"MainBeg  -> (                   : main_begin ;"
-				"MainEnd  -> )                   : main_end   ;"
-				"MainSign -> identifier MainArgs : main_name  ;"
-				"MainArgs -> MainArg MainArgs                 ;"
-				"         -> empty                            ;"
-				"MainArg  -> identifier          : main_arg   ;"
-				"MainBody -> Expr0 Exprs                      ;"
+				// main:
 
-				"Type  -> \\-\\> Port               ;"
-				"      -> empty                     ;"
-				"Port  -> identifier  : port_lookup ;"
-				"      -> number      : port_number ;"
-				"Exprs -> Expr0 Exprs               ;"
-				"      -> empty                     ;"
+					"MainBeg  -> (                   : main_begin ;"
+					"MainEnd  -> )                   : main_end   ;"
+					"MainSign -> identifier MainArgs : main_name  ;"
+					"MainArgs -> MainArg MainArgs                 ;"
+					"         -> empty                            ;"
+					"MainArg  -> identifier          : main_arg   ;"
+					"MainBody -> Expr0 Exprs                      ;"
 
-				"Const  -> false      : return_false     ;"
-				"       -> true       : return_true      ;"
-				"       -> number     : return_number    ;"
-				"       -> character  : return_character ;"
-				"       -> string     : return_string    ;"
-				"Lookup -> identifier : return_lookup    ;"
+				// type:
 
-				"Expr0 -> Const     ;"
-				"      -> Lookup    ;"
-				"      -> ( Expr1 ) ;"
+					"Type  -> \\-\\> Port               ;"
+					"      -> empty                     ;"
+					"Port  -> identifier  : port_lookup ;"
+					"      -> number      : port_number ;"
+					"Exprs -> Expr0 Exprs               ;"
+					"      -> empty                     ;"
 
-				"Expr1 -> Const                              ;"
-				"      -> IfBeg Pred IfType Ante Conse IfEnd ;"
-				"      -> define DefDisp                     ;"
-				"      -> quote Expr0                        ;"
-				"      -> begin Exprs                        ;"
-				"      -> lambda LArgs LBody                 ;"
-				"      -> set! Var Val                       ;"
-				"      -> Op OpArgs                          ;"
+				// return:
 
-				"IfBeg   -> if                      ;"
-				"Pred    -> Const                   ;"
-				"        -> Lookup                  ;"
-				"        -> PredBeg Expr1 PredEnd   ;"
-				"PredBeg -> (                       ;"
-				"PredEnd -> )           : pred_end  ;"
-				"IfType  -> \\-\\> Cast             ;"
-				"        -> empty       : if_deduce ;"
-				"Cast    -> identifier  : if_lookup ;"
-				"        -> number      : if_number ;"
-				"Ante    -> Expr0       : if_ante   ;"
-				"Conse   -> Expr0       : if_conse  ;"
-				"IfEnd   -> empty       : if_end    ;"
+					"Const  -> false      : return_false     ;"
+					"       -> true       : return_true      ;"
+					"       -> n_number   : return_n_number  ;"
+					"       -> r_number   : return_r_number  ;"
+					"       -> character  : return_character ;"
+					"       -> string     : return_string    ;"
+					"Lookup -> identifier : return_lookup    ;"
 
-				"DefDisp  -> Var Val                          ;"
-				"         -> ( DefSign ) Type DefBody         ;"
-				"DefSign  -> identifier DefArgs : define_name ;"
-				"DefArgs  -> DefArg DefArgs                   ;"
-				"         -> empty                            ;"
-				"DefArg   -> identifier         : define_arg  ;"
-				"DefBody  -> Expr0 DefExprs     : define_body ;"
-				"DefExprs -> Expr0 DefExprs                   ;"
-				"         -> empty              : define_end  ;"
+				// expression:
 
-				"Var -> identifier ;"
-				"Val -> Expr0      ;"
+					"Expr0 -> Const     ;"
+					"      -> Lookup    ;"
+					"      -> ( Expr1 ) ;"
 
-				"LArgs -> Expr0 ;"
-				"LBody -> Expr0 ;"
+					"Expr1 -> Const                              ;"
+					"      -> IfBeg Pred IfType Ante Conse IfEnd ;"
+					"      -> define DefDisp                     ;"
+					"      -> quote Expr0                        ;"
+					"      -> begin Exprs                        ;"
+					"      -> lambda LArgs LBody                 ;"
+					"      -> set! Var Val                       ;"
+					"      -> Op OpArgs                          ;"
 
-				"Op -> identifier : op_lookup ;"
-				"   -> \\=        : op_lookup ;"
-				"   -> <          : op_lookup ;"
-				"   -> <\\=       : op_lookup ;"
-				"   -> \\>        : op_lookup ;"
-				"   -> \\>\\=     : op_lookup ;"
-				"   -> +          : op_lookup ;"
-				"   -> *          : op_lookup ;"
-				"   -> \\-        : op_lookup ;"
-				"   -> /          : op_lookup ;"
+				// conditional:
 
-				"OpArgs -> Expr0 OpArgs      ;"
-				"       -> empty : op_return ;"
+					"IfBeg   -> if                      ;"
+					"Pred    -> Const                   ;"
+					"        -> Lookup                  ;"
+					"        -> PredBeg Expr1 PredEnd   ;"
+					"PredBeg -> (                       ;"
+					"PredEnd -> )           : if_begin  ;"
+					"IfType  -> \\-\\> Cast             ;"
+					"        -> empty       : if_deduce ;"
+					"Cast    -> identifier  : if_lookup ;"
+					"        -> number      : if_number ;"
+					"Ante    -> Expr0       : if_ante   ;"
+					"Conse   -> Expr0       : if_conse  ;"
+					"IfEnd   -> empty       : if_end    ;"
+
+				// define:
+
+					"DefDisp  -> Var Val                          ;"
+					"         -> ( DefSign ) Type DefBody         ;"
+					"DefSign  -> identifier DefArgs : define_name ;"
+					"DefArgs  -> DefArg DefArgs                   ;"
+					"         -> empty                            ;"
+					"DefArg   -> identifier         : define_arg  ;"
+					"DefBody  -> Expr0 DefExprs     : define_body ;"
+					"DefExprs -> Expr0 DefExprs                   ;"
+					"         -> empty              : define_end  ;"
+
+				// application:
+
+					"Op -> identifier : op_lookup ;"
+					"   -> \\=        : op_lookup ;"
+					"   -> <          : op_lookup ;"
+					"   -> <\\=       : op_lookup ;"
+					"   -> \\>        : op_lookup ;"
+					"   -> \\>\\=     : op_lookup ;"
+					"   -> +          : op_lookup ;"
+					"   -> *          : op_lookup ;"
+					"   -> \\-        : op_lookup ;"
+					"   -> /          : op_lookup ;"
+
+					"OpArgs -> Expr0 OpArgs      ;"
+					"       -> empty : op_return ;"
+
+				// (other):
+
+					"Var -> identifier ;"
+					"Val -> Expr0      ;"
+
+					"LArgs -> Expr0 ;"
+					"LBody -> Expr0 ;"
 		);}
 
 		nik_ces auto map = cctmp::table
@@ -160,23 +222,23 @@ namespace hustle {
 			sxt_pair( "identifier" , Token::identifier ),
 			sxt_pair( "false"      , Token::bool_f     ),
 			sxt_pair( "true"       , Token::bool_t     ),
-			sxt_pair( "number"     , Token::number     ),
+			sxt_pair( "n_number"   , Token::n_number   ),
+			sxt_pair( "r_number"   , Token::r_number   ),
 			sxt_pair( "character"  , Token::character  ),
 			sxt_pair( "string"     , Token::string     ),
 
 			sxt_pair( "if"     , Token::if_    ),
+			sxt_pair( "eq?"    , Token::eq_    ),
 			sxt_pair( "let"    , Token::let    ),
 			sxt_pair( "car"    , Token::car    ),
 			sxt_pair( "cdr"    , Token::cdr    ),
+			sxt_pair( "set!"   , Token::set_   ),
 			sxt_pair( "cons"   , Token::cons   ),
 			sxt_pair( "list"   , Token::list   ),
 			sxt_pair( "begin"  , Token::begin  ),
 			sxt_pair( "quote"  , Token::quote  ),
 			sxt_pair( "define" , Token::define ),
 			sxt_pair( "lambda" , Token::lambda ),
-
-			sxt_pair( "eq?"    , Token::eq_      ),
-			sxt_pair( "set!"   , Token::mu_table ),
 
 			sxt_pair( "("      , Token::l_expr     ),
 			sxt_pair( ")"      , Token::r_expr     ),
@@ -220,23 +282,21 @@ namespace hustle {
 
 				sxa_pair( "return_false"     , ActName::return_false     ),
 				sxa_pair( "return_true"      , ActName::return_true      ),
-				sxa_pair( "return_number"    , ActName::return_number    ),
+				sxa_pair( "return_n_number"  , ActName::return_n_number  ),
+				sxa_pair( "return_r_number"  , ActName::return_r_number  ),
 				sxa_pair( "return_character" , ActName::return_character ),
 				sxa_pair( "return_string"    , ActName::return_string    ),
 				sxa_pair( "return_lookup"    , ActName::return_lookup    ),
 
 			// if:
 
+				sxa_pair( "if_begin"  , ActName::if_begin  ),
 				sxa_pair( "if_deduce" , ActName::if_deduce ),
 				sxa_pair( "if_lookup" , ActName::if_lookup ),
 				sxa_pair( "if_number" , ActName::if_number ),
 				sxa_pair( "if_ante"   , ActName::if_ante   ),
 				sxa_pair( "if_conse"  , ActName::if_conse  ),
 				sxa_pair( "if_end"    , ActName::if_end    ),
-
-			// pred:
-
-				sxa_pair( "pred_end" , ActName::pred_end ),
 
 			// op:
 
@@ -319,6 +379,40 @@ namespace hustle {
 
 /***********************************************************************************************************************/
 
+// translation action:
+
+	template<action_type, auto...> struct T_hustle_translation_action;
+
+	template<typename AST>
+	struct T_hustle_ta :
+		public generator::T_generic_translation_action<T_hustle_translation_action, AST, HAAN>
+			{ };
+
+	// interface:
+
+		template<typename AST>
+		struct T_hustle_action
+		{
+			using T_ast		= AST;
+
+			nik_ces auto value	= T_hustle_ta<AST>{};
+			using type		= decltype(value);
+		};
+
+/***********************************************************************************************************************/
+
+// tree:
+
+	template<auto... Vs> 
+	struct T_hustle_syntax_tree : public assembly::T_syntax_tree<Vs...>
+	{
+		using base = assembly::T_syntax_tree<Vs...>;
+
+		nik_ce T_hustle_syntax_tree() : base{} { }
+	};
+
+/***********************************************************************************************************************/
+
 // interface:
 
 	template
@@ -328,7 +422,7 @@ namespace hustle {
 	>
 	struct T_hustle_parsed
 	{
-		using T_ast			= T_hustle_ast
+		using T_ast			= T_hustle_syntax_tree
 						<
 							static_source, static_env_lookup,
 							contr_size, stack_size, model_size

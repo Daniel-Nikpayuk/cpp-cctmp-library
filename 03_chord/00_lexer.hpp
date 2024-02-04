@@ -28,65 +28,123 @@ namespace chord {
 // cctmp:
 
 	template<auto U>
-	nik_ce auto & member_value_U					= cctmp::member_value_U<U>;
+	using T_store_U						= cctmp::T_store_U<U>;
 
-	using gkey_type							= cctmp::gkey_type;
-	using gckey_type						= cctmp::gckey_type;
+	template<auto... Vs>
+	using T_pack_Vs						= cctmp::T_pack_Vs<Vs...>;
 
-	using gindex_type						= cctmp::gindex_type;
-	using gcindex_type						= cctmp::gcindex_type;
+	template<typename T>
+	nik_ce auto U_store_T					= cctmp::U_store_T<T>;
 
-	nik_ce auto _zero						= cctmp::_zero;
-	nik_ce auto _one						= cctmp::_one;
-	nik_ce auto _two						= cctmp::_two;
-	nik_ce auto _three						= cctmp::_three;
-	nik_ce auto _four						= cctmp::_four;
-	nik_ce auto _five						= cctmp::_five;
-	nik_ce auto _six						= cctmp::_six;
-	nik_ce auto _seven						= cctmp::_seven;
-	nik_ce auto _eight						= cctmp::_eight;
-	nik_ce auto _nine						= cctmp::_nine;
-	nik_ce auto _ten						= cctmp::_ten;
+	template<template<auto...> typename B>
+	nik_ce auto U_store_B					= cctmp::U_store_B<B>;
 
-	using gchar_type						= cctmp::gchar_type;
-	using gcchar_type						= cctmp::gcchar_type;
+	template<typename... Ts>
+	nik_ce auto U_pack_Ts					= cctmp::U_pack_Ts<Ts...>;
 
-	nik_ce auto U_gkey_type						= cctmp::U_gkey_type;
-	nik_ce auto U_gchar_type					= cctmp::U_gchar_type;
+	template<auto V> nik_ce auto _static_callable_		= cctmp::_static_callable_<V>;
+
+	template<auto U>
+	nik_ce auto & member_value_U				= cctmp::member_value_U<U>;
+
+	using gkey_type						= cctmp::gkey_type;
+	using gckey_type					= cctmp::gckey_type;
+	using gchar_type					= cctmp::gchar_type;
+	using gcchar_type					= cctmp::gcchar_type;
+	using gindex_type					= cctmp::gindex_type;
+	using gcindex_type					= cctmp::gcindex_type;
+
+	nik_ce auto U_gkey_type					= cctmp::U_gkey_type;
+	nik_ce auto U_gchar_type				= cctmp::U_gchar_type;
+
+	nik_ce auto _zero					= cctmp::_zero;
+	nik_ce auto _one					= cctmp::_one;
+	nik_ce auto _two					= cctmp::_two;
+	nik_ce auto _three					= cctmp::_three;
+	nik_ce auto _four					= cctmp::_four;
+	nik_ce auto _five					= cctmp::_five;
+	nik_ce auto _six					= cctmp::_six;
+	nik_ce auto _seven					= cctmp::_seven;
+	nik_ce auto _eight					= cctmp::_eight;
+	nik_ce auto _nine					= cctmp::_nine;
+	nik_ce auto _ten					= cctmp::_ten;
+
+	template<auto... Vs>
+	nik_ce auto _subarray_same_				= cctmp::_subarray_same_<Vs...>;
+
+	template<auto f>
+	nik_ce auto _wrap_					= cctmp::_wrap_<f>;
+
+	template<auto Op, typename T>
+	using modify_type					= cctmp::modify_type<Op, T>;
+
+	nik_ce auto _from_const_				= cctmp::_from_const_;
+	nik_ce auto _from_reference_				= cctmp::_from_reference_;
+
+	template<auto... Vs> nik_ce auto car_			= cctmp::car_<Vs...>;
+	template<auto... Vs> nik_ce auto cdr_			= cctmp::cdr_<Vs...>;
+	template<auto... Vs> nik_ce auto push_			= cctmp::push_<Vs...>;
+	template<auto... Vs> nik_ce auto unpack_		= cctmp::unpack_<Vs...>;
+	template<auto... Vs> nik_ce auto map_			= cctmp::map_<Vs...>;
+
+	using strlit_type					= cctmp::strlit_type;
+	nik_ce auto U_strlit_type				= cctmp::U_strlit_type;
 
 	template<typename T, typename S = gindex_type>
-	using cselector							= cctmp::cselector<T, S>;
+	using cselector						= cctmp::cselector<T, S>;
+
+	template<typename Type, auto Size>
+	using sequence						= cctmp::sequence<Type, Size>;
+
+// assembly:
+
+	using AN						= assembly::AN;
+	using AT						= assembly::AT;
+	using AAN						= assembly::AAN;
+	using AAT						= assembly::AAT;
+
+	template<auto... Vs>
+	using T_assembly_compound				= assembly::T_assembly_compound<Vs...>;
 
 // generator:
 
-	using gstring_type						= generator::gstring_type;
-	using gcstring_type						= generator::gcstring_type;
+	using gstring_type					= generator::gstring_type;
+	using gcstring_type					= generator::gcstring_type;
 
-	using state_type						= generator::state_type;
-	using cstate_type						= generator::cstate_type;
-	using token_type						= generator::token_type;
-	using ctoken_type						= generator::ctoken_type;
+	using state_type					= generator::state_type;
+	using cstate_type					= generator::cstate_type;
+	using token_type					= generator::token_type;
+	using ctoken_type					= generator::ctoken_type;
 
-	using StateName							= generator::StateName;
-	using TokenName							= generator::TokenName;
+	using StateName						= generator::StateName;
+	using TokenName						= generator::TokenName;
 
-	nik_ce auto U_state_type					= generator::U_state_type;
-	nik_ce auto U_token_type					= generator::U_token_type;
+	nik_ce auto U_state_type				= generator::U_state_type;
+	nik_ce auto U_token_type				= generator::U_token_type;
 
-	using lexeme							= generator::lexeme;
-	using clexeme							= generator::clexeme;
+	using lexeme						= generator::lexeme;
+	using clexeme						= generator::clexeme;
+
+	using action_type					= generator::action_type;
+	nik_ce auto U_action_type				= generator::U_action_type;
+
+	using sxt_pair						= cctmp::pair<strlit_type, token_type>;
+	using sxa_pair						= cctmp::pair<strlit_type, action_type>;
+
+	using symbol_type					= generator::symbol_type;
+	using csymbol_type					= generator::csymbol_type;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// chord assembly:
+// chord:
 
 /***********************************************************************************************************************/
 
 // transition table:
 
-	struct T_chord_assembly_dftt
+	struct T_chord_dftt
 	{
 		struct Token
 		{
@@ -97,6 +155,8 @@ namespace chord {
 				prompt      ,
 				identifier  ,
 				number      ,
+				declare     ,
+				define      ,
 				copy        ,
 				paste       ,
 				quote       ,
@@ -296,7 +356,7 @@ namespace chord {
 
 		state_type table[State::dimension][Charset::dimension];
 
-		nik_ce T_chord_assembly_dftt() : table{}
+		nik_ce T_chord_dftt() : table{}
 		{
 			table[ State::initial ][ Charset::ula           ] = State::ulan;
 			table[ State::initial ][ Charset::digit         ] = State::numeral;
@@ -342,9 +402,9 @@ namespace chord {
 
 // automaton:
 
-	struct T_chord_assembly_dfa
+	struct T_chord_dfa
 	{
-		using T_dftt			= T_chord_assembly_dftt;
+		using T_dftt			= T_chord_dftt;
 		using Token			= typename T_dftt::Token;
 		nik_ces auto value		= T_dftt{};
 		nik_ces auto accept		= T_dftt::State::accept;
@@ -357,24 +417,26 @@ namespace chord {
 		nik_ces auto branch_charset     () { return generator::dfa_charset("branch"); }
 		nik_ces auto return_charset     () { return generator::dfa_charset("return"); }
 
+		nik_ces auto declare_charset    () { return generator::dfa_charset("declare"); }
+		nik_ces auto define_charset     () { return generator::dfa_charset("define");  }
 		nik_ces auto argpose_charset    () { return generator::dfa_charset("argpose"); }
 		nik_ces auto subpose_charset    () { return generator::dfa_charset("subpose"); }
-		nik_ces auto curry_charset      () { return generator::dfa_charset("curry"); }
+		nik_ces auto curry_charset      () { return generator::dfa_charset("curry");   }
 
 		nik_ces auto repeat_charset     () { return generator::dfa_charset("repeat"); }
-		nik_ces auto map_charset        () { return generator::dfa_charset("map"); }
-		nik_ces auto fold_charset       () { return generator::dfa_charset("fold"); }
-		nik_ces auto find_charset       () { return generator::dfa_charset("find"); }
-		nik_ces auto sift_charset       () { return generator::dfa_charset("sift"); }
+		nik_ces auto map_charset        () { return generator::dfa_charset("map");    }
+		nik_ces auto fold_charset       () { return generator::dfa_charset("fold");   }
+		nik_ces auto find_charset       () { return generator::dfa_charset("find");   }
+		nik_ces auto sift_charset       () { return generator::dfa_charset("sift");   }
 	};
 
 /***********************************************************************************************************************/
 
 // interface:
 
-	struct T_chord_assembly_lexer
+	struct T_chord_lexer
 	{
-		using T_dfa			= T_chord_assembly_dfa;
+		using T_dfa			= T_chord_dfa;
 		using Token			= typename T_dfa::Token;
 
 		using T_paste_lexer		= generator::T_keyword_lexer< T_dfa::paste_charset  , Token::paste   >;
@@ -385,6 +447,8 @@ namespace chord {
 		using T_branch_lexer		= generator::T_keyword_lexer< T_dfa::branch_charset , Token::branch  >;
 		using T_return_lexer		= generator::T_keyword_lexer< T_dfa::return_charset , Token::re_turn >;
 
+		using T_declare_lexer		= generator::T_keyword_lexer< T_dfa::declare_charset , Token::declare >;
+		using T_define_lexer		= generator::T_keyword_lexer< T_dfa::define_charset  , Token::define  >;
 		using T_argpose_lexer		= generator::T_keyword_lexer< T_dfa::argpose_charset , Token::argpose >;
 		using T_subpose_lexer		= generator::T_keyword_lexer< T_dfa::subpose_charset , Token::subpose >;
 		using T_curry_lexer		= generator::T_keyword_lexer< T_dfa::curry_charset   , Token::curry   >;
@@ -399,7 +463,7 @@ namespace chord {
 		{
 			generator::T_generic_lexer<T_dfa>::lex(l);
 
-			token_type t = T_dfa::accept.lookup(l.token, TokenName::invalid);
+			token_type t = T_dfa::accept.lookup(l.token, Token::invalid);
 
 			return keyword_check(l, t);
 		}
@@ -415,7 +479,7 @@ namespace chord {
 				case Token::identifier:
 				{
 					ctoken_type t0 = keyword(csel);
-					if (t0 != TokenName::invalid) rt = t0;
+					if (t0 != Token::invalid) rt = t0;
 					break;
 				}
 				case Token::label:
@@ -423,8 +487,8 @@ namespace chord {
 					csel.downright();
 					ctoken_type t0 = keyword(csel);
 				//	ctoken_type t1 = Token::keyword_label_error;
-				//	rt = (t0 == TokenName::invalid) ? t : t1;
-					if (t0 != TokenName::invalid) rt = t0;
+				//	rt = (t0 == Token::invalid) ? t : t1;
+					if (t0 != Token::invalid) rt = t0;
 					break;
 				}
 			}
@@ -434,7 +498,7 @@ namespace chord {
 
 		nik_ces token_type keyword(const cselector<char> & s)
 		{
-			token_type val = TokenName::invalid;
+			token_type val = Token::invalid;
 
 			switch (s.size())
 			{
@@ -452,13 +516,13 @@ namespace chord {
 		nik_ces token_type keyword_1(const cselector<char> & s)
 		{
 			if (generator::recognizes< T_paste_lexer >(s)) return T_paste_lexer::token;
-			else                                           return TokenName::invalid;
+			else                                           return Token::invalid;
 		}
 
 		nik_ces token_type keyword_3(const cselector<char> & s)
 		{
 			if (generator::recognizes< T_map_lexer >(s)) return T_map_lexer::token;
-			else                                         return TokenName::invalid;
+			else                                         return Token::invalid;
 		}
 
 		nik_ces token_type keyword_4(const cselector<char> & s)
@@ -470,28 +534,30 @@ namespace chord {
 			else if (generator::recognizes< T_fold_lexer >(s)) return T_fold_lexer::token;
 			else if (generator::recognizes< T_find_lexer >(s)) return T_find_lexer::token;
 			else if (generator::recognizes< T_sift_lexer >(s)) return T_sift_lexer::token;
-			else                                               return TokenName::invalid;
+			else                                               return Token::invalid;
 		}
 
 		nik_ces token_type keyword_5(const cselector<char> & s)
 		{
 			if (generator::recognizes< T_curry_lexer >(s)) return T_curry_lexer::token;
-			else                                           return TokenName::invalid;
+			else                                           return Token::invalid;
 		}
 
 		nik_ces token_type keyword_6(const cselector<char> & s)
 		{
-			if      (generator::recognizes< T_branch_lexer >(s)) return T_branch_lexer::token;
+			if      (generator::recognizes< T_define_lexer >(s)) return T_define_lexer::token;
+			else if (generator::recognizes< T_branch_lexer >(s)) return T_branch_lexer::token;
 			else if (generator::recognizes< T_return_lexer >(s)) return T_return_lexer::token;
 			else if (generator::recognizes< T_repeat_lexer >(s)) return T_repeat_lexer::token;
-			else                                                 return TokenName::invalid;
+			else                                                 return Token::invalid;
 		}
 
 		nik_ces token_type keyword_7(const cselector<char> & s)
 		{
-			if      (generator::recognizes< T_argpose_lexer >(s)) return T_argpose_lexer::token;
+			if      (generator::recognizes< T_declare_lexer >(s)) return T_declare_lexer::token;
+			else if (generator::recognizes< T_argpose_lexer >(s)) return T_argpose_lexer::token;
 			else if (generator::recognizes< T_subpose_lexer >(s)) return T_subpose_lexer::token;
-			else                                                  return TokenName::invalid;
+			else                                                  return Token::invalid;
 		}
 	};
 

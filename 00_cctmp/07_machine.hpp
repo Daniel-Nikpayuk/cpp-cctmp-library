@@ -409,6 +409,323 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// env(ironment) model:
+
+/***********************************************************************************************************************/
+
+// msg:
+
+	nik_ce void _not_found_() { }
+
+/***********************************************************************************************************************/
+
+// entry:
+
+	template<typename SizeType, SizeType Size = 8>
+	struct T_env_model_entry : public T_list_model_entry<SizeType, Size>
+	{
+		using base		= T_list_model_entry<SizeType, Size>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+		using Entry		= typename base::Entry;
+
+		struct Type     { enum : size_type { constant, variadic, compound, dimension }; };
+		struct Constant { enum : size_type { type = Entry::type, pos, dimension }; };
+		struct Variadic { enum : size_type { type = Entry::type, pos, dimension }; };
+		struct Compound
+		{
+			enum : size_type { type = Entry::type, kind, port, left, ins, aux, dimension };
+		};
+
+		nik_ce T_env_model_entry(csize_type t) : base{t} { }
+	};
+
+/***********************************************************************************************************************/
+
+// constant:
+
+	template<typename SizeType>
+	struct T_env_model_constant : public T_env_model_entry<SizeType>
+	{
+		using base		= T_env_model_entry<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+		using Type		= typename base::Type;
+		using Constant		= typename base::Constant;
+
+		nik_ce T_env_model_constant(csize_type p) : base{Type::constant}
+			{ base::array[Constant::pos] = p; }
+
+		nik_ce auto size() const { return Constant::dimension; }
+		nik_ce auto cend() const { return base::array + size(); }
+	};
+
+/***********************************************************************************************************************/
+
+// variadic:
+
+	template<typename SizeType>
+	struct T_env_model_variadic : public T_env_model_entry<SizeType>
+	{
+		using base		= T_env_model_entry<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+		using Type		= typename base::Type;
+		using Variadic		= typename base::Variadic;
+
+		nik_ce T_env_model_variadic(csize_type p) : base{Type::variadic}
+			{ base::array[Variadic::pos] = p; }
+
+		nik_ce auto size() const { return Variadic::dimension; }
+		nik_ce auto cend() const { return base::array + size(); }
+	};
+
+/***********************************************************************************************************************/
+
+// compound:
+
+	template<typename SizeType>
+	struct T_env_model_compound : public T_env_model_entry<SizeType>
+	{
+		using base		= T_env_model_entry<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+		using Type		= typename base::Type;
+		using Compound		= typename base::Compound;
+
+		nik_ce T_env_model_compound() : base{Type::compound} { }
+		nik_ce T_env_model_compound(csize_type p0, csize_type p1) : base{Type::compound}
+		{
+			base::array[Compound::left] = p0;
+			base::array[Compound::ins ] = p1;
+		}
+
+		nik_ce auto size() const { return Compound::dimension; }
+		nik_ce auto cend() const { return base::array + size(); }
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename CharType, typename SizeType, SizeType Size>
+	class T_env_model : public T_list_model<SizeType, Size>
+	{
+		public:
+
+			using base				= T_list_model<SizeType, Size>;
+			using size_type				= typename base::size_type;
+			using size_type_ref			= size_type &;
+			using csize_type			= typename base::csize_type;
+			using list_type				= typename base::list_type;
+			using clist_type			= typename base::clist_type;
+			using record_type			= pair<bool, size_type>;
+			using Pair				= typename base::Pair;
+
+			using char_type				= CharType;
+			using cselect				= cselector<char_type, size_type>;
+			using ccselect				= cselect const;
+			using ccselect_ref			= ccselect &;
+			using strlit_type			= string_literal<CharType, size_type>;
+			using cstrlit_type			= strlit_type const;
+			using cstrlit_ref			= cstrlit_type &;
+
+			using entry_type			= T_env_model_entry<SizeType>;
+			using centry_type			= entry_type const;
+			using centry_ptr			= centry_type *;
+			using centry_ref			= centry_type &;
+			using EntryType				= typename entry_type::Type;
+
+			using constant_type			= T_env_model_constant<SizeType>;
+			using cconstant_type			= constant_type const;
+			using cconstant_ref			= cconstant_type &;
+			using Constant				= typename constant_type::Constant;
+
+			using variadic_type			= T_env_model_variadic<SizeType>;
+			using cvariadic_type			= variadic_type const;
+			using cvariadic_ref			= cvariadic_type &;
+			using Variadic				= typename variadic_type::Variadic;
+
+			using compound_type			= T_env_model_compound<SizeType>;
+			using ccompound_type			= compound_type const;
+			using ccompound_ref			= ccompound_type &;
+			using Compound				= typename compound_type::Compound;
+
+		protected:
+
+			cstrlit_type src;
+
+		public:
+
+			nik_ce T_env_model(cstrlit_ref s) : base{}, src{s} { }
+
+			nik_ce auto get_value(csize_type p, csize_type n) const { return base::get_value(p, n); }
+			nik_ce void set_value(csize_type p, csize_type n, csize_type v) { base::set_value(p, n, v); }
+
+		protected:
+
+			// src:
+
+				nik_ce auto start  (ccselect_ref s) const { return s.cbegin() - src.cbegin(); }
+				nik_ce auto finish (ccselect_ref s) const { return src.cend() - s.cend(); }
+
+			// lookup:
+
+				nik_ce bool lookup_frame(ccselect_ref var, clist_type frame, size_type_ref entry) const
+				{
+					bool no_match = true;
+
+					for (auto k = frame; no_match && base::not_null(k); k = base::cdr(k))
+						no_match = lookup_binding(var, base::car(k), entry);
+
+					return no_match;
+				}
+
+				nik_ce bool lookup_binding(ccselect_ref var, csize_type binding, size_type_ref entry) const
+				{
+					auto variable = base::car(binding);
+					auto start    = base::get_value(variable, Pair::car);
+					auto finish   = base::get_value(variable, Pair::cdr);
+
+					auto src_cselect = src.cselect(start, finish);
+
+					bool match = apply<_subarray_same_<>>(var, src_cselect);
+
+					if (match) entry = base::cdr(binding);
+
+					return !match;
+				}
+
+			// binding:
+
+				nik_ce auto set_binding_variable(ccselect_ref var)
+				{
+					csize_type variable = base::allocate(Pair::dimension);
+					
+					base::set_value(variable, Pair::car , start(var));
+					base::set_value(variable, Pair::cdr , finish(var));
+
+					return variable;
+				}
+
+				nik_ce auto allocate_binding_value()
+					{ return base::allocate(entry_type::length); }
+
+				nik_ce auto set_variadic_value(cvariadic_ref val)
+				{
+					csize_type value = allocate_binding_value();
+
+					base::set_value(value, Variadic::type , val[Variadic::type]);
+					base::set_value(value, Variadic::pos  , val[Variadic::pos]);
+
+					return value;
+				}
+
+				nik_ce auto set_compound_value(ccompound_ref val)
+				{
+					csize_type value = allocate_binding_value();
+
+					base::set_value(value , Compound::type , val[Compound::type]);
+					base::set_value(value , Compound::left , val[Compound::left]);
+					base::set_value(value , Compound::ins  , val[Compound::ins ]);
+
+					return value;
+				}
+
+				nik_ce void set_binding_entry(csize_type variable, csize_type value, clist_type env)
+				{
+					auto frame   = base::car(env);
+					auto binding = base::cons(variable, value);
+					auto nframe  = base::cons(binding, frame);
+
+					base::set_value(env, Pair::car, nframe);
+				}
+
+		public:
+
+			// list:
+
+				nik_ce auto null_env     () const { return base::null_list(); }
+				nik_ce auto null_frame   () const { return base::null_list(); }
+				nik_ce auto null_binding () const { return base::null_list(); }
+
+			// env:
+
+				nik_ce auto lookup_variable(ccselect_ref var, clist_type env) const
+				{
+					bool no_match = true;
+					size_type entry = 0;
+
+					for (auto k = env; no_match && base::not_null(k); k = base::cdr(k))
+						no_match = lookup_frame(var, base::car(k), entry);
+
+					return record_type{!no_match, entry};
+				}
+
+				nik_ce void define_variable(ccselect_ref var, cvariadic_ref val, clist_type env)
+				{
+					auto variable = set_binding_variable(var);
+					auto value    = set_variadic_value(val);
+
+					set_binding_entry(variable, value, env);
+				}
+
+				nik_ce void define_compound(ccselect_ref var, clist_type env)
+				{
+					auto variable = set_binding_variable(var);
+					auto value    = set_compound_value(compound_type{});
+
+					set_binding_entry(variable, value, env);
+				}
+
+				nik_ce auto define_compound(ccselect_ref var, ccompound_ref val, clist_type env)
+				{
+					auto variable = set_binding_variable(var);
+					auto value    = set_compound_value(val);
+
+					set_binding_entry(variable, value, env);
+
+					return value;
+				}
+
+				template<typename Entry>
+				nik_ce void set_variable(ccselect_ref var, const Entry & val, clist_type env)
+				{
+					auto rec = lookup_variable(var, env);
+
+					set_binding_value(rec.v1, val);
+				}
+
+				nik_ce auto extend_environment(clist_type env)
+					{ return base::cons(null_frame(), env); }
+
+			// binding:
+
+				nik_ce bool is_compound(csize_type entry) const
+					{ return (base::get_value(entry, Compound::type) == EntryType::compound); }
+
+				nik_ce auto compound_kind(csize_type entry) const
+					{ return base::get_value(entry, Compound::kind); }
+
+				nik_ce auto compound_port(csize_type entry) const
+					{ return base::get_value(entry, Compound::port); }
+
+				nik_ce auto compound_left(csize_type entry) const
+					{ return base::get_value(entry, Compound::left); }
+
+				nik_ce auto compound_origin(csize_type entry) const
+					{ return base::get_value(entry, Compound::ins); }
+
+				nik_ce auto compound_aux(csize_type entry) const
+					{ return base::get_value(entry, Compound::aux); }
+
+				nik_ce auto variadic_pos(csize_type entry) const
+					{ return base::get_value(entry, Variadic::pos); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // controller:
 
 /***********************************************************************************************************************/
@@ -619,316 +936,6 @@ namespace cctmp {
 				contr->force_instr_value(Instr::next, Policy::relative, offset);
 			}
 		};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// env(ironment) model:
-
-/***********************************************************************************************************************/
-
-// msg:
-
-	nik_ce void _not_found_() { }
-
-/***********************************************************************************************************************/
-
-// entry:
-
-	template<typename SizeType, SizeType Size = 7>
-	struct T_env_model_entry : public T_list_model_entry<SizeType, Size>
-	{
-		using base		= T_list_model_entry<SizeType, Size>;
-		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
-		using Entry		= typename base::Entry;
-
-		struct Type     { enum : size_type { constant, variadic, compound, dimension }; };
-		struct Constant { enum : size_type { type = Entry::type, pos, dimension }; };
-		struct Variadic { enum : size_type { type = Entry::type, pos, dimension }; };
-		struct Compound
-		{
-			enum : size_type { type = Entry::type, kind, port, left, ins, env, aux, dimension };
-		};
-
-		nik_ce T_env_model_entry(csize_type t) : base{t} { }
-	};
-
-/***********************************************************************************************************************/
-
-// constant:
-
-	template<typename SizeType>
-	struct T_env_model_constant : public T_env_model_entry<SizeType>
-	{
-		using base		= T_env_model_entry<SizeType>;
-		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
-		using Type		= typename base::Type;
-		using Constant		= typename base::Constant;
-
-		nik_ce T_env_model_constant(csize_type p) : base{Type::constant}
-			{ base::array[Constant::pos] = p; }
-
-		nik_ce auto size() const { return Constant::dimension; }
-		nik_ce auto cend() const { return base::array + size(); }
-	};
-
-/***********************************************************************************************************************/
-
-// variadic:
-
-	template<typename SizeType>
-	struct T_env_model_variadic : public T_env_model_entry<SizeType>
-	{
-		using base		= T_env_model_entry<SizeType>;
-		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
-		using Type		= typename base::Type;
-		using Variadic		= typename base::Variadic;
-
-		nik_ce T_env_model_variadic(csize_type p) : base{Type::variadic}
-			{ base::array[Variadic::pos] = p; }
-
-		nik_ce auto size() const { return Variadic::dimension; }
-		nik_ce auto cend() const { return base::array + size(); }
-	};
-
-/***********************************************************************************************************************/
-
-// compound:
-
-	template<typename SizeType>
-	struct T_env_model_compound : public T_env_model_entry<SizeType>
-	{
-		using base		= T_env_model_entry<SizeType>;
-		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
-		using Type		= typename base::Type;
-		using Compound		= typename base::Compound;
-
-		nik_ce T_env_model_compound(csize_type p0, csize_type p1, csize_type p2) : base{Type::compound}
-		{
-			base::array[Compound::left] = p0;
-			base::array[Compound::ins ] = p1;
-			base::array[Compound::env ] = p2;
-		}
-
-		nik_ce auto size() const { return Compound::dimension; }
-		nik_ce auto cend() const { return base::array + size(); }
-	};
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename CharType, typename SizeType, SizeType Size>
-	class T_env_model : public T_list_model<SizeType, Size>
-	{
-		public:
-
-			using base				= T_list_model<SizeType, Size>;
-			using size_type				= typename base::size_type;
-			using size_type_ref			= size_type &;
-			using csize_type			= typename base::csize_type;
-			using list_type				= typename base::list_type;
-			using clist_type			= typename base::clist_type;
-			using record_type			= pair<bool, size_type>;
-			using Pair				= typename base::Pair;
-
-			using char_type				= CharType;
-			using cselect				= cselector<char_type, size_type>;
-			using ccselect				= cselect const;
-			using ccselect_ref			= ccselect &;
-			using strlit_type			= string_literal<CharType, size_type>;
-			using cstrlit_type			= strlit_type const;
-			using cstrlit_ref			= cstrlit_type &;
-
-			using entry_type			= T_env_model_entry<SizeType>;
-			using centry_type			= entry_type const;
-			using centry_ptr			= centry_type *;
-			using centry_ref			= centry_type &;
-			using EntryType				= typename entry_type::Type;
-
-			using constant_type			= T_env_model_constant<SizeType>;
-			using cconstant_type			= constant_type const;
-			using cconstant_ref			= cconstant_type &;
-			using Constant				= typename constant_type::Constant;
-
-			using variadic_type			= T_env_model_variadic<SizeType>;
-			using cvariadic_type			= variadic_type const;
-			using cvariadic_ref			= cvariadic_type &;
-			using Variadic				= typename variadic_type::Variadic;
-
-			using compound_type			= T_env_model_compound<SizeType>;
-			using ccompound_type			= compound_type const;
-			using ccompound_ref			= ccompound_type &;
-			using Compound				= typename compound_type::Compound;
-
-		protected:
-
-			cstrlit_type src;
-
-		public:
-
-			nik_ce T_env_model(cstrlit_ref s) : base{}, src{s} { }
-
-			nik_ce auto get_value(csize_type p, csize_type n) const { return base::get_value(p, n); }
-			nik_ce void set_value(csize_type p, csize_type n, csize_type v) { base::set_value(p, n, v); }
-
-		protected:
-
-			// src:
-
-				nik_ce auto start  (ccselect_ref s) const { return s.cbegin() - src.cbegin(); }
-				nik_ce auto finish (ccselect_ref s) const { return src.cend() - s.cend(); }
-
-			// lookup:
-
-				nik_ce bool lookup_frame(ccselect_ref var, clist_type frame, size_type_ref entry) const
-				{
-					bool no_match = true;
-
-					for (auto k = frame; no_match && base::not_null(k); k = base::cdr(k))
-						no_match = lookup_binding(var, base::car(k), entry);
-
-					return no_match;
-				}
-
-				nik_ce bool lookup_binding(ccselect_ref var, csize_type binding, size_type_ref entry) const
-				{
-					auto variable = base::car(binding);
-					auto start    = base::get_value(variable, Pair::car);
-					auto finish   = base::get_value(variable, Pair::cdr);
-
-					auto src_cselect = src.cselect(start, finish);
-
-					bool match = apply<_subarray_same_<>>(var, src_cselect);
-
-					if (match) entry = base::cdr(binding);
-
-					return !match;
-				}
-
-			// binding:
-
-				nik_ce auto set_binding_variable(ccselect_ref var)
-				{
-					csize_type variable = base::allocate(Pair::dimension);
-					
-					base::set_value(variable, Pair::car , start(var));
-					base::set_value(variable, Pair::cdr , finish(var));
-
-					return variable;
-				}
-
-				nik_ce auto allocate_binding_value()
-					{ return base::allocate(entry_type::length); }
-
-				nik_ce auto set_variadic_value(cvariadic_ref val)
-				{
-					csize_type value = allocate_binding_value();
-
-					base::set_value(value, Variadic::type , val[Variadic::type]);
-					base::set_value(value, Variadic::pos  , val[Variadic::pos]);
-
-					return value;
-				}
-
-				nik_ce auto set_compound_value(ccompound_ref val)
-				{
-					csize_type value = allocate_binding_value();
-
-					base::set_value(value, Compound::type , val[Compound::type]);
-					base::set_value(value, Compound::left , val[Compound::left]);
-					base::set_value(value, Compound::ins  , val[Compound::ins ]);
-					base::set_value(value, Compound::env  , val[Compound::env ]);
-
-					return value;
-				}
-
-				nik_ce void set_binding_entry(csize_type variable, csize_type value, clist_type env)
-				{
-					auto frame   = base::car(env);
-					auto binding = base::cons(variable, value);
-					auto nframe  = base::cons(binding, frame);
-
-					base::set_value(env, Pair::car, nframe);
-				}
-
-		public:
-
-			// list:
-
-				nik_ce auto null_env     () const { return base::null_list(); }
-				nik_ce auto null_frame   () const { return base::null_list(); }
-				nik_ce auto null_binding () const { return base::null_list(); }
-
-			// env:
-
-				nik_ce auto lookup_variable(ccselect_ref var, clist_type env) const
-				{
-					bool no_match = true;
-					size_type entry = 0;
-
-					for (auto k = env; no_match && base::not_null(k); k = base::cdr(k))
-						no_match = lookup_frame(var, base::car(k), entry);
-
-					return record_type{!no_match, entry};
-				}
-
-				nik_ce void define_variable(ccselect_ref var, cvariadic_ref val, clist_type env)
-				{
-					auto variable = set_binding_variable(var);
-					auto value    = set_variadic_value(val);
-
-					set_binding_entry(variable, value, env);
-				}
-
-				nik_ce auto define_compound(ccselect_ref var, ccompound_ref val, clist_type env)
-				{
-					auto variable = set_binding_variable(var);
-					auto value    = set_compound_value(val);
-
-					set_binding_entry(variable, value, env);
-
-					return value;
-				}
-
-				template<typename Entry>
-				nik_ce void set_variable(ccselect_ref var, const Entry & val, clist_type env)
-				{
-					auto rec = lookup_variable(var, env);
-
-					set_binding_value(rec.v1, val);
-				}
-
-				nik_ce auto extend_environment(clist_type env)
-					{ return base::cons(null_frame(), env); }
-
-			// binding:
-
-				nik_ce bool is_compound(csize_type entry) const
-					{ return (base::get_value(entry, Compound::type) == EntryType::compound); }
-
-				nik_ce auto compound_kind(csize_type entry) const
-					{ return base::get_value(entry, Compound::kind); }
-
-				nik_ce auto compound_port(csize_type entry) const
-					{ return base::get_value(entry, Compound::port); }
-
-				nik_ce auto compound_left(csize_type entry) const
-					{ return base::get_value(entry, Compound::left); }
-
-				nik_ce auto compound_origin(csize_type entry) const
-					{ return base::get_value(entry, Compound::ins); }
-
-				nik_ce auto compound_aux(csize_type entry) const
-					{ return base::get_value(entry, Compound::aux); }
-
-				nik_ce auto variadic_pos(csize_type entry) const
-					{ return base::get_value(entry, Variadic::pos); }
-	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

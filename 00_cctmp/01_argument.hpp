@@ -150,14 +150,16 @@ namespace cctmp {
 
 	// cast:
 
-		template<typename Type, nik_vp(V)(Type*)>
-		struct T_grammar<Shape::argument, Pattern::higher_order, ArgHigherOrder::cast, V>
+		template<auto U>
+		struct T_grammar<Shape::argument, Pattern::higher_order, ArgHigherOrder::cast, U>
 		{
+			using Type = T_store_U<U>;
+
 			template<typename T>
 			nik_ces auto result(T v) -> Type { return static_cast<Type>(v); }
 
-		}; template<auto V>
-			nik_ce auto _cast_ = U_arg_higher_order<ArgHigherOrder::cast, V>;
+		}; template<auto U>
+			nik_ce auto _cast_ = U_arg_higher_order<ArgHigherOrder::cast, U>;
 
 		// to_bool (syntactic sugar):
 

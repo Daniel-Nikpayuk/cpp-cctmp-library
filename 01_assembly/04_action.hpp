@@ -49,7 +49,7 @@ namespace assembly {
 			aatN, aat0_x_aatN, aat1_x_aatN, aat2_x_aatN,
 			list, arg, lookup, literal,
 			solve, resolve,
-			pad, eval, back,
+			pad, eval, back, replace,
 			go_to, branch, invert,
 
 			dimension
@@ -142,10 +142,10 @@ namespace assembly {
 			using cbool  = gcbool_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note, cindex arg_at, cbool mutate = false)
+			nik_ces void result(Contr *contr, cindex note, cindex arg_at)
 			{
 				assembly_action<AAN::push, AAT::instr>(contr, AN::arg, AT::select, arg_at);
-				assembly_action<AAN::push, AAT::instr>(contr, AN::arg, note, mutate);
+				assembly_action<AAN::push, AAT::instr>(contr, AN::arg, note);
 			}
 		};
 
@@ -322,10 +322,10 @@ namespace assembly {
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex pad_size, cindex note)
+			nik_ces void result(Contr *contr, cindex arg_at, cindex pad_size)
 			{
-				assembly_action<AAN::push, AAT::instr>(contr, AN::pad, AT::select, pad_size);
-				assembly_action<AAN::push, AAT::instr>(contr, AN::pad, note);
+				assembly_action<AAN::push, AAT::instr>(contr, AN::pad, AT::select, arg_at, pad_size);
+				assembly_action<AAN::push, AAT::instr>(contr, AN::pad, AT::id);
 			}
 		};
 
@@ -431,9 +431,9 @@ namespace assembly {
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note)
+			nik_ces void result(Contr *contr, cindex note, cindex mute)
 			{
-				assembly_action< AAN::delay , AAT::call  >(contr, AN::eval, note);
+				assembly_action< AAN::delay , AAT::call  >(contr, AN::eval, note, mute);
 				assembly_action< AAN::id    , AAT::begin >(contr);
 			}
 		};
@@ -468,9 +468,9 @@ namespace assembly {
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note, cindex pos)
+			nik_ces void result(Contr *contr, cindex note, cindex mute, cindex pos)
 			{
-				assembly_action< AAN::eval , AAT::begin >(contr, note);
+				assembly_action< AAN::eval , AAT::begin >(contr, note, mute);
 				assembly_action< AAN::eval , AAT::end   >(contr, pos, AT::first);
 			}
 		};
@@ -482,14 +482,34 @@ namespace assembly {
 		{
 			using cindex = gcindex_type;
 
+			nik_ces cindex mute     = 0;
 			nik_ces cindex arg_drop = 0;
 
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex pos, cindex num)
 			{
-				assembly_action< AAN::eval    , AAT::begin  >(contr, note);
+				assembly_action< AAN::eval    , AAT::begin  >(contr, note, mute);
 				assembly_action< AAN::generic , AAT::lookup >(contr, AT::first, pos, num);
 				assembly_action< AAN::eval    , AAT::end    >(contr, arg_drop, AT::first);
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// replace:
+
+	// id:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::replace, AAT::id, filler...>
+		{
+			using cindex = gcindex_type;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex arg_at)
+			{
+				assembly_action<AAN::push, AAT::instr>(contr, AN::arg, AT::select, arg_at);
+				assembly_action<AAN::push, AAT::instr>(contr, AN::arg, AT::replace);
 			}
 		};
 

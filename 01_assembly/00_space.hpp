@@ -39,6 +39,18 @@ namespace assembly {
 	template<typename T>
 	using T_restore_T					= cctmp::T_restore_T<T>;
 
+	template<auto... Vs>
+	nik_ce auto U_pack_Vs					= cctmp::U_pack_Vs<Vs...>;
+
+	template<auto U>
+	using member_type_U					= cctmp::member_type_U<U>;
+
+	nik_ce auto H_id					= cctmp::H_id;
+
+	template<auto V> nik_ce auto _static_callable_		= cctmp::_static_callable_<V>;
+	template<auto V> nik_ce auto _static_car_		= cctmp::_static_car_<V>;
+	template<auto V> nik_ce auto _static_cdr_		= cctmp::_static_cdr_<V>;
+
 	template<auto U>
 	nik_ce auto & member_value_U				= cctmp::member_value_U<U>;
 
@@ -46,12 +58,26 @@ namespace assembly {
 	using gchar_type					= cctmp::gchar_type;
 	using gcchar_type					= cctmp::gcchar_type;
 	using gkey_type						= cctmp::gkey_type;
+	using gindex_type					= cctmp::gindex_type;
 	using gcindex_type					= cctmp::gcindex_type;
 
 	nik_ce auto U_unsigned_long				= cctmp::U_unsigned_long;
 
+	template<auto U>
+	nik_ce auto _cast_					= cctmp::_cast_<U>;
+
+	template<auto... Vs>
+	nik_ce auto _subarray_match_				= cctmp::_subarray_match_<Vs...>;
+
 	template<auto... Vs>
 	nik_ce auto eval					= cctmp::eval<Vs...>;
+
+	template<auto Op, typename T>
+	using modify_type					= cctmp::modify_type<Op, T>;
+
+	nik_ce auto _from_reference_				= cctmp::_from_reference_;
+	nik_ce auto _to_list_					= cctmp::_to_list_;
+	nik_ce auto _cons_					= cctmp::_cons_;
 
 	template<auto... Vs>
 	nik_ce auto unpack_					= cctmp::unpack_<Vs...>;
@@ -62,8 +88,16 @@ namespace assembly {
 	template<auto U>
 	nik_ce auto _string_to_number_				= cctmp::_string_to_number_<U>;
 
+	template<auto... Vs> nik_ce auto stem_			= cctmp::stem_<Vs...>;
+
 	template<typename T, auto S>
 	using sequence						= cctmp::sequence<T, S>;
+
+	template<typename T, auto S>
+	using triple_stack					= cctmp::triple_stack<T, S>;
+
+	template<typename T, auto S>
+	using quad_stack					= cctmp::quad_stack<T, S>;
 
 	nik_ce auto _par_left_					= cctmp::_par_left_;
 	nik_ce auto _par_right_					= cctmp::_par_right_;
@@ -73,6 +107,12 @@ namespace assembly {
 
 	template<auto... Vs>
 	nik_ce auto segment_					= cctmp::segment_<Vs...>;
+
+	nik_ce auto H_env_lookup				= cctmp::H_env_lookup;
+	nik_ce auto H_env_tuple					= cctmp::H_env_tuple;
+
+	template<auto... Vs>
+	using T_machine_contr					= cctmp::T_machine_contr<Vs...>;
 
 	template<auto... Vs>
 	using T_machine_action					= cctmp::T_machine_action<Vs...>;
@@ -97,10 +137,10 @@ namespace assembly {
 		{
 			id = 0, identity = id, // convenience for default params.
 			halt    ,
-			boolean , number , character , string ,
-			literal , list   , lookup    , arg    ,
-			pad     , pound  , apply     , bind   , eval ,
-			go_to   , branch , invert    ,
+			boolean , n_number , r_number , character , string ,
+			literal , list     , lookup   , arg       ,
+			pad     , pound    , apply    , bind      , eval   ,
+			go_to   , branch   , invert   ,
 			dimension
 		};
 	};
@@ -116,11 +156,11 @@ namespace assembly {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first , port  , select ,
+			first , port  , select  ,
 			front , back  ,
 			ante  , conse ,
-			push  , pull  , drop   ,
-			verse , side  ,
+			push  , pull  , drop    ,
+			verse , side  , replace ,
 			dimension
 		};
 	};
@@ -186,20 +226,212 @@ namespace assembly {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// read:
+// space:
 
-	// Reimplement as immutable struct.
+/***********************************************************************************************************************/
+
+// p(arser )g(enerator):
+
+	template<typename T_grammar, template<auto...> typename B_scanned, template<auto...> typename B_parsed>
+	struct T_pg_static_space
+	{
+		// grammar:
+
+			nik_ces auto grammar		= U_store_T<T_grammar>;
+			nik_ces auto source		= _static_callable_<T_grammar::source>;
+
+		// scanned:
+
+			using T_scanned			= B_scanned<source>;
+			nik_ces auto scanned		= U_store_T<T_scanned>;
+
+		// parsed:
+
+			using T_parsed			= B_parsed<scanned, grammar>;
+			nik_ces auto parsed		= U_store_T<T_parsed>;
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template
+	<
+		typename T_grammar, template<auto...> typename B_pg_scanned,
+		template<auto...> typename B_pg_parsed, template<auto...> typename B_parsed
+	>
+	struct T_static_space
+	{
+
+		// pg:
+
+			using T_pg_space		= T_pg_static_space<T_grammar, B_pg_scanned, B_pg_parsed>;
+			nik_ces auto pg_parsed		= T_pg_space::parsed;
+
+		// parsed:
+
+			using T_parsed			= B_parsed<pg_parsed>;
+			nik_ces auto parsed		= U_store_T<T_parsed>;
+	};
+
+	// syntactic sugar:
+
+		template
+		<
+			typename T_grammar, template<auto...> typename B_pg_scanned,
+			template<auto...> typename B_pg_parsed, template<auto...> typename B_parsed
+		>
+		nik_ce auto U_static_space = U_store_T
+		<
+			T_static_space<T_grammar, B_pg_scanned, B_pg_parsed, B_parsed>
+		>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// metapile:
+
+/***********************************************************************************************************************/
+
+// contr:
+
+	template<auto space>
+	struct T_metapile_static_contr
+	{
+		nik_ces auto static_parsed	= T_store_U<space>::parsed;
+		nik_ces auto & parsed		= member_value_U<static_parsed>;
+
+		nik_ces auto & value		= parsed.contr;
+		using type			= modify_type<_from_reference_, decltype(value)>;
+
+	}; template<auto space>
+		nik_ce auto _metapile_contr_ = U_store_T<T_metapile_static_contr<space>>;
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template
+	<
+		typename T_grammar,
+		template<auto...> typename B_pg_scanned,
+		template<auto...> typename B_pg_parsed,
+		template<auto...> typename B_parsed,
+
+		auto callable_source,
+		auto initial_env,
+
+		auto contr_size =  512,
+		auto stack_size =  512,
+		auto model_size = 1024
+	>
+	struct T_metapile_static_space
+	{
+		nik_ces auto static_pair		= _static_callable_<callable_source>;
+		nik_ces auto static_source		= _static_car_<static_pair>;
+		nik_ces auto static_frame		= _static_cdr_<static_pair>;
+
+		nik_ces bool sf_is_empty		= member_value_U<static_frame>.is_empty();
+		nik_ces auto static_env			= stem_
+							<
+								sf_is_empty, initial_env,
+								_cons_, H_id, initial_env, static_frame
+							>;
+		nik_ces auto static_env_lookup		= unpack_<static_env, _to_list_, H_env_lookup>;
+		nik_ces auto static_env_tuple		= unpack_<static_env, _to_list_, H_env_tuple>;
+
+		template<auto pg_parsed>
+		using T_parsed				= B_parsed
+							<
+								pg_parsed, static_source, static_env_lookup,
+								contr_size, stack_size, model_size
+							>;
+
+		nik_ces auto static_space		= U_static_space<T_grammar, B_pg_scanned, B_pg_parsed, T_parsed>;
+		nik_ces auto static_contr		= _metapile_contr_<static_space>;
+	};
+
+	// syntactic sugar:
+
+		template
+		<
+			typename T_grammar,
+			template<auto...> typename B_pg_scanned,
+			template<auto...> typename B_pg_parsed,
+			template<auto...> typename B_parsed,
+
+			auto callable_source,
+			auto initial_env,
+
+			auto contr_size =  512,
+			auto stack_size =  512,
+			auto model_size = 1024
+		>
+		nik_ce auto metapile = T_metapile_static_space
+		<
+			T_grammar, B_pg_scanned, B_pg_parsed, B_parsed,
+			callable_source, initial_env, contr_size, stack_size, model_size
+
+		>::static_contr;
+
+/***********************************************************************************************************************/
+
+// apply:
+
+	template
+	<
+		typename T_grammar,
+		template<auto...> typename B_pg_scanned,
+		template<auto...> typename B_pg_parsed,
+		template<auto...> typename B_parsed,
+
+		auto callable_source,
+		auto subsource,
+		auto initial_env,
+		auto out_types,
+
+		auto contr_size =  512,
+		auto stack_size =  512,
+		auto model_size = 1024
+	>
+	struct T_metapile_apply
+	{
+		using metapile		= T_metapile_static_space
+					<
+						T_grammar, B_pg_scanned, B_pg_parsed, B_parsed,
+						callable_source, initial_env, contr_size, stack_size, model_size
+					>;
+		nik_ces auto contr	= _metapile_contr_<metapile::static_space>;
+
+		nik_ces auto list	= U_pack_Vs<metapile::static_source, subsource>;
+		nik_ces auto lookup	= metapile::static_env_tuple;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			nik_ce auto zero = gindex_type{0};
+			using pound      = T_assembly_compound<contr, zero>;
+
+			return pound::template result<list, lookup, out_types, zero, Ts...>(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// read:
 
 /***********************************************************************************************************************/
 
 // only:
 
-	struct T_read_only
+	template<auto...>
+	struct T_read
 	{
 		// default:
 
 			template<typename T>
-			nik_ces auto _result(nik_avp(T*)) { return U_store_T<T const>; }
+			nik_ces auto only(nik_avp(T*)) { return U_store_T<T const>; }
 
 		// pointer (recursive):
 
@@ -210,10 +442,12 @@ namespace assembly {
 			nik_ces auto add_pointer_const = U_store_T<T_add_pointer_const<T_store_U<U>>>;
 
 			template<typename T>
-			nik_ces auto _result(nik_avp(T**)) { return add_pointer_const<_result(U_store_T<T>)>; }
+			nik_ces auto only(nik_avp(T**))
+				{ return add_pointer_const<only(U_store_T<T>)>; }
 
 			template<typename T>
-			nik_ces auto _result(nik_avp(T*const*)) { return add_pointer_const<_result(U_store_T<T>)>; }
+			nik_ces auto only(nik_avp(T*const*))
+				{ return add_pointer_const<only(U_store_T<T>)>; }
 
 		// reference (recursive):
 
@@ -224,59 +458,53 @@ namespace assembly {
 			nik_ces auto add_reference_const = U_store_T<T_add_reference_const<T_store_U<U>>>;
 
 			template<typename T>
-			nik_ces auto _result(nik_avp(T&)) { return add_reference_const<_result(U_store_T<T>)>; }
+			nik_ces auto only(nik_avp(T&))
+				{ return add_reference_const<only(U_store_T<T>)>; }
+	};
 
-		template<auto U>
-		nik_ces auto result = _result(U);
+	// syntactic sugar:
 
-	}; nik_ce auto _read_only_ = U_custom_T<T_read_only>;
-
-	template<auto U>
-	using read_only = T_store_U<eval<_read_only_, U>>;
+		template<bool V, typename T> using read_type = typename T_read<V, U_store_T<T>>::mtype;
+		template<bool V, typename T> using read_cast = typename T_read<V, U_store_T<T>>::cast;
 
 /***********************************************************************************************************************/
 
-// write:
+// immutable:
 
-	struct T_read_write
+	template<auto U, auto... filler>
+	struct T_read<false, U, filler...>
 	{
-		// default (recursive):
+		protected:
 
-			template<typename T>
-			nik_ces auto _result(nik_avp(T*)) { return U_store_T<T>; }
+			nik_ces auto U_mtype	= T_read<filler...>::only(U);
+			nik_ces auto U_cast	= _cast_<U_mtype>;
 
-			template<typename T>
-			nik_ces auto _result(nik_avp(T const*)) { return U_store_T<T>; }
+		public:
 
-		// pointer (recursive):
+			using mtype		= T_store_U<U_mtype>;
+			using cast		= T_store_U<U_cast>;
+	};
 
-			template<typename T>
-			using T_add_pointer = T*;
+/***********************************************************************************************************************/
 
-			template<auto U>
-			nik_ces auto add_pointer = U_store_T<T_add_pointer<T_store_U<U>>>;
+// mutable:
 
-			template<typename T>
-			nik_ces auto _result(nik_avp(T**)) { return add_pointer<_result(U_store_T<T>)>; }
+	template<auto U, auto... filler>
+	struct T_read<true, U, filler...>
+	{
+		public:
 
-			template<typename T>
-			nik_ces auto _result(nik_avp(T*const*)) { return add_pointer<_result(U_store_T<T>)>; }
+			using mtype		= T_store_U<U>;
 
-		// reference:
+		protected:
 
-			template<typename T>
-			using T_add_reference = T&;
+			nik_ces auto U_mtype	= U_store_T<mtype>;
+			nik_ces auto U_cast	= _cast_<U_mtype>;
 
-			template<auto U>
-			nik_ces auto add_reference = U_store_T<T_add_reference<T_store_U<U>>>;
+		public:
 
-			template<typename T>
-			nik_ces auto _result(nik_avp(T&)) { return add_reference<_result(U_store_T<T>)>; }
-
-		template<auto U>
-		nik_ces auto result = _result(U);
-
-	}; nik_ce auto _read_write_ = U_custom_T<T_read_write>;
+			using cast		= T_store_U<U_cast>;
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
