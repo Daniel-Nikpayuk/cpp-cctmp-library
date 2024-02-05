@@ -162,7 +162,7 @@ namespace assembly {
 
 			return NIK_ASSEMBLY_TEMPLATE(c, i)
 				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, mT, Ts...)
-					(read_cast<n, nT>::template result<nT>(nv), vs...);
+					(static_cast<mT>(nv), vs...);
 		}
 	};
 
@@ -187,7 +187,7 @@ namespace assembly {
 
 			return NIK_ASSEMBLY_TEMPLATE(c, i)
 				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, Ts..., mT)
-					(vs..., read_cast<n, nT>::template result<nT>(nv));
+					(vs..., static_cast<mT>(nv));
 		}
 	};
 

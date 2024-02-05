@@ -153,7 +153,8 @@ namespace hustle {
 				invalid     = TokenName::invalid,
 				empty       = TokenName::dimension,
 				prompt      ,
-				arrow       ,
+				op_type     ,
+				arg_type    ,
 
 				identifier  ,
 				octothorpe  ,
@@ -202,7 +203,10 @@ namespace hustle {
 			{
 				empty       = StateName::empty,
 				initial     = StateName::initial,
+				l_paren     ,
+				r_paren     ,
 				arrow       ,
+				semicolon   ,
 
 				identifier  ,
 				hash        , // # (boolean)
@@ -213,8 +217,6 @@ namespace hustle {
 				character   ,
 				string      ,
 
-				l_paren     ,
-				r_paren     ,
 				equal       ,
 				compare_lt  ,
 				compare_le  ,
@@ -222,7 +224,7 @@ namespace hustle {
 				compare_ge  ,
 				plus        ,
 				star        ,
-				minus       ,
+				dash        ,
 				slash       ,
 				l_quote     ,
 
@@ -233,7 +235,10 @@ namespace hustle {
 			(
 				U_state_type, U_token_type,
 
-				cctmp::pair( arrow      , Token::arrow      ),
+				cctmp::pair( l_paren    , Token::l_expr     ),
+				cctmp::pair( r_paren    , Token::r_expr     ),
+				cctmp::pair( arrow      , Token::op_type    ),
+				cctmp::pair( semicolon  , Token::arg_type   ),
 
 				cctmp::pair( identifier , Token::identifier ),
 				cctmp::pair( boolean    , Token::boolean    ),
@@ -243,8 +248,6 @@ namespace hustle {
 				cctmp::pair( character  , Token::character  ),
 				cctmp::pair( string     , Token::string     ),
 
-				cctmp::pair( l_paren    , Token::l_expr     ),
-				cctmp::pair( r_paren    , Token::r_expr     ),
 				cctmp::pair( equal      , Token::equal      ),
 				cctmp::pair( compare_lt , Token::compare_lt ),
 				cctmp::pair( compare_le , Token::compare_le ),
@@ -252,7 +255,7 @@ namespace hustle {
 				cctmp::pair( compare_ge , Token::compare_ge ),
 				cctmp::pair( plus       , Token::add        ),
 				cctmp::pair( star       , Token::multiply   ),
-				cctmp::pair( minus      , Token::subtract   ),
+				cctmp::pair( dash       , Token::subtract   ),
 				cctmp::pair( slash      , Token::divide     )
 			);
 		};
@@ -266,18 +269,19 @@ namespace hustle {
 				digit       ,
 				quote       ,
 				period      ,
+				l_paren     ,
+				r_paren     ,
 				question    ,
+				semicolon   ,
 				octothorpe  ,
 				punctuation ,
 
-				l_paren     ,
-				r_paren     ,
 				equal       ,
 				l_angle     ,
 				r_angle     ,
 				plus        ,
 				star        ,
-				minus       ,
+				dash        ,
 				slash       ,
 
 				backslash   ,
@@ -290,18 +294,19 @@ namespace hustle {
 
 				cctmp::pair( '\'' , Charset::quote       ),
 				cctmp::pair( '.'  , Charset::period      ),
+				cctmp::pair( '('  , Charset::l_paren     ),
+				cctmp::pair( ')'  , Charset::r_paren     ),
 				cctmp::pair( '?'  , Charset::question    ),
+				cctmp::pair( ':'  , Charset::semicolon   ),
 				cctmp::pair( '#'  , Charset::octothorpe  ),
 				cctmp::pair( '!'  , Charset::punctuation ),
 
-				cctmp::pair( '('  , Charset::l_paren     ),
-				cctmp::pair( ')'  , Charset::r_paren     ),
 				cctmp::pair( '='  , Charset::equal       ),
 				cctmp::pair( '<'  , Charset::l_angle     ),
 				cctmp::pair( '>'  , Charset::r_angle     ),
 				cctmp::pair( '+'  , Charset::plus        ),
 				cctmp::pair( '*'  , Charset::star        ),
-				cctmp::pair( '-'  , Charset::minus       ),
+				cctmp::pair( '-'  , Charset::dash        ),
 				cctmp::pair( '/'  , Charset::slash       ),
 
 				cctmp::pair( '\\' , Charset::backslash   )
@@ -320,23 +325,24 @@ namespace hustle {
 		nik_ce T_hustle_dftt() : table{}
 		{
 			table[ State::initial    ][ Charset::ula         ] = State::identifier;
+			table[ State::initial    ][ Charset::l_paren     ] = State::l_paren;
+			table[ State::initial    ][ Charset::r_paren     ] = State::r_paren;
+			table[ State::initial    ][ Charset::semicolon   ] = State::semicolon;
 			table[ State::initial    ][ Charset::octothorpe  ] = State::hash;
 			table[ State::initial    ][ Charset::digit       ] = State::n_numeral;
 			table[ State::initial    ][ Charset::period      ] = State::period;
 			table[ State::initial    ][ Charset::quote       ] = State::l_quote;
-			table[ State::initial    ][ Charset::l_paren     ] = State::l_paren;
-			table[ State::initial    ][ Charset::r_paren     ] = State::r_paren;
 			table[ State::initial    ][ Charset::equal       ] = State::equal;
 			table[ State::initial    ][ Charset::l_angle     ] = State::compare_lt;
 			table[ State::initial    ][ Charset::r_angle     ] = State::compare_gt;
 			table[ State::initial    ][ Charset::plus        ] = State::plus;
 			table[ State::initial    ][ Charset::star        ] = State::star;
-			table[ State::initial    ][ Charset::minus       ] = State::minus;
+			table[ State::initial    ][ Charset::dash        ] = State::dash;
 			table[ State::initial    ][ Charset::slash       ] = State::slash;
 
 			table[ State::identifier ][ Charset::ula         ] = State::identifier;
 			table[ State::identifier ][ Charset::digit       ] = State::identifier;
-			table[ State::identifier ][ Charset::minus       ] = State::identifier;
+			table[ State::identifier ][ Charset::dash        ] = State::identifier;
 			table[ State::identifier ][ Charset::question    ] = State::identifier;
 			table[ State::identifier ][ Charset::punctuation ] = State::identifier;
 
@@ -359,7 +365,7 @@ namespace hustle {
 
 			table[ State::compare_gt ][ Charset::equal       ] = State::compare_ge;
 
-			table[ State::minus      ][ Charset::r_angle     ] = State::arrow;
+			table[ State::dash       ][ Charset::r_angle     ] = State::arrow;
 
 			// generator::T_generic_lexer_tt::set_backslash_entries<State, Charset>(table);
 		}

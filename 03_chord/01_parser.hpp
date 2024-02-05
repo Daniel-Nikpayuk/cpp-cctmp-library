@@ -49,6 +49,8 @@ namespace chord {
 
 			// define:
 
+				define_begin,
+				define_end,
 				define_arg,
 
 			// left:
@@ -179,19 +181,19 @@ namespace chord {
 
 				// declare:
 
-					"DecBeg  -> declare                 ;"
-					"DecArgs -> DecArg DecArgs          ;"
-					"        -> empty                   ;"
-					"DecArg  -> identifier : declare_op ;"
-					"DecEnd  -> \\;                     ;"
+					"DecBeg  -> declare                     ;"
+					"DecArgs -> DecArg DecArgs              ;"
+					"        -> empty                       ;"
+					"DecArg  -> identifier     : declare_op ;"
+					"DecEnd  -> \\;                         ;"
 
 				// define:
 
-					"DefBeg  -> define                  ;"
-					"DefArgs -> DefArg DefArgs          ;"
-					"        -> empty                   ;"
-					"DefArg  -> identifier : define_arg ;"
-					"DefEnd  -> \\;                     ;"
+					"DefBeg  -> define         : define_begin ;"
+					"DefArgs -> DefArg DefArgs                ;"
+					"        -> empty                         ;"
+					"DefArg  -> identifier     : define_arg   ;"
+					"DefEnd  -> \\;            : define_end   ;"
 
 				// jump:
 
@@ -492,7 +494,9 @@ namespace chord {
 
 				// define:
 
-					sxa_pair( "define_arg" , ActName::define_arg ),
+					sxa_pair( "define_begin" , ActName::define_begin ),
+					sxa_pair( "define_end"   , ActName::define_end   ),
+					sxa_pair( "define_arg"   , ActName::define_arg   ),
 
 				// left:
 

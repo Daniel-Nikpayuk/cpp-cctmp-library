@@ -69,6 +69,11 @@ namespace assembly {
 	template<auto... Vs>
 	nik_ce auto _subarray_match_				= cctmp::_subarray_match_<Vs...>;
 
+	nik_ce auto _string_to_number_				= cctmp::_string_to_number_;
+
+	template<auto U>
+	nik_ce auto _string_to_builtin_				= cctmp::_string_to_builtin_<U>;
+
 	template<auto... Vs>
 	nik_ce auto eval					= cctmp::eval<Vs...>;
 
@@ -82,13 +87,16 @@ namespace assembly {
 	template<auto... Vs>
 	nik_ce auto unpack_					= cctmp::unpack_<Vs...>;
 
-	template<typename T>
-	nik_ce auto U_custom_T					= cctmp::U_custom_T<T>;
+	template<auto V>
+	nik_ce auto is_null_					= cctmp::is_null_<V>;
 
-	template<auto U>
-	nik_ce auto _string_to_number_				= cctmp::_string_to_number_<U>;
+	template<auto V>
+	nik_ce auto car_					= cctmp::car_<V>;
 
 	template<auto... Vs> nik_ce auto stem_			= cctmp::stem_<Vs...>;
+
+	template<typename T>
+	nik_ce auto U_custom_T					= cctmp::U_custom_T<T>;
 
 	template<typename T, auto S>
 	using sequence						= cctmp::sequence<T, S>;
@@ -138,7 +146,7 @@ namespace assembly {
 			id = 0, identity = id, // convenience for default params.
 			halt    ,
 			boolean , n_number , r_number , character , string ,
-			literal , list     , lookup   , arg       ,
+			literal , list     , lookup   , type      , arg    ,
 			pad     , pound    , apply    , bind      , eval   ,
 			go_to   , branch   , invert   ,
 			dimension
@@ -158,7 +166,6 @@ namespace assembly {
 			id = 0, identity = id, // convenience for default params.
 			first , port  , select  ,
 			front , back  ,
-			ante  , conse ,
 			push  , pull  , drop    ,
 			verse , side  , replace ,
 			dimension
@@ -405,15 +412,22 @@ namespace assembly {
 
 		nik_ces auto list	= U_pack_Vs<metapile::static_source, subsource>;
 		nik_ces auto lookup	= metapile::static_env_tuple;
+		nik_ces auto zero	= gindex_type{0};
+
+		nik_ces auto compound()
+		{
+			if nik_ce (is_null_<out_types>) return U_store_T<T_assembly_compound<contr, zero>>;
+			else
+			{
+				nik_ce auto out_type = car_<out_types>;
+
+				return U_store_T<T_assembly_compound<out_type, contr, zero>>;
+			}
+		}
 
 		template<typename... Ts>
 		nik_ces auto result(Ts... vs)
-		{
-			nik_ce auto zero = gindex_type{0};
-			using pound      = T_assembly_compound<contr, zero>;
-
-			return pound::template result<list, lookup, out_types, zero, Ts...>(vs...);
-		}
+			{ return T_store_U<compound()>::template result<list, lookup, out_types, zero, Ts...>(vs...); }
 	};
 
 /***********************************************************************************************************************/
@@ -464,8 +478,8 @@ namespace assembly {
 
 	// syntactic sugar:
 
-		template<bool V, typename T> using read_type = typename T_read<V, U_store_T<T>>::mtype;
-		template<bool V, typename T> using read_cast = typename T_read<V, U_store_T<T>>::cast;
+		template<bool V, typename T>
+		using read_type = typename T_read<V, U_store_T<T>>::mtype;
 
 /***********************************************************************************************************************/
 
@@ -477,12 +491,10 @@ namespace assembly {
 		protected:
 
 			nik_ces auto U_mtype	= T_read<filler...>::only(U);
-			nik_ces auto U_cast	= _cast_<U_mtype>;
 
 		public:
 
 			using mtype		= T_store_U<U_mtype>;
-			using cast		= T_store_U<U_cast>;
 	};
 
 /***********************************************************************************************************************/
@@ -495,15 +507,6 @@ namespace assembly {
 		public:
 
 			using mtype		= T_store_U<U>;
-
-		protected:
-
-			nik_ces auto U_mtype	= U_store_T<mtype>;
-			nik_ces auto U_cast	= _cast_<U_mtype>;
-
-		public:
-
-			using cast		= T_store_U<U_cast>;
 	};
 
 /***********************************************************************************************************************/

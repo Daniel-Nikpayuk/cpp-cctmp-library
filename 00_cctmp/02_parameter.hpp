@@ -378,6 +378,7 @@ namespace cctmp {
 
 	template<auto p, auto Op, auto... Vs>  nik_ce auto unpack_  = eval<_b0_unpack_, p, Op, Vs...>;
 	template<auto p>                       nik_ce auto length_  = eval<_b0_unpack_, p, _length_>;
+	template<auto p>                       nik_ce auto is_null_ = eval<_b0_unpack_, p, _is_null_>;
 	template<auto p, auto... Vs>           nik_ce auto car_     = eval<_b0_unpack_, p, _car_, Vs...>;
 	template<auto p, auto... Vs>           nik_ce auto cadr_    = eval<_b0_unpack_, p, _cadr_, Vs...>;
 	template<auto p, auto... Vs>           nik_ce auto cdr_     = eval<_b0_unpack_, p, _cdr_, H_id, Vs...>;

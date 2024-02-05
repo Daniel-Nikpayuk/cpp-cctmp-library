@@ -39,16 +39,16 @@ namespace hustle {
 
 			// main:
 
-				main_name,
-				main_arg,
 				main_begin,
 				main_end,
+				main_name,
+				main_arg,
 
 			// define:
 
 				define_name,
 				define_arg,
-				define_begin,
+				define_body,
 				define_end,
 
 			// port:
@@ -72,6 +72,9 @@ namespace hustle {
 			// if:
 
 				if_begin,
+				if_deduce,
+				if_lookup,
+				if_number,
 				if_ante,
 				if_conse,
 				if_end,
@@ -112,22 +115,25 @@ namespace hustle {
 
 			// hustle:
 
-				"Start -> ( define ( MainSign ) OpType MainBody ) ;"
+				"Start -> MainBeg define ( MainSign ) OpType MainBody MainEnd ;"
 
 				// main:
 
-					"MainSign  -> identifier MainArgs : main_name  ;"
-					"MainArgs  -> MainArg MainArgs                 ;"
-					"          -> empty                            ;"
-					"MainArg   -> identifier          : main_arg   ;"
-					"MainBody  -> Expr0 MainExprs     : main_begin ;"
-					"MainExprs -> Expr0 MainExprs                  ;"
-					"          -> empty               : main_end   ;"
+					"MainBeg  -> (                   : main_begin ;"
+					"MainEnd  -> )                   : main_end   ;"
+					"MainSign -> identifier MainArgs : main_name  ;"
+					"MainArgs -> MainArg MainArgs                 ;"
+					"         -> empty                            ;"
+					"MainArg  -> identifier          : main_arg   ;"
+					"MainBody -> Expr0 Exprs                      ;"
 
 					"OpType -> \\-\\> OpPort                  ;"
 					"       -> empty                          ;"
 					"OpPort -> identifier    : op_port_lookup ;"
 					"       -> n_number      : op_port_number ;"
+
+					"Exprs -> Expr0 Exprs ;"
+					"      -> empty       ;"
 
 				// return:
 
@@ -151,17 +157,14 @@ namespace hustle {
 					"      -> Lookup    ;"
 					"      -> ( Expr1 ) ;"
 
-					"Expr1 -> Literal                     ;"
-					"      -> IfBeg Pred Ante Conse IfEnd ;"
-					"      -> define DefDisp              ;"
-					"      -> quote Expr0                 ;"
-					"      -> begin Exprs                 ;"
-					"      -> lambda LArgs LBody          ;"
-					"      -> set! VarExpr ValExpr        ;"
-					"      -> Op OpArgs                   ;"
-
-					"Exprs -> Expr0 Exprs ;"
-					"      -> empty       ;"
+					"Expr1 -> Literal                            ;"
+					"      -> IfBeg Pred IfType Ante Conse IfEnd ;"
+					"      -> define DefDisp                     ;"
+					"      -> quote Expr0                        ;"
+					"      -> begin Exprs                        ;"
+					"      -> lambda LArgs LBody                 ;"
+					"      -> set! VarExpr ValExpr               ;"
+					"      -> Op OpArgs                          ;"
 
 				// conditional:
 
@@ -171,21 +174,25 @@ namespace hustle {
 					"        -> PredBeg Expr1 PredEnd   ;"
 					"PredBeg -> (                       ;"
 					"PredEnd -> )           : if_begin  ;"
+					"IfType  -> \\-\\> Cast             ;"
+					"        -> empty       : if_deduce ;"
+					"Cast    -> identifier  : if_lookup ;"
+					"        -> n_number    : if_number ;"
 					"Ante    -> Expr0       : if_ante   ;"
 					"Conse   -> Expr0       : if_conse  ;"
 					"IfEnd   -> empty       : if_end    ;"
 
 				// define:
 
-					"DefDisp  -> VarExpr ValExpr                   ;"
-					"         -> ( DefSign ) OpType DefBody        ;"
-					"DefSign  -> identifier DefArgs : define_name  ;"
-					"DefArgs  -> DefArg DefArgs                    ;"
-					"         -> empty                             ;"
-					"DefArg   -> identifier         : define_arg   ;"
-					"DefBody  -> Expr0 DefExprs     : define_begin ;"
-					"DefExprs -> Expr0 DefExprs                    ;"
-					"         -> empty              : define_end   ;"
+					"DefDisp  -> VarExpr ValExpr                  ;"
+					"         -> ( DefSign ) OpType DefBody       ;"
+					"DefSign  -> identifier DefArgs : define_name ;"
+					"DefArgs  -> DefArg DefArgs                   ;"
+					"         -> empty                            ;"
+					"DefArg   -> identifier         : define_arg  ;"
+					"DefBody  -> Expr0 DefExprs     : define_body ;"
+					"DefExprs -> Expr0 DefExprs                   ;"
+					"         -> empty              : define_end  ;"
 
 				// application:
 
@@ -263,17 +270,17 @@ namespace hustle {
 
 			// main:
 
-				sxa_pair( "main_name"  , ActName::main_name  ),
-				sxa_pair( "main_arg"   , ActName::main_arg   ),
 				sxa_pair( "main_begin" , ActName::main_begin ),
 				sxa_pair( "main_end"   , ActName::main_end   ),
+				sxa_pair( "main_name"  , ActName::main_name  ),
+				sxa_pair( "main_arg"   , ActName::main_arg   ),
 
 			// define:
 
-				sxa_pair( "define_name"  , ActName::define_name  ),
-				sxa_pair( "define_arg"   , ActName::define_arg   ),
-				sxa_pair( "define_begin" , ActName::define_begin ),
-				sxa_pair( "define_end"   , ActName::define_end   ),
+				sxa_pair( "define_name" , ActName::define_name ),
+				sxa_pair( "define_arg"  , ActName::define_arg  ),
+				sxa_pair( "define_body" , ActName::define_body ),
+				sxa_pair( "define_end"  , ActName::define_end  ),
 
 			// port:
 
@@ -296,6 +303,9 @@ namespace hustle {
 			// if:
 
 				sxa_pair( "if_begin"  , ActName::if_begin  ),
+				sxa_pair( "if_deduce" , ActName::if_deduce ),
+				sxa_pair( "if_lookup" , ActName::if_lookup ),
+				sxa_pair( "if_number" , ActName::if_number ),
 				sxa_pair( "if_ante"   , ActName::if_ante   ),
 				sxa_pair( "if_conse"  , ActName::if_conse  ),
 				sxa_pair( "if_end"    , ActName::if_end    ),

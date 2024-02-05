@@ -76,9 +76,11 @@ namespace assembly {
 		bool cur_mute;
 		cselect repl_name;
 		size_type repl_pos;
-		size_type asm_note;
-		size_type asm_pos;
-		size_type asm_num;
+		size_type lit_name;
+		size_type lit_pos;
+		size_type lit_num;
+		size_type pad_pos;
+		size_type pad_num;
 		size_type ret_note;
 		size_type verse_size;
 		size_type arg_size;
@@ -88,8 +90,9 @@ namespace assembly {
 			contr{src_at, str_at},
 			model{src}, cur_env{model.null_env()},
 			cur_entry{}, cur_arity{}, cur_mute{},
-			repl_pos{}, asm_note{}, asm_pos{}, asm_num{},
-			ret_note{AT::first}, verse_size{}, arg_size{}
+			repl_pos{}, lit_name{}, lit_pos{}, lit_num{},
+			pad_pos{}, pad_num{}, ret_note{AT::first},
+			verse_size{}, arg_size{}
 
 			{ inc_env(); }
 
@@ -157,40 +160,71 @@ namespace assembly {
 
 		// main:
 
-			nik_ce void main_begin(cindex pad_size)
+			nik_ce void main_name(const cselect & s)
 			{
+				auto left = 0;
+				auto ins  = 0;
+				auto val  = pound_var_type(left, ins);
+				cur_entry = model.define_compound(s, val, cur_env);
+
+				inc_verse();
+			}
+
+			nik_ce void main_begin()
+			{
+				auto pos = 0;
+				auto pad = 1;
+
 				assembly_action< AAN::id  , AAT::begin >();
-				assembly_action< AAN::pad , AAT::id    >(0, pad_size);
-				inc_verse(pad_size);
+				assembly_action< AAN::pad , AAT::id    >(pos, pad);
 			}
 
 			nik_ce void main_end() { assembly_action<AAN::id, AAT::end>(AT::first); }
 
-			nik_ce void main_name(const cselect & s)
-				{ cur_entry = model.define_compound(s, pound_var_type{}, cur_env); }
-
 		// port:
 
-			nik_ce void port_lookup(const cselect & s)
-			{
-				auto record = cmodel.match_variable(s);
+			// op:
 
-				if (cmrec_match(record))
+				nik_ce void op_port_lookup(const cselect & s)
 				{
-					auto path = cmrec_entry(record);
+					auto record = cmodel.match_variable(s);
 
-					model.set_value(cur_entry, Compound::kind, 1); // magic number.
-					model.set_value(cur_entry, Compound::port, path.v0);
-					model.set_value(cur_entry, Compound::aux , path.v1);
+					if (cmrec_match(record))
+					{
+						auto path = cmrec_entry(record);
+
+						model.set_value(cur_entry, Compound::kind, 1); // magic number.
+						model.set_value(cur_entry, Compound::port, path.v0);
+						model.set_value(cur_entry, Compound::aux , path.v1);
+					}
+					else { } // error.
 				}
-				else { } // error.
-			}
 
-			nik_ce void port_number(cindex value)
-			{
-				model.set_value(cur_entry, Compound::kind, 2); // magic number.
-				model.set_value(cur_entry, Compound::port, value);
-			}
+				nik_ce void op_port_number(cindex value)
+				{
+					model.set_value(cur_entry, Compound::kind, 2); // magic number.
+					model.set_value(cur_entry, Compound::port, value);
+				}
+
+			// arg:
+
+				nik_ce void port_lookup(const cselect & s)
+				{
+					auto record = cmodel.match_variable(s);
+
+					if (cmrec_match(record))
+					{
+						auto path = cmrec_entry(record);
+						auto pos  = path.v0;
+						auto num  = path.v1;
+
+						force_literal_return(pos, num);
+					}
+					else { } // error.
+				}
+
+				nik_ce void port_number(cindex value)
+					{ force_literal_return(value); }
 
 		// declare:
 
@@ -200,6 +234,22 @@ namespace assembly {
 		// define:
 
 			// op:
+
+				nik_ce void define_op_name(const cselect & s)
+				{
+					auto left = verse_size;
+					auto ins  = contr.current(2);
+					auto val  = pound_var_type(left, ins);
+					auto env  = push_env();
+					cur_entry = model.define_compound(s, val, env);
+
+					pound.push(reset_args(), left, env);
+				}
+
+				nik_ce void define_op_arity(cindex value) { cur_arity = value; }
+
+				nik_ce void define_op_arg(const cselect & s)
+					{ model.define_variable(s, arg_var_type{push_verse()}, cur_env); }
 
 				nik_ce void define_op_begin()
 				{
@@ -218,31 +268,23 @@ namespace assembly {
 					assembly_action< AAN::go_to , AAT::end >();
 				}
 
-				nik_ce void define_op_name(const cselect & s)
-				{
-					auto left = verse_size;
-					auto ins  = contr.current(2);
-					auto val  = pound_var_type(left, ins);
-					auto env  = push_env();
-					cur_entry = model.define_compound(s, val, env);
-
-					pound.push(reset_args(), left, env);
-				}
-
-				nik_ce void define_op_arity(cindex value) { cur_arity = value; }
-
-				nik_ce void define_op_arg(const cselect & s)
-					{ model.define_variable(s, arg_var_type{push_verse()}, cur_env); }
-
 			// arg:
+
+				nik_ce void define_arg_variable(const cselect & s, cindex pos)
+					{ model.define_variable(s, arg_var_type{pos}, cur_env); }
+
+				nik_ce void define_arg_variable(const cselect & s)
+					{ define_arg_variable(s, push_verse()); }
+
+				nik_ce void define_arg_names(cindex pos, cindex pad_size)
+					{ assembly_action<AAN::pad, AAT::id>(pos, pad_size); }
 
 				nik_ce void define_arg_name(const cselect & s, cindex pad_size = 1)
 				{
 					auto pos = push_verse();
-					auto val = arg_var_type{pos};
 
-					model.define_variable(s, val, cur_env);
-					assembly_action<AAN::pad, AAT::id>(pos, pad_size);
+					define_arg_variable(s, pos);
+					define_arg_names(pos, pad_size);
 				}
 
 		// refine:
@@ -419,15 +461,43 @@ namespace assembly {
 				nik_ce void lookup_error_action(const cselect & s)
 					{ } // nothing yet.
 
+		// literal:
+
+			nik_ce void delay_literal_return(cindex name, src_ptr b_ptr, src_ptr e_ptr)
+			{
+				lit_name = name;
+				lit_pos  = left_size(b_ptr);
+				lit_num  = left_size(e_ptr);
+			}
+
+			nik_ce void force_literal_return()
+			{
+				assembly_action<AAN::literal, AAT::id>(ret_note, lit_name, lit_pos, lit_num);
+				inc_args_if();
+			}
+
+			nik_ce void force_literal_return(cindex pos)
+			{
+				assembly_action<AAN::literal, AAT::literal>
+					(ret_note, pos, lit_name, lit_pos, lit_num);
+
+				inc_args_if();
+			}
+
+			nik_ce void force_literal_return(cindex pos, cindex num)
+			{
+				assembly_action<AAN::literal, AAT::parameter>
+					(ret_note, pos, num, lit_name, lit_pos, lit_num);
+
+				inc_args_if();
+			}
+	
 		// return:
 
-			nik_ce void return_literal(cindex lit_name, src_ptr b_ptr, src_ptr e_ptr)
+			nik_ce void return_literal(cindex name, src_ptr b_ptr, src_ptr e_ptr)
 			{
-				auto b = left_size(b_ptr);
-				auto e = left_size(e_ptr);
-
-				assembly_action<AAN::literal, AAT::id>(ret_note, lit_name, b, e);
-				inc_args_if();
+				delay_literal_return(name, b_ptr, e_ptr);
+				force_literal_return();
 			}
 
 			nik_ce void return_boolean(const bool value)
@@ -467,39 +537,17 @@ namespace assembly {
 				contr.set_instr_value(contr_pos, instr_pos, value);
 			}
 
-			nik_ce void if_port_deduce() { asm_note = AT::id; }
-
-			nik_ce void if_port_lookup(const cselect & s)
-			{
-				auto record = cmodel.match_variable(s);
-				auto path   = cmrec_entry(record);
-
-				asm_note = AT::pull;
-				asm_pos  = path.v0;
-				asm_num  = path.v1;
-			}
-
-			nik_ce void if_port_number(cindex value)
-			{
-				asm_note = AT::port;
-				asm_num  = value;
-			}
-
-			nik_ce void if_ante_begin()
-			{
-				if	(asm_note == AT::pull) if_ante_lookup();
-				else if	(asm_note == AT::port) if_ante_number();
-				else	                       if_ante_deduce();
-			}
-
-			nik_ce void if_ante_lookup() { assembly_action<AAN::invert, AAT::lookup>(asm_pos, asm_num); }
-			nik_ce void if_ante_number() { assembly_action<AAN::invert, AAT::begin>(AT::port, asm_num); }
-			nik_ce void if_ante_deduce() { assembly_action<AAN::invert, AAT::begin>(AT::id); }
-
+			nik_ce void if_ante_begin() { assembly_action<AAN::invert, AAT::begin>(AT::id); }
 			nik_ce void if_ante_end(cindex offset) { assembly_action<AAN::invert, AAT::end>(offset); }
 
 			nik_ce void if_conse_begin () { assembly_action<AAN::go_to, AAT::begin>(); }
 			nik_ce void if_conse_end   () { assembly_action<AAN::go_to, AAT::end>(); }
+
+		// pad:
+
+			nik_ce auto padding() const  { return pad_num; }
+			nik_ce void reset_padding () { pad_num = 0; }
+			nik_ce void inc_padding   () { ++pad_num; }
 	};
 
 /***********************************************************************************************************************/

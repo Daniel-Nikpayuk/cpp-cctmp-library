@@ -227,7 +227,7 @@ namespace chord {
 				star          ,
 				caret         ,
 				plus          ,
-				minus         ,
+				dash          ,
 				tilde         ,
 				l_bracket     ,
 				r_bracket     ,
@@ -264,7 +264,7 @@ namespace chord {
 				cctmp::pair( star          , Token::dereference ),
 				cctmp::pair( caret         , Token::caret       ),
 				cctmp::pair( plus          , Token::increment   ),
-				cctmp::pair( minus         , Token::decrement   ),
+				cctmp::pair( dash          , Token::decrement   ),
 				cctmp::pair( tilde         , Token::tilde       ),
 				cctmp::pair( l_bracket     , Token::l_closed    ),
 				cctmp::pair( r_bracket     , Token::r_closed    ),
@@ -299,7 +299,7 @@ namespace chord {
 				star          ,
 				caret         ,
 				plus          ,
-				minus         ,
+				dash          ,
 				tilde         ,
 				l_bracket     ,
 				r_bracket     ,
@@ -332,7 +332,7 @@ namespace chord {
 				cctmp::pair( '*'  , Charset::star          ),
 				cctmp::pair( '^'  , Charset::caret         ),
 				cctmp::pair( '+'  , Charset::plus          ),
-				cctmp::pair( '-'  , Charset::minus         ),
+				cctmp::pair( '-'  , Charset::dash          ),
 				cctmp::pair( '~'  , Charset::tilde         ),
 				cctmp::pair( '['  , Charset::l_bracket     ),
 				cctmp::pair( ']'  , Charset::r_bracket     ),
@@ -373,7 +373,7 @@ namespace chord {
 			table[ State::initial ][ Charset::star          ] = State::star;
 			table[ State::initial ][ Charset::caret         ] = State::caret;
 			table[ State::initial ][ Charset::plus          ] = State::plus;
-			table[ State::initial ][ Charset::minus         ] = State::minus;
+			table[ State::initial ][ Charset::dash          ] = State::dash;
 			table[ State::initial ][ Charset::tilde         ] = State::tilde;
 			table[ State::initial ][ Charset::l_bracket     ] = State::l_bracket;
 			table[ State::initial ][ Charset::r_bracket     ] = State::r_bracket;

@@ -505,28 +505,51 @@ namespace cctmp {
 
 	// from string:
 
-		template<auto U_size_type>
-		struct T_grammar<Shape::argument, Pattern::number, ArgNumber::from_string, U_size_type>
-		{
-			using size_type  = T_store_U<U_size_type>;
-			using csize_type = size_type const;
+		// auto:
 
-			template<typename In, typename End>
-			nik_ces size_type result(In in, End end)
+			template<auto... filler>
+			struct T_grammar<Shape::argument, Pattern::number, ArgNumber::from_string, filler...>
 			{
-				size_type num = 0;
-
-				for (size_type dig = 0, exp = 1; end != in; exp *= 10)
+				template<typename In, typename End>
+				nik_ces auto result(In in, End end)
 				{
-					dig  = (*--end) - '0';
-					num += dig * exp;
+					auto num = 0;
+
+					for (auto dig = 0, exp = 1; end != in; exp *= 10)
+					{
+						dig  = (*--end) - '0';
+						num += dig * exp;
+					}
+
+					return num;
 				}
 
-				return num;
-			}
+			}; nik_ce auto _string_to_number_ = U_arg_number<ArgNumber::from_string>;
 
-		}; template<auto U_size_type = U_gindex_type>
-			nik_ce auto _string_to_number_ = U_arg_number<ArgNumber::from_string, U_size_type>;
+		// type:
+
+			template<auto U>
+			struct T_grammar<Shape::argument, Pattern::number, ArgNumber::from_string, U>
+			{
+				using size_type  = T_store_U<U>;
+				using csize_type = size_type const;
+
+				template<typename In, typename End>
+				nik_ces auto result(In in, End end) -> size_type
+				{
+					size_type num = 0;
+
+					for (size_type dig = 0, exp = 1; end != in; exp *= 10)
+					{
+						dig  = (*--end) - '0';
+						num += dig * exp;
+					}
+
+					return num;
+				}
+
+			}; template<auto U = U_gindex_type>
+				nik_ce auto _string_to_builtin_ = U_arg_number<ArgNumber::from_string, U>;
 
 	// syntactic sugar:
 

@@ -147,11 +147,6 @@
 
 /***********************************************************************************************************************/
 
-		//	"(define (main n)                 "
-		//	"  (define (sq (type 0) m) * m m) "
-		//	"  (sq n)                         "
-		//	")                                "
-
 		//	"(define (main n)          "
 		//	"  (define (sq m) (* m m)) "
 		//	"  (sq n)                  "
@@ -171,39 +166,39 @@
 		//	"  (sum-of-squares m n)                            "
 		//	")                                                 "
 
-		//	"(define (factorial n) -> fact_t "
+		//	"(define (factorial n) -> T      "
 		//	"  (if (= n 0)                   "
-		//	"    1                           "
+		//	"    1:T                         "
 		//	"    (* n (factorial (- n 1)))   "
 		//	"  )                             "
 		//	")                               "
 
-		//	"(define (fib n) -> fib_t            "
+		//	"(define (fib n) -> T                "
 		//	"  (if (< n 2)                       "
-		//	"    1                               "
+		//	"    1:T                             "
 		//	"    (+ (fib (- n 1)) (fib (- n 2))) "
 		//	"  )                                 "
 		//	")                                   "
 
+		//	"(define (main n)                "
+		//	"  (define (factorial k) -> T    "
+		//	"    (if (= k 0)                 "
+		//	"      1:T                       "
+		//	"      (* k (factorial (- k 1))) "
+		//	"    )                           "
+		//	"  )                             "
+		//	"  (factorial n)                 "
+		//	")                               "
+
 		//	"(define (main n)                  "
-		//	"  (define (factorial k) -> fact_t "
+		//	"  (define (factorial k p) -> T    "
 		//	"    (if (= k 0)                   "
-		//	"      1                           "
-		//	"      (* k (factorial (- k 1)))   "
+		//	"      p                           "
+		//	"      (factorial (- k 1) (* k p)) "
 		//	"    )                             "
 		//	"  )                               "
-		//	"  (factorial n)                   "
+		//	"  (factorial n 1:T)               "
 		//	")                                 "
-
-		//	"(define (main n)                    "
-		//	"  (define (factorial k p) -> fact_t "
-		//	"    (if (= k 0)                     "
-		//	"      p                             "
-		//	"      (factorial (- k 1) (* k p))   "
-		//	"    )                               "
-		//	"  )                                 "
-		//	"  (factorial n 1)                   "
-		//	")                                   "
 
 		//	"(define (sqrt x)                             "
 		//	"  (define (square y) (* y y))                "
@@ -215,7 +210,7 @@
 		//	"  (define (improve guess y)                  "
 		//	"    (average guess (/ y guess))              "
 		//	"  )                                          "
-		//	"  (define (sqrt-iter guess y) -> sqrt_t      "
+		//	"  (define (sqrt-iter guess y) -> T           "
 		//	"    (if (good-enough? guess y)               "
 		//	"      guess                                  "
 		//	"      (sqrt-iter (improve guess y) y)        "
@@ -234,7 +229,7 @@
 		//	"  (define (improve guess)                    "
 		//	"    (average guess (/ x guess))              "
 		//	"  )                                          "
-		//	"  (define (sqrt-iter guess) -> sqrt_t        "
+		//	"  (define (sqrt-iter guess) -> T             "
 		//	"    (if (good-enough? guess)                 "
 		//	"      guess                                  "
 		//	"      (sqrt-iter (improve guess))            "
@@ -252,7 +247,7 @@
 		return source
 	        (
 
-			, binding("fact_t", 0)
+			, binding("T", 0)
 		);
 	}
 

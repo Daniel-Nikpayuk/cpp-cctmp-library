@@ -197,7 +197,10 @@ namespace chord {
 		(
 			"square x                      ;"
 
-			"definitions:                  ;"
+			"vars:                         ;"
+			"declare sq                    ;"
+
+			"defs:                         ;"
 			"sq # argpose[1]{multiply 0 0} ;"
 
 			"body:                         ;"
@@ -253,9 +256,12 @@ namespace chord {
 	{
 		return source
 	        (
-			"f x y                                ;"
+			"main x y                             ;"
 
-			"definitions:                         ;"
+			"vars:                                ;"
+			"declare sq sum_of_sq                 ;"
+
+			"defs:                                ;"
 			"sq        # argpose[1]{multiply 0 0} ;"
 			"sum_of_sq # subpose[2]{add sq sq}    ;"
 

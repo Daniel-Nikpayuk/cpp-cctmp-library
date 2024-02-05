@@ -46,10 +46,9 @@ namespace assembly {
 			identity = 0, id = identity, // convenience for default params.
 
 			push, delay, force, generic,
-			aatN, aat0_x_aatN, aat1_x_aatN, aat2_x_aatN,
 			list, arg, lookup, literal,
-			solve, resolve,
-			pad, eval, back, replace,
+			solve, resolve, pad,
+			eval, back, replace,
 			go_to, branch, invert,
 
 			dimension
@@ -161,123 +160,6 @@ namespace assembly {
 				{ assembly_action<AAN::push, AAT::instr>(contr, AN::lookup, note, pos, num); }
 		};
 
-	// literal:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::generic, AAT::literal, filler...>
-		{
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note, cindex str_at, cindex name, cindex begin, cindex end)
-			{
-				assembly_action< AAN::delay , AAT::call >(contr, AN::literal, note, str_at);
-				assembly_action< AAN::solve , AAT::id   >(contr, name, begin, end);
-				assembly_action< AAN::force , AAT::call >(contr);
-			}
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note, cindex name, cindex begin, cindex end)
-				{ result(contr, note, contr->src_at, name, begin, end); }
-		};
-
-/***********************************************************************************************************************/
-
-// pairs:
-
-	// aatN:
-
-		template<gkey_type note0, gkey_type note1, auto... filler>
-		struct T_assembly_action<AAN::aatN, note0, note1, filler...>
-		{
-			template<typename Contr, typename... Ts>
-			nik_ces void result(Contr *contr, Ts... vs)
-				{ assembly_action<AAN::generic, note0>(contr, note1, vs...); }
-		};
-
-	// aat0 x aatN:
-
-		template<gkey_type note0, gkey_type note1, auto... filler>
-		struct T_assembly_action<AAN::aat0_x_aatN, note0, note1, filler...>
-		{
-			template<typename Contr, typename... Ts>
-			nik_ces void result(Contr *contr, Ts... vs)
-			{
-				assembly_action<AAN::generic, note0>(contr, AT::back);
-				assembly_action<AAN::generic, note1>(contr, AT::back, vs...);
-			}
-		};
-
-	// aat1 x aatN:
-
-		template<gkey_type note0, gkey_type note1, auto... filler>
-		struct T_assembly_action<AAN::aat1_x_aatN, note0, note1, filler...>
-		{
-			using cindex = gcindex_type;
-
-			template<typename Contr, typename... Ts>
-			nik_ces void result(Contr *contr, cindex v0, Ts... vs)
-			{
-				assembly_action<AAN::generic, note0>(contr, AT::back, v0);
-				assembly_action<AAN::generic, note1>(contr, AT::back, vs...);
-			}
-		};
-
-	// aat2 x aatN:
-
-		template<gkey_type note0, gkey_type note1, auto... filler>
-		struct T_assembly_action<AAN::aat2_x_aatN, note0, note1, filler...>
-		{
-			using cindex = gcindex_type;
-
-			template<typename Contr, typename... Ts>
-			nik_ces void result(Contr *contr, cindex v0, cindex v1, Ts... vs)
-			{
-				assembly_action<AAN::generic, note0>(contr, AT::back, v0, v1);
-				assembly_action<AAN::generic, note1>(contr, AT::back, vs...);
-			}
-		};
-
-/***********************************************************************************************************************/
-
-// list:
-
-	// list, arg, lookup, literal:
-
-		template<gkey_type note, auto... filler>
-		struct T_assembly_action<AAN::list, note, filler...> :
-			public T_assembly_action<AAN::aat1_x_aatN, AAT::list, note, filler...> { };
-
-/***********************************************************************************************************************/
-
-// arg:
-
-	// list, arg, lookup, literal:
-
-		template<gkey_type note, auto... filler>
-		struct T_assembly_action<AAN::arg, note, filler...> :
-			public T_assembly_action<AAN::aat1_x_aatN, AAT::arg, note, filler...> { };
-
-/***********************************************************************************************************************/
-
-// lookup:
-
-	// list, arg, lookup, literal:
-
-		template<gkey_type note, auto... filler>
-		struct T_assembly_action<AAN::lookup, note, filler...> :
-			public T_assembly_action<AAN::aat2_x_aatN, AAT::lookup, note, filler...> { };
-
-/***********************************************************************************************************************/
-
-// back:
-
-	// list, arg, lookup, literal:
-
-		template<gkey_type note, auto... filler>
-		struct T_assembly_action<AAN::back, note, filler...> :
-			public T_assembly_action<AAN::aatN, note, AT::back, filler...> { };
-
 /***********************************************************************************************************************/
 
 // solve:
@@ -306,8 +188,19 @@ namespace assembly {
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex name, cindex begin, cindex end)
-				{ assembly_action<AAN::push, AAT::instr>(contr, name, AT::port, begin, end); }
+			nik_ces void result(Contr *contr, cindex pos, cindex name, cindex begin, cindex end)
+			{
+				assembly_action<AAN::push, AAT::instr>(contr, AN::type, AT::push, pos);
+				assembly_action<AAN::push, AAT::instr>(contr, name, AT::port, begin, end);
+			}
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr, cindex pos, cindex num, cindex name, cindex begin, cindex end)
+			{
+				assembly_action<AAN::push, AAT::instr>(contr, AN::lookup, AT::push, pos, num);
+				assembly_action<AAN::push, AAT::instr>(contr, AN::type, AT::pull);
+				assembly_action<AAN::push, AAT::instr>(contr, name, AT::port, begin, end);
+			}
 		};
 
 /***********************************************************************************************************************/
@@ -392,10 +285,6 @@ namespace assembly {
 			}
 		};
 
-/***********************************************************************************************************************/
-
-// literal:
-
 	// id:
 
 		template<auto... filler>
@@ -417,6 +306,54 @@ namespace assembly {
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex name, cindex begin, cindex end)
 				{ result(contr, note, contr->src_at, name, begin, end); }
+		};
+
+	// literal:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::literal, AAT::literal, filler...>
+		{
+			using cindex = gcindex_type;
+
+			nik_ces cindex arg_drop = 0;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr,
+				cindex note, cindex str_at, cindex typ_at, cindex name, cindex begin, cindex end)
+			{
+				assembly_action< AAN::literal , AAT::begin >(contr, note, str_at);
+				assembly_action< AAN::resolve , AAT::id    >(contr, typ_at, name, begin, end);
+				assembly_action< AAN::literal , AAT::end   >(contr, arg_drop, AT::first);
+			}
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr,
+				cindex note, cindex typ_at, cindex name, cindex begin, cindex end)
+					{ result(contr, note, contr->src_at, typ_at, name, begin, end); }
+		};
+
+	// parameter:
+
+		template<auto... filler>
+		struct T_assembly_action<AAN::literal, AAT::parameter, filler...>
+		{
+			using cindex = gcindex_type;
+
+			nik_ces cindex arg_drop = 0;
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr,
+				cindex note, cindex str_at, cindex pos, cindex num, cindex name, cindex begin, cindex end)
+			{
+				assembly_action< AAN::literal , AAT::begin >(contr, note, str_at);
+				assembly_action< AAN::resolve , AAT::id    >(contr, pos, num, name, begin, end);
+				assembly_action< AAN::literal , AAT::end   >(contr, arg_drop, AT::first);
+			}
+
+			template<typename Contr>
+			nik_ces void result(Contr *contr,
+				cindex note, cindex pos, cindex num, cindex name, cindex begin, cindex end)
+					{ result(contr, note, contr->src_at, pos, num, name, begin, end); }
 		};
 
 /***********************************************************************************************************************/
@@ -565,21 +502,6 @@ namespace assembly {
 				{ assembly_action<AAN::delay, AAT::jump>(contr, AN::branch, note); }
 		};
 
-	// lookup:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::branch, AAT::lookup, filler...>
-		{
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex pos, cindex num)
-			{
-				assembly_action< AAN::generic , AAT::lookup >(contr, AT::push, pos, num);
-				assembly_action< AAN::branch  , AAT::begin  >(contr, AT::pull);
-			}
-		};
-
 	// end:
 
 		template<auto... filler>
@@ -606,21 +528,6 @@ namespace assembly {
 			template<typename Contr>
 			nik_ces void result(Contr *contr, cindex note, cindex num = 0)
 				{ assembly_action<AAN::delay, AAT::jump>(contr, AN::invert, note); }
-		};
-
-	// lookup:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::invert, AAT::lookup, filler...>
-		{
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex pos, cindex num)
-			{
-				assembly_action< AAN::generic , AAT::lookup >(contr, AT::push, pos, num);
-				assembly_action< AAN::invert  , AAT::begin  >(contr, AT::pull);
-			}
 		};
 
 	// end:
