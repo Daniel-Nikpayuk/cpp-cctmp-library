@@ -50,18 +50,7 @@ namespace chord {
 // op:
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::mor_op_value, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->apply_begin(l->left_cselect()); }
-			//	inc_args_if();
-	};
-
-// argpose:
-
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::mor_argpose_begin, filler...>
+	struct T_chord_translation_action<CAAN::mor_op_begin, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -73,7 +62,7 @@ namespace chord {
 	};
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::mor_argpose_end, filler...>
+	struct T_chord_translation_action<CAAN::mor_op_end, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
@@ -82,6 +71,24 @@ namespace chord {
 			t->define_op_end();
 		}
 	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::mor_op, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->apply_begin(l->left_cselect()); }
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::mor_op_range, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->reset_count(); }
+	};
+
+// argpose:
 
 	template<auto... filler>
 	struct T_chord_translation_action<CAAN::mor_argpose_value, filler...>
@@ -96,65 +103,42 @@ namespace chord {
 
 // subpose:
 
-/*
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::mor_subpose_begin, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
-	};
-
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::mor_subpose_end, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
-	};
-
 	template<auto... filler>
 	struct T_chord_translation_action<CAAN::mor_subpose_value, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
+			t->apply_begin(l->left_cselect());
+			t->lookup_variadic_back_action(t->arg_pos(t->count++));
+			t->inc_args_if();
+			t->apply_end();
 		}
 	};
-*/
 
 // curry:
-
-/*
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::mor_curry_begin, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
-	};
-
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::mor_curry_end, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-		}
-	};
 
 	template<auto... filler>
 	struct T_chord_translation_action<CAAN::mor_curry_value, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
+			{ t->return_lookup(l->left_cselect()); }
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::mor_curry_args, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
 		{
+			for (auto k = 0; k != t->cur_arity; ++k)
+			{
+				t->lookup_variadic_back_action(t->arg_pos(k));
+				t->inc_args_if();
+			}
 		}
 	};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

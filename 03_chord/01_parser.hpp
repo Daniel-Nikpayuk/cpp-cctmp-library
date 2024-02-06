@@ -43,6 +43,15 @@ namespace chord {
 				main_arg,
 				main_return,
 
+			// label:
+
+				label_delay,
+				label_force,
+
+			// goto:
+
+			// tail:
+
 			// declare:
 
 				declare_op,
@@ -97,13 +106,23 @@ namespace chord {
 
 				// op:
 
-					mor_op_value,
+					mor_op_begin,
+					mor_op_end,
+					mor_op,
+					mor_op_range,
 
 				// argpose:
 
-					mor_argpose_begin,
-					mor_argpose_end,
 					mor_argpose_value,
+
+				// subpose:
+
+					mor_subpose_value,
+
+				// curry:
+
+					mor_curry_value,
+					mor_curry_args,
 
 			// dimension:
 
@@ -140,8 +159,6 @@ namespace chord {
 
 				// main:
 
-					// add in type/port resolution.
-
 					"MainBeg  -> identifier       : main_name   ;"
 					"MainEnd  -> \\;                            ;"
 					"MainArgs -> MainArg MainArgs               ;"
@@ -151,11 +168,11 @@ namespace chord {
 
 				// block:
 
-					"Block    -> LabelBeg LabelEnd Instrs ;" //               ;"
-					"RecBlock -> Block RecBlock           ;" //               ;"
-					"         -> empty                    ;" // : label_force ;"
-					"LabelBeg -> label                    ;" // : label_delay ;"
-					"LabelEnd -> \\;                      ;" //               ;"
+					"Block    -> LabelBeg LabelEnd Instrs               ;"
+					"RecBlock -> Block RecBlock                         ;"
+					"         -> empty                    : label_force ;"
+					"LabelBeg -> label                    : label_delay ;"
+					"LabelEnd -> \\;                                    ;"
 
 				// instruction:
 
@@ -179,6 +196,18 @@ namespace chord {
 					"TestInstr   -> TestBeg SubOp SubArgs TestEnd                    ;"
 					"BranchInstr -> BranchBeg BranchVal BranchEnd                    ;"
 
+				// jump:
+
+					"GotoBeg   -> goto       ;" // : goto_begin   ;"
+					"GotoVal   -> identifier ;" // : goto_value   ;"
+					"GotoEnd   -> \\;        ;" // : goto_end     ;"
+					"TailBeg   -> tail       ;" // : tail_begin   ;"
+					"TailVal   -> identifier ;" // : tail_value   ;"
+					"TailEnd   -> \\;        ;" // : tail_end     ;"
+					"BranchBeg -> branch     ;" // : branch_begin ;"
+					"BranchVal -> identifier ;" // : branch_value ;"
+					"BranchEnd -> \\;        ;" // : branch_end   ;"
+
 				// declare:
 
 					"DecBeg  -> declare                     ;"
@@ -194,18 +223,6 @@ namespace chord {
 					"        -> empty                         ;"
 					"DefArg  -> identifier     : define_arg   ;"
 					"DefEnd  -> \\;            : define_end   ;"
-
-				// jump:
-
-					"GotoBeg   -> goto       ;" // : goto_begin   ;"
-					"GotoVal   -> identifier ;" // : goto_value   ;"
-					"GotoEnd   -> \\;        ;" // : goto_end     ;"
-					"TailBeg   -> tail       ;" // : tail_begin   ;"
-					"TailVal   -> identifier ;" // : tail_value   ;"
-					"TailEnd   -> \\;        ;" // : tail_end     ;"
-					"BranchBeg -> branch     ;" // : branch_begin ;"
-					"BranchVal -> identifier ;" // : branch_value ;"
-					"BranchEnd -> \\;        ;" // : branch_end   ;"
 
 				// application:
 
@@ -246,9 +263,9 @@ namespace chord {
 
 			// morph:
 
-				"Morph -> argpose MorArity ArgposeBeg MorOp ArgposeVals ArgposeEnd ;"
-				"      -> subpose MorArity SubposeBeg MorOp SubposeVals SubposeEnd ;"
-				"      ->   curry MorArity   CurryBeg MorOp   CurryVals   CurryEnd ;"
+				"Morph -> argpose MorArity MorOpBeg MorOp    ArgposeVals MorOpEnd ;"
+				"      -> subpose MorArity MorOpBeg MorOpRng SubposeVals MorOpEnd ;"
+				"      ->   curry MorArity MorOpBeg MorOp      CurryVals MorOpEnd ;"
 
 				// arity:
 
@@ -258,39 +275,36 @@ namespace chord {
 
 				// op:
 
-					"MorOp -> identifier : mor_op_value ;"
-					"      -> *          : mor_op_value ;"
-					"      -> +          : mor_op_value ;"
-					"      -> \\-        : mor_op_value ;"
-					"      -> @          : mor_op_value ;"
+					"MorOpBeg -> {          : mor_op_begin ;"
+					"MorOpEnd -> }          : mor_op_end   ;"
+					"MorOp    -> identifier : mor_op       ;"
+					"         -> *          : mor_op       ;"
+					"         -> +          : mor_op       ;"
+					"         -> \\-        : mor_op       ;"
+					"         -> @          : mor_op       ;"
+					"MorOpRng -> MorOp      : mor_op_range ;"
 
 				// argpose:
 
-					"ArgposeBeg  -> {                      : mor_argpose_begin ;"
-					"ArgposeEnd  -> }                      : mor_argpose_end   ;"
 					"ArgposeVals -> ArgposeVal ArgposeVals                     ;"
 					"            -> empty                                      ;"
 					"ArgposeVal  -> number                 : mor_argpose_value ;"
 
 				// subpose:
 
-					"SubposeBeg  -> {                      ;" // : mor_subpose_begin ;"
-					"SubposeEnd  -> }                      ;" // : mor_subpose_end   ;"
-					"SubposeVals -> SubposeVal SubposeVals ;" //                     ;"
-					"            -> empty                  ;" //                     ;"
-					"SubposeVal  -> identifier             ;" // : mor_subpose_value ;"
-					"            -> @                      ;" // : mor_subpose_id    ;"
-					"            -> *                      ;" // : mor_subpose_deref ;"
-					"            -> +                      ;" // : mor_subpose_inc   ;"
-					"            -> \\-                    ;" // : mor_subpose_dec   ;"
+					"SubposeVals -> SubposeVal SubposeVals                     ;"
+					"            -> empty                                      ;"
+					"SubposeVal  -> identifier             : mor_subpose_value ;"
+					"            -> *                      : mor_subpose_value ;"
+					"            -> +                      : mor_subpose_value ;"
+					"            -> \\-                    : mor_subpose_value ;"
+					"            -> @                      : mor_subpose_value ;"
 
 				// curry:
 
-					"CurryBeg  -> {                  ;" //: mor_curry_begin ;"
-					"CurryEnd  -> }                  ;" //: mor_curry_end   ;"
-					"CurryVals -> CurryVal CurryVals ;" //                  ;"
-					"          -> empty              ;" //                  ;"
-					"CurryVal  -> identifier         ;" //: mor_curry_value ;"
+					"CurryVals -> CurryVal CurryVals                   ;"
+					"          -> empty              : mor_curry_args  ;"
+					"CurryVal  -> identifier         : mor_curry_value ;"
 
 			// cycle:
 
@@ -473,8 +487,8 @@ namespace chord {
 
 				// label:
 
-				//	sxa_pair( "label_delay" , ActName::label_delay ),
-				//	sxa_pair( "label_force" , ActName::label_force ),
+					sxa_pair( "label_delay" , ActName::label_delay ),
+					sxa_pair( "label_force" , ActName::label_force ),
 
 				// goto:
 
@@ -542,29 +556,23 @@ namespace chord {
 
 				// op:
 
-					sxt_pair( "mor_op_value" , ActName::mor_op_value ),
+					sxt_pair( "mor_op_begin" , ActName::mor_op_begin ),
+					sxt_pair( "mor_op_end"   , ActName::mor_op_end   ),
+					sxt_pair( "mor_op"       , ActName::mor_op       ),
+					sxt_pair( "mor_op_range" , ActName::mor_op_range ),
 
 				// argpose:
 
-					sxt_pair( "mor_argpose_begin" , ActName::mor_argpose_begin ),
-					sxt_pair( "mor_argpose_end"   , ActName::mor_argpose_end   ),
-					sxt_pair( "mor_argpose_value" , ActName::mor_argpose_value )//,
+					sxt_pair( "mor_argpose_value" , ActName::mor_argpose_value ),
 
 				// subpose:
 
-				//	sxt_pair( "mor_subpose_begin" , ActName::mor_subpose_begin ),
-				//	sxt_pair( "mor_subpose_end"   , ActName::mor_subpose_end   ),
-				//	sxt_pair( "mor_subpose_value" , ActName::mor_subpose_value ),
-				//	sxt_pair( "mor_subpose_id"    , ActName::mor_subpose_id    ),
-				//	sxt_pair( "mor_subpose_deref" , ActName::mor_subpose_deref ),
-				//	sxt_pair( "mor_subpose_inc"   , ActName::mor_subpose_inc   ),
-				//	sxt_pair( "mor_subpose_dec"   , ActName::mor_subpose_dec   ),
+					sxt_pair( "mor_subpose_value" , ActName::mor_subpose_value ),
 
 				// curry:
 
-				//	sxt_pair( "mor_curry_begin" , ActName::mor_curry_begin ),
-				//	sxt_pair( "mor_curry_end"   , ActName::mor_curry_end   ),
-				//	sxt_pair( "mor_curry_value" , ActName::mor_curry_value ),
+					sxt_pair( "mor_curry_value" , ActName::mor_curry_value ),
+					sxt_pair( "mor_curry_args"  , ActName::mor_curry_args  )//,
 
 			// cycle:
 

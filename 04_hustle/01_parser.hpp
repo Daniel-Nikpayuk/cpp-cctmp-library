@@ -37,6 +37,10 @@ namespace hustle {
 		{
 			nop = generator::AN::nop,
 
+			// param:
+
+				param_type,
+
 			// main:
 
 				main_name,
@@ -54,10 +58,8 @@ namespace hustle {
 			// port:
 
 				op_port_lookup,
-				op_port_number,
 				port_deduce,
 				port_lookup,
-				port_number,
 
 			// return:
 
@@ -112,22 +114,27 @@ namespace hustle {
 
 			// hustle:
 
-				"Start -> ( define ( MainSign ) OpType MainBody ) ;"
+				"Start   -> ( Generic )                             ;"
+				"Generic -> type Param Params ( Main )              ;"
+				"        -> Main                                    ;"
+				"Params  -> Param Params                            ;"
+				"        -> empty                                   ;"
+				"Param   -> identifier                 : param_type ;"
 
 				// main:
 
-					"MainSign  -> identifier MainArgs : main_name  ;"
-					"MainArgs  -> MainArg MainArgs                 ;"
-					"          -> empty                            ;"
-					"MainArg   -> identifier          : main_arg   ;"
-					"MainBody  -> Expr0 MainExprs     : main_begin ;"
-					"MainExprs -> Expr0 MainExprs                  ;"
-					"          -> empty               : main_end   ;"
+					"Main      -> define ( MainSign ) OpType MainBody              ;"
+					"MainSign  -> identifier MainArgs                 : main_name  ;"
+					"MainArgs  -> MainArg MainArgs                                 ;"
+					"          -> empty                                            ;"
+					"MainArg   -> identifier                          : main_arg   ;"
+					"MainBody  -> Expr0 MainExprs                     : main_begin ;"
+					"MainExprs -> Expr0 MainExprs                                  ;"
+					"          -> empty                               : main_end   ;"
 
 					"OpType -> \\-\\> OpPort                  ;"
 					"       -> empty                          ;"
 					"OpPort -> identifier    : op_port_lookup ;"
-					"       -> n_number      : op_port_number ;"
 
 				// return:
 
@@ -143,7 +150,6 @@ namespace hustle {
 					"Type -> \\: Port                 ;"
 					"     -> empty      : port_deduce ;"
 					"Port -> identifier : port_lookup ;"
-					"     -> n_number   : port_number ;"
 
 				// expression:
 
@@ -236,6 +242,7 @@ namespace hustle {
 			sxt_pair( "let"    , Token::let    ),
 			sxt_pair( "car"    , Token::car    ),
 			sxt_pair( "cdr"    , Token::cdr    ),
+			sxt_pair( "type"   , Token::type   ),
 			sxt_pair( "set!"   , Token::set_   ),
 			sxt_pair( "cons"   , Token::cons   ),
 			sxt_pair( "list"   , Token::list   ),
@@ -263,6 +270,10 @@ namespace hustle {
 
 			// main:
 
+				sxa_pair( "param_type" , ActName::param_type ),
+
+			// main:
+
 				sxa_pair( "main_name"  , ActName::main_name  ),
 				sxa_pair( "main_arg"   , ActName::main_arg   ),
 				sxa_pair( "main_begin" , ActName::main_begin ),
@@ -278,10 +289,8 @@ namespace hustle {
 			// port:
 
 				sxa_pair( "op_port_lookup" , ActName::op_port_lookup ),
-				sxa_pair( "op_port_number" , ActName::op_port_number ),
 				sxa_pair( "port_deduce"    , ActName::port_deduce    ),
 				sxa_pair( "port_lookup"    , ActName::port_lookup    ),
-				sxa_pair( "port_number"    , ActName::port_number    ),
 
 			// return:
 
@@ -328,7 +337,7 @@ namespace hustle {
 		using T_lexer			= typename T_grammar::T_lexer;
 		using Token			= typename T_grammar::Token;
 
-		nik_ces auto prod_size		= cctmp::string_literal("(d(S)TB)").size(); // needs refining.
+		nik_ces auto prod_size		= cctmp::string_literal("d(S)TB").size(); // needs refining.
 
 		nik_ces auto stack_start	= symbol_type{generator::Sign::nonterminal, base::start_index};
 		nik_ces auto stack_finish	= symbol_type{generator::Sign::terminal, Token::prompt};

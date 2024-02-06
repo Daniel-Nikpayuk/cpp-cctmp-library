@@ -25,6 +25,25 @@ namespace assembly {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// routines:
+
+/***********************************************************************************************************************/
+
+// divisor:
+
+	template<typename T>
+	nik_ce auto divisor(T v)
+	{
+		T n{1};
+
+		while (--v != 0) n *= 10;
+
+		return n;
+	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // halt:
 
 /***********************************************************************************************************************/
@@ -101,7 +120,7 @@ namespace assembly {
 		{
 			auto b  = v.cbegin() + AD<c>::pos(i);
 			auto e  = v.cbegin() + AD<c>::num(i);
-			auto nv = cctmp::apply<_string_to_number_>(b, e);
+			auto nv = cctmp::apply<_string_to_builtin_<>>(b, e);
 
 			return NIK_ASSEMBLY_TEMPLATE(c, i)
 				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, decltype(nv) const, Ts...)
@@ -144,28 +163,40 @@ namespace assembly {
 	template<auto... filler>
 	struct T_assembly<AN::r_number, AT::id, filler...>
 	{
-		using size_type			= double;
-		using csize_type		= size_type const;
-		nik_ces auto _match_		= _subarray_match_<>;
-		nik_ces auto _to_builtin_	= _string_to_builtin_<U_unsigned_long>;
-
-		nik_ces auto divisor(unsigned long n)
-		{
-			size_type v = 1;
-
-			while (--n != 0) v *= 10;
-
-			return v;
-		}
-
 		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t, r), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs)
 		{
 			auto b  = v.cbegin() + AD<c>::pos(i);
 			auto e  = v.cbegin() + AD<c>::num(i);
-			auto k  = cctmp::apply<_match_>(b, e, '.');
-			auto nn = cctmp::apply<_to_builtin_>(b, k);
-			auto nr = cctmp::apply<_to_builtin_>(k+1, e);
+			auto k  = cctmp::apply<_subarray_match_<>>(b, e, '.');
+			auto nn = cctmp::apply<_string_to_builtin_<U_auto_float>>(b, k);
+			auto nr = cctmp::apply<_string_to_builtin_<U_auto_float>>(k+1, e);
+			auto nv = nn + nr/divisor(e-k);
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i)
+				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, decltype(nv), Ts...)
+					(nv, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// port:
+
+	template<auto... filler>
+	struct T_assembly<AN::r_number, AT::port, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t, r), typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs)
+		{
+			using size_type  = T_store_U<r>;
+			using csize_type = size_type const;
+
+			auto b  = v.cbegin() + AD<c>::pos(i);
+			auto e  = v.cbegin() + AD<c>::num(i);
+			auto k  = cctmp::apply<_subarray_match_<>>(b, e, '.');
+			auto nn = cctmp::apply<_string_to_builtin_<r>>(b, k);
+			auto nr = cctmp::apply<_string_to_builtin_<r>>(k+1, e);
 			auto nv = nn + nr/divisor(e-k);
 
 			return NIK_ASSEMBLY_TEMPLATE(c, i)
@@ -186,14 +217,36 @@ namespace assembly {
 	template<auto... filler>
 	struct T_assembly<AN::character, AT::id, filler...>
 	{
-		using char_type  = gchar_type;
-		using cchar_type = gcchar_type;
+		using char_type  = T_store_U<U_auto_char>;
+		using cchar_type = char_type const;
 
 		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t, r), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs)
 		{
 			auto b  = v.cbegin() + AD<c>::pos(i) + 1;
-			auto nv = cchar_type{*b};
+			auto nv = static_cast<char_type>(*b);
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i)
+				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, cchar_type, Ts...)
+					(nv, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// port:
+
+	template<auto... filler>
+	struct T_assembly<AN::character, AT::port, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t, r), typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs)
+		{
+			using char_type  = T_store_U<r>;
+			using cchar_type = char_type const;
+
+			auto b  = v.cbegin() + AD<c>::pos(i) + 1;
+			auto nv = static_cast<char_type>(*b);
 
 			return NIK_ASSEMBLY_TEMPLATE(c, i)
 				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, cchar_type, Ts...)
@@ -213,23 +266,53 @@ namespace assembly {
 	template<auto... filler>
 	struct T_assembly<AN::string, AT::id, filler...>
 	{
-		using char_type = gchar_type;
+		using char_type = T_store_U<U_auto_char>;
 
 		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t, r), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs)
 		{
-			nik_ce auto b = v.cbegin() + AD<c>::pos(i);
-			nik_ce auto e = v.cbegin() + AD<c>::num(i);
-
-			using seq_type  = sequence<char_type, (e - b)>;
+			nik_ce auto n   = AD<c>::pos(i);
+			nik_ce auto m   = AD<c>::num(i);
+			using seq_type  = sequence<char_type, (m - n)>;
 			using cseq_type = seq_type const;
+
+			auto b = v.cbegin() + n;
+			auto e = v.cbegin() + m;
 
 			seq_type nv;
 			for (auto k = b; k != e; ++k) nv.push(*k);
 
 			return NIK_ASSEMBLY_TEMPLATE(c, i)
 				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, cseq_type, Ts...)
-					(static_cast<cseq_type>(nv), vs...);
+					(nv, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// port:
+
+	template<auto... filler>
+	struct T_assembly<AN::string, AT::port, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t, r), typename T, typename... Ts>
+		nik_ces auto result(T v, Ts... vs)
+		{
+			nik_ce auto n   = AD<c>::pos(i);
+			nik_ce auto m   = AD<c>::num(i);
+			using char_type = T_store_U<r>;
+			using seq_type  = sequence<char_type, (m - n)>;
+			using cseq_type = seq_type const;
+
+			auto b = v.cbegin() + n;
+			auto e = v.cbegin() + m;
+
+			seq_type nv;
+			for (auto k = b; k != e; ++k) nv.push(*k);
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i)
+				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, cseq_type, Ts...)
+					(nv, vs...);
 		}
 	};
 
@@ -383,8 +466,6 @@ namespace assembly {
 	template<auto... filler>
 	struct T_assembly<AN::lookup, AT::push, filler...>
 	{
-		using cindex = gindex_type;
-
 		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t, r), typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
@@ -392,7 +473,7 @@ namespace assembly {
 			nik_ce auto   m  = AD<c>::num(i);
 			nik_ce auto & t0 = member_value_U<l>;
 			nik_ce auto & t1 = t0.template cvalue<n>();
-			nik_ce cindex nr = t1.template cvalue<m>();
+			nik_ce auto   nr = t1.template cvalue<m>();
 
 			return NIK_ASSEMBLY_TEMPLATE(c, i)
 				::NIK_ASSEMBLY_RESULT_TS(c, i, j, l, t, nr, Ts...)

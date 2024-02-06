@@ -50,7 +50,7 @@ namespace assembly {
 		using csize_type		= typename model_type::csize_type;
 		using mrec_type			= typename model_type::record_type;
 		using env_type			= typename model_type::list_type;
-		using look_var_type		= typename model_type::constant_type;
+		using param_var_type		= typename model_type::parameter_type;
 		using arg_var_type		= typename model_type::variadic_type;
 		using pound_var_type		= typename model_type::compound_type;
 		using Compound			= typename pound_var_type::Compound;
@@ -84,6 +84,7 @@ namespace assembly {
 		size_type ret_note;
 		size_type verse_size;
 		size_type arg_size;
+		size_type count;
 
 		nik_ce T_syntax_tree() :
 
@@ -92,7 +93,7 @@ namespace assembly {
 			cur_entry{}, cur_arity{}, cur_mute{},
 			repl_pos{}, lit_name{}, lit_pos{}, lit_num{},
 			pad_pos{}, pad_num{}, ret_note{AT::first},
-			verse_size{}, arg_size{}
+			verse_size{}, arg_size{}, count{}
 
 			{ inc_env(); }
 
@@ -118,6 +119,10 @@ namespace assembly {
 
 				return v;
 			}
+
+		// count:
+
+			nik_ce void reset_count() { count = 0; }
 
 		// verse:
 
@@ -158,6 +163,11 @@ namespace assembly {
 				return v;
 			}
 
+		// param:
+
+			nik_ce void param_type(const cselect & s)
+				{ model.define_parameter(s, param_var_type{count++}, cur_env); }
+
 		// main:
 
 			nik_ce void main_name(const cselect & s)
@@ -187,44 +197,34 @@ namespace assembly {
 
 				nik_ce void op_port_lookup(const cselect & s)
 				{
-					auto record = cmodel.match_variable(s);
+					auto record = lookup_variable(s);
 
-					if (cmrec_match(record))
+					if (mrec_match(record))
 					{
-						auto path = cmrec_entry(record);
+						auto entry = mrec_entry(record);
+						auto pos   = model.parameter_pos(entry);
 
 						model.set_value(cur_entry, Compound::kind, 1); // magic number.
-						model.set_value(cur_entry, Compound::port, path.v0);
-						model.set_value(cur_entry, Compound::aux , path.v1);
+						model.set_value(cur_entry, Compound::port, pos);
 					}
 					else { } // error.
-				}
-
-				nik_ce void op_port_number(cindex value)
-				{
-					model.set_value(cur_entry, Compound::kind, 2); // magic number.
-					model.set_value(cur_entry, Compound::port, value);
 				}
 
 			// arg:
 
 				nik_ce void port_lookup(const cselect & s)
 				{
-					auto record = cmodel.match_variable(s);
+					auto record = lookup_variable(s);
 
-					if (cmrec_match(record))
+					if (mrec_match(record))
 					{
-						auto path = cmrec_entry(record);
-						auto pos  = path.v0;
-						auto num  = path.v1;
+						auto entry = mrec_entry(record);
+						auto pos   = model.parameter_pos(entry);
 
-						force_literal_return(pos, num);
+						force_literal_return(pos);
 					}
 					else { } // error.
 				}
-
-				nik_ce void port_number(cindex value)
-					{ force_literal_return(value); }
 
 		// declare:
 
@@ -345,7 +345,7 @@ namespace assembly {
 				arg_size  = drop + (ret_note == AT::back);
 
 				assembly_action<AAN::push, AAT::instr>(AN::arg, note, pos, num);
-				assembly_action<AAN::push, AAT::instr>(name, ret_note);
+				assembly_action<AAN::push, AAT::instr>(name, ret_note); // AT::side ?
 			}
 
 		// replace:
@@ -402,21 +402,11 @@ namespace assembly {
 					auto origin = model.compound_origin(entry);
 
 					if      (kind == 0) lookup_pound_action (entry, origin);
-					else if (kind == 1) lookup_pull_action  (entry, origin);
-					else if (kind == 2) lookup_port_action  (entry, origin);
+					else if (kind == 1) lookup_port_action  (entry, origin);
 				}
 
 				nik_ce void lookup_pound_action(cindex entry, cindex pos)
 					{ assembly_action<AAN::push, AAT::instr>(AN::pound, AT::id, pos); }
-
-				nik_ce void lookup_pull_action(cindex entry, cindex pos)
-				{
-					auto pos0 = model.compound_port (entry);
-					auto num0 = model.compound_aux  (entry);
-
-					assembly_action<AAN::push, AAT::instr>(AN::lookup, AT::push, pos0, num0);
-					assembly_action<AAN::push, AAT::instr>(AN::pound, AT::pull, pos);
-				}
 
 				nik_ce void lookup_port_action(cindex entry, cindex pos)
 				{
@@ -484,14 +474,6 @@ namespace assembly {
 				inc_args_if();
 			}
 
-			nik_ce void force_literal_return(cindex pos, cindex num)
-			{
-				assembly_action<AAN::literal, AAT::parameter>
-					(ret_note, pos, num, lit_name, lit_pos, lit_num);
-
-				inc_args_if();
-			}
-	
 		// return:
 
 			nik_ce void return_literal(cindex name, src_ptr b_ptr, src_ptr e_ptr)

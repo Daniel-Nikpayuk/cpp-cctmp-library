@@ -195,7 +195,7 @@ namespace chord {
 	{
 		return source
 		(
-			"square x                      ;"
+			"main x                        ;"
 
 			"vars:                         ;"
 			"declare sq                    ;"
@@ -292,14 +292,17 @@ namespace chord {
 	{
 		return source
 		(
-			"twice x                     ;"
+			"main x                         ;"
 
-			"definitions:                ;"
-			"tw # curry[1]{multiply two} ;"
+			"vars:                          ;"
+			"declare twice                  ;"
 
-			"body:                       ;"
-			". = tw x                    ;"
-			"return _                    ;"
+			"defs:                          ;"
+			"twice # curry[1]{multiply two} ;"
+
+			"body:                          ;"
+			". = twice x                    ;"
+			"return _                       ;"
 
 			, cctmp::binding( "two" , 2 )
 		);

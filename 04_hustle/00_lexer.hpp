@@ -171,6 +171,7 @@ namespace hustle {
 				let         ,
 				car         ,
 				cdr         ,
+				type        ,
 				set_        ,
 				cons        ,
 				list        ,
@@ -390,6 +391,7 @@ namespace hustle {
 		nik_ces auto let_charset        () { return generator::dfa_charset("let");    }
 		nik_ces auto car_charset        () { return generator::dfa_charset("car");    }
 		nik_ces auto cdr_charset        () { return generator::dfa_charset("cdr");    }
+		nik_ces auto type_charset       () { return generator::dfa_charset("type");   }
 		nik_ces auto set__charset       () { return generator::dfa_charset("set!");   }
 		nik_ces auto cons_charset       () { return generator::dfa_charset("cons");   }
 		nik_ces auto list_charset       () { return generator::dfa_charset("list");   }
@@ -413,6 +415,7 @@ namespace hustle {
 		using T_let_lexer		= generator::T_keyword_lexer< T_dfa::let_charset    , Token::let     >;
 		using T_car_lexer		= generator::T_keyword_lexer< T_dfa::car_charset    , Token::car     >;
 		using T_cdr_lexer		= generator::T_keyword_lexer< T_dfa::cdr_charset    , Token::cdr     >;
+		using T_type_lexer		= generator::T_keyword_lexer< T_dfa::type_charset   , Token::type    >;
 		using T_set__lexer		= generator::T_keyword_lexer< T_dfa::set__charset   , Token::set_    >;
 		using T_cons_lexer		= generator::T_keyword_lexer< T_dfa::cons_charset   , Token::cons    >;
 		using T_list_lexer		= generator::T_keyword_lexer< T_dfa::list_charset   , Token::list    >;
@@ -489,7 +492,8 @@ namespace hustle {
 
 		nik_ces token_type keyword_4(const cselector<char> & s)
 		{
-			if      (generator::recognizes< T_set__lexer >(s)) return T_set__lexer::token;
+			if      (generator::recognizes< T_type_lexer >(s)) return T_type_lexer::token;
+			else if (generator::recognizes< T_set__lexer >(s)) return T_set__lexer::token;
 			else if (generator::recognizes< T_cons_lexer >(s)) return T_cons_lexer::token;
 			else if (generator::recognizes< T_list_lexer >(s)) return T_list_lexer::token;
 			else                                               return Token::invalid;

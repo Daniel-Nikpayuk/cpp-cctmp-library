@@ -429,15 +429,36 @@ namespace cctmp {
 		using csize_type	= typename base::csize_type;
 		using Entry		= typename base::Entry;
 
-		struct Type     { enum : size_type { constant, variadic, compound, dimension }; };
-		struct Constant { enum : size_type { type = Entry::type, pos, dimension }; };
-		struct Variadic { enum : size_type { type = Entry::type, pos, dimension }; };
+		struct Type      { enum : size_type { parameter, constant, variadic, compound, dimension }; };
+		struct Parameter { enum : size_type { type = Entry::type, pos, dimension }; };
+		struct Constant  { enum : size_type { type = Entry::type, pos, dimension }; };
+		struct Variadic  { enum : size_type { type = Entry::type, pos, dimension }; };
 		struct Compound
 		{
-			enum : size_type { type = Entry::type, kind, port, left, ins, aux, dimension };
+			enum : size_type { type = Entry::type, kind, port, left, ins, dimension };
 		};
 
 		nik_ce T_env_model_entry(csize_type t) : base{t} { }
+	};
+
+/***********************************************************************************************************************/
+
+// parameter:
+
+	template<typename SizeType>
+	struct T_env_model_parameter : public T_env_model_entry<SizeType>
+	{
+		using base		= T_env_model_entry<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+		using Type		= typename base::Type;
+		using Parameter		= typename base::Parameter;
+
+		nik_ce T_env_model_parameter(csize_type p) : base{Type::parameter}
+			{ base::array[Parameter::pos] = p; }
+
+		nik_ce auto size() const { return Parameter::dimension; }
+		nik_ce auto cend() const { return base::array + size(); }
 	};
 
 /***********************************************************************************************************************/
@@ -536,6 +557,11 @@ namespace cctmp {
 			using centry_ref			= centry_type &;
 			using EntryType				= typename entry_type::Type;
 
+			using parameter_type			= T_env_model_parameter<SizeType>;
+			using cparameter_type			= parameter_type const;
+			using cparameter_ref			= cparameter_type &;
+			using Parameter				= typename parameter_type::Parameter;
+
 			using constant_type			= T_env_model_constant<SizeType>;
 			using cconstant_type			= constant_type const;
 			using cconstant_ref			= cconstant_type &;
@@ -611,6 +637,16 @@ namespace cctmp {
 				nik_ce auto allocate_binding_value()
 					{ return base::allocate(entry_type::length); }
 
+				nik_ce auto set_parameter_value(cparameter_ref val)
+				{
+					csize_type value = allocate_binding_value();
+
+					base::set_value(value, Parameter::type , val[Parameter::type]);
+					base::set_value(value, Parameter::pos  , val[Parameter::pos]);
+
+					return value;
+				}
+
 				nik_ce auto set_variadic_value(cvariadic_ref val)
 				{
 					csize_type value = allocate_binding_value();
@@ -662,6 +698,14 @@ namespace cctmp {
 					return record_type{!no_match, entry};
 				}
 
+				nik_ce void define_parameter(ccselect_ref var, cparameter_ref val, clist_type env)
+				{
+					auto variable = set_binding_variable(var);
+					auto value    = set_parameter_value(val);
+
+					set_binding_entry(variable, value, env);
+				}
+
 				nik_ce void define_variable(ccselect_ref var, cvariadic_ref val, clist_type env)
 				{
 					auto variable = set_binding_variable(var);
@@ -699,7 +743,17 @@ namespace cctmp {
 				nik_ce auto extend_environment(clist_type env)
 					{ return base::cons(null_frame(), env); }
 
-			// binding:
+			// parameter:
+
+				nik_ce auto parameter_pos(csize_type entry) const
+					{ return base::get_value(entry, Parameter::pos); }
+
+			// variadic:
+
+				nik_ce auto variadic_pos(csize_type entry) const
+					{ return base::get_value(entry, Variadic::pos); }
+
+			// compound:
 
 				nik_ce bool is_compound(csize_type entry) const
 					{ return (base::get_value(entry, Compound::type) == EntryType::compound); }
@@ -715,12 +769,6 @@ namespace cctmp {
 
 				nik_ce auto compound_origin(csize_type entry) const
 					{ return base::get_value(entry, Compound::ins); }
-
-				nik_ce auto compound_aux(csize_type entry) const
-					{ return base::get_value(entry, Compound::aux); }
-
-				nik_ce auto variadic_pos(csize_type entry) const
-					{ return base::get_value(entry, Variadic::pos); }
 	};
 
 /***********************************************************************************************************************/

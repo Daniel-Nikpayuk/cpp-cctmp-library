@@ -89,6 +89,12 @@ namespace cctmp {
 		nik_ce auto U_signed_long			= U_store_T < signed long      >;
 		nik_ce auto U_signed_long_long			= U_store_T < signed long long >;
 
+	// auto:
+
+		nik_ce auto U_auto_char				= U_store_T < decltype( '\0' ) >;
+		nik_ce auto U_auto_int				= U_store_T < decltype(   0  ) >;
+		nik_ce auto U_auto_float			= U_store_T < decltype( 0.0  ) >;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 

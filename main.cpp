@@ -128,31 +128,32 @@
 	{
 		return source
 	        (
-			"(define (sqrt x)                             "
+			"(type T                                        "
+			"  (define (sqrt x)                             "
 
-			"  (define (square y) (* y y))                "
-			"  (define (abs y) (if (< y 0.0) (- y) y))    "
-			"  (define (good-enough? guess)               "
-			"    (< (abs (- (square guess) x)) tolerance) "
-			"  )                                          "
+			"    (define (square y) (* y y))                "
+			"    (define (abs y) (if (< y 0) (- y) y))      "
+			"    (define (good-enough? guess)               "
+			"      (< (abs (- (square guess) x)) tolerance) "
+			"    )                                          "
 
-			"  (define (average y z) (/ (+ y z) 2.0))     "
-			"  (define (improve guess)                    "
-			"    (average guess (/ x guess))              "
-			"  )                                          "
+			"    (define (average y z) (/ (+ y z) 2))       "
+			"    (define (improve guess)                    "
+			"      (average guess (/ x guess))              "
+			"    )                                          "
 
-			"  (define (sqrt-iter guess) -> T             "
-			"    (if (good-enough? guess)                 "
-			"      guess                                  "
-			"      (sqrt-iter (improve guess))            "
-			"    )                                        "
-			"  )                                          "
+			"    (define (sqrt-iter guess) -> T             "
+			"      (if (good-enough? guess)                 "
+			"        guess                                  "
+			"        (sqrt-iter (improve guess))            "
+			"      )                                        "
+			"    )                                          "
 
-			"  (sqrt-iter 1.0)                            "
-			")                                            "
+			"    (sqrt-iter 1:T)                            "
+			"  )                                            "
+			")                                              "
 
-			, binding( "tolerance" , 0.00000000001 )
-			, binding( "T"         , 0             )
+			, binding( "tolerance" , 0.0001 )
 		);
 	}
 
@@ -164,17 +165,17 @@
 	{
 		return source
 	        (
-			"square x                      ;"
+			"main pred ante conse   ;"
 
-			"vars:                         ;"
-			"declare sq                    ;"
+			"body:                  ;"
+			"  test equal pred zero ;"
+			"  branch alt           ;"
+			"  return conse         ;"
 
-			"defs:                         ;"
-			"sq # argpose[1]{multiply 0 0} ;"
+			"alt:                   ;"
+			"  return ante          ;"
 
-			"body:                         ;"
-			". = sq x                      ;"
-			"return _                      ;"
+			, cctmp::binding( "zero" , 0 )
 		);
 	}
 
@@ -188,10 +189,10 @@
 	int main(int argc, char *argv[])
 	{
 	//	using chord_size_type = unsigned long;
-	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
+	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env>>; // , chord_size_type>;
 
-	//	chord_size_type val = T_chord_apply::result(chord_size_type(5)); // main_at(0, argc, argv)));
-	//	printf("%lu\n", val);
+	//	auto val = T_chord_apply::result(9); // main_at(0, argc, argv)));
+	//	printf("%d\n", val);
 
 		//
 

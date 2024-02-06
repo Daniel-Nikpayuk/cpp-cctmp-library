@@ -61,7 +61,8 @@ namespace assembly {
 	using gindex_type					= cctmp::gindex_type;
 	using gcindex_type					= cctmp::gcindex_type;
 
-	nik_ce auto U_unsigned_long				= cctmp::U_unsigned_long;
+	nik_ce auto U_auto_char					= cctmp::U_auto_char;
+	nik_ce auto U_auto_float				= cctmp::U_auto_float;
 
 	template<auto U>
 	nik_ce auto _cast_					= cctmp::_cast_<U>;
@@ -69,10 +70,8 @@ namespace assembly {
 	template<auto... Vs>
 	nik_ce auto _subarray_match_				= cctmp::_subarray_match_<Vs...>;
 
-	nik_ce auto _string_to_number_				= cctmp::_string_to_number_;
-
-	template<auto U>
-	nik_ce auto _string_to_builtin_				= cctmp::_string_to_builtin_<U>;
+	template<auto... Us>
+	nik_ce auto _string_to_builtin_				= cctmp::_string_to_builtin_<Us...>;
 
 	template<auto... Vs>
 	nik_ce auto eval					= cctmp::eval<Vs...>;

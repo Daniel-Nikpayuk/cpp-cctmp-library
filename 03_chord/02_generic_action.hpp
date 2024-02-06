@@ -107,6 +107,30 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
+// label:
+
+	// delay:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::label_delay, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ }
+		};
+
+	// force:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::label_force, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ }
+		};
+
+/***********************************************************************************************************************/
+
 // declare (function):
 
 	// op:
