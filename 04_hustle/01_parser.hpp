@@ -71,17 +71,20 @@ namespace hustle {
 				return_string,
 				return_lookup,
 
+			// apply:
+
+				apply_begin_oper,
+				apply_begin_expr,
+				apply_end,
+				apply_patch,
+				apply_call,
+
 			// if:
 
 				if_begin,
 				if_ante,
 				if_conse,
 				if_end,
-
-			// op:
-
-				op_lookup,
-				op_return,
 
 			// dimension:
 
@@ -139,13 +142,22 @@ namespace hustle {
 				// return:
 
 					"Literal -> Value Type                    ;"
-					"Value   -> false      : return_false     ;"
-					"        -> true       : return_true      ;"
+					"Value   -> #f         : return_false     ;"
+					"        -> #t         : return_true      ;"
 					"        -> n_number   : return_n_number  ;"
 					"        -> r_number   : return_r_number  ;"
 					"        -> character  : return_character ;"
 					"        -> string     : return_string    ;"
 					"Lookup  -> identifier : return_lookup    ;"
+					"        -> \\=        : return_lookup    ;"
+					"        -> <          : return_lookup    ;"
+					"        -> <\\=       : return_lookup    ;"
+					"        -> \\>        : return_lookup    ;"
+					"        -> \\>\\=     : return_lookup    ;"
+					"        -> +          : return_lookup    ;"
+					"        -> *          : return_lookup    ;"
+					"        -> \\-        : return_lookup    ;"
+					"        -> /          : return_lookup    ;"
 
 					"Type -> \\: Port                 ;"
 					"     -> empty      : port_deduce ;"
@@ -158,28 +170,16 @@ namespace hustle {
 					"      -> ( Expr1 ) ;"
 
 					"Expr1 -> Literal                     ;"
+					"      -> Op OpRest                   ;"
 					"      -> IfBeg Pred Ante Conse IfEnd ;"
 					"      -> define DefDisp              ;"
 					"      -> quote Expr0                 ;"
 					"      -> begin Exprs                 ;"
 					"      -> lambda LArgs LBody          ;"
 					"      -> set! VarExpr ValExpr        ;"
-					"      -> Op OpArgs                   ;"
 
 					"Exprs -> Expr0 Exprs ;"
 					"      -> empty       ;"
-
-				// conditional:
-
-					"IfBeg   -> if                      ;"
-					"Pred    -> Literal                 ;"
-					"        -> Lookup                  ;"
-					"        -> PredBeg Expr1 PredEnd   ;"
-					"PredBeg -> (                       ;"
-					"PredEnd -> )           : if_begin  ;"
-					"Ante    -> Expr0       : if_ante   ;"
-					"Conse   -> Expr0       : if_conse  ;"
-					"IfEnd   -> empty       : if_end    ;"
 
 				// define:
 
@@ -195,19 +195,22 @@ namespace hustle {
 
 				// application:
 
-					"Op -> identifier : op_lookup ;"
-					"   -> \\=        : op_lookup ;"
-					"   -> <          : op_lookup ;"
-					"   -> <\\=       : op_lookup ;"
-					"   -> \\>        : op_lookup ;"
-					"   -> \\>\\=     : op_lookup ;"
-					"   -> +          : op_lookup ;"
-					"   -> *          : op_lookup ;"
-					"   -> \\-        : op_lookup ;"
-					"   -> /          : op_lookup ;"
+					"Op     -> Lookup       : apply_begin_oper ;"
+					"       -> ( Expr1 )    : apply_begin_expr ;"
+					"OpRest -> Expr0 OpArgs : apply_patch      ;"
+					"       -> empty        : apply_call       ;"
+					"OpArgs -> Expr0 OpArgs                    ;"
+					"       -> empty        : apply_end        ;"
 
-					"OpArgs -> Expr0 OpArgs      ;"
-					"       -> empty : op_return ;"
+				// conditional:
+
+					"IfBeg   -> if        : if_begin ;"
+					"Pred    -> Literal              ;"
+					"        -> Lookup               ;"
+					"        -> ( Expr1 )            ;"
+					"Ante    -> Expr0     : if_ante  ;"
+					"Conse   -> Expr0     : if_conse ;"
+					"IfEnd   -> empty     : if_end   ;"
 
 				// (other):
 
@@ -230,8 +233,8 @@ namespace hustle {
 			sxt_pair( "\\:"    , Token::arg_type ),
 
 			sxt_pair( "identifier" , Token::identifier ),
-			sxt_pair( "false"      , Token::bool_f     ),
-			sxt_pair( "true"       , Token::bool_t     ),
+			sxt_pair( "#f"         , Token::bool_f     ),
+			sxt_pair( "#t"         , Token::bool_t     ),
 			sxt_pair( "n_number"   , Token::n_number   ),
 			sxt_pair( "r_number"   , Token::r_number   ),
 			sxt_pair( "character"  , Token::character  ),
@@ -302,17 +305,20 @@ namespace hustle {
 				sxa_pair( "return_string"    , ActName::return_string    ),
 				sxa_pair( "return_lookup"    , ActName::return_lookup    ),
 
+			// apply:
+
+				sxa_pair( "apply_begin_oper" , ActName::apply_begin_oper ),
+				sxa_pair( "apply_begin_expr" , ActName::apply_begin_expr ),
+				sxa_pair( "apply_end"        , ActName::apply_end        ),
+				sxa_pair( "apply_patch"      , ActName::apply_patch      ),
+				sxa_pair( "apply_call"       , ActName::apply_call       ),
+
 			// if:
 
-				sxa_pair( "if_begin"  , ActName::if_begin  ),
-				sxa_pair( "if_ante"   , ActName::if_ante   ),
-				sxa_pair( "if_conse"  , ActName::if_conse  ),
-				sxa_pair( "if_end"    , ActName::if_end    ),
-
-			// op:
-
-				sxa_pair( "op_lookup" , ActName::op_lookup ),
-				sxa_pair( "op_return" , ActName::op_return )
+				sxa_pair( "if_begin" , ActName::if_begin ),
+				sxa_pair( "if_ante"  , ActName::if_ante  ),
+				sxa_pair( "if_conse" , ActName::if_conse ),
+				sxa_pair( "if_end"   , ActName::if_end   )
 		);
 	};
 

@@ -65,10 +65,10 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
-// first:
+// id:
 
 	template<auto... filler>
-	struct T_assembly<AN::boolean, AT::first, filler...>
+	struct T_assembly<AN::boolean, AT::id, filler...>
 	{
 		using csize_type = gcbool_type;
 
@@ -85,21 +85,22 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
-// back:
+// port:
 
 	template<auto... filler>
-	struct T_assembly<AN::boolean, AT::back, filler...>
+	struct T_assembly<AN::boolean, AT::port, filler...>
 	{
-		using csize_type = gcbool_type;
-
 		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t, r), typename T, typename... Ts>
 		nik_ces auto result(T v, Ts... vs)
 		{
-			nik_ce auto nv = AD<c>::pos(i);
+			using size_type  = T_store_U<r>;
+			using csize_type = size_type const;
+
+			nik_ce auto nv   = AD<c>::pos(i);
 
 			return NIK_ASSEMBLY_TEMPLATE(c, i)
-				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, Ts..., csize_type)
-					(vs..., nv);
+				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, csize_type, Ts...)
+					(nv, vs...);
 		}
 	};
 
@@ -170,8 +171,8 @@ namespace assembly {
 			auto e  = v.cbegin() + AD<c>::num(i);
 			auto k  = cctmp::apply<_subarray_match_<>>(b, e, '.');
 			auto nn = cctmp::apply<_string_to_builtin_<U_auto_float>>(b, k);
-			auto nr = cctmp::apply<_string_to_builtin_<U_auto_float>>(k+1, e);
-			auto nv = nn + nr/divisor(e-k);
+			auto nm = cctmp::apply<_string_to_builtin_<U_auto_float>>(k+1, e);
+			auto nv = nn + nm/divisor(e-k);
 
 			return NIK_ASSEMBLY_TEMPLATE(c, i)
 				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, decltype(nv), Ts...)
@@ -196,8 +197,8 @@ namespace assembly {
 			auto e  = v.cbegin() + AD<c>::num(i);
 			auto k  = cctmp::apply<_subarray_match_<>>(b, e, '.');
 			auto nn = cctmp::apply<_string_to_builtin_<r>>(b, k);
-			auto nr = cctmp::apply<_string_to_builtin_<r>>(k+1, e);
-			auto nv = nn + nr/divisor(e-k);
+			auto nm = cctmp::apply<_string_to_builtin_<r>>(k+1, e);
+			auto nv = nn + nm/divisor(e-k);
 
 			return NIK_ASSEMBLY_TEMPLATE(c, i)
 				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, csize_type, Ts...)

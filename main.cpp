@@ -120,14 +120,7 @@
 		return sum;
 	}
 
-/***********************************************************************************************************************/
-
-// hustle:
-
-	constexpr auto _hustle_test_func()
-	{
-		return source
-	        (
+/*
 			"(type T                                        "
 			"  (define (sqrt x)                             "
 
@@ -154,17 +147,58 @@
 			")                                              "
 
 			, binding( "tolerance" , 0.0001 )
-		);
-	}
+*/
+
+/***********************************************************************************************************************/
+
+// hustle:
+
+
+
+/*
+	// It's hard to explain to those who aren't in the know
+
+		// that this is relevant:
+
+			constexpr auto _hustle_test_func()
+			{
+				return source
+			        (
+					"(type T                           "
+					"  (define (main k)                "
+					"    (define (factorial n) -> T    "
+					"      (if (= n 0)                 "
+					"        1:T                       "
+					"        (* n (factorial (- n 1))) "
+					"      )                           "
+					"    )                             "
+					"    (factorial k)                 "
+					"  )                               "
+					")                                 "
+				);
+			}
+
+		// given that it can be rephrased much more simply as this:
+
+			template<typename T>
+			constexpr auto factorial(T n) -> T
+			{
+				if (n == 0) return 1;
+				else        return n * factorial(n-1);
+			}
+*/
+
+
 
 /***********************************************************************************************************************/
 
 // chord:
 
+/*
 	constexpr auto _chord_test_func()
 	{
 		return source
-	        (
+		(
 			"main pred ante conse   ;"
 
 			"body:                  ;"
@@ -178,13 +212,61 @@
 			, cctmp::binding( "zero" , 0 )
 		);
 	}
+*/
+
+		//	"(type T                         "
+		//	"(define (main k)                "
+
+		//	"  (define (factorial n) -> T    "
+		//	"    (if (= n 0)                 "
+		//	"      1:T                       "
+		//	"      (* n (factorial (- n 1))) "
+		//	"    )                           "
+		//	"  )                             "
+
+		//	"  (factorial k)                 "
+
+		//	"))                              "
 
 /***********************************************************************************************************************/
 
 //	using chord_grammar			= chord::T_chord_assembly_grammar;
 //	constexpr auto static_grammar		= U_store_T<chord_grammar>;
 
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(define (main n)          "
+			"  (define (sq k) (* k k)) "
+			"  (sq n)                  "
+			")                         "
+		);
+	}
+
 /***********************************************************************************************************************/
+
+	template<auto static_contr>
+	void print_controller()
+	{
+		constexpr auto & contr = member_value_U<static_contr>;
+
+		for (auto k = 0; k != contr.size(); ++k)
+		{
+			auto s = (k < 10) ? "  " : (k < 100) ? " " : "";
+			printf("line %s%d -", s, k);
+
+			for (auto j = 0; j != Instr::dimension; ++j)
+			{
+				auto v = contr[k][j];
+				auto t = (v < 10) ? "  " : (v < 100) ? " " : "";
+
+				printf(" %s%d", t, v);
+			}
+
+			printf("\n");
+		}
+	}
 
 	int main(int argc, char *argv[])
 	{
@@ -194,12 +276,11 @@
 	//	auto val = T_chord_apply::result(9); // main_at(0, argc, argv)));
 	//	printf("%d\n", val);
 
-		//
+		using hustle_size_type = unsigned long; // double;
+		using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env>; // , hustle_size_type>;
 
-	//	using hustle_size_type = double;
-	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
-
-	//	auto val = T_hustle_apply::result(hustle_size_type(main_at(0, argc, argv)));
+		auto val = T_hustle_apply::result(hustle_size_type(5)); // , hustle_size_type(6)); // main_at(0, argc, argv)));
+		printf("%lu\n", val);
 	//	printf("%1.11f\n", val);
 
 		//

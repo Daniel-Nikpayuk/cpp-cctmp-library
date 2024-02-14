@@ -115,37 +115,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// entry:
-
-	template<typename SizeType, SizeType Size>
-	class T_list_model_entry
-	{
-		public:
-
-			using size_type			= SizeType;
-			using csize_type		= size_type const;
-
-			nik_ces size_type length	= Size;
-
-			struct Entry { enum : size_type { type, dimension }; };
-
-		protected:
-
-			size_type array[length];
-
-		public:
-
-			nik_ce T_list_model_entry() : array{} { }
-			nik_ce T_list_model_entry(csize_type t) : array{} { array[Entry::type] = t; }
-
-			nik_ce auto cbegin () const { return array; }
-			nik_ce auto cend   () const { return array + length; }
-
-			nik_ce auto operator [] (csize_type n) const { return array[n]; }
-	};
-
-/***********************************************************************************************************************/
-
 // interface:
 
 	template<typename SizeType, SizeType Size>
@@ -175,16 +144,19 @@ namespace cctmp {
 
 		protected:
 
-			// array:
-
-				nik_ce auto get_value(csize_type p, csize_type n) const { return *(array + p + n); }
-				nik_ce void set_value(csize_type p, csize_type n, csize_type v) { *(array + p + n) = v; }
-
 			// free:
 
 				nik_ce auto allocate(csize_type s) { return (free -= s); }
 
 		public:
+
+			// array:
+
+				nik_ce auto cbegin () const { return array; }
+				nik_ce auto cend   () const { return array + length; }
+
+				nik_ce auto get_value(csize_type p, csize_type n) const { return *(array + p + n); }
+				nik_ce void set_value(csize_type p, csize_type n, csize_type v) { *(array + p + n) = v; }
 
 			// list:
 
@@ -199,12 +171,24 @@ namespace cctmp {
 				nik_ce auto car(clist_type l) const { return get_value(l, Pair::car); }
 				nik_ce auto cdr(clist_type l) const { return get_value(l, Pair::cdr); }
 
-				nik_ce auto cons(csize_type v, clist_type l)
+				nik_ce auto cons(csize_type p, clist_type l)
 				{
-					auto nl = allocate(Pair::dimension);
+					size_type nl = allocate(Pair::dimension);
 
-					set_value(nl, Pair::car, v);
+					set_value(nl, Pair::car, p);
 					set_value(nl, Pair::cdr, l);
+
+					return nl;
+				}
+
+				template<typename In, typename End>
+				nik_ce auto cons(In in, End end, clist_type l)
+				{
+					size_type p  = allocate(end - in);
+					size_type nl = cons(p, l);
+					size_type k  = 0;
+
+					while (in != end) set_value(p, k++, *in++);
 
 					return nl;
 				}
@@ -251,13 +235,14 @@ namespace cctmp {
 
 			nik_ce csize_type content() const { return base::car(current); }
 
-			nik_ce csize_type push(csize_type s)
-			{
-				csize_type value = base::allocate(s);
-				current = base::cons(value, current);
+			nik_ce csize_type cbegin () const { return current; }
+			nik_ce csize_type cend   () const { return base::null; }
 
-				return value;
-			}
+			nik_ce void clear() { current = base::null; }
+			nik_ce void push(csize_type s) { current = base::cons(base::allocate(s), current); }
+
+			template<typename In, typename End>
+			nik_ce void push(In in, End end) { current = base::cons(in, end, current); }
 
 			nik_ce void pop(csize_type s)
 			{
@@ -268,44 +253,49 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// generic:
+// multi(dimensional):
 
 	template<typename SizeType, SizeType EntrySize, SizeType Size>
-	class generic_stack : public T_stack<SizeType, 2 * EntrySize * Size>
+	class multistack : public T_stack<SizeType, (EntrySize + 2) * Size>
 	{
 		protected:
 
-			nik_ces auto entry_size		= EntrySize;
-			nik_ces auto length		= 2 * entry_size * Size;
+			nik_ces SizeType entry_size		= EntrySize;
+			nik_ces SizeType length			= (entry_size + 2) * Size;
 
 		public:
 
-			using base		= T_stack<SizeType, length>;
-			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
-			using Pair		= typename base::Pair;
+			using base				= T_stack<SizeType, length>;
+			using size_type				= typename base::size_type;
+			using csize_type			= typename base::csize_type;
+			using Pair				= typename base::Pair;
 
-			using entry_type	= literal<size_type, size_type>;
-			using centry_type	= entry_type const;
-			using centry_ref	= centry_type &;
+			using entry_type			= literal<size_type, size_type>;
+			using centry_type			= entry_type const;
+			using centry_ref			= centry_type &;
 
 		protected:
 
-			csize_type zero_entry[entry_size];
+			csize_type zero_array[entry_size];
+			centry_type zero_entry;
 
 		public:
 
-			nik_ce generic_stack() : base{}, zero_entry{} { }
+			nik_ce multistack() :
+				base{}, zero_array{},
+				zero_entry{zero_array, zero_array + entry_size}
+					{ }
+
+			// value:
+
+				nik_ce auto entry_begin () const { return base::array + base::content(); }
+				nik_ce auto entry_end   () const { return entry_begin() + entry_size; }
+				nik_ce auto entry       () const { return centry_type{entry_begin(), entry_end()}; }
 
 			// push:
 
 				nik_ce void fast_push(csize_type (&ent)[entry_size])
-				{
-					csize_type value = base::push(entry_size);
-
-					for (size_type k = 0; k != entry_size; ++k)
-						base::set_value(value, k, ent[k]);
-				}
+					{ base::push(ent, ent + entry_size); }
 
 				nik_ce bool push(csize_type (&ent)[entry_size])
 				{
@@ -320,19 +310,17 @@ namespace cctmp {
 
 				nik_ce centry_type fast_pop()
 				{
-					csize_type  value = base::content();
-					csize_type *begin = base::array + value;
-					csize_type *end   = begin + entry_size;
+					centry_type ent = entry();
 
 					base::pop(entry_size);
 
-					return centry_type{begin, end};
+					return ent;
 				}
 
 				nik_ce centry_type pop()
 				{
-					if (base::not_empty()) return fast_pop();
-					else return centry_type{zero_entry, zero_entry + entry_size};
+					if (base::is_empty()) return zero_entry;
+					else                  return fast_pop();
 				}
 	};
 
@@ -341,12 +329,16 @@ namespace cctmp {
 // unit:
 
 	template<typename SizeType, SizeType Size>
-	struct unit_stack : public generic_stack<SizeType, 1, Size>
+	struct unit_stack : public multistack<SizeType, 1, Size>
 	{
-		using base       = generic_stack<SizeType, 1, Size>;
+		using base       = multistack<SizeType, 1, Size>;
+		using size_type  = typename base::size_type;
 		using csize_type = typename base::csize_type;
 
 		nik_ce unit_stack() : base{} { }
+
+		nik_ce size_type & value() { return base::array[base::content()]; }
+		nik_ce csize_type cvalue() const { return base::array[base::content()]; }
 
 		nik_ce csize_type pop() { return base::pop()[0]; }
 
@@ -359,9 +351,9 @@ namespace cctmp {
 // pair:
 
 	template<typename SizeType, SizeType Size>
-	struct pair_stack : public generic_stack<SizeType, 2, Size>
+	struct pair_stack : public multistack<SizeType, 2, Size>
 	{
-		using base       = generic_stack<SizeType, 2, Size>;
+		using base       = multistack<SizeType, 2, Size>;
 		using csize_type = typename base::csize_type;
 
 		nik_ce pair_stack() : base{} { }
@@ -375,9 +367,9 @@ namespace cctmp {
 // triple:
 
 	template<typename SizeType, SizeType Size>
-	struct triple_stack : public generic_stack<SizeType, 3, Size>
+	struct triple_stack : public multistack<SizeType, 3, Size>
 	{
-		using base       = generic_stack<SizeType, 3, Size>;
+		using base       = multistack<SizeType, 3, Size>;
 		using csize_type = typename base::csize_type;
 
 		nik_ce triple_stack() : base{} { }
@@ -391,9 +383,9 @@ namespace cctmp {
 // quad(ruple):
 
 	template<typename SizeType, SizeType Size>
-	struct quad_stack : public generic_stack<SizeType, 4, Size>
+	struct quad_stack : public multistack<SizeType, 4, Size>
 	{
-		using base       = generic_stack<SizeType, 4, Size>;
+		using base       = multistack<SizeType, 4, Size>;
 		using csize_type = typename base::csize_type;
 
 		nik_ce quad_stack() : base{} { }

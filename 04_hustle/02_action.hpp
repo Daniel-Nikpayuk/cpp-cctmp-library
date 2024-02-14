@@ -79,7 +79,8 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->param_type(l->left_cselect()); }
+			//	{ t->param_type(l->left_cselect()); }
+				{ }
 		};
 
 /***********************************************************************************************************************/
@@ -181,7 +182,8 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->op_port_lookup(l->left_cselect()); }
+			//	{ t->op_port_lookup(l->left_cselect()); }
+				{ }
 		};
 
 /***********************************************************************************************************************/
@@ -205,20 +207,13 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->port_lookup(l->left_cselect()); }
+			//	{ t->port_lookup(l->left_cselect()); }
+				{ }
 		};
 
 /***********************************************************************************************************************/
 
 // return:
-
-	template<auto lit_name, auto... filler>
-	struct T_literal_return_action
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ t->delay_literal_return(lit_name, l->cbegin(), l->ccurrent()); }
-	};
 
 	// false:
 
@@ -227,7 +222,7 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->return_boolean(false); }
+				{ t->delay_boolean_return(false); }
 		};
 
 	// true:
@@ -237,7 +232,17 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->return_boolean(false); }
+				{ t->delay_boolean_return(true); }
+		};
+
+	// (literal name):
+
+		template<auto lit_name, auto... filler>
+		struct T_literal_return_action
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->delay_literal_return(lit_name, l->cbegin(), l->ccurrent()); }
 		};
 
 	// n_number:
@@ -271,7 +276,61 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->return_lookup(l->left_cselect()); }
+				{ t->lookup_return(l->left_cselect()); }
+		};
+
+/***********************************************************************************************************************/
+
+// apply:
+
+	// begin oper(ator):
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::apply_begin_oper, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->apply_begin(l->left_cselect()); }
+		};
+
+	// begin expr(ession):
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::apply_begin_expr, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->apply_begin(); }
+		};
+
+	// end:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::apply_end, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->apply_end(); }
+		};
+
+	// patch:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::apply_patch, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->apply_patch(); }
+		};
+
+	// call:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::apply_call, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->apply_call(); }
 		};
 
 /***********************************************************************************************************************/
@@ -285,7 +344,7 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->if_predicate(); }
+				{ t->if_pred_begin(); }
 		};
 
 	// ante:
@@ -295,7 +354,10 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->if_ante_begin(); }
+			{
+				t->if_pred_end();
+				t->if_ante_begin();
+			}
 		};
 
 	// conse:
@@ -303,12 +365,10 @@ namespace hustle {
 		template<auto... filler>
 		struct T_hustle_translation_action<HAAN::if_conse, filler...>
 		{
-			nik_ces auto offset = 1;
-
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->if_ante_end(offset);
+				t->if_ante_end();
 				t->if_conse_begin();
 			}
 		};
@@ -321,32 +381,6 @@ namespace hustle {
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 				{ t->if_conse_end(); }
-		};
-
-/***********************************************************************************************************************/
-
-// op:
-
-	// lookup:
-
-		template<auto... filler>
-		struct T_hustle_translation_action<HAAN::op_lookup, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-				{ t->apply_begin(l->left_cselect()); }
-		};
-
-	// return:
-
-		template<auto... filler>
-		struct T_hustle_translation_action<HAAN::op_return, filler...>
-		{
-			using cindex = gindex_type;
-
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-				{ t->apply_end(); }
 		};
 
 /***********************************************************************************************************************/
