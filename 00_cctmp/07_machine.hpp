@@ -388,6 +388,17 @@ namespace cctmp {
 
 		protected:
 
+			// entry:
+
+				nik_ce auto entry(clist_type env) const
+				{
+					auto frame   = base::car(env);
+					auto binding = base::car(frame);
+					auto entry   = base::cdr(binding);
+
+					return entry;
+				}
+
 			// src:
 
 				nik_ce auto start  (ccselect_ref s) const { return s.cbegin() - src.cbegin(); }
@@ -489,8 +500,7 @@ namespace cctmp {
 					else { } // error.
 				}
 
-				nik_ce auto extend_environment(clist_type env)
-					{ return base::cons(null_frame(), env); }
+				nik_ce auto extend_env(clist_type env) { return base::cons(null_frame(), env); }
 	};
 
 /***********************************************************************************************************************/

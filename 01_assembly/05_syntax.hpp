@@ -50,8 +50,7 @@ namespace assembly {
 			nik_ces auto & cmodel		= member_value_U<static_env_lookup>;
 			using cinhabit_type		= typename member_type_U<static_env_lookup>::inhabit_type;
 
-			using env_type			= unit_stack<list_type, stack_size>;
-			using cache_type		= pair_stack<size_type, stack_size>;
+			using cache_type		= unit_stack<size_type, stack_size>;
 			using cbool			= gcbool_type;
 
 			struct Action    { enum : size_type { error, pound, port, back, first, match, dimension }; };
@@ -62,6 +61,7 @@ namespace assembly {
 
 		protected:
 
+			size_type env;
 			size_type asm_name;
 			size_type asm_note;
 			size_type asm_pos;
@@ -69,24 +69,26 @@ namespace assembly {
 
 		public:
 
-			env_type env;
 			cache_type cache;
 
 			nik_ce T_syntax_model(cstrlit_ref s) :
-				base{s}, asm_name{}, asm_note{}, asm_pos{}, asm_num{}
-					{ env.push(base::null_env()); push_env(); } // move push_env to main.
-
-			nik_ce auto get_value(csize_type n) const { return base::base::get_value(entry(), n); }
-			nik_ce void set_value(csize_type n, csize_type v) { base::base::set_value(entry(), n, v); }
+				base{s}, env{base::null_env()}, asm_name{}, asm_note{}, asm_pos{}, asm_num{}
+					{ env_push(); }
 
 			// env:
 
-				nik_ce void push_env() { env.push(base::extend_environment(env.cvalue())); }
+				nik_ce auto env_entry() const { return base::entry(env); }
+
+				nik_ce void env_push () { env = base::extend_env(env); }
+				nik_ce void env_pop  () { env = base::cdr(env); }
 
 			// cache:
 
-				nik_ce auto match() const { return cache.entry()[0]; }
-				nik_ce auto entry() const { return cache.entry()[1]; }
+				nik_ce auto get_cache_value(csize_type n) const
+					{ return base::base::get_value(cache.cvalue(), n); }
+
+				nik_ce void set_cache_value(csize_type n, csize_type v)
+					{ base::base::set_value(cache.cvalue(), n, v); }
 
 			// asm:
 
@@ -98,14 +100,7 @@ namespace assembly {
 			// lookup:
 
 				nik_ce bool lookup_variable(const cselect & s)
-				{
-					cbool success = base::lookup_variable(s, env.cvalue());
-
-					if (success) cache.push(success, base::inhabit.pop());
-					else         cache.push(success, 0);
-
-					return success;
-				}
+					{ return base::lookup_variable(s, env); }
 
 				nik_ce auto assemble_variable(const cselect & s, csize_type note)
 				{
@@ -117,30 +112,25 @@ namespace assembly {
 				nik_ce void define_variable(const cselect & s, csize_type (&ent)[N])
 				{
 					if (lookup_variable(s)) { } // error.
-					else base::define_variable(s, ent, ent + N, env.cvalue());
+					else base::define_variable(s, ent, ent + N, env);
 				}
 
-			// compound:
-
-				nik_ce bool fast_is_compound() const
-					{ return (get_value(Entry::type) == Entry::compound); }
-
-				nik_ce bool is_compound() const
-					{ return (match() && fast_is_compound()); }
-
 		protected:
+
+			nik_ce bool is_compound() const
+				{ return (base::get_value(Entry::type) == Entry::compound); }
 
 			// model action:
 
 				nik_ce auto assemble_model(csize_type note)
 				{
-					if (fast_is_compound()) return assemble_compound();
-					else                    return assemble_argument(note);
+					if (is_compound()) return assemble_compound();
+					else               return assemble_argument(note);
 				}
 
 				nik_ce auto assemble_compound()
 				{
-					auto kind = get_value(Compound::kind);
+					auto kind = base::get_value(Compound::kind);
 
 					if      (kind == 0) return assemble_pound();
 					else if (kind == 1) return assemble_port();
@@ -151,10 +141,8 @@ namespace assembly {
 				{
 					asm_name = AN::pound;
 					asm_note = AT::id;
-					asm_pos  = get_value(Compound::origin);
+					asm_pos  = base::get_value(Compound::origin);
 					asm_num  = 0;
-
-					cache.pop();
 
 					return Action::pound;
 				}
@@ -163,10 +151,8 @@ namespace assembly {
 				{
 					asm_name = AN::pound;
 					asm_note = AT::port;
-					asm_pos  = get_value(Compound::origin);
-					asm_num  = get_value(Compound::port);
-
-					cache.pop();
+					asm_pos  = base::get_value(Compound::origin);
+					asm_num  = base::get_value(Compound::port);
 
 					return Action::port;
 				}
@@ -181,10 +167,8 @@ namespace assembly {
 				{
 					asm_name = AN::id;
 					asm_note = AT::back;
-					asm_pos  = get_value(Argument::pos);
+					asm_pos  = base::get_value(Argument::pos);
 					asm_num  = 0;
-
-					cache.pop();
 
 					return Action::back;
 				}
@@ -193,10 +177,8 @@ namespace assembly {
 				{
 					asm_name = AN::id;
 					asm_note = AT::first;
-					asm_pos  = get_value(Argument::pos);
+					asm_pos  = base::get_value(Argument::pos);
 					asm_num  = 0;
-
-					cache.pop();
 
 					return Action::first;
 				}
@@ -306,37 +288,10 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
-// pound:
+// count:
 
 	template<typename SizeType>
-	class T_syntax_pound
-	{
-		public:
-
-			using size_type = SizeType;
-
-		protected:
-
-			size_type arg_size;
-
-		public:
-
-			nik_ce T_syntax_pound() : arg_size{} { }
-
-			nik_ce auto arity() const { return arg_size; }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// variadic:
-
-/***********************************************************************************************************************/
-
-// padding:
-
-	template<typename SizeType>
-	class T_syntax_padding
+	class T_syntax_count
 	{
 		public:
 
@@ -345,17 +300,22 @@ namespace assembly {
 
 		protected:
 
-			size_type pos;
 			size_type num;
 
 		public:
 
-			nik_ce T_syntax_padding() : pos{}, num{} { }
+			nik_ce T_syntax_count() : num{} { }
 
-			nik_ce auto size  () const  { return num; }
-			nik_ce void reset () { num = 0; }
-			nik_ce void inc   () { ++num; }
+			nik_ce auto size() const { return num; }
+			nik_ce void reset() { num = 0; }
+			nik_ce void upsize(csize_type n = 1) { num += n; }
+			nik_ce auto inc_size(csize_type n = 1) { auto v = size(); upsize(n); return v; }
 	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// variadic:
 
 /***********************************************************************************************************************/
 
@@ -393,9 +353,9 @@ namespace assembly {
 			using stack_type	= unit_stack<size_type, stack_size>;
 			using StackPair		= typename stack_type::Pair;
 
-			struct Stage { enum : gkey_type { expedite, defer, dimension }; };
+			struct Stage { enum : gkey_type { atomic, compound, defer, dimension }; };
 
-			stack_type status;
+			stack_type procedure;
 			stack_type current;
 			stack_type note;
 
@@ -405,10 +365,10 @@ namespace assembly {
 				note.push(AT::first);
 			}
 
-			// status:
+			// procedure:
 
-				nik_ce bool is_expedited () const { return (status.cvalue() == Stage::expedite); }
-				nik_ce bool is_deferred  () const { return (status.cvalue() == Stage::defer); }
+				nik_ce bool is_compound() const { return (procedure.cvalue() == Stage::compound); }
+				nik_ce bool is_deferred() const { return (procedure.cvalue() == Stage::defer); }
 
 			// return:
 
@@ -478,15 +438,15 @@ namespace assembly {
 		using ModelAction		= typename model_type::Action;
 		using ModelEntry		= typename model_type::Entry;
 		using Compound			= typename model_type::Compound;
+		using Parameter			= typename model_type::Parameter;
 
 		using verse_type		= T_syntax_verse<size_type, stack_size>; // make stack sizes
 		using stage_type		= T_syntax_stage<size_type, stack_size>; // independent?
 		using Stage			= typename stage_type::Stage;
 
-		using padding_type		= T_syntax_padding<size_type>;
 		using literal_type		= T_syntax_literal<size_type>;
 		using lookup_type		= T_syntax_lookup <cselect>;
-		using pound_type		= T_syntax_pound<size_type>;
+		using count_type		= T_syntax_count<size_type>;
 		using replace_type		= T_syntax_replace<cselect, size_type>;
 
 		enum : gkey_type
@@ -502,10 +462,9 @@ namespace assembly {
 		verse_type verse;
 		stage_type stage;
 
-		padding_type padding;
 		literal_type literal;
 		lookup_type lookup;
-		pound_type pound;
+		count_type count;
 		replace_type replace;
 
 		nik_ce T_syntax_tree() : contr{src_at, str_at}, model{src} { }
@@ -539,17 +498,15 @@ namespace assembly {
 
 		// param:
 
-		//	nik_ce void param_type(const cselect & s)
-		//		{ model.define_parameter(s, param_var_type{count++}, cur_env); }
+			nik_ce void param_type(const cselect & s) { define_parameter(s, count.inc_size()); }
 
 		// main:
 
 			nik_ce void main_name(const cselect & s)
 			{
-		//		nik_ce auto left = 0;
-		//		nik_ce auto ins  = 0;
-		//		nik_ce auto val  = pound_var_type(left, ins);
-		//		cur_entry = model.define_compound(s, val, cur_env);
+				define_compound(s);
+				verse.current.push(verse.size());
+				stage.current.push(verse.size()); // reset stage to verse.
 
 				upsize_verse();
 			}
@@ -563,60 +520,69 @@ namespace assembly {
 				assembly_action<AAN::pad , AAT::id    >(pos, pad);
 			}
 
-			nik_ce void main_end() { assembly_action<AAN::id, AAT::end>(AT::first); }
+			nik_ce void main_end()
+			{
+				undefine_compound();
+
+				assembly_action<AAN::id, AAT::end>(AT::first);
+			}
 
 		// port:
 
 			// op:
 
-			//	nik_ce void op_port_lookup(const cselect & s)
-			//	{
-			//		auto rec = model.lookup_variable(s);
+				nik_ce void op_port_lookup(const cselect & s)
+				{
+					if (model.lookup_variable(s))
+					{
+						auto pos = model.get_value(Parameter::pos);
 
-			//		if (mrec_match(rec))
-			//		{
-			//			auto entry = mrec_entry(rec);
-			//			auto pos   = model.parameter_pos(entry);
-
-			//			model.set_value(cur_entry, Compound::kind, 1); // magic number.
-			//			model.set_value(cur_entry, Compound::port, pos);
-			//		}
-			//		else { } // error.
-			//	}
+						model.set_cache_value(Compound::kind, 1); // magic number.
+						model.set_cache_value(Compound::port, pos);
+					}
+					else { } // error.
+				}
 
 			// arg:
 
-			//	nik_ce void port_lookup(const cselect & s)
-			//	{
-			//		auto rec = model.lookup_variable(s);
+				nik_ce void port_lookup(const cselect & s)
+				{
+					if (model.lookup_variable(s))
+					{
+						auto pos = model.get_value(Parameter::pos);
 
-			//		if (mrec_match(rec))
-			//		{
-			//			auto entry = mrec_entry(rec);
-			//			auto pos   = model.parameter_pos(entry);
-
-			//			force_literal_return(pos);
-			//		}
-			//		else { } // error.
-			//	}
+						force_literal_return(pos);
+					}
+					else { } // error.
+				}
 
 		// declare:
 
-		//	nik_ce void declare_op_name(const cselect & s)
-		//		{ model.define_compound(s, cur_env); }
+			nik_ce void declare_op_name(const cselect & s)
+				{ } // { define_compound(s); } // undefine_compound ?
 
 		// define:
+
+			nik_ce void define_parameter(const cselect & s, cindex pos)
+				{ model.define_variable(s, {ModelEntry::parameter, pos}); }
 
 			nik_ce void define_argument(const cselect & s, cindex pos)
 				{ model.define_variable(s, {ModelEntry::argument, pos}); }
 
-			nik_ce void define_compound(const cselect & s, cindex left, cindex origin)
+			nik_ce void define_compound(const cselect & s, cindex left = 0, cindex origin = 0)
 			{
 				nik_ce size_type kind = 0;
 				nik_ce size_type port = 0;
 
 				model.define_variable(s, {ModelEntry::compound, left, origin, kind, port});
-				model.push_env();
+				model.cache.push(model.env_entry());
+				model.env_push();
+			}
+
+			nik_ce void undefine_compound()
+			{
+				model.cache.pop();
+				model.env_pop();
 			}
 
 			// op:
@@ -641,6 +607,7 @@ namespace assembly {
 				{
 					verse.current.pop();
 					stage.current.pop();
+					undefine_compound();
 
 					assembly_action< AAN::id    , AAT::end >(AT::first);
 					assembly_action< AAN::go_to , AAT::end >();
@@ -773,15 +740,19 @@ namespace assembly {
 
 			nik_ce void apply_begin(const cselect & s)
 			{
-				model.lookup_variable(s);
-				stage.status.push(Stage::expedite);
+				auto is_pound = model.lookup_variable(s);
+				auto status   = is_pound ? Stage::compound : Stage::atomic;
+
+				if (is_pound) model.cache.push(model.inhabit.cvalue());
+
+				stage.procedure.push(status);
 				stage.current.push(stage.size());
 				stage.note.push(AT::back);
 			}
 
 			nik_ce void apply_begin()
 			{
-				stage.status.push(Stage::defer);
+				stage.procedure.push(Stage::defer);
 				stage.current.push(stage.size());
 				stage.note.push(AT::back);
 			}
@@ -789,7 +760,7 @@ namespace assembly {
 			nik_ce void apply_end()
 			{
 				if      (stage.is_deferred()) apply_deferred_end();
-				else if (model.is_compound()) apply_compound_end();
+				else if (stage.is_compound()) apply_compound_end();
 				else                          apply_atomic_end();
 			}
 
@@ -799,11 +770,11 @@ namespace assembly {
 
 				nik_ce void apply_compound_end()
 				{
-					auto left = model.get_value(Compound::left);
+					auto left = model.get_cache_value(Compound::left);
 
 					model.cache.pop();
 					stage.current.pop();
-					stage.status.pop();
+					stage.procedure.pop();
 					stage.note.pop();
 
 					assembly_action<AAN::push, AAT::instr>(AN::arg, AT::verse, left, stage.size());
@@ -814,7 +785,7 @@ namespace assembly {
 				nik_ce void apply_atomic_end()
 				{
 					stage.current.pop();
-					stage.status.pop();
+					stage.procedure.pop();
 					stage.note.pop();
 
 					assembly_action<AAN::push, AAT::instr>(AN::arg, AT::select, stage.size());

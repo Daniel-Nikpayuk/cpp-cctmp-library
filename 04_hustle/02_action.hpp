@@ -79,8 +79,7 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-			//	{ t->param_type(l->left_cselect()); }
-				{ }
+				{ t->param_type(l->left_cselect()); }
 		};
 
 /***********************************************************************************************************************/
@@ -182,8 +181,7 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-			//	{ t->op_port_lookup(l->left_cselect()); }
-				{ }
+				{ t->op_port_lookup(l->left_cselect()); }
 		};
 
 /***********************************************************************************************************************/
@@ -207,8 +205,7 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-			//	{ t->port_lookup(l->left_cselect()); }
-				{ }
+				{ t->port_lookup(l->left_cselect()); }
 		};
 
 /***********************************************************************************************************************/

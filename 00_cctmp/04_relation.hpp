@@ -146,6 +146,7 @@ namespace cctmp {
 
 			// free:
 
+				nik_ce void clear() { free = length; }
 				nik_ce auto allocate(csize_type s) { return (free -= s); }
 
 		public:
@@ -238,7 +239,6 @@ namespace cctmp {
 			nik_ce csize_type cbegin () const { return current; }
 			nik_ce csize_type cend   () const { return base::null; }
 
-			nik_ce void clear() { current = base::null; }
 			nik_ce void push(csize_type s) { current = base::cons(base::allocate(s), current); }
 
 			template<typename In, typename End>
@@ -248,6 +248,12 @@ namespace cctmp {
 			{
 				current = base::cdr(current);
 				release(Pair::dimension + s);
+			}
+
+			nik_ce void clear()
+			{
+				current = base::null;
+				base::clear();
 			}
 	};
 

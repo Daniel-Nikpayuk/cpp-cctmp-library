@@ -103,9 +103,6 @@ namespace assembly {
 	template<typename T, auto S>
 	using unit_stack					= cctmp::unit_stack<T, S>;
 
-	template<typename T, auto S>
-	using pair_stack					= cctmp::pair_stack<T, S>;
-
 	nik_ce auto _par_left_					= cctmp::_par_left_;
 	nik_ce auto _par_right_					= cctmp::_par_right_;
 
