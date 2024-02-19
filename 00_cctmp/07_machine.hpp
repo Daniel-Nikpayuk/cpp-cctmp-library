@@ -388,21 +388,31 @@ namespace cctmp {
 
 		protected:
 
-			// entry:
-
-				nik_ce auto entry(clist_type env) const
-				{
-					auto frame   = base::car(env);
-					auto binding = base::car(frame);
-					auto entry   = base::cdr(binding);
-
-					return entry;
-				}
-
 			// src:
 
 				nik_ce auto start  (ccselect_ref s) const { return s.cbegin() - src.cbegin(); }
 				nik_ce auto finish (ccselect_ref s) const { return src.cend() - s.cend(); }
+
+			// env:
+
+				nik_ce auto get_frame   (clist_type env) const { return base::car(env); }
+				nik_ce auto get_binding (clist_type env) const { return base::car(get_frame(env)); }
+				nik_ce auto get_entry   (clist_type env) const { return base::cdr(get_binding(env)); }
+
+		public:
+
+			// name:
+
+				nik_ce auto get_name(csize_type binding) const
+				{
+					auto variable = base::car(binding);
+					auto start    = base::get_value(variable, Pair::car);
+					auto finish   = base::get_value(variable, Pair::cdr);
+
+					return src.cselect(start, finish);
+				}
+
+		protected:
 
 			// lookup:
 
@@ -414,12 +424,7 @@ namespace cctmp {
 
 				nik_ce void lookup_binding(ccselect_ref var, csize_type binding)
 				{
-					auto variable = base::car(binding);
-					auto start    = base::get_value(variable, Pair::car);
-					auto finish   = base::get_value(variable, Pair::cdr);
-					auto src_csel = src.cselect(start, finish);
-
-					if (apply<_subarray_same_<>>(var, src_csel))
+					if (apply<_subarray_same_<>>(var, get_name(binding)))
 						inhabit.push(base::cdr(binding));
 				}
 

@@ -102,31 +102,62 @@ namespace chord {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->main_end(); }
+				{ t->first_return(); }
+		};
+
+	// accept:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::main_accept, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+			{
+				t->force_define_jumps();
+				t->undefine_compound();
+			}
 		};
 
 /***********************************************************************************************************************/
 
 // label:
 
+	// value:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::label_value, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->define_label(l->left_cselect(0, 1)); }
+		};
+
+/***********************************************************************************************************************/
+
+// goto:
+
 	// delay:
 
 		template<auto... filler>
-		struct T_chord_translation_action<CAAN::label_delay, filler...>
+		struct T_chord_translation_action<CAAN::goto_delay, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ }
+				{ t->delay_define_goto(l->left_cselect()); }
 		};
 
-	// force:
+/***********************************************************************************************************************/
+
+// branch:
+
+	// delay:
 
 		template<auto... filler>
-		struct T_chord_translation_action<CAAN::label_force, filler...>
+		struct T_chord_translation_action<CAAN::branch_delay, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ }
+				{ t->delay_define_branch(l->left_cselect()); }
 		};
 
 /***********************************************************************************************************************/
@@ -140,7 +171,7 @@ namespace chord {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->declare_op_name(l->left_cselect()); }
+				{ t->delay_define_compound(l->left_cselect()); }
 		};
 
 /***********************************************************************************************************************/
@@ -155,8 +186,8 @@ namespace chord {
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->pad_pos = t->verse_size;
-				t->reset_padding();
+				t->count.cache(t->verse.size());
+				t->count.reset();
 			}
 		};
 
@@ -167,7 +198,7 @@ namespace chord {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->define_arg_names(t->pad_pos, t->padding()); }
+				{ t->define_arg_names(t->count.cache(), t->count.size()); }
 		};
 
 	// arg:
@@ -178,8 +209,8 @@ namespace chord {
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->define_arg_variable(l->left_cselect());
-				t->inc_padding();
+				t->define_arg_name(l->left_cselect());
+				t->count.upsize();
 			}
 		};
 
@@ -249,7 +280,10 @@ namespace chord {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->apply_begin(l->left_cselect()); }
+			{
+				t->apply_begin(l->left_cselect());
+				t->lookup_return(l->left_cselect());
+			}
 		};
 
 	// paste:
@@ -285,7 +319,7 @@ namespace chord {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->return_lookup(l->left_cselect()); }
+				{ t->lookup_return(l->left_cselect()); }
 		};
 
 	// paste:
@@ -323,7 +357,7 @@ namespace chord {
 
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->return_lookup(l->left_cselect(), mute); }
+				{ t->lookup_return(l->left_cselect(), mute); }
 		};
 
 /***********************************************************************************************************************/
@@ -337,7 +371,7 @@ namespace chord {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->return_lookup(l->left_cselect()); }
+				{ t->lookup_return(l->left_cselect()); }
 		};
 
 	// paste:

@@ -229,26 +229,41 @@
 		//	"  )                                            "
 		//	")                                              "
 
-		//	"(type T                                        "
-		//	"  (define (sqrt x)                             "
-		//	"    (define (square y) (* y y))                "
-		//	"    (define (abs y) (if (< y 0.0) (- y) y))    "
-		//	"    (define (good-enough? guess)               "
-		//	"      (< (abs (- (square guess) x)) tolerance) "
-		//	"    )                                          "
-		//	"    (define (average y z) (/ (+ y z) 2.0))     "
-		//	"    (define (improve guess)                    "
-		//	"      (average guess (/ x guess))              "
-		//	"    )                                          "
-		//	"    (define (sqrt-iter guess) -> T             "
-		//	"      (if (good-enough? guess)                 "
-		//	"        guess                                  "
-		//	"        (sqrt-iter (improve guess))            "
-		//	"      )                                        "
-		//	"    )                                          "
-		//	"    (sqrt-iter 1.0)                            "
-		//	"  )                                            "
-		//	")                                              "
+		//	"(type T                                                                    "
+		//	"  (define (sqrt x)                                                         "
+
+		//	"    (define (square y) (* y y))                                            "
+		//	"    (define (abs y) (if (< y 0) (- y) y))                                  "
+		//	"    (define (good-enough? guess) (< (abs (- (square guess) x)) tolerance)) "
+
+		//	"    (define (average y z) (/ (+ y z) 2))                                   "
+		//	"    (define (improve guess) (average guess (/ x guess)) )                  "
+
+		//	"    (define (sqrt-iter guess) -> T                                         "
+		//	"      (if (good-enough? guess) guess (sqrt-iter (improve guess)))          "
+		//	"    )                                                                      "
+
+		//	"    (sqrt-iter 1:T)                                                        "
+		//	"  )                                                                        "
+		//	")                                                                          "
+
+	template<typename T>
+	constexpr auto sqrt_iter(T x, T guess) -> T
+	{
+		auto tolerance		= 0.0001;
+		auto square		= [](T y){ return y * y; };
+		auto abs		= [](T y){ return (y < 0) ? -y : y; };
+		auto good_enough	= [&](T g) { return (abs(square(g) - x) < tolerance); };
+
+		auto average		= [](T y, T z){ return (y + z) / 2; };
+		auto improve		= [&](T g){ return average(g, x/g); };
+
+		if (good_enough(guess)) return guess;
+		else return sqrt_iter(x, improve(guess));
+	}
+
+	template<typename T>
+	constexpr auto sqrt(T x) { return sqrt_iter(x, 1.0); }
 
 /***********************************************************************************************************************/
 

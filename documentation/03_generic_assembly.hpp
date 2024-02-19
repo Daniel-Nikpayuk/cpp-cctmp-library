@@ -44,6 +44,7 @@ namespace chord {
 
 	#define NIK_UNIT_TEST_X_TO5_PLUS1_V0
 	#define NIK_UNIT_TEST_REASSIGN_V0
+	#define NIK_UNIT_TEST_IF_THEN_ELSE_V0
 	#define NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V0
 	#define NIK_UNIT_TEST_SEMIDYNAMIC_TYPING_V1
 	#define NIK_UNIT_TEST_BINARY_DISPATCH_V0
@@ -171,7 +172,7 @@ namespace chord {
 	{
 		return source
 		(
-			"square x         ;"
+			"main x           ;"
 
 			"body:            ;"
 			". = multiply x x ;"
@@ -230,13 +231,13 @@ namespace chord {
 	{
 		return source
                 (
-			"sum_of_squares x y ;"
+			"main x y         ;"
 
-			"body:              ;"
-			"x = multiply x x   ;"
-			"y = multiply y y   ;"
-			". = add      x y   ;"
-			"return _           ;"
+			"body:            ;"
+			"x = multiply x x ;"
+			"y = multiply y y ;"
+			". = add      x y ;"
+			"return _         ;"
 		);
 	}
 
@@ -478,6 +479,39 @@ namespace chord {
 	template<typename T1, typename T2>
 	constexpr auto reassign_v0(T1 x, T2 y)
 		{ return chord_apply<_reassign_v0, cctmp::null_env, T2>(x, y); }
+
+#endif
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// if then else:
+
+/***********************************************************************************************************************/
+
+// version 0:
+
+	constexpr auto _if_then_else_v0()
+	{
+		return source
+		(
+			"main pred ante conse   ;"
+
+			"body:                  ;"
+			"  test equal pred zero ;"
+			"  branch alt           ;"
+			"  return conse         ;"
+
+			"alt:                   ;"
+			"  return ante          ;"
+		);
+	}
+
+#ifdef NIK_UNIT_TEST_IF_THEN_ELSE_V0
+
+	template<typename T1, typename T2, typename T3>
+	constexpr auto if_then_else_v0(T1 x, T2 y, T3 z)
+		{ return chord_apply<_if_then_else_v0, cctmp::null_env, T2>(x, y, z); }
 
 #endif
 

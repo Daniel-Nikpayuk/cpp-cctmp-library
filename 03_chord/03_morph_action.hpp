@@ -36,7 +36,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->define_op_arity(l->to_number()); }
+			{ t->delay_define_arity(l->to_number()); }
 	};
 
 	template<auto... filler>
@@ -44,7 +44,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->define_op_arity(0); }
+			{ t->delay_define_arity(0); }
 	};
 
 // op:
@@ -55,8 +55,8 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->refine_op_name(t->repl_name);
-			t->refine_op_args();
+			t->force_define_compound(t->replace.name());
+			t->force_define_arity();
 			t->define_op_begin();
 		}
 	};
@@ -77,7 +77,10 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->apply_begin(l->left_cselect()); }
+		{
+			t->apply_begin(l->left_cselect());
+			t->lookup_return(l->left_cselect());
+		}
 	};
 
 	template<auto... filler>
@@ -85,7 +88,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->reset_count(); }
+			{ t->count.reset(); }
 	};
 
 // argpose:
@@ -96,8 +99,8 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->lookup_variadic_back_action(t->arg_pos(l->to_number()));
-			t->inc_args_if();
+			t->back_lookup_return(l->to_number());
+			t->stage.upsize();
 		}
 	};
 
@@ -110,8 +113,9 @@ namespace chord {
 		nik_ces void result(AST *t, clexeme *l)
 		{
 			t->apply_begin(l->left_cselect());
-			t->lookup_variadic_back_action(t->arg_pos(t->count++));
-			t->inc_args_if();
+			t->lookup_return(l->left_cselect());
+			t->back_lookup_return(t->count.inc_size());
+			t->stage.upsize();
 			t->apply_end();
 		}
 	};
@@ -123,7 +127,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ t->return_lookup(l->left_cselect()); }
+			{ t->lookup_return(l->left_cselect()); }
 	};
 
 	template<auto... filler>
@@ -132,10 +136,10 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			for (auto k = 0; k != t->cur_arity; ++k)
+			for (auto k = 0; k != t->pound.arity(); ++k)
 			{
-				t->lookup_variadic_back_action(t->arg_pos(k));
-				t->inc_args_if();
+				t->back_lookup_return(k);
+				t->stage.upsize();
 			}
 		}
 	};

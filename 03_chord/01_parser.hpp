@@ -42,15 +42,16 @@ namespace chord {
 				main_name,
 				main_arg,
 				main_return,
+				main_accept,
 
 			// label:
 
-				label_delay,
-				label_force,
+				label_value,
 
-			// goto:
+			// jump:
 
-			// tail:
+				goto_delay,
+				branch_delay,
 
 			// declare:
 
@@ -170,8 +171,8 @@ namespace chord {
 
 					"Block    -> LabelBeg LabelEnd Instrs               ;"
 					"RecBlock -> Block RecBlock                         ;"
-					"         -> empty                    : label_force ;"
-					"LabelBeg -> label                    : label_delay ;"
+					"         -> empty                    : main_accept ;"
+					"LabelBeg -> label                    : label_value ;"
 					"LabelEnd -> \\;                                    ;"
 
 				// instruction:
@@ -180,7 +181,6 @@ namespace chord {
 					"            -> return UnitVal MainRet                           ;"
 					"RecInstr    -> Instr RecInstr                                   ;"
 					"            -> GotoBeg GotoVal GotoEnd                          ;"
-					"            -> TailBeg TailVal TailEnd                          ;"
 					"            -> return UnitVal MainRet                           ;"
 					"            -> empty                                            ;"
 					"Instr       -> DecBeg DecArg DecArgs DecEnd                     ;"
@@ -198,15 +198,12 @@ namespace chord {
 
 				// jump:
 
-					"GotoBeg   -> goto       ;" // : goto_begin   ;"
-					"GotoVal   -> identifier ;" // : goto_value   ;"
-					"GotoEnd   -> \\;        ;" // : goto_end     ;"
-					"TailBeg   -> tail       ;" // : tail_begin   ;"
-					"TailVal   -> identifier ;" // : tail_value   ;"
-					"TailEnd   -> \\;        ;" // : tail_end     ;"
-					"BranchBeg -> branch     ;" // : branch_begin ;"
-					"BranchVal -> identifier ;" // : branch_value ;"
-					"BranchEnd -> \\;        ;" // : branch_end   ;"
+					"GotoBeg   -> goto                      ;"
+					"GotoVal   -> identifier : goto_delay   ;"
+					"GotoEnd   -> \\;                       ;"
+					"BranchBeg -> branch                    ;"
+					"BranchVal -> identifier : branch_delay ;"
+					"BranchEnd -> \\;                       ;"
 
 				// declare:
 
@@ -230,15 +227,15 @@ namespace chord {
 					"SwapEnd  -> \\;        ;" // : swap_end    ;"
 					"VoidBeg  -> void       ;" // : void_begin  ;"
 					"VoidEnd  -> \\;        ;" // : void_end    ;"
-					"ApplyBeg -> \\=        ;" // : apply_begin ;" // required still ?
+					"ApplyBeg -> \\=                            ;"
 					"ApplyEnd -> \\;              : apply_end   ;"
-					"TestBeg  -> test       ;" // : test_begin  ;"
-					"TestEnd  -> \\;        ;" // : test_end    ;"
+					"TestBeg  -> test             : left_copy   ;"
+					"TestEnd  -> \\;              : apply_end   ;"
 
 				// assignment:
 
-					"AssignBeg ->   # ;" // : assign_begin ;"
-					"AssignEnd -> \\;       : assign_end   ;"
+					"AssignBeg ->   #              ;"
+					"AssignEnd -> \\; : assign_end ;"
 
 				// argument:
 
@@ -435,7 +432,7 @@ namespace chord {
 			sxt_pair( "label"      , Token::label      ),
 			sxt_pair( "return"     , Token::re_turn    ),
 			sxt_pair( "goto"       , Token::go_to      ),
-			sxt_pair( "tail"       , Token::tail       ),
+		//	sxt_pair( "tail"       , Token::tail       ),
 			sxt_pair( "!"          , Token::mu_table   ),
 			sxt_pair( "\\="        , Token::apply      ),
 			sxt_pair( "test"       , Token::test       ),
@@ -484,23 +481,16 @@ namespace chord {
 					sxa_pair( "main_name"   , ActName::main_name   ),
 					sxa_pair( "main_arg"    , ActName::main_arg    ),
 					sxa_pair( "main_return" , ActName::main_return ),
+					sxa_pair( "main_accept" , ActName::main_accept ),
 
 				// label:
 
-					sxa_pair( "label_delay" , ActName::label_delay ),
-					sxa_pair( "label_force" , ActName::label_force ),
+					sxa_pair( "label_value" , ActName::label_value ),
 
-				// goto:
+				// jump:
 
-				//	sxa_pair( "goto_begin" , ActName::goto_begin ),
-				//	sxa_pair( "goto_value" , ActName::goto_value ),
-				//	sxa_pair( "goto_end"   , ActName::goto_end   ),
-
-				// tail:
-
-				//	sxa_pair( "tail_begin" , ActName::tail_begin ),
-				//	sxa_pair( "tail_value" , ActName::tail_value ),
-				//	sxa_pair( "tail_end"   , ActName::tail_end   ),
+					sxa_pair( "goto_delay"   , ActName::goto_delay   ),
+					sxa_pair( "branch_delay" , ActName::branch_delay ),
 
 				// declare:
 
@@ -757,12 +747,68 @@ namespace chord {
 		using base		= assembly::T_syntax_tree<Vs...>;
 		using size_type		= typename base::size_type;
 		using csize_type	= typename base::csize_type;
+		using cselect		= typename base::cselect;
+		using model_type	= typename base::model_type;
+		using ModelEntry	= typename base::ModelEntry;
 
-		nik_ce T_chord_syntax_tree() : base{} { }
+		using clist_type	= typename model_type::clist_type;
+		using model_base	= typename model_type::base;
+		using model_subbase	= typename model_base::base;
+
+		struct ChordEntry { enum : size_type { label = ModelEntry::dimension, jump, dimension }; };
+		struct JumpEntry  { enum : size_type { pos   = ModelEntry::init, dimension }; };
+
+		model_type jump;
+
+		nik_ce T_chord_syntax_tree() : base{}, jump{base::src} { }
 
 		// label:
 
-			// add in label tracking/resolution here.
+			nik_ce void define_label(const cselect & s)
+			{
+				csize_type pos = base::contr.current();
+
+				if (base::model.lookup_variable(s)) { } // error.
+				else base::model.define_variable(s, {ChordEntry::label, pos});
+			}
+
+		// jump:
+
+			nik_ce void delay_define_jump(const cselect & s, csize_type name)
+			{
+				csize_type pos = base::contr.current(1);
+
+				jump.define_variable(s, {ChordEntry::jump, pos});
+				base::template assembly_action<AAN::push, AAT::instr>(name, AT::id);
+			}
+
+			nik_ce void delay_define_goto   (const cselect & s) { delay_define_jump(s, AN::go_to); }
+			nik_ce void delay_define_branch (const cselect & s) { delay_define_jump(s, AN::branch); }
+
+			nik_ce void force_define_jumps()
+			{
+				for (auto k = jump.env_origin(); jump.not_null(k); k = jump.cdr(k))
+					force_define_frames(jump.car(k));
+			}
+
+			nik_ce void force_define_frames(clist_type frame)
+			{
+				for (auto k = frame; jump.not_null(k); k = jump.cdr(k))
+					force_define_bindings(jump.car(k));
+			}
+
+			nik_ce void force_define_bindings(clist_type binding)
+			{
+				if (base::model.lookup_variable(jump.get_name(binding)))
+				{
+					auto entry = jump.cdr(binding);
+					auto pos   = static_cast<model_subbase>(jump).get_value(entry, JumpEntry::pos);
+					auto value = base::model.get_value(JumpEntry::pos);
+
+					base::contr.set_instr_value(pos, cctmp::Instr::pos, value);
+				}
+				else { } // error.
+			}
 	};
 
 /***********************************************************************************************************************/

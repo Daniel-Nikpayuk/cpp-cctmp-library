@@ -77,10 +77,16 @@ namespace assembly {
 
 			// env:
 
-				nik_ce auto env_entry() const { return base::entry(env); }
+				nik_ce auto env_origin () const { return env; }
+				nik_ce auto env_entry  () const { return base::get_entry(env); }
 
 				nik_ce void env_push () { env = base::extend_env(env); }
 				nik_ce void env_pop  () { env = base::cdr(env); }
+
+			// inhabit:
+
+				nik_ce bool is_compound() const
+					{ return (base::get_value(Entry::type) == Entry::compound); }
 
 			// cache:
 
@@ -116,9 +122,6 @@ namespace assembly {
 				}
 
 		protected:
-
-			nik_ce bool is_compound() const
-				{ return (base::get_value(Entry::type) == Entry::compound); }
 
 			// model action:
 
@@ -288,6 +291,30 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
+// pound:
+
+	template<typename SizeType>
+	class T_syntax_pound
+	{
+		public:
+
+			using size_type		= SizeType;
+			using csize_type	= size_type const;
+
+		protected:
+
+			size_type arg_size;
+
+		public:
+
+			nik_ce T_syntax_pound() : arg_size{} { }
+
+			nik_ce auto arity() const { return arg_size; }
+			nik_ce auto set_arity(csize_type n) { arg_size = n; }
+	};
+
+/***********************************************************************************************************************/
+
 // count:
 
 	template<typename SizeType>
@@ -300,16 +327,24 @@ namespace assembly {
 
 		protected:
 
+			size_type pos;
 			size_type num;
 
 		public:
 
-			nik_ce T_syntax_count() : num{} { }
+			nik_ce T_syntax_count() : pos{}, num{} { }
 
-			nik_ce auto size() const { return num; }
-			nik_ce void reset() { num = 0; }
-			nik_ce void upsize(csize_type n = 1) { num += n; }
-			nik_ce auto inc_size(csize_type n = 1) { auto v = size(); upsize(n); return v; }
+			// pos:
+
+				nik_ce auto cache() const { return pos; }
+				nik_ce void cache(csize_type n) { pos = n; }
+
+			// num:
+
+				nik_ce auto size() const { return num; }
+				nik_ce void reset() { num = 0; }
+				nik_ce void upsize(csize_type n = 1) { num += n; }
+				nik_ce auto inc_size(csize_type n = 1) { auto v = size(); upsize(n); return v; }
 	};
 
 /***********************************************************************************************************************/
@@ -411,6 +446,14 @@ namespace assembly {
 		public:
 
 			nik_ce T_syntax_replace() : asm_pos{} { }
+
+			nik_ce auto name () const { return asm_var; }
+			nik_ce auto pos  () const { return asm_pos; }
+
+			nik_ce bool not_copy() const { return (asm_pos != 0); }
+
+			nik_ce void set_name(const cselect & s) { asm_var = s; }
+			nik_ce void set_pos(csize_type n) { asm_pos = n; }
 	};
 
 /***********************************************************************************************************************/
@@ -437,15 +480,18 @@ namespace assembly {
 		using model_type		= T_syntax_model<size_type, model_size, stack_size, static_env_lookup>;
 		using ModelAction		= typename model_type::Action;
 		using ModelEntry		= typename model_type::Entry;
-		using Compound			= typename model_type::Compound;
 		using Parameter			= typename model_type::Parameter;
+		using Argument			= typename model_type::Argument;
+		using Compound			= typename model_type::Compound;
+
+		using literal_type		= T_syntax_literal<size_type>;
+		using lookup_type		= T_syntax_lookup<cselect>;
+		using pound_type		= T_syntax_pound<size_type>;
 
 		using verse_type		= T_syntax_verse<size_type, stack_size>; // make stack sizes
 		using stage_type		= T_syntax_stage<size_type, stack_size>; // independent?
 		using Stage			= typename stage_type::Stage;
 
-		using literal_type		= T_syntax_literal<size_type>;
-		using lookup_type		= T_syntax_lookup <cselect>;
 		using count_type		= T_syntax_count<size_type>;
 		using replace_type		= T_syntax_replace<cselect, size_type>;
 
@@ -459,11 +505,12 @@ namespace assembly {
 
 		contr_type contr;
 		model_type model;
-		verse_type verse;
-		stage_type stage;
-
 		literal_type literal;
 		lookup_type lookup;
+		pound_type pound;
+
+		verse_type verse;
+		stage_type stage;
 		count_type count;
 		replace_type replace;
 
@@ -474,6 +521,8 @@ namespace assembly {
 			template<auto name, auto note, typename... Ts>
 			nik_ce void assembly_action(Ts... vs)
 				{ assembly::assembly_action<name, note>(&contr, vs...); }
+
+			nik_ce void first_return() { assembly_action<AAN::id, AAT::end>(AT::first); }
 
 		// source:
 
@@ -496,6 +545,12 @@ namespace assembly {
 				return v;
 			}
 
+			nik_ce void push_verse_stage()
+			{
+				verse.current.push(verse.size());
+				stage.current.push(verse.size()); // reset stage to verse.
+			}
+
 		// param:
 
 			nik_ce void param_type(const cselect & s) { define_parameter(s, count.inc_size()); }
@@ -505,8 +560,7 @@ namespace assembly {
 			nik_ce void main_name(const cselect & s)
 			{
 				define_compound(s);
-				verse.current.push(verse.size());
-				stage.current.push(verse.size()); // reset stage to verse.
+				push_verse_stage();
 
 				upsize_verse();
 			}
@@ -523,8 +577,7 @@ namespace assembly {
 			nik_ce void main_end()
 			{
 				undefine_compound();
-
-				assembly_action<AAN::id, AAT::end>(AT::first);
+				first_return();
 			}
 
 		// port:
@@ -556,11 +609,6 @@ namespace assembly {
 					else { } // error.
 				}
 
-		// declare:
-
-			nik_ce void declare_op_name(const cselect & s)
-				{ } // { define_compound(s); } // undefine_compound ?
-
 		// define:
 
 			nik_ce void define_parameter(const cselect & s, cindex pos)
@@ -569,12 +617,30 @@ namespace assembly {
 			nik_ce void define_argument(const cselect & s, cindex pos)
 				{ model.define_variable(s, {ModelEntry::argument, pos}); }
 
-			nik_ce void define_compound(const cselect & s, cindex left = 0, cindex origin = 0)
+			nik_ce void delay_define_compound(const cselect & s, cindex left = 0, cindex origin = 0)
 			{
 				nik_ce size_type kind = 0;
 				nik_ce size_type port = 0;
 
 				model.define_variable(s, {ModelEntry::compound, left, origin, kind, port});
+			}
+
+			nik_ce void force_define_compound(const cselect & s)
+			{
+				if (model.lookup_variable(s))
+				{
+					model.set_value(Compound::left, verse.size());
+					model.set_value(Compound::origin, contr.current(2));
+					model.env_push();
+
+					push_verse_stage();
+				}
+				else { } // error.
+			}
+
+			nik_ce void define_compound(const cselect & s, cindex left = 0, cindex origin = 0)
+			{
+				delay_define_compound(s, left, origin);
 				model.cache.push(model.env_entry());
 				model.env_push();
 			}
@@ -585,17 +651,18 @@ namespace assembly {
 				model.env_pop();
 			}
 
+			nik_ce void delay_define_arity(cindex n) { pound.set_arity(n); }
+			nik_ce void force_define_arity() { stage.upsize(pound.arity()); }
+
 			// op:
 
 				nik_ce void define_op_name(const cselect & s)
 				{
 					define_compound(s, verse.size(), contr.current(2));
-					verse.current.push(verse.size());
-					stage.current.push(verse.size()); // reset stage to verse.
+					push_verse_stage();
 				}
 
 				nik_ce void define_op_arg(const cselect & s) { define_argument(s, inc_verse()); }
-			//	nik_ce void define_op_arity(cindex value) { cur_arity = value; }
 
 				nik_ce void define_op_begin()
 				{
@@ -609,52 +676,17 @@ namespace assembly {
 					stage.current.pop();
 					undefine_compound();
 
-					assembly_action< AAN::id    , AAT::end >(AT::first);
-					assembly_action< AAN::go_to , AAT::end >();
+					first_return();
+					assembly_action<AAN::go_to, AAT::end>();
 				}
 
 			// arg:
 
-			//	nik_ce void define_arg_variable(const cselect & s, cindex pos)
-			//		{ model.define_variable(s, arg_var_type{pos}); }
+				nik_ce void define_arg_name(const cselect & s)
+					{ define_argument(s, inc_verse()); }
 
-			//	nik_ce void define_arg_variable(const cselect & s)
-			//		{ define_arg_variable(s, push_verse()); }
-
-			//	nik_ce void define_arg_names(cindex pos, cindex pad_size)
-			//		{ assembly_action<AAN::pad, AAT::id>(pos, pad_size); }
-
-			//	nik_ce void define_arg_name(const cselect & s, cindex pad_size = 1)
-			//	{
-			//		auto pos = push_verse();
-
-			//		define_arg_variable(s, pos);
-			//		define_arg_names(pos, pad_size);
-			//	}
-
-		// refine:
-
-			// op:
-
-			//	nik_ce void refine_op_name(const cselect & s)
-			//	{
-			//		auto rec = model.lookup_variable(s);
-
-			//		if (mrec_match(rec))
-			//		{
-			//			auto left = verse_size;
-			//			auto ins  = contr.current(2);
-			//			auto env  = push_env();
-			//			cur_entry = mrec_entry(rec);
-
-			//			model.set_value(cur_entry, Compound::left, left);
-			//			model.set_value(cur_entry, Compound::ins, ins);
-			//			pound.push(reset_args(), left, env);
-			//		}
-			//		else { } // error.
-			//	}
-
-			//	nik_ce void refine_op_args() { inc_args(cur_arity); }
+				nik_ce void define_arg_names(cindex pos, cindex pad_size)
+					{ assembly_action<AAN::pad, AAT::id>(pos, pad_size); }
 
 		// literal:
 
@@ -736,6 +768,9 @@ namespace assembly {
 		      		force_lookup_return();
 			}
 
+			nik_ce void back_lookup_return(cindex pos, const bool mute = false)
+				{ assembly_action<AAN::lookup, AAT::variable>(AT::back, mute, verse.size() + pos); }
+
 		// apply:
 
 			nik_ce void apply_begin(const cselect & s)
@@ -803,25 +838,25 @@ namespace assembly {
 
 		// replace:
 
-		//	nik_ce void copy_replace() { repl_pos = 0; }
+			nik_ce void copy_replace() { replace.set_pos(0); }
 
-		//	nik_ce void delay_replace(const cselect & s)
-		//	{
-		//		repl_name = s;
-		//		auto record = model.lookup_variable(s);
+			nik_ce void delay_replace(const cselect & s)
+			{
+				replace.set_name(s);
 
-		//		if (mrec_match(record)) delay_match_replace(mrec_entry(record));
-		//		else { } // error.
-		//	}
+				if (model.lookup_variable(s)) delay_match_replace();
+				else { } // error.
+			}
 
-		//	nik_ce void delay_match_replace(cindex entry)
-		//	{
-		//		if (model.is_compound(entry)) repl_pos = 0;
-		//		else repl_pos = model.variadic_pos(entry);
-		//	}
+			nik_ce void delay_match_replace()
+			{
+				// test against all other entry types?
+				if (model.is_compound()) { } // error: one definition rule?
+				else replace.set_pos(model.get_value(Argument::pos));
+			}
 
-		//	nik_ce void force_replace() { if (repl_pos) force_verse_replace(); }
-		//	nik_ce void force_verse_replace() { assembly_action<AAN::replace, AAT::id>(repl_pos); }
+			nik_ce void force_replace() { if (replace.not_copy()) force_verse_replace(); }
+			nik_ce void force_verse_replace() { assembly_action<AAN::replace, AAT::id>(replace.pos()); }
 
 		// conditional:
 
