@@ -128,7 +128,6 @@
 	{
 		return source
 	        (
-
 			"(type T                                                                    "
 			"  (define (sqrt x)                                                         "
 
@@ -159,17 +158,19 @@
 	{
 		return source
 		(
-			"main pred ante conse   ;"
+			"type T             ;"
+			"factorial n -> T   ;"
 
-			"body:                  ;"
-			"  test equal pred zero ;"
-			"  branch alt           ;"
-			"  return conse         ;"
+			"body:              ;"
+			"  test equal n 0   ;"
+			"  branch done      ;"
+			"  . = subtract n 1 ;"
+			"  . = factorial _  ;"
+			"  . = multiply n _ ;"
+			"  return _         ;"
 
-			"alt:                   ;"
-			"  return ante          ;"
-
-			, binding("zero", 0)
+			"done:              ;"
+			"  return 1:T       ;"
 		);
 	}
 
@@ -180,11 +181,17 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	using chord_size_type = unsigned long;
-	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env>; // , chord_size_type>;
+		// 17032, 16994
 
-	//	auto val = T_chord_apply::result(1, 8, 9); // main_at(0, argc, argv)));
-	//	printf("%d\n", val);
+	//	using chord_size_type = unsigned long;
+	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
+
+	//	auto val = T_chord_apply::result(chord_size_type(main_at(0, argc, argv)));
+	//	printf("%lu\n", val);
+
+		// 17136, 17056
+		// 17136, 16952
+		// 17680, 16952
 
 	//	using hustle_size_type = double;
 	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;

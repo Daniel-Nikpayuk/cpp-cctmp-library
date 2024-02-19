@@ -513,6 +513,7 @@ namespace assembly {
 		stage_type stage;
 		count_type count;
 		replace_type replace;
+		cselect name;
 
 		nik_ce T_syntax_tree() : contr{src_at, str_at}, model{src} { }
 
@@ -557,26 +558,26 @@ namespace assembly {
 
 		// main:
 
-			nik_ce void main_name(const cselect & s)
+			nik_ce void main_begin(const cselect & s)
 			{
-				define_compound(s);
-				push_verse_stage();
-
-				upsize_verse();
-			}
-
-			nik_ce void main_begin()
-			{
-				nik_ce auto pos = 0;
 				nik_ce auto pad = 1;
 
-				assembly_action<AAN::id  , AAT::begin >();
-				assembly_action<AAN::pad , AAT::id    >(pos, pad);
+				name = s;
+				assembly_action< AAN::id   , AAT::begin >();
+				assembly_action< AAN::push , AAT::instr >(AN::hash, AT::port, contr.current(5));
+				assembly_action< AAN::pad  , AAT::id    >(0, pad);
+
+				upsize_verse(pad);
+				define_op_name(s);
 			}
 
 			nik_ce void main_end()
 			{
-				undefine_compound();
+				nik_ce auto left = 1;
+
+				define_op_end();
+				assembly_action<AAN::push, AAT::instr>(AN::arg, AT::verse, left, left);
+				assembly_action<AAN::push, AAT::instr>(AN::bind, stage.note_return()); // AT::side ?
 				first_return();
 			}
 
@@ -803,11 +804,8 @@ namespace assembly {
 				{
 				}
 
-				nik_ce void apply_compound_end()
+				nik_ce void apply_compound_end(cindex left)
 				{
-					auto left = model.get_cache_value(Compound::left);
-
-					model.cache.pop();
 					stage.current.pop();
 					stage.procedure.pop();
 					stage.note.pop();
@@ -815,6 +813,12 @@ namespace assembly {
 					assembly_action<AAN::push, AAT::instr>(AN::arg, AT::verse, left, stage.size());
 					assembly_action<AAN::push, AAT::instr>(AN::bind, stage.note_return()); // AT::side ?
 					stage.upsize_if();
+				}
+
+				nik_ce void apply_compound_end()
+				{
+					apply_compound_end(model.get_cache_value(Compound::left));
+					model.cache.pop();
 				}
 
 				nik_ce void apply_atomic_end()

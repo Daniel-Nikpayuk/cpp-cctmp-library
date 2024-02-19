@@ -86,26 +86,6 @@ namespace hustle {
 
 // main:
 
-	// name:
-
-		template<auto... filler>
-		struct T_hustle_translation_action<HAAN::main_name, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-				{ t->main_name(l->left_cselect()); }
-		};
-
-	// arg:
-
-		template<auto... filler>
-		struct T_hustle_translation_action<HAAN::main_arg, filler...>
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-				{ t->define_op_arg(l->left_cselect()); }
-		};
-
 	// begin:
 
 		template<auto... filler>
@@ -113,7 +93,7 @@ namespace hustle {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->main_begin(); }
+				{ t->main_begin(l->left_cselect()); }
 		};
 
 	// end:
@@ -124,6 +104,16 @@ namespace hustle {
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 				{ t->main_end(); }
+		};
+
+	// arg:
+
+		template<auto... filler>
+		struct T_hustle_translation_action<HAAN::main_arg, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->define_op_arg(l->left_cselect()); }
 		};
 
 /***********************************************************************************************************************/

@@ -37,12 +37,23 @@ namespace chord {
 		{
 			nop = generator::AN::nop,
 
+			// param:
+
+				param_type,
+
 			// main:
 
 				main_name,
+				main_begin,
+				main_end,
 				main_arg,
 				main_return,
-				main_accept,
+
+			// port:
+
+				op_port_lookup,
+				port_deduce,
+				port_lookup,
 
 			// label:
 
@@ -97,6 +108,11 @@ namespace chord {
 				unit_value,
 				unit_paste,
 				unit_quote,
+
+			// literal:
+
+				literal_n_number,
+				literal_r_number,
 
 			// morph:
 
@@ -156,22 +172,35 @@ namespace chord {
 
 			// assembly:
 
-				"Start -> MainBeg MainArgs MainEnd Block RecBlock ;"
+				"Start  -> type Param Params \\; Main Body              ;"
+				"       -> Main Body                                    ;"
+				"Params -> Param Params                                 ;"
+				"       -> empty                                        ;"
+				"Param  -> identifier                      : param_type ;"
 
 				// main:
 
-					"MainBeg  -> identifier       : main_name   ;"
-					"MainEnd  -> \\;                            ;"
-					"MainArgs -> MainArg MainArgs               ;"
-					"         -> empty                          ;"
-					"MainArg  -> identifier       : main_arg    ;"
-					"MainRet  -> \\;              : main_return ;"
+					"Main     -> MainBeg MainArgs OpType MainEnd               ;"
+					"MainBeg  -> identifier                      : main_name   ;"
+					"MainEnd  -> \\;                                           ;"
+					"MainArgs -> MainArg MainArgs                              ;"
+					"         -> empty                                         ;"
+					"MainArg  -> identifier                      : main_arg    ;"
+					"MainRet  -> \\;                             : main_return ;"
+
+					"OpType -> \\-\\> OpPort                  ;"
+					"       -> empty                          ;"
+					"OpPort -> identifier    : op_port_lookup ;"
+
+				// body:
+
+					"Body -> Block RecBlock : main_begin ;"
 
 				// block:
 
 					"Block    -> LabelBeg LabelEnd Instrs               ;"
 					"RecBlock -> Block RecBlock                         ;"
-					"         -> empty                    : main_accept ;"
+					"         -> empty                    : main_end    ;"
 					"LabelBeg -> label                    : label_value ;"
 					"LabelEnd -> \\;                                    ;"
 
@@ -245,18 +274,30 @@ namespace chord {
 					"SubArgs ->   SubArg SubArgs                ;"
 					"        -> ! MutArg SubArgs                ;"
 					"        -> empty                           ;"
-					"SubArg  -> identifier       : subarg_value ;"
+					"SubArg  -> Literal                         ;"
+					"        -> identifier       : subarg_value ;"
 					"        -> _                : subarg_paste ;"
 					"        -> quote            : subarg_quote ;"
 					"MutArg  -> identifier       : mutarg_value ;"
 
 				// unit:
 
-					"UnitVal -> identifier : unit_value ;"
+					"UnitVal -> Literal                 ;"
+					"        -> identifier : unit_value ;"
 					"        -> _          : unit_paste ;"
 					"        -> quote      : unit_quote ;"
 					"        -> Morph                   ;"
 				//	"        -> Cycle                   ;"
+
+				// literal:
+
+					"Literal -> Value Type                  ;"
+					"Value   -> n_number : literal_n_number ;"
+					"        -> r_number : literal_r_number ;"
+
+					"Type -> \\: Port                 ;"
+					"     -> empty      : port_deduce ;"
+					"Port -> identifier : port_lookup ;"
 
 			// morph:
 
@@ -268,7 +309,7 @@ namespace chord {
 
 					"MorArity  -> [ MorNumber ]                   ;"
 					"          -> empty         : mor_arity_zero  ;"
-					"MorNumber -> number        : mor_arity_value ;"
+					"MorNumber -> n_number      : mor_arity_value ;"
 
 				// op:
 
@@ -285,7 +326,7 @@ namespace chord {
 
 					"ArgposeVals -> ArgposeVal ArgposeVals                     ;"
 					"            -> empty                                      ;"
-					"ArgposeVal  -> number                 : mor_argpose_value ;"
+					"ArgposeVal  -> n_number               : mor_argpose_value ;"
 
 				// subpose:
 
@@ -421,8 +462,13 @@ namespace chord {
 
 			sxt_pair( " "          , Token::invalid    ),
 			sxt_pair( "$"          , Token::prompt     ),
+			sxt_pair( "\\-\\>"     , Token::op_type    ),
+			sxt_pair( "\\:"        , Token::arg_type   ),
+
+			sxt_pair( "type"       , Token::type       ),
 			sxt_pair( "identifier" , Token::identifier ),
-			sxt_pair( "number"     , Token::number     ),
+			sxt_pair( "n_number"   , Token::n_number   ),
+			sxt_pair( "r_number"   , Token::r_number   ),
 			sxt_pair( "declare"    , Token::declare    ),
 			sxt_pair( "define"     , Token::define     ),
 			sxt_pair( "."          , Token::copy       ),
@@ -432,7 +478,6 @@ namespace chord {
 			sxt_pair( "label"      , Token::label      ),
 			sxt_pair( "return"     , Token::re_turn    ),
 			sxt_pair( "goto"       , Token::go_to      ),
-		//	sxt_pair( "tail"       , Token::tail       ),
 			sxt_pair( "!"          , Token::mu_table   ),
 			sxt_pair( "\\="        , Token::apply      ),
 			sxt_pair( "test"       , Token::test       ),
@@ -476,12 +521,23 @@ namespace chord {
 
 			// generic:
 
+				// param:
+
+					sxa_pair( "param_type" , ActName::param_type ),
+
 				// main:
 
 					sxa_pair( "main_name"   , ActName::main_name   ),
+					sxa_pair( "main_begin"  , ActName::main_begin  ),
+					sxa_pair( "main_end"    , ActName::main_end    ),
 					sxa_pair( "main_arg"    , ActName::main_arg    ),
 					sxa_pair( "main_return" , ActName::main_return ),
-					sxa_pair( "main_accept" , ActName::main_accept ),
+
+				// port:
+
+					sxa_pair( "op_port_lookup" , ActName::op_port_lookup ),
+					sxa_pair( "port_deduce"    , ActName::port_deduce    ),
+					sxa_pair( "port_lookup"    , ActName::port_lookup    ),
 
 				// label:
 
@@ -536,6 +592,11 @@ namespace chord {
 					sxa_pair( "unit_value" , ActName::unit_value ),
 					sxa_pair( "unit_paste" , ActName::unit_paste ),
 					sxa_pair( "unit_quote" , ActName::unit_quote ),
+
+				// literal:
+
+					sxa_pair( "literal_n_number" , ActName::literal_n_number ),
+					sxa_pair( "literal_r_number" , ActName::literal_r_number ),
 
 			// morph:
 

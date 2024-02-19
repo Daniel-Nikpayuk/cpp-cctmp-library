@@ -70,6 +70,20 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
+// param:
+
+	// type:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::param_type, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->param_type(l->left_cselect()); }
+		};
+
+/***********************************************************************************************************************/
+
 // main:
 
 	// name:
@@ -79,9 +93,29 @@ namespace chord {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
+				{ t->main_begin(l->left_cselect()); }
+		};
+
+	// begin:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::main_begin, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->define_op_begin(); }
+		};
+
+	// end:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::main_end, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->main_name(l->left_cselect());
-				t->main_begin();
+				t->force_define_jumps();
+				t->main_end();
 			}
 		};
 
@@ -105,17 +139,42 @@ namespace chord {
 				{ t->first_return(); }
 		};
 
-	// accept:
+/***********************************************************************************************************************/
+
+// op port:
+
+	// lookup:
 
 		template<auto... filler>
-		struct T_chord_translation_action<CAAN::main_accept, filler...>
+		struct T_chord_translation_action<CAAN::op_port_lookup, filler...>
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-			{
-				t->force_define_jumps();
-				t->undefine_compound();
-			}
+				{ t->op_port_lookup(l->left_cselect()); }
+		};
+
+/***********************************************************************************************************************/
+
+// port:
+
+	// deduce:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::port_deduce, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->force_literal_return(); }
+		};
+
+	// lookup:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::port_lookup, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->port_lookup(l->left_cselect()); }
 		};
 
 /***********************************************************************************************************************/
@@ -292,9 +351,8 @@ namespace chord {
 		struct T_chord_translation_action<CAAN::subop_paste, filler...>
 		{
 			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-			{
-			}
+			nik_ces void result(AST *t, clexeme *l) // clean up!
+				{ t->template assembly_action<AAN::lookup, AAT::variable>(AT::back, false, 0); }
 		};
 
 	// quote:
@@ -328,9 +386,8 @@ namespace chord {
 		struct T_chord_translation_action<CAAN::subarg_paste, filler...>
 		{
 			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-			{
-			}
+			nik_ces void result(AST *t, clexeme *l) // clean up!
+				{ t->template assembly_action<AAN::lookup, AAT::variable>(AT::back, false, 0); }
 		};
 
 	// quote:
@@ -381,9 +438,7 @@ namespace chord {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-			{
-				// do nothing ?
-			}
+				{ } // do nothing ?
 		};
 
 	// quote:
@@ -396,6 +451,32 @@ namespace chord {
 			{
 			}
 		};
+
+/***********************************************************************************************************************/
+
+// literal:
+
+	// (name):
+
+		template<auto lit_name, auto... filler>
+		struct T_literal_return_action
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->delay_literal_return(lit_name, l->cbegin(), l->ccurrent()); }
+		};
+
+	// n_number:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::literal_n_number, filler...> :
+			public T_literal_return_action<AN::n_number> { };
+
+	// r_number:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::literal_r_number, filler...> :
+			public T_literal_return_action<AN::r_number> { };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

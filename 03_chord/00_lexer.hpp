@@ -153,8 +153,13 @@ namespace chord {
 				invalid     = TokenName::invalid,
 				empty       = TokenName::dimension,
 				prompt      ,
+				op_type     ,
+				arg_type    ,
+
+				type        ,
 				identifier  ,
-				number      ,
+				n_number    ,
+				r_number    ,
 				declare     ,
 				define      ,
 				copy        ,
@@ -164,7 +169,6 @@ namespace chord {
 				label       ,
 				re_turn     ,
 				go_to       ,
-				tail        ,
 				mu_table    ,
 				apply       ,
 				test        ,
@@ -211,14 +215,18 @@ namespace chord {
 			{
 				empty         = StateName::empty,
 				initial       = StateName::initial,
+				arrow         ,
+				colon         ,
+
 				ulan          , // underscore latin alphanumeric
-				numeral       ,
+				n_numeral     ,
+				r_numeral     ,
 				semicolon     ,
 				octothorpe    ,
 				equal         ,
 				punctuation   ,
 				period        ,
-				colon         ,
+				label         ,
 
 				l_angle       ,
 				r_angle       ,
@@ -248,14 +256,18 @@ namespace chord {
 			(
 				U_state_type, U_token_type,
 
+				cctmp::pair( arrow         , Token::op_type     ),
+				cctmp::pair( colon         , Token::arg_type    ),
+
 				cctmp::pair( ulan          , Token::identifier  ),
-				cctmp::pair( numeral       , Token::number      ),
+				cctmp::pair( n_numeral     , Token::n_number    ),
+				cctmp::pair( r_numeral     , Token::r_number    ),
 				cctmp::pair( semicolon     , Token::statement   ),
 				cctmp::pair( octothorpe    , Token::assign      ),
 				cctmp::pair( equal         , Token::apply       ),
 				cctmp::pair( punctuation   , Token::mu_table    ),
 				cctmp::pair( period        , Token::copy        ),
-				cctmp::pair( colon         , Token::label       ),
+				cctmp::pair( label         , Token::label       ),
 
 				cctmp::pair( l_brace       , Token::l_scope     ),
 				cctmp::pair( r_brace       , Token::r_scope     ),
@@ -284,13 +296,13 @@ namespace chord {
 			{
 				other         = 0,
 				ula           , // underscore latin alphabet
+				colon         ,
 				digit         ,
 				semicolon     ,
 				octothorpe    ,
 				equal         ,
 				punctuation   ,
 				period        ,
-				colon         ,
 
 				l_angle       ,
 				r_angle       ,
@@ -318,12 +330,12 @@ namespace chord {
 			(
 				U_gchar_type, U_gkey_type,
 
+				cctmp::pair( ':'  , Charset::colon         ),
 				cctmp::pair( ';'  , Charset::semicolon     ),
 				cctmp::pair( '#'  , Charset::octothorpe    ),
 				cctmp::pair( '='  , Charset::equal         ),
 				cctmp::pair( '!'  , Charset::punctuation   ),
 				cctmp::pair( '.'  , Charset::period        ),
-				cctmp::pair( ':'  , Charset::colon         ),
 
 				cctmp::pair( '<'  , Charset::l_angle       ),
 				cctmp::pair( '>'  , Charset::r_angle       ),
@@ -358,38 +370,46 @@ namespace chord {
 
 		nik_ce T_chord_dftt() : table{}
 		{
-			table[ State::initial ][ Charset::ula           ] = State::ulan;
-			table[ State::initial ][ Charset::digit         ] = State::numeral;
-			table[ State::initial ][ Charset::semicolon     ] = State::semicolon;
-			table[ State::initial ][ Charset::octothorpe    ] = State::octothorpe;
-			table[ State::initial ][ Charset::equal         ] = State::equal;
-			table[ State::initial ][ Charset::punctuation   ] = State::punctuation;
-			table[ State::initial ][ Charset::period        ] = State::period;
+			table[ State::initial    ][ Charset::ula           ] = State::ulan;
+			table[ State::initial    ][ Charset::digit         ] = State::n_numeral;
+			table[ State::initial    ][ Charset::colon         ] = State::colon;
+			table[ State::initial    ][ Charset::semicolon     ] = State::semicolon;
+			table[ State::initial    ][ Charset::octothorpe    ] = State::octothorpe;
+			table[ State::initial    ][ Charset::equal         ] = State::equal;
+			table[ State::initial    ][ Charset::punctuation   ] = State::punctuation;
+			table[ State::initial    ][ Charset::period        ] = State::period;
 
-			table[ State::initial ][ Charset::l_angle       ] = State::l_angle;
-			table[ State::initial ][ Charset::r_angle       ] = State::r_angle;
-			table[ State::initial ][ Charset::bar           ] = State::bar;
-			table[ State::initial ][ Charset::at            ] = State::at;
-			table[ State::initial ][ Charset::star          ] = State::star;
-			table[ State::initial ][ Charset::caret         ] = State::caret;
-			table[ State::initial ][ Charset::plus          ] = State::plus;
-			table[ State::initial ][ Charset::dash          ] = State::dash;
-			table[ State::initial ][ Charset::tilde         ] = State::tilde;
-			table[ State::initial ][ Charset::l_bracket     ] = State::l_bracket;
-			table[ State::initial ][ Charset::r_bracket     ] = State::r_bracket;
-			table[ State::initial ][ Charset::l_parenthesis ] = State::l_parenthesis;
-			table[ State::initial ][ Charset::r_parenthesis ] = State::r_parenthesis;
-			table[ State::initial ][ Charset::l_brace       ] = State::l_brace;
-			table[ State::initial ][ Charset::r_brace       ] = State::r_brace;
-			table[ State::initial ][ Charset::comma         ] = State::comma;
+			table[ State::initial    ][ Charset::l_angle       ] = State::l_angle;
+			table[ State::initial    ][ Charset::r_angle       ] = State::r_angle;
+			table[ State::initial    ][ Charset::bar           ] = State::bar;
+			table[ State::initial    ][ Charset::at            ] = State::at;
+			table[ State::initial    ][ Charset::star          ] = State::star;
+			table[ State::initial    ][ Charset::caret         ] = State::caret;
+			table[ State::initial    ][ Charset::plus          ] = State::plus;
+			table[ State::initial    ][ Charset::dash          ] = State::dash;
+			table[ State::initial    ][ Charset::tilde         ] = State::tilde;
+			table[ State::initial    ][ Charset::l_bracket     ] = State::l_bracket;
+			table[ State::initial    ][ Charset::r_bracket     ] = State::r_bracket;
+			table[ State::initial    ][ Charset::l_parenthesis ] = State::l_parenthesis;
+			table[ State::initial    ][ Charset::r_parenthesis ] = State::r_parenthesis;
+			table[ State::initial    ][ Charset::l_brace       ] = State::l_brace;
+			table[ State::initial    ][ Charset::r_brace       ] = State::r_brace;
+			table[ State::initial    ][ Charset::comma         ] = State::comma;
 
-			table[ State::initial ][ Charset::quote         ] = State::l_quote;
+			table[ State::initial    ][ Charset::quote         ] = State::l_quote;
 
-			table[ State::ulan    ][ Charset::ula           ] = State::ulan;
-			table[ State::ulan    ][ Charset::digit         ] = State::ulan;
-			table[ State::ulan    ][ Charset::colon         ] = State::colon;
+			table[ State::ulan       ][ Charset::ula           ] = State::ulan;
+			table[ State::ulan       ][ Charset::digit         ] = State::ulan;
+			table[ State::ulan       ][ Charset::colon         ] = State::label;
 
-			table[ State::numeral ][ Charset::digit         ] = State::numeral;
+			table[ State::n_numeral  ][ Charset::digit         ] = State::n_numeral;
+			table[ State::n_numeral  ][ Charset::period        ] = State::period;
+
+			table[ State::r_numeral  ][ Charset::digit         ] = State::r_numeral;
+
+			table[ State::period     ][ Charset::digit         ] = State::r_numeral;
+
+			table[ State::dash       ][ Charset::r_angle       ] = State::arrow;
 
 			generator::T_generic_lexer_tt::set_backslash_entries<State, Charset>(table);
 		}
@@ -410,10 +430,10 @@ namespace chord {
 		nik_ces auto accept		= T_dftt::State::accept;
 
 		nik_ces auto paste_charset      () { return generator::dfa_charset("_");      }
+		nik_ces auto type_charset       () { return generator::dfa_charset("type");   }
 		nik_ces auto void_charset       () { return generator::dfa_charset("void");   }
 		nik_ces auto test_charset       () { return generator::dfa_charset("test");   }
 		nik_ces auto goto_charset       () { return generator::dfa_charset("goto");   }
-		nik_ces auto tail_charset       () { return generator::dfa_charset("tail");   }
 		nik_ces auto branch_charset     () { return generator::dfa_charset("branch"); }
 		nik_ces auto return_charset     () { return generator::dfa_charset("return"); }
 
@@ -440,10 +460,10 @@ namespace chord {
 		using Token			= typename T_dfa::Token;
 
 		using T_paste_lexer		= generator::T_keyword_lexer< T_dfa::paste_charset  , Token::paste   >;
+		using T_type_lexer		= generator::T_keyword_lexer< T_dfa::type_charset   , Token::type    >;
 		using T_void_lexer		= generator::T_keyword_lexer< T_dfa::void_charset   , Token::vo_id   >;
 		using T_test_lexer		= generator::T_keyword_lexer< T_dfa::test_charset   , Token::test    >;
 		using T_goto_lexer		= generator::T_keyword_lexer< T_dfa::goto_charset   , Token::go_to   >;
-		using T_tail_lexer		= generator::T_keyword_lexer< T_dfa::tail_charset   , Token::tail    >;
 		using T_branch_lexer		= generator::T_keyword_lexer< T_dfa::branch_charset , Token::branch  >;
 		using T_return_lexer		= generator::T_keyword_lexer< T_dfa::return_charset , Token::re_turn >;
 
@@ -527,10 +547,10 @@ namespace chord {
 
 		nik_ces token_type keyword_4(const cselector<char> & s)
 		{
-			if      (generator::recognizes< T_void_lexer >(s)) return T_void_lexer::token;
+			if      (generator::recognizes< T_type_lexer >(s)) return T_type_lexer::token;
+			else if (generator::recognizes< T_void_lexer >(s)) return T_void_lexer::token;
 			else if (generator::recognizes< T_test_lexer >(s)) return T_test_lexer::token;
 			else if (generator::recognizes< T_goto_lexer >(s)) return T_goto_lexer::token;
-			else if (generator::recognizes< T_tail_lexer >(s)) return T_tail_lexer::token;
 			else if (generator::recognizes< T_fold_lexer >(s)) return T_fold_lexer::token;
 			else if (generator::recognizes< T_find_lexer >(s)) return T_find_lexer::token;
 			else if (generator::recognizes< T_sift_lexer >(s)) return T_sift_lexer::token;

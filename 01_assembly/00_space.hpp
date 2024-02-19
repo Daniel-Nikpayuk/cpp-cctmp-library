@@ -143,7 +143,7 @@ namespace assembly {
 			halt    ,
 			boolean , n_number , r_number , character , string ,
 			literal , list     , lookup   , type      , arg    ,
-			pad     , pound    , apply    , bind      , eval   ,
+			pad     , hash     , pound    , apply     , bind   , eval ,
 			go_to   , branch   , invert   ,
 			dimension
 		};
@@ -410,20 +410,12 @@ namespace assembly {
 		nik_ces auto lookup	= metapile::static_env_tuple;
 		nik_ces auto zero	= gindex_type{0};
 
-		nik_ces auto compound()
-		{
-			if nik_ce (is_null_<out_types>) return U_store_T<T_assembly_compound<contr, zero>>;
-			else
-			{
-				nik_ce auto out_type = car_<out_types>;
-
-				return U_store_T<T_assembly_compound<out_type, contr, zero>>;
-			}
-		}
-
 		template<typename... Ts>
 		nik_ces auto result(Ts... vs)
-			{ return T_store_U<compound()>::template result<list, lookup, out_types, zero, Ts...>(vs...); }
+		{
+			return T_assembly_compound<contr, zero>::template
+				result<list, lookup, out_types, zero, Ts...>(vs...);
+		}
 	};
 
 /***********************************************************************************************************************/

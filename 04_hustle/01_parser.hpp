@@ -43,10 +43,9 @@ namespace hustle {
 
 			// main:
 
-				main_name,
-				main_arg,
 				main_begin,
 				main_end,
+				main_arg,
 
 			// define:
 
@@ -126,14 +125,14 @@ namespace hustle {
 
 				// main:
 
-					"Main      -> define ( MainSign ) OpType MainBody              ;"
-					"MainSign  -> identifier MainArgs                 : main_name  ;"
-					"MainArgs  -> MainArg MainArgs                                 ;"
-					"          -> empty                                            ;"
-					"MainArg   -> identifier                          : main_arg   ;"
-					"MainBody  -> Expr0 MainExprs                     : main_begin ;"
-					"MainExprs -> Expr0 MainExprs                                  ;"
-					"          -> empty                               : main_end   ;"
+					"Main      -> define ( MainSign ) OpType MainBody                ;"
+					"MainSign  -> identifier MainArgs                 : main_begin   ;"
+					"MainArgs  -> MainArg MainArgs                                   ;"
+					"          -> empty                                              ;"
+					"MainArg   -> identifier                          : main_arg     ;"
+					"MainBody  -> Expr0 MainExprs                     : define_begin ;"
+					"MainExprs -> Expr0 MainExprs                                    ;"
+					"          -> empty                               : main_end     ;"
 
 					"OpType -> \\-\\> OpPort                  ;"
 					"       -> empty                          ;"
@@ -277,10 +276,9 @@ namespace hustle {
 
 			// main:
 
-				sxa_pair( "main_name"  , ActName::main_name  ),
-				sxa_pair( "main_arg"   , ActName::main_arg   ),
 				sxa_pair( "main_begin" , ActName::main_begin ),
 				sxa_pair( "main_end"   , ActName::main_end   ),
+				sxa_pair( "main_arg"   , ActName::main_arg   ),
 
 			// define:
 

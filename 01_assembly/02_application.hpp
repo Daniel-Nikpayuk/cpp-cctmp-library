@@ -74,6 +74,51 @@ namespace assembly {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// hash:
+
+/***********************************************************************************************************************/
+
+// id:
+
+	template<auto... filler>
+	struct T_assembly<AN::hash, AT::id, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t, r), typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			nik_ce auto ni = AD<c>::pos(i);
+			nik_ce auto nv = U_assembly_compound<c, ni>;
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i)
+				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, decltype(nv), Ts...)
+					(nv, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// port:
+
+	template<auto... filler>
+	struct T_assembly<AN::hash, AT::port, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t, r), typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			nik_ce auto ni = AD<c>::pos(i);
+			nik_ce auto n  = AD<c>::num(i);
+			nik_ce auto s  = at_<t, n>;
+			nik_ce auto nv = U_assembly_compound<s, c, ni>;
+
+			return NIK_ASSEMBLY_TEMPLATE(c, i)
+				::NIK_ASSEMBLY_RESULT_2TS(c, i, j, l, t, r, decltype(nv), Ts...)
+					(nv, vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // (com)pound:
 
 /***********************************************************************************************************************/
@@ -120,6 +165,7 @@ namespace assembly {
 
 // pull:
 
+/*
 	template<auto... filler>
 	struct T_assembly<AN::pound, AT::pull, filler...>
 	{
@@ -135,6 +181,7 @@ namespace assembly {
 					(vs..., nv);
 		}
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

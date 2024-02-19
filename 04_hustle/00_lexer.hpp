@@ -207,7 +207,7 @@ namespace hustle {
 				l_paren     ,
 				r_paren     ,
 				arrow       ,
-				semicolon   ,
+				colon       ,
 
 				identifier  ,
 				hash        , // # (boolean)
@@ -239,7 +239,7 @@ namespace hustle {
 				cctmp::pair( l_paren    , Token::l_expr     ),
 				cctmp::pair( r_paren    , Token::r_expr     ),
 				cctmp::pair( arrow      , Token::op_type    ),
-				cctmp::pair( semicolon  , Token::arg_type   ),
+				cctmp::pair( colon      , Token::arg_type   ),
 
 				cctmp::pair( identifier , Token::identifier ),
 				cctmp::pair( boolean    , Token::boolean    ),
@@ -269,11 +269,11 @@ namespace hustle {
 				ula         , // underscore latin alphabet
 				digit       ,
 				quote       ,
+				colon       ,
 				period      ,
 				l_paren     ,
 				r_paren     ,
 				question    ,
-				semicolon   ,
 				octothorpe  ,
 				punctuation ,
 
@@ -294,11 +294,11 @@ namespace hustle {
 				U_gchar_type, U_gkey_type,
 
 				cctmp::pair( '\'' , Charset::quote       ),
+				cctmp::pair( ':'  , Charset::colon       ),
 				cctmp::pair( '.'  , Charset::period      ),
 				cctmp::pair( '('  , Charset::l_paren     ),
 				cctmp::pair( ')'  , Charset::r_paren     ),
 				cctmp::pair( '?'  , Charset::question    ),
-				cctmp::pair( ':'  , Charset::semicolon   ),
 				cctmp::pair( '#'  , Charset::octothorpe  ),
 				cctmp::pair( '!'  , Charset::punctuation ),
 
@@ -328,7 +328,7 @@ namespace hustle {
 			table[ State::initial    ][ Charset::ula         ] = State::identifier;
 			table[ State::initial    ][ Charset::l_paren     ] = State::l_paren;
 			table[ State::initial    ][ Charset::r_paren     ] = State::r_paren;
-			table[ State::initial    ][ Charset::semicolon   ] = State::semicolon;
+			table[ State::initial    ][ Charset::colon       ] = State::colon;
 			table[ State::initial    ][ Charset::octothorpe  ] = State::hash;
 			table[ State::initial    ][ Charset::digit       ] = State::n_numeral;
 			table[ State::initial    ][ Charset::period      ] = State::period;
