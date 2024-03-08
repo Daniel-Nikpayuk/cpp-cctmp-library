@@ -357,7 +357,9 @@ namespace cctmp {
 	{
 		public:
 
-			using base			= T_list_model<SizeType, Size>;
+			nik_ces SizeType length		= Size;
+
+			using base			= T_list_model<SizeType, length>;
 			using size_type			= typename base::size_type;
 			using csize_type		= typename base::csize_type;
 			using list_type			= typename base::list_type;
@@ -586,6 +588,7 @@ namespace cctmp {
 
 			nik_ces const auto & instr (cindex i) { return contr[i]; }
 			nik_ces gindex_type value  (cindex i, cindex n) { return contr[i][n]; }
+			nik_ces gindex_type peek   (cindex i, cindex m, cindex n) { return contr[i + m][n]; }
 
 			nik_ces gindex_type pos (cindex i) { return value(i, MI::pos); }
 			nik_ces gindex_type num (cindex i) { return value(i, MI::num); }

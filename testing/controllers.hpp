@@ -20,11 +20,9 @@
 #include<cstdio>
 
 #define NIK_PARSER_GENERATOR_PARSER_OBJ       "../transition_tables/00_parser_generator_parser.hpp"
-#define NIK_CHORD_ASSEMBLY_SCANNER_PARSER_OBJ "../transition_tables/01_chord_assembly_scanner.hpp"
 #define NIK_CHORD_ASSEMBLY_PARSER_OBJ         "../transition_tables/02_chord_assembly_parser.hpp"
 
 #define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
-#define NIK_CHORD_ASSEMBLY_SCANNER_PARSER
 #define NIK_CHORD_ASSEMBLY_PARSER
 
 /***********************************************************************************************************************/

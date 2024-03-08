@@ -38,13 +38,12 @@ namespace chord {
 		 	U_gchar_type,
 
 			cctmp::binding( "id"                    , cctmp::_id_                    ),
-			cctmp::binding( "nop"                   , cctmp::_nop_                   ),
+			cctmp::binding( "first"                 , cctmp::_first_                 ),
 			cctmp::binding( "upshift"               , cctmp::_upshift_               ),
 			cctmp::binding( "downshift"             , cctmp::_downshift_             ),
 
 			cctmp::binding( "dereference"           , cctmp::_dereference_           ),
 			cctmp::binding( "appoint"               , cctmp::_appoint_               ),
-			cctmp::binding( "to_bool"               , cctmp::_to_bool_               ),
 
 			cctmp::binding( "not"                   , cctmp::_not_                   ),
 			cctmp::binding( "and"                   , cctmp::_and_                   ),
@@ -70,17 +69,10 @@ namespace chord {
 			cctmp::binding( "increment"             , cctmp::_increment_<1>          ),
 			cctmp::binding( "decrement"             , cctmp::_increment_<-1>         ),
 
-			cctmp::binding( "is_array"              , cctmp::_is_array_              ),
-			cctmp::binding( "array_type"            , cctmp::_array_type_            ),
-			cctmp::binding( "array_size"            , cctmp::_array_size_            ),
-			cctmp::binding( "array_begin"           , cctmp::_array_begin_           ),
-			cctmp::binding( "array_last"            , cctmp::_array_last_            ),
-			cctmp::binding( "array_end"             , cctmp::_array_end_             ),
-			cctmp::binding( "log_floor"             , cctmp::_log_floor_             ),
-
-			cctmp::binding( "is_sequence"           , cctmp::_is_sequence_           ),
-			cctmp::binding( "sequence_type"         , cctmp::_sequence_type_         ),
-			cctmp::binding( "sequence_length"       , cctmp::_sequence_length_       )
+			cctmp::binding( "@"                     , cctmp::_id_                    ),
+			cctmp::binding( "*"                     , cctmp::_dereference_           ),
+			cctmp::binding( "+"                     , cctmp::_increment_<1>          ),
+			cctmp::binding( "-"                     , cctmp::_increment_<-1>         )
 		);
 	};
 

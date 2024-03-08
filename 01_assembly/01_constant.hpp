@@ -581,9 +581,10 @@ namespace assembly {
 	template
 	<
 		template<auto...> typename B0, auto... LUs, nik_vp(p0)(B0<LUs...>*),
-		template<auto...> typename B1, auto... RUs, nik_vp(p1)(B1<RUs...>*)
+		template<auto...> typename B1, auto... RUs, nik_vp(p1)(B1<RUs...>*),
+		auto... filler
 	>
-	struct T_assembly<AN::arg, AT::drop, p0, p1>
+	struct T_assembly<AN::arg, AT::drop, p0, p1, filler...>
 	{
 		template<NIK_ASSEMBLY_PARAMS(c, i, j, l, t, r), typename... Ts>
 		nik_ces auto result(T_store_U<LUs>... lvs, T_store_U<RUs>... rvs)
@@ -601,9 +602,10 @@ namespace assembly {
 	template
 	<
 		template<auto...> typename B0, auto LU, auto... LUs, nik_vp(p0)(B0<LU, LUs...>*),
-		template<auto...> typename B1, auto RU, auto... RUs, nik_vp(p1)(B1<RU, RUs...>*)
+		template<auto...> typename B1, auto RU, auto... RUs, nik_vp(p1)(B1<RU, RUs...>*),
+		auto... filler
 	>
-	struct T_assembly<AN::arg, AT::replace, p0, p1>
+	struct T_assembly<AN::arg, AT::replace, p0, p1, filler...>
 	{
 		using LT = T_store_U<LU>;
 		using RT = T_store_U<RU>;

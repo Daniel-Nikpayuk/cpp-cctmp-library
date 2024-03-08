@@ -679,18 +679,19 @@ namespace chord {
 	{
 		return source
 		(
-			"factorial n        ;"
+			"type T             ;"
+			"factorial n -> T   ;"
 
 			"body:              ;"
-			"test equal n zero  ;"
-			"branch done        ;"
-			". = subtract n one ;"
-			". = factorial _    ;"
-			". = multiply n _   ;"
-			"return _           ;"
+			"  test equal n 0   ;"
+			"  branch done      ;"
+			"  . = subtract n 1 ;"
+			"  . = factorial _  ;"
+			"  . = multiply n _ ;"
+			"  return _         ;"
 
 			"done:              ;"
-			"return one         ;"
+			"  return 1:T       ;"
 		);
 	}
 

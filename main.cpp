@@ -20,14 +20,12 @@
 #include<cstdio>
 #include<cstdlib>
 
-#define NIK_PARSER_GENERATOR_PARSER_OBJ       "../object/00_parser_generator_parser.hpp"
-#define NIK_CHORD_ASSEMBLY_SCANNER_PARSER_OBJ "../object/01_chord_assembly_scanner.hpp"
-#define NIK_CHORD_ASSEMBLY_PARSER_OBJ         "../object/02_chord_assembly_parser.hpp"
-#define NIK_HUSTLE_PARSER_OBJ                 "../object/03_hustle_parser.hpp"
+#define NIK_PARSER_GENERATOR_PARSER_OBJ "../object/00_parser_generator_parser.hpp"
+#define NIK_CHORD_PARSER_OBJ            "../object/01_chord_parser.hpp"
+#define NIK_HUSTLE_PARSER_OBJ           "../object/02_hustle_parser.hpp"
 
-//#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
-//#define NIK_CHORD_ASSEMBLY_SCANNER_PARSER
-//#define NIK_CHORD_ASSEMBLY_PARSER
+#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
+#define NIK_CHORD_PARSER
 //#define NIK_HUSTLE_PARSER
 
 /***********************************************************************************************************************/
@@ -58,9 +56,9 @@
 
 #include"03_chord/00_lexer.hpp"
 #include"03_chord/01_parser.hpp"
-#include"03_chord/02_generic_action.hpp"
-#include"03_chord/03_morph_action.hpp"
-//#include"03_chord/04_cycle_action.hpp"
+#include"03_chord/02_syntax.hpp"
+#include"03_chord/03_kernel_action.hpp"
+#include"03_chord/04_cycle_action.hpp"
 #include"03_chord/05_metapiler.hpp"
 
 #include"04_hustle/00_lexer.hpp"
@@ -90,6 +88,33 @@
 /***********************************************************************************************************************/
 
 	using namespace cctmp;
+
+/***********************************************************************************************************************/
+
+	using chord_grammar			= chord::T_chord_grammar;
+	constexpr auto static_grammar		= U_store_T<chord_grammar>;
+
+	template<auto static_contr>
+	void print_controller(int b = 0, int e = member_value_U<static_contr>.size())
+	{
+		constexpr auto & contr = member_value_U<static_contr>;
+
+		for (auto k = b; k != e; ++k)
+		{
+			auto s = (k < 10) ? "  " : (k < 100) ? " " : "";
+			printf("line %s%d -", s, k);
+
+			for (auto j = 0; j != Instr::dimension; ++j)
+			{
+				auto v = contr[k][j];
+				auto t = (v < 10) ? "  " : (v < 100) ? " " : "";
+
+				printf(" %s%d", t, v);
+			}
+
+			printf("\n");
+		}
+	}
 
 /***********************************************************************************************************************/
 
@@ -152,42 +177,55 @@
 
 /***********************************************************************************************************************/
 
+		//	"main out in end in1                               ;"
+
+		//	"vars:                                             ;"
+		//	"  declare conv                                    ;"
+
+		//	"defs:                                             ;"
+		//	"  conv # fold[2]{add * @|multiply||} <> (-|+,] [] ;"
+
+		//	"body:                                             ;"
+		//	"  . = conv !out end in in1                        ;"
+		//	"  return _                                        ;"
+
 // chord:
 
 	constexpr auto _chord_test_func()
 	{
 		return source
 		(
-			"type T             ;"
-			"factorial n -> T   ;"
+			"main out in end in1                                ;"
 
-			"body:              ;"
-			"  test equal n 0   ;"
-			"  branch done      ;"
-			"  . = subtract n 1 ;"
-			"  . = factorial _  ;"
-			"  . = multiply n _ ;"
-			"  return _         ;"
+			"vars:                                              ;"
+			"  declare dot_prod                                 ;"
 
-			"done:              ;"
-			"  return 1:T       ;"
+			"defs:                                              ;"
+			"  dot_prod # fold[2]{add * @|multiply||} <> [,) [) ;"
+
+			"body:                                              ;"
+			"  . = dot_prod !out in end in1                     ;"
+			"  return _                                         ;"
 		);
 	}
 
 /***********************************************************************************************************************/
 
-//	using chord_grammar			= chord::T_chord_assembly_grammar;
-//	constexpr auto static_grammar		= U_store_T<chord_grammar>;
-
 	int main(int argc, char *argv[])
 	{
 		// 17032, 16994
 
-	//	using chord_size_type = unsigned long;
-	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
+		using chord_size_type = int*;
+		using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
+		using chord_arr_type  = sequence<int, 5>;
 
-	//	auto val = T_chord_apply::result(chord_size_type(main_at(0, argc, argv)));
-	//	printf("%lu\n", val);
+		int val = 0;
+
+		chord_arr_type s0({ 1, 1, 1, 1, 1 });
+		chord_arr_type s1({ 0, 1, 2, 3, 4 });
+
+		T_chord_apply::template result<chord_size_type>(&val, s0.cbegin(), s0.cend(), s1.cbegin());
+		printf("%d\n", val);
 
 		// 17136, 17056
 		// 17136, 16952
@@ -201,7 +239,7 @@
 
 		//
 
-	//	print_controller<chord::metapile<_chord_test_func, null_env>>();
+	//	print_controller<chord::metapile<_chord_test_func, null_env>>();//103);
 	//	print_controller<hustle::metapile<_hustle_test_func, null_env>>();
 
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};

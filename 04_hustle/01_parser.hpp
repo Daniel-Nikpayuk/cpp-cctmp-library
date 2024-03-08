@@ -330,7 +330,7 @@ namespace hustle {
 // interface:
 
 #ifdef NIK_HUSTLE_PARSER
-#include NIK_HUSTLE_OBJ
+#include NIK_HUSTLE_PARSER_OBJ
 #else
 
 	template<typename T_grammar>

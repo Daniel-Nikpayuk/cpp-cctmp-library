@@ -336,15 +336,15 @@ namespace assembly {
 
 			// pos:
 
-				nik_ce auto cache() const { return pos; }
+				nik_ce size_type cache() const { return pos; }
 				nik_ce void cache(csize_type n) { pos = n; }
 
 			// num:
 
-				nik_ce auto size() const { return num; }
+				nik_ce size_type size() const { return num; }
 				nik_ce void reset() { num = 0; }
 				nik_ce void upsize(csize_type n = 1) { num += n; }
-				nik_ce auto inc_size(csize_type n = 1) { auto v = size(); upsize(n); return v; }
+				nik_ce size_type inc_size(csize_type n = 1) { auto v = size(); upsize(n); return v; }
 	};
 
 /***********************************************************************************************************************/
@@ -653,7 +653,8 @@ namespace assembly {
 			}
 
 			nik_ce void delay_define_arity(cindex n) { pound.set_arity(n); }
-			nik_ce void force_define_arity() { stage.upsize(pound.arity()); }
+			nik_ce void force_define_arity(cindex n) { stage.upsize(n); }
+			nik_ce void force_define_arity() { force_define_arity(pound.arity()); }
 
 			// op:
 

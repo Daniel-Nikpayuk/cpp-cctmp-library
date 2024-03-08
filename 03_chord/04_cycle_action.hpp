@@ -25,160 +25,74 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// subpose:
-
-	// begin:
-
-		struct T_cyc_subpose_begin
-		{
-			template<typename AST>
-			nik_ces void result(AST *t)
-			{
-				t->contr.push_machine();
-				t->cycle.subroutine().push_subcontr(t->contr.instr_at());
-				t->cycle.subroutine().push_compound(t->pound.allocate());
-
-				T_subpose_begin::template result<AST>(t);
-			}
-		};
-
-	// end:
-
-		struct T_cyc_subpose_end
-		{
-			template<typename AST>
-			nik_ces void result(AST *t)
-			{
-				T_subpose_end::template result<AST>(t);
-				t->contr.pop_machine();
-			}
-		};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// cycle:
+// cycle action:
 
 /***********************************************************************************************************************/
 
-// default argop:
-
-	template<gindex_type start, gindex_type finish>
-	struct T_cyc_def_argop
-	{
-		template<typename AST>
-		nik_ces void result(AST *t)
-		{
-			auto aux_at = t->contr.aux_at;
-			auto arg_at = t->line.sub_at();
-			t->line.inc_sub();
-
-			t->template chain_action< CAN::generic , CAT::lookup >(CT::pull, aux_at, start, finish);
-			t->template chain_action< CAN::generic , CAT::arg    >(CT::push, arg_at);
-		}
-	};
-
-	using T_cyc_id_argop      = T_cyc_def_argop< T_def_subsrc::id_start      , T_def_subsrc::id_finish      >;
-	using T_cyc_deref_argop   = T_cyc_def_argop< T_def_subsrc::deref_start   , T_def_subsrc::deref_finish   >;
-	using T_cyc_appoint_argop = T_cyc_def_argop< T_def_subsrc::appoint_start , T_def_subsrc::appoint_finish >;
-	using T_cyc_equal_argop   = T_cyc_def_argop< T_def_subsrc::equal_start   , T_def_subsrc::equal_finish   >;
-
-// option:
+// routine:
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_option_amp, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l) // ast alignment with camp:
-		{
-			t->cycle.subroutine().push_subcontr(_zero);
-			t->cycle.subroutine().push_compound(_zero);
-		}
-	};
-
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_option_cont, filler...>
+	struct T_chord_translation_action<CAAN::cyc_rout_begin, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			T_cyc_subpose_end::template result<AST>(t);
-			T_cyc_subpose_begin::template result<AST>(t);
+			t->force_define_compound(t->replace.name());
+			t->force_define_arity();
+			t->define_op_begin();
+			t->internal_defs_begin();
 		}
 	};
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_option_begin, filler...>
+	struct T_chord_translation_action<CAAN::cyc_rout_end, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ T_cyc_subpose_begin::template result<AST>(t); }
+			{ t->act_subpose_end(); }
 	};
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_option_end, filler...>
+	struct T_chord_translation_action<CAAN::cyc_rout_op, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ T_cyc_subpose_end::template result<AST>(t); }
-	};
-
-// op, val:
-
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_op_value, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->copy_op(l->left_cselect());
-
-			t->capture_op();
-		}
+			{ t->act_subpose_op(l->left_cselect()); }
 	};
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_value, filler...>
+	struct T_chord_translation_action<CAAN::cyc_rout_value, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->copy_val(l->left_cselect());
-
-			t->capture_argop();
-			t->paste_argop();
-		}
+			{ t->subpose_value(l->left_cselect()); }
 	};
 
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_id, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ T_cyc_id_argop::template result<AST>(t); }
-	};
-
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_deref, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ T_cyc_deref_argop::template result<AST>(t); }
-	};
+/***********************************************************************************************************************/
 
 // combine:
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_combine_rest2, filler...>
+	struct T_chord_translation_action<CAAN::cyc_combine, filler...>
 	{
-		using T_cyc_combine_rest1 = T_chord_translation_action<CAAN::cyc_combine_rest1, filler...>;
-
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			T_cyc_deref_argop::template result<AST>(t);
-			T_cyc_combine_rest1::template result<AST>(t, l);
+			nik_ce auto arity = 2;
+
+			t->set_combine();
+			t->act_subpose_begin(arity);
+		}
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::cyc_combine_rest2, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			t->subpose_value(t->cselect_deref());
+			t->subpose_value(t->cselect_deref());
 		}
 	};
 
@@ -187,21 +101,36 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ T_cyc_id_argop::template result<AST>(t); }
+		{
+			t->subpose_value(t->cselect_deref());
+		}
 	};
+
+/***********************************************************************************************************************/
 
 // action:
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_action_defs, filler...>
+	struct T_chord_translation_action<CAAN::cyc_action, filler...>
 	{
-		using T_cyc_action_rest = T_chord_translation_action<CAAN::cyc_action_rest, filler...>;
-
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			T_cyc_deref_argop::template result<AST>(t);
-			T_cyc_action_rest::template result<AST>(t, l);
+			t->set_action();
+			t->act_subpose_begin(t->pound.arity());
+		}
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::cyc_action_defs, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			t->set_action();
+			t->act_subpose_begin(t->pound.arity());
+			t->act_subpose_op(t->cselect_first());
+			t->act_subpose_values(t->cselect_deref(), 0, t->pound.arity());
 		}
 	};
 
@@ -211,67 +140,52 @@ namespace chord {
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			auto pound = t->pound[t->cycle.clast()->compound_at()];
-			auto arity = pound.arity();
-
-			for (auto k = 0; k != arity + 1; ++k)
-				T_cyc_deref_argop::template result<AST>(t);
+			t->act_subpose_values(t->cselect_deref(), t->count.size(), t->pound.arity());
 		}
 	};
 
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_action_op_value, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->copy_op(l->left_cselect());
-
-			t->capture_op();
-		}
-	};
-
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_action_op_id, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ }
-	};
-
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_action_op_deref, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ }
-	};
+/***********************************************************************************************************************/
 
 // mutate:
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_mutate_defs, filler...>
+	struct T_chord_translation_action<CAAN::cyc_mutate, filler...>
 	{
-		using T_cyc_mutate_rest2 = T_chord_translation_action<CAAN::cyc_mutate_rest2, filler...>;
-
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			T_cyc_appoint_argop::template result<AST>(t);
-			T_cyc_mutate_rest2::template result<AST>(t, l);
+			nik_ce auto arity = 2;
+
+			t->set_mutate();
+			t->act_subpose_begin(arity);
+		}
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::cyc_mutate_defs, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			nik_ce auto arity = 2;
+			nik_ce bool mute  = true;
+
+			t->set_mutate();
+			t->act_subpose_begin(arity);
+			t->act_subpose_op(t->cselect_appoint());
+			t->subpose_value(t->cselect_id(), mute);
+			t->subpose_value(t->cselect_id());
 		}
 	};
 
 	template<auto... filler>
 	struct T_chord_translation_action<CAAN::cyc_mutate_rest2, filler...>
 	{
-		using T_cyc_mutate_rest1 = T_chord_translation_action<CAAN::cyc_mutate_rest1, filler...>;
-
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			T_cyc_id_argop::template result<AST>(t);
-			T_cyc_mutate_rest1::template result<AST>(t, l);
+			t->subpose_value(t->cselect_deref());
+			t->subpose_value(t->cselect_id());
 		}
 	};
 
@@ -280,34 +194,51 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ T_cyc_id_argop::template result<AST>(t); }
+		{
+			t->subpose_value(t->cselect_id());
+		}
 	};
+
+/***********************************************************************************************************************/
 
 // predicate:
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_predicate_defs, filler...>
+	struct T_chord_translation_action<CAAN::cyc_predicate, filler...>
 	{
-		using T_cyc_predicate_rest2 = T_chord_translation_action<CAAN::cyc_predicate_rest2, filler...>;
-
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			T_cyc_equal_argop::template result<AST>(t);
-			T_cyc_predicate_rest2::template result<AST>(t, l);
+			nik_ce auto arity = 2;
+
+			t->set_predicate();
+			t->act_subpose_begin(arity);
+		}
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::cyc_predicate_defs, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			nik_ce auto arity = 2;
+
+			t->set_predicate();
+			t->act_subpose_begin(arity);
+			t->act_subpose_op(t->cselect_not_equal());
+			t->act_subpose_values(t->cselect_id());
 		}
 	};
 
 	template<auto... filler>
 	struct T_chord_translation_action<CAAN::cyc_predicate_rest2, filler...>
 	{
-		using T_cyc_predicate_rest1 = T_chord_translation_action<CAAN::cyc_predicate_rest1, filler...>;
-
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			T_cyc_id_argop::template result<AST>(t);
-			T_cyc_predicate_rest1::template result<AST>(t, l);
+			t->subpose_value(t->cselect_id());
+			t->subpose_value(t->cselect_id());
 		}
 	};
 
@@ -316,8 +247,12 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ T_cyc_id_argop::template result<AST>(t); }
+		{
+			t->subpose_value(t->cselect_id());
+		}
 	};
+
+/***********************************************************************************************************************/
 
 // interval:
 
@@ -326,7 +261,10 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+		{
+			t->interval.upsize();
+			t->interval.last()->set_left_closed();
+		}
 	};
 
 	template<auto... filler>
@@ -334,7 +272,10 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+		{
+			t->interval.upsize();
+			t->interval.last()->set_left_open();
+		}
 	};
 
 	template<auto... filler>
@@ -342,7 +283,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+			{ t->interval.last()->set_right_closed(); }
 	};
 
 	template<auto... filler>
@@ -350,7 +291,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+			{ t->interval.last()->set_right_open(); }
 	};
 
 	template<auto... filler>
@@ -358,8 +299,13 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+		{
+			t->interval.upsize();
+			t->interval.last()->set_fixed();
+		}
 	};
+
+/***********************************************************************************************************************/
 
 // iterator:
 
@@ -376,7 +322,10 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+		{
+			t->push_dec();
+			t->push_inc();
+		}
 	};
 
 	template<auto... filler>
@@ -392,7 +341,10 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+		{
+			t->push_inc();
+			t->push_dec();
+		}
 	};
 
 	template<auto... filler>
@@ -419,6 +371,8 @@ namespace chord {
 			{ }
 	};
 
+/***********************************************************************************************************************/
+
 // tonic:
 
 	template<auto... filler>
@@ -442,7 +396,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+			{ t->push_tonic(); }
 	};
 
 	template<auto... filler>
@@ -469,49 +423,63 @@ namespace chord {
 			{ }
 	};
 
-// (accept):
+/***********************************************************************************************************************/
+
+// compose:
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_repeat, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ }
-	};
-
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_map, filler...>
-	{
-		template<typename AST>
-		nik_ces void result(AST *t, clexeme *l)
-			{ }
-	};
-
-	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_fold, filler...>
+	struct T_chord_translation_action<CAAN::cyc_comp_repeat, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
 		{
-			t->template machine_action<MAN::push, MAT::id>(AN::cycle, AT::cons_f);
-			t->template machine_action<MAN::pop, MAT::id>(); // debugging.
+			t->define_repeat();
+			t->define_op_end();
 		}
 	};
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_find, filler...>
+	struct T_chord_translation_action<CAAN::cyc_comp_map, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+		{
+			t->define_map();
+			t->define_op_end();
+		}
 	};
 
 	template<auto... filler>
-	struct T_chord_translation_action<CAAN::cyc_sift, filler...>
+	struct T_chord_translation_action<CAAN::cyc_comp_fold, filler...>
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+		{
+			t->define_fold();
+			t->define_op_end();
+		}
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::cyc_comp_find, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			t->define_find();
+			t->define_op_end();
+		}
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::cyc_comp_sift, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			t->define_sift();
+			t->define_op_end();
+		}
 	};
 
 /***********************************************************************************************************************/

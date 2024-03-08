@@ -42,6 +42,8 @@ namespace assembly {
 	template<auto... Vs>
 	nik_ce auto U_pack_Vs					= cctmp::U_pack_Vs<Vs...>;
 
+	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
+
 	template<auto U>
 	using member_type_U					= cctmp::member_type_U<U>;
 
@@ -79,6 +81,8 @@ namespace assembly {
 	template<auto Op, typename T>
 	using modify_type					= cctmp::modify_type<Op, T>;
 
+	nik_ce auto _from_const_				= cctmp::_from_const_;
+	nik_ce auto _from_pointer_				= cctmp::_from_pointer_;
 	nik_ce auto _from_reference_				= cctmp::_from_reference_;
 	nik_ce auto _to_list_					= cctmp::_to_list_;
 	nik_ce auto _cons_					= cctmp::_cons_;
@@ -124,6 +128,11 @@ namespace assembly {
 	using MAN						= cctmp::MAN;
 	using MAT						= cctmp::MAT;
 
+	// syntactic sugar:
+
+		template<auto U>
+		using to_mptr = T_store_U<eval<_from_const_, eval<_from_pointer_, U>>>*;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -140,11 +149,13 @@ namespace assembly {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			halt    ,
-			boolean , n_number , r_number , character , string ,
-			literal , list     , lookup   , type      , arg    ,
-			pad     , hash     , pound    , apply     , bind   , eval ,
-			go_to   , branch   , invert   ,
+			halt    ,							//  1
+			boolean , n_number , r_number , character , string ,		//  2
+			literal , list     , lookup   , type      , arg    ,		//  7
+			pad     , hash     , pound    , apply     , bind   , eval ,	// 12
+			go_to   , branch   , invert   , loop      ,			// 18
+			cycle   , next     , set      ,					// 22
+			repeat  , map      , fold     , find      , sift   ,		// 25
 			dimension
 		};
 	};
@@ -160,10 +171,12 @@ namespace assembly {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first , port  , select  ,
-			front , back  ,
-			push  , pull  , drop    ,
-			verse , side  , replace ,
+			first  , port , select  ,		//  1
+			front  , back ,				//  4
+			push   , pull , drop    ,		//  6
+			verse  , side , replace ,		//  9
+			pred   , act  , cont    , last ,	// 12
+			inc    , dec  ,				// 16
 			dimension
 		};
 	};

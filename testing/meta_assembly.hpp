@@ -48,11 +48,11 @@
 /***********************************************************************************************************************/
 
 	template<auto static_contr>
-	void print_controller()
+	void print_controller(int b = 0, int e = member_value_U<static_contr>.size())
 	{
 		constexpr auto & contr = member_value_U<static_contr>;
 
-		for (auto k = 0; k != contr.size(); ++k)
+		for (auto k = b; k != e; ++k)
 		{
 			auto s = (k < 10) ? "  " : (k < 100) ? " " : "";
 			printf("line %s%d -", s, k);

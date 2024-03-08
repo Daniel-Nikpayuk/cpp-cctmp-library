@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// generic action:
+// kernel (generic, compound, morph) action:
 
 namespace chord {
 
@@ -55,7 +55,7 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// action:
+// generic action:
 
 /***********************************************************************************************************************/
 
@@ -477,6 +477,119 @@ namespace chord {
 		template<auto... filler>
 		struct T_chord_translation_action<CAAN::literal_r_number, filler...> :
 			public T_literal_return_action<AN::r_number> { };
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// compound action:
+
+/***********************************************************************************************************************/
+
+// arity:
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::pound_arity_value, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->delay_define_arity(l->to_number()); }
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::pound_arity_zero, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->delay_define_arity(0); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// morph action:
+
+/***********************************************************************************************************************/
+
+// op:
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::mor_op_begin, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->morph_op_begin(t->replace.name()); }
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::mor_op_end, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->morph_op_end(); }
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::mor_op, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->morph_op_return(l->left_cselect()); }
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::mor_op_range, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->morph_op_range(); }
+	};
+
+// argpose:
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::mor_argpose_value, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			t->back_lookup_return(l->to_number());
+			t->stage.upsize();
+		}
+	};
+
+// subpose:
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::mor_subpose_value, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->subpose_value(l->left_cselect()); }
+	};
+
+// curry:
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::mor_curry_value, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+			{ t->lookup_return(l->left_cselect()); }
+	};
+
+	template<auto... filler>
+	struct T_chord_translation_action<CAAN::mor_curry_args, filler...>
+	{
+		template<typename AST>
+		nik_ces void result(AST *t, clexeme *l)
+		{
+			for (auto k = 0; k != t->pound.arity(); ++k)
+			{
+				t->back_lookup_return(k);
+				t->stage.upsize();
+			}
+		}
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

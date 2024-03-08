@@ -482,14 +482,17 @@ namespace chord {
 	{
 		return source
 		(
-			"f out in end in1                              ;"
+			"main out in end in1                               ;"
 
-			"definitions:                                  ;"
-			" conv # fold[1]{add * @|multiply||}<>(-|+,][] ;"
+			"vars:                                             ;"
+			"  declare conv                                    ;"
 
-			"body:                                         ;"
-			" . = conv !out end in in1                     ;"
-			" return _                                     ;"
+			"defs:                                             ;"
+			"  conv # fold[1]{add * @|multiply||} <> (-|+,] [] ;"
+
+			"body:                                             ;"
+			"  . = conv !out end in in1                        ;"
+			"  return _                                        ;"
 		);
 	}
 
@@ -497,6 +500,28 @@ namespace chord {
 	constexpr auto convolution_v0(Out out, In in, End end, In1 in1)
 		{ return (Out) *chord::chord_apply<_convolution_v0, null_env, Out*>(&out, in, end, in1); }
 */
+
+	constexpr auto _chord_test_func()
+	{
+		return source
+		(
+			"main out in end in1                                  ;" // [] - closed, acts on both endpoints.
+
+			"vars:                                                ;" // (] - opening, acts on right endpoint.
+			"  declare conv                                       ;" // () - open, acts on neither endpoint.
+
+			"defs:                                                ;" // [) - closing, acts on left endpoint.
+			"  conv # fold[1]{add * @|multiply||}  <>  (-|+,]  [] ;"
+		//     					       |   |       |
+		//     					       |   |       ---- [in1] is a tone interval.
+		//     					       |   ------------ (end, in] is the root reverse interval.
+		//     					       ---------------- <out> is the tonic fixed interval.
+
+			"body:                                                ;"
+			"  . = conv !out end in in1                           ;"
+			"  return _                                           ;"
+		);
+	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

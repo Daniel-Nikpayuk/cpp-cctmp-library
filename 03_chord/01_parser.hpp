@@ -114,12 +114,14 @@ namespace chord {
 				literal_n_number,
 				literal_r_number,
 
-			// morph:
+			// compound:
 
 				// arity:
 
-					mor_arity_value,
-					mor_arity_zero,
+					pound_arity_value,
+					pound_arity_zero,
+
+			// morph:
 
 				// op:
 
@@ -140,6 +142,76 @@ namespace chord {
 
 					mor_curry_value,
 					mor_curry_args,
+
+			// cycle:
+
+				// routine:
+
+					cyc_rout_begin,
+					cyc_rout_end,
+					cyc_rout_op,
+					cyc_rout_value,
+
+				// combine:
+
+					cyc_combine,
+					cyc_combine_rest2,
+					cyc_combine_rest1,
+
+				// action:
+
+					cyc_action,
+					cyc_action_defs,
+					cyc_action_rest,
+
+				// mutate:
+
+					cyc_mutate,
+					cyc_mutate_defs,
+					cyc_mutate_rest2,
+					cyc_mutate_rest1,
+
+				// predicate:
+
+					cyc_predicate,
+					cyc_predicate_defs,
+					cyc_predicate_rest2,
+					cyc_predicate_rest1,
+
+				// interval:
+
+					cyc_ival_left_closed,
+					cyc_ival_left_open,
+					cyc_ival_right_closed,
+					cyc_ival_right_open,
+					cyc_ival_fixed,
+
+				// iterator:
+
+					cyc_iter_inc_dec,
+					cyc_iter_dec_inc,
+					cyc_iter_upsize,
+					cyc_iter_pair,
+					cyc_iter_none,
+					cyc_iter_value,
+					cyc_iter_void,
+
+				// tonic:
+
+					cyc_tonic_inc_dec,
+					cyc_tonic_dec_inc,
+					cyc_tonic_pair,
+					cyc_tonic_none,
+					cyc_tonic_value,
+					cyc_tonic_void,
+
+				// compose:
+
+					cyc_comp_repeat,
+					cyc_comp_map,
+					cyc_comp_fold,
+					cyc_comp_find,
+					cyc_comp_sift,
 
 			// dimension:
 
@@ -287,7 +359,7 @@ namespace chord {
 					"        -> _          : unit_paste ;"
 					"        -> quote      : unit_quote ;"
 					"        -> Morph                   ;"
-				//	"        -> Cycle                   ;"
+					"        -> Cycle                   ;"
 
 				// literal:
 
@@ -299,17 +371,19 @@ namespace chord {
 					"     -> empty      : port_deduce ;"
 					"Port -> identifier : port_lookup ;"
 
-			// morph:
-
-				"Morph -> argpose MorArity MorOpBeg MorOp    ArgposeVals MorOpEnd ;"
-				"      -> subpose MorArity MorOpBeg MorOpRng SubposeVals MorOpEnd ;"
-				"      ->   curry MorArity MorOpBeg MorOp      CurryVals MorOpEnd ;"
+			// compound:
 
 				// arity:
 
-					"MorArity  -> [ MorNumber ]                   ;"
-					"          -> empty         : mor_arity_zero  ;"
-					"MorNumber -> n_number      : mor_arity_value ;"
+					"Arity  -> [ Number ]                     ;"
+					"       -> empty      : pound_arity_zero  ;"
+					"Number -> n_number   : pound_arity_value ;"
+
+			// morph:
+
+				"Morph -> argpose Arity MorOpBeg MorOp    ArgposeVals MorOpEnd ;"
+				"      -> subpose Arity MorOpBeg MorOpRng SubposeVals MorOpEnd ;"
+				"      ->   curry Arity MorOpBeg MorOp      CurryVals MorOpEnd ;"
 
 				// op:
 
@@ -346,84 +420,86 @@ namespace chord {
 
 			// cycle:
 
-			//	"Cycle -> repeat MorArity  AMPOpt        LMRIval RepeatIvals ;"
-			//	"      -> map    MorArity  AMPOpt LRIval LMRIval    MapIvals ;"
-			//	"      -> fold   MorArity CAMPOpt  FIval LMRIval   FoldIvals ;"
-			//	"      -> find   MorArity  AMPOpt LRIval LMRIval   FindIvals ;"
-			//	"      -> sift   MorArity  AMPOpt LRIval LMRIval   SiftIvals ;"
+			//	"Cycle -> repeat Arity  AMP        LMRIval RepeatIvals ;"
+			//	"      -> map    Arity  AMP LRIval LMRIval    MapIvals ;"
+			//	"      -> fold   Arity CAMP  FIval LMRIval   FoldIvals ;"
+			//	"      -> find   Arity  AMP LRIval LMRIval   FindIvals ;"
+			//	"      -> sift   Arity  AMP LRIval LMRIval   SiftIvals ;"
 
-				// option:
+				"Cycle -> fold   Arity CAMP  FIval LMRIval   FoldIvals ;"
 
-				//	"CAMPOpt -> OptBeg Combine OptCont Action OptCont Mutate OptCont Predicate OptEnd  ;"
-				//	"AMPOpt  -> OptBeg Action OptCont Mutate OptCont Predicate OptEnd : cyc_option_amp ;"
+				// routine:
 
-				//	"OptCont -> | : cyc_option_cont  ;"
-				//	"OptBeg  -> { : cyc_option_begin ;"
-				//	"OptEnd  -> } : cyc_option_end   ;"
+					"CAMP -> CRBeg Combine CRBar Action CRBar Mutate CRBar Predicate CREnd ;"
+				//	"AMP  -> CRBeg               Action CRBar Mutate CRBar Predicate CREnd ;"
 
-					// op, val:
+					"CRBeg -> { : cyc_rout_begin ;"
+					"CRBar -> | : cyc_rout_end   ;"
+					"CREnd -> } : cyc_rout_end   ;"
 
-					//	"CycOp  -> identifier : cyc_op_value ;"
-					//	"CycVal -> identifier : cyc_value    ;"
-					//	"       -> @          : cyc_id       ;"
-					//	"       -> *          : cyc_deref    ;"
+					"CRMinOp -> identifier : cyc_rout_op    ;"
+					"        -> *          : cyc_rout_op    ;"
+					"        -> @          : cyc_rout_op    ;"
+					"CROp    -> CRMinOp                     ;"
+					"        -> +          : cyc_rout_op    ;"
+					"        -> \\-        : cyc_rout_op    ;"
+					"CRVal   -> identifier : cyc_rout_value ;"
+					"        -> *          : cyc_rout_value ;"
+					"        -> @          : cyc_rout_value ;"
 
 					// combine:
 
-					//	"Combine   -> CycOp  CombRest2                     ;"
-					//	"CombRest2 -> CycVal CombRest1                     ;"
-					//	"          -> empty            : cyc_combine_rest2 ;"
-					//	"CombRest1 -> CycVal                               ;"
-					//	"          -> empty            : cyc_combine_rest1 ;"
+						"Combine   -> CROp  CombRest2 : cyc_combine       ;"
+						"CombRest2 -> CRVal CombRest1                     ;"
+						"          -> empty           : cyc_combine_rest2 ;"
+						"CombRest1 -> CRVal                               ;"
+						"          -> empty           : cyc_combine_rest1 ;"
 
 					// action:
 
-					//	"Action  -> ActOp  ActRest                       ;"
-					//	"        -> empty          : cyc_action_defs     ;"
-					//	"ActRest -> CycVal ActRest                       ;"
-					//	"        -> empty          : cyc_action_rest     ;"
-					//	"ActOp   -> identifier     : cyc_action_op_value ;"
-					//	"        -> @              : cyc_action_op_id    ;"
-					//	"        -> *              : cyc_action_op_deref ;"
+						"Action  -> CRMinOp ActRest : cyc_action      ;"
+						"        -> empty           : cyc_action_defs ;"
+						"ActRest -> CRVal   ActRest                   ;"
+						"        -> empty           : cyc_action_rest ;"
 
 					// mutate:
 
-					//	"Mutate   -> CycOp  MutRest2                    ;"
-					//	"         -> empty           : cyc_mutate_defs  ;"
-					//	"MutRest2 -> CycVal MutRest1                    ;"
-					//	"         -> empty           : cyc_mutate_rest2 ;"
-					//	"MutRest1 -> CycVal                             ;"
-					//	"         -> empty           : cyc_mutate_rest1 ;"
+						"Mutate   -> CROp  MutRest2 : cyc_mutate       ;"
+						"         -> empty          : cyc_mutate_defs  ;"
+						"MutRest2 -> CRVal MutRest1                    ;"
+						"         -> empty          : cyc_mutate_rest2 ;"
+						"MutRest1 -> CRVal                             ;"
+						"         -> empty          : cyc_mutate_rest1 ;"
 
 					// predicate:
 
-					//	"Predicate -> CycOp  PredRest2                       ;"
-					//	"          -> empty            : cyc_predicate_defs  ;"
-					//	"PredRest2 -> CycVal PredRest1                       ;"
-					//	"          -> empty            : cyc_predicate_rest2 ;"
-					//	"PredRest1 -> CycVal                                 ;"
-					//	"          -> empty            : cyc_predicate_rest1 ;"
+						"Predicate -> CROp  PredRest2 : cyc_predicate       ;"
+						"          -> empty           : cyc_predicate_defs  ;"
+						"PredRest2 -> CRVal PredRest1                       ;"
+						"          -> empty           : cyc_predicate_rest2 ;"
+						"PredRest1 -> CRVal                                 ;"
+						"          -> empty           : cyc_predicate_rest1 ;"
 
 				// interval:
 
-				//	"LRIval  -> LIval PairIter             RIval ;"
-				//	"LMRIval -> LIval PairIter , TonicIter RIval ;"
+					"LRIval  -> LIval PairIter             RIval ;"
+					"LMRIval -> LIval PairIter , TonicIter RIval ;"
 
-				//	"LIval -> [     : cyc_ival_left_closed  ;"
-				//	"      -> (     : cyc_ival_left_open    ;"
-				//	"RIval -> ]     : cyc_ival_right_closed ;"
-				//	"      -> )     : cyc_ival_right_open   ;"
-				//	"FIval -> < \\> : cyc_ival_fixed        ;"
+					"LIval -> [     : cyc_ival_left_closed  ;"
+					"      -> (     : cyc_ival_left_open    ;"
+					"RIval -> ]     : cyc_ival_right_closed ;"
+					"      -> )     : cyc_ival_right_open   ;"
+					"FIval -> < \\> : cyc_ival_fixed        ;"
 
-				//	"Ival ->  FIval ;"
-				//	"     -> LRIval ;"
+					"Ival ->  FIval ;"
+					"     -> LRIval ;"
 
 				// iterator:
 
-				//	"PairIter ->   + | \\-          : cyc_iter_inc_dec ;"
-				//	"         -> \\- |   +          : cyc_iter_dec_inc ;"
+					"PairIter ->   + | \\-          : cyc_iter_inc_dec ;"
+					"         -> \\- |   +          : cyc_iter_dec_inc ;"
 				//	"         -> IterVal | PrevIter : cyc_iter_upsize  ;"
-				//	"         -> empty              : cyc_iter_pair    ;"
+					"         -> empty              : cyc_iter_pair    ;"
 				//	"PrevIter -> IterVal                               ;"
 				//	"         -> ~                  : cyc_iter_none    ;"
 				//	"IterVal  -> identifier         : cyc_iter_value   ;"
@@ -432,10 +508,10 @@ namespace chord {
 
 				// tonic:
 
-				//	"TonicIter ->   + | \\-            : cyc_tonic_inc_dec ;"
+					"TonicIter ->   + | \\-            : cyc_tonic_inc_dec ;"
 				//	"          -> \\- |   +            : cyc_tonic_dec_inc ;"
 				//	"          -> TonicVal | PrevTonic                     ;"
-				//	"          -> empty                : cyc_tonic_pair    ;"
+					"          -> empty                : cyc_tonic_pair    ;"
 				//	"PrevTonic -> TonicVal                                 ;"
 				//	"          -> ~                    : cyc_tonic_none    ;"
 				//	"TonicVal  -> identifier           : cyc_tonic_value   ;"
@@ -444,16 +520,16 @@ namespace chord {
 
 				// (accept):
 
-				//	"RepeatIvals -> FIval RepeatIvals  ;"
-				//	"            -> empty : cyc_repeat ;"
-				//	"MapIvals    -> Ival MapIvals      ;"
-				//	"            -> empty : cyc_map    ;"
-				//	"FoldIvals   -> Ival FoldIvals     ;"
-				//	"            -> empty : cyc_fold   ;"
-				//	"FindIvals   -> Ival FindIvals     ;"
-				//	"            -> empty : cyc_find   ;"
-				//	"SiftIvals   -> Ival SiftIvals     ;"
-				//	"            -> empty : cyc_sift   ;"
+				//	"RepeatIvals -> FIval RepeatIvals                   ;"
+				//	"            -> empty             : cyc_comp_repeat ;"
+				//	"MapIvals    -> Ival MapIvals                       ;"
+				//	"            -> empty             : cyc_comp_map    ;"
+					"FoldIvals   -> Ival FoldIvals                      ;"
+					"            -> empty             : cyc_comp_fold   ;"
+				//	"FindIvals   -> Ival FindIvals                      ;"
+				//	"            -> empty             : cyc_comp_find   ;"
+				//	"SiftIvals   -> Ival SiftIvals                      ;"
+				//	"            -> empty             : cyc_comp_sift   ;"
 		);}
 
 		nik_ces auto map = cctmp::table
@@ -598,12 +674,14 @@ namespace chord {
 					sxa_pair( "literal_n_number" , ActName::literal_n_number ),
 					sxa_pair( "literal_r_number" , ActName::literal_r_number ),
 
-			// morph:
+			// compound:
 
 				// arity:
 
-					sxt_pair( "mor_arity_value" , ActName::mor_arity_value ),
-					sxt_pair( "mor_arity_zero"  , ActName::mor_arity_zero  ),
+					sxt_pair( "pound_arity_value" , ActName::pound_arity_value ),
+					sxt_pair( "pound_arity_zero"  , ActName::pound_arity_zero  ),
+
+			// morph:
 
 				// op:
 
@@ -623,279 +701,78 @@ namespace chord {
 				// curry:
 
 					sxt_pair( "mor_curry_value" , ActName::mor_curry_value ),
-					sxt_pair( "mor_curry_args"  , ActName::mor_curry_args  )//,
+					sxt_pair( "mor_curry_args"  , ActName::mor_curry_args  ),
 
 			// cycle:
 
-				// option:
+				// routine:
 
-				//	sxt_pair( "cyc_option_begin" , ActName::cyc_option_begin ),
-				//	sxt_pair( "cyc_option_end"   , ActName::cyc_option_end   ),
-				//	sxt_pair( "cyc_option_amp"   , ActName::cyc_option_amp   ),
-				//	sxt_pair( "cyc_option_cont"  , ActName::cyc_option_cont  ),
-
-				// op, val:
-
-				//	sxt_pair( "cyc_op_value" , ActName::cyc_op_value ),
-				//	sxt_pair( "cyc_value"    , ActName::cyc_value    ),
-				//	sxt_pair( "cyc_id"       , ActName::cyc_id       ),
-				//	sxt_pair( "cyc_deref"    , ActName::cyc_deref    ),
+					sxt_pair( "cyc_rout_begin" , ActName::cyc_rout_begin ),
+					sxt_pair( "cyc_rout_end"   , ActName::cyc_rout_end   ),
+					sxt_pair( "cyc_rout_op"    , ActName::cyc_rout_op    ),
+					sxt_pair( "cyc_rout_value" , ActName::cyc_rout_value ),
 
 				// combine:
 
-				//	sxt_pair( "cyc_combine_rest2" , ActName::cyc_combine_rest2 ),
-				//	sxt_pair( "cyc_combine_rest1" , ActName::cyc_combine_rest1 ),
+					sxt_pair( "cyc_combine"       , ActName::cyc_combine       ),
+					sxt_pair( "cyc_combine_rest2" , ActName::cyc_combine_rest2 ),
+					sxt_pair( "cyc_combine_rest1" , ActName::cyc_combine_rest1 ),
 
 				// action:
 
-				//	sxt_pair( "cyc_action_defs"     , ActName::cyc_action_defs     ),
-				//	sxt_pair( "cyc_action_rest"     , ActName::cyc_action_rest     ),
-				//	sxt_pair( "cyc_action_op_value" , ActName::cyc_action_op_value ),
-				//	sxt_pair( "cyc_action_op_id"    , ActName::cyc_action_op_id    ),
-				//	sxt_pair( "cyc_action_op_deref" , ActName::cyc_action_op_deref ),
+					sxt_pair( "cyc_action"      , ActName::cyc_action      ),
+					sxt_pair( "cyc_action_defs" , ActName::cyc_action_defs ),
+					sxt_pair( "cyc_action_rest" , ActName::cyc_action_rest ),
 
 				// mutate:
 
-				//	sxt_pair( "cyc_mutate_defs"  , ActName::cyc_mutate_defs  ),
-				//	sxt_pair( "cyc_mutate_rest2" , ActName::cyc_mutate_rest2 ),
-				//	sxt_pair( "cyc_mutate_rest1" , ActName::cyc_mutate_rest1 ),
+					sxt_pair( "cyc_mutate"       , ActName::cyc_mutate       ),
+					sxt_pair( "cyc_mutate_defs"  , ActName::cyc_mutate_defs  ),
+					sxt_pair( "cyc_mutate_rest2" , ActName::cyc_mutate_rest2 ),
+					sxt_pair( "cyc_mutate_rest1" , ActName::cyc_mutate_rest1 ),
 
 				// predicate:
 
-				//	sxt_pair( "cyc_predicate_defs"  , ActName::cyc_predicate_defs  ),
-				//	sxt_pair( "cyc_predicate_rest2" , ActName::cyc_predicate_rest2 ),
-				//	sxt_pair( "cyc_predicate_rest1" , ActName::cyc_predicate_rest1 ),
+					sxt_pair( "cyc_predicate"       , ActName::cyc_predicate       ),
+					sxt_pair( "cyc_predicate_defs"  , ActName::cyc_predicate_defs  ),
+					sxt_pair( "cyc_predicate_rest2" , ActName::cyc_predicate_rest2 ),
+					sxt_pair( "cyc_predicate_rest1" , ActName::cyc_predicate_rest1 ),
 
 				// interval:
 
-				//	sxt_pair( "cyc_ival_left_closed"  , ActName::cyc_ival_left_closed  ),
-				//	sxt_pair( "cyc_ival_left_open"    , ActName::cyc_ival_left_open    ),
-				//	sxt_pair( "cyc_ival_right_closed" , ActName::cyc_ival_right_closed ),
-				//	sxt_pair( "cyc_ival_right_open"   , ActName::cyc_ival_right_open   ),
-				//	sxt_pair( "cyc_ival_fixed"        , ActName::cyc_ival_fixed        ),
+					sxt_pair( "cyc_ival_left_closed"  , ActName::cyc_ival_left_closed  ),
+					sxt_pair( "cyc_ival_left_open"    , ActName::cyc_ival_left_open    ),
+					sxt_pair( "cyc_ival_right_closed" , ActName::cyc_ival_right_closed ),
+					sxt_pair( "cyc_ival_right_open"   , ActName::cyc_ival_right_open   ),
+					sxt_pair( "cyc_ival_fixed"        , ActName::cyc_ival_fixed        ),
 
 				// iterator:
 
-				//	sxt_pair( "cyc_iter_inc_dec" , ActName::cyc_iter_inc_dec ),
-				//	sxt_pair( "cyc_iter_dec_inc" , ActName::cyc_iter_dec_inc ),
-				//	sxt_pair( "cyc_iter_upsize"  , ActName::cyc_iter_upsize  ),
-				//	sxt_pair( "cyc_iter_pair"    , ActName::cyc_iter_pair    ),
-				//	sxt_pair( "cyc_iter_none"    , ActName::cyc_iter_none    ),
-				//	sxt_pair( "cyc_iter_value"   , ActName::cyc_iter_value   ),
-				//	sxt_pair( "cyc_iter_void"    , ActName::cyc_iter_void    ),
+					sxt_pair( "cyc_iter_inc_dec" , ActName::cyc_iter_inc_dec ),
+					sxt_pair( "cyc_iter_dec_inc" , ActName::cyc_iter_dec_inc ),
+					sxt_pair( "cyc_iter_upsize"  , ActName::cyc_iter_upsize  ),
+					sxt_pair( "cyc_iter_pair"    , ActName::cyc_iter_pair    ),
+					sxt_pair( "cyc_iter_none"    , ActName::cyc_iter_none    ),
+					sxt_pair( "cyc_iter_value"   , ActName::cyc_iter_value   ),
+					sxt_pair( "cyc_iter_void"    , ActName::cyc_iter_void    ),
 
 				// tonic:
 
-				//	sxt_pair( "cyc_tonic_inc_dec" , ActName::cyc_tonic_inc_dec ),
-				//	sxt_pair( "cyc_tonic_dec_inc" , ActName::cyc_tonic_dec_inc ),
-				//	sxt_pair( "cyc_tonic_pair"    , ActName::cyc_tonic_pair    ),
-				//	sxt_pair( "cyc_tonic_none"    , ActName::cyc_tonic_none    ),
-				//	sxt_pair( "cyc_tonic_value"   , ActName::cyc_tonic_value   ),
-				//	sxt_pair( "cyc_tonic_void"    , ActName::cyc_tonic_void    ),
+					sxt_pair( "cyc_tonic_inc_dec" , ActName::cyc_tonic_inc_dec ),
+					sxt_pair( "cyc_tonic_dec_inc" , ActName::cyc_tonic_dec_inc ),
+					sxt_pair( "cyc_tonic_pair"    , ActName::cyc_tonic_pair    ),
+					sxt_pair( "cyc_tonic_none"    , ActName::cyc_tonic_none    ),
+					sxt_pair( "cyc_tonic_value"   , ActName::cyc_tonic_value   ),
+					sxt_pair( "cyc_tonic_void"    , ActName::cyc_tonic_void    ),
 
-				// (accept):
+				// compose:
 
-				//	sxt_pair( "cyc_repeat" , ActName::cyc_repeat ),
-				//	sxt_pair( "cyc_map"    , ActName::cyc_map    ),
-				//	sxt_pair( "cyc_fold"   , ActName::cyc_fold   ),
-				//	sxt_pair( "cyc_find"   , ActName::cyc_find   ),
-				//	sxt_pair( "cyc_sift"   , ActName::cyc_sift   )
+					sxt_pair( "cyc_comp_repeat" , ActName::cyc_comp_repeat ),
+					sxt_pair( "cyc_comp_map"    , ActName::cyc_comp_map    ),
+					sxt_pair( "cyc_comp_fold"   , ActName::cyc_comp_fold   ),
+					sxt_pair( "cyc_comp_find"   , ActName::cyc_comp_find   ),
+					sxt_pair( "cyc_comp_sift"   , ActName::cyc_comp_sift   )
 		);
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// pushdown automaton:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-#ifdef NIK_CHORD_PARSER
-#include NIK_CHORD_OBJ
-#else
-
-	template<typename T_grammar>
-	struct T_chord_pda : public generator::T_generic_pda<T_grammar>
-	{
-		using base			= generator::T_generic_pda<T_grammar>;
-		using ActName			= typename T_grammar::ActName;
-		using T_lexer			= typename T_grammar::T_lexer;
-		using Token			= typename T_grammar::Token;
-
-		nik_ces auto prod_size		= cctmp::string_literal("!B=OAE").size(); // needs refining.
-	//	nik_ces auto prod_size		= cctmp::string_literal("{C|A|M|P}").size(); // needs refining.
-
-		nik_ces auto stack_start	= symbol_type{generator::Sign::nonterminal, base::start_index};
-		nik_ces auto stack_finish	= symbol_type{generator::Sign::terminal, Token::prompt};
-
-		nik_ces auto stack_size		= cctmp::literal("F{C|A|M|P}YPZ<>YPZYP,PZV;HGO").size(); // needs refining.
-							// literal is intentional.
-							// this is the longest possible sentential.
-							// might need updating.
-	};
-
-#endif
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// parser:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<auto static_pg_parsed, typename T_action, typename T_grammar>
-	struct T_chord_parser
-	{
-		using T_ast		= typename T_action::T_ast;
-		using T_pda		= T_chord_pda<T_grammar>;
-		using T_parser		= generator::T_generic_parser<T_action, T_pda>;
-		using parseme_type	= generator::T_parseme<T_ast>;
-		using parsoid_type	= generator::T_parsoid<T_pda::stack_size, T_pda::prod_size>;
-
-		nik_ces auto & pda	= T_parser::pda; static_assert(!pda.ambiguous, "ambiguous cfg!");
-
-		parseme_type parseme;
-		parsoid_type parsoid;
-
-		nik_ce T_chord_parser(const cselector<char> & s) :
-
-			parseme(s), parsoid{T_pda::stack_start, T_pda::stack_finish}
-
-			{ parse(parseme, parsoid); }
-
-		nik_ces void parse(parseme_type & p, parsoid_type & q)
-			{ T_parser::parse(p, q); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// parsed:
-
-/***********************************************************************************************************************/
-
-// translation action:
-
-	template<action_type, auto...> struct T_chord_translation_action;
-
-	template<typename AST>
-	struct T_chord_ta :
-		public generator::T_generic_translation_action<T_chord_translation_action, AST, CAAN>
-			{ };
-
-	// interface:
-
-		template<typename AST>
-		struct T_chord_action
-		{
-			using T_ast		= AST;
-
-			nik_ces auto value	= T_chord_ta<AST>{};
-			using type		= decltype(value);
-		};
-
-/***********************************************************************************************************************/
-
-// tree:
-
-	template<auto... Vs> 
-	struct T_chord_syntax_tree : public assembly::T_syntax_tree<Vs...>
-	{
-		using base		= assembly::T_syntax_tree<Vs...>;
-		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
-		using cselect		= typename base::cselect;
-		using model_type	= typename base::model_type;
-		using ModelEntry	= typename base::ModelEntry;
-
-		using clist_type	= typename model_type::clist_type;
-		using model_base	= typename model_type::base;
-		using model_subbase	= typename model_base::base;
-
-		struct ChordEntry { enum : size_type { label = ModelEntry::dimension, jump, dimension }; };
-		struct JumpEntry  { enum : size_type { pos   = ModelEntry::init, dimension }; };
-
-		model_type jump;
-
-		nik_ce T_chord_syntax_tree() : base{}, jump{base::src} { }
-
-		// label:
-
-			nik_ce void define_label(const cselect & s)
-			{
-				csize_type pos = base::contr.current();
-
-				if (base::model.lookup_variable(s)) { } // error.
-				else base::model.define_variable(s, {ChordEntry::label, pos});
-			}
-
-		// jump:
-
-			nik_ce void delay_define_jump(const cselect & s, csize_type name)
-			{
-				csize_type pos = base::contr.current(1);
-
-				jump.define_variable(s, {ChordEntry::jump, pos});
-				base::template assembly_action<AAN::push, AAT::instr>(name, AT::id);
-			}
-
-			nik_ce void delay_define_goto   (const cselect & s) { delay_define_jump(s, AN::go_to); }
-			nik_ce void delay_define_branch (const cselect & s) { delay_define_jump(s, AN::branch); }
-
-			nik_ce void force_define_jumps()
-			{
-				for (auto k = jump.env_origin(); jump.not_null(k); k = jump.cdr(k))
-					force_define_frames(jump.car(k));
-			}
-
-			nik_ce void force_define_frames(clist_type frame)
-			{
-				for (auto k = frame; jump.not_null(k); k = jump.cdr(k))
-					force_define_bindings(jump.car(k));
-			}
-
-			nik_ce void force_define_bindings(clist_type binding)
-			{
-				if (base::model.lookup_variable(jump.get_name(binding)))
-				{
-					auto entry = jump.cdr(binding);
-					auto pos   = static_cast<model_subbase>(jump).get_value(entry, JumpEntry::pos);
-					auto value = base::model.get_value(JumpEntry::pos);
-
-					base::contr.set_instr_value(pos, cctmp::Instr::pos, value);
-				}
-				else { } // error.
-			}
-	};
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template
-	<
-		auto static_pg_parsed, auto static_source, auto static_env_lookup,
-		auto contr_size, auto stack_size, auto model_size
-	>
-	struct T_chord_parsed
-	{
-		using T_ast			= T_chord_syntax_tree
-						<
-							static_source, static_env_lookup,
-							contr_size, stack_size, model_size
-						>;
-		using T_action			= T_chord_action<T_ast>;
-		using T_grammar			= T_chord_grammar;
-		using T_parser			= T_chord_parser<static_pg_parsed, T_action, T_grammar>;
-
-		nik_ces auto & src		= member_value_U<static_source>;
-		nik_ces auto parser		= T_parser{src.cselect()};
-		nik_ces auto & value		= parser.parseme.tree;
-		using type			= modify_type<_from_reference_, decltype(value)>;
 	};
 
 /***********************************************************************************************************************/
