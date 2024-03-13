@@ -180,38 +180,39 @@ namespace chord {
 
 				// interval:
 
+					cyc_ival_fixed,
 					cyc_ival_left_closed,
 					cyc_ival_left_open,
-					cyc_ival_right_closed,
-					cyc_ival_right_open,
-					cyc_ival_fixed,
+					cyc_ival_init_closed,
+					cyc_ival_init_open,
+					cyc_ival_root_closed,
+					cyc_ival_root_open,
+					cyc_ival_rest_closed,
+					cyc_ival_rest_open,
 
-				// iterator:
+					cyc_ival_repeat,
+					cyc_ival_map,
+					cyc_ival_fold,
+					cyc_ival_find,
+					cyc_ival_sift,
 
-					cyc_iter_inc_dec,
-					cyc_iter_dec_inc,
-					cyc_iter_upsize,
-					cyc_iter_pair,
-					cyc_iter_none,
-					cyc_iter_value,
-					cyc_iter_void,
+				// note (iterator):
 
-				// tonic:
+					cyc_note_inc_dec,
+					cyc_note_dec_inc,
+					cyc_note_defs,
+					cyc_note_value,
+					cyc_note_void,
+					cyc_note_none,
+
+				// tonic (iterator):
 
 					cyc_tonic_inc_dec,
 					cyc_tonic_dec_inc,
-					cyc_tonic_pair,
-					cyc_tonic_none,
+					cyc_tonic_defs,
 					cyc_tonic_value,
 					cyc_tonic_void,
-
-				// compose:
-
-					cyc_comp_repeat,
-					cyc_comp_map,
-					cyc_comp_fold,
-					cyc_comp_find,
-					cyc_comp_sift,
+					cyc_tonic_none,
 
 			// dimension:
 
@@ -420,18 +421,16 @@ namespace chord {
 
 			// cycle:
 
-			//	"Cycle -> repeat Arity  AMP        LMRIval RepeatIvals ;"
-			//	"      -> map    Arity  AMP LRIval LMRIval    MapIvals ;"
-			//	"      -> fold   Arity CAMP  FIval LMRIval   FoldIvals ;"
-			//	"      -> find   Arity  AMP LRIval LMRIval   FindIvals ;"
-			//	"      -> sift   Arity  AMP LRIval LMRIval   SiftIvals ;"
-
-				"Cycle -> fold   Arity CAMP  FIval LMRIval   FoldIvals ;"
+				"Cycle -> repeat Arity  AMP         LRMIval RepeatIvals ;"
+				"      -> map    Arity  AMP LRLIval LRMIval    MapIvals ;"
+				"      -> fold   Arity CAMP   FIval LRMIval   FoldIvals ;"
+				"      -> find   Arity  AMP LRLIval LRMIval   FindIvals ;"
+				"      -> sift   Arity  AMP LRLIval LRMIval   SiftIvals ;"
 
 				// routine:
 
 					"CAMP -> CRBeg Combine CRBar Action CRBar Mutate CRBar Predicate CREnd ;"
-				//	"AMP  -> CRBeg               Action CRBar Mutate CRBar Predicate CREnd ;"
+					"AMP  -> CRBeg               Action CRBar Mutate CRBar Predicate CREnd ;"
 
 					"CRBeg -> { : cyc_rout_begin ;"
 					"CRBar -> | : cyc_rout_end   ;"
@@ -482,54 +481,57 @@ namespace chord {
 
 				// interval:
 
-					"LRIval  -> LIval PairIter             RIval ;"
-					"LMRIval -> LIval PairIter , TonicIter RIval ;"
+					"LRLIval -> LIval NoteIter             RLIval ;"
+					"LRMIval -> LIval NoteIter , TonicIter RMIval ;"
+					"LRRIval -> LIval NoteIter             RRIval ;"
 
-					"LIval -> [     : cyc_ival_left_closed  ;"
-					"      -> (     : cyc_ival_left_open    ;"
-					"RIval -> ]     : cyc_ival_right_closed ;"
-					"      -> )     : cyc_ival_right_open   ;"
-					"FIval -> < \\> : cyc_ival_fixed        ;"
+					"FIval  -> < \\> : cyc_ival_fixed       ;"
+					"LIval  -> [     : cyc_ival_left_closed ;"
+					"       -> (     : cyc_ival_left_open   ;"
+					"RLIval -> ]     : cyc_ival_init_closed ;"
+					"       -> )     : cyc_ival_init_open   ;"
+					"RMIval -> ]     : cyc_ival_root_closed ;"
+					"       -> )     : cyc_ival_root_open   ;"
+					"RRIval -> ]     : cyc_ival_rest_closed ;"
+					"       -> )     : cyc_ival_rest_open   ;"
 
-					"Ival ->  FIval ;"
-					"     -> LRIval ;"
-
-				// iterator:
-
-					"PairIter ->   + | \\-          : cyc_iter_inc_dec ;"
-					"         -> \\- |   +          : cyc_iter_dec_inc ;"
-				//	"         -> IterVal | PrevIter : cyc_iter_upsize  ;"
-					"         -> empty              : cyc_iter_pair    ;"
-				//	"PrevIter -> IterVal                               ;"
-				//	"         -> ~                  : cyc_iter_none    ;"
-				//	"IterVal  -> identifier         : cyc_iter_value   ;"
-				//	"         -> ^ VoidVal                             ;"
-				//	"VoidVal  -> identifier         : cyc_iter_void    ;"
-
-				// tonic:
-
-					"TonicIter ->   + | \\-            : cyc_tonic_inc_dec ;"
-				//	"          -> \\- |   +            : cyc_tonic_dec_inc ;"
-				//	"          -> TonicVal | PrevTonic                     ;"
-					"          -> empty                : cyc_tonic_pair    ;"
-				//	"PrevTonic -> TonicVal                                 ;"
-				//	"          -> ~                    : cyc_tonic_none    ;"
-				//	"TonicVal  -> identifier           : cyc_tonic_value   ;"
-				//	"          -> ^ VoidTonic                              ;"
-				//	"VoidTonic -> identifier           : cyc_tonic_void    ;"
-
-				// (accept):
-
-				//	"RepeatIvals -> FIval RepeatIvals                   ;"
-				//	"            -> empty             : cyc_comp_repeat ;"
-				//	"MapIvals    -> Ival MapIvals                       ;"
-				//	"            -> empty             : cyc_comp_map    ;"
+					"RepeatIvals -> FIval RepeatIvals                   ;"
+					"            -> empty             : cyc_ival_repeat ;"
+					"MapIvals    -> Ival MapIvals                       ;"
+					"            -> empty             : cyc_ival_map    ;"
 					"FoldIvals   -> Ival FoldIvals                      ;"
-					"            -> empty             : cyc_comp_fold   ;"
-				//	"FindIvals   -> Ival FindIvals                      ;"
-				//	"            -> empty             : cyc_comp_find   ;"
-				//	"SiftIvals   -> Ival SiftIvals                      ;"
-				//	"            -> empty             : cyc_comp_sift   ;"
+					"            -> empty             : cyc_ival_fold   ;"
+					"FindIvals   -> Ival FindIvals                      ;"
+					"            -> empty             : cyc_ival_find   ;"
+					"SiftIvals   -> Ival SiftIvals                      ;"
+					"            -> empty             : cyc_ival_sift   ;"
+
+					"Ival ->   FIval ;"
+					"     -> LRRIval ;"
+
+				// note (iterator):
+
+					"NoteIter ->   + | \\-           : cyc_note_inc_dec ;"
+					"         -> \\- |   +           : cyc_note_dec_inc ;"
+					"         -> NoteNext | NotePrev                    ;"
+					"         -> empty               : cyc_note_defs    ;"
+					"NoteNext -> identifier          : cyc_note_value   ;"
+					"         -> ^ NoteVoid                             ;"
+					"NoteVoid -> identifier          : cyc_note_void    ;"
+					"NotePrev -> NoteNext                               ;"
+					"         -> ~                   : cyc_note_none    ;"
+
+				// tonic (iterator):
+
+					"TonicIter ->   + | \\-             : cyc_tonic_inc_dec ;"
+					"          -> \\- |   +             : cyc_tonic_dec_inc ;"
+					"          -> TonicNext | TonicPrev                     ;"
+					"          -> empty                 : cyc_tonic_defs    ;"
+					"TonicNext -> identifier            : cyc_tonic_value   ;"
+					"          -> ^ TonicVoid                               ;"
+					"TonicVoid -> identifier            : cyc_tonic_void    ;"
+					"TonicPrev -> TonicNext                                 ;"
+					"          -> ~                     : cyc_tonic_none    ;"
 		);}
 
 		nik_ces auto map = cctmp::table
@@ -740,38 +742,39 @@ namespace chord {
 
 				// interval:
 
-					sxt_pair( "cyc_ival_left_closed"  , ActName::cyc_ival_left_closed  ),
-					sxt_pair( "cyc_ival_left_open"    , ActName::cyc_ival_left_open    ),
-					sxt_pair( "cyc_ival_right_closed" , ActName::cyc_ival_right_closed ),
-					sxt_pair( "cyc_ival_right_open"   , ActName::cyc_ival_right_open   ),
-					sxt_pair( "cyc_ival_fixed"        , ActName::cyc_ival_fixed        ),
+					sxt_pair( "cyc_ival_fixed"       , ActName::cyc_ival_fixed       ),
+					sxt_pair( "cyc_ival_left_closed" , ActName::cyc_ival_left_closed ),
+					sxt_pair( "cyc_ival_left_open"   , ActName::cyc_ival_left_open   ),
+					sxt_pair( "cyc_ival_init_closed" , ActName::cyc_ival_init_closed ),
+					sxt_pair( "cyc_ival_init_open"   , ActName::cyc_ival_init_open   ),
+					sxt_pair( "cyc_ival_root_closed" , ActName::cyc_ival_root_closed ),
+					sxt_pair( "cyc_ival_root_open"   , ActName::cyc_ival_root_open   ),
+					sxt_pair( "cyc_ival_rest_closed" , ActName::cyc_ival_rest_closed ),
+					sxt_pair( "cyc_ival_rest_open"   , ActName::cyc_ival_rest_open   ),
 
-				// iterator:
+					sxt_pair( "cyc_ival_repeat" , ActName::cyc_ival_repeat ),
+					sxt_pair( "cyc_ival_map"    , ActName::cyc_ival_map    ),
+					sxt_pair( "cyc_ival_fold"   , ActName::cyc_ival_fold   ),
+					sxt_pair( "cyc_ival_find"   , ActName::cyc_ival_find   ),
+					sxt_pair( "cyc_ival_sift"   , ActName::cyc_ival_sift   ),
 
-					sxt_pair( "cyc_iter_inc_dec" , ActName::cyc_iter_inc_dec ),
-					sxt_pair( "cyc_iter_dec_inc" , ActName::cyc_iter_dec_inc ),
-					sxt_pair( "cyc_iter_upsize"  , ActName::cyc_iter_upsize  ),
-					sxt_pair( "cyc_iter_pair"    , ActName::cyc_iter_pair    ),
-					sxt_pair( "cyc_iter_none"    , ActName::cyc_iter_none    ),
-					sxt_pair( "cyc_iter_value"   , ActName::cyc_iter_value   ),
-					sxt_pair( "cyc_iter_void"    , ActName::cyc_iter_void    ),
+				// note (iterator):
 
-				// tonic:
+					sxt_pair( "cyc_note_inc_dec" , ActName::cyc_note_inc_dec ),
+					sxt_pair( "cyc_note_dec_inc" , ActName::cyc_note_dec_inc ),
+					sxt_pair( "cyc_note_defs"    , ActName::cyc_note_defs    ),
+					sxt_pair( "cyc_note_value"   , ActName::cyc_note_value   ),
+					sxt_pair( "cyc_note_void"    , ActName::cyc_note_void    ),
+					sxt_pair( "cyc_note_none"    , ActName::cyc_note_none    ),
+
+				// tonic (iterator):
 
 					sxt_pair( "cyc_tonic_inc_dec" , ActName::cyc_tonic_inc_dec ),
 					sxt_pair( "cyc_tonic_dec_inc" , ActName::cyc_tonic_dec_inc ),
-					sxt_pair( "cyc_tonic_pair"    , ActName::cyc_tonic_pair    ),
-					sxt_pair( "cyc_tonic_none"    , ActName::cyc_tonic_none    ),
+					sxt_pair( "cyc_tonic_defs"    , ActName::cyc_tonic_defs    ),
 					sxt_pair( "cyc_tonic_value"   , ActName::cyc_tonic_value   ),
 					sxt_pair( "cyc_tonic_void"    , ActName::cyc_tonic_void    ),
-
-				// compose:
-
-					sxt_pair( "cyc_comp_repeat" , ActName::cyc_comp_repeat ),
-					sxt_pair( "cyc_comp_map"    , ActName::cyc_comp_map    ),
-					sxt_pair( "cyc_comp_fold"   , ActName::cyc_comp_fold   ),
-					sxt_pair( "cyc_comp_find"   , ActName::cyc_comp_find   ),
-					sxt_pair( "cyc_comp_sift"   , ActName::cyc_comp_sift   )
+					sxt_pair( "cyc_tonic_none"    , ActName::cyc_tonic_none    )
 		);
 	};
 

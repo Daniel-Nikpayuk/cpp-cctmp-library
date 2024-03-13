@@ -327,14 +327,17 @@ namespace chord {
 	{
 		return source
 		(
-			"f out in end in1                            ;"
+			"main out in end in1                                ;"
 
-			"definitions:                                ;"
-			" dot_prod # fold<multiply|add * @||>{}[,)[) ;"
+			"vars:                                              ;"
+			"  declare dot_prod                                 ;"
 
-			"body:                                       ;"
-			" . = dot_prod !out in end in1               ;"
-			" return _                                   ;"
+			"defs:                                              ;"
+			"  dot_prod # fold[2]{add * @|multiply||} <> [,) [) ;"
+
+			"body:                                              ;"
+			"  . = dot_prod !out in end in1                     ;"
+			"  return _                                         ;"
 		);
 	}
 

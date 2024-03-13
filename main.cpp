@@ -56,10 +56,11 @@
 
 #include"03_chord/00_lexer.hpp"
 #include"03_chord/01_parser.hpp"
-#include"03_chord/02_syntax.hpp"
-#include"03_chord/03_kernel_action.hpp"
-#include"03_chord/04_cycle_action.hpp"
-#include"03_chord/05_metapiler.hpp"
+#include"03_chord/02_cycle.hpp"
+#include"03_chord/03_syntax.hpp"
+#include"03_chord/04_kernel_action.hpp"
+#include"03_chord/05_cycle_action.hpp"
+#include"03_chord/06_metapiler.hpp"
 
 #include"04_hustle/00_lexer.hpp"
 #include"04_hustle/01_parser.hpp"
@@ -177,35 +178,23 @@
 
 /***********************************************************************************************************************/
 
-		//	"main out in end in1                               ;"
-
-		//	"vars:                                             ;"
-		//	"  declare conv                                    ;"
-
-		//	"defs:                                             ;"
-		//	"  conv # fold[2]{add * @|multiply||} <> (-|+,] [] ;"
-
-		//	"body:                                             ;"
-		//	"  . = conv !out end in in1                        ;"
-		//	"  return _                                        ;"
-
 // chord:
 
 	constexpr auto _chord_test_func()
 	{
 		return source
 		(
-			"main out in end in1                                ;"
+			"main out in end in1                               ;"
 
-			"vars:                                              ;"
-			"  declare dot_prod                                 ;"
+			"vars:                                             ;"
+			"  declare conv                                    ;"
 
-			"defs:                                              ;"
-			"  dot_prod # fold[2]{add * @|multiply||} <> [,) [) ;"
+			"defs:                                             ;"
+			"  conv # fold[2]{add * @|multiply||} <> (-|+,] [] ;"
 
-			"body:                                              ;"
-			"  . = dot_prod !out in end in1                     ;"
-			"  return _                                         ;"
+			"body:                                             ;"
+			"  . = conv !out end in in1                        ;"
+			"  return _                                        ;"
 		);
 	}
 
@@ -221,8 +210,8 @@
 
 		int val = 0;
 
-		chord_arr_type s0({ 1, 1, 1, 1, 1 });
-		chord_arr_type s1({ 0, 1, 2, 3, 4 });
+		chord_arr_type s0({ 1, 2, 3, 4, 5 });
+		chord_arr_type s1({ 1, 2, 3, 4, 5 });
 
 		T_chord_apply::template result<chord_size_type>(&val, s0.cbegin(), s0.cend(), s1.cbegin());
 		printf("%d\n", val);

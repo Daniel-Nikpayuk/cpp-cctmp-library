@@ -175,7 +175,7 @@ namespace assembly {
 			front  , back ,				//  4
 			push   , pull , drop    ,		//  6
 			verse  , side , replace ,		//  9
-			pred   , act  , cont    , last ,	// 12
+			pred   , act  , cont    , end ,		// 12
 			inc    , dec  ,				// 16
 			dimension
 		};

@@ -29,110 +29,6 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
-// interval:
-
-	template<typename SizeType>
-	struct T_chord_iterator
-	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		struct Iter		{ enum : size_type { next, prev, dimension }; };
-
-		size_type pos;
-		bool side;
-
-		nik_ce T_chord_iterator() : pos{}, side{} { }
-		nik_ce T_chord_iterator(csize_type p, const bool s) : pos{p}, side{s} { }
-
-		// pos:
-
-			nik_ce auto get_pos() const { return pos; }
-			nik_ce void set_pos(csize_type p) { pos = p; }
-
-		// side:
-
-			nik_ce auto get_side() const { return side; }
-			nik_ce void set_side(const bool s) { side = s; }
-	};
-
-/***********************************************************************************************************************/
-
-// interval:
-
-	template<typename SizeType>
-	struct T_chord_interval
-	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-		using iter_type		= T_chord_iterator<size_type>;
-		using Iter		= typename iter_type::Iter;
-
-		struct Ival		{ enum : size_type { tone, root, dimension }; };
-		struct Point		{ enum : size_type { fixed, closed, open, dimension }; };
-
-		using iter_seq		= sequence<iter_type, static_cast<size_type>(Iter::dimension)>;
-
-		size_type ival;
-		size_type left;
-		size_type right;
-
-		iter_seq note_iter;
-		iter_seq tonic_iter;
-
-		nik_ce T_chord_interval() :
-			ival{Ival::tone}, left{Point::fixed}, right{Point::fixed}
-				{ }
-
-		nik_ce bool is_tone   () const { return (ival == Ival::tone); }
-		nik_ce bool is_root   () const { return (ival == Ival::root); }
-		nik_ce bool has_tonic () const { return (ival == Ival::root); }
-
-		// ival:
-
-			nik_ce auto not_left_fixed  () const { return (left  != Point::fixed); }
-			nik_ce auto not_right_fixed () const { return (right != Point::fixed); }
-			nik_ce auto not_fixed       () const { return (not_left_fixed() && not_right_fixed()); }
-
-			nik_ce void set_left  (csize_type p) { left = p; }
-			nik_ce void set_right (csize_type p) { right = p; }
-
-			nik_ce void set_left_closed  () { set_left(Point::closed); }
-			nik_ce void set_left_open    () { set_left(Point::open); }
-			nik_ce void set_right_closed () { set_right(Point::closed); }
-			nik_ce void set_right_open   () { set_right(Point::open); }
-
-			nik_ce void set_fixed()
-			{
-				set_left(Point::fixed);
-				set_right(Point::fixed);
-			}
-
-		// note:
-
-			nik_ce void push_note(csize_type p, const bool s = false)
-				{ note_iter.push(iter_type{p, s}); }
-
-		// tonic:
-
-			nik_ce void push_tonic(csize_type p, const bool s = false)
-			{
-				ival = Ival::root;
-				tonic_iter.push(iter_type{p, s});
-			}
-
-			nik_ce void push_tonic()
-			{
-				const auto & next = note_iter[Iter::next];
-				const auto & prev = note_iter[Iter::prev];
-
-				push_tonic(next.get_pos(), next.get_side());
-				push_tonic(prev.get_pos(), prev.get_side());
-			}
-	};
-
-/***********************************************************************************************************************/
-
 // interface:
 
 	template<auto... Vs> 
@@ -151,20 +47,25 @@ namespace chord {
 
 		struct ChordEntry	{ enum : size_type { label = ModelEntry::dimension, jump, dimension }; };
 		struct JumpEntry	{ enum : size_type { pos   = ModelEntry::init, dimension }; };
+		struct CycleFront	{ enum : size_type { next, dimension }; };
 		struct CycleId		{ enum : size_type { predicate, side, dimension }; };
+		struct CycleBack	{ enum : size_type { action, next, dimension }; };
 		struct CycleSide	{ enum : size_type { action, next, dimension }; };
 		struct Routine		{ enum : size_type { combine, action, mutate, predicate, dimension }; };
 		struct CycleNext	{ enum : size_type { inc, dec, dimension }; };
 
+		using cycle_front_seq	= sequence<size_type, static_cast<size_type>(CycleFront::dimension)>;
 		using cycle_id_seq	= sequence<size_type, static_cast<size_type>(CycleId::dimension)>;
+		using cycle_back_seq	= sequence<size_type, static_cast<size_type>(CycleBack::dimension)>;
 		using cycle_side_seq	= sequence<size_type, static_cast<size_type>(CycleSide::dimension)>;
 		using cycle_next_seq	= sequence<size_type, static_cast<size_type>(CycleNext::dimension)>;
 		using routine_seq	= sequence<size_type, static_cast<size_type>(Routine::dimension)>;
-		using interval_type	= T_chord_interval<size_type>;
-		using interval_seq	= sequence<interval_type, model_base::length>; // make size independent?
+		using interval_seq	= T_chord_intervals<size_type, model_base::length>; // make size independent?
 
 		model_type jump;
+		cycle_front_seq cycle_front;
 		cycle_id_seq cycle_id;
+		cycle_back_seq cycle_back;
 		cycle_side_seq cycle_side;
 		cycle_next_seq cycle_next;
 		routine_seq routine;
@@ -264,7 +165,7 @@ namespace chord {
 			nik_ce void subpose_value(const cselect & s, const bool mute = false)
 			{
 				auto is_id = cctmp::apply<_subarray_same_<>>(s, cselect_id());
-				
+
 				if (is_id) subpose_value_id(mute);
 				else       subpose_value_apply(s, mute);
 			}
@@ -331,67 +232,93 @@ namespace chord {
 
 		// iterator:
 
-			nik_ce auto note_pos(csize_type n, csize_type m) const
-				{ return interval[n].note_iter[m].get_pos(); }
-
-			nik_ce auto note_last(csize_type m) const { return note_pos(interval.max(), m); }
-
-			nik_ce void push_iter(csize_type pos, csize_type note)
+			nik_ce void note_push(csize_type pos, csize_type note)
 			{
-				if (cycle_next[pos]) push_iter_interval(pos);
-				else                 push_iter_assembly(pos, note);
+				if (cycle_next[pos]) note_push_interval(pos);
+				else                 note_push_assembly(pos, note);
 			}
 
-			nik_ce void push_iter_interval(csize_type pos)
-				{ interval.last()->push_note(cycle_next[pos]); }
+			nik_ce void note_push_interval(csize_type pos)
+				{ interval.push_note(cycle_next[pos]); }
 
-			nik_ce void push_iter_assembly(csize_type pos, csize_type note)
+			nik_ce void note_push_assembly(csize_type pos, csize_type note)
 			{
 				cycle_next[pos] = base::contr.current(1);
 
-				push_iter_interval(pos);
-				push_iter_assembly(note);
+				note_push_interval(pos);
+				note_push_assembly(note);
 			}
 
-			nik_ce void push_iter_assembly(csize_type note)
+			nik_ce void note_push_assembly(csize_type note)
 			{
 				base::template assembly_action< AAN::id   , AAT::begin >();
 				base::template assembly_action< AAN::push , AAT::instr >(AN::next, note);
 			}
 
+			nik_ce void note_next_assembly(csize_type arg_pos)
+			{
+				base::template assembly_action<AAN::id, AAT::begin>();
+				base::template assembly_action<AAN::push, AAT::instr>(AN::arg, AT::select, arg_pos);
+			}
+
 			// fast:
 
-				nik_ce void push_inc() { push_iter(CycleNext::inc, AT::inc); }
-				nik_ce void push_dec() { push_iter(CycleNext::dec, AT::dec); }
+				nik_ce void note_push_inc() { note_push(CycleNext::inc, AT::inc); }
+				nik_ce void note_push_dec() { note_push(CycleNext::dec, AT::dec); }
 
 			// tonic:
 
-				nik_ce void push_tonic() { interval.last()->push_tonic(); }
+				nik_ce void tonic_push() { interval.push_tonic(); }
+
+		// next:
+
+			nik_ce void define_next_begin(csize_type first_arg)
+			{
+				cycle_side[CycleSide::next] = base::contr.current(1);
+				note_next_assembly(first_arg);
+			}
+
+			nik_ce void define_next_cont_fast(csize_type ival_pos, csize_type next_arg)
+			{
+				auto ni = interval.note_pos(ival_pos, 0);
+
+				base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, next_arg);
+			}
+
+			nik_ce void define_next_cont(csize_type ival_pos, csize_type next_arg)
+				{ if (interval.not_fixed(ival_pos)) define_next_cont_fast(ival_pos, next_arg); }
+
+			nik_ce void define_next_rest(csize_type b, csize_type n)
+				{ for (auto k = b; k != interval.size(); ++k) define_next_cont(k, n + k - 1); }
+
+			nik_ce void define_next_end()
+				{ base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::end); }
+
+		// before:
+
+			nik_ce void define_before_begin(csize_type first_arg)
+			{
+				cycle_front[CycleFront::next] = base::contr.current(1);
+				note_next_assembly(first_arg);
+			}
+
+			nik_ce void define_before_cont_fast(csize_type ival_pos, csize_type next_arg)
+			{
+				auto ni = interval.note_pos(ival_pos, 0);
+
+				base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, next_arg);
+			}
+
+			nik_ce void define_before_cont(csize_type ival_pos, csize_type next_arg)
+				{ if (interval.is_left_open(ival_pos)) define_before_cont_fast(ival_pos, next_arg); }
+
+			nik_ce void define_before_rest(csize_type b, csize_type n)
+				{ for (auto k = b; k != interval.size(); ++k) define_before_cont(k, n + k - 1); }
+
+			nik_ce void define_before_end()
+				{ base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::end); }
 
 		// cycle:
-
-			nik_ce void define_precycle()
-			{
-				auto s = base::verse.size();
-
-				base::template assembly_action<AAN::push, AAT::instr>(AN::arg, AT::select, s);
-			}
-
-			nik_ce void define_cycle()
-			{
-				auto ni = cycle_id[CycleId::predicate];
-				auto mi = cycle_id[CycleId::side];
-
-				base::template assembly_action<AAN::push, AAT::instr>(AN::cycle, AT::id, ni, mi);
-			}
-
-			nik_ce void define_postcycle()
-			{
-				auto s = base::verse.size();
-
-				base::template assembly_action<AAN::push, AAT::instr>(AN::arg, AT::drop, s);
-				base::first_return();
-			}
 
 			nik_ce void define_cycle_side()
 			{
@@ -403,118 +330,94 @@ namespace chord {
 				base::template assembly_action<AAN::push, AAT::instr>(AN::cycle, AT::side, ni, mi);
 			}
 
-			nik_ce void define_loop()
+			nik_ce void define_cycle_before()
 			{
-				define_cycle_side ();
-				internal_defs_end ();
-				define_precycle   ();
-				define_cycle      ();
-				define_postcycle  ();
+				auto s = base::verse.size();
+
+				if (interval.has_left_next()) define_cycle_front();
+				base::template assembly_action<AAN::push, AAT::instr>(AN::arg, AT::select, s);
 			}
 
-		// next:
-
-			nik_ce void define_next_begin(csize_type arg_pos)
+			nik_ce void define_cycle_front()
 			{
-				cycle_side[CycleSide::next] = base::contr.current(1);
-				base::template assembly_action<AAN::id, AAT::begin>();
-				base::template assembly_action<AAN::push, AAT::instr>(AN::arg, AT::select, arg_pos);
+				auto ni = cycle_front[CycleFront::next];
+
+				base::template assembly_action<AAN::push, AAT::instr>(AN::cycle, AT::front, ni);
 			}
 
-			nik_ce void define_next_cont_fast(csize_type ival_pos, csize_type arg_pos)
+			nik_ce void define_cycle_loop()
 			{
-				auto ni = note_pos(ival_pos, 0);
+				auto ni = cycle_id[CycleId::predicate];
+				auto mi = cycle_id[CycleId::side];
 
-				base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, arg_pos);
+				base::template assembly_action<AAN::push, AAT::instr>(AN::cycle, AT::id, ni, mi);
 			}
 
-			nik_ce void define_next_cont(csize_type ival_pos, csize_type arg_pos)
-				{ if (interval[ival_pos].not_fixed()) define_next_cont_fast(ival_pos, arg_pos); }
-
-			nik_ce void define_next_rest(csize_type b, csize_type n)
-				{ for (auto k = b; k != interval.max(); ++k) define_next_cont(k, n + k); }
-
-			nik_ce void define_next_end()
-				{ base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::last, note_last(0)); }
-
-		// repeat:
-
-			nik_ce void define_repeat()
+			nik_ce void define_cycle_after()
 			{
+				auto s = base::verse.size();
+
+				if (interval.has_right_action()) define_cycle_back_action();
+				if (interval.has_right_next())   define_cycle_back_next();
+				base::template assembly_action<AAN::push, AAT::instr>(AN::arg, AT::drop, s);
+				base::first_return();
 			}
 
-		// map:
-
-			nik_ce void define_map()
+			nik_ce void define_cycle_back_action()
 			{
+				auto ni = cycle_back[CycleBack::action];
+
+				base::template assembly_action<AAN::push, AAT::instr>(AN::cycle, AT::act, ni);
 			}
 
-		// fold:
-
-			nik_ce void define_fold_pred()
+			nik_ce void define_cycle_back_next()
 			{
-				auto ni = get_predicate();
+				auto ni = cycle_back[CycleBack::next];
 
-				cycle_id[CycleId::predicate] = base::contr.current(1);
-				base::template assembly_action<AAN::id, AAT::begin>();
-				base::template assembly_action<AAN::push, AAT::instr>(AN::fold, AT::pred, ni);
+				base::template assembly_action<AAN::push, AAT::instr>(AN::cycle, AT::back, ni);
 			}
 
-			nik_ce void define_fold_action()
+			nik_ce void define_cycle()
 			{
-				auto ni = get_action();
-				auto mi = get_combine();
-				auto li = get_mutate();
+				define_cycle_side   ();
+				internal_defs_end   ();
 
-				cycle_side[CycleSide::action] = base::contr.current(1);
-				base::template assembly_action<AAN::id, AAT::begin>();
-				base::template assembly_action<AAN::push, AAT::instr>(AN::fold, AT::act, ni, mi, 2);
-				base::template assembly_action<AAN::push, AAT::instr>(li, 0);
+				define_cycle_before ();
+				define_cycle_loop   ();
+				define_cycle_after  ();
 			}
 
-			nik_ce void define_fold_precycle()
+		// after:
+
+			nik_ce void define_after_begin(csize_type first_arg)
 			{
+				cycle_back[CycleBack::next] = base::contr.current(1);
+				note_next_assembly(first_arg);
 			}
 
-			nik_ce void define_fold_cycle()
+			nik_ce void define_after_cont_fast(csize_type ival_pos, csize_type next_arg)
 			{
-				auto n = base::verse.size();
-				auto l = n + 1; // in
-				auto m = n + 3; // in1
+				auto ni = interval.note_pos(ival_pos, 0);
 
-				define_fold_pred   (    );
-				define_fold_action (    );
-
-				define_next_begin  (l   );
-				define_next_cont   (1, m); // in
-				define_next_rest   (2, m); // in1
-				define_next_end    (    );
+				base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, next_arg);
 			}
 
-			nik_ce void define_fold_postcycle()
-			{
-			}
+			nik_ce void define_after_cont(csize_type ival_pos, csize_type next_arg)
+				{ if (interval.is_right_open(ival_pos)) define_after_cont_fast(ival_pos, next_arg); }
 
-			nik_ce void define_fold()
-			{
-				define_fold_precycle  ();
-				define_fold_cycle     ();
-				define_fold_postcycle ();
+			nik_ce void define_after_rest(csize_type b, csize_type n)
+				{ for (auto k = b; k != interval.size(); ++k) define_after_cont(k, n + k - 1); }
 
-				define_loop();
-			}
+			nik_ce void define_after_end()
+				{ base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::end); }
 
-		// find:
+		// functional:
 
-			nik_ce void define_find()
-			{
-			}
-
-		// sift:
-
-			nik_ce void define_sift()
-			{
-			}
+			nik_ce void define_repeat () { T_chord_repeat <size_type> :: define_cycle(this); }
+			nik_ce void define_map    () { T_chord_map    <size_type> :: define_cycle(this); }
+			nik_ce void define_fold   () { T_chord_fold   <size_type> :: define_cycle(this); }
+			nik_ce void define_find   () { T_chord_find   <size_type> :: define_cycle(this); }
+			nik_ce void define_sift   () { T_chord_sift   <size_type> :: define_cycle(this); }
 	};
 
 /***********************************************************************************************************************/
