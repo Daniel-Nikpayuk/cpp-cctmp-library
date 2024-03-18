@@ -432,6 +432,46 @@ namespace assembly {
 	};
 
 /***********************************************************************************************************************/
+
+// fast apply:
+
+	template
+	<
+		auto contr,
+		auto subsource,
+		auto initial_env,
+		auto out_types,
+
+		auto contr_size =  512,
+		auto stack_size =  512,
+		auto model_size = 1024
+	>
+	struct T_metapile_fast_apply
+	{
+		nik_ces auto callable_source	= T_store_U<contr>::src;
+		nik_ces auto static_pair	= _static_callable_<callable_source>;
+		nik_ces auto static_source	= _static_car_<static_pair>;
+		nik_ces auto static_frame	= _static_cdr_<static_pair>;
+
+		nik_ces auto list		= U_pack_Vs<static_source, subsource>;
+		nik_ces bool sf_is_empty	= member_value_U<static_frame>.is_empty();
+		nik_ces auto static_env		= stem_
+						<
+							sf_is_empty, initial_env,
+							_cons_, H_id, initial_env, static_frame
+						>;
+		nik_ces auto lookup		= unpack_<static_env, _to_list_, H_env_tuple>;
+		nik_ces auto zero		= gindex_type{0};
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			return T_assembly_compound<contr, zero>::template
+				result<list, lookup, out_types, zero, Ts...>(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // read:

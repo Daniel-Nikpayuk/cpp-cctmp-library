@@ -99,7 +99,9 @@ namespace chord {
 			nik_ce auto not_left_fixed  () const { return (left  != Point::fixed); }
 			nik_ce auto not_right_fixed () const { return (right != Point::fixed); }
 			nik_ce auto not_fixed       () const { return (not_left_fixed() && not_right_fixed()); }
+
 			nik_ce auto is_left_open    () const { return (left == Point::open); }
+			nik_ce auto is_right_open   () const { return (right == Point::open); }
 
 			nik_ce void set_left  (csize_type p) { left = p; }
 			nik_ce void set_right (csize_type p) { right = p; }
@@ -524,13 +526,53 @@ namespace chord {
 
 			template<typename AST>
 			nik_ces void define_cycle_after_diminished(AST *t)
-			{
-				t->cycle_back[AST::CycleBack::action] = t->cycle_side[AST::CycleSide::action];
-			}
+				{ t->cycle_back[AST::CycleBack::action] = t->cycle_side[AST::CycleSide::action]; }
 
 			template<typename AST>
 			nik_ces void define_cycle_after_minor(AST *t)
 			{
+				t->cycle_back[AST::CycleBack::action] = t->cycle_side[AST::CycleSide::action];
+
+				if (t->interval.is_right_open(Ival::in)) define_cycle_after_minor_in  (t);
+				else                                     define_cycle_after_minor_ins (t);
+			}
+
+			template<typename AST>
+			nik_ces void define_cycle_after_minor_in(AST *t)
+			{
+				auto out_pos = t->verse.size();
+				auto  in_pos = out_pos + Sign::in;
+				auto ins_pos = out_pos + Sign::ins;
+
+				t->define_after_begin (in_pos);
+				t->define_after_cont  (Ival::in, ins_pos);
+				t->define_after_rest  (Ival::ins, ins_pos);
+				t->define_after_end   ();
+			}
+
+			template<typename AST>
+			nik_ces void define_cycle_after_minor_ins(AST *t)
+			{
+				auto out_pos  = t->verse.size();
+				auto ins_pos  = out_pos + Sign::ins;
+				auto ival_pos = find_cycle_after(t);
+				auto sign_pos = out_pos + ival_pos + 1;
+
+				t->define_after_begin (sign_pos);
+				t->define_after_rest  (ival_pos, ins_pos);
+				t->define_after_end   ();
+			}
+
+			template<typename AST>
+			nik_ces auto find_cycle_after(AST *t)
+			{
+				size_type k = Ival::ins;
+
+				while (k != t->interval.size())
+					if (t->interval.is_right_open(k)) break;
+					else ++k;
+
+				return k;
 			}
 
 		// cycle:

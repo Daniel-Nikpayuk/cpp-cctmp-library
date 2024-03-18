@@ -24,56 +24,24 @@
 #define NIK_CHORD_PARSER_OBJ            "../object/01_chord_parser.hpp"
 #define NIK_HUSTLE_PARSER_OBJ           "../object/02_hustle_parser.hpp"
 
-#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
-#define NIK_CHORD_PARSER
+//#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
+//#define NIK_CHORD_PARSER
 //#define NIK_HUSTLE_PARSER
 
 /***********************************************************************************************************************/
 
 #include"define_macros.hpp"
 
-#include"00_cctmp/00_grammar.hpp"
-#include"00_cctmp/01_argument.hpp"
-#include"00_cctmp/02_parameter.hpp"
-#include"00_cctmp/03_scope.hpp"
-#include"00_cctmp/04_relation.hpp"
-#include"00_cctmp/05_praxis.hpp"
-#include"00_cctmp/06_algorithm.hpp"
-#include"00_cctmp/07_machine.hpp"
-#include"00_cctmp/08_graph.hpp"
-
-#include"01_assembly/00_space.hpp"
-#include"01_assembly/01_constant.hpp"
-#include"01_assembly/02_application.hpp"
-#include"01_assembly/03_conditional.hpp"
-#include"01_assembly/04_action.hpp"
-#include"01_assembly/05_syntax.hpp"
-
-#include"02_generator/00_ll_lexer.hpp"
-#include"02_generator/01_ll_syntax.hpp"
-#include"02_generator/02_ll_parser.hpp"
-#include"02_generator/03_ll_table.hpp"
-
-#include"03_chord/00_lexer.hpp"
-#include"03_chord/01_parser.hpp"
-#include"03_chord/02_cycle.hpp"
-#include"03_chord/03_syntax.hpp"
-#include"03_chord/04_kernel_action.hpp"
-#include"03_chord/05_cycle_action.hpp"
-#include"03_chord/06_metapiler.hpp"
-
-#include"04_hustle/00_lexer.hpp"
-#include"04_hustle/01_parser.hpp"
-#include"04_hustle/02_action.hpp"
-#include"04_hustle/03_metapiler.hpp"
-
-//#include"05_math/00_byte_ring.hpp"
-//#include"05_math/01_byte_array_ring.hpp"
-//#include"05_math/02_cryptography.hpp"
-//#include"05_math/03_linear_algebra.hpp"
-//#include"05_math/04_signal_processing.hpp"
+#include"include/00_cctmp.h"
+#include"include/01_assembly.h"
+#include"include/02_generator.h"
+#include"include/03_chord.h"
+#include"include/04_hustle.h"
 
 #include"undef_macros.hpp"
+
+#include"testing/chord/generic_assembly/square_v0.hpp"
+#include"testing/hustle/square_root_v0.hpp"
 
 //#include"documentation/02_controllers.hpp"
 //#include"documentation/03_generic_assembly.hpp"
@@ -204,27 +172,48 @@
 	{
 		// 17032, 16994
 
-		using chord_size_type = int*;
-		using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
-		using chord_arr_type  = sequence<int, 5>;
+	//	using T_chord_apply = chord::T_apply<_square_v0, null_env, int>;
 
-		int val = 0;
+	//	auto val = T_chord_apply::template result<int>(5);
+	//	printf("%d\n", val);
 
-		chord_arr_type s0({ 1, 2, 3, 4, 5 });
-		chord_arr_type s1({ 1, 2, 3, 4, 5 });
+		//
 
-		T_chord_apply::template result<chord_size_type>(&val, s0.cbegin(), s0.cend(), s1.cbegin());
-		printf("%d\n", val);
+	//	using T_chord_fast_apply = chord::T_fast_apply<_chord_square_v0<gindex_type>, null_env, int>;
+
+	//	auto val = T_chord_fast_apply::result(5);
+	//	printf("%d\n", val);
+
+		//
+
+	//	using T_hustle_fast_apply = hustle::T_fast_apply<_hustle_square_root_v0<gindex_type>, null_env, double>;
+
+	//	auto val = T_hustle_fast_apply::result(double{2});
+	//	printf("%1.11f\n", val);
+
+		//
+
+	//	using chord_size_type = int*;
+	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
+	//	using chord_arr_type  = sequence<int, 5>;
+
+	//	int val = 0;
+
+	//	chord_arr_type s0({ 1, 2, 3, 4, 5 });
+	//	chord_arr_type s1({ 1, 2, 3, 4, 5 });
+
+	//	T_chord_apply::template result<chord_size_type>(&val, s0.cbegin(), s0.cend(), s1.cbegin());
+	//	printf("%d\n", val);
 
 		// 17136, 17056
 		// 17136, 16952
 		// 17680, 16952
 
-	//	using hustle_size_type = double;
-	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
+		using hustle_size_type = double;
+		using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
 
-	//	auto val = T_hustle_apply::result(hustle_size_type(main_at(0, argc, argv)));
-	//	printf("%1.11f\n", val);
+		auto val = T_hustle_apply::result(hustle_size_type(2));//main_at(0, argc, argv)));
+		printf("%1.11f\n", val);
 
 		//
 

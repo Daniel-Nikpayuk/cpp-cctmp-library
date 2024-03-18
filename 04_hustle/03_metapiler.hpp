@@ -130,6 +130,25 @@ namespace hustle {
 	};
 
 /***********************************************************************************************************************/
+
+// fast apply:
+
+	template<auto contr, auto initial_env, typename... OutTypes>
+	struct T_fast_apply
+	{
+		nik_ces auto extended_env			= push_<initial_env, hustle_default_frame>;
+		nik_ces auto out_types				= U_pack_Ts<OutTypes...>;
+		using T_metapile_fast_apply			= assembly::T_metapile_fast_apply
+								<
+									contr, _hustle_subsource_,
+									extended_env, out_types
+								>;
+
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs) { return T_metapile_fast_apply::template result<Ts...>(vs...); }
+	};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
