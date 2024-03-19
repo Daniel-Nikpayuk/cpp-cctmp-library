@@ -35,23 +35,20 @@
 #include"include/00_cctmp.h"
 #include"include/01_assembly.h"
 #include"include/02_generator.h"
-#include"include/03_chord.h"
-#include"include/04_hustle.h"
+#include"include/03_fileput.h"
+#include"include/04_chord.h"
+#include"include/05_hustle.h"
 
 #include"undef_macros.hpp"
 
-#include"testing/chord/generic_assembly/square_v0.hpp"
-#include"testing/hustle/square_root_v0.hpp"
+#include"testing/chord/assembly/directory.h"
+#include"testing/hustle/directory.h"
 
-//#include"documentation/02_controllers.hpp"
-//#include"documentation/03_generic_assembly.hpp"
-//#include"documentation/04_chord_progressions.hpp"
-
-//#include"testing/00_generic_printers.hpp"
-//#include"testing/01_parser_generator_printers.hpp"
-//#include"testing/02_chord_assembly_printers.hpp"
-//#include"testing/04_chord_grammar_tests.hpp"
-//#include"testing/05_progression_grammar_tests.hpp"
+//#include"experimental/00_generic_printers.hpp"
+//#include"experimental/01_parser_generator_printers.hpp"
+//#include"experimental/02_chord_assembly_printers.hpp"
+//#include"experimental/04_chord_grammar_tests.hpp"
+//#include"experimental/05_progression_grammar_tests.hpp"
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -62,28 +59,6 @@
 
 	using chord_grammar			= chord::T_chord_grammar;
 	constexpr auto static_grammar		= U_store_T<chord_grammar>;
-
-	template<auto static_contr>
-	void print_controller(int b = 0, int e = member_value_U<static_contr>.size())
-	{
-		constexpr auto & contr = member_value_U<static_contr>;
-
-		for (auto k = b; k != e; ++k)
-		{
-			auto s = (k < 10) ? "  " : (k < 100) ? " " : "";
-			printf("line %s%d -", s, k);
-
-			for (auto j = 0; j != Instr::dimension; ++j)
-			{
-				auto v = contr[k][j];
-				auto t = (v < 10) ? "  " : (v < 100) ? " " : "";
-
-				printf(" %s%d", t, v);
-			}
-
-			printf("\n");
-		}
-	}
 
 /***********************************************************************************************************************/
 
@@ -170,25 +145,22 @@
 
 	int main(int argc, char *argv[])
 	{
-		// 17032, 16994
-
-	//	using T_chord_apply = chord::T_apply<_square_v0, null_env, int>;
-
-	//	auto val = T_chord_apply::template result<int>(5);
-	//	printf("%d\n", val);
-
-		//
-
-	//	using T_chord_fast_apply = chord::T_fast_apply<_chord_square_v0<gindex_type>, null_env, int>;
+	//	using T_chord_fast_apply = chord::T_fast_apply
+	//	<
+	//		contr_object_chord_square_v0<gindex_type>, _chord_square_v0, null_env, int
+	//	>;
 
 	//	auto val = T_chord_fast_apply::result(5);
 	//	printf("%d\n", val);
 
 		//
 
-	//	using T_hustle_fast_apply = hustle::T_fast_apply<_hustle_square_root_v0<gindex_type>, null_env, double>;
+	//	using T_hustle_fast_apply = hustle::T_fast_apply
+	//	<
+	//		contr_object_hustle_square_root_v0<gindex_type>, _hustle_square_root_v0, null_env, double
+	//	>;
 
-	//	auto val = T_hustle_fast_apply::result(double{2});
+	//	auto val = T_hustle_fast_apply::result(main_at(0, argc, argv));
 	//	printf("%1.11f\n", val);
 
 		//
@@ -205,15 +177,13 @@
 	//	T_chord_apply::template result<chord_size_type>(&val, s0.cbegin(), s0.cend(), s1.cbegin());
 	//	printf("%d\n", val);
 
-		// 17136, 17056
-		// 17136, 16952
-		// 17680, 16952
+		//
 
-		using hustle_size_type = double;
-		using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
+	//	using hustle_size_type = double;
+	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
 
-		auto val = T_hustle_apply::result(hustle_size_type(2));//main_at(0, argc, argv)));
-		printf("%1.11f\n", val);
+	//	auto val = T_hustle_apply::result(hustle_size_type(main_at(0, argc, argv)));
+	//	printf("%1.11f\n", val);
 
 		//
 

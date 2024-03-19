@@ -462,6 +462,7 @@ namespace cctmp {
 			// immutable:
 
 				nik_ce size_type length () const { return Size; }
+				nik_ce ctype_ptr origin () const { return initial; }
 
 				nik_ce auto left_size (ctype_cptr i) const { return i - initial; }
 

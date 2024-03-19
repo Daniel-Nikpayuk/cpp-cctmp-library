@@ -438,6 +438,7 @@ namespace assembly {
 	template
 	<
 		auto contr,
+		auto callable_source,
 		auto subsource,
 		auto initial_env,
 		auto out_types,
@@ -448,7 +449,6 @@ namespace assembly {
 	>
 	struct T_metapile_fast_apply
 	{
-		nik_ces auto callable_source	= T_store_U<contr>::src;
 		nik_ces auto static_pair	= _static_callable_<callable_source>;
 		nik_ces auto static_source	= _static_car_<static_pair>;
 		nik_ces auto static_frame	= _static_cdr_<static_pair>;

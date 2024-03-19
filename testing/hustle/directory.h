@@ -17,11 +17,7 @@
 **
 ************************************************************************************************************************/
 
-#include"../03_chord/00_lexer.hpp"
-#include"../03_chord/01_parser.hpp"
-#include"../03_chord/02_cycle.hpp"
-#include"../03_chord/03_syntax.hpp"
-#include"../03_chord/04_kernel_action.hpp"
-#include"../03_chord/05_cycle_action.hpp"
-#include"../03_chord/06_metapiler.hpp"
+#include"inventory.hpp"
+
+#include"square_root_v0.hpp"
 

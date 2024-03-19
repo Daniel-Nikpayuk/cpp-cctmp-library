@@ -599,6 +599,9 @@ namespace cctmp {
 		struct T_grammar<Shape::argument, Pattern::array, ArgArray::size, filler...>
 		{
 			template<typename T, auto S>
+			nik_ces auto result(T[S]) { return S; }
+
+			template<typename T, auto S>
 			nik_ces auto result(T(&)[S]) { return S; }
 
 		}; nik_ce auto _array_size_ = U_arg_array<ArgArray::size>;

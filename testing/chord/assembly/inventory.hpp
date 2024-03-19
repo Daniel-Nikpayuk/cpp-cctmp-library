@@ -17,39 +17,23 @@
 **
 ************************************************************************************************************************/
 
-#include<cstdio>
-#include<cstdlib>
-
-#define NIK_PARSER_GENERATOR_PARSER_OBJ "../object/00_parser_generator_parser.hpp"
-#define NIK_HUSTLE_PARSER_OBJ           "../object/02_hustle_parser.hpp"
-
-//#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
-//#define NIK_HUSTLE_PARSER
+// inventory:
 
 /***********************************************************************************************************************/
 
-#include"../../define_macros.hpp"
+// square:
 
-#include"../../include/00_cctmp.h"
-#include"../../include/01_assembly.h"
-#include"../../include/02_generator.h"
-#include"../../include/03_fileput.h"
-#include"../../include/05_hustle.h"
+	// v0:
 
-#include"../../undef_macros.hpp"
+		constexpr auto _chord_square_v0()
+		{
+			return cctmp::source
+			(
+				"main x           ;"
 
-#include"inventory.hpp"
-
-/***********************************************************************************************************************/
-
-	constexpr auto contr_hustle_square_root_v0 = hustle::metapile<_hustle_square_root_v0, cctmp::null_env>;
-
-/***********************************************************************************************************************/
-
-	int main(int argc, char *argv[])
-	{
-		fileput::write_controller<contr_hustle_square_root_v0>("hustle", "square_root_v0");
-
-		return 0;
-	}
+				"body:            ;"
+				". = multiply x x ;"
+				"return _         ;"
+			);
+		}
 

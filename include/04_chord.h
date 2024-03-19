@@ -17,9 +17,11 @@
 **
 ************************************************************************************************************************/
 
-#include"../05_math/00_byte_ring.hpp"
-#include"../05_math/01_byte_array_ring.hpp"
-#include"../05_math/02_cryptography.hpp"
-#include"../05_math/03_linear_algebra.hpp"
-#include"../05_math/04_signal_processing.hpp"
+#include"../04_chord/00_lexer.hpp"
+#include"../04_chord/01_parser.hpp"
+#include"../04_chord/02_cycle.hpp"
+#include"../04_chord/03_syntax.hpp"
+#include"../04_chord/04_kernel_action.hpp"
+#include"../04_chord/05_cycle_action.hpp"
+#include"../04_chord/06_metapiler.hpp"
 

@@ -21,34 +21,34 @@
 #include<cstdlib>
 
 #define NIK_PARSER_GENERATOR_PARSER_OBJ "../object/00_parser_generator_parser.hpp"
-#define NIK_HUSTLE_PARSER_OBJ           "../object/02_hustle_parser.hpp"
+#define NIK_CHORD_PARSER_OBJ            "../object/01_chord_parser.hpp"
 
-//#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
-//#define NIK_HUSTLE_PARSER
+#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
+#define NIK_CHORD_PARSER
 
 /***********************************************************************************************************************/
 
-#include"../../define_macros.hpp"
+#include"../../../define_macros.hpp"
 
-#include"../../include/00_cctmp.h"
-#include"../../include/01_assembly.h"
-#include"../../include/02_generator.h"
-#include"../../include/03_fileput.h"
-#include"../../include/05_hustle.h"
+#include"../../../include/00_cctmp.h"
+#include"../../../include/01_assembly.h"
+#include"../../../include/02_generator.h"
+#include"../../../include/03_fileput.h"
+#include"../../../include/04_chord.h"
 
-#include"../../undef_macros.hpp"
+#include"../../../undef_macros.hpp"
 
 #include"inventory.hpp"
 
 /***********************************************************************************************************************/
 
-	constexpr auto contr_hustle_square_root_v0 = hustle::metapile<_hustle_square_root_v0, cctmp::null_env>;
+	constexpr auto contr_chord_square_v0 = chord::metapile<_chord_square_v0, cctmp::null_env>;
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		fileput::write_controller<contr_hustle_square_root_v0>("hustle", "square_root_v0");
+		fileput::write_controller<contr_chord_square_v0>("chord", "square_v0");
 
 		return 0;
 	}

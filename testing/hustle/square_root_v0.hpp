@@ -1,4 +1,4 @@
-/***********************************************************************************************************************
+/************************************************************************************************************************
 **
 ** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
@@ -15,21 +15,14 @@
 ** You should have received a copy of the GNU General Public License along with cpp_cctmp_library.
 ** If not, see <http://www.gnu.org/licenses/>.
 **
-***********************************************************************************************************************/
+************************************************************************************************************************/
+
+// object:
 
 	template<typename SizeType>
-	struct T_hustle_square_root_v0
+	struct T_contr_object_hustle_square_root_v0
 	{
 		using size_type = SizeType;
-
-		constexpr static auto src()
-		{
-			return cctmp::source
-			(
-				"(type T                                                                      (define (sqrt x)                                                             (define (square y) (* y y))                                                (define (abs y) (if (< y 0) (- y) y))                                      (define (good-enough? guess) (< (abs (- (square guess) x)) tolerance))     (define (average y z) (/ (+ y z) 2))                                       (define (improve guess) (average guess (/ x guess)) )                      (define (sqrt-iter guess) -> T                                               (if (good-enough? guess) guess (sqrt-iter (improve guess)))              )                                                                          (sqrt-iter 1:T)                                                          )                                                                        )                                                                          "
-				, cctmp::binding( "tolerance" , 0.0001 )
-			);
-		}
 
 		constexpr static size_type value[][5] =
 		{
@@ -229,5 +222,8 @@
 		};
 
 	}; template<typename SizeType>
-		constexpr auto _hustle_square_root_v0 = cctmp::U_store_T<T_hustle_square_root_v0<SizeType>>;
+		constexpr auto contr_object_hustle_square_root_v0 = cctmp::U_store_T
+		<
+			T_contr_object_hustle_square_root_v0<SizeType>
+		>;
 

@@ -1,4 +1,4 @@
-/***********************************************************************************************************************
+/************************************************************************************************************************
 **
 ** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
 **
@@ -15,20 +15,14 @@
 ** You should have received a copy of the GNU General Public License along with cpp_cctmp_library.
 ** If not, see <http://www.gnu.org/licenses/>.
 **
-***********************************************************************************************************************/
+************************************************************************************************************************/
+
+// object:
 
 	template<typename SizeType>
-	struct T_chord_square_v0
+	struct T_contr_object_chord_square_v0
 	{
 		using size_type = SizeType;
-
-		constexpr static auto src()
-		{
-			return cctmp::source
-			(
-				"main x           ;body:            ;. = multiply x x ;return _         ;"
-			);
-		}
 
 		constexpr static size_type value[][5] =
 		{
@@ -62,5 +56,8 @@
 		};
 
 	}; template<typename SizeType>
-		constexpr auto _chord_square_v0 = cctmp::U_store_T<T_chord_square_v0<SizeType>>;
+		constexpr auto contr_object_chord_square_v0 = cctmp::U_store_T
+		<
+			T_contr_object_chord_square_v0<SizeType>
+		>;
 
