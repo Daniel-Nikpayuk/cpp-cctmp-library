@@ -42,13 +42,72 @@
 
 /***********************************************************************************************************************/
 
-	constexpr auto contr_chord_square_v0 = chord::metapile<_chord_square_v0, cctmp::null_env>;
+	template<auto callable_source, auto initial_env>
+	constexpr auto metapile = chord::metapile<callable_source, initial_env>;
+
+	constexpr auto null_env = cctmp::null_env;
+
+/***********************************************************************************************************************/
+
+//	constexpr auto contr_chord_square_v0             = metapile< _chord_square_v0             , null_env >;
+//	constexpr auto contr_chord_square_v1             = metapile< _chord_square_v1             , null_env >;
+//	constexpr auto contr_chord_sum_of_squares_v0     = metapile< _chord_sum_of_squares_v0     , null_env >;
+//	constexpr auto contr_chord_sum_of_squares_v1     = metapile< _chord_sum_of_squares_v1     , null_env >;
+//	constexpr auto contr_chord_twice_v0              = metapile< _chord_twice_v0              , null_env >;
+//	constexpr auto contr_chord_plus_n_v0             = metapile< _chord_plus_n_v0             , null_env >;
+//	constexpr auto contr_chord_two_x_sqd_v0          = metapile< _chord_two_x_sqd_v0          , null_env >;
+//	constexpr auto contr_chord_x_sqd_plus_y4_v0      = metapile< _chord_x_sqd_plus_y4_v0      , null_env >;
+//	constexpr auto contr_chord_x_to5_plus1_v0        = metapile< _chord_x_to5_plus1_v0        , null_env >;
+//	constexpr auto contr_chord_reassign_v0           = metapile< _chord_reassign_v0           , null_env >;
+//	constexpr auto contr_chord_if_then_else_v0       = metapile< _chord_if_then_else_v0       , null_env >;
+//	constexpr auto contr_chord_semidynamic_typing_v0 = metapile< _chord_semidynamic_typing_v0 , null_env >;
+//	constexpr auto contr_chord_semidynamic_typing_v1 = metapile< _chord_semidynamic_typing_v1 , null_env >;
+//	constexpr auto contr_chord_binary_dispatch_v0    = metapile< _chord_binary_dispatch_v0    , null_env >;
+//	constexpr auto contr_chord_binary_dispatch_v1    = metapile< _chord_binary_dispatch_v1    , null_env >;
+//	constexpr auto contr_chord_factorial_v0          = metapile< _chord_factorial_v0          , null_env >;
+//	constexpr auto contr_chord_factorial_v1          = metapile< _chord_factorial_v1          , null_env >;
+//	constexpr auto contr_chord_factorial_v2          = metapile< _chord_factorial_v2          , null_env >;
+//	constexpr auto contr_chord_factorial_v3          = metapile< _chord_factorial_v3          , null_env >;
+//	constexpr auto contr_chord_factorial_v4          = metapile< _chord_factorial_v4          , null_env >;
+//	constexpr auto contr_chord_factorial_v5          = metapile< _chord_factorial_v5          , null_env >;
+//	constexpr auto contr_chord_fibonacci_v0          = metapile< _chord_fibonacci_v0          , null_env >;
+//	constexpr auto contr_chord_fibonacci_v1          = metapile< _chord_fibonacci_v1          , null_env >;
+//	constexpr auto contr_chord_fall_fact_2_v0        = metapile< _chord_fall_fact_2_v0<true>  , null_env >;
+//	constexpr auto contr_chord_fall_fact_2_v1        = metapile< _chord_fall_fact_2_v1<true>  , null_env >;
+//	constexpr auto contr_chord_void_effects_v0       = metapile< _chord_void_effects_v0       , null_env >;
+//	constexpr auto contr_chord_side_effects_v0       = metapile< _chord_side_effects_v0       , null_env >;
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		fileput::write_controller<contr_chord_square_v0>("chord", "square_v0");
+	//	fileput::write_controller< contr_chord_square_v0             >( "chord" , "square_v0"             );
+	//	fileput::write_controller< contr_chord_square_v1             >( "chord" , "square_v1"             );
+	//	fileput::write_controller< contr_chord_sum_of_squares_v0     >( "chord" , "sum_of_squares_v0"     );
+	//	fileput::write_controller< contr_chord_sum_of_squares_v1     >( "chord" , "sum_of_squares_v1"     );
+	//	fileput::write_controller< contr_chord_twice_v0              >( "chord" , "twice_v0"              );
+	//	fileput::write_controller< contr_chord_plus_n_v0             >( "chord" , "plus_n_v0"             );
+	//	fileput::write_controller< contr_chord_two_x_sqd_v0          >( "chord" , "two_x_sqd_v0"          );
+	//	fileput::write_controller< contr_chord_x_sqd_plus_y4_v0      >( "chord" , "x_sqd_plus_y4_v0"      );
+	//	fileput::write_controller< contr_chord_x_to5_plus1_v0        >( "chord" , "x_to5_plus1_v0"        );
+	//	fileput::write_controller< contr_chord_reassign_v0           >( "chord" , "reassign_v0"           );
+	//	fileput::write_controller< contr_chord_if_then_else_v0       >( "chord" , "if_then_else_v0"       );
+	//	fileput::write_controller< contr_chord_semidynamic_typing_v0 >( "chord" , "semidynamic_typing_v0" );
+	//	fileput::write_controller< contr_chord_semidynamic_typing_v1 >( "chord" , "semidynamic_typing_v1" );
+	//	fileput::write_controller< contr_chord_binary_dispatch_v0    >( "chord" , "binary_dispatch_v0"    );
+	//	fileput::write_controller< contr_chord_binary_dispatch_v1    >( "chord" , "binary_dispatch_v1"    );
+	//	fileput::write_controller< contr_chord_factorial_v0          >( "chord" , "factorial_v0"          );
+	//	fileput::write_controller< contr_chord_factorial_v1          >( "chord" , "factorial_v1"          );
+	//	fileput::write_controller< contr_chord_factorial_v2          >( "chord" , "factorial_v2"          );
+	//	fileput::write_controller< contr_chord_factorial_v3          >( "chord" , "factorial_v3"          );
+	//	fileput::write_controller< contr_chord_factorial_v4          >( "chord" , "factorial_v4"          );
+	//	fileput::write_controller< contr_chord_factorial_v5          >( "chord" , "factorial_v5"          );
+	//	fileput::write_controller< contr_chord_fibonacci_v0          >( "chord" , "fibonacci_v0"          );
+	//	fileput::write_controller< contr_chord_fibonacci_v1          >( "chord" , "fibonacci_v1"          );
+	//	fileput::write_controller< contr_chord_fall_fact_2_v0        >( "chord" , "fall_fact_2_v0"        );
+	//	fileput::write_controller< contr_chord_fall_fact_2_v1        >( "chord" , "fall_fact_2_v1"        );
+	//	fileput::write_controller< contr_chord_void_effects_v0       >( "chord" , "void_effects_v0"       );
+	//	fileput::write_controller< contr_chord_side_effects_v0       >( "chord" , "side_effects_v0"       );
 
 		return 0;
 	}

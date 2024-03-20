@@ -42,13 +42,20 @@
 
 /***********************************************************************************************************************/
 
-	constexpr auto contr_hustle_square_root_v0 = hustle::metapile<_hustle_square_root_v0, cctmp::null_env>;
+	template<auto callable_source, auto initial_env>
+	constexpr auto metapile = hustle::metapile<callable_source, initial_env>;
+
+	constexpr auto null_env = cctmp::null_env;
+
+/***********************************************************************************************************************/
+
+	constexpr auto contr_hustle_square_root_v0 = metapile< _hustle_square_root_v0 , null_env >;
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		fileput::write_controller<contr_hustle_square_root_v0>("hustle", "square_root_v0");
+		fileput::write_controller< contr_hustle_square_root_v0 >( "hustle" , "square_root_v0" );
 
 		return 0;
 	}

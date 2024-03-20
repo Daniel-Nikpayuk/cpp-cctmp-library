@@ -41,8 +41,8 @@
 
 #include"undef_macros.hpp"
 
-#include"testing/chord/assembly/directory.h"
-#include"testing/hustle/directory.h"
+#include"testing/chord/assembly/unit_test.hpp"
+//#include"testing/hustle/unit_test.hpp"
 
 //#include"experimental/00_generic_printers.hpp"
 //#include"experimental/01_parser_generator_printers.hpp"
@@ -145,26 +145,6 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	using T_chord_fast_apply = chord::T_fast_apply
-	//	<
-	//		contr_object_chord_square_v0<gindex_type>, _chord_square_v0, null_env, int
-	//	>;
-
-	//	auto val = T_chord_fast_apply::result(5);
-	//	printf("%d\n", val);
-
-		//
-
-	//	using T_hustle_fast_apply = hustle::T_fast_apply
-	//	<
-	//		contr_object_hustle_square_root_v0<gindex_type>, _hustle_square_root_v0, null_env, double
-	//	>;
-
-	//	auto val = T_hustle_fast_apply::result(main_at(0, argc, argv));
-	//	printf("%1.11f\n", val);
-
-		//
-
 	//	using chord_size_type = int*;
 	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
 	//	using chord_arr_type  = sequence<int, 5>;
@@ -192,6 +172,40 @@
 
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};
 	//	tr_table_printer.print_num_tr_table();
+
+		//
+
+	//	unit_test_chord_square_v0             <gindex_type> (5);
+	//	unit_test_chord_square_v1             <gindex_type> (5);
+	//	unit_test_chord_sum_of_squares_v0     <gindex_type> (3, 4);
+	//	unit_test_chord_sum_of_squares_v1     <gindex_type> (3, 4);
+	//	unit_test_chord_twice_v0              <gindex_type> (5);
+	//	unit_test_chord_plus_n_v0             <gindex_type> (3, 4);
+	//	unit_test_chord_two_x_sqd_v0          <gindex_type> (5);
+	//	unit_test_chord_x_sqd_plus_y4_v0      <gindex_type> (3, 2);
+	//	unit_test_chord_x_to5_plus1_v0        <gindex_type> (2, 0);
+	//	unit_test_chord_reassign_v0           <gindex_type> (3, 4);
+	//	unit_test_chord_if_then_else_v0       <gindex_type> (true, 5, 6);
+	//	unit_test_chord_semidynamic_typing_v0 <gindex_type> (complex_number{1, 0}, 6); // *
+	//	unit_test_chord_semidynamic_typing_v1 <gindex_type> (complex_number{1, 0}, 6); // **
+	//	unit_test_chord_binary_dispatch_v0    <gindex_type> (true, 3, 4); // **
+	//	unit_test_chord_binary_dispatch_v1    <gindex_type> (true, 3, 4); // **
+	//	unit_test_chord_factorial_v0          <gindex_type> (9);
+	//	unit_test_chord_factorial_v1          <gindex_type> (9);
+	//	unit_test_chord_factorial_v2          <gindex_type> (9); // **
+	//	unit_test_chord_factorial_v3          <gindex_type> (9);
+	//	unit_test_chord_factorial_v4          <gindex_type> (9);
+	//	unit_test_chord_factorial_v5          <gindex_type> (9);
+	//	unit_test_chord_fibonacci_v0          <gindex_type> (8); // **
+	//	unit_test_chord_fibonacci_v1          <gindex_type> (8); // **
+	//	unit_test_chord_fall_fact_2_v0        <true, gindex_type> (5);
+	//	unit_test_chord_fall_fact_2_v1        <true, gindex_type> (5); // *
+	//	unit_test_chord_void_effects_v0       <gindex_type> ();
+	//	unit_test_chord_side_effects_v0       <gindex_type> ();
+
+		//
+
+	//	unit_test_hustle_square_root_v0<gindex_type>(2.0);
 
 		return 0;
 	}

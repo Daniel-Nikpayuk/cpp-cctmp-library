@@ -220,7 +220,7 @@ namespace fileput {
 	template<auto static_contr, typename T, auto N0, auto N1>
 	void write_controller(const T(&s0)[N0], const T(&s1)[N1])
 	{
-		auto file_ptr = fopen(string16_catenate(s1, ".hpp").origin(), "w");
+		auto file_ptr = fopen(string16_catenate("contr/", s1, ".hpp").origin(), "w");
 
 		if (file_ptr) write_to_file<static_contr>(file_ptr, s0, s1);
 

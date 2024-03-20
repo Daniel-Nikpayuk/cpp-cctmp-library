@@ -17,7 +17,28 @@
 **
 ************************************************************************************************************************/
 
+// unit test:
+
+#include"contr/square_root_v0.hpp"
+
 #include"inventory.hpp"
 
-#include"square_root_v0.hpp"
+/***********************************************************************************************************************/
+
+// square root:
+
+	// v0:
+
+		template<typename SizeType, typename T>
+		constexpr void unit_test_hustle_square_root_v0(T v)
+		{
+			using T_hustle_fast_apply = hustle::T_fast_apply
+			<
+				contr_object_hustle_square_root_v0<SizeType>,
+				_hustle_square_root_v0, cctmp::null_env, T
+			>;
+
+			auto val = T_hustle_fast_apply::result(v);
+			printf("%1.11f\n", val);
+		}
 
