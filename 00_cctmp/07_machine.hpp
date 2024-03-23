@@ -540,13 +540,9 @@ namespace cctmp {
 
 		struct Policy { enum : size_type { absolute = 0, relative, dimension }; };
 
-		cindex src_at;
-		cindex str_at;
-
 		stack_type stack; 
 
-		nik_ce T_machine_contr(cindex src, cindex str) :
-			base{}, src_at{src}, str_at{str} { }
+		nik_ce T_machine_contr() : base{} { }
 
 		// instr:
 

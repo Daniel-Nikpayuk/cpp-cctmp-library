@@ -3630,6 +3630,45 @@ namespace cctmp_program
 	//	auto targeted_printer = chord_assembly_targeted_printer<src>{};
 	//	targeted_printer.print_controller();
 
+/*
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(define (main)                    "
+			"  (define (morph n)               "
+			"    (define (iter k n)            "
+			"      (if (= k n) nil             "
+			"        (cons k (iter (+ k 1) n)) "
+			"      )                           "
+			"    )                             "
+			"    (iter 0 n)                    "
+			"  )                               "
+			"  (morph 5)                       " // (0 1 2 3 4)
+			")                                 "
+		);
+	}
+*/
+
+/*
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(define (main)             "
+			"  (define (f y)            "
+			"    (define (g x) (+ x y)) "
+			"    g                      "
+			"  )                        "
+			"  ((f 5) 6)                "
+			")                          "
+		);
+	}
+*/
+
+		//	"  (define (f x) (+ x 5)) "
+		//	"  f                      "
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

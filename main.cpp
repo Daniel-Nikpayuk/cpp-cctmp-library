@@ -42,7 +42,7 @@
 #include"undef_macros.hpp"
 
 //#include"testing/chord/assembly/unit_test.hpp"
-#include"testing/hustle/unit_test.hpp"
+//#include"testing/hustle/unit_test.hpp"
 
 //#include"experimental/00_generic_printers.hpp"
 //#include"experimental/01_parser_generator_printers.hpp"
@@ -115,53 +115,13 @@
 
 // hustle:
 
-/*
 	constexpr auto _hustle_test_func()
 	{
 		return source
 	        (
-			"(define (main)                    "
-			"  (define (morph n)               "
-			"    (define (iter k n)            "
-			"      (if (= k n) nil             "
-			"        (cons k (iter (+ k 1) n)) "
-			"      )                           "
-			"    )                             "
-			"    (iter 0 n)                    "
-			"  )                               "
-			"  (morph 5)                       " // (0 1 2 3 4)
-			")                                 "
-		);
-	}
-*/
-
-/*
-	constexpr auto _hustle_test_func()
-	{
-		return source
-	        (
-			"(define (main)             "
-			"  (define (f y)            "
-			"    (define (g x) (+ x y)) "
-			"    g                      "
-			"  )                        "
-			"  ((f 5) 6)                "
-			")                          "
-		);
-	}
-*/
-
-		//	"  (define (f x) (+ x 5)) "
-		//	"  f                      "
-
-	constexpr auto _hustle_test_func()
-	{
-		return source
-	        (
-			"(type T"
 			"(define (main)           "
-			"  5:T                    "
-			"))                       "
+			"  5                      "
+			")                        "
 		);
 	}
 
@@ -169,11 +129,11 @@
 
 	int main(int argc, char *argv[])
 	{
-		using hustle_size_type = double;
-		using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
+	//	using hustle_size_type = double;
+	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
 
-		auto val = T_hustle_apply::result();
-		printf("%f\n", val);
+	//	auto val = T_hustle_apply::result();
+	//	printf("%f\n", val);
 
 		//
 
@@ -191,7 +151,7 @@
 
 		//
 
-	//	fileput::print_controller<chord::metapile<_chord_test_func, null_env>>();//103);
+	//	fileput::print_controller<chord::metapile<_chord_test_func, null_env>>();
 	//	fileput::print_controller<hustle::metapile<_hustle_test_func, null_env>>();
 
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};

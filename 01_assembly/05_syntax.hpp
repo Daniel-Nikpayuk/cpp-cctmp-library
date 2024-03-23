@@ -230,6 +230,7 @@ namespace assembly {
 
 		protected:
 
+			size_type asm_name;
 			size_type asm_note;
 			size_type asm_pos;
 			size_type asm_num;
@@ -237,19 +238,22 @@ namespace assembly {
 
 		public:
 
-			nik_ce T_syntax_literal() : asm_note{}, asm_pos{}, asm_num{}, asm_aux{} { }
+			nik_ce T_syntax_literal() : asm_name{}, asm_note{}, asm_pos{}, asm_num{}, asm_aux{} { }
 
+			nik_ce auto name () const { return asm_name; }
 			nik_ce auto note () const { return asm_note; }
 			nik_ce auto pos  () const { return asm_pos; }
 			nik_ce auto num  () const { return asm_num; }
 			nik_ce auto aux  () const { return asm_aux; }
 
-			nik_ce void set(csize_type a, csize_type p, csize_type n = 0, csize_type x = 0)
+			nik_ce void set(csize_type n0, csize_type n1,
+				csize_type p0, csize_type p1 = 0, csize_type p2 = 0)
 			{
-				asm_note = a;
-				asm_pos  = p;
-				asm_num  = n;
-				asm_aux  = x;
+				asm_name = n0;
+				asm_note = n1;
+				asm_pos  = p0;
+				asm_num  = p1;
+				asm_aux  = p2;
 			}
 	};
 
@@ -491,14 +495,6 @@ namespace assembly {
 		using count_type		= T_syntax_count<size_type>;
 		using replace_type		= T_syntax_replace<cselect, size_type>;
 
-		enum : gkey_type
-		{
-			src_at = 0,
-			str_at,
-
-			dimension
-		};
-
 		contr_type contr;
 		model_type model;
 		literal_type literal;
@@ -511,7 +507,7 @@ namespace assembly {
 		replace_type replace;
 		cselect name;
 
-		nik_ce T_syntax_tree() : contr{src_at, str_at}, model{src} { }
+		nik_ce T_syntax_tree() : model{src} { }
 
 		// action:
 
@@ -522,6 +518,9 @@ namespace assembly {
 			nik_ce void first_return() { assembly_action<AAN::id, AAT::end>(AT::first); }
 
 		// source:
+
+			template<typename T>
+			nik_ce auto divisor(T v) { T n{1}; while (--v != 0) n *= 10; return n; }
 
 			nik_ce auto left_size(src_ptr i) const { return i - src.origin(); }
 
@@ -695,12 +694,12 @@ namespace assembly {
 				// boolean:
 
 					nik_ce void delay_boolean_return(const bool value)
-						{ literal.set(AT::boolean, value); }
+						{ literal.set(AN::literal, AT::boolean, value); }
 
 				// character:
 
 					nik_ce void delay_character_return(src_ptr b, src_ptr e)
-						{ literal.set(AT::character, *e); }
+						{ literal.set(AN::literal, AT::character, *(b + 1)); }
 
 				// n_number:
 
@@ -708,7 +707,7 @@ namespace assembly {
 					{
 						auto pos = cctmp::apply<_string_to_builtin_<U_gindex_type>>(b, e);
 						
-						literal.set(AT::n_number, pos);
+						literal.set(AN::literal, AT::n_number, pos);
 					}
 
 				// r_number:
@@ -718,8 +717,9 @@ namespace assembly {
 						src_ptr k = cctmp::apply<_subarray_match_<>>(b, e, '.');
 						auto pos  = cctmp::apply<_string_to_builtin_<U_gindex_type>>(b, k);
 						auto num  = cctmp::apply<_string_to_builtin_<U_gindex_type>>(k+1, e);
+						auto div  = divisor(e-k);
 
-						literal.set(AT::r_number, pos, num, e-k);
+						literal.set(AN::floating, AT::r_number, pos, num, div);
 					}
 
 			// force:
@@ -729,12 +729,13 @@ namespace assembly {
 
 				nik_ce void force_literal_value()
 				{
+					auto name = literal.name();
 					auto note = stage.note_return();
 					auto pos  = literal.pos();
 					auto num  = literal.num();
 					auto aux0 = literal.aux();
 
-					assembly_action<AAN::push, AAT::instr>(AN::literal, note, pos, num, aux0);
+					assembly_action<AAN::push, AAT::instr>(name, note, pos, num, aux0);
 					stage.upsize_if();
 				}
 
@@ -746,7 +747,7 @@ namespace assembly {
 
 				nik_ce void force_literal_return(cindex pos)
 				{
-					force_literal_port(AT::port, pos);
+					force_literal_port(AT::push, pos);
 					force_literal_value();
 				}
 

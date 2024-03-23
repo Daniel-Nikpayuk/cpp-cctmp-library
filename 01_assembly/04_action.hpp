@@ -47,8 +47,7 @@ namespace assembly {
 
 			push, delay, force, generic,
 			arg, lookup, literal,
-			solve, resolve, pad,
-			eval, back, replace,
+			pad, eval, back, replace,
 			go_to, branch, invert,
 
 			dimension
@@ -147,41 +146,6 @@ namespace assembly {
 			nik_ces void result(Contr *contr, cindex note, cindex pos, cindex num)
 				{ assembly_action<AAN::push, AAT::instr>(contr, AN::lookup, note, pos, num); }
 		};
-
-/***********************************************************************************************************************/
-
-// solve:
-
-	// id:
-
-	//	template<auto... filler>
-	//	struct T_assembly_action<AAN::solve, AAT::id, filler...>
-	//	{
-	//		using cindex = gcindex_type;
-
-	//		template<typename Contr>
-	//		nik_ces void result(Contr *contr, cindex name, cindex begin, cindex end)
-	//			{ assembly_action<AAN::push, AAT::instr>(contr, name, AT::id, begin, end); }
-	//	};
-
-/***********************************************************************************************************************/
-
-// resolve:
-
-	// id:
-
-	//	template<auto... filler>
-	//	struct T_assembly_action<AAN::resolve, AAT::id, filler...>
-	//	{
-	//		using cindex = gcindex_type;
-
-	//		template<typename Contr>
-	//		nik_ces void result(Contr *contr, cindex pos, cindex name, cindex begin, cindex end)
-	//		{
-	//			assembly_action<AAN::push, AAT::instr>(contr, AN::type, AT::push, pos);
-	//			assembly_action<AAN::push, AAT::instr>(contr, name, AT::port, begin, end);
-	//		}
-	//	};
 
 /***********************************************************************************************************************/
 

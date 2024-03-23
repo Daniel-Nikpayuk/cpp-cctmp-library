@@ -27,6 +27,7 @@ namespace fileput {
 
 // cctmp:
 
+	using gchar_type					= cctmp::gchar_type;
 	using gindex_type					= cctmp::gindex_type;
 
 	template<auto U>
@@ -112,6 +113,8 @@ namespace fileput {
 	template<typename T, auto N0, auto N1>
 	constexpr auto string_def_begin(const T(&s0)[N0], const T(&s1)[N1])
 	{
+		nik_ce T size[] = "8";
+
 		return string16_catenate
 		(
 			"// object:\n\n"
@@ -124,7 +127,11 @@ namespace fileput {
 			"\t{\n"
 			"\t\tusing size_type = SizeType;\n"
 			"\n"
-			"\t\tconstexpr static size_type value[][5] =\n"
+			"\t\tconstexpr static size_type value[][",
+
+			size,
+
+			"] =\n"
 			"\t\t{\n"
 		);
 	}
