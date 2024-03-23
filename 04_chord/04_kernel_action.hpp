@@ -25,37 +25,7 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// subsource:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	struct T_chord_subsource
-	{
-		nik_ces auto value			= cctmp::string_literal
-							{
-								"false"
-								"true"
-							};
-		using type				= decltype(value);
-
-		nik_ces gindex_type false_start		= 0;
-		nik_ces gindex_type false_size		= 5;
-		nik_ces gindex_type false_finish	= value.size() - (false_start + false_size);
-		nik_ces auto false_cselect		= value.cselect(false_start, false_finish);
-
-		nik_ces gindex_type true_start		= false_start + false_size;
-		nik_ces gindex_type true_size		= 4;
-		nik_ces gindex_type true_finish		= value.size() - (true_start + true_size);
-		nik_ces auto true_cselect		= value.cselect(true_start, true_finish);
-
-	}; nik_ce auto _chord_subsource_ = U_store_T<T_chord_subsource>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// generic action:
+// generic:
 
 /***********************************************************************************************************************/
 
@@ -456,27 +426,25 @@ namespace chord {
 
 // literal:
 
-	// (name):
-
-		template<auto lit_name, auto... filler>
-		struct T_literal_return_action
-		{
-			template<typename AST>
-			nik_ces void result(AST *t, clexeme *l)
-				{ t->delay_literal_return(lit_name, l->cbegin(), l->ccurrent()); }
-		};
-
 	// n_number:
 
 		template<auto... filler>
-		struct T_chord_translation_action<CAAN::literal_n_number, filler...> :
-			public T_literal_return_action<AN::n_number> { };
+		struct T_chord_translation_action<CAAN::literal_n_number, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->delay_n_number_return(l->cbegin(), l->ccurrent()); }
+		};
 
 	// r_number:
 
 		template<auto... filler>
-		struct T_chord_translation_action<CAAN::literal_r_number, filler...> :
-			public T_literal_return_action<AN::r_number> { };
+		struct T_chord_translation_action<CAAN::literal_r_number, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->delay_r_number_return(l->cbegin(), l->ccurrent()); }
+		};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

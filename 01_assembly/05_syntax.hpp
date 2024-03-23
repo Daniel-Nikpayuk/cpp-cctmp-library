@@ -230,30 +230,26 @@ namespace assembly {
 
 		protected:
 
-			size_type asm_name;
+			size_type asm_note;
 			size_type asm_pos;
 			size_type asm_num;
+			size_type asm_aux;
 
 		public:
 
-			nik_ce T_syntax_literal() : asm_name{}, asm_pos{}, asm_num{} { }
+			nik_ce T_syntax_literal() : asm_note{}, asm_pos{}, asm_num{}, asm_aux{} { }
 
-			nik_ce auto name () const { return asm_name; }
+			nik_ce auto note () const { return asm_note; }
 			nik_ce auto pos  () const { return asm_pos; }
 			nik_ce auto num  () const { return asm_num; }
+			nik_ce auto aux  () const { return asm_aux; }
 
-			nik_ce void set(csize_type a, csize_type p, csize_type n)
+			nik_ce void set(csize_type a, csize_type p, csize_type n = 0, csize_type x = 0)
 			{
-				asm_name = a;
+				asm_note = a;
 				asm_pos  = p;
 				asm_num  = n;
-			}
-
-			nik_ce void set_boolean(csize_type p)
-			{
-				asm_name = AN::boolean;
-				asm_pos  = p;
-				asm_num  = 0;
+				asm_aux  = x;
 			}
 	};
 
@@ -571,6 +567,8 @@ namespace assembly {
 				define_op_name(s);
 			}
 
+			nik_ce void main_port_deduce() { contr[1][AI::note] = AT::id; }
+
 			nik_ce void main_end()
 			{
 				nik_ce auto left = 1;
@@ -692,32 +690,65 @@ namespace assembly {
 
 		// literal:
 
-			nik_ce void delay_boolean_return(const bool value) { literal.set_boolean(value); }
+			// delay:
 
-			nik_ce void delay_literal_return(cindex name, src_ptr b_ptr, src_ptr e_ptr)
-				{ literal.set(name, left_size(b_ptr), left_size(e_ptr)); }
+				// boolean:
 
-			nik_ce void force_literal_return()
-			{
-				auto note = stage.note_return();
-				auto name = literal.name();
-				auto pos  = literal.pos();
-				auto num  = literal.num();
+					nik_ce void delay_boolean_return(const bool value)
+						{ literal.set(AT::boolean, value); }
 
-				assembly_action<AAN::literal, AAT::id>(note, name, pos, num);
-				stage.upsize_if();
-			}
+				// character:
 
-			nik_ce void force_literal_return(cindex value)
-			{
-				auto note = stage.note_return();
-				auto name = literal.name();
-				auto pos  = literal.pos();
-				auto num  = literal.num();
+					nik_ce void delay_character_return(src_ptr b, src_ptr e)
+						{ literal.set(AT::character, *e); }
 
-				assembly_action<AAN::literal, AAT::literal>(note, value, name, pos, num);
-				stage.upsize_if();
-			}
+				// n_number:
+
+					nik_ce void delay_n_number_return(src_ptr b, src_ptr e)
+					{
+						auto pos = cctmp::apply<_string_to_builtin_<U_gindex_type>>(b, e);
+						
+						literal.set(AT::n_number, pos);
+					}
+
+				// r_number:
+
+					nik_ce void delay_r_number_return(src_ptr b, src_ptr e)
+					{
+						src_ptr k = cctmp::apply<_subarray_match_<>>(b, e, '.');
+						auto pos  = cctmp::apply<_string_to_builtin_<U_gindex_type>>(b, k);
+						auto num  = cctmp::apply<_string_to_builtin_<U_gindex_type>>(k+1, e);
+
+						literal.set(AT::r_number, pos, num, e-k);
+					}
+
+			// force:
+
+				nik_ce void force_literal_port(cindex note, cindex pos = 0)
+					{ assembly_action<AAN::push, AAT::instr>(AN::type, note, pos); }
+
+				nik_ce void force_literal_value()
+				{
+					auto note = stage.note_return();
+					auto pos  = literal.pos();
+					auto num  = literal.num();
+					auto aux0 = literal.aux();
+
+					assembly_action<AAN::push, AAT::instr>(AN::literal, note, pos, num, aux0);
+					stage.upsize_if();
+				}
+
+				nik_ce void force_literal_return()
+				{
+					force_literal_port(literal.note());
+					force_literal_value();
+				}
+
+				nik_ce void force_literal_return(cindex pos)
+				{
+					force_literal_port(AT::port, pos);
+					force_literal_value();
+				}
 
 		// lookup:
 

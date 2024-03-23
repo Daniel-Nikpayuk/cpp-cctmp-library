@@ -46,7 +46,7 @@ namespace assembly {
 			identity = 0, id = identity, // convenience for default params.
 
 			push, delay, force, generic,
-			list, arg, lookup, literal,
+			arg, lookup, literal,
 			solve, resolve, pad,
 			eval, back, replace,
 			go_to, branch, invert,
@@ -66,7 +66,7 @@ namespace assembly {
 		{
 			identity = 0, id = identity, // convenience for default params.
 			instr, jump, call,
-			list, arg, lookup, literal,
+			arg, lookup, literal,
 			replace, begin, end,
 			variable, parameter,
 			dimension
@@ -120,18 +120,6 @@ namespace assembly {
 
 // generic:
 
-	// list:
-
-		template<auto... filler>
-		struct T_assembly_action<AAN::generic, AAT::list, filler...>
-		{
-			using cindex = gcindex_type;
-
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note, cindex list_at)
-				{ assembly_action<AAN::push, AAT::instr>(contr, AN::list, note, list_at); }
-		};
-
 	// arg:
 
 		template<auto... filler>
@@ -166,15 +154,15 @@ namespace assembly {
 
 	// id:
 
-		template<auto... filler>
-		struct T_assembly_action<AAN::solve, AAT::id, filler...>
-		{
-			using cindex = gcindex_type;
+	//	template<auto... filler>
+	//	struct T_assembly_action<AAN::solve, AAT::id, filler...>
+	//	{
+	//		using cindex = gcindex_type;
 
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex name, cindex begin, cindex end)
-				{ assembly_action<AAN::push, AAT::instr>(contr, name, AT::id, begin, end); }
-		};
+	//		template<typename Contr>
+	//		nik_ces void result(Contr *contr, cindex name, cindex begin, cindex end)
+	//			{ assembly_action<AAN::push, AAT::instr>(contr, name, AT::id, begin, end); }
+	//	};
 
 /***********************************************************************************************************************/
 
@@ -182,18 +170,18 @@ namespace assembly {
 
 	// id:
 
-		template<auto... filler>
-		struct T_assembly_action<AAN::resolve, AAT::id, filler...>
-		{
-			using cindex = gcindex_type;
+	//	template<auto... filler>
+	//	struct T_assembly_action<AAN::resolve, AAT::id, filler...>
+	//	{
+	//		using cindex = gcindex_type;
 
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex pos, cindex name, cindex begin, cindex end)
-			{
-				assembly_action<AAN::push, AAT::instr>(contr, AN::type, AT::push, pos);
-				assembly_action<AAN::push, AAT::instr>(contr, name, AT::port, begin, end);
-			}
-		};
+	//		template<typename Contr>
+	//		nik_ces void result(Contr *contr, cindex pos, cindex name, cindex begin, cindex end)
+	//		{
+	//			assembly_action<AAN::push, AAT::instr>(contr, AN::type, AT::push, pos);
+	//			assembly_action<AAN::push, AAT::instr>(contr, name, AT::port, begin, end);
+	//		}
+	//	};
 
 /***********************************************************************************************************************/
 
@@ -246,83 +234,83 @@ namespace assembly {
 
 	// begin:
 
-		template<auto... filler>
-		struct T_assembly_action<AAN::literal, AAT::begin, filler...>
-		{
-			using cindex = gcindex_type;
+	//	template<auto... filler>
+	//	struct T_assembly_action<AAN::literal, AAT::begin, filler...>
+	//	{
+	//		using cindex = gcindex_type;
 
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note, cindex str_at)
-			{
-				assembly_action< AAN::delay , AAT::call  >(contr, AN::literal, note, str_at);
-				assembly_action< AAN::id    , AAT::begin >(contr);
-			}
-		};
+	//		template<typename Contr>
+	//		nik_ces void result(Contr *contr, cindex note, cindex str_at)
+	//		{
+	//			assembly_action< AAN::delay , AAT::call  >(contr, AN::literal, note, str_at);
+	//			assembly_action< AAN::id    , AAT::begin >(contr);
+	//		}
+	//	};
 
 	// end:
 
-		template<auto... filler>
-		struct T_assembly_action<AAN::literal, AAT::end, filler...>
-		{
-			using cindex = gcindex_type;
+	//	template<auto... filler>
+	//	struct T_assembly_action<AAN::literal, AAT::end, filler...>
+	//	{
+	//		using cindex = gcindex_type;
 
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex arg_drop, cindex note)
-			{
-				if (arg_drop)
-				assembly_action< AAN::generic , AAT::arg  >(contr, AT::drop, arg_drop);
+	//		template<typename Contr>
+	//		nik_ces void result(Contr *contr, cindex arg_drop, cindex note)
+	//		{
+	//			if (arg_drop)
+	//			assembly_action< AAN::generic , AAT::arg  >(contr, AT::drop, arg_drop);
 
-				assembly_action< AAN::id      , AAT::end  >(contr, note);
-				assembly_action< AAN::force   , AAT::call >(contr);
-			}
-		};
+	//			assembly_action< AAN::id      , AAT::end  >(contr, note);
+	//			assembly_action< AAN::force   , AAT::call >(contr);
+	//		}
+	//	};
 
 	// id:
 
-		template<auto... filler>
-		struct T_assembly_action<AAN::literal, AAT::id, filler...>
-		{
-			using cindex = gcindex_type;
+	//	template<auto... filler>
+	//	struct T_assembly_action<AAN::literal, AAT::id, filler...>
+	//	{
+	//		using cindex = gcindex_type;
 
-			nik_ces cindex arg_drop = 0;
+	//		nik_ces cindex arg_drop = 0;
 
-			template<typename Contr>
-			nik_ces void result(Contr *contr,
-				cindex note, cindex str_at, cindex name, cindex begin, cindex end)
-			{
-				assembly_action< AAN::literal , AAT::begin >(contr, note, str_at);
-				assembly_action< AAN::solve   , AAT::id    >(contr, name, begin, end);
-				assembly_action< AAN::literal , AAT::end   >(contr, arg_drop, AT::first);
-			}
+	//		template<typename Contr>
+	//		nik_ces void result(Contr *contr,
+	//			cindex note, cindex str_at, cindex name, cindex begin, cindex end)
+	//		{
+	//			assembly_action< AAN::literal , AAT::begin >(contr, note, str_at);
+	//			assembly_action< AAN::solve   , AAT::id    >(contr, name, begin, end);
+	//			assembly_action< AAN::literal , AAT::end   >(contr, arg_drop, AT::first);
+	//		}
 
-			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex note, cindex name, cindex begin, cindex end)
-				{ result(contr, note, contr->src_at, name, begin, end); }
-		};
+	//		template<typename Contr>
+	//		nik_ces void result(Contr *contr, cindex note, cindex name, cindex begin, cindex end)
+	//			{ result(contr, note, contr->src_at, name, begin, end); }
+	//	};
 
 	// literal:
 
-		template<auto... filler>
-		struct T_assembly_action<AAN::literal, AAT::literal, filler...>
-		{
-			using cindex = gcindex_type;
+	//	template<auto... filler>
+	//	struct T_assembly_action<AAN::literal, AAT::literal, filler...>
+	//	{
+	//		using cindex = gcindex_type;
 
-			nik_ces cindex arg_drop = 0;
+	//		nik_ces cindex arg_drop = 0;
 
-			template<typename Contr>
-			nik_ces void result(Contr *contr,
-				cindex note, cindex str_at, cindex typ_at, cindex name, cindex begin, cindex end)
-			{
-				assembly_action< AAN::literal , AAT::begin >(contr, note, str_at);
-				assembly_action< AAN::resolve , AAT::id    >(contr, typ_at, name, begin, end);
-				assembly_action< AAN::literal , AAT::end   >(contr, arg_drop, AT::first);
-			}
+	//		template<typename Contr>
+	//		nik_ces void result(Contr *contr,
+	//			cindex note, cindex str_at, cindex typ_at, cindex name, cindex begin, cindex end)
+	//		{
+	//			assembly_action< AAN::literal , AAT::begin >(contr, note, str_at);
+	//			assembly_action< AAN::resolve , AAT::id    >(contr, typ_at, name, begin, end);
+	//			assembly_action< AAN::literal , AAT::end   >(contr, arg_drop, AT::first);
+	//		}
 
-			template<typename Contr>
-			nik_ces void result(Contr *contr,
-				cindex note, cindex typ_at, cindex name, cindex begin, cindex end)
-					{ result(contr, note, contr->src_at, typ_at, name, begin, end); }
-		};
+	//		template<typename Contr>
+	//		nik_ces void result(Contr *contr,
+	//			cindex note, cindex typ_at, cindex name, cindex begin, cindex end)
+	//				{ result(contr, note, contr->src_at, typ_at, name, begin, end); }
+	//	};
 
 /***********************************************************************************************************************/
 

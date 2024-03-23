@@ -517,6 +517,16 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// instructions:
+
+	struct Instr { enum : gkey_type { name = 0, note, pos, num, aux0, aux1, aux2, next, dimension }; };
+
+	// type:
+
+		using instr_type = sequence<gindex_type, static_cast<gindex_type>(Instr::dimension)>;
+
+/***********************************************************************************************************************/
+
 // interface:
 
 	template<gindex_type StackSize, gindex_type Size>
@@ -545,7 +555,8 @@ namespace cctmp {
 			nik_ce void set_instr_value(cindex contr_pos, cindex instr_pos, cindex value)
 				{ base::operator[](contr_pos)[instr_pos] = value; }
 
-			nik_ce void push_instr(cindex name, cindex note, cindex pos = 0, cindex num = 0, cindex next = 1)
+			nik_ce void push_instr(cindex name, cindex note, cindex pos = 0, cindex num = 0,
+				cindex aux0 = 0, cindex aux1 = 0, cindex aux2 = 0, cindex next = 1)
 			{
 				base::upsize();
 				base::end()->fullsize();
@@ -554,6 +565,9 @@ namespace cctmp {
 				set_instr_value( current() , Instr::note , note );
 				set_instr_value( current() , Instr::pos  , pos  );
 				set_instr_value( current() , Instr::num  , num  );
+				set_instr_value( current() , Instr::aux0 , aux0 );
+				set_instr_value( current() , Instr::aux1 , aux1 );
+				set_instr_value( current() , Instr::aux2 , aux2 );
 				set_instr_value( current() , Instr::next , next );
 			}
 
@@ -590,8 +604,11 @@ namespace cctmp {
 			nik_ces gindex_type value  (cindex i, cindex n) { return contr[i][n]; }
 			nik_ces gindex_type peek   (cindex i, cindex m, cindex n) { return contr[i + m][n]; }
 
-			nik_ces gindex_type pos (cindex i) { return value(i, MI::pos); }
-			nik_ces gindex_type num (cindex i) { return value(i, MI::num); }
+			nik_ces gindex_type pos  (cindex i) { return value(i, MI::pos); }
+			nik_ces gindex_type num  (cindex i) { return value(i, MI::num); }
+			nik_ces gindex_type aux0 (cindex i) { return value(i, MI::aux0); }
+			nik_ces gindex_type aux1 (cindex i) { return value(i, MI::aux1); }
+			nik_ces gindex_type aux2 (cindex i) { return value(i, MI::aux2); }
 
 		// navigators:
 
@@ -651,9 +668,12 @@ namespace cctmp {
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr,
-				cindex name, cindex note, cindex pos = 0, cindex num = 0, cindex next = 1)
-					{ contr->push_instr(name, note, pos, num, next); }
+			nik_ces void result
+			(
+				Contr *contr, cindex name, cindex note, cindex pos = 0, cindex num = 0,
+				cindex aux0 = 0, cindex aux1 = 0, cindex aux2 = 0, cindex next = 1
+			)
+			{ contr->push_instr(name, note, pos, num, aux0, aux1, aux2, next); }
 		};
 
 /***********************************************************************************************************************/
@@ -668,9 +688,13 @@ namespace cctmp {
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex name, cindex note, cindex num = 0, cindex next = 1)
+			nik_ces void result
+			(
+				Contr *contr, cindex name, cindex note, cindex num = 0,
+				cindex aux0 = 0, cindex aux1 = 0, cindex aux2 = 0, cindex next = 1
+			)
 			{
-				contr->push_instr(name, note, 0, num, next);
+				contr->push_instr(name, note, 0, num, aux0, aux1, aux2, next);
 				contr->delay_instr_value();
 			}
 		};
@@ -683,10 +707,14 @@ namespace cctmp {
 			using cindex = gcindex_type;
 
 			template<typename Contr>
-			nik_ces void result(Contr *contr, cindex name, cindex note, cindex num = 0)
+			nik_ces void result
+			(
+				Contr *contr, cindex name, cindex note, cindex num = 0,
+				cindex aux0 = 0, cindex aux1 = 0, cindex aux2 = 0
+			)
 			{
 				cindex pos = contr->current(2);
-				contr->push_instr(name, note, pos, num, 0);
+				contr->push_instr(name, note, pos, num, aux0, aux1, aux2, 0);
 				contr->delay_instr_value();
 			}
 		};

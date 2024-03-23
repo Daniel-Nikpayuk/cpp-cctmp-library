@@ -41,8 +41,8 @@
 
 #include"undef_macros.hpp"
 
-#include"testing/chord/assembly/unit_test.hpp"
-//#include"testing/hustle/unit_test.hpp"
+//#include"testing/chord/assembly/unit_test.hpp"
+#include"testing/hustle/unit_test.hpp"
 
 //#include"experimental/00_generic_printers.hpp"
 //#include"experimental/01_parser_generator_printers.hpp"
@@ -91,36 +91,6 @@
 
 /***********************************************************************************************************************/
 
-// hustle:
-
-	constexpr auto _hustle_test_func()
-	{
-		return source
-	        (
-			"(type T                                                                    "
-			"  (define (sqrt x)                                                         "
-
-			"    (define (square y) (* y y))                                            "
-			"    (define (abs y) (if (< y 0) (- y) y))                                  "
-			"    (define (good-enough? guess) (< (abs (- (square guess) x)) tolerance)) "
-
-			"    (define (average y z) (/ (+ y z) 2))                                   "
-			"    (define (improve guess) (average guess (/ x guess)) )                  "
-
-			"    (define (sqrt-iter guess) -> T                                         "
-			"      (if (good-enough? guess) guess (sqrt-iter (improve guess)))          "
-			"    )                                                                      "
-
-			"    (sqrt-iter 1:T)                                                        "
-			"  )                                                                        "
-			")                                                                          "
-
-			, binding( "tolerance" , 0.0001 )
-		);
-	}
-
-/***********************************************************************************************************************/
-
 // chord:
 
 	constexpr auto _chord_test_func()
@@ -143,8 +113,70 @@
 
 /***********************************************************************************************************************/
 
+// hustle:
+
+/*
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(define (main)                    "
+			"  (define (morph n)               "
+			"    (define (iter k n)            "
+			"      (if (= k n) nil             "
+			"        (cons k (iter (+ k 1) n)) "
+			"      )                           "
+			"    )                             "
+			"    (iter 0 n)                    "
+			"  )                               "
+			"  (morph 5)                       " // (0 1 2 3 4)
+			")                                 "
+		);
+	}
+*/
+
+/*
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(define (main)             "
+			"  (define (f y)            "
+			"    (define (g x) (+ x y)) "
+			"    g                      "
+			"  )                        "
+			"  ((f 5) 6)                "
+			")                          "
+		);
+	}
+*/
+
+		//	"  (define (f x) (+ x 5)) "
+		//	"  f                      "
+
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(type T"
+			"(define (main)           "
+			"  5:T                    "
+			"))                       "
+		);
+	}
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
+		using hustle_size_type = double;
+		using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
+
+		auto val = T_hustle_apply::result();
+		printf("%f\n", val);
+
+		//
+
 	//	using chord_size_type = int*;
 	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
 	//	using chord_arr_type  = sequence<int, 5>;
@@ -159,16 +191,8 @@
 
 		//
 
-	//	using hustle_size_type = double;
-	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
-
-	//	auto val = T_hustle_apply::result(hustle_size_type(main_at(0, argc, argv)));
-	//	printf("%1.11f\n", val);
-
-		//
-
-	//	print_controller<chord::metapile<_chord_test_func, null_env>>();//103);
-	//	print_controller<hustle::metapile<_hustle_test_func, null_env>>();
+	//	fileput::print_controller<chord::metapile<_chord_test_func, null_env>>();//103);
+	//	fileput::print_controller<hustle::metapile<_hustle_test_func, null_env>>();
 
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};
 	//	tr_table_printer.print_num_tr_table();
@@ -205,7 +229,7 @@
 
 		//
 
-	//	unit_test_hustle_square_root_v0<gindex_type>(2.0);
+	//	unit_test_hustle_square_root_v0<gindex_type>(double(main_at(0, argc, argv)));
 
 		return 0;
 	}

@@ -91,9 +91,10 @@ namespace cctmp {
 
 	// auto:
 
-		nik_ce auto U_auto_char				= U_store_T < decltype( '\0' ) >;
-		nik_ce auto U_auto_int				= U_store_T < decltype(   0  ) >;
-		nik_ce auto U_auto_float			= U_store_T < decltype( 0.0  ) >;
+		nik_ce auto U_auto_bool				= U_store_T < decltype( false ) >;
+		nik_ce auto U_auto_char				= U_store_T < decltype(  '\0' ) >;
+		nik_ce auto U_auto_int				= U_store_T < decltype(    0  ) >;
+		nik_ce auto U_auto_float			= U_store_T < decltype(  0.0  ) >;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

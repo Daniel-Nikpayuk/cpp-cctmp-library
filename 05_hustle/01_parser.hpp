@@ -46,6 +46,8 @@ namespace hustle {
 				main_begin,
 				main_end,
 				main_arg,
+				main_deduce,
+				main_port,
 
 			// define:
 
@@ -53,10 +55,10 @@ namespace hustle {
 				define_arg,
 				define_begin,
 				define_end,
+				define_port,
 
 			// port:
 
-				op_port_lookup,
 				port_deduce,
 				port_lookup,
 
@@ -125,18 +127,18 @@ namespace hustle {
 
 				// main:
 
-					"Main      -> define ( MainSign ) OpType MainBody                ;"
-					"MainSign  -> identifier MainArgs                 : main_begin   ;"
-					"MainArgs  -> MainArg MainArgs                                   ;"
-					"          -> empty                                              ;"
-					"MainArg   -> identifier                          : main_arg     ;"
-					"MainBody  -> Expr0 MainExprs                     : define_begin ;"
-					"MainExprs -> Expr0 MainExprs                                    ;"
-					"          -> empty                               : main_end     ;"
+					"Main      -> define ( MainSign ) MainType MainBody                ;"
+					"MainSign  -> identifier MainArgs                   : main_begin   ;"
+					"MainArgs  -> MainArg MainArgs                                     ;"
+					"          -> empty                                                ;"
+					"MainArg   -> identifier                            : main_arg     ;"
+					"MainBody  -> Expr0 MainExprs                       : define_begin ;"
+					"MainExprs -> Expr0 MainExprs                                      ;"
+					"          -> empty                                 : main_end     ;"
 
-					"OpType -> \\-\\> OpPort                  ;"
-					"       -> empty                          ;"
-					"OpPort -> identifier    : op_port_lookup ;"
+					"MainType -> \\-\\> MainPort               ;"
+					"         -> empty           : main_deduce ;"
+					"MainPort -> identifier      : main_port   ;"
 
 				// return:
 
@@ -183,7 +185,7 @@ namespace hustle {
 				// define:
 
 					"DefDisp  -> VarExpr ValExpr                   ;"
-					"         -> ( DefSign ) OpType DefBody        ;"
+					"         -> ( DefSign ) DefType DefBody       ;"
 					"DefSign  -> identifier DefArgs : define_name  ;"
 					"DefArgs  -> DefArg DefArgs                    ;"
 					"         -> empty                             ;"
@@ -191,6 +193,10 @@ namespace hustle {
 					"DefBody  -> Expr0 DefExprs     : define_begin ;"
 					"DefExprs -> Expr0 DefExprs                    ;"
 					"         -> empty              : define_end   ;"
+
+					"DefType -> \\-\\> DefPort               ;"
+					"        -> empty                        ;"
+					"DefPort -> identifier     : define_port ;"
 
 				// application:
 
@@ -276,9 +282,11 @@ namespace hustle {
 
 			// main:
 
-				sxa_pair( "main_begin" , ActName::main_begin ),
-				sxa_pair( "main_end"   , ActName::main_end   ),
-				sxa_pair( "main_arg"   , ActName::main_arg   ),
+				sxa_pair( "main_begin"  , ActName::main_begin  ),
+				sxa_pair( "main_end"    , ActName::main_end    ),
+				sxa_pair( "main_arg"    , ActName::main_arg    ),
+				sxa_pair( "main_deduce" , ActName::main_deduce ),
+				sxa_pair( "main_port"   , ActName::main_port   ),
 
 			// define:
 
@@ -286,12 +294,12 @@ namespace hustle {
 				sxa_pair( "define_arg"   , ActName::define_arg   ),
 				sxa_pair( "define_begin" , ActName::define_begin ),
 				sxa_pair( "define_end"   , ActName::define_end   ),
+				sxa_pair( "define_port"  , ActName::define_port  ),
 
 			// port:
 
-				sxa_pair( "op_port_lookup" , ActName::op_port_lookup ),
-				sxa_pair( "port_deduce"    , ActName::port_deduce    ),
-				sxa_pair( "port_lookup"    , ActName::port_lookup    ),
+				sxa_pair( "port_deduce" , ActName::port_deduce ),
+				sxa_pair( "port_lookup" , ActName::port_lookup ),
 
 			// return:
 

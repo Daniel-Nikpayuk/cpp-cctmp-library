@@ -63,7 +63,10 @@ namespace assembly {
 	using gindex_type					= cctmp::gindex_type;
 	using gcindex_type					= cctmp::gcindex_type;
 
+	nik_ce auto U_gindex_type				= cctmp::U_gindex_type;
+	nik_ce auto U_auto_bool					= cctmp::U_auto_bool;
 	nik_ce auto U_auto_char					= cctmp::U_auto_char;
+	nik_ce auto U_auto_int					= cctmp::U_auto_int;
 	nik_ce auto U_auto_float				= cctmp::U_auto_float;
 
 	template<auto U>
@@ -149,13 +152,12 @@ namespace assembly {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			halt    ,							//  1
-			boolean , n_number , r_number , character , string ,		//  2
-			literal , list     , lookup   , type      , arg    ,		//  7
-			pad     , hash     , pound    , apply     , bind   , eval ,	// 12
-			go_to   , branch   , invert   , loop      ,			// 18
-			cycle   , next     , set      ,					// 22
-			repeat  , map      , fold     , find      , sift   ,		// 25
+			halt   ,						//  1
+			type   , literal , floating , string , lookup , arg  ,	//  2
+			pad    , hash    , pound    , apply  , bind   , eval ,	//  8
+			go_to  , branch  , invert   , loop   ,	  	    	// 14
+			cycle  , next    , set      ,	     	      		// 18
+			repeat , map     , fold     , find   , sift   ,		// 21
 			dimension
 		};
 	};
@@ -171,12 +173,13 @@ namespace assembly {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first  , port , select  ,		//  1
-			front  , back ,				//  4
-			push   , pull , drop    ,		//  6
-			verse  , side , replace ,		//  9
-			pred   , act  , cont    , end ,		// 12
-			inc    , dec  ,				// 16
+			first   , front     , back     ,		//  1
+			boolean , character , n_number , r_number ,	//  4
+			port    , select    ,				//  8
+			push    , pull      , drop     ,		// 10
+			verse   , side      , replace  ,		// 13
+			pred    , act       , cont     , end      ,	// 16
+			inc     , dec       ,				// 20
 			dimension
 		};
 	};
@@ -207,11 +210,11 @@ namespace assembly {
 		template<auto c, auto i>
 		struct T_assembly_compound<c, i>
 		{
-			template<auto j, auto l, auto t, auto r, typename... Ts>
+			template<auto l, auto t, auto r, typename... Ts>
 			nik_ces auto result(Ts... vs)
 			{
 				return NIK_ASSEMBLY_TEMPLATE(c, i)
-					::NIK_ASSEMBLY_RESULT_TS(c, i, j, l, t, r, Ts...)
+					::NIK_ASSEMBLY_RESULT_TS(c, i, l, t, r, Ts...)
 						(vs...);
 			}
 		};
@@ -223,11 +226,11 @@ namespace assembly {
 		{
 			using S = T_store_U<s>;
 
-			template<auto j, auto l, auto t, auto r, typename... Ts>
+			template<auto l, auto t, auto r, typename... Ts>
 			nik_ces auto result(Ts... vs) -> S
 			{
 				return NIK_ASSEMBLY_TEMPLATE(c, i)
-					::NIK_ASSEMBLY_RESULT_TS(c, i, j, l, t, r, Ts...)
+					::NIK_ASSEMBLY_RESULT_TS(c, i, l, t, r, Ts...)
 						(vs...);
 			}
 		};
@@ -402,7 +405,6 @@ namespace assembly {
 		template<auto...> typename B_parsed,
 
 		auto callable_source,
-		auto subsource,
 		auto initial_env,
 		auto out_types,
 
@@ -419,7 +421,6 @@ namespace assembly {
 					>;
 		nik_ces auto contr	= _metapile_contr_<metapile::static_space>;
 
-		nik_ces auto list	= U_pack_Vs<metapile::static_source, subsource>;
 		nik_ces auto lookup	= metapile::static_env_tuple;
 		nik_ces auto zero	= gindex_type{0};
 
@@ -427,7 +428,7 @@ namespace assembly {
 		nik_ces auto result(Ts... vs)
 		{
 			return T_assembly_compound<contr, zero>::template
-				result<list, lookup, out_types, zero, Ts...>(vs...);
+				result<lookup, out_types, zero, Ts...>(vs...);
 		}
 	};
 
@@ -439,7 +440,6 @@ namespace assembly {
 	<
 		auto contr,
 		auto callable_source,
-		auto subsource,
 		auto initial_env,
 		auto out_types,
 
@@ -453,7 +453,6 @@ namespace assembly {
 		nik_ces auto static_source	= _static_car_<static_pair>;
 		nik_ces auto static_frame	= _static_cdr_<static_pair>;
 
-		nik_ces auto list		= U_pack_Vs<static_source, subsource>;
 		nik_ces bool sf_is_empty	= member_value_U<static_frame>.is_empty();
 		nik_ces auto static_env		= stem_
 						<
@@ -467,7 +466,7 @@ namespace assembly {
 		nik_ces auto result(Ts... vs)
 		{
 			return T_assembly_compound<contr, zero>::template
-				result<list, lookup, out_types, zero, Ts...>(vs...);
+				result<lookup, out_types, zero, Ts...>(vs...);
 		}
 	};
 

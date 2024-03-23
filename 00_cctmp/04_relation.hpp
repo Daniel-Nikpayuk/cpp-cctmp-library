@@ -697,16 +697,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// (controller) instructions:
-
-	struct Instr { enum : gkey_type { name = 0, note, pos, num, next, dimension }; };
-
-	// type:
-
-		using instr_type = sequence<gindex_type, static_cast<gindex_type>(Instr::dimension)>;
-
-/***********************************************************************************************************************/
-
 // operators:
 
 	struct ArgSequence
