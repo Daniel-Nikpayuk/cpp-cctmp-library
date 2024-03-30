@@ -15,36 +15,53 @@ referencing The Dragon Book on compiler theory for their implementation. The bac
 achieves its translation by making use of a theoretical correspondence between assembly
 language and an extension of continuation passing style.
 
-This project is ongoing.
+This project is currently proof of concept, with the following roadmap leading to
+a version 1.0 release:
 
-The last major update to this repo was on June 27th, 2023. The update adds a constexpr
-LL(1) parser generator built upon a framework of iterator-like classes and their arrays
-(see the scope/relation/graph files). Furthermore, these *constant expression* safe
-classes along with the parser generator have been used to reimplement the previously
-existing generic assembly language which his the base of the metapiler itself.
+a) The major goal for a version 1.0 release is to build two embedded domain specific languages (DSL) which will then be used
+to rebuild as much of this library as is reasonable. The idea is for it to be semi-self hosting.
 
-The general roadmap from this update is to clean up and extend the parser generator's
-capabilities, then use them to extend the generic assembly language to include what
-I am calling the *chord progression* paradigm. I will further complete the chord assembly
-language by adding the ability to *quote* and thus embed its own sublanguages.
+b) The first DSL is call Chord: It is a generic assembly which supports a chord progression paradigm. This chord progression
+paradigm offers grammar to create functional operators { repeat, map, fold, find, sift }.
 
-Beyond this, I still need to properly build the error reporting system for these
-languages, but before I do the plan is to build two specific modules to test out and
-demonstrate the grammatical stability of the chord assembly language itself. The first
-module will be *big number arithmetic* (along with some basic number theoretic cryptography).
-The second module will be *fast fourier algorithms*, hopefully with some proof of concept
-image or sound analysis.
+c) The second DSL is a Scheme-like language called Hustle: It is intended to be as close to Scheme as is reasonable given
+the differences in their underlying computational models.
 
-Once these goals are achieved I will release version 1.0 of the metapiler. I expect this
-to take at least year. Versioning will be established as single source files supplied with
-version release details. Otherwise, the modularized multisource files in the root directory
-of this repository should always be considered ongoing (experimental snapshots).
+d) Both languages will be implemented using a common DSL Engine which supports a common continuation assembly language.
 
-Finally, and as of yet, the documentation and single source folders are empty. The testing folder
-is currently an ad-hoc collection of otherwise disorganized tests (and older obsolete
-code I intend to bring in and translate at a later date). It is part of the roadmap
-to clean this up as proper source test files.
+e) Continuation Assembly: This is a metaobject assembly (used to build constexpr functions through continuation machines).
+I will be adding markup instructions so that DSL architects can encode documentation into their front end translations.
+I will (re)implement my Chord and Hustle langs to do the same, and will provide an initial -O0 backend.
 
+f) Higher Order Functions: The Hustle lang should be able to pass expressions as arguments to function calls.
+This becomes a problem relative to the underlying continuation machine type system. This problem will be solved
+by adding in new continuation machines to support expression trampolining. Notably, it is the conditional expression
+(if pred ante conse) that complicates things.
+
+As such, I will add in machines that compute the predicate function, which then returns a deferral:
+
+A deferral is a pair that holds the branching subroutines as compile time objects, and holds the predicate return
+as a constexpr runtime bool value. The thing to note is that the function created to evaluate the expression is guaranteed
+to return a single type. Once returned, we check to see if it is a trampolined value: If so we try again and reevaluate,
+otherwise we pass the resolved value to the next instruction accordingly.
+This works because we're within a larger continuation's scope.
+
+The Hustle lang will need to be tweaked to update this approach.
+
+g) Syntax Tree Exposure:
+
+For the initial purpose of encoding data structures within the continuation assembly, and in particular the intent
+of creating a DSL to freely manipulate tuples (while deferring tuple type commitment), a syntax tree IR is required.
+
+The hustle lang is a natural choice to support this, and as such I've decided I will add in grammar to work
+with both C++ (imported) types, as well as this syntax tree IR. What this means in the long run is that
+the Hustle lang will also need to support the ability to convert between these representations.
+
+h) Add in lexer, structure, and LR(1) generators;
+i) add in error messaging.
+j) add in unit tests.
+
+At such a point the project's version 1.0 will be done. I intend to leave backend optimizers to others.
 As this project grows and stabilizes, I hope you find it to be of interest, and even maybe some use.
 
 Thank you.

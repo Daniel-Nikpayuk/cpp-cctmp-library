@@ -301,178 +301,67 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// cycle:
+// one cycle:
 
 /***********************************************************************************************************************/
 
-// repeat:
+// precycle:
 
 	template<typename SizeType>
-	struct T_chord_repeat
+	struct T_chord_precycle
 	{
 		using size_type		= SizeType;
 		using csize_type	= size_type const;
 
-		struct Ival		{ enum : size_type { out, ins, dimension }; };
-		struct Sign		{ enum : size_type { out, end, ins, dimension }; };
+		// in, ins:
 
-		template<typename AST>
-		nik_ces void define_cycle_before(AST *t)
-		{
-		}
+			template<typename Prog, typename AST>
+			nik_ces void define_in_ins(AST *t)
+				{ if (t->interval.has_left_next()) dispatch_in_ins<Prog>(t); }
 
-		template<typename AST>
-		nik_ces void define_cycle_loop(AST *t)
-		{
-		}
+		// dispatch:
 
-		template<typename AST>
-		nik_ces void define_cycle_after(AST *t)
-		{
-		}
-
-		template<typename AST>
-		nik_ces void define_cycle(AST *t)
-		{
-			define_cycle_before (t);
-			define_cycle_loop   (t);
-			define_cycle_after  (t);
-
-			t->define_cycle();
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// map:
-
-	template<typename SizeType>
-	struct T_chord_map
-	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		struct Ival		{ enum : size_type { out, in, ins, dimension }; };
-		struct Sign		{ enum : size_type { out, in, end, ins, dimension }; };
-
-		template<typename AST>
-		nik_ces void define_cycle_before(AST *t)
-		{
-		}
-
-		template<typename AST>
-		nik_ces void define_cycle_loop(AST *t)
-		{
-		}
-
-		template<typename AST>
-		nik_ces void define_cycle_after(AST *t)
-		{
-		}
-
-		template<typename AST>
-		nik_ces void define_cycle(AST *t)
-		{
-			define_cycle_before (t);
-			define_cycle_loop   (t);
-			define_cycle_after  (t);
-
-			t->define_cycle();
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// fold:
-
-	template<typename SizeType>
-	struct T_chord_fold
-	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		struct Ival		{ enum : size_type { out, in, ins, dimension }; };
-		struct Sign		{ enum : size_type { out, in, end, ins, dimension }; };
-
-		template<typename AST>
-		nik_ces void define_pred(AST *t)
-		{
-			auto ni = t->get_predicate();
-
-			t->cycle_id[AST::CycleId::predicate] = t->contr.current(1);
-			t->template assembly_action<AAN::id, AAT::begin>();
-			t->template assembly_action<AAN::push, AAT::instr>(AN::fold, AT::pred, ni);
-		}
-
-		template<typename AST>
-		nik_ces void define_action(AST *t)
-		{
-			auto ni = t->get_action();
-			auto mi = t->get_combine();
-			auto li = t->get_mutate();
-
-			t->cycle_side[AST::CycleSide::action] = t->contr.current(1);
-			t->template assembly_action<AAN::id, AAT::begin>();
-			t->template assembly_action<AAN::push, AAT::instr>(AN::fold, AT::act, ni, mi, 2);
-			t->template assembly_action<AAN::push, AAT::instr>(li, 0);
-		}
-
-		template<typename AST>
-		nik_ces void define_next(AST *t)
-		{
-			auto out_pos = t->verse.size();
-			auto  in_pos = out_pos + Sign::in;
-			auto ins_pos = out_pos + Sign::ins;
-
-			t->define_next_begin (in_pos);
-			t->define_next_cont  (Ival::in, ins_pos);
-			t->define_next_rest  (Ival::ins, ins_pos);
-			t->define_next_end   ();
-		}
-
-		// before:
-
-			template<typename AST>
-			nik_ces void define_cycle_before(AST *t)
-				{ if (t->interval.has_left_next()) dispatch_cycle_before(t); }
-
-			template<typename AST>
-			nik_ces void dispatch_cycle_before(AST *t)
+			template<typename Prog, typename AST>
+			nik_ces void dispatch_in_ins(AST *t)
 			{
-				if (t->interval.is_left_open(Ival::in)) define_cycle_before_in  (t);
-				else                                    define_cycle_before_ins (t);
+				using Ival = typename Prog::Ival;
+
+				if (t->interval.is_left_open(Ival::in)) define_in  <Prog>(t);
+				else                                    define_ins <Prog>(t);
 			}
 
-			template<typename AST>
-			nik_ces void define_cycle_before_in(AST *t)
+		// in:
+
+			template<typename Prog, typename AST>
+			nik_ces void define_in(AST *t)
 			{
 				auto out_pos = t->verse.size();
-				auto  in_pos = out_pos + Sign::in;
-				auto ins_pos = out_pos + Sign::ins;
+				auto  in_pos = out_pos + Prog::Sign::in;
+				auto ins_pos = out_pos + Prog::Sign::ins;
 
-				t->define_before_begin (in_pos);
-				t->define_before_cont  (Ival::in, ins_pos);
-				t->define_before_rest  (Ival::ins, ins_pos);
-				t->define_before_end   ();
+				define_begin (t, in_pos);
+				define_cont  (t, Prog::Ival::in, ins_pos);
+				define_rest  (t, Prog::Ival::ins, ins_pos);
+				define_end   (t);
 			}
 
-			template<typename AST>
-			nik_ces void define_cycle_before_ins(AST *t)
+			template<typename Prog, typename AST>
+			nik_ces void define_ins(AST *t)
 			{
 				auto out_pos  = t->verse.size();
-				auto ins_pos  = out_pos + Sign::ins;
-				auto ival_pos = find_cycle_before(t);
+				auto ins_pos  = out_pos + Prog::Sign::ins;
+				auto ival_pos = find_left_open_ins<Prog>(t);
 				auto sign_pos = out_pos + ival_pos + 1;
 
-				t->define_before_begin (sign_pos);
-				t->define_before_rest  (ival_pos, ins_pos);
-				t->define_before_end   ();
+				define_begin (t, sign_pos);
+				define_rest  (t, ival_pos, ins_pos);
+				define_end   (t);
 			}
 
-			template<typename AST>
-			nik_ces auto find_cycle_before(AST *t)
+			template<typename Prog, typename AST>
+			nik_ces auto find_left_open_ins(AST *t)
 			{
-				size_type k = Ival::ins;
+				size_type k = Prog::Ival::ins;
 
 				while (k != t->interval.size())
 					if (t->interval.is_left_open(k)) break;
@@ -481,92 +370,218 @@ namespace chord {
 				return k;
 			}
 
-		// loop:
+		// generic:
 
 			template<typename AST>
-			nik_ces void define_cycle_loop(AST *t)
+			nik_ces void define_begin(AST *t, csize_type first_arg)
 			{
-				define_pred   (t);
-				define_action (t);
-				define_next   (t);
-			}
-
-		// after:
-
-			template<typename AST>
-			nik_ces void define_cycle_after(AST *t)
-			{
-				if      (t->interval.is_augmented())  define_cycle_after_augmented  (t);
-				else if (t->interval.is_diminished()) define_cycle_after_diminished (t);
-				else                                  define_cycle_after_minor      (t);
+				t->cycle_front[AST::CycleFront::next] = t->contr.current(1);
+				t->note_next_assembly(first_arg);
 			}
 
 			template<typename AST>
-			nik_ces void define_cycle_after_augmented(AST *t)
+			nik_ces void define_cont_fast(AST *t, csize_type ival_pos, csize_type next_arg)
 			{
-				if      (t->interval.is_tonic(Ival::in)) define_cycle_after_tonic (t);
-				else if (t->interval.is_tone())          define_cycle_after_tone  (t);
-				else                                     define_cycle_after_peek  (t);
+				auto ni = t->interval.note_pos(ival_pos, 0);
+
+				t->template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, next_arg);
 			}
 
 			template<typename AST>
-			nik_ces void define_cycle_after_tonic(AST *t)
+			nik_ces void define_cont(AST *t, csize_type ival_pos, csize_type next_arg)
+				{ if (t->interval.is_left_open(ival_pos)) define_cont_fast(t, ival_pos, next_arg); }
+
+			template<typename AST>
+			nik_ces void define_rest(AST *t, csize_type b, csize_type n)
+				{ for (auto k = b; k != t->interval.size(); ++k) define_cont(t, k, n + k - 1); }
+
+			template<typename AST>
+			nik_ces void define_end(AST *t)
+				{ t->template assembly_action<AAN::push, AAT::instr>(AN::next, AT::end); }
+	};
+
+/***********************************************************************************************************************/
+
+// cycle:
+
+	template<typename SizeType>
+	struct T_chord_cycle
+	{
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		// acm, in, ins:
+
+			template<typename Prog, typename AST>
+			nik_ces void define_acm_in_ins(AST *t)
 			{
+				define_pred        <Prog>(t);
+				define_action_acm  <Prog>(t);
+				define_next_in_ins <Prog>(t);
+			}
+
+		// pred:
+
+			template<typename Prog, typename AST>
+			nik_ces void define_pred(AST *t)
+			{
+				auto ni = t->get_predicate();
+
+				t->cycle_id[AST::CycleId::predicate] = t->contr.current(1);
+				t->template assembly_action<AAN::id, AAT::begin>();
+				t->template assembly_action<AAN::push, AAT::instr>(Prog::name, AT::pred, ni);
+			}
+
+		// action:
+
+			// acm:
+
+				template<typename Prog, typename AST>
+				nik_ces void define_action_acm(AST *t)
+				{
+					auto ni = t->get_action();
+					auto mi = t->get_combine();
+					auto li = t->get_mutate();
+
+					t->cycle_side[AST::CycleSide::action] = t->contr.current(1);
+					t->template assembly_action<AAN::id, AAT::begin>();
+					t->template assembly_action<AAN::push, AAT::instr>(Prog::name, AT::act, ni, mi, 2);
+					t->template assembly_action<AAN::push, AAT::instr>(li, 0);
+				}
+
+		// next:
+
+			// in, ins:
+
+				template<typename Prog, typename AST>
+				nik_ces void define_next_in_ins(AST *t)
+				{
+					auto out_pos = t->verse.size();
+					auto  in_pos = out_pos + Prog::Sign::in;
+					auto ins_pos = out_pos + Prog::Sign::ins;
+
+					define_begin (t, in_pos);
+					define_cont  (t, Prog::Ival::in, ins_pos);
+					define_rest  (t, Prog::Ival::ins, ins_pos);
+					define_end   (t);
+				}
+
+		// generic:
+
+			template<typename AST>
+			nik_ces void define_begin(AST *t, csize_type first_arg)
+			{
+				t->cycle_side[AST::CycleSide::next] = t->contr.current(1);
+				t->note_next_assembly(first_arg);
 			}
 
 			template<typename AST>
-			nik_ces void define_cycle_after_tone(AST *t)
+			nik_ces void define_cont_fast(AST *t, csize_type ival_pos, csize_type next_arg)
 			{
+				auto ni = t->interval.note_pos(ival_pos, 0);
+
+				t->template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, next_arg);
 			}
 
 			template<typename AST>
-			nik_ces void define_cycle_after_peek(AST *t)
+			nik_ces void define_cont(AST *t, csize_type ival_pos, csize_type next_arg)
+				{ if (t->interval.not_fixed(ival_pos)) define_cont_fast(t, ival_pos, next_arg); }
+
+			template<typename AST>
+			nik_ces void define_rest(AST *t, csize_type b, csize_type n)
+				{ for (auto k = b; k != t->interval.size(); ++k) define_cont(t, k, n + k - 1); }
+
+			template<typename AST>
+			nik_ces void define_end(AST *t)
+				{ t->template assembly_action<AAN::push, AAT::instr>(AN::next, AT::end); }
+	};
+
+/***********************************************************************************************************************/
+
+// postcycle:
+
+	template<typename SizeType>
+	struct T_chord_postcycle
+	{
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		// in, ins:
+
+			template<typename Prog, typename AST>
+			nik_ces void define_in_ins(AST *t)
+			{
+				if      (t->interval.is_augmented())  define_augmented_in_ins  <Prog>(t);
+				else if (t->interval.is_diminished()) define_diminished_in_ins <Prog>(t);
+				else                                  define_minor_in_ins      <Prog>(t);
+			}
+
+			template<typename Prog, typename AST>
+			nik_ces void define_augmented_in_ins(AST *t)
+			{
+				if      (t->interval.is_tonic(Prog::Ival::in)) define_tonic_in_ins <Prog>(t);
+				else if (t->interval.is_tone())                define_tone_in_ins  <Prog>(t);
+				else                                           define_peek_in_ins  <Prog>(t);
+			}
+
+			template<typename Prog, typename AST>
+			nik_ces void define_tonic_in_ins(AST *t)
 			{
 			}
 
-			template<typename AST>
-			nik_ces void define_cycle_after_diminished(AST *t)
+			template<typename Prog, typename AST>
+			nik_ces void define_tone_in_ins(AST *t)
+			{
+			}
+
+			template<typename Prog, typename AST>
+			nik_ces void define_peek_in_ins(AST *t)
+			{
+			}
+
+			template<typename Prog, typename AST>
+			nik_ces void define_diminished_in_ins(AST *t)
 				{ t->cycle_back[AST::CycleBack::action] = t->cycle_side[AST::CycleSide::action]; }
 
-			template<typename AST>
-			nik_ces void define_cycle_after_minor(AST *t)
+			template<typename Prog, typename AST>
+			nik_ces void define_minor_in_ins(AST *t)
 			{
 				t->cycle_back[AST::CycleBack::action] = t->cycle_side[AST::CycleSide::action];
 
-				if (t->interval.is_right_open(Ival::in)) define_cycle_after_minor_in  (t);
-				else                                     define_cycle_after_minor_ins (t);
+				if (t->interval.is_right_open(Prog::Ival::in)) define_minor_in  <Prog>(t);
+				else                                           define_minor_ins <Prog>(t);
 			}
 
-			template<typename AST>
-			nik_ces void define_cycle_after_minor_in(AST *t)
+			template<typename Prog, typename AST>
+			nik_ces void define_minor_in(AST *t)
 			{
 				auto out_pos = t->verse.size();
-				auto  in_pos = out_pos + Sign::in;
-				auto ins_pos = out_pos + Sign::ins;
+				auto  in_pos = out_pos + Prog::Sign::in;
+				auto ins_pos = out_pos + Prog::Sign::ins;
 
-				t->define_after_begin (in_pos);
-				t->define_after_cont  (Ival::in, ins_pos);
-				t->define_after_rest  (Ival::ins, ins_pos);
-				t->define_after_end   ();
+				define_begin (t, in_pos);
+				define_cont  (t, Prog::Ival::in, ins_pos);
+				define_rest  (t, Prog::Ival::ins, ins_pos);
+				define_end   (t);
 			}
 
-			template<typename AST>
-			nik_ces void define_cycle_after_minor_ins(AST *t)
+			template<typename Prog, typename AST>
+			nik_ces void define_minor_ins(AST *t)
 			{
 				auto out_pos  = t->verse.size();
-				auto ins_pos  = out_pos + Sign::ins;
-				auto ival_pos = find_cycle_after(t);
+				auto ins_pos  = out_pos + Prog::Sign::ins;
+				auto ival_pos = find_right_open_ins<Prog>(t);
 				auto sign_pos = out_pos + ival_pos + 1;
 
-				t->define_after_begin (sign_pos);
-				t->define_after_rest  (ival_pos, ins_pos);
-				t->define_after_end   ();
+				define_begin (t, sign_pos);
+				define_rest  (t, ival_pos, ins_pos);
+				define_end   (t);
 			}
 
-			template<typename AST>
-			nik_ces auto find_cycle_after(AST *t)
+			template<typename Prog, typename AST>
+			nik_ces auto find_right_open_ins(AST *t)
 			{
-				size_type k = Ival::ins;
+				size_type k = Prog::Ival::ins;
 
 				while (k != t->interval.size())
 					if (t->interval.is_right_open(k)) break;
@@ -575,95 +590,105 @@ namespace chord {
 				return k;
 			}
 
-		// cycle:
+
+		// generic:
 
 			template<typename AST>
-			nik_ces void define_cycle(AST *t)
+			nik_ces void define_begin(AST *t, csize_type first_arg)
 			{
-				define_cycle_before (t);
-				define_cycle_loop   (t);
-				define_cycle_after  (t);
-
-				t->define_cycle();
+				t->cycle_back[AST::CycleBack::next] = t->contr.current(1);
+				t->note_next_assembly(first_arg);
 			}
+
+			template<typename AST>
+			nik_ces void define_cont_fast(AST *t, csize_type ival_pos, csize_type next_arg)
+			{
+				auto ni = t->interval.note_pos(ival_pos, 0);
+
+				t->template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, next_arg);
+			}
+
+			template<typename AST>
+			nik_ces void define_cont(AST *t, csize_type ival_pos, csize_type next_arg)
+				{ if (t->interval.is_right_open(ival_pos)) define_cont_fast(t, ival_pos, next_arg); }
+
+			template<typename AST>
+			nik_ces void define_rest(AST *t, csize_type b, csize_type n)
+				{ for (auto k = b; k != t->interval.size(); ++k) define_cont(t, k, n + k - 1); }
+
+			template<typename AST>
+			nik_ces void define_end(AST *t)
+				{ t->template assembly_action<AAN::push, AAT::instr>(AN::next, AT::end); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// progression:
+
+/***********************************************************************************************************************/
+
+// repeat:
+
+	template<typename size_type>
+	struct T_chord_repeat
+	{
+		nik_ces size_type name = AN::repeat;
+
+		struct Ival { enum : size_type { out, ins, dimension }; };
+		struct Sign { enum : size_type { out, end, ins, dimension }; };
+	};
+
+/***********************************************************************************************************************/
+
+// map:
+
+	template<typename size_type>
+	struct T_chord_map
+	{
+		nik_ces size_type name = AN::map;
+
+		struct Ival { enum : size_type { out, in, ins, dimension }; };
+		struct Sign { enum : size_type { out, in, end, ins, dimension }; };
+	};
+
+/***********************************************************************************************************************/
+
+// fold:
+
+	template<typename size_type>
+	struct T_chord_fold
+	{
+		nik_ces size_type name = AN::fold;
+
+		struct Ival { enum : size_type { out, in, ins, dimension }; };
+		struct Sign { enum : size_type { out, in, end, ins, dimension }; };
 	};
 
 /***********************************************************************************************************************/
 
 // find:
 
-	template<typename SizeType>
+	template<typename size_type>
 	struct T_chord_find
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		nik_ces size_type name = AN::find;
 
-		struct Ival		{ enum : size_type { out, in, ins, dimension }; };
-		struct Sign		{ enum : size_type { out, in, end, ins, dimension }; };
-
-		template<typename AST>
-		nik_ces void define_cycle_before(AST *t)
-		{
-		}
-
-		template<typename AST>
-		nik_ces void define_cycle_loop(AST *t)
-		{
-		}
-
-		template<typename AST>
-		nik_ces void define_cycle_after(AST *t)
-		{
-		}
-
-		template<typename AST>
-		nik_ces void define_cycle(AST *t)
-		{
-			define_cycle_before (t);
-			define_cycle_loop   (t);
-			define_cycle_after  (t);
-
-			t->define_cycle();
-		}
+		struct Ival { enum : size_type { out, in, ins, dimension }; };
+		struct Sign { enum : size_type { out, in, end, ins, dimension }; };
 	};
 
 /***********************************************************************************************************************/
 
 // sift:
 
-	template<typename SizeType>
+	template<typename size_type>
 	struct T_chord_sift
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		nik_ces size_type name = AN::sift;
 
-		struct Ival		{ enum : size_type { out, in, ins, dimension }; };
-		struct Sign		{ enum : size_type { out, in, end, ins, dimension }; };
-
-		template<typename AST>
-		nik_ces void define_cycle_before(AST *t)
-		{
-		}
-
-		template<typename AST>
-		nik_ces void define_cycle_loop(AST *t)
-		{
-		}
-
-		template<typename AST>
-		nik_ces void define_cycle_after(AST *t)
-		{
-		}
-
-		template<typename AST>
-		nik_ces void define_cycle(AST *t)
-		{
-			define_cycle_before (t);
-			define_cycle_loop   (t);
-			define_cycle_after  (t);
-
-			t->define_cycle();
-		}
+		struct Ival { enum : size_type { out, in, ins, dimension }; };
+		struct Sign { enum : size_type { out, in, end, ins, dimension }; };
 	};
 
 /***********************************************************************************************************************/

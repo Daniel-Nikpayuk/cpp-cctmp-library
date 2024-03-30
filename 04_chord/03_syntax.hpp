@@ -270,55 +270,17 @@ namespace chord {
 
 				nik_ce void tonic_push() { interval.push_tonic(); }
 
-		// next:
-
-			nik_ce void define_next_begin(csize_type first_arg)
-			{
-				cycle_side[CycleSide::next] = base::contr.current(1);
-				note_next_assembly(first_arg);
-			}
-
-			nik_ce void define_next_cont_fast(csize_type ival_pos, csize_type next_arg)
-			{
-				auto ni = interval.note_pos(ival_pos, 0);
-
-				base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, next_arg);
-			}
-
-			nik_ce void define_next_cont(csize_type ival_pos, csize_type next_arg)
-				{ if (interval.not_fixed(ival_pos)) define_next_cont_fast(ival_pos, next_arg); }
-
-			nik_ce void define_next_rest(csize_type b, csize_type n)
-				{ for (auto k = b; k != interval.size(); ++k) define_next_cont(k, n + k - 1); }
-
-			nik_ce void define_next_end()
-				{ base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::end); }
-
-		// before:
-
-			nik_ce void define_before_begin(csize_type first_arg)
-			{
-				cycle_front[CycleFront::next] = base::contr.current(1);
-				note_next_assembly(first_arg);
-			}
-
-			nik_ce void define_before_cont_fast(csize_type ival_pos, csize_type next_arg)
-			{
-				auto ni = interval.note_pos(ival_pos, 0);
-
-				base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, next_arg);
-			}
-
-			nik_ce void define_before_cont(csize_type ival_pos, csize_type next_arg)
-				{ if (interval.is_left_open(ival_pos)) define_before_cont_fast(ival_pos, next_arg); }
-
-			nik_ce void define_before_rest(csize_type b, csize_type n)
-				{ for (auto k = b; k != interval.size(); ++k) define_before_cont(k, n + k - 1); }
-
-			nik_ce void define_before_end()
-				{ base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::end); }
-
 		// cycle:
+
+			nik_ce void define_cycle()
+			{
+				define_cycle_side   ();
+				internal_defs_end   ();
+
+				define_cycle_before ();
+				define_cycle_loop   ();
+				define_cycle_after  ();
+			}
 
 			nik_ce void define_cycle_side()
 			{
@@ -377,47 +339,34 @@ namespace chord {
 				base::template assembly_action<AAN::push, AAT::instr>(AN::cycle, AT::back, ni);
 			}
 
-			nik_ce void define_cycle()
-			{
-				define_cycle_side   ();
-				internal_defs_end   ();
-
-				define_cycle_before ();
-				define_cycle_loop   ();
-				define_cycle_after  ();
-			}
-
-		// after:
-
-			nik_ce void define_after_begin(csize_type first_arg)
-			{
-				cycle_back[CycleBack::next] = base::contr.current(1);
-				note_next_assembly(first_arg);
-			}
-
-			nik_ce void define_after_cont_fast(csize_type ival_pos, csize_type next_arg)
-			{
-				auto ni = interval.note_pos(ival_pos, 0);
-
-				base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, next_arg);
-			}
-
-			nik_ce void define_after_cont(csize_type ival_pos, csize_type next_arg)
-				{ if (interval.is_right_open(ival_pos)) define_after_cont_fast(ival_pos, next_arg); }
-
-			nik_ce void define_after_rest(csize_type b, csize_type n)
-				{ for (auto k = b; k != interval.size(); ++k) define_after_cont(k, n + k - 1); }
-
-			nik_ce void define_after_end()
-				{ base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::end); }
-
 		// functional:
 
-			nik_ce void define_repeat () { T_chord_repeat <size_type> :: define_cycle(this); }
-			nik_ce void define_map    () { T_chord_map    <size_type> :: define_cycle(this); }
-			nik_ce void define_fold   () { T_chord_fold   <size_type> :: define_cycle(this); }
-			nik_ce void define_find   () { T_chord_find   <size_type> :: define_cycle(this); }
-			nik_ce void define_sift   () { T_chord_sift   <size_type> :: define_cycle(this); }
+			nik_ce void define_repeat()
+			{
+			}
+
+			nik_ce void define_map()
+			{
+			}
+
+			nik_ce void define_fold()
+			{
+				using Prog = T_chord_fold<size_type>;
+
+				T_chord_precycle  <size_type>::template define_in_ins     <Prog>(this);
+				T_chord_cycle     <size_type>::template define_acm_in_ins <Prog>(this);
+				T_chord_postcycle <size_type>::template define_in_ins     <Prog>(this);
+
+				define_cycle();
+			}
+
+			nik_ce void define_find()
+			{
+			}
+
+			nik_ce void define_sift()
+			{
+			}
 	};
 
 /***********************************************************************************************************************/

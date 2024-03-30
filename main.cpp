@@ -24,8 +24,8 @@
 #define NIK_CHORD_PARSER_OBJ            "../object/01_chord_parser.hpp"
 #define NIK_HUSTLE_PARSER_OBJ           "../object/02_hustle_parser.hpp"
 
-//#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
-//#define NIK_CHORD_PARSER
+#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
+#define NIK_CHORD_PARSER
 //#define NIK_HUSTLE_PARSER
 
 /***********************************************************************************************************************/
@@ -42,6 +42,7 @@
 #include"undef_macros.hpp"
 
 //#include"testing/chord/assembly/unit_test.hpp"
+#include"testing/chord/progression/unit_test.hpp"
 //#include"testing/hustle/unit_test.hpp"
 
 //#include"experimental/00_generic_printers.hpp"
@@ -91,6 +92,39 @@
 
 /***********************************************************************************************************************/
 
+/*
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(define (main a b n)     "
+			"  ((if (= n 0) + *) a b) "
+			")                        "
+		);
+	}
+
+	template<auto contr, auto n, typename... Ts>
+	constexpr auto eval(nik_vp(index)(T_pack_Vs<n>*), Ts... vs) // doesn't work because vs... are not constexpr!
+	{
+		if constexpr (is_atomic<contr, n>) return index;
+		else                               return eval<contr>(U_pack_Vs<call<contr, n>(vs...)>, vs...);
+	}
+*/
+
+// hustle:
+
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(define (main)           "
+			"  5                      "
+			")                        "
+		);
+	}
+
+/***********************************************************************************************************************/
+
 // chord:
 
 	constexpr auto _chord_test_func()
@@ -113,41 +147,27 @@
 
 /***********************************************************************************************************************/
 
-// hustle:
-
-	constexpr auto _hustle_test_func()
-	{
-		return source
-	        (
-			"(define (main)           "
-			"  5                      "
-			")                        "
-		);
-	}
-
-/***********************************************************************************************************************/
-
 	int main(int argc, char *argv[])
 	{
+		using chord_size_type = int*;
+		using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
+		using chord_arr_type  = sequence<int, 5>;
+
+		int val = 0;
+
+		chord_arr_type s0({ 1, 2, 3, 4, 5 });
+		chord_arr_type s1({ 1, 2, 3, 4, 5 });
+
+		T_chord_apply::template result<chord_size_type>(&val, s0.cbegin(), s0.cend(), s1.cbegin());
+		printf("%d\n", val);
+
+		//
+
 	//	using hustle_size_type = double;
 	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
 
 	//	auto val = T_hustle_apply::result();
 	//	printf("%f\n", val);
-
-		//
-
-	//	using chord_size_type = int*;
-	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
-	//	using chord_arr_type  = sequence<int, 5>;
-
-	//	int val = 0;
-
-	//	chord_arr_type s0({ 1, 2, 3, 4, 5 });
-	//	chord_arr_type s1({ 1, 2, 3, 4, 5 });
-
-	//	T_chord_apply::template result<chord_size_type>(&val, s0.cbegin(), s0.cend(), s1.cbegin());
-	//	printf("%d\n", val);
 
 		//
 
@@ -186,6 +206,15 @@
 	//	unit_test_chord_fall_fact_2_v1        <true, gindex_type> (5); // *
 	//	unit_test_chord_void_effects_v0       <gindex_type> ();
 	//	unit_test_chord_side_effects_v0       <gindex_type> ();
+
+		//
+
+	//	using chord_arr_type = sequence<int, 5>;
+
+	//	chord_arr_type s0({ 1, 2, 3, 4, 5 });
+	//	chord_arr_type s1({ 1, 2, 3, 4, 5 });
+
+	//	unit_test_chord_convolution_v0 <gindex_type> (0, s0, s1);
 
 		//
 
