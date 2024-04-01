@@ -52,6 +52,13 @@ namespace chord {
 			{
 			}
 
+		// am, out, ins:
+
+			template<typename Prog, typename AST>
+			nik_ces void am_out_ins(AST *t)
+			{
+			}
+
 		// acm, in, ins:
 
 			template<typename Prog, typename AST>
@@ -78,6 +85,13 @@ namespace chord {
 			{
 			}
 
+		// am, out, ins:
+
+			template<typename Prog, typename AST>
+			nik_ces void am_out_ins(AST *t)
+			{
+			}
+
 		// acm, in, ins:
 
 			template<typename Prog, typename AST>
@@ -101,6 +115,13 @@ namespace chord {
 
 			template<typename Prog, typename AST>
 			nik_ces void am_out_in_ins(AST *t)
+			{
+			}
+
+		// am, out, ins:
+
+			template<typename Prog, typename AST>
+			nik_ces void am_out_ins(AST *t)
 			{
 			}
 
@@ -135,6 +156,16 @@ namespace chord {
 				else                                           Peek::template  am_out_in_ins<Prog>(t);
 			}
 
+		// am, out, ins:
+
+			template<typename Prog, typename AST>
+			nik_ces void am_out_ins(AST *t)
+			{
+				if      (t->interval.is_tonic(Prog::Ival::out)) Tonic::template am_out_ins<Prog>(t);
+				else if (t->interval.is_tone())                 Tone::template  am_out_ins<Prog>(t);
+				else                                            Peek::template  am_out_ins<Prog>(t);
+			}
+
 		// acm, in, ins:
 
 			template<typename Prog, typename AST>
@@ -167,6 +198,11 @@ namespace chord {
 			template<typename Prog, typename AST>
 			nik_ces void am_out_in_ins(AST *t) { Cycle::action(t); }
 
+		// am, out, ins:
+
+			template<typename Prog, typename AST>
+			nik_ces void am_out_ins(AST *t) { Cycle::action(t); }
+
 		// acm, in, ins:
 
 			template<typename Prog, typename AST>
@@ -196,19 +232,21 @@ namespace chord {
 			{
 				Cycle::action(t);
 
-				if      (t->interval.is_right_open(Prog::Ival::out)) am_out <Prog>(t);
-				else if (t->interval.is_right_open(Prog::Ival::in))  am_in  <Prog>(t);
-				else                                                 am_ins <Prog>(t);
+				if      (t->interval.is_right_open(Prog::Ival::out)) next_out_in_ins <Prog>(t);
+				else if (t->interval.is_right_open(Prog::Ival::in))  next_in_ins     <Prog>(t);
+				else                                                 next_ins        <Prog>(t);
 			}
 
-			template<typename Prog, typename AST>
-			nik_ces void am_out(AST *t) { Subcycle::template next_out_in_ins<Prog>(t); }
+		// am, out, ins:
 
 			template<typename Prog, typename AST>
-			nik_ces void am_in(AST *t) { Subcycle::template next_in_ins<Prog>(t); }
+			nik_ces void am_out_ins(AST *t)
+			{
+				Cycle::action(t);
 
-			template<typename Prog, typename AST>
-			nik_ces void am_ins(AST *t) { Subcycle::template next_ins<Prog>(t); }
+				if (t->interval.is_right_open(Prog::Ival::out)) next_out_in_ins <Prog>(t);
+				else                                            next_ins        <Prog>(t);
+			}
 
 		// acm, in, ins:
 
@@ -217,15 +255,20 @@ namespace chord {
 			{
 				Cycle::action(t);
 
-				if (t->interval.is_right_open(Prog::Ival::in)) acm_in  <Prog>(t);
-				else                                           acm_ins <Prog>(t);
+				if (t->interval.is_right_open(Prog::Ival::in)) next_in_ins <Prog>(t);
+				else                                           next_ins    <Prog>(t);
 			}
 
-			template<typename Prog, typename AST>
-			nik_ces void acm_in(AST *t) { Subcycle::template next_in_ins<Prog>(t); }
+		// generic:
 
 			template<typename Prog, typename AST>
-			nik_ces void acm_ins(AST *t) { Subcycle::template next_ins<Prog>(t); }
+			nik_ces void next_out_in_ins(AST *t) { Subcycle::template next_out_in_ins<Prog>(t); }
+
+			template<typename Prog, typename AST>
+			nik_ces void next_in_ins(AST *t) { Subcycle::template next_in_ins<Prog>(t); }
+
+			template<typename Prog, typename AST>
+			nik_ces void next_ins(AST *t) { Subcycle::template next_ins<Prog>(t); }
 	};
 
 /***********************************************************************************************************************/
@@ -324,6 +367,12 @@ namespace chord {
 				nik_ces void define_out_in_ins(AST *t)
 					{ if (t->interval.has_left_next()) dispatch_out_in_ins<Prog>(t); }
 
+			// out, ins:
+
+				template<typename Prog, typename AST>
+				nik_ces void define_out_ins(AST *t)
+					{ if (t->interval.has_left_next()) dispatch_out_ins<Prog>(t); }
+
 			// in, ins:
 
 				template<typename Prog, typename AST>
@@ -340,6 +389,15 @@ namespace chord {
 					if      (t->interval.is_left_open(Prog::Ival::out)) next_out_in_ins <Prog>(t);
 					else if (t->interval.is_left_open(Prog::Ival::in))  next_in_ins     <Prog>(t);
 					else                                                next_ins        <Prog>(t);
+				}
+
+			// out, ins:
+
+				template<typename Prog, typename AST>
+				nik_ces void dispatch_out_ins(AST *t)
+				{
+					if (t->interval.is_left_open(Prog::Ival::out)) next_out_ins <Prog>(t);
+					else                                           next_ins     <Prog>(t);
 				}
 
 			// in, ins:
@@ -364,6 +422,11 @@ namespace chord {
 						else
 							Subcycle::template next_out_ins<Prog>(t);
 					}
+
+				// out, ins:
+
+					template<typename Prog, typename AST>
+					nik_ces void next_out_ins(AST *t) { Subcycle::template next_out_ins<Prog>(t); }
 
 				// in, ins:
 
@@ -414,6 +477,16 @@ namespace chord {
 				define_next_out_in_ins <Prog>(t);
 			}
 
+		// am, out, ins:
+
+			template<typename Prog, typename AST>
+			nik_ces void define_am_out_ins(AST *t)
+			{
+				define_pred         <Prog>(t);
+				define_action_am    <Prog>(t);
+				define_next_out_ins <Prog>(t);
+			}
+
 		// acm, in, ins:
 
 			template<typename Prog, typename AST>
@@ -459,7 +532,7 @@ namespace chord {
 				nik_ces void define_action_acm(AST *t)
 				{
 					auto name = Prog::name;
-					auto note = AT::act_comb_mut;
+					auto note = AT::comb_mut;
 					auto ni   = t->get_action();
 					auto mi   = t->get_combine();
 					auto li   = t->get_mutate();
@@ -475,6 +548,11 @@ namespace chord {
 
 				template<typename Prog, typename AST>
 				nik_ces void define_next_out_in_ins(AST *t) { Subcycle::template next_out_in_ins<Prog>(t); }
+
+			// out, ins:
+
+				template<typename Prog, typename AST>
+				nik_ces void define_next_out_ins(AST *t) { Subcycle::template next_out_ins<Prog>(t); }
 
 			// in, ins:
 
@@ -525,6 +603,16 @@ namespace chord {
 					else if (t->interval.is_minor())      Minor::template      am_out_in_ins<Prog>(t);
 				}
 
+			// am, out, ins:
+
+				template<typename Prog, typename AST>
+				nik_ces void define_am_out_ins(AST *t)
+				{
+					if      (t->interval.is_augmented())  Augmented::template  am_out_ins<Prog>(t);
+					else if (t->interval.is_diminished()) Diminished::template am_out_ins<Prog>(t);
+					else if (t->interval.is_minor())      Minor::template      am_out_ins<Prog>(t);
+				}
+
 			// acm, in, ins:
 
 				template<typename Prog, typename AST>
@@ -571,8 +659,8 @@ namespace chord {
 	{
 		nik_ces size_type name = AN::out_ins;
 
-		struct Ival { enum : size_type { out, ins, dimension }; };
-		struct Sign { enum : size_type { out, end, ins, dimension }; };
+		struct Ival { enum : size_type { out, ins, dimension, in }; };		// debugging.
+		struct Sign { enum : size_type { out, end, ins, dimension, in }; };	// debugging.
 	};
 
 /***********************************************************************************************************************/

@@ -279,9 +279,53 @@ namespace chord {
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
+				const bool not_side   = not t->stage.side.cvalue();
+				const bool is_replace = not_side && t->replace.not_copy();
+
 				t->apply_end();
-				t->force_replace();
+
+				if (is_replace) t->force_replace();
 			}
+		};
+
+/***********************************************************************************************************************/
+
+// side:
+
+	// begin:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::side_begin, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->side_replace(); }
+		};
+
+/***********************************************************************************************************************/
+
+// swap:
+
+	// begin:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::swap_begin, filler...>
+		{
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->swap_replace(l->left_cselect()); }
+		};
+
+	// value:
+
+		template<auto... filler>
+		struct T_chord_translation_action<CAAN::swap_value, filler...>
+		{
+			nik_ces bool mute = true;
+
+			template<typename AST>
+			nik_ces void result(AST *t, clexeme *l)
+				{ t->lookup_return(t->replace.name(), mute); }
 		};
 
 /***********************************************************************************************************************/
@@ -295,7 +339,7 @@ namespace chord {
 		{
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
-				{ t->force_replace(); }
+				{ if (t->replace.not_copy()) t->force_replace(); }
 		};
 
 /***********************************************************************************************************************/
@@ -310,7 +354,7 @@ namespace chord {
 			template<typename AST>
 			nik_ces void result(AST *t, clexeme *l)
 			{
-				t->apply_begin(l->left_cselect());
+				t->apply_begin(l->left_cselect(), t->replace.reset_side());
 				t->lookup_return(l->left_cselect());
 			}
 		};

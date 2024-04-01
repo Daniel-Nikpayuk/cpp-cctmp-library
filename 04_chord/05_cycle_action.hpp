@@ -401,7 +401,10 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+		{
+			t->note_push_inc();
+			t->note_push_dec();
+		}
 	};
 
 	template<auto... filler>
@@ -431,7 +434,9 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-			{ }
+		{
+		//	t->note_push(AST::CycleNext::inc, AT::cont);
+		}
 	};
 
 	template<auto... filler>

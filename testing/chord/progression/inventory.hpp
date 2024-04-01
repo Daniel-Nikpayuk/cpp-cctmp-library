@@ -133,12 +133,15 @@
 
 /***********************************************************************************************************************/
 
-// printer:
+// print:
 
 	struct T_print
 	{
-		template<typename T0, typename T1>
-		constexpr static void result(T0 v0, T1 v1) { printf(v1, v0); }
+		template<typename T>
+		constexpr static void result(T v) { printf("%s", v); }
+
+		template<typename T, typename Fmt>
+		constexpr static void result(T v, Fmt fmt) { printf(fmt, v); }
 
 	}; constexpr auto _print_ = cctmp::U_store_T<T_print>;
 
@@ -423,14 +426,13 @@
 				"  arr_pr  # repeat[1]{@ @|print * @|}(-|+,]<>   ;"
 
 				"body:                                           ;"
-				"  . = arr_map !out in zero                      ;"
+				"  . = arr_map !out in 0                         ;"
 				"  . = arr_pr _ out format                       ;"
 				"  return _                                      ;"
 
 				, cctmp::binding( "div_by_n" , _divide_by_<n> )
 				, cctmp::binding( "rem_by_n" , _modulo_by_<n> )
 				, cctmp::binding( "print"    , _print_        )
-				, cctmp::binding( "zero"     , 0              )
 			);
 		}
 
@@ -454,12 +456,44 @@
 				"  arr_pr   # repeat[1]{@ @|print * @|}(-|+,]<> ;"
 
 				"body:                                          ;"
-				"  . = arr_zero !out end zero                   ;"
+				"  . = arr_zero !out end 0                      ;"
 				"  . = arr_pr _ out format                      ;"
 				"  return _                                     ;"
 
 				, cctmp::binding( "print" , _print_ )
-				, cctmp::binding( "zero"  , 0       )
+			);
+		}
+
+/***********************************************************************************************************************/
+
+// set printer:
+
+	// v0:
+
+		constexpr auto _chord_set_printer_v0()
+		{
+			return cctmp::source
+			(
+				"main out last                                  ;"
+
+				"vars:                                          ;"
+				"  declare arr_print                            ;"
+
+				"defs:                                          ;"
+				"  arr_print # repeat[1]{@ @|print * @|} [,) <> ;"
+
+				"body:                                          ;"
+				"  void print beg_fmt                           ;"
+				"  . = arr_print out last arr_fmt               ;"
+				"  . = dereference _                            ;"
+				"  void print _ end_fmt                         ;"
+
+				"  return last                                  ;"
+
+				, cctmp::binding( "print"   , _print_               )
+				, cctmp::binding( "beg_fmt" , strlit_type{" { "}    )
+				, cctmp::binding( "arr_fmt" , strlit_type{"%d, "}   )
+				, cctmp::binding( "end_fmt" , strlit_type{"%d }\n"} )
 			);
 		}
 

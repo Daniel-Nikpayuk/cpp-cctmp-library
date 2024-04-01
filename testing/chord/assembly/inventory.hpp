@@ -788,7 +788,7 @@
 		{
 			return cctmp::source
 			(
-				"f x y               ;"
+				"main x y            ;"
 
 				"body:               ;"
 				"  . = increment y   ;"
@@ -807,7 +807,7 @@
 		{
 			return cctmp::source
 			(
-				"f x y              ;"
+				"main x y           ;"
 
 				"body:              ;"
 				"   . = increment y ;"

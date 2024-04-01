@@ -177,11 +177,12 @@ namespace assembly {
 		{
 			id = 0, identity = id, // convenience for default params.
 			first   , front     , back     ,
-			boolean , character , n_number , r_number     ,
+			boolean , character , n_number , r_number ,
 			port    , select    ,
 			push    , pull      , drop     ,
 			verse   , side      , replace  ,
-			pred    , act       , act_mut  , act_comb_mut ,
+			pred    , find      ,
+			act     , act_mut   , comb_mut ,
 			cont    , end       ,
 			inc     , dec       ,
 			dimension

@@ -390,6 +390,7 @@ namespace assembly {
 
 			struct Stage { enum : gkey_type { atomic, compound, defer, dimension }; };
 
+			stack_type side;
 			stack_type procedure;
 			stack_type current;
 			stack_type note;
@@ -442,18 +443,22 @@ namespace assembly {
 
 			cselect asm_var;
 			size_type asm_pos;
+			bool side;
 
 		public:
 
-			nik_ce T_syntax_replace() : asm_pos{} { }
+			nik_ce T_syntax_replace() : asm_pos{}, side{} { }
 
 			nik_ce auto name () const { return asm_var; }
 			nik_ce auto pos  () const { return asm_pos; }
 
-			nik_ce bool not_copy() const { return (asm_pos != 0); }
+			nik_ce bool not_copy () const { return (asm_pos != 0); }
 
 			nik_ce void set_name(const cselect & s) { asm_var = s; }
 			nik_ce void set_pos(csize_type n) { asm_pos = n; }
+
+			nik_ce void set_side() { side = true; }
+			nik_ce const bool reset_side() { const bool v = side; side = false; return v; }
 	};
 
 /***********************************************************************************************************************/
@@ -807,20 +812,22 @@ namespace assembly {
 
 		// apply:
 
-			nik_ce void apply_begin(const cselect & s)
+			nik_ce void apply_begin(const cselect & s, const bool is_side = false)
 			{
 				auto is_pound = model.lookup_variable(s);
 				auto status   = is_pound ? Stage::compound : Stage::atomic;
 
 				if (is_pound) model.cache.push(model.inhabit.cvalue());
 
+				stage.side.push(is_side);
 				stage.procedure.push(status);
 				stage.current.push(stage.size());
 				stage.note.push(AT::back);
 			}
 
-			nik_ce void apply_begin()
+			nik_ce void apply_begin(const bool is_side = false)
 			{
+				stage.side.push(is_side);
 				stage.procedure.push(Stage::defer);
 				stage.current.push(stage.size());
 				stage.note.push(AT::back);
@@ -843,8 +850,10 @@ namespace assembly {
 					stage.procedure.pop();
 					stage.note.pop();
 
+					auto note = stage.side.pop() ? AT::side : stage.note_return();
+
 					assembly_action<AAN::push, AAT::instr>(AN::arg, AT::verse, left, stage.size());
-					assembly_action<AAN::push, AAT::instr>(AN::bind, stage.note_return()); // AT::side ?
+					assembly_action<AAN::push, AAT::instr>(AN::bind, note);
 					stage.upsize_if();
 				}
 
@@ -860,8 +869,10 @@ namespace assembly {
 					stage.procedure.pop();
 					stage.note.pop();
 
+					auto note = stage.side.pop() ? AT::side : stage.note_return();
+
 					assembly_action<AAN::push, AAT::instr>(AN::arg, AT::select, stage.size());
-					assembly_action<AAN::push, AAT::instr>(AN::apply, stage.note_return()); // AT::side ?
+					assembly_action<AAN::push, AAT::instr>(AN::apply, note);
 					stage.upsize_if();
 				}
 
@@ -876,6 +887,13 @@ namespace assembly {
 		// replace:
 
 			nik_ce void copy_replace() { replace.set_pos(0); }
+			nik_ce void side_replace() { replace.set_side(); }
+
+			nik_ce void swap_replace(const cselect & s)
+			{
+				replace.set_name(s);
+				replace.set_side();
+			}
 
 			nik_ce void delay_replace(const cselect & s)
 			{
@@ -892,8 +910,7 @@ namespace assembly {
 				else replace.set_pos(model.get_value(Argument::pos));
 			}
 
-			nik_ce void force_replace() { if (replace.not_copy()) force_verse_replace(); }
-			nik_ce void force_verse_replace() { assembly_action<AAN::replace, AAT::id>(replace.pos()); }
+			nik_ce void force_replace() { assembly_action<AAN::replace, AAT::id>(replace.pos()); }
 
 		// conditional:
 

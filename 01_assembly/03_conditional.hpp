@@ -187,6 +187,40 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
+// find:
+
+/*
+	template<auto p0, auto p1, auto... filler>
+	struct T_assembly<AN::cycle, AT::find, p0, p1, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>	// various optimized machines can be
+		nik_ces auto result(Ts... vs)					// refactored now using aux0, aux1, ...
+		{
+			nik_ce auto ni = AD<c>::pos(i);
+			nik_ce auto mi = AD<c>::num(i);
+			nik_ce auto li = AD<c>::aux0(i);
+
+			while (NIK_ASSEMBLY_TEMPLATE_2WS(c, ni, p0, p1)
+				::NIK_ASSEMBLY_RESULT_TS(c, ni, l, t, r, Ts...)
+					(vs...)) // predicate
+
+				if (NIK_ASSEMBLY_TEMPLATE_2WS(c, mi, p0, p1)
+					::NIK_ASSEMBLY_RESULT_TS(c, mi, l, t, r, Ts...)
+						(vs...)) break; // match
+
+				else NIK_ASSEMBLY_TEMPLATE_2WS(c, li, p0, p1)
+						::NIK_ASSEMBLY_RESULT_TS(c, li, l, t, r, Ts*...)
+							(&vs...); // next
+
+			return NIK_ASSEMBLY_TEMPLATE_2WS(c, i, p0, p1)
+				::NIK_ASSEMBLY_RESULT_TS(c, i, l, t, r, Ts...)
+					(vs...);
+		}
+	};
+*/
+
+/***********************************************************************************************************************/
+
 // act(ion):
 
 	template<auto p0, auto p1, auto... filler>
@@ -437,7 +471,7 @@ namespace assembly {
 		template<auto...> typename B1, auto OU, auto EU, auto... IUs,
 		nik_vp(p1)(B1<OU, EU, IUs...>*), auto... filler
 	>
-	struct T_assembly<AN::out_ins, AT::act, p0, p1, filler...>
+	struct T_assembly<AN::out_ins, AT::act_mut, p0, p1, filler...>
 	{
 		using Out = T_store_U<OU>;
 		using End = T_store_U<EU>;
@@ -524,7 +558,7 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
-// act(ion) comb(ine) mut(ate):
+// comb(ine) mut(ate):
 
 	template
 	<
@@ -532,7 +566,7 @@ namespace assembly {
 		template<auto...> typename B1, auto OU, auto IU, auto EU, auto... IUs,
 		nik_vp(p1)(B1<OU, IU, EU, IUs...>*), auto... filler
 	>
-	struct T_assembly<AN::out_in_ins, AT::act_comb_mut, p0, p1, filler...>
+	struct T_assembly<AN::out_in_ins, AT::comb_mut, p0, p1, filler...>
 	{
 		using Out = T_store_U<OU>;
 		using In  = T_store_U<IU>;

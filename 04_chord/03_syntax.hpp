@@ -638,13 +638,13 @@ namespace chord {
 
 			nik_ce void define_repeat()
 			{
-			//	using Prog = T_chord_repeat<size_type>;
+				using Prog = T_chord_repeat<size_type>;
 
-			//	T_chord_precycle  <size_type>::template define_out_ins    <Prog>(this);
-			//	T_chord_cycle     <size_type>::template define_am_out_ins <Prog>(this);
-			//	T_chord_postcycle <size_type>::template define_am_out_ins <Prog>(this);
+				T_chord_precycle  <size_type>::template define_out_ins    <Prog>(this);
+				T_chord_cycle     <size_type>::template define_am_out_ins <Prog>(this);
+				T_chord_postcycle <size_type>::template define_am_out_ins <Prog>(this);
 
-			//	define_cycle();
+				define_cycle();
 			}
 
 			nik_ce void define_map()
@@ -674,8 +674,8 @@ namespace chord {
 			//	using Prog = T_chord_find<size_type>;
 
 			//	T_chord_precycle  <size_type>::template define_in_ins     <Prog>(this);
-			//	T_chord_cycle     <size_type>::template define_acm_in_ins <Prog>(this);
-			//	T_chord_postcycle <size_type>::template define_acm_in_ins <Prog>(this);
+			//	T_chord_cycle     <size_type>::template define_fmb_in_ins <Prog>(this);
+			//	T_chord_postcycle <size_type>::template define_fmb_in_ins <Prog>(this);
 
 			//	define_cycle();
 			}
@@ -685,8 +685,8 @@ namespace chord {
 			//	using Prog = T_chord_sift<size_type>;
 
 			//	T_chord_precycle  <size_type>::template define_in_ins     <Prog>(this);
-			//	T_chord_cycle     <size_type>::template define_acm_in_ins <Prog>(this);
-			//	T_chord_postcycle <size_type>::template define_acm_in_ins <Prog>(this);
+			//	T_chord_cycle     <size_type>::template define_fmc_in_ins <Prog>(this);
+			//	T_chord_postcycle <size_type>::template define_fmc_in_ins <Prog>(this);
 
 			//	define_cycle();
 			}

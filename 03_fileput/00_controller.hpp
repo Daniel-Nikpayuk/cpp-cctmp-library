@@ -107,40 +107,42 @@ namespace fileput {
 	(
 		U_gindex_type, U_strlit_type,
 
-		ixs_pair( AT::id           , "AT::id"           ),
+		ixs_pair( AT::id        , "AT::id"        ),
 
-		ixs_pair( AT::first        , "AT::first"        ),
-		ixs_pair( AT::front        , "AT::front"        ),
-		ixs_pair( AT::back         , "AT::back"         ),
+		ixs_pair( AT::first     , "AT::first"     ),
+		ixs_pair( AT::front     , "AT::front"     ),
+		ixs_pair( AT::back      , "AT::back"      ),
 
-		ixs_pair( AT::boolean      , "AT::boolean"      ),
-		ixs_pair( AT::character    , "AT::character"    ),
-		ixs_pair( AT::n_number     , "AT::n_number"     ),
-		ixs_pair( AT::r_number     , "AT::r_number"     ),
+		ixs_pair( AT::boolean   , "AT::boolean"   ),
+		ixs_pair( AT::character , "AT::character" ),
+		ixs_pair( AT::n_number  , "AT::n_number"  ),
+		ixs_pair( AT::r_number  , "AT::r_number"  ),
 
-		ixs_pair( AT::port         , "AT::port"         ),
-		ixs_pair( AT::select       , "AT::select"       ),
+		ixs_pair( AT::port      , "AT::port"      ),
+		ixs_pair( AT::select    , "AT::select"    ),
 
-		ixs_pair( AT::push         , "AT::push"         ),
-		ixs_pair( AT::pull         , "AT::pull"         ),
-		ixs_pair( AT::drop         , "AT::drop"         ),
+		ixs_pair( AT::push      , "AT::push"      ),
+		ixs_pair( AT::pull      , "AT::pull"      ),
+		ixs_pair( AT::drop      , "AT::drop"      ),
 
-		ixs_pair( AT::verse        , "AT::verse"        ),
-		ixs_pair( AT::side         , "AT::side"         ),
-		ixs_pair( AT::replace      , "AT::replace"      ),
+		ixs_pair( AT::verse     , "AT::verse"     ),
+		ixs_pair( AT::side      , "AT::side"      ),
+		ixs_pair( AT::replace   , "AT::replace"   ),
 
-		ixs_pair( AT::pred         , "AT::pred"         ),
-		ixs_pair( AT::act          , "AT::act"          ),
-		ixs_pair( AT::act_mut      , "AT::act_mut"      ),
-		ixs_pair( AT::act_comb_mut , "AT::act_comb_mut" ),
+		ixs_pair( AT::pred      , "AT::pred"      ),
+		ixs_pair( AT::find      , "AT::find"      ),
 
-		ixs_pair( AT::cont         , "AT::cont"         ),
-		ixs_pair( AT::end          , "AT::end"          ),
+		ixs_pair( AT::act       , "AT::act"       ),
+		ixs_pair( AT::act_mut   , "AT::act_mut"   ),
+		ixs_pair( AT::comb_mut  , "AT::comb_mut"  ),
 
-		ixs_pair( AT::inc          , "AT::inc"          ),
-		ixs_pair( AT::dec          , "AT::dec"          ),
+		ixs_pair( AT::cont      , "AT::cont"      ),
+		ixs_pair( AT::end       , "AT::end"       ),
 
-		ixs_pair( AT::dimension    , "AT::dimension"    )
+		ixs_pair( AT::inc       , "AT::inc"       ),
+		ixs_pair( AT::dec       , "AT::dec"       ),
+
+		ixs_pair( AT::dimension , "AT::dimension" )
 	);
 
 /***********************************************************************************************************************/

@@ -83,6 +83,15 @@ namespace chord {
 
 				apply_end,
 
+			// side:
+
+				side_begin,
+
+			// swap:
+
+				swap_begin,
+				swap_value,
+
 			// assign:
 
 				assign_end,
@@ -289,7 +298,7 @@ namespace chord {
 					"            -> DefBeg DefArg DefArgs DefEnd                     ;"
 					"            -> LeftVal RightInstr                               ;"
 					"            -> TestInstr BranchInstr                            ;"
-					"            -> ! SwapBeg \\= SubOp SubArgs SwapEnd              ;"
+					"            -> ! SwapBeg \\= SubOp SwapArg SubArgs SwapEnd      ;"
 					"            -> VoidBeg SubOp SubArgs VoidEnd                    ;"
 					"LeftVal     -> identifier                          : left_value ;"
 					"            -> .                                   : left_copy  ;"
@@ -325,14 +334,15 @@ namespace chord {
 
 				// application:
 
-					"SwapBeg  -> identifier ;" // : swap_begin  ;"
-					"SwapEnd  -> \\;        ;" // : swap_end    ;"
-					"VoidBeg  -> void       ;" // : void_begin  ;"
-					"VoidEnd  -> \\;        ;" // : void_end    ;"
-					"ApplyBeg -> \\=                            ;"
-					"ApplyEnd -> \\;              : apply_end   ;"
-					"TestBeg  -> test             : left_copy   ;"
-					"TestEnd  -> \\;              : apply_end   ;"
+					"SwapBeg  -> identifier : swap_begin ;"
+					"SwapArg  -> empty      : swap_value ;"
+					"SwapEnd  -> \\;        : apply_end  ;"
+					"VoidBeg  -> void       : side_begin ;"
+					"VoidEnd  -> \\;        : apply_end  ;"
+					"ApplyBeg -> \\=                     ;"
+					"ApplyEnd -> \\;        : apply_end  ;"
+					"TestBeg  -> test       : left_copy  ;"
+					"TestEnd  -> \\;        : apply_end  ;"
 
 				// assignment:
 
@@ -643,7 +653,16 @@ namespace chord {
 
 				// apply:
 
-					sxa_pair( "apply_end" , ActName::apply_end ),
+					sxa_pair( "apply_end"  , ActName::apply_end  ),
+
+				// side:
+
+					sxa_pair( "side_begin" , ActName::side_begin ),
+
+				// swap:
+
+					sxa_pair( "swap_begin" , ActName::swap_begin ),
+					sxa_pair( "swap_value" , ActName::swap_value ),
 
 				// assign:
 

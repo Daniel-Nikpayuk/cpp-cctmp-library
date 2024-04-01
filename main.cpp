@@ -116,23 +116,72 @@
 
 /***********************************************************************************************************************/
 
+// divide by:
+
+	template<auto V>
+	struct T_divide_by
+	{
+		template<typename T>
+		constexpr static auto result(T v) { return (v / V); }
+
+	}; template<auto V>
+		constexpr auto _divide_by_ = U_store_T<T_divide_by<V>>;
+
+/***********************************************************************************************************************/
+
+// modulo by:
+
+	template<auto V>
+	struct T_modulo_by
+	{
+		template<typename T>
+		constexpr static auto result(T v) { return (v % V); }
+
+	}; template<auto V>
+		constexpr auto _modulo_by_ = U_store_T<T_modulo_by<V>>;
+
+/***********************************************************************************************************************/
+
+// print:
+
+	struct T_print
+	{
+		template<typename T>
+		constexpr static auto result(T v) { printf("%s", v.origin()); return 0; }
+
+		template<typename T, typename Fmt>
+		constexpr static auto result(T v, Fmt fmt) { printf(fmt.origin(), v); return 0; }
+
+	}; constexpr auto _print_ = U_store_T<T_print>;
+
+/***********************************************************************************************************************/
+
 // chord:
+
+		//	"main out in format                                ;"
+		//	"  declare arr_map arr_pr                          ;"
+		//	"  arr_pr  # repeat[1]{@ @|print * @|} (-|+,] <>   ;"
+		//	"  . = arr_pr _ out format                         ;"
+		//	, cctmp::binding( "print"    , _print_         )
 
 	constexpr auto _chord_test_func()
 	{
 		return source
 		(
-			"main out in end in1                               ;"
+			"main out in                                       ;"
 
 			"vars:                                             ;"
-			"  declare conv                                    ;"
+			"  declare arr_map                                 ;"
 
 			"defs:                                             ;"
-			"  conv # fold[2]{add * @|multiply||} <> (-|+,] [] ;"
+			"  arr_map # map[1]{rem_by_n @||} [) [div_by_n|~,) ;"
 
 			"body:                                             ;"
-			"  . = conv !out end in in1                        ;"
+			"  . = arr_map !out in 0                           ;"
 			"  return _                                        ;"
+
+			, cctmp::binding( "div_by_n" , _divide_by_<10> )
+			, cctmp::binding( "rem_by_n" , _modulo_by_<10> )
 		);
 	}
 
@@ -140,19 +189,19 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	using chord_size_type = int*;
+	//	using chord_size_type = int const*;
 	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
 	//	using chord_arr_type  = sequence<int, 5>;
 
 	//	chord_arr_type s0({ 1, 2, 3, 4, 5 });
 	//	chord_arr_type s1({ 1, 2, 3, 4, 5 });
 
-		//
+	      //
 
 	//	chord_arr_type val;
 	//	val.fullsize();
 
-	//	T_chord_apply::template result<chord_size_type>(val.begin(), s0.cbegin(), s0.cend(), s1.cbegin());
+	//	T_chord_apply::template result<chord_size_type>(val.begin(), 1563);
 	//	print_array(val.cbegin(), val.cend());
 
 		//
