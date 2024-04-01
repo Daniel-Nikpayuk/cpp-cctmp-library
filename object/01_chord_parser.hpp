@@ -375,10 +375,10 @@
 			list[3357].push({true, 92}); list[3357].push({true, 90}); list[3357].push({true, 99});
 			list[3357].valid = true; list[3357].action = 0;
 			list[3358].push({false, 46}); list[3358].push({true, 56}); list[3358].push({true, 71});
-			list[3358].push({true, 89}); list[3358].push({true, 90}); list[3358].push({true, 100});
+			list[3358].push({true, 92}); list[3358].push({true, 90}); list[3358].push({true, 100});
 			list[3358].valid = true; list[3358].action = 0;
 			list[3359].push({false, 47}); list[3359].push({true, 56}); list[3359].push({true, 71});
-			list[3359].push({true, 89}); list[3359].push({true, 90}); list[3359].push({true, 101});
+			list[3359].push({true, 92}); list[3359].push({true, 90}); list[3359].push({true, 101});
 			list[3359].valid = true; list[3359].action = 0;
 			list[3384].push({true, 72}); list[3384].push({true, 78}); list[3384].push({true, 73});
 			list[3384].push({true, 81}); list[3384].push({true, 73}); list[3384].push({true, 83});

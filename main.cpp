@@ -42,7 +42,7 @@
 #include"undef_macros.hpp"
 
 //#include"testing/chord/assembly/unit_test.hpp"
-#include"testing/chord/progression/unit_test.hpp"
+//#include"testing/chord/progression/unit_test.hpp"
 //#include"testing/hustle/unit_test.hpp"
 
 //#include"experimental/00_generic_printers.hpp"
@@ -90,26 +90,17 @@
 		return sum;
 	}
 
+	template<typename In, typename End>
+	void print_array(In in, End end)
+	{
+		printf("{ ");
+
+		for (auto k = in; k != end; ++k) printf("%d, ", *k);
+
+		printf(" }\n");
+	}
+
 /***********************************************************************************************************************/
-
-/*
-	constexpr auto _hustle_test_func()
-	{
-		return source
-	        (
-			"(define (main a b n)     "
-			"  ((if (= n 0) + *) a b) "
-			")                        "
-		);
-	}
-
-	template<auto contr, auto n, typename... Ts>
-	constexpr auto eval(nik_vp(index)(T_pack_Vs<n>*), Ts... vs) // doesn't work because vs... are not constexpr!
-	{
-		if constexpr (is_atomic<contr, n>) return index;
-		else                               return eval<contr>(U_pack_Vs<call<contr, n>(vs...)>, vs...);
-	}
-*/
 
 // hustle:
 
@@ -149,17 +140,27 @@
 
 	int main(int argc, char *argv[])
 	{
-		using chord_size_type = int*;
-		using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
-		using chord_arr_type  = sequence<int, 5>;
+	//	using chord_size_type = int*;
+	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
+	//	using chord_arr_type  = sequence<int, 5>;
 
-		int val = 0;
+	//	chord_arr_type s0({ 1, 2, 3, 4, 5 });
+	//	chord_arr_type s1({ 1, 2, 3, 4, 5 });
 
-		chord_arr_type s0({ 1, 2, 3, 4, 5 });
-		chord_arr_type s1({ 1, 2, 3, 4, 5 });
+		//
 
-		T_chord_apply::template result<chord_size_type>(&val, s0.cbegin(), s0.cend(), s1.cbegin());
-		printf("%d\n", val);
+	//	chord_arr_type val;
+	//	val.fullsize();
+
+	//	T_chord_apply::template result<chord_size_type>(val.begin(), s0.cbegin(), s0.cend(), s1.cbegin());
+	//	print_array(val.cbegin(), val.cend());
+
+		//
+
+	//	int val = 0;
+
+	//	T_chord_apply::template result<chord_size_type>(&val, s0.cbegin(), s0.cend(), s1.cbegin());
+	//	printf("%d\n", val);
 
 		//
 
@@ -171,8 +172,8 @@
 
 		//
 
-	//	fileput::print_controller<chord::metapile<_chord_test_func, null_env>>();
-	//	fileput::print_controller<hustle::metapile<_hustle_test_func, null_env>>();
+	//	fileput::print_assembly_controller<chord::metapile<_chord_test_func, null_env>>();
+	//	fileput::print_assembly_controller<hustle::metapile<_hustle_test_func, null_env>>();
 
 	//	auto tr_table_printer = generator::parser_generator_tt_printer<static_grammar>{};
 	//	tr_table_printer.print_num_tr_table();
@@ -209,12 +210,17 @@
 
 		//
 
-	//	using chord_arr_type = sequence<int, 5>;
-
-	//	chord_arr_type s0({ 1, 2, 3, 4, 5 });
-	//	chord_arr_type s1({ 1, 2, 3, 4, 5 });
-
-	//	unit_test_chord_convolution_v0 <gindex_type> (0, s0, s1);
+	//	unit_test_chord_initialize_v0           <gindex_type> (0, s0, s1);
+	//	unit_test_chord_array_square_v0         <gindex_type> (0, s0, s1);
+	//	unit_test_chord_vector_sum_v0           <gindex_type> (0, s0, s1);
+	//	unit_test_chord_array_add_v0            <gindex_type> (0, s0, s1);
+	//	unit_test_chord_sum_v0                  <gindex_type> (0, 1, 100);
+	//	unit_test_chord_dot_product_v0          <gindex_type> (0, s0, s1);
+	//	unit_test_chord_convolution_v0          <gindex_type> (0, s0, s1);
+	//	unit_test_chord_first_less_than_five_v0 <gindex_type> (0, s0, s1);
+	//	unit_test_chord_all_less_than_five_v0   <gindex_type> (0, s0, s1);
+	//	unit_test_chord_change_of_base_printer  <gindex_type> (0, s0, s1);
+	//	unit_test_chord_array_printer           <gindex_type> (0, s0, s1);
 
 		//
 

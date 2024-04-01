@@ -55,7 +55,9 @@
 
 	int main(int argc, char *argv[])
 	{
-		fileput::write_controller< contr_hustle_square_root_v0 >( "hustle" , "square_root_v0" );
+		constexpr char dsl[] = "hustle";
+
+		fileput::write_controller< contr_hustle_square_root_v0 >(dsl, "square_root_v0" );
 
 		return 0;
 	}

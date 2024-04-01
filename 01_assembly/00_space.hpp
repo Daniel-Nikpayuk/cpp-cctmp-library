@@ -134,7 +134,10 @@ namespace assembly {
 	// syntactic sugar:
 
 		template<auto U>
-		using to_mptr = T_store_U<eval<_from_const_, eval<_from_pointer_, U>>>*;
+		using from_cptr = T_store_U<eval<_from_const_, eval<_from_pointer_, U>>>;
+
+		template<auto U> // assumes U is a pointer type.
+		using to_mptr = from_cptr<U> *;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -152,12 +155,12 @@ namespace assembly {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			halt   ,						//  1
-			type   , literal , floating , string , lookup , arg  ,	//  2
-			pad    , hash    , pound    , apply  , bind   , eval ,	//  8
-			go_to  , branch  , invert   , loop   ,	  	    	// 14
-			cycle  , next    , set      ,	     	      		// 18
-			repeat , map     , fold     , find   , sift   ,		// 21
+			halt    ,
+			type    , literal    , floating , string , lookup , arg  ,
+			pad     , hash       , pound    , apply  , bind   , eval ,
+			go_to   , branch     , invert   , loop   ,
+			cycle   , next       , set      ,
+			out_ins , out_in_ins ,
 			dimension
 		};
 	};
@@ -173,13 +176,14 @@ namespace assembly {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first   , front     , back     ,		//  1
-			boolean , character , n_number , r_number ,	//  4
-			port    , select    ,				//  8
-			push    , pull      , drop     ,		// 10
-			verse   , side      , replace  ,		// 13
-			pred    , act       , cont     , end      ,	// 16
-			inc     , dec       ,				// 20
+			first   , front     , back     ,
+			boolean , character , n_number , r_number     ,
+			port    , select    ,
+			push    , pull      , drop     ,
+			verse   , side      , replace  ,
+			pred    , act       , act_mut  , act_comb_mut ,
+			cont    , end       ,
+			inc     , dec       ,
 			dimension
 		};
 	};

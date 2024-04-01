@@ -128,11 +128,13 @@ namespace hustle {
 	using action_type					= generator::action_type;
 	nik_ce auto U_action_type				= generator::U_action_type;
 
-	using sxt_pair						= cctmp::pair<strlit_type, token_type>;
-	using sxa_pair						= cctmp::pair<strlit_type, action_type>;
-
 	using symbol_type					= generator::symbol_type;
 	using csymbol_type					= generator::csymbol_type;
+
+	// syntactic sugar:
+
+		using sxt_pair					= cctmp::pair<strlit_type, token_type>;
+		using sxa_pair					= cctmp::pair<strlit_type, action_type>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -30,13 +30,118 @@ namespace fileput {
 	using gchar_type					= cctmp::gchar_type;
 	using gindex_type					= cctmp::gindex_type;
 
+	nik_ce auto U_gindex_type				= cctmp::U_gindex_type;
+
 	template<auto U>
 	nik_ce auto & member_value_U				= cctmp::member_value_U<U>;
+
+	using strlit_type					= cctmp::strlit_type;
+
+	nik_ce auto U_strlit_type				= cctmp::U_strlit_type;
 
 	template<typename T, auto S>
 	using sequence						= cctmp::sequence<T, S>;
 
 	using Instr						= cctmp::Instr;
+
+	// syntactic sugar:
+
+		using ixs_pair					= cctmp::pair<gindex_type, strlit_type>;
+
+// assembly:
+
+	using AN						= assembly::AN;
+	using AT						= assembly::AT;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// assembly:
+
+/***********************************************************************************************************************/
+
+// names:
+
+	nik_ce auto assembly_names = cctmp::table
+	(
+		U_gindex_type, U_strlit_type,
+
+		ixs_pair( AN::id         , "AN::id"         ),
+
+		ixs_pair( AN::halt       , "AN::halt"       ),
+
+		ixs_pair( AN::type       , "AN::type"       ),
+		ixs_pair( AN::literal    , "AN::literal"    ),
+		ixs_pair( AN::floating   , "AN::floating"   ),
+		ixs_pair( AN::string     , "AN::string"     ),
+		ixs_pair( AN::lookup     , "AN::lookup"     ),
+		ixs_pair( AN::arg        , "AN::arg"        ),
+
+		ixs_pair( AN::pad        , "AN::pad"        ),
+		ixs_pair( AN::hash       , "AN::hash"       ),
+		ixs_pair( AN::pound      , "AN::pound"      ),
+		ixs_pair( AN::apply      , "AN::apply"      ),
+		ixs_pair( AN::bind       , "AN::bind"       ),
+		ixs_pair( AN::eval       , "AN::eval"       ),
+
+		ixs_pair( AN::go_to      , "AN::go_to"      ),
+		ixs_pair( AN::branch     , "AN::branch"     ),
+		ixs_pair( AN::invert     , "AN::invert"     ),
+		ixs_pair( AN::loop       , "AN::loop"       ),
+
+		ixs_pair( AN::cycle      , "AN::cycle"      ),
+		ixs_pair( AN::next       , "AN::next"       ),
+		ixs_pair( AN::set        , "AN::set"        ),
+
+		ixs_pair( AN::out_ins    , "AN::out_ins"    ),
+		ixs_pair( AN::out_in_ins , "AN::out_in_ins" ),
+
+		ixs_pair( AN::dimension  , "AN::dimension"  )
+	);
+
+/***********************************************************************************************************************/
+
+// notes:
+
+	nik_ce auto assembly_notes = cctmp::table
+	(
+		U_gindex_type, U_strlit_type,
+
+		ixs_pair( AT::id           , "AT::id"           ),
+
+		ixs_pair( AT::first        , "AT::first"        ),
+		ixs_pair( AT::front        , "AT::front"        ),
+		ixs_pair( AT::back         , "AT::back"         ),
+
+		ixs_pair( AT::boolean      , "AT::boolean"      ),
+		ixs_pair( AT::character    , "AT::character"    ),
+		ixs_pair( AT::n_number     , "AT::n_number"     ),
+		ixs_pair( AT::r_number     , "AT::r_number"     ),
+
+		ixs_pair( AT::port         , "AT::port"         ),
+		ixs_pair( AT::select       , "AT::select"       ),
+
+		ixs_pair( AT::push         , "AT::push"         ),
+		ixs_pair( AT::pull         , "AT::pull"         ),
+		ixs_pair( AT::drop         , "AT::drop"         ),
+
+		ixs_pair( AT::verse        , "AT::verse"        ),
+		ixs_pair( AT::side         , "AT::side"         ),
+		ixs_pair( AT::replace      , "AT::replace"      ),
+
+		ixs_pair( AT::pred         , "AT::pred"         ),
+		ixs_pair( AT::act          , "AT::act"          ),
+		ixs_pair( AT::act_mut      , "AT::act_mut"      ),
+		ixs_pair( AT::act_comb_mut , "AT::act_comb_mut" ),
+
+		ixs_pair( AT::cont         , "AT::cont"         ),
+		ixs_pair( AT::end          , "AT::end"          ),
+
+		ixs_pair( AT::inc          , "AT::inc"          ),
+		ixs_pair( AT::dec          , "AT::dec"          ),
+
+		ixs_pair( AT::dimension    , "AT::dimension"    )
+	);
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -241,10 +346,16 @@ namespace fileput {
 
 /***********************************************************************************************************************/
 
-// print controller:
+// spacing:
+
+	void print_spacing(int n) { for (auto k = 0; k != n; ++k) printf(" "); }
+
+/***********************************************************************************************************************/
+
+// numeric:
 
 	template<auto static_contr>
-	void print_controller(int b = 0, int e = member_value_U<static_contr>.size())
+	void print_numeric_controller(int b = 0, int e = member_value_U<static_contr>.size())
 	{
 		constexpr auto & contr = member_value_U<static_contr>;
 
@@ -254,6 +365,42 @@ namespace fileput {
 			printf("line %s%d -", s, k);
 
 			for (auto j = 0; j != Instr::dimension; ++j)
+			{
+				auto v = contr[k][j];
+				auto t = (v < 10) ? "  " : (v < 100) ? " " : "";
+
+				printf(" %s%d", t, v);
+			}
+
+			printf("\n");
+		}
+	}
+
+/***********************************************************************************************************************/
+
+// assembly:
+
+	template<auto static_contr>
+	void print_assembly_controller(int b = 0, int e = member_value_U<static_contr>.size())
+	{
+		constexpr auto & contr  = member_value_U<static_contr>;
+		constexpr auto name_max = 14; // AN::out_in_ins
+		constexpr auto note_max = 13; // AT::character
+
+		for (auto k = b; k != e; ++k)
+		{
+			auto s = (k < 10) ? "  " : (k < 100) ? " " : "";
+			printf("line %s%d -", s, k);
+
+			auto name = assembly_names.lookup(contr[k][0], "unknown");
+			printf(" %s", name.origin());
+			print_spacing(name_max - name.size());
+
+			auto note = assembly_notes.lookup(contr[k][1], "unknown");
+			printf(" %s", note.origin());
+			print_spacing(note_max - note.size());
+
+			for (auto j = 2; j != Instr::dimension; ++j)
 			{
 				auto v = contr[k][j];
 				auto t = (v < 10) ? "  " : (v < 100) ? " " : "";

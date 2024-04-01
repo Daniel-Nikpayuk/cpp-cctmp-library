@@ -84,7 +84,7 @@
 		template<typename T>
 		constexpr static auto result(T x) { return (x * x); }
 
-	}; constexpr auto _square_ = U_store_T<T_square>;
+	}; constexpr auto _square_ = cctmp::U_store_T<T_square>;
 
 /***********************************************************************************************************************/
 
@@ -103,7 +103,7 @@
 		}
 
 	}; template<auto radix = 10>
-		constexpr auto _carry_add_ = U_store_T<T_carry_add<radix>>;
+		constexpr auto _carry_add_ = cctmp::U_store_T<T_carry_add<radix>>;
 
 /***********************************************************************************************************************/
 
@@ -116,7 +116,7 @@
 		constexpr static auto result(T v) { return (v / V); }
 
 	}; template<auto V>
-		constexpr auto _divide_by_ = U_store_T<T_divide_by<V>>;
+		constexpr auto _divide_by_ = cctmp::U_store_T<T_divide_by<V>>;
 
 /***********************************************************************************************************************/
 
@@ -129,7 +129,7 @@
 		constexpr static auto result(T v) { return (v % V); }
 
 	}; template<auto V>
-		constexpr auto _modulo_by_ = U_store_T<T_modulo_by<V>>;
+		constexpr auto _modulo_by_ = cctmp::U_store_T<T_modulo_by<V>>;
 
 /***********************************************************************************************************************/
 
@@ -140,7 +140,7 @@
 		template<typename T0, typename T1>
 		constexpr static void result(T0 v0, T1 v1) { printf(v1, v0); }
 
-	}; constexpr auto _print_ = U_store_T<T_print>;
+	}; constexpr auto _print_ = cctmp::U_store_T<T_print>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -163,17 +163,17 @@
 		{
 			return cctmp::source
 			(
-				"main out end in                   ;"
+				"main out end in                    ;"
 
-				"vars:                             ;"
-				"  declare arr_init                ;"
+				"vars:                              ;"
+				"  declare arr_init                 ;"
 
-				"defs:                             ;"
-				" arr_init # repeat[1]{@ @||}[,)<> ;"
+				"defs:                              ;"
+				"  arr_init # repeat[1]{@ @||}[,)<> ;"
 
-				"body:                             ;"
-				" . = arr_init !out end in         ;"
-				" return _                         ;"
+				"body:                              ;"
+				"  . = arr_init !out end in         ;"
+				"  return _                         ;"
 			);
 		}
 
@@ -192,17 +192,17 @@
 		{
 			return cctmp::source
 			(
-				"main out in end                 ;"
+				"main out in end                  ;"
 
-				"vars:                           ;"
-				"  declare arr_sq                ;"
+				"vars:                            ;"
+				"  declare arr_sq                 ;"
 
-				"defs:                           ;"
-				" arr_sq # map[1]{square||}[)[,) ;"
+				"defs:                            ;"
+				"  arr_sq # map[1]{square||}[)[,) ;"
 
-				"body:                           ;"
-				" . = arr_map !out in end        ;"
-				" return _                       ;"
+				"body:                            ;"
+				"  . = arr_map !out in end        ;"
+				"  return _                       ;"
 
 				, cctmp::binding( "square" , _square_ )
 			);
@@ -210,25 +210,25 @@
 
 /***********************************************************************************************************************/
 
-// vector sum:
+// vector add:
 
 	// v0:
 
-		constexpr auto _chord_vector_sum_v0()
+		constexpr auto _chord_vector_add_v0()
 		{
 			return cctmp::source
 			(
-				"main out in end in1             ;"
+				"main out in end in1              ;"
 
-				"vars:                           ;"
-				"  declare vec_sum               ;"
+				"vars:                            ;"
+				"  declare vec_add                ;"
 
-				"defs:                           ;"
-				" vec_sum # map[2]{add||}[)[,)[) ;"
+				"defs:                            ;"
+				"  vec_add # map[2]{add||}[)[,)[) ;"
 
-				"body:                           ;"
-				" . = vec_sum !out in end in1    ;"
-				" return _                       ;"
+				"body:                            ;"
+				"  . = vec_add !out in end in1    ;"
+				"  return _                       ;"
 			);
 		}
 
@@ -242,17 +242,17 @@
 		{
 			return cctmp::source
 			(
-				"main out in end in1 aux                       ;"
+				"main out in end in1 aux                        ;"
 
-				"vars:                                         ;"
-				"  declare arr_add                             ;"
+				"vars:                                          ;"
+				"  declare arr_add                              ;"
 
-				"defs:                                         ;"
-				" arr_add # map[3]{carry_add * * @||}[][,][]<> ;"
+				"defs:                                          ;"
+				"  arr_add # map[3]{carry_add * * @||}[][,][]<> ;"
 
-				"body:                                         ;"
-				" . = arr_add !out in end in1 !aux             ;"
-				" return _                                     ;"
+				"body:                                          ;"
+				"  . = arr_add !out in end in1 !aux             ;"
+				"  return _                                     ;"
 
 				, cctmp::binding( "carry_add" , _carry_add_<> )
 			);
@@ -273,17 +273,17 @@
 		{
 			return cctmp::source
 			(
-				"main out in end                ;"
+				"main out in end                     ;"
 
-				"vars:                          ;"
-				"  declare sum                  ;"
+				"vars:                               ;"
+				"  declare sum                       ;"
 
-				"defs:                          ;"
-				" sum # fold[1]{add|@ @||}{}[,) ;"
+				"defs:                               ;"
+				"  sum # fold[1]{add * @|@ @||}<>[,] ;"
 
-				"body:                          ;"
-				" . = sum !out in end           ;"
-				" return _                      ;"
+				"body:                               ;"
+				"  . = sum !out in end               ;"
+				"  return _                          ;"
 			);
 		}
 
@@ -350,17 +350,17 @@
 		{
 			return cctmp::source
 			(
-				"main out in end                     ;"
+				"main out in end                      ;"
 
-				"vars:                               ;"
-				"  declare arr_find                  ;"
+				"vars:                                ;"
+				"  declare arr_find                   ;"
 
-				"definitions:                  	     ;"
-				" arr_find # find[1]{lt_five||}<>[,) ;"
+				"definitions:                  	      ;"
+				"  arr_find # find[1]{lt_five||}<>[,) ;"
 
-				"body:                               ;"
-				" . = arr_find !out in end           ;"
-				" return _                           ;"
+				"body:                                ;"
+				"  . = arr_find !out in end           ;"
+				"  return _                           ;"
 
 				, cctmp::binding( "lt_five" , cctmp::_is_less_than_<5> )
 			);
@@ -381,17 +381,17 @@
 		{
 			return cctmp::source
 			(
-				"main out in end                     ;"
+				"main out in end                      ;"
 
-				"vars:                               ;"
-				"  declare arr_sift                  ;"
+				"vars:                                ;"
+				"  declare arr_sift                   ;"
 
-				"defs:                               ;"
-				" arr_sift # sift[1]{lt_five||}<>[,) ;"
+				"defs:                                ;"
+				"  arr_sift # sift[1]{lt_five||}<>[,) ;"
 
-				"body:                               ;"
-				" . = arr_sift !out in end           ;"
-				" return _                           ;"
+				"body:                                ;"
+				"  . = arr_sift !out in end           ;"
+				"  return _                           ;"
 
 				, cctmp::binding( "lt_five" , cctmp::_is_less_than_<5> )
 			);
@@ -413,19 +413,19 @@
 		{
 			return cctmp::source
 			(
-				"main out in format                             ;"
+				"main out in format                              ;"
 
-				"vars:                                          ;"
-				"  declare arr_map arr_pr                       ;"
+				"vars:                                           ;"
+				"  declare arr_map arr_pr                        ;"
 
-				"defs:                                          ;"
-				" arr_map # map[1]{rem_by_n @||}[)[div_by_n|~,) ;"
-				" arr_pr  # repeat[1]{@ @|print * @|}(-|+,]<>   ;"
+				"defs:                                           ;"
+				"  arr_map # map[1]{rem_by_n @||}[)[div_by_n|~,) ;"
+				"  arr_pr  # repeat[1]{@ @|print * @|}(-|+,]<>   ;"
 
-				"body:                                          ;"
-				" . = arr_map !out in zero                      ;"
-				" . = arr_pr _ out format                       ;"
-				" return _                                      ;"
+				"body:                                           ;"
+				"  . = arr_map !out in zero                      ;"
+				"  . = arr_pr _ out format                       ;"
+				"  return _                                      ;"
 
 				, cctmp::binding( "div_by_n" , _divide_by_<n> )
 				, cctmp::binding( "rem_by_n" , _modulo_by_<n> )
@@ -444,19 +444,19 @@
 		{
 			return cctmp::source
 			(
-				"main out end format                           ;"
+				"main out end format                            ;"
 
-				"vars:                                         ;"
-				"  declare arr_zero arr_pr                     ;"
+				"vars:                                          ;"
+				"  declare arr_zero arr_pr                      ;"
 
-				"defs:                                         ;"
-				" arr_zero # repeat[1]{@ @||}[,)<>             ;"
-				" arr_pr   # repeat[1]{@ @|print * @|}(-|+,]<> ;"
+				"defs:                                          ;"
+				"  arr_zero # repeat[1]{@ @||}[,)<>             ;"
+				"  arr_pr   # repeat[1]{@ @|print * @|}(-|+,]<> ;"
 
-				"body:                                         ;"
-				" . = arr_zero !out end zero                   ;"
-				" . = arr_pr _ out format                      ;"
-				" return _                                     ;"
+				"body:                                          ;"
+				"  . = arr_zero !out end zero                   ;"
+				"  . = arr_pr _ out format                      ;"
+				"  return _                                     ;"
 
 				, cctmp::binding( "print" , _print_ )
 				, cctmp::binding( "zero"  , 0       )

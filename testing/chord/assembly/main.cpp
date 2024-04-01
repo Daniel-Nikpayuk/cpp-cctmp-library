@@ -81,33 +81,35 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	fileput::write_controller< contr_chord_square_v0             >( "chord" , "square_v0"             );
-	//	fileput::write_controller< contr_chord_square_v1             >( "chord" , "square_v1"             );
-	//	fileput::write_controller< contr_chord_sum_of_squares_v0     >( "chord" , "sum_of_squares_v0"     );
-	//	fileput::write_controller< contr_chord_sum_of_squares_v1     >( "chord" , "sum_of_squares_v1"     );
-	//	fileput::write_controller< contr_chord_twice_v0              >( "chord" , "twice_v0"              );
-	//	fileput::write_controller< contr_chord_plus_n_v0             >( "chord" , "plus_n_v0"             );
-	//	fileput::write_controller< contr_chord_two_x_sqd_v0          >( "chord" , "two_x_sqd_v0"          );
-	//	fileput::write_controller< contr_chord_x_sqd_plus_y4_v0      >( "chord" , "x_sqd_plus_y4_v0"      );
-	//	fileput::write_controller< contr_chord_x_to5_plus1_v0        >( "chord" , "x_to5_plus1_v0"        );
-	//	fileput::write_controller< contr_chord_reassign_v0           >( "chord" , "reassign_v0"           );
-	//	fileput::write_controller< contr_chord_if_then_else_v0       >( "chord" , "if_then_else_v0"       );
-	//	fileput::write_controller< contr_chord_semidynamic_typing_v0 >( "chord" , "semidynamic_typing_v0" );
-	//	fileput::write_controller< contr_chord_semidynamic_typing_v1 >( "chord" , "semidynamic_typing_v1" );
-	//	fileput::write_controller< contr_chord_binary_dispatch_v0    >( "chord" , "binary_dispatch_v0"    );
-	//	fileput::write_controller< contr_chord_binary_dispatch_v1    >( "chord" , "binary_dispatch_v1"    );
-	//	fileput::write_controller< contr_chord_factorial_v0          >( "chord" , "factorial_v0"          );
-	//	fileput::write_controller< contr_chord_factorial_v1          >( "chord" , "factorial_v1"          );
-	//	fileput::write_controller< contr_chord_factorial_v2          >( "chord" , "factorial_v2"          );
-	//	fileput::write_controller< contr_chord_factorial_v3          >( "chord" , "factorial_v3"          );
-	//	fileput::write_controller< contr_chord_factorial_v4          >( "chord" , "factorial_v4"          );
-	//	fileput::write_controller< contr_chord_factorial_v5          >( "chord" , "factorial_v5"          );
-	//	fileput::write_controller< contr_chord_fibonacci_v0          >( "chord" , "fibonacci_v0"          );
-	//	fileput::write_controller< contr_chord_fibonacci_v1          >( "chord" , "fibonacci_v1"          );
-	//	fileput::write_controller< contr_chord_fall_fact_2_v0        >( "chord" , "fall_fact_2_v0"        );
-	//	fileput::write_controller< contr_chord_fall_fact_2_v1        >( "chord" , "fall_fact_2_v1"        );
-	//	fileput::write_controller< contr_chord_void_effects_v0       >( "chord" , "void_effects_v0"       );
-	//	fileput::write_controller< contr_chord_side_effects_v0       >( "chord" , "side_effects_v0"       );
+		constexpr char dsl[] = "chord";
+
+	//	fileput::write_controller< contr_chord_square_v0             >(dsl, "square_v0"             );
+	//	fileput::write_controller< contr_chord_square_v1             >(dsl, "square_v1"             );
+	//	fileput::write_controller< contr_chord_sum_of_squares_v0     >(dsl, "sum_of_squares_v0"     );
+	//	fileput::write_controller< contr_chord_sum_of_squares_v1     >(dsl, "sum_of_squares_v1"     );
+	//	fileput::write_controller< contr_chord_twice_v0              >(dsl, "twice_v0"              );
+	//	fileput::write_controller< contr_chord_plus_n_v0             >(dsl, "plus_n_v0"             );
+	//	fileput::write_controller< contr_chord_two_x_sqd_v0          >(dsl, "two_x_sqd_v0"          );
+	//	fileput::write_controller< contr_chord_x_sqd_plus_y4_v0      >(dsl, "x_sqd_plus_y4_v0"      );
+	//	fileput::write_controller< contr_chord_x_to5_plus1_v0        >(dsl, "x_to5_plus1_v0"        );
+	//	fileput::write_controller< contr_chord_reassign_v0           >(dsl, "reassign_v0"           );
+	//	fileput::write_controller< contr_chord_if_then_else_v0       >(dsl, "if_then_else_v0"       );
+	//	fileput::write_controller< contr_chord_semidynamic_typing_v0 >(dsl, "semidynamic_typing_v0" );
+	//	fileput::write_controller< contr_chord_semidynamic_typing_v1 >(dsl, "semidynamic_typing_v1" );
+	//	fileput::write_controller< contr_chord_binary_dispatch_v0    >(dsl, "binary_dispatch_v0"    );
+	//	fileput::write_controller< contr_chord_binary_dispatch_v1    >(dsl, "binary_dispatch_v1"    );
+	//	fileput::write_controller< contr_chord_factorial_v0          >(dsl, "factorial_v0"          );
+	//	fileput::write_controller< contr_chord_factorial_v1          >(dsl, "factorial_v1"          );
+	//	fileput::write_controller< contr_chord_factorial_v2          >(dsl, "factorial_v2"          );
+	//	fileput::write_controller< contr_chord_factorial_v3          >(dsl, "factorial_v3"          );
+	//	fileput::write_controller< contr_chord_factorial_v4          >(dsl, "factorial_v4"          );
+	//	fileput::write_controller< contr_chord_factorial_v5          >(dsl, "factorial_v5"          );
+	//	fileput::write_controller< contr_chord_fibonacci_v0          >(dsl, "fibonacci_v0"          );
+	//	fileput::write_controller< contr_chord_fibonacci_v1          >(dsl, "fibonacci_v1"          );
+	//	fileput::write_controller< contr_chord_fall_fact_2_v0        >(dsl, "fall_fact_2_v0"        );
+	//	fileput::write_controller< contr_chord_fall_fact_2_v1        >(dsl, "fall_fact_2_v1"        );
+	//	fileput::write_controller< contr_chord_void_effects_v0       >(dsl, "void_effects_v0"       );
+	//	fileput::write_controller< contr_chord_side_effects_v0       >(dsl, "side_effects_v0"       );
 
 		return 0;
 	}

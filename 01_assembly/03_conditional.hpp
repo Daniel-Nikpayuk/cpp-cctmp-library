@@ -187,7 +187,7 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
-// act:
+// act(ion):
 
 	template<auto p0, auto p1, auto... filler>
 	struct T_assembly<AN::cycle, AT::act, p0, p1, filler...>
@@ -259,7 +259,7 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
-// cont:
+// cont(inue):
 
 	template
 	<
@@ -305,7 +305,7 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
-// inc:
+// inc(rement):
 
 	template
 	<
@@ -324,7 +324,7 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
-// dec:
+// dec(rement):
 
 	template
 	<
@@ -399,11 +399,73 @@ namespace assembly {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// fold:
+// out, ins:
 
 /***********************************************************************************************************************/
 
-// pred:
+// pred(icate):
+
+	template
+	<
+		template<auto...> typename B0, auto... LUs, nik_vp(p0)(B0<LUs...>*),
+		template<auto...> typename B1, auto OU, auto EU, auto... IUs,
+		nik_vp(p1)(B1<OU, EU, IUs...>*), auto... filler
+	>
+	struct T_assembly<AN::out_ins, AT::pred, p0, p1, filler...>
+	{
+		using Out = T_store_U<OU>;
+		using End = T_store_U<EU>;
+
+		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>
+		nik_ces auto result(T_store_U<LUs>... lvs, Out out, End end, T_store_U<IUs>... ins)
+		{
+			nik_ce auto ni = AD<c>::pos(i);
+
+			return NIK_ASSEMBLY_TEMPLATE(c, ni)
+				::NIK_ASSEMBLY_RESULT_3TS(c, ni, l, t, r, T_store_U<LUs>..., Out, End)
+					(lvs..., out, end);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// act(ion) mut(ate):
+
+	template
+	<
+		template<auto...> typename B0, auto... LUs, nik_vp(p0)(B0<LUs...>*),
+		template<auto...> typename B1, auto OU, auto EU, auto... IUs,
+		nik_vp(p1)(B1<OU, EU, IUs...>*), auto... filler
+	>
+	struct T_assembly<AN::out_ins, AT::act, p0, p1, filler...>
+	{
+		using Out = T_store_U<OU>;
+		using End = T_store_U<EU>;
+
+		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>
+		nik_ces auto result(T_store_U<LUs>*... lvs, Out* out, End* end, T_store_U<IUs>*... ins)
+		{
+			nik_ce auto ni = AD<c>::pos(i);
+			nik_ce auto mi = AD<c>::num(i);
+
+			auto nv = NIK_ASSEMBLY_TEMPLATE(c, ni)
+				::NIK_ASSEMBLY_RESULT_2TS(c, ni, l, t, r, T_store_U<LUs>..., T_store_U<IUs>...)
+					(*lvs..., *ins...); // action
+
+			NIK_ASSEMBLY_TEMPLATE(c, mi)
+				::NIK_ASSEMBLY_RESULT_3TS(c, mi, l, t, r, T_store_U<LUs>..., Out, decltype(nv))
+					(*lvs..., *out, nv); // mutate
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// out, in, ins:
+
+/***********************************************************************************************************************/
+
+// pred(icate):
 
 	template
 	<
@@ -411,7 +473,7 @@ namespace assembly {
 		template<auto...> typename B1, auto OU, auto IU, auto EU, auto... IUs,
 		nik_vp(p1)(B1<OU, IU, EU, IUs...>*), auto... filler
 	>
-	struct T_assembly<AN::fold, AT::pred, p0, p1, filler...>
+	struct T_assembly<AN::out_in_ins, AT::pred, p0, p1, filler...>
 	{
 		using Out = T_store_U<OU>;
 		using In  = T_store_U<IU>;
@@ -430,7 +492,7 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
-// act:
+// act(ion) mut(ate):
 
 	template
 	<
@@ -438,9 +500,9 @@ namespace assembly {
 		template<auto...> typename B1, auto OU, auto IU, auto EU, auto... IUs,
 		nik_vp(p1)(B1<OU, IU, EU, IUs...>*), auto... filler
 	>
-	struct T_assembly<AN::fold, AT::act, p0, p1, filler...>
+	struct T_assembly<AN::out_in_ins, AT::act_mut, p0, p1, filler...>
 	{
-		using Out = T_store_U<eval<cctmp::_add_pointer_, eval<cctmp::_from_const_, eval<cctmp::_remove_pointer_, OU>>>>;
+		using Out = T_store_U<OU>;
 		using In  = T_store_U<IU>;
 		using End = T_store_U<EU>;
 
@@ -449,7 +511,39 @@ namespace assembly {
 		{
 			nik_ce auto ni = AD<c>::pos(i);
 			nik_ce auto mi = AD<c>::num(i);
-			nik_ce auto li = AD<c>::peek(i, 1, 0);
+
+			auto nv = NIK_ASSEMBLY_TEMPLATE(c, ni)
+				::NIK_ASSEMBLY_RESULT_3TS(c, ni, l, t, r, T_store_U<LUs>..., In, T_store_U<IUs>...)
+					(*lvs..., *in, *ins...); // action
+
+			NIK_ASSEMBLY_TEMPLATE(c, mi)
+				::NIK_ASSEMBLY_RESULT_3TS(c, mi, l, t, r, T_store_U<LUs>..., Out, decltype(nv))
+					(*lvs..., *out, nv); // mutate
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// act(ion) comb(ine) mut(ate):
+
+	template
+	<
+		template<auto...> typename B0, auto... LUs, nik_vp(p0)(B0<LUs...>*),
+		template<auto...> typename B1, auto OU, auto IU, auto EU, auto... IUs,
+		nik_vp(p1)(B1<OU, IU, EU, IUs...>*), auto... filler
+	>
+	struct T_assembly<AN::out_in_ins, AT::act_comb_mut, p0, p1, filler...>
+	{
+		using Out = T_store_U<OU>;
+		using In  = T_store_U<IU>;
+		using End = T_store_U<EU>;
+
+		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>
+		nik_ces auto result(T_store_U<LUs>*... lvs, Out* out, In* in, End* end, T_store_U<IUs>*... ins)
+		{
+			nik_ce auto ni = AD<c>::pos(i);
+			nik_ce auto mi = AD<c>::num(i);
+			nik_ce auto li = AD<c>::aux0(i);
 
 			auto nv = NIK_ASSEMBLY_TEMPLATE(c, ni)
 				::NIK_ASSEMBLY_RESULT_3TS(c, ni, l, t, r, T_store_U<LUs>..., In, T_store_U<IUs>...)

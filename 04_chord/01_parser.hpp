@@ -424,8 +424,8 @@ namespace chord {
 				"Cycle -> repeat Arity  AMP         LRMIval RepeatIvals ;"
 				"      -> map    Arity  AMP LRLIval LRMIval    MapIvals ;"
 				"      -> fold   Arity CAMP   FIval LRMIval   FoldIvals ;"
-				"      -> find   Arity  AMP LRLIval LRMIval   FindIvals ;"
-				"      -> sift   Arity  AMP LRLIval LRMIval   SiftIvals ;"
+				"      -> find   Arity  AMP   FIval LRMIval   FindIvals ;"
+				"      -> sift   Arity  AMP   FIval LRMIval   SiftIvals ;"
 
 				// routine:
 
