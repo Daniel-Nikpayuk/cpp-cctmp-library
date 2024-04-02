@@ -137,11 +137,11 @@
 
 	struct T_print
 	{
-		template<typename T>
-		constexpr static void result(T v) { printf("%s", v); }
+		template<typename T> // non void return is temporary.
+		constexpr static auto result(T v) { printf("%s", v.origin()); return 0; }
 
-		template<typename T, typename Fmt>
-		constexpr static void result(T v, Fmt fmt) { printf(fmt, v); }
+		template<typename T, typename Fmt> // non void return is temporary.
+		constexpr static auto result(T v, Fmt fmt) { printf(fmt.origin(), v); return 0; }
 
 	}; constexpr auto _print_ = cctmp::U_store_T<T_print>;
 
@@ -411,28 +411,29 @@
 
 	// v0:
 
-		template<auto n>
+		template<auto radix>
 		constexpr auto _chord_change_of_base_printer_v0()
 		{
 			return cctmp::source
 			(
-				"main out in format                              ;"
+				"main out in                                       ;"
 
-				"vars:                                           ;"
-				"  declare arr_map arr_pr                        ;"
+				"vars:                                             ;"
+				"  declare arr_map arr_pr                          ;"
 
-				"defs:                                           ;"
-				"  arr_map # map[1]{rem_by_n @||}[)[div_by_n|~,) ;"
-				"  arr_pr  # repeat[1]{@ @|print * @|}(-|+,]<>   ;"
+				"defs:                                             ;"
+				"  arr_map # map[1]{rem_by_n @||} [) [div_by_n|~,) ;"
+				"  arr_pr  # repeat[1]{@ @|print * @|} (-|+,] <>   ;"
 
-				"body:                                           ;"
-				"  . = arr_map !out in 0                         ;"
-				"  . = arr_pr _ out format                       ;"
-				"  return _                                      ;"
+				"body:                                             ;"
+				"  . = arr_map !out in 0                           ;"
+				"  . = arr_pr _ out format                         ;"
+				"  return _                                        ;"
 
-				, cctmp::binding( "div_by_n" , _divide_by_<n> )
-				, cctmp::binding( "rem_by_n" , _modulo_by_<n> )
-				, cctmp::binding( "print"    , _print_        )
+				, cctmp::binding( "print"    , _print_                  )
+				, cctmp::binding( "div_by_n" , _divide_by_<radix>       )
+				, cctmp::binding( "rem_by_n" , _modulo_by_<radix>       )
+				, cctmp::binding( "format"   , cctmp::strlit_type{"%d"} )
 			);
 		}
 
@@ -490,10 +491,10 @@
 
 				"  return last                                  ;"
 
-				, cctmp::binding( "print"   , _print_               )
-				, cctmp::binding( "beg_fmt" , strlit_type{" { "}    )
-				, cctmp::binding( "arr_fmt" , strlit_type{"%d, "}   )
-				, cctmp::binding( "end_fmt" , strlit_type{"%d }\n"} )
+				, cctmp::binding( "print"   , _print_                      )
+				, cctmp::binding( "beg_fmt" , cctmp::strlit_type{" { "}    )
+				, cctmp::binding( "arr_fmt" , cctmp::strlit_type{"%d, "}   )
+				, cctmp::binding( "end_fmt" , cctmp::strlit_type{"%d }\n"} )
 			);
 		}
 

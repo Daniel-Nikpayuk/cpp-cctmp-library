@@ -290,13 +290,13 @@ namespace chord {
 		// sign:
 
 			template<typename Prog, typename AST>
-			nik_ces auto sign_out(AST *t) { return t->verse.size() + Prog::Sign::out; }
+			nik_ces auto sign_out(AST *t) { return Prog::Sign::out; }
 
 			template<typename Prog, typename AST>
-			nik_ces auto sign_in(AST *t) { return sign_out<Prog>(t) + Prog::Sign::in; }
+			nik_ces auto sign_in(AST *t) { return Prog::Sign::in; }
 
 			template<typename Prog, typename AST>
-			nik_ces auto sign_ins(AST *t) { return sign_out<Prog>(t) + Prog::Sign::ins; }
+			nik_ces auto sign_ins(AST *t) { return Prog::Sign::ins; }
 
 		// next:
 

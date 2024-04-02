@@ -101,9 +101,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->subpose_value(t->cselect_deref());
-		}
+			{ t->subpose_value(t->cselect_deref()); }
 	};
 
 /***********************************************************************************************************************/
@@ -139,9 +137,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->act_subpose_values(t->cselect_deref(), t->count.size(), t->pound.arity());
-		}
+			{ t->act_subpose_values(t->cselect_deref(), t->count.size(), t->pound.arity()); }
 	};
 
 /***********************************************************************************************************************/
@@ -194,9 +190,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->subpose_value(t->cselect_id());
-		}
+			{ t->subpose_value(t->cselect_id()); }
 	};
 
 /***********************************************************************************************************************/
@@ -247,9 +241,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-			t->subpose_value(t->cselect_id());
-		}
+			{ t->subpose_value(t->cselect_id()); }
 	};
 
 /***********************************************************************************************************************/
@@ -434,9 +426,7 @@ namespace chord {
 	{
 		template<typename AST>
 		nik_ces void result(AST *t, clexeme *l)
-		{
-		//	t->note_push(AST::CycleNext::inc, AT::cont);
-		}
+			{ t->note_push_value(l->left_cselect()); }
 	};
 
 	template<auto... filler>

@@ -49,17 +49,17 @@
 
 /***********************************************************************************************************************/
 
-//	constexpr auto contr_chord_initialize_v0             = metapile< _chord_initialize_v0             , null_env >;
-//	constexpr auto contr_chord_array_square_v0           = metapile< _chord_array_square_v0           , null_env >;
-//	constexpr auto contr_chord_vector_add_v0             = metapile< _chord_vector_add_v0             , null_env >;
-//	constexpr auto contr_chord_array_add_v0              = metapile< _chord_array_add_v0              , null_env >;
-//	constexpr auto contr_chord_sum_v0                    = metapile< _chord_sum_v0                    , null_env >;
-//	constexpr auto contr_chord_dot_product_v0            = metapile< _chord_dot_product_v0            , null_env >;
-//	constexpr auto contr_chord_convolution_v0            = metapile< _chord_convolution_v0            , null_env >;
-//	constexpr auto contr_chord_first_less_than_five_v0   = metapile< _chord_first_less_than_five_v0   , null_env >;
-//	constexpr auto contr_chord_all_less_than_five_v0     = metapile< _chord_all_less_than_five_v0     , null_env >;
-//	constexpr auto contr_chord_change_of_base_printer_v0 = metapile< _chord_change_of_base_printer_v0 , null_env >;
-//	constexpr auto contr_chord_array_printer_v0          = metapile< _chord_array_printer_v0          , null_env >;
+//	constexpr auto contr_chord_initialize_v0             = metapile< _chord_initialize_v0                 , null_env >;
+//	constexpr auto contr_chord_array_square_v0           = metapile< _chord_array_square_v0               , null_env >;
+//	constexpr auto contr_chord_vector_add_v0             = metapile< _chord_vector_add_v0                 , null_env >;
+//	constexpr auto contr_chord_array_add_v0              = metapile< _chord_array_add_v0                  , null_env >;
+//	constexpr auto contr_chord_sum_v0                    = metapile< _chord_sum_v0                        , null_env >;
+//	constexpr auto contr_chord_dot_product_v0            = metapile< _chord_dot_product_v0                , null_env >;
+//	constexpr auto contr_chord_convolution_v0            = metapile< _chord_convolution_v0                , null_env >;
+//	constexpr auto contr_chord_first_less_than_five_v0   = metapile< _chord_first_less_than_five_v0       , null_env >;
+//	constexpr auto contr_chord_all_less_than_five_v0     = metapile< _chord_all_less_than_five_v0         , null_env >;
+//	constexpr auto contr_chord_change_of_base_printer_v0 = metapile< _chord_change_of_base_printer_v0<10> , null_env >;
+//	constexpr auto contr_chord_array_printer_v0          = metapile< _chord_array_printer_v0              , null_env >;
 
 /***********************************************************************************************************************/
 

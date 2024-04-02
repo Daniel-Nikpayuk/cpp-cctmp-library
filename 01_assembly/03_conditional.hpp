@@ -295,33 +295,69 @@ namespace assembly {
 
 // cont(inue):
 
+/*
 	template
 	<
 		template<auto...> typename B0,          auto... LUs, nik_vp(p0)(B0<    LUs...>*),
-		template<auto...> typename B1, auto RU, auto... RUs, nik_vp(p1)(B1<RU, RUs...>*),
+		template<auto...> typename B1,          auto... MUs, nik_vp(p1)(B1<    MUs...>*),
+		template<auto...> typename B2, auto RU, auto... RUs, nik_vp(p2)(B2<RU, RUs...>*),
 		auto... filler
 	>
-	struct T_assembly<AN::next, AT::cont, p0, p1, filler...>
+	struct T_assembly<AN::next, AT::cont, p0, p1, p2, filler...>
 	{
 		using RT = T_store_U<RU>;
 		using T  = to_mptr<RU>;
 
 		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>
-		nik_ces auto result(T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs)
+		nik_ces auto result(T_store_U<LUs>... lvs, T_store_U<MUs>... mvs, RT rv, T_store_U<RUs>... rvs)
 		{
-			nik_ce auto ni  = AD<c>::pos(i);
-			nik_ce auto n   = AD<c>::num(i);
-			nik_ce auto np0 = eval<_par_left_ , n, LUs..., RU, RUs...>;
-			nik_ce auto np1 = eval<_par_right_, n, LUs..., RU, RUs...>;
-			nik_ce auto p   = cctmp::U_pack_Ts<T>;
+			nik_ce auto ni   = AD<c>::pos(i);
+			nik_ce auto n    = AD<c>::num(i);
+			nik_ce auto np1  = cctmp::U_pack_Ts<T>;
+			nik_ce auto nnp1 = eval<_par_left_ , n, MUs..., RU, RUs...>;
+			nik_ce auto nnp2 = eval<_par_right_, n, MUs..., RU, RUs...>;
 
-			NIK_ASSEMBLY_TEMPLATE_2WS(c, ni, p0, p)
+			NIK_ASSEMBLY_TEMPLATE_2WS(c, ni, p0, np1)
 				::NIK_ASSEMBLY_RESULT_2TS(c, ni, l, t, r, T_store_U<LUs>..., T)
 					(lvs..., const_cast<T>(rv)); // iter
 
-			return NIK_ASSEMBLY_TEMPLATE_2WS(c, i, np0, np1)
-				::NIK_ASSEMBLY_RESULT_3TS(c, i, l, t, r, T_store_U<LUs>..., RT, T_store_U<RUs>...)
-					(lvs..., rv, rvs...);
+			return NIK_ASSEMBLY_TEMPLATE_3WS(c, i, p0, nnp1, nnp2)
+				::NIK_ASSEMBLY_RESULT_4TS(c, i, l, t, r,
+					T_store_U<LUs>..., T_store_U<MUs>..., RT, T_store_U<RUs>...)
+						(lvs..., mvs..., rv, rvs...);
+		}
+	};
+*/
+
+	template
+	<
+		template<auto...> typename B0,          auto... LUs, nik_vp(p0)(B0<    LUs...>*),
+		template<auto...> typename B1,          auto... MUs, nik_vp(p1)(B1<    MUs...>*),
+		template<auto...> typename B2, auto RU, auto... RUs, nik_vp(p2)(B2<RU, RUs...>*),
+		auto... filler
+	>
+	struct T_assembly<AN::next, AT::cont, p0, p1, p2, filler...>
+	{
+		using RT = T_store_U<RU>;
+		using  T = to_mptr<RU>;
+
+		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>
+		nik_ces auto result(T_store_U<LUs>... lvs, T_store_U<MUs>... mvs, RT rv, T_store_U<RUs>... rvs)
+		{
+			nik_ce auto ni   = AD<c>::pos(i);
+			nik_ce auto n    = AD<c>::num(i);
+			nik_ce auto np1  = cctmp::U_pack_Ts<T>;
+			nik_ce auto nnp1 = eval<_par_left_ , n, MUs..., RU, RUs...>;
+			nik_ce auto nnp2 = eval<_par_right_, n, MUs..., RU, RUs...>;
+
+			NIK_ASSEMBLY_TEMPLATE_2WS(c, ni, p0, np1)
+				::NIK_ASSEMBLY_RESULT_2TS(c, ni, l, t, r, T_store_U<LUs>..., T)
+					(lvs..., const_cast<T>(rv)); // iter
+
+			return NIK_ASSEMBLY_TEMPLATE_3WS(c, i, p0, nnp1, nnp2)
+				::NIK_ASSEMBLY_RESULT_4TS(c, i, l, t, r,
+					T_store_U<LUs>..., T_store_U<MUs>..., RT, T_store_U<RUs>...)
+						(lvs..., mvs..., rv, rvs...);
 		}
 	};
 
@@ -329,12 +365,43 @@ namespace assembly {
 
 // end:
 
-	template<auto p0, auto p1, auto... filler>
-	struct T_assembly<AN::next, AT::end, p0, p1, filler...>
+	template<auto p0, auto p1, auto p2, auto... filler>
+	struct T_assembly<AN::next, AT::end, p0, p1, p2, filler...>
 	{
 		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>
 		nik_ces auto result(Ts... vs)
 			{ } // do nothing.
+	};
+
+/***********************************************************************************************************************/
+
+// side:
+
+	template
+	<
+		template<auto...> typename B0, auto... LUs, nik_vp(p0)(B0<LUs...>*),
+		template<auto...> typename B1, auto    RU , nik_vp(p1)(B1<RU    >*),
+		auto... filler
+	>
+	struct T_assembly<AN::next, AT::side, p0, p1, filler...>
+	{
+		using RT = T_store_U<RU>;
+		using  T = modify_type<_from_pointer_, RT>;
+
+		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>
+		nik_ces auto result(T_store_U<LUs>... lvs, RT rv)
+		{
+			nik_ce auto ni = AD<c>::pos(i);
+			nik_ce auto mi = AD<c>::num(i);
+
+			auto nv = NIK_ASSEMBLY_TEMPLATE(c, ni)
+				::NIK_ASSEMBLY_RESULT_2TS(c, ni, l, t, r, T_store_U<LUs>..., T)
+					(lvs..., *rv); // action
+
+			NIK_ASSEMBLY_TEMPLATE(c, mi)
+				::NIK_ASSEMBLY_RESULT_3TS(c, mi, l, t, r, T_store_U<LUs>..., RT, decltype(nv))
+					(lvs..., rv, nv); // mutate
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -373,36 +440,6 @@ namespace assembly {
 		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>
 		nik_ces auto result(T_store_U<LUs>... lvs, RT rv)
 			{ --*rv; }
-	};
-
-/***********************************************************************************************************************/
-
-// side:
-
-	template
-	<
-		template<auto...> typename B0, auto... LUs, nik_vp(p0)(B0<LUs...>*),
-		template<auto...> typename B1, auto    RU , nik_vp(p1)(B1<RU    >*),
-		auto... filler
-	>
-	struct T_assembly<AN::next, AT::side, p0, p1, filler...>
-	{
-		using RT = T_store_U<RU>;
-
-		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>
-		nik_ces auto result(T_store_U<LUs>... lvs, RT rv)
-		{
-			nik_ce auto ni = AD<c>::pos(i);
-			nik_ce auto mi = AD<c>::num(i);
-
-			auto nv = NIK_ASSEMBLY_TEMPLATE(c, ni)
-				::NIK_ASSEMBLY_RESULT_2TS(c, ni, l, t, r, T_store_U<LUs>..., RT)
-					(lvs..., rv); // action
-
-			NIK_ASSEMBLY_TEMPLATE(c, mi)
-				::NIK_ASSEMBLY_RESULT_3TS(c, mi, l, t, r, T_store_U<LUs>..., RT, decltype(nv))
-					(lvs..., rv, nv); // mutate
-		}
 	};
 
 /***********************************************************************************************************************/

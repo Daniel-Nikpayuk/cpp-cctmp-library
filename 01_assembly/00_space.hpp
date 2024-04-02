@@ -155,12 +155,12 @@ namespace assembly {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			halt    ,
-			type    , literal    , floating , string , lookup , arg  ,
-			pad     , hash       , pound    , apply  , bind   , eval ,
-			go_to   , branch     , invert   , loop   ,
-			cycle   , next       , set      ,
-			out_ins , out_in_ins ,
+			halt    ,							//  1
+			type    , literal    , floating , string , lookup , arg  ,	//  2
+			pad     , hash       , pound    , apply  , bind   , eval ,	//  8
+			go_to   , branch     , invert   , loop   ,			// 14
+			cycle   , next       , set      ,				// 18
+			out_ins , out_in_ins ,						// 21
 			dimension
 		};
 	};
@@ -176,15 +176,15 @@ namespace assembly {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first   , front     , back     ,
-			boolean , character , n_number , r_number ,
-			port    , select    ,
-			push    , pull      , drop     ,
-			verse   , side      , replace  ,
-			pred    , find      ,
-			act     , act_mut   , comb_mut ,
-			cont    , end       ,
-			inc     , dec       ,
+			first   , front     , back     ,		//  1
+			boolean , character , n_number , r_number ,	//  4
+			port    , select    ,				//  8
+			push    , pull      , drop     ,		// 10
+			verse   , side      , replace  ,		// 13
+			pred    , find      ,				// 16
+			act     , act_mut   , comb_mut ,		// 18
+			cont    , end       ,				// 19
+			inc     , dec       ,				// 21
 			dimension
 		};
 	};

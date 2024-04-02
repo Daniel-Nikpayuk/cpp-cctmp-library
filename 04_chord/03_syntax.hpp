@@ -175,6 +175,19 @@ namespace chord {
 
 			nik_ce void set_init(csize_type n) { init = n; }
 
+		// reset:
+
+			nik_ce void reset()
+			{
+				for (auto k = base::begin(); k != base::end(); ++k)
+				{
+					k->note_iter.clear();
+					k->tonic_iter.clear();
+				}
+
+				base::clear();
+			}
+
 		// chord:
 
 			nik_ce auto is_major      () const { return (chord == Chord::major); }
@@ -343,16 +356,18 @@ namespace chord {
 		cycle_id_seq cycle_id;
 		cycle_back_seq cycle_back;
 		cycle_side_seq cycle_side;
-		cycle_next_seq cycle_next;
+		cycle_next_seq cycle_next_memoize;
 		routine_seq routine;
 		interval_seq interval;
 
 		nik_ce T_chord_syntax_tree() : base{}, jump{base::src}
 		{
-			cycle_id.fullsize   ();
-			cycle_side.fullsize ();
-			cycle_next.fullsize ();
-			routine.fullsize    ();
+			cycle_front        .fullsize();
+			cycle_id           .fullsize();
+			cycle_back         .fullsize();
+			cycle_side         .fullsize();
+			cycle_next_memoize .fullsize();
+			routine            .fullsize();
 		}
 
 		// cselect:
@@ -508,21 +523,13 @@ namespace chord {
 
 		// iterator:
 
-			nik_ce void note_push(csize_type pos, csize_type note)
+			nik_ce void note_next_assembly(csize_type arg_pos)
 			{
-				if (cycle_next[pos]) note_push_interval(pos);
-				else                 note_push_assembly(pos, note);
-			}
+				auto pos = base::verse.size();
+				auto num = base::verse.size() + arg_pos;
 
-			nik_ce void note_push_interval(csize_type pos)
-				{ interval.push_note(cycle_next[pos]); }
-
-			nik_ce void note_push_assembly(csize_type pos, csize_type note)
-			{
-				cycle_next[pos] = base::contr.current(1);
-
-				note_push_interval(pos);
-				note_push_assembly(note);
+				base::template assembly_action<AAN::id, AAT::begin>();
+				base::template assembly_action<AAN::push, AAT::instr>(AN::arg, AT::verse, pos, num);
 			}
 
 			nik_ce void note_push_assembly(csize_type note)
@@ -531,16 +538,49 @@ namespace chord {
 				base::template assembly_action< AAN::push , AAT::instr >(AN::next, note);
 			}
 
-			nik_ce void note_next_assembly(csize_type arg_pos)
-			{
-				base::template assembly_action<AAN::id, AAT::begin>();
-				base::template assembly_action<AAN::push, AAT::instr>(AN::arg, AT::select, arg_pos);
-			}
+			// value:
 
-			// fast:
+				nik_ce void note_push_value(const cselect & s)
+				{
+					auto name = AN::next;
+					auto note = AT::side;
+					auto act  = base::contr.current(1);
+					auto mut  = get_mutate();
 
-				nik_ce void note_push_inc() { note_push(CycleNext::inc, AT::inc); }
-				nik_ce void note_push_dec() { note_push(CycleNext::dec, AT::dec); }
+					act_subpose_begin(1);
+					morph_op_return(s);
+					subpose_value_id(false); // mute ?
+					act_subpose_end();
+
+					interval.push_note(base::contr.current(1));
+
+					base::template assembly_action< AAN::id   , AAT::begin >();
+					base::template assembly_action< AAN::push , AAT::instr >(name, note, act, mut);
+				}
+
+			// memoize:
+
+				nik_ce void note_push_memoize(csize_type pos, csize_type note)
+				{
+					if (cycle_next_memoize[pos]) note_push_memoize_interval(pos);
+					else                         note_push_memoize_assembly(pos, note);
+				}
+
+				nik_ce void note_push_memoize_interval(csize_type pos)
+					{ interval.push_note(cycle_next_memoize[pos]); }
+
+				nik_ce void note_push_memoize_assembly(csize_type pos, csize_type note)
+				{
+					cycle_next_memoize[pos] = base::contr.current(1);
+
+					note_push_memoize_interval(pos);
+					note_push_assembly(note);
+				}
+
+			// inc, dec:
+
+				nik_ce void note_push_inc() { note_push_memoize(CycleNext::inc, AT::inc); }
+				nik_ce void note_push_dec() { note_push_memoize(CycleNext::dec, AT::dec); }
 
 			// tonic:
 
@@ -556,6 +596,8 @@ namespace chord {
 				define_cycle_before ();
 				define_cycle_loop   ();
 				define_cycle_after  ();
+
+				interval.reset      ();
 			}
 
 			nik_ce void define_cycle_side()
@@ -626,9 +668,10 @@ namespace chord {
 
 			nik_ce void define_next_cont(csize_type ival_pos, csize_type next_arg)
 			{
-				auto ni = interval.note_pos(ival_pos, 0);
+				auto ni  = interval.note_pos(ival_pos, 0);
+				auto pos = next_arg;
 
-				base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, next_arg);
+				base::template assembly_action<AAN::push, AAT::instr>(AN::next, AT::cont, ni, pos);
 			}
 
 			nik_ce void define_next_end()

@@ -90,16 +90,6 @@
 		return sum;
 	}
 
-	template<typename In, typename End>
-	void print_array(In in, End end)
-	{
-		printf("{ ");
-
-		for (auto k = in; k != end; ++k) printf("%d, ", *k);
-
-		printf(" }\n");
-	}
-
 /***********************************************************************************************************************/
 
 // hustle:
@@ -116,53 +106,7 @@
 
 /***********************************************************************************************************************/
 
-// divide by:
-
-	template<auto V>
-	struct T_divide_by
-	{
-		template<typename T>
-		constexpr static auto result(T v) { return (v / V); }
-
-	}; template<auto V>
-		constexpr auto _divide_by_ = U_store_T<T_divide_by<V>>;
-
-/***********************************************************************************************************************/
-
-// modulo by:
-
-	template<auto V>
-	struct T_modulo_by
-	{
-		template<typename T>
-		constexpr static auto result(T v) { return (v % V); }
-
-	}; template<auto V>
-		constexpr auto _modulo_by_ = U_store_T<T_modulo_by<V>>;
-
-/***********************************************************************************************************************/
-
-// print:
-
-	struct T_print
-	{
-		template<typename T>
-		constexpr static auto result(T v) { printf("%s", v.origin()); return 0; }
-
-		template<typename T, typename Fmt>
-		constexpr static auto result(T v, Fmt fmt) { printf(fmt.origin(), v); return 0; }
-
-	}; constexpr auto _print_ = U_store_T<T_print>;
-
-/***********************************************************************************************************************/
-
 // chord:
-
-		//	"main out in format                                ;"
-		//	"  declare arr_map arr_pr                          ;"
-		//	"  arr_pr  # repeat[1]{@ @|print * @|} (-|+,] <>   ;"
-		//	"  . = arr_pr _ out format                         ;"
-		//	, cctmp::binding( "print"    , _print_         )
 
 	constexpr auto _chord_test_func()
 	{
@@ -171,17 +115,21 @@
 			"main out in                                       ;"
 
 			"vars:                                             ;"
-			"  declare arr_map                                 ;"
+			"  declare arr_map arr_pr                          ;"
 
 			"defs:                                             ;"
 			"  arr_map # map[1]{rem_by_n @||} [) [div_by_n|~,) ;"
+			"  arr_pr  # repeat[1]{@ @|print * @|} (-|+,] <>   ;"
 
 			"body:                                             ;"
 			"  . = arr_map !out in 0                           ;"
+			"  . = arr_pr _ out format                         ;"
 			"  return _                                        ;"
 
-			, cctmp::binding( "div_by_n" , _divide_by_<10> )
-			, cctmp::binding( "rem_by_n" , _modulo_by_<10> )
+			, binding( "print"    , _print_           )
+			, binding( "div_by_n" , _divide_by_<10>   )
+			, binding( "rem_by_n" , _modulo_by_<10>   )
+			, binding( "format"   , strlit_type{"%d"} )
 		);
 	}
 
@@ -196,13 +144,13 @@
 	//	chord_arr_type s0({ 1, 2, 3, 4, 5 });
 	//	chord_arr_type s1({ 1, 2, 3, 4, 5 });
 
-	      //
+		//
 
 	//	chord_arr_type val;
 	//	val.fullsize();
 
-	//	T_chord_apply::template result<chord_size_type>(val.begin(), 1563);
-	//	print_array(val.cbegin(), val.cend());
+	//	T_chord_apply::result(val.begin(), 1563);
+	//	printf("\n");
 
 		//
 
@@ -259,17 +207,17 @@
 
 		//
 
-	//	unit_test_chord_initialize_v0           <gindex_type> (0, s0, s1);
-	//	unit_test_chord_array_square_v0         <gindex_type> (0, s0, s1);
-	//	unit_test_chord_vector_sum_v0           <gindex_type> (0, s0, s1);
-	//	unit_test_chord_array_add_v0            <gindex_type> (0, s0, s1);
-	//	unit_test_chord_sum_v0                  <gindex_type> (0, 1, 100);
-	//	unit_test_chord_dot_product_v0          <gindex_type> (0, s0, s1);
-	//	unit_test_chord_convolution_v0          <gindex_type> (0, s0, s1);
-	//	unit_test_chord_first_less_than_five_v0 <gindex_type> (0, s0, s1);
-	//	unit_test_chord_all_less_than_five_v0   <gindex_type> (0, s0, s1);
-	//	unit_test_chord_change_of_base_printer  <gindex_type> (0, s0, s1);
-	//	unit_test_chord_array_printer           <gindex_type> (0, s0, s1);
+	//	unit_test_chord_initialize_v0             <gindex_type> (0, s0, s1);
+	//	unit_test_chord_array_square_v0           <gindex_type> (0, s0, s1);
+	//	unit_test_chord_vector_sum_v0             <gindex_type> (0, s0, s1);
+	//	unit_test_chord_array_add_v0              <gindex_type> (0, s0, s1);
+	//	unit_test_chord_sum_v0                    <gindex_type> (0, 1, 100);
+	//	unit_test_chord_dot_product_v0            <gindex_type> (0, s0, s1);
+	//	unit_test_chord_convolution_v0            <gindex_type> (0, s0, s1);
+	//	unit_test_chord_first_less_than_five_v0   <gindex_type> (0, s0, s1);
+	//	unit_test_chord_all_less_than_five_v0     <gindex_type> (0, s0, s1);
+	//	unit_test_chord_change_of_base_printer_v0 <gindex_type> (1563);
+	//	unit_test_chord_array_printer_v0          <gindex_type> (0, s0, s1);
 
 		//
 
