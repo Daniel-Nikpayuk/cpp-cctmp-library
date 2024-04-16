@@ -239,7 +239,7 @@
 	}
 
 	template<typename T>
-	constexpr auto sqrt(T x) { return sqrt_iter(x, 1.0); }
+	constexpr auto sqrt(T x) { return sqrt_iter<T>(x, 1.0); }
 
 /***********************************************************************************************************************/
 

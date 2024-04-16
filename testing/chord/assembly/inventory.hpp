@@ -336,11 +336,11 @@
 		{
 			return cctmp::source
 			(
-				"main x y           ;"
+				"main x y   ;"
 
-				"body:              ;"
-				"  x # y            ;"
-				"  return x         ;"
+				"body:      ;"
+				"  x # y    ;"
+				"  return x ;"
 			);
 		}
 
@@ -409,6 +409,8 @@
 				"set_c_to_five:         ;"
 				"  c # 5:T              ;"
 				"  return c             ;"
+
+			//	, cctmp::binding( "_1_0i" , complex_number{1, 0} )
 			);
 		}
 
@@ -422,23 +424,23 @@
 		{
 			return cctmp::source
 			(
-				"main n g h x y             ;"
+				"main n g h x y   ;"
 
-				"vars:                      ;"
-				"define f                   ;"
+				"vars:            ;"
+				"define f         ;"
 
-				"body:                      ;"
-				"  test equal n 0           ;"
-				"  branch to_g              ;"
-				"  f # h                    ;"
-				"goto done                  ;"
+				"body:            ;"
+				"  test equal n 0 ;"
+				"  branch to_g    ;"
+				"  f # h          ;"
+				"goto done        ;"
 
-				"to_g:                      ;"
-				"  f # g                    ;"
+				"to_g:            ;"
+				"  f # g          ;"
 
-				"done:                      ;"
-				"  . = f x y                ;"
-				"  return _                 ;"
+				"done:            ;"
+				"  . = f x y      ;"
+				"  return _       ;"
 			);
 		}
 
@@ -448,23 +450,23 @@
 		{
 			return cctmp::source
 			(
-				"main n g h x y             ;"
+				"main n g h x y   ;"
 
-				"vars:                      ;"
-				"define f                   ;"
+				"vars:            ;"
+				"define f         ;"
 
-				"body:                      ;"
-				"  f # h                    ;"
-				"  test equal n 0           ;"
-				"  branch to_g              ;"
-				"goto done                  ;"
+				"body:            ;"
+				"  f # h          ;"
+				"  test equal n 0 ;"
+				"  branch to_g    ;"
+				"goto done        ;"
 
-				"to_g:                      ;"
-				"  f # g                    ;"
+				"to_g:            ;"
+				"  f # g          ;"
 
-				"done:                      ;"
-				"  . = f x y                ;"
-				"  return _                 ;"
+				"done:            ;"
+				"  . = f x y      ;"
+				"  return _       ;"
 			);
 		}
 
@@ -649,7 +651,7 @@
 				"fibonacci n -> T    ;"
 
 				"vars:               ;"
-				"define n1 n2        ;"
+				"  define n1 n2      ;"
 
 				"body:               ;"
 				"  test equal n 0    ;"

@@ -58,7 +58,7 @@
 //	constexpr auto contr_chord_convolution_v0            = metapile< _chord_convolution_v0                , null_env >;
 //	constexpr auto contr_chord_first_less_than_five_v0   = metapile< _chord_first_less_than_five_v0       , null_env >;
 //	constexpr auto contr_chord_all_less_than_five_v0     = metapile< _chord_all_less_than_five_v0         , null_env >;
-//	constexpr auto contr_chord_change_of_base_printer_v0 = metapile< _chord_change_of_base_printer_v0<10> , null_env >;
+//	constexpr auto contr_chord_change_of_base_printer_v0 = metapile< _chord_change_of_base_printer_v0< 2> , null_env >;
 //	constexpr auto contr_chord_array_printer_v0          = metapile< _chord_array_printer_v0              , null_env >;
 
 /***********************************************************************************************************************/
@@ -67,17 +67,17 @@
 	{
 		constexpr char dsl[] = "chord";
 
-	//	fileput::write_controller< contr_chord_initialize_v0             >(dsl, "initialize_v0"             );
-	//	fileput::write_controller< contr_chord_array_square_v0           >(dsl, "array_square_v0"           );
-	//	fileput::write_controller< contr_chord_vector_add_v0             >(dsl, "vector_add_v0"             );
-	//	fileput::write_controller< contr_chord_array_add_v0              >(dsl, "array_add_v0"              );
-	//	fileput::write_controller< contr_chord_sum_v0                    >(dsl, "sum_v0"                    );
-	//	fileput::write_controller< contr_chord_dot_product_v0            >(dsl, "dot_product_v0"            );
-	//	fileput::write_controller< contr_chord_convolution_v0            >(dsl, "convolution_v0"            );
-	//	fileput::write_controller< contr_chord_first_less_than_five_v0   >(dsl, "first_less_than_five_v0"   );
-	//	fileput::write_controller< contr_chord_all_less_than_five_v0     >(dsl, "all_less_than_five_v0"     );
-	//	fileput::write_controller< contr_chord_change_of_base_printer_v0 >(dsl, "change_of_base_printer_v0" );
-	//	fileput::write_controller< contr_chord_array_printer_v0          >(dsl, "array_printer_v0"          );
+	//	fileput::write_assembly_controller< contr_chord_initialize_v0             >(dsl, "initialize_v0"             );
+	//	fileput::write_assembly_controller< contr_chord_array_square_v0           >(dsl, "array_square_v0"           );
+	//	fileput::write_assembly_controller< contr_chord_vector_add_v0             >(dsl, "vector_add_v0"             );
+	//	fileput::write_assembly_controller< contr_chord_array_add_v0              >(dsl, "array_add_v0"              );
+	//	fileput::write_assembly_controller< contr_chord_sum_v0                    >(dsl, "sum_v0"                    );
+	//	fileput::write_assembly_controller< contr_chord_dot_product_v0            >(dsl, "dot_product_v0"            );
+	//	fileput::write_assembly_controller< contr_chord_convolution_v0            >(dsl, "convolution_v0"            );
+	//	fileput::write_assembly_controller< contr_chord_first_less_than_five_v0   >(dsl, "first_less_than_five_v0"   );
+	//	fileput::write_assembly_controller< contr_chord_all_less_than_five_v0     >(dsl, "all_less_than_five_v0"     );
+	//	fileput::write_assembly_controller< contr_chord_change_of_base_printer_v0 >(dsl, "change_of_base_printer_v0" );
+	//	fileput::write_assembly_controller< contr_chord_array_printer_v0          >(dsl, "array_printer_v0"          );
 
 		return 0;
 	}

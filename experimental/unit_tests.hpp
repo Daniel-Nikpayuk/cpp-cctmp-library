@@ -3630,25 +3630,47 @@ namespace cctmp_program
 	//	auto targeted_printer = chord_assembly_targeted_printer<src>{};
 	//	targeted_printer.print_controller();
 
-/*
 	constexpr auto _hustle_test_func()
 	{
 		return source
 	        (
-			"(define (main)                    "
-			"  (define (morph n)               "
-			"    (define (iter k n)            "
-			"      (if (= k n) nil             "
-			"        (cons k (iter (+ k 1) n)) "
-			"      )                           "
-			"    )                             "
-			"    (iter 0 n)                    "
-			"  )                               "
-			"  (morph 5)                       " // (0 1 2 3 4)
+			"(define (main a n)             "
+			"  (define (range k)            "
+			"    (if (= k n) nil            "
+			"      (cons k (range (+ k 1))) " // cannot be resolved at metacompile time.
+			"    )                          " // a, n, k are referenced as args in the verse.
+			"  )                            "
+			"  (tuple (range a))            " // return: tuple{a, a+1, a+2, a+3, ..., a+(n-1)}
+			")                              "
+		);					  // accumulating a temporary constexpr controller
+	}						  // is problematic because the calling contexts
+							  // are temporary as well, and so the actual
+							  // content gets lost unless you return actual
+							  // values, but that's problematic because
+							  // of C++17's restrictions on NTTPs.
+							  // actual C++ data structures might
+							  // be the only way.
+
+							  // then again:
+							  // (cons a (cons (+ a 1) (cons (+ (+ a 1) 1) ...)))
+							  // this would be a list of valid expressions.
+
+	// manual grammar:
+
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(define (main a n)                "
+			"  (define (range k)               "
+			"    (if (= k n) nil               " 
+			"      (cons #k (range #(+ #k 1))) " // # is an operator that says: Don't get
+			"    )                             " // the value of the variable itself,
+			"  )                               " // instead directly pass the subroutine
+			"  (tuple (range #a))              " // that references it (unevaluated).
 			")                                 "
 		);
 	}
-*/
 
 /*
 	constexpr auto _hustle_test_func()

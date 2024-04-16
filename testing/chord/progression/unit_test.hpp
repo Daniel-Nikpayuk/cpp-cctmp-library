@@ -147,18 +147,22 @@
 		template<typename SizeType, typename T>
 		constexpr void unit_test_chord_change_of_base_printer_v0(T v)
 		{
-			using T_chord_fast_apply = chord::T_fast_apply
-			<
-				contr_object_chord_change_of_base_printer_v0<SizeType>,
-				_chord_change_of_base_printer_v0<10>, cctmp::null_env, T const*
-			>;
+			if (!v) printf(" %d\n", 0);
+			else
+			{
+				using T_chord_fast_apply = chord::T_fast_apply
+				<
+					contr_object_chord_change_of_base_printer_v0<SizeType>,
+					_chord_change_of_base_printer_v0< 2>, cctmp::null_env, T const*
+				>;
 
-			constexpr auto max_size = 64;
-			cctmp::sequence<T, max_size> s;
+				constexpr auto max_size = 64;
+				cctmp::sequence<T, max_size> s;
 
-			printf(" ");
-			T_chord_fast_apply::result(s.begin(), v);
-			printf("\n");
+				printf(" ");
+				T_chord_fast_apply::result(s.begin(), v);
+				printf("\n");
+			}
 		}
 
 // array_printer:

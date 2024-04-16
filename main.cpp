@@ -42,7 +42,7 @@
 #include"undef_macros.hpp"
 
 //#include"testing/chord/assembly/unit_test.hpp"
-//#include"testing/chord/progression/unit_test.hpp"
+#include"testing/chord/progression/unit_test.hpp"
 //#include"testing/hustle/unit_test.hpp"
 
 //#include"experimental/00_generic_printers.hpp"
@@ -103,6 +103,33 @@
 			")                        "
 		);
 	}
+
+/*
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(define (main a n)             "
+			"  (define (range k)            "
+			"    (if (= k n) nil            "
+			"      (cons k (range (+ k 1))) " // cannot be resolved at metacompile time.
+			"    )                          " // a, n, k are referenced as args in the verse.
+			"  )                            "
+			"  (tuple (range a))            " // return: tuple{a, a+1, a+2, a+3, ..., a+(n-1)}
+			")                              "
+		);					  // accumulating a temporary constexpr controller
+	}						  // is problematic because the calling contexts
+*/
+							  // are temporary as well, and so the actual
+							  // content gets lost unless you return actual
+							  // values, but that's problematic because
+							  // of C++17's restrictions on NTTPs.
+							  // actual C++ data structures might
+							  // be the only way.
+
+							  // then again:
+							  // (cons a (cons (+ a 1) (cons (+ (+ a 1) 1) ...)))
+							  // this would be a list of valid expressions.
 
 /***********************************************************************************************************************/
 
@@ -188,8 +215,8 @@
 	//	unit_test_chord_x_to5_plus1_v0        <gindex_type> (2, 0);
 	//	unit_test_chord_reassign_v0           <gindex_type> (3, 4);
 	//	unit_test_chord_if_then_else_v0       <gindex_type> (true, 5, 6);
-	//	unit_test_chord_semidynamic_typing_v0 <gindex_type> (complex_number{1, 0}, 6); // *
-	//	unit_test_chord_semidynamic_typing_v1 <gindex_type> (complex_number{1, 0}, 6); // **
+	//	unit_test_chord_semidynamic_typing_v0 <gindex_type> (complex_number{0, 1}, 6);
+	//	unit_test_chord_semidynamic_typing_v1 <gindex_type> (complex_number{0, 1}, 6);
 	//	unit_test_chord_binary_dispatch_v0    <gindex_type> (true, 3, 4); // **
 	//	unit_test_chord_binary_dispatch_v1    <gindex_type> (true, 3, 4); // **
 	//	unit_test_chord_factorial_v0          <gindex_type> (9);
@@ -216,7 +243,7 @@
 	//	unit_test_chord_convolution_v0            <gindex_type> (0, s0, s1);
 	//	unit_test_chord_first_less_than_five_v0   <gindex_type> (0, s0, s1);
 	//	unit_test_chord_all_less_than_five_v0     <gindex_type> (0, s0, s1);
-	//	unit_test_chord_change_of_base_printer_v0 <gindex_type> (1563);
+	//	unit_test_chord_change_of_base_printer_v0 <gindex_type> (main_at(0, argc, argv));
 	//	unit_test_chord_array_printer_v0          <gindex_type> (0, s0, s1);
 
 		//

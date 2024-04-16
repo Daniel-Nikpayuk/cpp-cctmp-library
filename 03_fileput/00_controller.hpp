@@ -220,8 +220,6 @@ namespace fileput {
 	template<typename T, auto N0, auto N1>
 	constexpr auto string_def_begin(const T(&s0)[N0], const T(&s1)[N1])
 	{
-		nik_ce T size[] = "8";
-
 		return string16_catenate
 		(
 			"// object:\n\n"
@@ -234,6 +232,32 @@ namespace fileput {
 			"\t{\n"
 			"\t\tusing size_type = SizeType;\n"
 			"\n"
+		);
+	}
+
+/***********************************************************************************************************************/
+
+// def(ine) assembly:
+
+	constexpr auto string_def_assembly()
+	{
+		return	"\t\tusing AN = assembly::AN;\n"
+			"\t\tusing AT = assembly::AT;\n"
+			"\n"
+			;
+	}
+
+/***********************************************************************************************************************/
+
+// def(ine) value:
+
+	template<typename T>
+	constexpr auto string_def_value()
+	{
+		nik_ce T size[] = "8";
+
+		return string16_catenate
+		(
 			"\t\tconstexpr static size_type value[][",
 
 			size,
@@ -274,10 +298,17 @@ namespace fileput {
 
 /***********************************************************************************************************************/
 
-// lit(eral) to file:
+// spacing:
+
+	template<typename FilePtr>
+	void fprint_spacing(FilePtr file_ptr, int n) { for (auto k = 0; k != n; ++k) fprintf(file_ptr, " "); }
+
+/***********************************************************************************************************************/
+
+// numeric to file:
 
 	template<auto static_contr, typename FilePtr, typename StrType>
-	void lit_to_file(FilePtr file_ptr, int k, int j, StrType str)
+	void numeric_to_file(FilePtr file_ptr, int k, int j, StrType str)
 	{
 		constexpr auto & contr = member_value_U<static_contr>;
 
@@ -289,18 +320,65 @@ namespace fileput {
 
 /***********************************************************************************************************************/
 
-// row to file:
+// name to file:
 
 	template<auto static_contr, typename FilePtr, typename StrType>
+	void name_to_file(FilePtr file_ptr, int k, StrType str)
+	{
+		constexpr auto & contr  = member_value_U<static_contr>;
+		constexpr auto name_max = 14; // AN::out_in_ins
+
+		auto name = assembly_names.lookup(contr[k][Instr::name], "unknown");
+		fprintf(file_ptr, " %s", name.origin());
+		fprint_spacing(file_ptr, name_max - name.size());
+		fprintf(file_ptr, " ,");
+	}
+
+/***********************************************************************************************************************/
+
+// note to file:
+
+	template<auto static_contr, typename FilePtr, typename StrType>
+	void note_to_file(FilePtr file_ptr, int k, StrType str)
+	{
+		constexpr auto & contr  = member_value_U<static_contr>;
+		constexpr auto note_max = 13; // AT::character
+
+		auto note = assembly_notes.lookup(contr[k][Instr::note], "unknown");
+		fprintf(file_ptr, " %s", note.origin());
+		fprint_spacing(file_ptr, note_max - note.size());
+		fprintf(file_ptr, " ,");
+	}
+
+/***********************************************************************************************************************/
+
+// literal to file:
+
+	template<auto static_contr, bool is_numeric, typename FilePtr, typename StrType>
+	void literal_to_file(FilePtr file_ptr, int k, int j, StrType str)
+	{
+		const bool is_name = !is_numeric && (j == Instr::name);
+		const bool is_note = !is_numeric && (j == Instr::note);
+
+		if      (is_name)    name_to_file<static_contr>(file_ptr, k, str);
+		else if (is_note)    note_to_file<static_contr>(file_ptr, k, str);
+		else              numeric_to_file<static_contr>(file_ptr, k, j, str);
+	}
+
+/***********************************************************************************************************************/
+
+// row to file:
+
+	template<auto static_contr, bool is_numeric, typename FilePtr, typename StrType>
 	void row_to_file(FilePtr file_ptr, int k, StrType str)
 	{
 		fputs("\t\t\t{", file_ptr);
 
 		auto e = Instr::dimension;
 
-		for (auto j = 0; j != e - 1; ++j) lit_to_file<static_contr>(file_ptr, k, j, ",");
+		for (auto j = 0; j != e - 1; ++j) literal_to_file<static_contr, is_numeric>(file_ptr, k, j, ",");
 
-		lit_to_file<static_contr>(file_ptr, k, e - 1, "");
+		literal_to_file<static_contr, is_numeric>(file_ptr, k, e - 1, "");
 
 		fputs(" }"  , file_ptr);
 		fputs(str   , file_ptr);
@@ -311,7 +389,7 @@ namespace fileput {
 
 // write to file:
 
-	template<auto static_contr, typename FilePtr, typename T, auto N0, auto N1>
+	template<auto static_contr, bool is_numeric, typename FilePtr, typename T, auto N0, auto N1>
 	void write_to_file(FilePtr file_ptr, const T(&s0)[N0], const T(&s1)[N1])
 	{
 		auto b = 0;
@@ -320,9 +398,13 @@ namespace fileput {
 		fputs(string_copyright("24").origin(), file_ptr);
 		fputs(string_def_begin(s0, s1).origin(), file_ptr);
 
-		for (auto k = b; k != e - 1; ++k) row_to_file<static_contr>(file_ptr, k, ",");
+		if (!is_numeric) fputs(string_def_assembly(), file_ptr);
 
-		row_to_file<static_contr>(file_ptr, e - 1, "");
+		fputs(string_def_value<T>().origin(), file_ptr);
+
+		for (auto k = b; k != e - 1; ++k) row_to_file<static_contr, is_numeric>(file_ptr, k, ",");
+
+		row_to_file<static_contr, is_numeric>(file_ptr, e - 1, "");
 
 		fputs(string_def_end(s0, s1).origin(), file_ptr);
 	}
@@ -331,15 +413,31 @@ namespace fileput {
 
 // write controller:
 
-	template<auto static_contr, typename T, auto N0, auto N1>
-	void write_controller(const T(&s0)[N0], const T(&s1)[N1])
-	{
-		auto file_ptr = fopen(string16_catenate("contr/", s1, ".hpp").origin(), "w");
+	// numeric:
 
-		if (file_ptr) write_to_file<static_contr>(file_ptr, s0, s1);
+		template<auto static_contr, typename T, auto N0, auto N1>
+		void write_numeric_controller(const T(&s0)[N0], const T(&s1)[N1])
+		{
+			auto file_ptr = fopen(string16_catenate("contr/", s1, ".hpp").origin(), "w");
 
-		fclose(file_ptr);
-	}
+			constexpr bool is_numeric = true;
+			if (file_ptr) write_to_file<static_contr, is_numeric>(file_ptr, s0, s1);
+
+			fclose(file_ptr);
+		}
+
+	// assembly:
+
+		template<auto static_contr, typename T, auto N0, auto N1>
+		void write_assembly_controller(const T(&s0)[N0], const T(&s1)[N1])
+		{
+			auto file_ptr = fopen(string16_catenate("contr/", s1, ".hpp").origin(), "w");
+
+			constexpr bool is_numeric = false;
+			if (file_ptr) write_to_file<static_contr, is_numeric>(file_ptr, s0, s1);
+
+			fclose(file_ptr);
+		}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -394,11 +492,11 @@ namespace fileput {
 			auto s = (k < 10) ? "  " : (k < 100) ? " " : "";
 			printf("line %s%d -", s, k);
 
-			auto name = assembly_names.lookup(contr[k][0], "unknown");
+			auto name = assembly_names.lookup(contr[k][Instr::name], "unknown");
 			printf(" %s", name.origin());
 			print_spacing(name_max - name.size());
 
-			auto note = assembly_notes.lookup(contr[k][1], "unknown");
+			auto note = assembly_notes.lookup(contr[k][Instr::note], "unknown");
 			printf(" %s", note.origin());
 			print_spacing(note_max - note.size());
 

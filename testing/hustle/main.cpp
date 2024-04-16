@@ -57,7 +57,7 @@
 	{
 		constexpr char dsl[] = "hustle";
 
-		fileput::write_controller< contr_hustle_square_root_v0 >(dsl, "square_root_v0" );
+		fileput::write_assembly_controller< contr_hustle_square_root_v0 >(dsl, "square_root_v0" );
 
 		return 0;
 	}
