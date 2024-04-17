@@ -49,7 +49,15 @@
 
 /***********************************************************************************************************************/
 
-	constexpr auto contr_hustle_square_root_v0 = metapile< _hustle_square_root_v0 , null_env >;
+//	constexpr auto contr_hustle_square_v0         = metapile< _hustle_square_v0         , null_env >;
+//	constexpr auto contr_hustle_sum_of_squares_v0 = metapile< _hustle_sum_of_squares_v0 , null_env >;
+//	constexpr auto contr_hustle_sum_of_squares_v1 = metapile< _hustle_sum_of_squares_v1 , null_env >;
+//	constexpr auto contr_hustle_factorial_v0      = metapile< _hustle_factorial_v0      , null_env >;
+//	constexpr auto contr_hustle_factorial_v1      = metapile< _hustle_factorial_v1      , null_env >;
+//	constexpr auto contr_hustle_factorial_v2      = metapile< _hustle_factorial_v2      , null_env >;
+//	constexpr auto contr_hustle_fibonacci_v0      = metapile< _hustle_fibonacci_v0      , null_env >;
+//	constexpr auto contr_hustle_square_root_v0    = metapile< _hustle_square_root_v0    , null_env >;
+//	constexpr auto contr_hustle_square_root_v1    = metapile< _hustle_square_root_v1    , null_env >;
 
 /***********************************************************************************************************************/
 
@@ -57,7 +65,15 @@
 	{
 		constexpr char dsl[] = "hustle";
 
-		fileput::write_assembly_controller< contr_hustle_square_root_v0 >(dsl, "square_root_v0" );
+	//	fileput::write_assembly_controller< contr_hustle_square_v0         >(dsl, "square_v0"         );
+	//	fileput::write_assembly_controller< contr_hustle_sum_of_squares_v0 >(dsl, "sum_of_squares_v0" );
+	//	fileput::write_assembly_controller< contr_hustle_sum_of_squares_v1 >(dsl, "sum_of_squares_v1" );
+	//	fileput::write_assembly_controller< contr_hustle_factorial_v0      >(dsl, "factorial_v0"      );
+	//	fileput::write_assembly_controller< contr_hustle_factorial_v1      >(dsl, "factorial_v1"      );
+	//	fileput::write_assembly_controller< contr_hustle_factorial_v2      >(dsl, "factorial_v2"      );
+	//	fileput::write_assembly_controller< contr_hustle_fibonacci_v0      >(dsl, "fibonacci_v0"      );
+	//	fileput::write_assembly_controller< contr_hustle_square_root_v0    >(dsl, "square_root_v0"    );
+	//	fileput::write_assembly_controller< contr_hustle_square_root_v1    >(dsl, "square_root_v1"    );
 
 		return 0;
 	}

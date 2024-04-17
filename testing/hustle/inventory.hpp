@@ -21,6 +21,139 @@
 
 /***********************************************************************************************************************/
 
+// square:
+
+	// v0:
+
+		constexpr auto _hustle_square_v0()
+		{
+			return cctmp::source
+		        (
+				"(define (main n)          "
+				"  (define (sq m) (* m m)) "
+				"  (sq n)                  "
+				")                         "
+			);
+		}
+
+/***********************************************************************************************************************/
+
+// sum of squares:
+
+	// v0:
+
+		constexpr auto _hustle_sum_of_squares_v0()
+		{
+			return cctmp::source
+		        (
+				"(define (main m n)                                "
+				"  (define (sq x) (* x x))                         "
+				"  (define (sum-of-squares x y) (+ (sq x) (sq y))) "
+				"  (sum-of-squares m n)                            "
+				")                                                 "
+			);
+		}
+
+	// v1:
+
+		constexpr auto _hustle_sum_of_squares_v1()
+		{
+			return cctmp::source
+		        (
+				"(define (main m n)             "
+				"  (define (sum-of-squares x y) "
+				"    (define (sq z) (* z z))    "
+				"    (+ (sq x) (sq y))          "
+				"  )                            "
+				"  (sum-of-squares m n)         "
+				")                              "
+			);
+		}
+
+/***********************************************************************************************************************/
+
+// factorial:
+
+	// v0:
+
+		constexpr auto _hustle_factorial_v0()
+		{
+			return cctmp::source
+		        (
+				"(type T                         "
+				"  (define (factorial n) -> T    "
+				"    (if (= n 0)                 "
+				"      1:T                       "
+				"      (* n (factorial (- n 1))) "
+				"    )                           "
+				"  )                             "
+				")                               "
+			);
+		}
+
+	// v1:
+
+		constexpr auto _hustle_factorial_v1()
+		{
+			return cctmp::source
+		        (
+				"(type T                           "
+				"  (define (main n)                "
+				"    (define (factorial k) -> T    "
+				"      (if (= k 0)                 "
+				"        1:T                       "
+				"        (* k (factorial (- k 1))) "
+				"      )                           "
+				"    )                             "
+				"    (factorial n)                 "
+				"  )                               "
+				")                                 "
+			);
+		}
+
+	// v2:
+
+		constexpr auto _hustle_factorial_v2()
+		{
+			return cctmp::source
+		        (
+				"(type T                             "
+				"  (define (main n)                  "
+				"    (define (factorial k p) -> T    "
+				"      (if (= k 0)                   "
+				"        p                           "
+				"        (factorial (- k 1) (* k p)) "
+				"      )                             "
+				"    )                               "
+				"    (factorial n 1:T)               "
+				"  )                                 "
+				")                                   "
+			);
+		}
+
+/***********************************************************************************************************************/
+
+// fibonacci:
+
+	// v0:
+
+		constexpr auto _hustle_fibonacci_v0()
+		{
+			return cctmp::source
+		        (
+				"(type T                               "
+				"  (define (fib n) -> T                "
+				"    (if (< n 2)                       "
+				"      1:T                             "
+				"      (+ (fib (- n 1)) (fib (- n 2))) "
+				"    )                                 "
+				"  )                                   "
+				")                                     "
+			);
+		}
+
+/***********************************************************************************************************************/
+
 // square root:
 
 	// v0:
@@ -46,6 +179,32 @@
 				"    (sqrt-iter 1:T)                                                        "
 				"  )                                                                        "
 				")                                                                          "
+
+				, cctmp::binding( "tolerance" , 0.0001 )
+			);
+		}
+
+	// v1:
+
+		constexpr auto _hustle_square_root_v1()
+		{
+			return cctmp::source
+		        (
+				"(type T                                                                       "
+				"  (define (sqrt x)                                                            "
+				"    (define (square y) (* y y))                                               "
+				"    (define (abs y) (if (< y zero) (- y) y))                                  "
+				"    (define (good-enough? guess y) (< (abs (- (square guess) y)) tolerance))  "
+				"    (define (average y z) (/ (+ y z) two))                                    "
+				"    (define (improve guess y) (average guess (/ y guess)))                    "
+
+				"    (define (sqrt-iter guess y) -> T                                          "
+				"      (if (good-enough? guess y) guess (sqrt-iter (improve guess y) y))       "
+				"    )                                                                         "
+
+				"    (sqrt-iter one x)                                                         "
+				"  )                                                                           "
+				")                                                                             "
 
 				, cctmp::binding( "tolerance" , 0.0001 )
 			);

@@ -19,9 +19,146 @@
 
 // unit test:
 
+#include"contr/square_v0.hpp"
+#include"contr/sum_of_squares_v0.hpp"
+#include"contr/sum_of_squares_v1.hpp"
+#include"contr/factorial_v0.hpp"
+#include"contr/factorial_v1.hpp"
+#include"contr/factorial_v2.hpp"
+#include"contr/fibonacci_v0.hpp"
 #include"contr/square_root_v0.hpp"
+#include"contr/square_root_v1.hpp"
 
 #include"inventory.hpp"
+
+/***********************************************************************************************************************/
+
+// square:
+
+	// v0:
+
+		template<typename SizeType, typename T>
+		constexpr void unit_test_hustle_square_v0(T v)
+		{
+			using T_hustle_fast_apply = hustle::T_fast_apply
+			<
+				contr_object_hustle_square_v0<SizeType>,
+				_hustle_square_v0, cctmp::null_env, T
+			>;
+
+			auto val = T_hustle_fast_apply::result(v);
+			printf("%d\n", val);
+		}
+
+/***********************************************************************************************************************/
+
+// sum of squares:
+
+	// v0:
+
+		template<typename SizeType, typename T>
+		constexpr void unit_test_hustle_sum_of_squares_v0(T v0, T v1)
+		{
+			using T_hustle_fast_apply = hustle::T_fast_apply
+			<
+				contr_object_hustle_sum_of_squares_v0<SizeType>,
+				_hustle_sum_of_squares_v0, cctmp::null_env, T
+			>;
+
+			auto val = T_hustle_fast_apply::result(v0, v1);
+			printf("%d\n", val);
+		}
+
+	// v1:
+
+		template<typename SizeType, typename T>
+		constexpr void unit_test_hustle_sum_of_squares_v1(T v0, T v1)
+		{
+			using T_hustle_fast_apply = hustle::T_fast_apply
+			<
+				contr_object_hustle_sum_of_squares_v1<SizeType>,
+				_hustle_sum_of_squares_v1, cctmp::null_env, T
+			>;
+
+			auto val = T_hustle_fast_apply::result(v0, v1);
+			printf("%d\n", val);
+		}
+
+/***********************************************************************************************************************/
+
+// factorial:
+
+	// v0:
+
+		template<typename SizeType, typename T>
+		constexpr void unit_test_hustle_factorial_v0(T v)
+		{
+			using T_hustle_fast_apply = hustle::T_fast_apply
+			<
+				contr_object_hustle_factorial_v0<SizeType>,
+				_hustle_factorial_v0, cctmp::null_env, T
+			>;
+
+			auto val = T_hustle_fast_apply::result(v);
+			printf("%d\n", val);
+		}
+
+/***********************************************************************************************************************/
+
+// factorial:
+
+	// v1:
+
+		template<typename SizeType, typename T>
+		constexpr void unit_test_hustle_factorial_v1(T v)
+		{
+			using T_hustle_fast_apply = hustle::T_fast_apply
+			<
+				contr_object_hustle_factorial_v1<SizeType>,
+				_hustle_factorial_v1, cctmp::null_env, T
+			>;
+
+			auto val = T_hustle_fast_apply::result(v);
+			printf("%d\n", val);
+		}
+
+/***********************************************************************************************************************/
+
+// factorial:
+
+	// v2:
+
+		template<typename SizeType, typename T>
+		constexpr void unit_test_hustle_factorial_v2(T v)
+		{
+			using T_hustle_fast_apply = hustle::T_fast_apply
+			<
+				contr_object_hustle_factorial_v2<SizeType>,
+				_hustle_factorial_v2, cctmp::null_env, T
+			>;
+
+			auto val = T_hustle_fast_apply::result(v);
+			printf("%d\n", val);
+		}
+
+/***********************************************************************************************************************/
+
+// fibonacci:
+
+	// v0:
+
+		template<typename SizeType, typename T>
+		constexpr void unit_test_hustle_fibonacci_v0(T v)
+		{
+			using T_hustle_fast_apply = hustle::T_fast_apply
+			<
+				contr_object_hustle_fibonacci_v0<SizeType>,
+				_hustle_fibonacci_v0, cctmp::null_env, T
+			>;
+
+			auto val = T_hustle_fast_apply::result(v);
+			printf("%d\n", val);
+		}
 
 /***********************************************************************************************************************/
 
@@ -36,6 +173,21 @@
 			<
 				contr_object_hustle_square_root_v0<SizeType>,
 				_hustle_square_root_v0, cctmp::null_env, T
+			>;
+
+			auto val = T_hustle_fast_apply::result(v);
+			printf("%1.11f\n", val);
+		}
+
+	// v1:
+
+		template<typename SizeType, typename T>
+		constexpr void unit_test_hustle_square_root_v1(T v)
+		{
+			using T_hustle_fast_apply = hustle::T_fast_apply
+			<
+				contr_object_hustle_square_root_v1<SizeType>,
+				_hustle_square_root_v1, cctmp::null_env, T
 			>;
 
 			auto val = T_hustle_fast_apply::result(v);

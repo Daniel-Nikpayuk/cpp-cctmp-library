@@ -42,8 +42,8 @@
 #include"undef_macros.hpp"
 
 //#include"testing/chord/assembly/unit_test.hpp"
-#include"testing/chord/progression/unit_test.hpp"
-//#include"testing/hustle/unit_test.hpp"
+//#include"testing/chord/progression/unit_test.hpp"
+#include"testing/hustle/unit_test.hpp"
 
 //#include"experimental/00_generic_printers.hpp"
 //#include"experimental/01_parser_generator_printers.hpp"
@@ -104,37 +104,11 @@
 		);
 	}
 
-/*
-	constexpr auto _hustle_test_func()
-	{
-		return source
-	        (
-			"(define (main a n)             "
-			"  (define (range k)            "
-			"    (if (= k n) nil            "
-			"      (cons k (range (+ k 1))) " // cannot be resolved at metacompile time.
-			"    )                          " // a, n, k are referenced as args in the verse.
-			"  )                            "
-			"  (tuple (range a))            " // return: tuple{a, a+1, a+2, a+3, ..., a+(n-1)}
-			")                              "
-		);					  // accumulating a temporary constexpr controller
-	}						  // is problematic because the calling contexts
-*/
-							  // are temporary as well, and so the actual
-							  // content gets lost unless you return actual
-							  // values, but that's problematic because
-							  // of C++17's restrictions on NTTPs.
-							  // actual C++ data structures might
-							  // be the only way.
-
-							  // then again:
-							  // (cons a (cons (+ a 1) (cons (+ (+ a 1) 1) ...)))
-							  // this would be a list of valid expressions.
-
 /***********************************************************************************************************************/
 
 // chord:
 
+/*
 	constexpr auto _chord_test_func()
 	{
 		return source
@@ -159,11 +133,20 @@
 			, binding( "format"   , strlit_type{"%d"} )
 		);
 	}
+*/
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
+	//	using hustle_size_type = unsigned long;
+	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
+
+	//	auto val = T_hustle_apply::result(hustle_size_type{5});
+	//	printf("%lu\n", val);
+
+		//
+
 	//	using chord_size_type = int const*;
 	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
 	//	using chord_arr_type  = sequence<int, 5>;
@@ -248,7 +231,15 @@
 
 		//
 
+	//	unit_test_hustle_square_v0<gindex_type>(5);
+	//	unit_test_hustle_sum_of_squares_v0<gindex_type>(3, 4);
+	//	unit_test_hustle_sum_of_squares_v1<gindex_type>(3, 4);
+	//	unit_test_hustle_factorial_v0<gindex_type>(9);
+	//	unit_test_hustle_factorial_v1<gindex_type>(9);
+	//	unit_test_hustle_factorial_v2<gindex_type>(9);
+	//	unit_test_hustle_fibonacci_v0<gindex_type>(12);
 	//	unit_test_hustle_square_root_v0<gindex_type>(double(main_at(0, argc, argv)));
+	//	unit_test_hustle_square_root_v1<gindex_type>(double(main_at(0, argc, argv))); // **
 
 		return 0;
 	}
