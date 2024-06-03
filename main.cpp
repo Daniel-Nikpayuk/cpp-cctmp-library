@@ -26,7 +26,7 @@
 
 #define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
 #define NIK_CHORD_PARSER
-//#define NIK_HUSTLE_PARSER
+#define NIK_HUSTLE_PARSER
 
 /***********************************************************************************************************************/
 
@@ -43,13 +43,11 @@
 
 //#include"testing/chord/assembly/unit_test.hpp"
 //#include"testing/chord/progression/unit_test.hpp"
-#include"testing/hustle/unit_test.hpp"
+//#include"testing/hustle/unit_test.hpp"
 
 //#include"experimental/00_generic_printers.hpp"
 //#include"experimental/01_parser_generator_printers.hpp"
 //#include"experimental/02_chord_assembly_printers.hpp"
-//#include"experimental/04_chord_grammar_tests.hpp"
-//#include"experimental/05_progression_grammar_tests.hpp"
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -59,7 +57,8 @@
 /***********************************************************************************************************************/
 
 	using chord_grammar			= chord::T_chord_grammar;
-	constexpr auto static_grammar		= U_store_T<chord_grammar>;
+	using hustle_grammar			= hustle::T_hustle_grammar;
+	constexpr auto static_grammar		= U_store_T<hustle_grammar>;
 
 /***********************************************************************************************************************/
 
@@ -98,8 +97,8 @@
 	{
 		return source
 	        (
-			"(define (main)           "
-			"  5                      "
+			"(define (main n)         "
+			"  ((if (= n 0) + *) 2 3) "
 			")                        "
 		);
 	}
@@ -108,51 +107,56 @@
 
 // chord:
 
-/*
 	constexpr auto _chord_test_func()
 	{
 		return source
 		(
-			"main out in                                       ;"
+			"main out in end in1                               ;"
 
 			"vars:                                             ;"
-			"  declare arr_map arr_pr                          ;"
+			"  declare chord_f                                 ;"
 
 			"defs:                                             ;"
-			"  arr_map # map[1]{rem_by_n @||} [) [div_by_n|~,) ;"
-			"  arr_pr  # repeat[1]{@ @|print * @|} (-|+,] <>   ;"
+		//	"  chord_f # fold[1]{add|@ @||} <> [,)             ;"
+			"  chord_f # fold[2]{add * @|multiply||} <> (,] (] ;"
 
 			"body:                                             ;"
-			"  . = arr_map !out in 0                           ;"
-			"  . = arr_pr _ out format                         ;"
+			"  . = chord_f !out in end in1                     ;"
 			"  return _                                        ;"
-
-			, binding( "print"    , _print_           )
-			, binding( "div_by_n" , _divide_by_<10>   )
-			, binding( "rem_by_n" , _modulo_by_<10>   )
-			, binding( "format"   , strlit_type{"%d"} )
 		);
 	}
-*/
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-	//	using hustle_size_type = unsigned long;
-	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
+		using chord_size_type = int const*;
+		using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
+		using chord_arr_type  = sequence<int , 5>;
 
-	//	auto val = T_hustle_apply::result(hustle_size_type{5});
-	//	printf("%lu\n", val);
+		chord_arr_type s0({ 1, 2, 3, 4, 5 });
 
 		//
 
-	//	using chord_size_type = int const*;
-	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
-	//	using chord_arr_type  = sequence<int, 5>;
+		int val = 0;
 
-	//	chord_arr_type s0({ 1, 2, 3, 4, 5 });
-	//	chord_arr_type s1({ 1, 2, 3, 4, 5 });
+		T_chord_apply::result(&val, s0.cbegin(), s0.cend() - 1, s0.cbegin());
+		printf("%d\n", val);
+	//	fileput::print_assembly_controller<chord::metapile<_chord_test_func, null_env>>();
+
+		//
+
+	//	using chord_find_type = sequence<int*, 1>;
+	//	chord_find_type record;
+
+	//	T_chord_apply::result(record.begin(), s0.cbegin(), s0.cend());
+	//	printf("%d\n", record.size());
+
+		//
+
+	//	using T_chord_apply = chord::T_apply<_chord_test_func, null_env, unsigned long>;
+
+	//	static_assert(T_chord_apply::result(9) == 362880);
 
 		//
 
@@ -164,18 +168,28 @@
 
 		//
 
-	//	int val = 0;
+	//	using hustle_size_type = int;
+	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
+	//	fileput::print_assembly_controller<hustle::metapile<_hustle_test_func, null_env>>();
 
-	//	T_chord_apply::template result<chord_size_type>(&val, s0.cbegin(), s0.cend(), s1.cbegin());
+	//	auto val = T_hustle_apply::result(5);
 	//	printf("%d\n", val);
 
 		//
 
-	//	using hustle_size_type = double;
+	//	using hustle_size_type = unsigned long;
 	//	using T_hustle_apply   = hustle::T_apply<_hustle_test_func, null_env, hustle_size_type>;
 
-	//	auto val = T_hustle_apply::result();
-	//	printf("%f\n", val);
+	//	auto val = T_hustle_apply::result(main_at(0, argc, argv));
+	//	printf("%lu\n", val);
+
+		// gcc - 1.892s
+		// gcc - 1.178s
+		// gcc - 0.914s
+
+		// clang - 2.721s
+		// clang - 1.698s
+		// clang - 1.461s
 
 		//
 
@@ -200,20 +214,13 @@
 	//	unit_test_chord_if_then_else_v0       <gindex_type> (true, 5, 6);
 	//	unit_test_chord_semidynamic_typing_v0 <gindex_type> (complex_number{0, 1}, 6);
 	//	unit_test_chord_semidynamic_typing_v1 <gindex_type> (complex_number{0, 1}, 6);
-	//	unit_test_chord_binary_dispatch_v0    <gindex_type> (true, 3, 4); // **
-	//	unit_test_chord_binary_dispatch_v1    <gindex_type> (true, 3, 4); // **
 	//	unit_test_chord_factorial_v0          <gindex_type> (9);
 	//	unit_test_chord_factorial_v1          <gindex_type> (9);
-	//	unit_test_chord_factorial_v2          <gindex_type> (9); // **
 	//	unit_test_chord_factorial_v3          <gindex_type> (9);
 	//	unit_test_chord_factorial_v4          <gindex_type> (9);
 	//	unit_test_chord_factorial_v5          <gindex_type> (9);
-	//	unit_test_chord_fibonacci_v0          <gindex_type> (8); // **
-	//	unit_test_chord_fibonacci_v1          <gindex_type> (8); // **
 	//	unit_test_chord_fall_fact_2_v0        <true, gindex_type> (5);
-	//	unit_test_chord_fall_fact_2_v1        <true, gindex_type> (5); // *
-	//	unit_test_chord_void_effects_v0       <gindex_type> ();
-	//	unit_test_chord_side_effects_v0       <gindex_type> ();
+	//	unit_test_chord_void_effects_v0       <gindex_type> (5, 6);
 
 		//
 

@@ -204,7 +204,7 @@
 				"  arr_sq # map[1]{square||}[)[,) ;"
 
 				"body:                            ;"
-				"  . = arr_map !out in end        ;"
+				"  . = arr_sq !out in end         ;"
 				"  return _                       ;"
 
 				, cctmp::binding( "square" , _square_ )

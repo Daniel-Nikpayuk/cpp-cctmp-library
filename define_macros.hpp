@@ -856,6 +856,14 @@
 															\
 		NIK_ASSEMBLY_RESULT_BEGIN_3(_c_, _i_, _l_, _t_, _r_, _t0_, _t1_, _t2_), _t3_
 
+	#define NIK_ASSEMBLY_RESULT_BEGIN_5(_c_, _i_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_, _t4_)			\
+															\
+		NIK_ASSEMBLY_RESULT_BEGIN_4(_c_, _i_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_), _t4_
+
+	#define NIK_ASSEMBLY_RESULT_BEGIN_6(_c_, _i_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_, _t4_, _t5_)		\
+															\
+		NIK_ASSEMBLY_RESULT_BEGIN_5(_c_, _i_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_, _t4_), _t5_
+
 	#define NIK_ASSEMBLY_RESULT_END 										\
 															\
 		>
@@ -883,6 +891,16 @@
 	#define NIK_ASSEMBLY_RESULT_4TS(_c_, _i_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_)				\
 															\
 		NIK_ASSEMBLY_RESULT_BEGIN_4(_c_, _i_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_)				\
+		NIK_ASSEMBLY_RESULT_END
+
+	#define NIK_ASSEMBLY_RESULT_5TS(_c_, _i_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_, _t4_)				\
+															\
+		NIK_ASSEMBLY_RESULT_BEGIN_5(_c_, _i_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_, _t4_)			\
+		NIK_ASSEMBLY_RESULT_END
+
+	#define NIK_ASSEMBLY_RESULT_6TS(_c_, _i_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_, _t4_, _t5_)			\
+															\
+		NIK_ASSEMBLY_RESULT_BEGIN_6(_c_, _i_, _l_, _t_, _r_, _t0_, _t1_, _t2_, _t3_, _t4_, _t5_)		\
 		NIK_ASSEMBLY_RESULT_END
 
 /***********************************************************************************************************************/

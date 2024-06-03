@@ -44,8 +44,8 @@
 #include"contr/fibonacci_v1.hpp"
 #include"contr/fall_fact_2_v0.hpp"
 #include"contr/fall_fact_2_v1.hpp"
-//#include"contr/void_effects_v0.hpp"
-//#include"contr/side_effects_v0.hpp"
+#include"contr/void_effects_v0.hpp"
+#include"contr/side_effects_v0.hpp"
 
 #include"inventory.hpp"
 
@@ -486,18 +486,18 @@
 
 	// v0:
 
-	//	template<typename SizeType, typename T>
-	//	constexpr void unit_test_chord_void_effects_v0(T v)
-	//	{
-	//		using T_chord_fast_apply = chord::T_fast_apply
-	//		<
-	//			contr_object_chord_void_effects_v0<SizeType>,
-	//			_chord_void_effects_v0, cctmp::null_env, T
-	//		>;
+		template<typename SizeType, typename T>
+		constexpr void unit_test_chord_void_effects_v0(T v0, T v1)
+		{
+			using T_chord_fast_apply = chord::T_fast_apply
+			<
+				contr_object_chord_void_effects_v0<SizeType>,
+				_chord_void_effects_v0, cctmp::null_env, T const*
+			>;
 
-	//		auto val = T_chord_fast_apply::result(v);
-	//		printf("%d\n", val);
-	//	}
+			auto val = T_chord_fast_apply::result(&v0, v1);
+			printf("%d\n", *val);
+		}
 
 /***********************************************************************************************************************/
 
@@ -505,16 +505,16 @@
 
 	// v0:
 
-	//	template<typename SizeType, typename T>
-	//	constexpr void unit_test_chord_side_effects_v0(T v)
-	//	{
-	//		using T_chord_fast_apply = chord::T_fast_apply
-	//		<
-	//			contr_object_chord_side_effects_v0<SizeType>,
-	//			_chord_side_effects_v0, cctmp::null_env, T
-	//		>;
+		template<typename SizeType, typename T>
+		constexpr void unit_test_chord_side_effects_v0(T v0, T v1)
+		{
+			using T_chord_fast_apply = chord::T_fast_apply
+			<
+				contr_object_chord_side_effects_v0<SizeType>,
+				_chord_side_effects_v0, cctmp::null_env, T const*
+			>;
 
-	//		auto val = T_chord_fast_apply::result(v);
-	//		printf("%d\n", val);
-	//	}
+			auto val = T_chord_fast_apply::result(&v0);
+			printf("%d\n", *val);
+		}
 

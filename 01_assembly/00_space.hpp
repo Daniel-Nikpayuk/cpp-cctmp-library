@@ -160,7 +160,7 @@ namespace assembly {
 			pad     , hash       , pound    , apply  , bind   , eval ,	//  8
 			go_to   , branch     , invert   , loop   ,			// 14
 			cycle   , next       , set      ,				// 18
-			out_ins , out_in_ins ,						// 21
+			repeat  , map        , fold     , find   , sift   ,		// 21
 			dimension
 		};
 	};
@@ -176,15 +176,12 @@ namespace assembly {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			first   , front     , back     ,		//  1
-			boolean , character , n_number , r_number ,	//  4
-			port    , select    ,				//  8
-			push    , pull      , drop     ,		// 10
-			verse   , side      , replace  ,		// 13
-			pred    , find      ,				// 16
-			act     , act_mut   , comb_mut ,		// 18
-			cont    , end       ,				// 19
-			inc     , dec       ,				// 21
+			none    , first     , front    , back     ,	//  1
+			boolean , character , n_number , r_number ,	//  5
+			port    , select    ,				//  9
+			push    , pull      , drop     ,		// 11
+			verse   , side      , replace  ,		// 14
+			inc     , dec       ,				// 17
 			dimension
 		};
 	};

@@ -93,8 +93,11 @@ namespace fileput {
 		ixs_pair( AN::next       , "AN::next"       ),
 		ixs_pair( AN::set        , "AN::set"        ),
 
-		ixs_pair( AN::out_ins    , "AN::out_ins"    ),
-		ixs_pair( AN::out_in_ins , "AN::out_in_ins" ),
+		ixs_pair( AN::repeat     , "AN::repeat"     ),
+		ixs_pair( AN::map        , "AN::map"        ),
+		ixs_pair( AN::fold       , "AN::fold"       ),
+		ixs_pair( AN::find       , "AN::find"       ),
+		ixs_pair( AN::sift       , "AN::sift"       ),
 
 		ixs_pair( AN::dimension  , "AN::dimension"  )
 	);
@@ -109,6 +112,7 @@ namespace fileput {
 
 		ixs_pair( AT::id        , "AT::id"        ),
 
+		ixs_pair( AT::none      , "AT::none"      ),
 		ixs_pair( AT::first     , "AT::first"     ),
 		ixs_pair( AT::front     , "AT::front"     ),
 		ixs_pair( AT::back      , "AT::back"      ),
@@ -128,16 +132,6 @@ namespace fileput {
 		ixs_pair( AT::verse     , "AT::verse"     ),
 		ixs_pair( AT::side      , "AT::side"      ),
 		ixs_pair( AT::replace   , "AT::replace"   ),
-
-		ixs_pair( AT::pred      , "AT::pred"      ),
-		ixs_pair( AT::find      , "AT::find"      ),
-
-		ixs_pair( AT::act       , "AT::act"       ),
-		ixs_pair( AT::act_mut   , "AT::act_mut"   ),
-		ixs_pair( AT::comb_mut  , "AT::comb_mut"  ),
-
-		ixs_pair( AT::cont      , "AT::cont"      ),
-		ixs_pair( AT::end       , "AT::end"       ),
 
 		ixs_pair( AT::inc       , "AT::inc"       ),
 		ixs_pair( AT::dec       , "AT::dec"       ),
@@ -380,9 +374,9 @@ namespace fileput {
 
 		literal_to_file<static_contr, is_numeric>(file_ptr, k, e - 1, "");
 
-		fputs(" }"  , file_ptr);
-		fputs(str   , file_ptr);
-		fputs(" \n" , file_ptr);
+		fputs(" }" , file_ptr);
+		fputs(str  , file_ptr);
+		fputs("\n" , file_ptr);
 	}
 
 /***********************************************************************************************************************/

@@ -25,624 +25,321 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// quality:
-
-	template<typename> struct T_chord_subcycle;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// augmented:
-
-/***********************************************************************************************************************/
-
-// tonic:
-
-	template<typename Cycle>
-	struct T_chord_augmented_tonic
-	{
-		using size_type		= typename Cycle::size_type;
-		using csize_type	= typename Cycle::csize_type;
-		using Subcycle		= T_chord_subcycle<Cycle>;
-
-		// am, out, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_in_ins(AST *t)
-			{
-			}
-
-		// am, out, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_ins(AST *t)
-			{
-			}
-
-		// acm, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void acm_in_ins(AST *t)
-			{
-			}
-	};
-
-/***********************************************************************************************************************/
-
-// tone:
-
-	template<typename Cycle>
-	struct T_chord_augmented_tone
-	{
-		using size_type		= typename Cycle::size_type;
-		using csize_type	= typename Cycle::csize_type;
-		using Subcycle		= T_chord_subcycle<Cycle>;
-
-		// am, out, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_in_ins(AST *t)
-			{
-			}
-
-		// am, out, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_ins(AST *t)
-			{
-			}
-
-		// acm, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void acm_in_ins(AST *t)
-			{
-			}
-	};
-
-/***********************************************************************************************************************/
-
-// peek:
-
-	template<typename Cycle>
-	struct T_chord_augmented_peek
-	{
-		using size_type		= typename Cycle::size_type;
-		using csize_type	= typename Cycle::csize_type;
-		using Subcycle		= T_chord_subcycle<Cycle>;
-
-		// am, out, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_in_ins(AST *t)
-			{
-			}
-
-		// am, out, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_ins(AST *t)
-			{
-			}
-
-		// acm, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void acm_in_ins(AST *t)
-			{
-			}
-	};
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename Cycle>
-	struct T_chord_augmented
-	{
-		using size_type		= typename Cycle::size_type;
-		using csize_type	= typename Cycle::csize_type;
-		using Tonic		= T_chord_augmented_tonic <Cycle>;
-		using Tone		= T_chord_augmented_tone  <Cycle>;
-		using Peek		= T_chord_augmented_peek  <Cycle>;
-
-		// am, out, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_in_ins(AST *t)
-			{
-				if      (t->interval.is_tonic(Prog::Ival::in)) Tonic::template am_out_in_ins<Prog>(t);
-				else if (t->interval.is_tone())                Tone::template  am_out_in_ins<Prog>(t);
-				else                                           Peek::template  am_out_in_ins<Prog>(t);
-			}
-
-		// am, out, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_ins(AST *t)
-			{
-				if      (t->interval.is_tonic(Prog::Ival::out)) Tonic::template am_out_ins<Prog>(t);
-				else if (t->interval.is_tone())                 Tone::template  am_out_ins<Prog>(t);
-				else                                            Peek::template  am_out_ins<Prog>(t);
-			}
-
-		// acm, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void acm_in_ins(AST *t)
-			{
-				if      (t->interval.is_tonic(Prog::Ival::in)) Tonic::template acm_in_ins<Prog>(t);
-				else if (t->interval.is_tone())                Tone::template  acm_in_ins<Prog>(t);
-				else                                           Peek::template  acm_in_ins<Prog>(t);
-			}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// diminished:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename Cycle>
-	struct T_chord_diminished
-	{
-		using size_type		= typename Cycle::size_type;
-		using csize_type	= typename Cycle::csize_type;
-		using Subcycle		= T_chord_subcycle<Cycle>;
-
-		// am, out, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_in_ins(AST *t) { Cycle::action(t); }
-
-		// am, out, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_ins(AST *t) { Cycle::action(t); }
-
-		// acm, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void acm_in_ins(AST *t) { Cycle::action(t); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// minor:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename Cycle>
-	struct T_chord_minor
-	{
-		using size_type		= typename Cycle::size_type;
-		using csize_type	= typename Cycle::csize_type;
-		using Subcycle		= T_chord_subcycle<Cycle>;
-
-		// am, out, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_in_ins(AST *t)
-			{
-				Cycle::action(t);
-
-				if      (t->interval.is_right_open(Prog::Ival::out)) next_out_in_ins <Prog>(t);
-				else if (t->interval.is_right_open(Prog::Ival::in))  next_in_ins     <Prog>(t);
-				else                                                 next_ins        <Prog>(t);
-			}
-
-		// am, out, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void am_out_ins(AST *t)
-			{
-				Cycle::action(t);
-
-				if (t->interval.is_right_open(Prog::Ival::out)) next_out_in_ins <Prog>(t);
-				else                                            next_ins        <Prog>(t);
-			}
-
-		// acm, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void acm_in_ins(AST *t)
-			{
-				Cycle::action(t);
-
-				if (t->interval.is_right_open(Prog::Ival::in)) next_in_ins <Prog>(t);
-				else                                           next_ins    <Prog>(t);
-			}
-
-		// generic:
-
-			template<typename Prog, typename AST>
-			nik_ces void next_out_in_ins(AST *t) { Subcycle::template next_out_in_ins<Prog>(t); }
-
-			template<typename Prog, typename AST>
-			nik_ces void next_in_ins(AST *t) { Subcycle::template next_in_ins<Prog>(t); }
-
-			template<typename Prog, typename AST>
-			nik_ces void next_ins(AST *t) { Subcycle::template next_ins<Prog>(t); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // one cycle:
 
 /***********************************************************************************************************************/
 
-// subcycle:
+// define iter:
 
-	template<typename Cycle>
-	struct T_chord_subcycle
+	template<typename SizeType>
+	struct T_chord_define_iter
 	{
-		using size_type		= typename Cycle::size_type;
-		using csize_type	= typename Cycle::csize_type;
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		// init(ialize):
+
+			template<typename AST>
+			nik_ces void init(AST *t, csize_type n)
+			{
+				t->iterate[n] = t->contr.current(1);
+
+				t->assembly_id_begin();
+			}
+
+		// term(inalize):
+
+			template<typename AST>
+			nik_ces void term(AST *t) { t->assembly_push_instr(AN::halt, AT::none); }
+
+		// note:
+
+			template<typename AST>
+			nik_ces void note(AST *t, csize_type ival_pos, csize_type n, csize_type arg_pos)
+			{
+				auto ni = t->interval.note_contr_pos(ival_pos, n);
+
+				t->note_next_assembly(arg_pos);
+				t->assembly_push_instr(AN::next, AT::id, ni);
+			}
+
+			template<typename AST>
+			nik_ces void note_next(AST *t, csize_type ival_pos, csize_type arg_pos)
+				{ note(t, ival_pos, AST::Iter::next, arg_pos); }
+
+			template<typename AST>
+			nik_ces void note_prev(AST *t, csize_type ival_pos, csize_type arg_pos)
+				{ note(t, ival_pos, AST::Iter::prev, arg_pos); }
+
+		// tonic:
+
+			template<typename AST>
+			nik_ces void tonic(AST *t, csize_type ival_pos, csize_type n, csize_type arg_pos)
+			{
+				auto ni = t->interval.tonic_contr_pos(ival_pos, n);
+
+				t->note_next_assembly(arg_pos);
+				t->assembly_push_instr(AN::next, AT::id, ni);
+			}
+
+			template<typename AST>
+			nik_ces void tonic_next(AST *t, csize_type ival_pos, csize_type arg_pos)
+				{ tonic(t, ival_pos, AST::Iter::next, arg_pos); }
+
+			template<typename AST>
+			nik_ces void tonic_prev(AST *t, csize_type ival_pos, csize_type arg_pos)
+				{ tonic(t, ival_pos, AST::Iter::prev, arg_pos); }
+	};
+
+/***********************************************************************************************************************/
+
+// define note:
+
+	template<typename SizeType>
+	struct T_chord_define_note
+	{
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		using define_iter	= T_chord_define_iter<size_type>;
+
+		// ival:
+
+			template<typename Prog, typename AST>
+			nik_ces csize_type ival_out(AST *t) { return Prog::Ival::out; }
+
+			template<typename Prog, typename AST>
+			nik_ces csize_type ival_in(AST *t) { return Prog::Ival::in; }
+
+			template<typename Prog, typename AST>
+			nik_ces csize_type ival_ins(AST *t) { return Prog::Ival::ins; }
+
+			template<typename Prog, typename AST>
+			nik_ces csize_type ival_root(AST *t) { return Prog::Ival::root; }
 
 		// sign:
 
 			template<typename Prog, typename AST>
-			nik_ces auto sign_out(AST *t) { return Prog::Sign::out; }
+			nik_ces csize_type sign_out(AST *t) { return Prog::Sign::out; }
 
 			template<typename Prog, typename AST>
-			nik_ces auto sign_in(AST *t) { return Prog::Sign::in; }
+			nik_ces csize_type sign_in(AST *t) { return Prog::Sign::in; }
 
 			template<typename Prog, typename AST>
-			nik_ces auto sign_ins(AST *t) { return Prog::Sign::ins; }
+			nik_ces csize_type sign_ins(AST *t) { return Prog::Sign::ins; }
+
+			template<typename Prog, typename AST>
+			nik_ces csize_type sign_end(AST *t) { return Prog::Sign::end; }
+
+		// match:
+
+			template<typename Pred, typename Prog, typename AST>
+			nik_ces auto match_ins(AST *t)
+			{
+				bool match = false;
+
+				for (auto ival_pos = ival_ins<Prog>(t); ival_pos != t->interval.size(); ++ival_pos)
+					if (Pred::result(t, ival_pos)) { match = true; break; }
+
+				return match;
+			}
 
 		// next:
 
 			template<typename Prog, typename AST>
-			nik_ces void next_out_in_ins(AST *t)
-			{
-				auto out_pos = sign_out <Prog>(t);
-				auto in_pos  = sign_in  <Prog>(t);
-				auto ins_pos = sign_ins <Prog>(t);
-
-				Cycle::next_begin(t, out_pos);
-				Cycle::next_cont(t, Prog::Ival::out, in_pos);
-				Cycle::next_cont(t, Prog::Ival::in, ins_pos);
-				Cycle::next_rest(t, Prog::Ival::ins, ins_pos);
-				Cycle::next_end(t);
-			}
+			nik_ces void next_out(AST *t) { define_iter::note_next(t, ival_out<Prog>(t), sign_out<Prog>(t)); }
 
 			template<typename Prog, typename AST>
-			nik_ces void next_out_ins(AST *t)
-			{
-				auto out_pos = sign_out<Prog>(t);
-				auto ins_pos = sign_ins<Prog>(t);
-
-				Cycle::next_begin(t, out_pos);
-				Cycle::next_cont(t, Prog::Ival::out, ins_pos);
-				Cycle::next_rest(t, Prog::Ival::ins, ins_pos);
-				Cycle::next_end(t);
-			}
+			nik_ces void next_in(AST *t) { define_iter::note_next(t, ival_in<Prog>(t), sign_in<Prog>(t)); }
 
 			template<typename Prog, typename AST>
-			nik_ces void next_in_ins(AST *t)
-			{
-				auto in_pos  = sign_in  <Prog>(t);
-				auto ins_pos = sign_ins <Prog>(t);
+			nik_ces void next_end(AST *t) { define_iter::note_next(t, ival_root<Prog>(t), sign_end<Prog>(t)); }
 
-				Cycle::next_begin(t, in_pos);
-				Cycle::next_cont(t, Prog::Ival::in, ins_pos);
-				Cycle::next_rest(t, Prog::Ival::ins, ins_pos);
-				Cycle::next_end(t);
-			}
+		// prev:
 
 			template<typename Prog, typename AST>
+			nik_ces void prev_out(AST *t) { define_iter::note_prev(t, ival_out<Prog>(t), sign_out<Prog>(t)); }
+
+			template<typename Prog, typename AST>
+			nik_ces void prev_in(AST *t) { define_iter::note_prev(t, ival_in<Prog>(t), sign_in<Prog>(t)); }
+
+			template<typename Prog, typename AST>
+			nik_ces void prev_end(AST *t) { define_iter::tonic_prev(t, ival_root<Prog>(t), sign_end<Prog>(t)); }
+	};
+
+/***********************************************************************************************************************/
+
+// define note if:
+
+	template<typename SizeType>
+	struct T_chord_define_note_if
+	{
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		using define_iter	= T_chord_define_iter<size_type>;
+		using define_note	= T_chord_define_note<size_type>;
+
+		// next:
+
+			template<typename Pred, typename Prog, typename AST>
+			nik_ces void next_out(AST *t)
+			{
+				auto ival_pos = define_note::template ival_out<Prog>(t);
+
+				if (Pred::result(t, ival_pos)) define_note::template next_out<Prog>(t);
+			}
+
+			template<typename Pred, typename Prog, typename AST>
+			nik_ces void next_in(AST *t)
+			{
+				auto ival_pos = define_note::template ival_in<Prog>(t);
+
+				if (Pred::result(t, ival_pos)) define_note::template next_in<Prog>(t);
+			}
+
+			template<typename Pred, typename Prog, typename AST>
+			nik_ces void next_end(AST *t) { if (Pred::result(t)) define_note::template next_end<Prog>(t); }
+
+			template<typename Pred, typename Prog, typename AST>
 			nik_ces void next_ins(AST *t)
 			{
-				auto ins_pos = sign_ins<Prog>(t);
+				auto has_next_ins = define_note::template match_ins<Pred, Prog>(t);
 
-				Cycle::next_rest(t, Prog::Ival::ins, ins_pos);
-				Cycle::next_end(t);
+				if (has_next_ins)
+				{
+					auto ival_beg = define_note::template ival_ins<Prog>(t);
+					auto sign_pos = define_note::template sign_ins<Prog>(t);
+
+					for (auto ival_pos = ival_beg; ival_pos != t->interval.size(); ++ival_pos)
+						if (Pred::result(t, ival_pos))
+							define_iter::note_next(t, ival_pos, sign_pos++);
+				}
+			}
+
+		// prev:
+
+			template<typename Pred, typename Prog, typename AST>
+			nik_ces void prev_out(AST *t)
+			{
+				auto ival_pos = define_note::template ival_out<Prog>(t);
+
+				if (Pred::result(t, ival_pos)) define_note::template prev_out<Prog>(t);
+			}
+
+			template<typename Pred, typename Prog, typename AST>
+			nik_ces void prev_in(AST *t)
+			{
+				auto ival_pos = define_note::template ival_in<Prog>(t);
+
+				if (Pred::result(t, ival_pos)) define_note::template prev_in<Prog>(t);
+			}
+
+			template<typename Pred, typename Prog, typename AST>
+			nik_ces void prev_end(AST *t) { if (Pred::result(t)) define_note::template prev_end<Prog>(t); }
+
+			template<typename Pred, typename Prog, typename AST>
+			nik_ces void prev_ins(AST *t)
+			{
+				auto has_prev_ins = define_note::template match_ins<Pred, Prog>(t);
+
+				if (has_prev_ins)
+				{
+					auto ival_beg = define_note::template ival_ins<Prog>(t);
+					auto sign_pos = define_note::template sign_ins<Prog>(t);
+
+					for (auto ival_pos = ival_beg; ival_pos != t->interval.size(); ++ival_pos)
+						if (Pred::result(t, ival_pos))
+							define_iter::note_prev(t, ival_pos, sign_pos++);
+				}
 			}
 	};
 
 /***********************************************************************************************************************/
 
-// precycle:
+// extend pred if:
 
 	template<typename SizeType>
-	struct T_chord_precycle
+	struct T_chord_extend_pred_if
 	{
 		using size_type		= SizeType;
 		using csize_type	= size_type const;
-		using Subcycle		= T_chord_subcycle<T_chord_precycle>;
 
-		// define:
+		using define_iter	= T_chord_define_iter<size_type>;
+		using define_note	= T_chord_define_note<size_type>;
 
-			// out, in, ins:
+		// peek:
 
-				template<typename Prog, typename AST>
-				nik_ces void define_out_in_ins(AST *t)
-					{ if (t->interval.has_left_next()) dispatch_out_in_ins<Prog>(t); }
+			template<typename Pred, typename Prog, typename AST>
+			nik_ces void peek_in(AST *t)
+			{
+				// not yet implemented.
+			}
+	};
 
-			// out, ins:
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-				template<typename Prog, typename AST>
-				nik_ces void define_out_ins(AST *t)
-					{ if (t->interval.has_left_next()) dispatch_out_ins<Prog>(t); }
+// predicate:
 
-			// in, ins:
+/***********************************************************************************************************************/
 
-				template<typename Prog, typename AST>
-				nik_ces void define_in_ins(AST *t)
-					{ if (t->interval.has_left_next()) dispatch_in_ins<Prog>(t); }
+// not fixed:
 
-		// dispatch:
-
-			// out, in, ins:
-
-				template<typename Prog, typename AST>
-				nik_ces void dispatch_out_in_ins(AST *t)
-				{
-					if      (t->interval.is_left_open(Prog::Ival::out)) next_out_in_ins <Prog>(t);
-					else if (t->interval.is_left_open(Prog::Ival::in))  next_in_ins     <Prog>(t);
-					else                                                next_ins        <Prog>(t);
-				}
-
-			// out, ins:
-
-				template<typename Prog, typename AST>
-				nik_ces void dispatch_out_ins(AST *t)
-				{
-					if (t->interval.is_left_open(Prog::Ival::out)) next_out_ins <Prog>(t);
-					else                                           next_ins     <Prog>(t);
-				}
-
-			// in, ins:
-
-				template<typename Prog, typename AST>
-				nik_ces void dispatch_in_ins(AST *t)
-				{
-					if (t->interval.is_left_open(Prog::Ival::in)) next_in_ins <Prog>(t);
-					else                                          next_ins    <Prog>(t);
-				}
-
-			// next:
-
-				// out, in, ins:
-
-					template<typename Prog, typename AST>
-					nik_ces void next_out_in_ins(AST *t)
-					{
-						if (t->interval.is_left_open(Prog::Ival::in))
-
-							Subcycle::template next_out_in_ins<Prog>(t);
-						else
-							Subcycle::template next_out_ins<Prog>(t);
-					}
-
-				// out, ins:
-
-					template<typename Prog, typename AST>
-					nik_ces void next_out_ins(AST *t) { Subcycle::template next_out_ins<Prog>(t); }
-
-				// in, ins:
-
-					template<typename Prog, typename AST>
-					nik_ces void next_in_ins(AST *t) { Subcycle::template next_in_ins<Prog>(t); }
-
-				// ins:
-
-					template<typename Prog, typename AST>
-					nik_ces void next_ins(AST *t) { Subcycle::template next_ins<Prog>(t); }
-
-		// generic:
-
-			template<typename AST>
-			nik_ces void next_begin(AST *t, csize_type first_arg)
-				{ t->next_begin(t->cycle_front, AST::CycleFront::next, first_arg); }
-
-			template<typename AST>
-			nik_ces void next_cont(AST *t, csize_type ival_pos, csize_type next_arg)
-				{ if (t->interval.is_left_open(ival_pos)) t->define_next_cont(ival_pos, next_arg); }
-
-			template<typename AST>
-			nik_ces void next_rest(AST *t, csize_type b, csize_type n)
-				{ for (auto k = b; k != t->interval.size(); ++k) next_cont(t, k, n + k - 1); }
-
-			template<typename AST>
-			nik_ces void next_end(AST *t) { t->define_next_end(); }
+	struct T_chord_predicate_not_fixed
+	{
+		template<typename AST, typename T>
+		nik_ces auto result(AST *t, T ival_pos) { return t->interval.not_fixed(ival_pos); }
 	};
 
 /***********************************************************************************************************************/
 
-// cycle:
+// is left open:
 
-	template<typename SizeType>
-	struct T_chord_cycle
+	struct T_chord_predicate_is_left_open
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-		using Subcycle		= T_chord_subcycle<T_chord_cycle>;
-
-		// am, out, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void define_am_out_in_ins(AST *t)
-			{
-				define_pred            <Prog>(t);
-				define_action_am       <Prog>(t);
-				define_next_out_in_ins <Prog>(t);
-			}
-
-		// am, out, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void define_am_out_ins(AST *t)
-			{
-				define_pred         <Prog>(t);
-				define_action_am    <Prog>(t);
-				define_next_out_ins <Prog>(t);
-			}
-
-		// acm, in, ins:
-
-			template<typename Prog, typename AST>
-			nik_ces void define_acm_in_ins(AST *t)
-			{
-				define_pred        <Prog>(t);
-				define_action_acm  <Prog>(t);
-				define_next_in_ins <Prog>(t);
-			}
-
-		// pred:
-
-			template<typename Prog, typename AST>
-			nik_ces void define_pred(AST *t)
-			{
-				auto ni = t->get_predicate();
-
-				t->cycle_id[AST::CycleId::predicate] = t->contr.current(1);
-				t->template assembly_action<AAN::id, AAT::begin>();
-				t->template assembly_action<AAN::push, AAT::instr>(Prog::name, AT::pred, ni);
-			}
-
-		// action:
-
-			// am:
-
-				template<typename Prog, typename AST>
-				nik_ces void define_action_am(AST *t)
-				{
-					auto name = Prog::name;
-					auto note = AT::act_mut;
-					auto ni   = t->get_action();
-					auto mi   = t->get_mutate();
-
-					t->cycle_side[AST::CycleSide::action] = t->contr.current(1);
-					t->template assembly_action<AAN::id, AAT::begin>();
-					t->template assembly_action<AAN::push, AAT::instr>(name, note, ni, mi);
-				}
-
-			// acm:
-
-				template<typename Prog, typename AST>
-				nik_ces void define_action_acm(AST *t)
-				{
-					auto name = Prog::name;
-					auto note = AT::comb_mut;
-					auto ni   = t->get_action();
-					auto mi   = t->get_combine();
-					auto li   = t->get_mutate();
-
-					t->cycle_side[AST::CycleSide::action] = t->contr.current(1);
-					t->template assembly_action<AAN::id, AAT::begin>();
-					t->template assembly_action<AAN::push, AAT::instr>(name, note, ni, mi, li);
-				}
-
-		// next:
-
-			// out, in, ins:
-
-				template<typename Prog, typename AST>
-				nik_ces void define_next_out_in_ins(AST *t) { Subcycle::template next_out_in_ins<Prog>(t); }
-
-			// out, ins:
-
-				template<typename Prog, typename AST>
-				nik_ces void define_next_out_ins(AST *t) { Subcycle::template next_out_ins<Prog>(t); }
-
-			// in, ins:
-
-				template<typename Prog, typename AST>
-				nik_ces void define_next_in_ins(AST *t) { Subcycle::template next_in_ins<Prog>(t); }
-
-		// generic:
-
-			template<typename AST>
-			nik_ces void next_begin(AST *t, csize_type first_arg)
-				{ t->next_begin(t->cycle_side, AST::CycleSide::next, first_arg); }
-
-			template<typename AST>
-			nik_ces void next_cont(AST *t, csize_type ival_pos, csize_type next_arg)
-				{ if (t->interval.not_fixed(ival_pos)) t->define_next_cont(ival_pos, next_arg); }
-
-			template<typename AST>
-			nik_ces void next_rest(AST *t, csize_type b, csize_type n)
-				{ for (auto k = b; k != t->interval.size(); ++k) next_cont(t, k, n + k - 1); }
-
-			template<typename AST>
-			nik_ces void next_end(AST *t) { t->define_next_end(); }
+		template<typename AST, typename T>
+		nik_ces auto result(AST *t, T ival_pos) { return t->interval.is_left_open(ival_pos); }
 	};
 
 /***********************************************************************************************************************/
 
-// postcycle:
+// is right open:
 
-	template<typename SizeType>
-	struct T_chord_postcycle
+	struct T_chord_predicate_is_right_open
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-		using Subcycle		= T_chord_subcycle   <T_chord_postcycle>;
-		using Augmented		= T_chord_augmented  <T_chord_postcycle>;
-		using Diminished	= T_chord_diminished <T_chord_postcycle>;
-		using Minor		= T_chord_minor      <T_chord_postcycle>;
+		template<typename AST, typename T>
+		nik_ces auto result(AST *t, T ival_pos) { return t->interval.is_right_open(ival_pos); }
+	};
 
-		// define:
+/***********************************************************************************************************************/
 
-			// am, out, in, ins:
+// is right closed:
 
-				template<typename Prog, typename AST>
-				nik_ces void define_am_out_in_ins(AST *t)
-				{
-					if      (t->interval.is_augmented())  Augmented::template  am_out_in_ins<Prog>(t);
-					else if (t->interval.is_diminished()) Diminished::template am_out_in_ins<Prog>(t);
-					else if (t->interval.is_minor())      Minor::template      am_out_in_ins<Prog>(t);
-				}
+	struct T_chord_predicate_is_right_closed
+	{
+		template<typename AST, typename T>
+		nik_ces auto result(AST *t, T ival_pos) { return t->interval.is_right_closed(ival_pos); }
+	};
 
-			// am, out, ins:
+/***********************************************************************************************************************/
 
-				template<typename Prog, typename AST>
-				nik_ces void define_am_out_ins(AST *t)
-				{
-					if      (t->interval.is_augmented())  Augmented::template  am_out_ins<Prog>(t);
-					else if (t->interval.is_diminished()) Diminished::template am_out_ins<Prog>(t);
-					else if (t->interval.is_minor())      Minor::template      am_out_ins<Prog>(t);
-				}
+// is augmented tonic:
 
-			// acm, in, ins:
+	struct T_chord_predicate_is_augmented_tonic
+	{
+		template<typename AST>
+		nik_ces auto result(AST *t) { return t->interval.is_augmented_tonic(); }
+	};
 
-				template<typename Prog, typename AST>
-				nik_ces void define_acm_in_ins(AST *t)
-				{
-					if      (t->interval.is_augmented())  Augmented::template  acm_in_ins<Prog>(t);
-					else if (t->interval.is_diminished()) Diminished::template acm_in_ins<Prog>(t);
-					else if (t->interval.is_minor())      Minor::template      acm_in_ins<Prog>(t);
-				}
+/***********************************************************************************************************************/
 
-		// generic:
+// is augmented peek:
 
-			template<typename AST>
-			nik_ces void action(AST *t)
-				{ t->cycle_back[AST::CycleBack::action] = t->cycle_side[AST::CycleSide::action]; }
-
-			template<typename AST>
-			nik_ces void next_begin(AST *t, csize_type first_arg)
-				{ t->next_begin(t->cycle_back, AST::CycleBack::next, first_arg); }
-
-			template<typename AST>
-			nik_ces void next_cont(AST *t, csize_type ival_pos, csize_type next_arg)
-				{ if (t->interval.is_right_open(ival_pos)) t->define_next_cont(ival_pos, next_arg); }
-
-			template<typename AST>
-			nik_ces void next_rest(AST *t, csize_type b, csize_type n)
-				{ for (auto k = b; k != t->interval.size(); ++k) next_cont(t, k, n + k - 1); }
-
-			template<typename AST>
-			nik_ces void next_end(AST *t) { t->define_next_end(); }
+	struct T_chord_predicate_is_augmented_peek
+	{
+		template<typename AST>
+		nik_ces auto result(AST *t) { return t->interval.is_augmented_peek(); }
 	};
 
 /***********************************************************************************************************************/
@@ -654,65 +351,623 @@ namespace chord {
 
 // repeat:
 
-	template<typename size_type>
+	template<typename SizeType>
 	struct T_chord_repeat
 	{
-		nik_ces size_type name = AN::out_ins;
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
 
-		struct Ival { enum : size_type { out, ins, dimension, in }; };		// debugging.
-		struct Sign { enum : size_type { out, end, ins, dimension, in }; };	// debugging.
+		using define_iter	= T_chord_define_iter    <size_type>;
+		using define_note	= T_chord_define_note    <size_type>;
+		using define_note_if	= T_chord_define_note_if <size_type>;
+
+		using left_open		= T_chord_predicate_is_left_open;
+
+		nik_ces size_type name	= AN::repeat;
+
+		struct Ival { enum : size_type { out, root = out, ins, dimension, in }; };
+		struct Sign { enum : size_type { out, end, ins, dimension, in }; };
+
+		// internal:
+
+			// precycle:
+
+				template<typename AST>
+				nik_ces void define_internal_precycle(AST *t)
+				{
+					define_iter    ::init(t, AST::Iterate::front);
+					define_note_if ::template next_out<left_open, T_chord_repeat>(t);
+					define_iter    ::term(t);
+				};
+
+			// cycle:
+
+				template<typename AST>
+				nik_ces void define_internal_cycle(AST *t)
+				{
+					define_iter ::init(t, AST::Iterate::loop);
+					define_note ::template next_out<T_chord_repeat>(t);
+					define_iter ::term(t);
+				};
+
+			// postcycle:
+
+				// not required.
+
+			// action:
+
+				template<typename AST>
+				nik_ces void define_internal_action(AST *t)
+				{
+					define_internal_precycle (t);
+					define_internal_cycle    (t);
+				};
+
+		// loop action:
+
+			template<typename AST>
+			nik_ces void define_loop_action(AST *t)
+			{
+				auto ni = t->get_predicate ();
+				auto mi = t->get_action    ();
+				auto li = t->get_mutate    ();
+				auto ki = t->iterate[AST::Iterate::loop];
+
+				t->assembly_push_instr(name, AT::id, ni, mi, li, ki);
+			}
+
+		// back action:
+
+			template<typename AST>
+			nik_ces void define_back_action(AST *t)
+			{
+				auto ni = t->get_action();
+				auto mi = t->get_mutate();
+
+				t->assembly_push_instr(name, AT::back, ni, mi);
+			}
 	};
 
 /***********************************************************************************************************************/
 
 // map:
 
-	template<typename size_type>
+	template<typename SizeType>
 	struct T_chord_map
 	{
-		nik_ces size_type name = AN::out_in_ins;
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
 
-		struct Ival { enum : size_type { out, in, ins, dimension }; };
+		using define_iter	= T_chord_define_iter    <size_type>;
+		using define_note	= T_chord_define_note    <size_type>;
+		using define_note_if	= T_chord_define_note_if <size_type>;
+		using extend_pred_if	= T_chord_extend_pred_if <size_type>;
+
+		using not_fixed		= T_chord_predicate_not_fixed;
+		using left_open		= T_chord_predicate_is_left_open;
+		using right_open	= T_chord_predicate_is_right_open;
+		using right_closed	= T_chord_predicate_is_right_closed;
+		using aug_tonic		= T_chord_predicate_is_augmented_tonic;
+		using aug_peek		= T_chord_predicate_is_augmented_peek;
+
+		nik_ces size_type name	= AN::map;
+
+		struct Ival { enum : size_type { out, in, root = in, ins, dimension }; };
 		struct Sign { enum : size_type { out, in, end, ins, dimension }; };
+
+		// internal:
+
+			// precycle:
+
+				template<typename AST>
+				nik_ces void define_internal_precycle(AST *t)
+				{
+					define_iter    ::init(t, AST::Iterate::front);
+					define_note_if ::template next_out < left_open , T_chord_map >(t);
+					define_note_if ::template next_in  < left_open , T_chord_map >(t);
+					define_note_if ::template next_ins < left_open , T_chord_map >(t);
+					define_note_if ::template prev_end < aug_tonic , T_chord_map >(t);
+					define_iter    ::term(t);
+				};
+
+			// cycle:
+
+				template<typename AST>
+				nik_ces void define_internal_cycle(AST *t)
+				{
+					define_iter    ::init(t, AST::Iterate::loop);
+					define_note    ::template next_out<T_chord_map>(t);
+					define_note    ::template next_in<T_chord_map>(t);
+					define_note_if ::template next_ins<not_fixed, T_chord_map>(t);
+					define_iter    ::term(t);
+
+					extend_pred_if ::template peek_in<aug_peek, T_chord_map>(t);
+				};
+
+			// postcycle:
+
+				// augmented:
+
+					template<typename AST>
+					nik_ces void define_internal_augmented_tone(AST *t)
+						{ define_note_if::template prev_ins<right_closed, T_chord_map>(t); };
+
+					template<typename AST>
+					nik_ces void define_internal_augmented_not_tone(AST *t)
+					{
+						define_note_if ::template next_out<right_open, T_chord_map>(t);
+						define_note    ::template next_in<T_chord_map>(t);
+						define_note_if ::template next_ins<right_open, T_chord_map>(t);
+						define_note_if ::template next_end<aug_tonic, T_chord_map>(t);
+					};
+
+					template<typename AST>
+					nik_ces void define_internal_augmented(AST *t)
+					{
+						define_iter::init(t, AST::Iterate::back);
+
+						if (t->interval.is_tone()) define_internal_augmented_tone     (t);
+						else                       define_internal_augmented_not_tone (t);
+
+						define_iter::term(t);
+					};
+
+				// minor:
+
+					template<typename AST>
+					nik_ces void define_internal_minor(AST *t)
+					{
+						define_iter    ::init(t, AST::Iterate::back);
+						define_note_if ::template next_out<right_open, T_chord_map>(t);
+						define_note_if ::template next_ins<right_open, T_chord_map>(t);
+						define_iter    ::term(t);
+					};
+
+				template<typename AST>
+				nik_ces void define_internal_postcycle(AST *t)
+				{
+					if      (t->interval.is_augmented ()) define_internal_augmented (t);
+					else if (t->interval.is_minor     ()) define_internal_minor     (t);
+				};
+
+			// action:
+
+				template<typename AST>
+				nik_ces void define_internal_action(AST *t)
+				{
+					define_internal_precycle  (t);
+					define_internal_cycle     (t);
+					define_internal_postcycle (t);
+				};
+
+		// loop action:
+
+			template<typename AST>
+			nik_ces void define_loop_action(AST *t)
+			{
+				auto ni = t->get_predicate ();
+				auto mi = t->get_action    ();
+				auto li = t->get_mutate    ();
+				auto ki = t->iterate[AST::Iterate::loop];
+
+				t->assembly_push_instr(name, AT::id, ni, mi, li, ki);
+			}
+
+		// back action:
+
+			template<typename AST>
+			nik_ces void define_back_action(AST *t)
+			{
+				auto ni = t->get_action();
+				auto mi = t->get_mutate();
+
+				t->assembly_push_instr(name, AT::back, ni, mi);
+			}
 	};
 
 /***********************************************************************************************************************/
 
 // fold:
 
-	template<typename size_type>
+	template<typename SizeType>
 	struct T_chord_fold
 	{
-		nik_ces size_type name = AN::out_in_ins;
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
 
-		struct Ival { enum : size_type { out, in, ins, dimension }; };
+		using define_iter	= T_chord_define_iter    <size_type>;
+		using define_note	= T_chord_define_note    <size_type>;
+		using define_note_if	= T_chord_define_note_if <size_type>;
+		using extend_pred_if	= T_chord_extend_pred_if <size_type>;
+
+		using not_fixed		= T_chord_predicate_not_fixed;
+		using left_open		= T_chord_predicate_is_left_open;
+		using right_open	= T_chord_predicate_is_right_open;
+		using right_closed	= T_chord_predicate_is_right_closed;
+		using aug_tonic		= T_chord_predicate_is_augmented_tonic;
+		using aug_peek		= T_chord_predicate_is_augmented_peek;
+
+		nik_ces size_type name	= AN::fold;
+
+		struct Ival { enum : size_type { out, in, root = in, ins, dimension }; };
 		struct Sign { enum : size_type { out, in, end, ins, dimension }; };
+
+		// internal:
+
+			// precycle:
+
+				template<typename AST>
+				nik_ces void define_internal_precycle(AST *t)
+				{
+					define_iter    ::init(t, AST::Iterate::front);
+					define_note_if ::template next_in  < left_open , T_chord_fold >(t);
+					define_note_if ::template next_ins < left_open , T_chord_fold >(t);
+					define_note_if ::template prev_end < aug_tonic , T_chord_fold >(t);
+					define_iter    ::term(t);
+				};
+
+			// cycle:
+
+				template<typename AST>
+				nik_ces void define_internal_cycle(AST *t)
+				{
+					define_iter    ::init(t, AST::Iterate::loop);
+					define_note    ::template next_in<T_chord_fold>(t);
+					define_note_if ::template next_ins<not_fixed, T_chord_fold>(t);
+					define_iter    ::term(t);
+
+					extend_pred_if ::template peek_in<aug_peek, T_chord_fold>(t);
+				};
+
+			// postcycle:
+
+				// augmented:
+
+					template<typename AST>
+					nik_ces void define_internal_augmented_tone(AST *t)
+						{ define_note_if::template prev_ins<right_closed, T_chord_fold>(t); };
+
+					template<typename AST>
+					nik_ces void define_internal_augmented_not_tone(AST *t)
+					{
+						define_note    ::template next_in<T_chord_fold>(t);
+						define_note_if ::template next_ins<right_open, T_chord_fold>(t);
+						define_note_if ::template next_end<aug_tonic, T_chord_fold>(t);
+					};
+
+					template<typename AST>
+					nik_ces void define_internal_augmented(AST *t)
+					{
+						define_iter::init(t, AST::Iterate::back);
+
+						if (t->interval.is_tone()) define_internal_augmented_tone     (t);
+						else                       define_internal_augmented_not_tone (t);
+
+						define_iter::term(t);
+					};
+
+				// minor:
+
+					template<typename AST>
+					nik_ces void define_internal_minor(AST *t)
+					{
+						define_iter    ::init(t, AST::Iterate::back);
+						define_note_if ::template next_ins<right_open, T_chord_fold>(t);
+						define_iter    ::term(t);
+					};
+
+				template<typename AST>
+				nik_ces void define_internal_postcycle(AST *t)
+				{
+					if      (t->interval.is_augmented ()) define_internal_augmented (t);
+					else if (t->interval.is_minor     ()) define_internal_minor     (t);
+				};
+
+			// action:
+
+				template<typename AST>
+				nik_ces void define_internal_action(AST *t)
+				{
+					define_internal_precycle  (t);
+					define_internal_cycle     (t);
+					define_internal_postcycle (t);
+				};
+
+		// loop action:
+
+			template<typename AST>
+			nik_ces void define_loop_action(AST *t)
+			{
+				auto ni = t->get_predicate ();
+				auto mi = t->get_action    ();
+				auto li = t->get_combine   ();
+				auto ki = t->get_mutate    ();
+				auto ji = t->iterate[AST::Iterate::loop];
+
+				t->assembly_push_instr(name, AT::id, ni, mi, li, ki, ji);
+			}
+
+		// back action:
+
+			template<typename AST>
+			nik_ces void define_back_action(AST *t)
+			{
+				auto ni = t->get_action  ();
+				auto mi = t->get_combine ();
+				auto li = t->get_mutate  ();
+
+				t->assembly_push_instr(name, AT::back, ni, mi, li);
+			}
 	};
 
 /***********************************************************************************************************************/
 
 // find:
 
-	template<typename size_type>
+	template<typename SizeType>
 	struct T_chord_find
 	{
-		nik_ces size_type name = AN::out_in_ins;
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
 
-		struct Ival { enum : size_type { out, in, ins, dimension }; };
+		using define_iter	= T_chord_define_iter    <size_type>;
+		using define_note	= T_chord_define_note    <size_type>;
+		using define_note_if	= T_chord_define_note_if <size_type>;
+		using extend_pred_if	= T_chord_extend_pred_if <size_type>;
+
+		using not_fixed		= T_chord_predicate_not_fixed;
+		using left_open		= T_chord_predicate_is_left_open;
+		using right_open	= T_chord_predicate_is_right_open;
+		using right_closed	= T_chord_predicate_is_right_closed;
+		using aug_tonic		= T_chord_predicate_is_augmented_tonic;
+		using aug_peek		= T_chord_predicate_is_augmented_peek;
+
+		nik_ces size_type name	= AN::find;
+
+		struct Ival { enum : size_type { out, in, root = in, ins, dimension }; };
 		struct Sign { enum : size_type { out, in, end, ins, dimension }; };
+
+		// internal:
+
+			// precycle:
+
+				template<typename AST>
+				nik_ces void define_internal_precycle(AST *t)
+				{
+					define_iter    ::init(t, AST::Iterate::front);
+					define_note_if ::template next_in  < left_open , T_chord_find >(t);
+					define_note_if ::template next_ins < left_open , T_chord_find >(t);
+					define_note_if ::template prev_end < aug_tonic , T_chord_find >(t);
+					define_iter    ::term(t);
+				};
+
+			// cycle:
+
+				template<typename AST>
+				nik_ces void define_internal_cycle(AST *t)
+				{
+					define_iter    ::init(t, AST::Iterate::loop);
+					define_note    ::template next_in<T_chord_find>(t);
+					define_note_if ::template next_ins<not_fixed, T_chord_find>(t);
+					define_iter    ::term(t);
+
+					extend_pred_if ::template peek_in<aug_peek, T_chord_find>(t);
+				};
+
+			// postcycle:
+
+				// augmented:
+
+					template<typename AST>
+					nik_ces void define_internal_augmented_tone(AST *t)
+						{ define_note_if::template prev_ins<right_closed, T_chord_find>(t); };
+
+					template<typename AST>
+					nik_ces void define_internal_augmented_not_tone(AST *t)
+					{
+						define_note    ::template next_in<T_chord_find>(t);
+						define_note_if ::template next_ins<right_open, T_chord_find>(t);
+						define_note_if ::template next_end<aug_tonic, T_chord_find>(t);
+					};
+
+					template<typename AST>
+					nik_ces void define_internal_augmented(AST *t)
+					{
+						define_iter::init(t, AST::Iterate::back);
+
+						if (t->interval.is_tone()) define_internal_augmented_tone     (t);
+						else                       define_internal_augmented_not_tone (t);
+
+						define_iter::term(t);
+					};
+
+				// minor:
+
+					template<typename AST>
+					nik_ces void define_internal_minor(AST *t)
+					{
+						define_iter    ::init(t, AST::Iterate::back);
+						define_note_if ::template next_ins<right_open, T_chord_find>(t);
+						define_iter    ::term(t);
+					};
+
+				template<typename AST>
+				nik_ces void define_internal_postcycle(AST *t)
+				{
+					if      (t->interval.is_augmented ()) define_internal_augmented (t);
+					else if (t->interval.is_minor     ()) define_internal_minor     (t);
+				};
+
+			// action:
+
+				template<typename AST>
+				nik_ces void define_internal_action(AST *t)
+				{
+					define_internal_precycle  (t);
+					define_internal_cycle     (t);
+					define_internal_postcycle (t);
+				};
+
+		// loop action:
+
+			template<typename AST>
+			nik_ces void define_loop_action(AST *t)
+			{
+				auto ni = t->get_predicate ();
+				auto mi = t->get_action    ();
+				auto li = t->get_mutate    ();
+				auto ki = t->iterate[AST::Iterate::loop]; // debugging, tone next (out).
+				auto ji = t->iterate[AST::Iterate::loop];
+
+				t->assembly_push_instr(name, AT::id, ni, mi, li, ki, ji);
+			}
+
+		// back action:
+
+			template<typename AST>
+			nik_ces void define_back_action(AST *t)
+			{
+				auto ni = t->get_action();
+				auto mi = t->get_mutate();
+				auto li = t->iterate[AST::Iterate::loop]; // debugging, tone next (out).
+
+				t->assembly_push_instr(name, AT::back, ni, mi, li);
+			}
 	};
 
 /***********************************************************************************************************************/
 
 // sift:
 
-	template<typename size_type>
+	template<typename SizeType>
 	struct T_chord_sift
 	{
-		nik_ces size_type name = AN::out_in_ins;
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
 
-		struct Ival { enum : size_type { out, in, ins, dimension }; };
+		using define_iter	= T_chord_define_iter    <size_type>;
+		using define_note	= T_chord_define_note    <size_type>;
+		using define_note_if	= T_chord_define_note_if <size_type>;
+		using extend_pred_if	= T_chord_extend_pred_if <size_type>;
+
+		using not_fixed		= T_chord_predicate_not_fixed;
+		using left_open		= T_chord_predicate_is_left_open;
+		using right_open	= T_chord_predicate_is_right_open;
+		using right_closed	= T_chord_predicate_is_right_closed;
+		using aug_tonic		= T_chord_predicate_is_augmented_tonic;
+		using aug_peek		= T_chord_predicate_is_augmented_peek;
+
+		nik_ces size_type name	= AN::sift;
+
+		struct Ival { enum : size_type { out, in, root = in, ins, dimension }; };
 		struct Sign { enum : size_type { out, in, end, ins, dimension }; };
+
+		// internal:
+
+			// precycle:
+
+				template<typename AST>
+				nik_ces void define_internal_precycle(AST *t)
+				{
+					define_iter    ::init(t, AST::Iterate::front);
+					define_note_if ::template next_in  < left_open , T_chord_sift >(t);
+					define_note_if ::template next_ins < left_open , T_chord_sift >(t);
+					define_note_if ::template prev_end < aug_tonic , T_chord_sift >(t);
+					define_iter    ::term(t);
+				};
+
+			// cycle:
+
+				template<typename AST>
+				nik_ces void define_internal_cycle(AST *t)
+				{
+					define_iter    ::init(t, AST::Iterate::loop);
+					define_note    ::template next_in<T_chord_sift>(t);
+					define_note_if ::template next_ins<not_fixed, T_chord_sift>(t);
+					define_iter    ::term(t);
+
+					extend_pred_if ::template peek_in<aug_peek, T_chord_sift>(t);
+				};
+
+			// postcycle:
+
+				// augmented:
+
+					template<typename AST>
+					nik_ces void define_internal_augmented_tone(AST *t)
+						{ define_note_if::template prev_ins<right_closed, T_chord_sift>(t); };
+
+					template<typename AST>
+					nik_ces void define_internal_augmented_not_tone(AST *t)
+					{
+						define_note    ::template next_in<T_chord_sift>(t);
+						define_note_if ::template next_ins<right_open, T_chord_sift>(t);
+						define_note_if ::template next_end<aug_tonic, T_chord_sift>(t);
+					};
+
+					template<typename AST>
+					nik_ces void define_internal_augmented(AST *t)
+					{
+						define_iter::init(t, AST::Iterate::back);
+
+						if (t->interval.is_tone()) define_internal_augmented_tone     (t);
+						else                       define_internal_augmented_not_tone (t);
+
+						define_iter::term(t);
+					};
+
+				// minor:
+
+					template<typename AST>
+					nik_ces void define_internal_minor(AST *t)
+					{
+						define_iter    ::init(t, AST::Iterate::back);
+						define_note_if ::template next_ins<right_open, T_chord_sift>(t);
+						define_iter    ::term(t);
+					};
+
+				template<typename AST>
+				nik_ces void define_internal_postcycle(AST *t)
+				{
+					if      (t->interval.is_augmented ()) define_internal_augmented (t);
+					else if (t->interval.is_minor     ()) define_internal_minor     (t);
+				};
+
+			// action:
+
+				template<typename AST>
+				nik_ces void define_internal_action(AST *t)
+				{
+					define_internal_precycle  (t);
+					define_internal_cycle     (t);
+					define_internal_postcycle (t);
+				};
+
+		// loop action:
+
+			template<typename AST>
+			nik_ces void define_loop_action(AST *t)
+			{
+				auto ni = t->get_predicate ();
+				auto mi = t->get_action    ();
+				auto li = t->get_mutate    ();
+				auto ki = t->iterate[AST::Iterate::loop]; // debugging, tone next (out).
+				auto ji = t->iterate[AST::Iterate::loop];
+
+				t->assembly_push_instr(name, AT::id, ni, mi, li, ki, ji);
+			}
+
+		// back action:
+
+			template<typename AST>
+			nik_ces void define_back_action(AST *t)
+			{
+				auto ni = t->get_action();
+				auto mi = t->get_mutate();
+				auto li = t->iterate[AST::Iterate::loop]; // debugging, tone next (out).
+
+				t->assembly_push_instr(name, AT::back, ni, mi, li);
+			}
 	};
 
 /***********************************************************************************************************************/

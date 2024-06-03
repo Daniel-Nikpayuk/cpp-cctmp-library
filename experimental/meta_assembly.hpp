@@ -51,6 +51,93 @@
 
 /***********************************************************************************************************************/
 
+	// data structure internal representation is as follows:
+
+		// To represent a pair, the first element is the location in the variadic pack.
+		// the second element is the adjacent location in the variadic pack.
+		// the second element, when referring to another pair holds a "pointer" (T_pack<index>)
+		// to the next pair.
+
+		// when you cons, you check if the second arg is a pair. If so, add the pointer.
+
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(define (main m n)               "
+			"  (define (range k l)            "
+			"    (if (= m k) l                " 
+			"      (range (- k 1) (cons k l)) "
+			"    )                            "
+			"  )                              "
+			"  (list-to-tuple (range n nil))  "
+			")                                "
+		);
+	}
+
+/***********************************************************************************************************************/
+
+	constexpr auto _Nil_ = U_store_T<void>;
+
+	struct T_cons
+	{
+		template<typename T0, typename T1>
+		constexpr static auto result(T0 v0, T1 v1) { return pair<T0, T1>{v0, v1}; }
+
+	}; constexpr auto _Cons_ = U_store_T<T_cons>;
+
+	struct T_car
+	{
+		template<typename P>
+		constexpr static auto result(P p) { return p.v0; }
+
+	}; constexpr auto _Car_ = U_store_T<T_car>;
+
+	constexpr auto _hustle_test_func()
+	{
+		return source
+	        (
+			"(define (main n)     "
+			"  (Car (Cons n Nil)) "
+			")                    "
+
+			, binding( "Nil"  , _Nil_  )
+			, binding( "Cons" , _Cons_ )
+			, binding( "Car"  , _Car_  )
+		);
+	}
+
+/***********************************************************************************************************************/
+
+	//	return source // direct style:		// continuation passing style:
+	//	(
+	//		"(define (main n)         "		"(define (main& n k)          "
+	//		"  ((if (= n 0) + *) 2 3) "		"  (=& n 0 (lambda (b)        "
+	//		")                        "		"    (if& b +& *& (lambda (f) "
+	//	);                                 		"      (f 2 3 k))))))         "
+
+			// works:
+
+			//	"(define (main n)              "
+			//	"  (define x (if (= n 0) 2 3)) "
+			//	"  x                           "
+			//	")                             "
+
+			// doesn't yet work:
+
+			//	"(define (main n)              "
+			//	"  (define x (if (= n 0) + *)) "
+			//	"  (x 2 3)                     "
+			//	")                             "
+
+			//	"(define (main n)              "
+			//	"  (define x 2)                "
+			//	"  (define y n)                "
+			//	"  x                           "
+			//	")                             "
+
+/***********************************************************************************************************************/
+
 	template<typename T>
 	constexpr auto sqrt_iter(T x, T guess) -> T
 	{
@@ -104,4 +191,78 @@
 		};
 
 	}; constexpr auto U_val = U_store_T<T_val>;
+
+/***********************************************************************************************************************/
+
+// atomic (7, 8?):
+
+	// literal (boolean):
+
+		// line   5 - AN::id         AT::id          0   0   0   0   0   1
+		// line   6 - AN::type       AT::boolean     0   0   0   0   0   1
+		// line   7 - AN::literal    AT::first       1   0   0   0   0   1
+		// line   8 - AN::halt       AT::first       0   0   0   0   0   1
+
+	// literal (character):
+
+		// line   5 - AN::id         AT::id          0   0   0   0   0   1
+		// line   6 - AN::type       AT::character   0   0   0   0   0   1
+		// line   7 - AN::literal    AT::first      99   0   0   0   0   1
+		// line   8 - AN::halt       AT::first       0   0   0   0   0   1
+
+	// literal (n number):
+
+		// line   5 - AN::id         AT::id          0   0   0   0   0   1
+		// line   6 - AN::type       AT::n_number    0   0   0   0   0   1
+		// line   7 - AN::literal    AT::first       5   0   0   0   0   1
+		// line   8 - AN::halt       AT::first       0   0   0   0   0   1
+
+	// literal (r number):
+
+		// line   5 - AN::id         AT::id          0   0   0   0   0   1
+		// line   6 - AN::type       AT::r_number    0   0   0   0   0   1
+		// line   7 - AN::floating   AT::first       5   0  10   0   0   1
+		// line   8 - AN::halt       AT::first       0   0   0   0   0   1
+
+	// literal (t number):
+
+		// line   5 - AN::id         AT::id          0   0   0   0   0   1
+		// line   6 - AN::type       AT::push        0   0   0   0   0   1
+		// line   7 - AN::literal    AT::first       5   0   0   0   0   1
+		// line   8 - AN::halt       AT::first       0   0   0   0   0   1
+
+	// variable (universe):
+
+		// line   7 - AN::id         AT::id          0   0   0   0   0   1
+		// line   8 - AN::arg        AT::select      1   0   0   0   0   1
+		// line   9 - AN::arg        AT::drop        0   0   0   0   0   1
+		// line  10 - AN::halt       AT::first       0   0   0   0   0   1
+
+	// variable (import):
+
+		// line   7 - AN::id         AT::id          0   0   0   0   0   1
+		// line   8 - AN::lookup     AT::first       0   0   0   0   0   1
+		// line   9 - AN::halt       AT::first       0   0   0   0   0   1
+
+	// assign ?
+
+// compound:
+
+	// replace ?
+
+	// pair:
+
+	// type:
+
+	// apply:
+
+	// bind:
+
+	// if then else:
+
+	// define:
+
+	// define type:
+
+/***********************************************************************************************************************/
 

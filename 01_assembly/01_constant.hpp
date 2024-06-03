@@ -29,6 +29,17 @@ namespace assembly {
 
 /***********************************************************************************************************************/
 
+// none:
+
+	template<auto... filler>
+	struct T_assembly<AN::halt, AT::none, filler...>
+	{
+		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>
+		nik_ces auto result(Ts... vs) { } // do nothing.
+	};
+
+/***********************************************************************************************************************/
+
 // first:
 
 	template<auto... filler>

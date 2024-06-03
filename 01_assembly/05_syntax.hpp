@@ -520,6 +520,13 @@ namespace assembly {
 			nik_ce void assembly_action(Ts... vs)
 				{ assembly::assembly_action<name, note>(&contr, vs...); }
 
+			nik_ce void assembly_id_begin()
+				{ assembly::assembly_action<AAN::id, AAT::begin>(&contr); }
+
+			template<typename... Ts>
+			nik_ce void assembly_push_instr(Ts... vs)
+				{ assembly::assembly_action<AAN::push, AAT::instr>(&contr, vs...); }
+
 			nik_ce void first_return() { assembly_action<AAN::id, AAT::end>(AT::first); }
 
 		// source:
