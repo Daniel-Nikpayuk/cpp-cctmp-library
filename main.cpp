@@ -58,7 +58,7 @@
 
 	using chord_grammar			= chord::T_chord_grammar;
 	using hustle_grammar			= hustle::T_hustle_grammar;
-	constexpr auto static_grammar		= U_store_T<hustle_grammar>;
+	constexpr auto static_grammar		= U_store_T<chord_grammar>;
 
 /***********************************************************************************************************************/
 
@@ -107,6 +107,80 @@
 
 // chord:
 
+/*
+	constexpr auto _chord_test_func()
+	{
+		return source
+		(
+			"main in end format                          ;"
+
+			"vars:                                       ;"
+			"  declare arr_pr                            ;"
+
+			"defs:                                       ;"
+			"  arr_pr # repeat[1]{@ @|print * @|} [,) <> ;"
+
+			"body:                                       ;"
+			"  . = arr_pr !in end format                 ;"
+			"  return _                                  ;"
+
+			, binding("print", _print_)
+		);
+	}
+*/
+
+/*
+	constexpr auto _chord_print_v0()
+	{
+		return source
+		(
+			"main in end format                          ;"
+
+			"vars:                                       ;"
+			"  declare arr_pr                            ;"
+
+			"defs:                                       ;"
+			"  arr_pr # repeat[1]{@ @|print * @|} [,) <> ;"
+
+			"body:                                       ;"
+			"  . = arr_pr in end format                  ;"
+			"  return _                                  ;"
+
+			, binding("print", _print_)
+		//	, binding("format", strlit_type{"%d, "})
+		);
+	}
+*/
+
+/***********************************************************************************************************************/
+
+// print:
+
+	// v0:
+
+	//	template<typename SizeType>
+	//	constexpr void unit_test_chord_print_v0()
+	//	{
+	//		using chord_rtn_type = int const;
+	//		using chord_arr_type = cctmp::sequence<int , 5>;
+
+	//		chord_arr_type s0({ 1, 2, 3, 4, 5 });
+
+	//		using T_chord_fast_apply = chord::T_apply
+	//		<
+	//		//	contr_object_chord_sum_v0<SizeType>,
+	//			_chord_print_v0, cctmp::null_env, chord_rtn_type
+	//		>;
+
+	//		T_chord_fast_apply::result(s0.cbegin(), s0.cend(), strlit_type{"%d, "});
+	//		printf("\n");
+	//	}
+
+/***********************************************************************************************************************/
+
+		//	"  chord_f # fold[1]{add|@ @||} <> [,)             ;"
+		//	"  chord_f # fold[2]{add * @|multiply||} <> (,] (] ;"
+
 	constexpr auto _chord_test_func()
 	{
 		return source
@@ -117,8 +191,7 @@
 			"  declare chord_f                                 ;"
 
 			"defs:                                             ;"
-		//	"  chord_f # fold[1]{add|@ @||} <> [,)             ;"
-			"  chord_f # fold[2]{add * @|multiply||} <> (,] (] ;"
+			"  chord_f # fold[2]{add * @|multiply||} <> [,] [] ;"
 
 			"body:                                             ;"
 			"  . = chord_f !out in end in1                     ;"
@@ -130,7 +203,9 @@
 
 	int main(int argc, char *argv[])
 	{
-		using chord_size_type = int const*;
+	//	unit_test_chord_print_v0<gindex_type>();
+
+		using chord_size_type = int;// const*;
 		using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
 		using chord_arr_type  = sequence<int , 5>;
 
@@ -140,6 +215,7 @@
 
 		int val = 0;
 
+	//	T_chord_apply::result(&val, s0.cbegin(), s0.cend());
 		T_chord_apply::result(&val, s0.cbegin(), s0.cend() - 1, s0.cbegin());
 		printf("%d\n", val);
 	//	fileput::print_assembly_controller<chord::metapile<_chord_test_func, null_env>>();

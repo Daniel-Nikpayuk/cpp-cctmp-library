@@ -356,8 +356,8 @@ namespace assembly {
 
 				NIK_ASSEMBLY_TEMPLATE(c, ki)
 					::NIK_ASSEMBLY_RESULT_4TS(c, ki, l, t, r,
-						T_store_U<LUs>..., Out*, End, T_store_U<IUs>*...)
-							(lvs..., &out, end, &ins...); // next
+						T_store_U<LUs>..., Out*, End*, T_store_U<IUs>*...)
+							(lvs..., &out, &end, &ins...); // next
 			}
 
 			return NIK_ASSEMBLY_TEMPLATE_2WS(c, i, p0, p1)
@@ -448,8 +448,8 @@ namespace assembly {
 
 				NIK_ASSEMBLY_TEMPLATE(c, ki)
 					::NIK_ASSEMBLY_RESULT_5TS(c, ki, l, t, r,
-						T_store_U<LUs>..., Out*, In*, End, T_store_U<IUs>*...)
-							(lvs..., &out, &in, end, &ins...); // next
+						T_store_U<LUs>..., Out*, In*, End*, T_store_U<IUs>*...)
+							(lvs..., &out, &in, &end, &ins...); // next
 			}
 
 			return NIK_ASSEMBLY_TEMPLATE_2WS(c, i, p0, p1)
@@ -645,8 +645,8 @@ namespace assembly {
 								(lv, lvs..., out, in, ins...); // mutate
 
 					NIK_ASSEMBLY_TEMPLATE(c, ki)
-						::NIK_ASSEMBLY_RESULT_3TS(c, ki, l, t, r, LT, T_store_U<LUs>..., Out)
-							(lv, lvs..., out); // tone next
+						::NIK_ASSEMBLY_RESULT_3TS(c, ki, l, t, r, LT, T_store_U<LUs>..., Out*)
+							(lv, lvs..., &out); // tone next
 
 					match = true;
 					break;
@@ -654,8 +654,8 @@ namespace assembly {
 
 				NIK_ASSEMBLY_TEMPLATE(c, ji)
 					::NIK_ASSEMBLY_RESULT_6TS(c, ji, l, t, r,
-						LT, T_store_U<LUs>..., Out, In, End, T_store_U<IUs>...)
-							(lv, lvs..., out, in, end, ins...); // next
+						LT, T_store_U<LUs>..., Out*, In*, End*, T_store_U<IUs>*...)
+							(lv, lvs..., &out, &in, &end, &ins...); // next
 			}
 
 			return NIK_ASSEMBLY_TEMPLATE_2WS(c, i, p0, p1)
@@ -701,8 +701,8 @@ namespace assembly {
 							(lv, lvs..., out, in, ins...); // mutate
 
 				NIK_ASSEMBLY_TEMPLATE_2WS(c, li, p0, p1)
-					::NIK_ASSEMBLY_RESULT_3TS(c, li, l, t, r, LT, T_store_U<LUs>..., Out)
-						(lv, lvs..., out); // tone next
+					::NIK_ASSEMBLY_RESULT_3TS(c, li, l, t, r, LT, T_store_U<LUs>..., Out*)
+						(lv, lvs..., &out); // tone next
 			}
 
 			return NIK_ASSEMBLY_TEMPLATE_2WS(c, i, p0, p1)
@@ -757,14 +757,14 @@ namespace assembly {
 								(lvs..., out, in, ins...); // mutate
 
 					NIK_ASSEMBLY_TEMPLATE(c, ki)
-						::NIK_ASSEMBLY_RESULT_2TS(c, ki, l, t, r, T_store_U<LUs>..., Out)
-							(lvs..., out); // tone next
+						::NIK_ASSEMBLY_RESULT_2TS(c, ki, l, t, r, T_store_U<LUs>..., Out*)
+							(lvs..., &out); // tone next
 				}
 
 				NIK_ASSEMBLY_TEMPLATE(c, ji)
 					::NIK_ASSEMBLY_RESULT_5TS(c, ji, l, t, r,
-						T_store_U<LUs>..., Out, In, End, T_store_U<IUs>...)
-							(lvs..., out, in, end, ins...); // next
+						T_store_U<LUs>..., Out*, In*, End*, T_store_U<IUs>*...)
+							(lvs..., &out, &in, &end, &ins...); // next
 			}
 
 			return NIK_ASSEMBLY_TEMPLATE_2WS(c, i, p0, p1)

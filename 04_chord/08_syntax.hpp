@@ -25,360 +25,6 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// iterator:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename SizeType>
-	struct T_chord_iterator
-	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		size_type contr_pos;
-		bool side;
-
-		nik_ce T_chord_iterator() : contr_pos{}, side{} { }
-		nik_ce T_chord_iterator(csize_type p, const bool s) : contr_pos{p}, side{s} { }
-
-		// pos:
-
-			nik_ce auto get_contr_pos() const { return contr_pos; }
-			nik_ce void set_contr_pos(csize_type p) { contr_pos = p; }
-
-		// side:
-
-			nik_ce auto get_side() const { return side; }
-			nik_ce void set_side(const bool s) { side = s; }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// interval:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename SizeType>
-	struct T_chord_interval
-	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		struct Ival		{ enum : size_type { tone, root, dimension }; };
-		struct Point		{ enum : size_type { fixed, closed, open, dimension }; };
-		struct Iter		{ enum : size_type { next, prev, dimension }; };
-
-		using iter_type		= T_chord_iterator<size_type>;
-		using iter_seq		= sequence<iter_type, static_cast<size_type>(Iter::dimension)>;
-
-		size_type ival;
-		size_type left;
-		size_type right;
-
-		iter_seq note_iter;
-		iter_seq tonic_iter;
-
-		nik_ce T_chord_interval() :
-			ival{Ival::tone}, left{Point::fixed}, right{Point::fixed}
-				{ }
-
-		nik_ce bool is_tone   () const { return (ival == Ival::tone); }
-		nik_ce bool is_root   () const { return (ival == Ival::root); }
-		nik_ce bool has_tonic () const { return (ival == Ival::root); }
-
-		// ival:
-
-			nik_ce auto not_left_fixed  () const { return (left  != Point::fixed); }
-			nik_ce auto not_right_fixed () const { return (right != Point::fixed); }
-			nik_ce auto not_fixed       () const { return (not_left_fixed() && not_right_fixed()); }
-
-			nik_ce auto is_left_open    () const { return (left  == Point::open); }
-			nik_ce auto is_right_open   () const { return (right == Point::open); }
-			nik_ce auto is_right_closed () const { return (right == Point::closed); }
-
-			nik_ce void set_left  (csize_type p) { left = p; }
-			nik_ce void set_right (csize_type p) { right = p; }
-
-			nik_ce void set_left_fixed   () { set_left(Point::fixed);   }
-			nik_ce void set_left_closed  () { set_left(Point::closed);  }
-			nik_ce void set_left_open    () { set_left(Point::open);    }
-			nik_ce void set_right_fixed  () { set_right(Point::fixed);  }
-			nik_ce void set_right_closed () { set_right(Point::closed); }
-			nik_ce void set_right_open   () { set_right(Point::open);   }
-
-		// note:
-
-			nik_ce void push_note(csize_type p, const bool s = false)
-				{ note_iter.push(iter_type{p, s}); }
-
-		// tonic:
-
-			nik_ce void push_tonic(csize_type p, const bool s = false)
-			{
-				ival = Ival::root;
-				tonic_iter.push(iter_type{p, s});
-			}
-
-		// iter:
-
-			nik_ce bool is_note_reversible  () const { return (note_iter.size() == 2); }
-			nik_ce bool is_tonic_reversible () const { return (tonic_iter.size() == 2); }
-	};
-
-/***********************************************************************************************************************/
-
-// intervals:
-
-	// major: all intervals right open, tone notes align centre (with tonic note).
-	// augmented: root interval right open, at least one tone interval right closed.
-	//            right closed tone notes align left (of tonic note).
-			// there are 3 algorithm dispatch cases:
-				// 1) tonic: tonic note is reversible.
-					// a) move tonic note prev.
-					// b) march (move) root and tone notes.
-					// c) update (move) root and tone notes.
-					// d) update tonic note next.
-				// 2) tone: tonic note is not reversible,
-				//          but all left aligned tone notes are reversible.
-					// a) march root and tone notes.
-					// b) backdate (move) left aligned tone notes.
-				// 3) peek: tonic note is not reversible,
-				//          and at least one left aligned tone note is not reversible.
-					// a) peekmarch (move) root and tone notes.
-					// b) update root and tone notes.
-	// diminished: all intervals right closed, tone notes align centre (with tonic note).
-	// minor: root interval right closed, at least one tone interval right open.
-	//        right open tone notes align right (of tonic note).
-
-	template<typename SizeType, SizeType Size>
-	struct T_chord_intervals : public sequence<T_chord_interval<SizeType>, Size>
-	{
-		using base		= sequence<T_chord_interval<SizeType>, Size>;
-		using interval_type	= typename base::type;
-		using size_type		= typename interval_type::size_type;
-		using csize_type	= typename interval_type::csize_type;
-		using Iter		= typename interval_type::Iter;
-
-		struct Augmented	{ enum : size_type { tonic, tone, peek, dimension }; };
-		struct Chord		{ enum : size_type { none, major, augmented, diminished, minor, dimension }; };
-
-		size_type augmented;
-		size_type init;
-		size_type chord;
-		bool has_left_open;
-		bool is_tone_augmented;
-
-		nik_ce T_chord_intervals() :
-			base{}, augmented{Augmented::peek}, init{Chord::none}, chord{Chord::none},
-			has_left_open{}, is_tone_augmented{}
-				{ }
-
-		// reset:
-
-			nik_ce void reset()
-			{
-				for (auto k = base::begin(); k != base::end(); ++k)
-				{
-					k->note_iter.clear();
-					k->tonic_iter.clear();
-				}
-
-				base::clear();
-
-				augmented         = Augmented::peek;
-				init              = Chord::none;
-				chord             = Chord::none;
-				has_left_open     = false;
-				is_tone_augmented = false;
-			}
-
-		// ival (random access):
-
-			nik_ce auto not_fixed(csize_type n) const
-				{ return base::operator[](n).not_fixed(); }
-
-			nik_ce auto is_left_open(csize_type n) const
-				{ return base::operator[](n).is_left_open(); }
-
-			nik_ce auto is_right_open(csize_type n) const
-				{ return base::operator[](n).is_right_open(); }
-
-			nik_ce auto is_right_closed(csize_type n) const
-				{ return base::operator[](n).is_right_closed(); }
-
-		// ival (last):
-
-			nik_ce void set_fixed()
-			{
-				base::last()->set_left_fixed();
-				base::last()->set_right_fixed();
-			}
-
-			nik_ce void set_left_closed () { base::last()->set_left_closed(); }
-			nik_ce void set_left_open   () { base::last()->set_left_open(); has_left_open = true; }
-
-			nik_ce void set_init_closed()
-			{
-				base::last()->set_right_closed();
-				set_init(Chord::diminished);
-			}
-
-			nik_ce void set_init_open()
-			{
-				base::last()->set_right_open();
-				set_init(Chord::major);
-				update_tone_augmented();
-			}
-
-			nik_ce void set_root_closed()
-			{
-				base::last()->set_right_closed();
-				set_chord(Chord::diminished);
-			}
-
-			nik_ce void set_root_open()
-			{
-				base::last()->set_right_open();
-				set_chord(Chord::major);
-			}
-
-			nik_ce void set_rest_closed()
-			{
-				base::last()->set_right_closed();
-				update_chord(Chord::diminished);
-			}
-
-			nik_ce void set_rest_open()
-			{
-				base::last()->set_right_open();
-				update_chord(Chord::major);
-				update_tone_augmented();
-			}
-
-			nik_ce void push_note(csize_type p, const bool s = false)
-				{ base::last()->push_note(p, s); }
-
-			nik_ce void push_tonic()
-			{
-				const auto & next = base::last()->note_iter[Iter::next];
-				const auto & prev = base::last()->note_iter[Iter::prev];
-
-				base::last()->push_tonic(next.get_contr_pos(), next.get_side());
-				base::last()->push_tonic(prev.get_contr_pos(), prev.get_side());
-			}
-
-		// iter:
-
-			// note:
-
-				nik_ce auto note_iter(csize_type n, csize_type m) const
-					{ return base::operator[](n).note_iter[m]; }
-
-				nik_ce auto note_iter(csize_type m) const
-					{ return note_iter(base::max(), m); }
-
-				nik_ce auto note_contr_pos(csize_type n, csize_type m) const
-					{ return note_iter(n, m).get_contr_pos(); }
-
-				nik_ce auto note_contr_pos(csize_type m) const
-					{ return note_iter(m).get_contr_pos(); }
-
-			// tonic:
-
-				nik_ce auto tonic_iter(csize_type n, csize_type m) const
-					{ return base::operator[](n).tonic_iter[m]; }
-
-				nik_ce auto tonic_iter(csize_type m) const
-					{ return tonic_iter(base::max(), m); }
-
-				nik_ce auto tonic_contr_pos(csize_type n, csize_type m) const
-					{ return tonic_iter(n, m).get_contr_pos(); }
-
-				nik_ce auto tonic_contr_pos(csize_type m) const
-					{ return tonic_iter(m).get_contr_pos(); }
-
-				nik_ce auto is_tonic_reversible(csize_type n) const
-					{ return base::operator[](n).is_tonic_reversible(); }
-
-		// augmented:
-
-			nik_ce auto is_tonic () const { return (augmented == Augmented::tonic); }
-			nik_ce auto is_tone  () const { return (augmented == Augmented::tone); }
-			nik_ce auto is_peek  () const { return (augmented == Augmented::peek); }
-
-			nik_ce void update_tone_augmented()
-				{ is_tone_augmented = is_tone_augmented && base::last()->is_note_reversible(); }
-
-			nik_ce void resolve_augmented(csize_type root)
-			{
-				if      (is_tonic_reversible(root)) augmented = Augmented::tonic;
-				else if (is_tone_augmented        ) augmented = Augmented::tone;
-				else                                augmented = Augmented::peek;
-			}
-
-		// init:
-
-			nik_ce void set_init(csize_type n) { init = n; }
-
-		// chord:
-
-			nik_ce auto is_major      () const { return (chord == Chord::major); }
-			nik_ce auto is_augmented  () const { return (chord == Chord::augmented); }
-			nik_ce auto is_diminished () const { return (chord == Chord::diminished); }
-			nik_ce auto is_minor      () const { return (chord == Chord::minor); }
-
-			nik_ce void set_chord(csize_type n) { chord = n; }
-
-			nik_ce void update_chord(csize_type n)
-			{
-				if      (is_diminished()) update_chord_diminished(n);
-				else if (is_major())      update_chord_major(n);
-			}
-
-			nik_ce void update_chord_diminished(csize_type n)
-				{ if (n != Chord::diminished) chord = Chord::minor; }
-
-			nik_ce void update_chord_major(csize_type n)
-				{ if (n != Chord::major) chord = Chord::augmented; }
-
-			nik_ce void resolve_chord(csize_type root)
-			{
-				update_chord(init);
-
-				if (is_augmented()) resolve_augmented(root);
-			}
-
-		// next:
-
-			nik_ce auto is_augmented_tonic () const { return is_augmented() && is_tonic(); }
-			nik_ce auto is_augmented_peek  () const { return is_augmented() && is_peek(); }
-
-			nik_ce auto has_left_next      () const { return has_left_open; }
-			nik_ce auto has_left_prev      () const { return is_augmented_tonic(); }
-
-			nik_ce auto has_right_action() const
-			{
-				if (is_augmented()) return not is_tone  ();
-				else                return not is_major ();
-			}
-
-			nik_ce auto has_right_next() const
-			{
-				if (is_augmented()) return not is_tone  ();
-				else                return     is_minor ();
-			}
-
-			nik_ce auto has_right_prev() const { return is_augmented() && is_tone(); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // tree:
 
 /***********************************************************************************************************************/
@@ -402,7 +48,7 @@ namespace chord {
 		struct ChordEntry	{ enum : size_type { label = ModelEntry::dimension, jump, dimension }; };
 		struct JumpEntry	{ enum : size_type { pos   = ModelEntry::init, dimension }; };
 		struct Routine		{ enum : size_type { combine, action, mutate, predicate, dimension }; };
-		struct Iterate		{ enum : size_type { front, loop, back, dimension }; };
+		struct Iterate		{ enum : size_type { preloop, loop, postloop, cond, dimension }; };
 		struct Memoize		{ enum : size_type { inc, dec, dimension }; };
 
 		using routine_seq	= sequence<size_type, static_cast<size_type>(Routine::dimension)>;
@@ -410,6 +56,7 @@ namespace chord {
 		using memoize_seq	= sequence<size_type, static_cast<size_type>(Memoize::dimension)>;
 		using interval_seq	= T_chord_intervals<size_type, model_base::length>; // make size independent?
 		using Iter		= typename interval_seq::Iter;
+		using Ival		= typename interval_seq::Ival;
 
 		model_type jump;
 		routine_seq routine;
@@ -639,119 +286,121 @@ namespace chord {
 
 		// interval:
 
-			template<typename Prog>
-			nik_ce void resolve_interval() { interval.resolve_chord(Prog::Ival::root); }
+		//	template<typename Prog>
+		//	nik_ce void resolve_interval() { interval.resolve_chord(Prog::Ival::root); }
 
 		// internal:
 
-			template<typename Prog>
-			nik_ce void define_internal()
-			{
-				Prog::define_internal_action(this);
-				internal_defs_end();
-			}
+		//	template<typename Prog>
+		//	nik_ce void define_internal()
+		//	{
+		//		Prog::define_internal_action(this);
+		//		internal_defs_end();
+		//	}
 
 		// cycle:
 
-			template<typename Prog>
-			nik_ce void define_cycle()
-			{
-				define_cycle_before      ();
-				define_cycle_loop<Prog>  ();
-				define_cycle_after<Prog> ();
-				interval.reset           ();
-			}
+		//	template<typename Prog>
+		//	nik_ce void define_cycle()
+		//	{
+		//		define_cycle_before      ();
+		//		define_cycle_loop<Prog>  ();
+		//		define_cycle_after<Prog> ();
+		//		interval.reset           ();
+		//	}
 
 			// before:
 
-				nik_ce void define_cycle_before()
-				{
-					auto b = interval.has_left_next() || interval.has_left_prev();
-					auto s = base::verse.size();
+			//	nik_ce void define_cycle_before()
+			//	{
+			//		auto b = interval.has_left_next() || interval.has_left_prev();
+			//		auto s = base::verse.size();
 
-					if (b) define_cycle_front();
-					base::assembly_push_instr(AN::arg, AT::select, s);
-				}
+			//		if (b) define_cycle_front();
+			//		base::assembly_push_instr(AN::arg, AT::select, s);
+			//	}
 
-				nik_ce void define_cycle_front()
-				{
-					auto ni = iterate[Iterate::front];
+			//	nik_ce void define_cycle_front()
+			//	{
+			//		auto ni = iterate[Iterate::front];
 
-					base::assembly_push_instr(AN::cycle, AT::front, ni);
-				}
+			//		base::assembly_push_instr(AN::cycle, AT::front, ni);
+			//	}
 
 			// loop:
 
-				template<typename Prog>
-				nik_ce void define_cycle_loop() { Prog::define_loop_action(this); }
+			//	template<typename Prog>
+			//	nik_ce void define_cycle_loop() { Prog::define_loop_action(this); }
 
 			// after:
 
-				template<typename Prog>
-				nik_ce void define_cycle_after()
-				{
-					auto a = interval.has_right_action();
-					auto b = interval.has_right_next() || interval.has_right_prev();
-					auto s = base::verse.size();
+			//	template<typename Prog>
+			//	nik_ce void define_cycle_after()
+			//	{
+			//		auto a = interval.has_right_action();
+			//		auto b = interval.has_right_next() || interval.has_right_prev();
+			//		auto s = base::verse.size();
 
-					if (a) Prog::define_back_action(this);
-					if (b) define_cycle_back_next();
-					base::assembly_push_instr(AN::arg, AT::drop, s);
-					base::first_return();
-				}
+			//		if (a) Prog::define_back_action(this);
+			//		if (b) define_cycle_back_next();
+			//		base::assembly_push_instr(AN::arg, AT::drop, s);
+			//		base::first_return();
+			//	}
 
-				nik_ce void define_cycle_back_next()
-				{
-					auto ni = iterate[Iterate::back];
+			//	nik_ce void define_cycle_back_next()
+			//	{
+			//		auto ni = iterate[Iterate::back];
 
-					base::assembly_push_instr(AN::cycle, AT::back, ni);
-				}
+			//		base::assembly_push_instr(AN::cycle, AT::back, ni);
+			//	}
 
 		// functional:
 
 			nik_ce void define_repeat()
 			{
-				using Prog = T_chord_repeat<size_type>;
+			//	using Prog = T_chord_repeat<size_type>;
 
-				resolve_interval<Prog>();
-				define_internal<Prog>();
-				define_cycle<Prog>();
+			//	define_internal<Prog>();
+			//	auto s = base::verse.size();
+			//	base::assembly_push_instr(AN::arg, AT::select, s);
+			//	define_cycle_loop<Prog>(); // debugging.
+			//	interval.reset();
 			}
 
 			nik_ce void define_map()
 			{
-				using Prog = T_chord_map<size_type>;
+			//	using Prog = T_chord_map<size_type>;
 
-				resolve_interval<Prog>();
-				define_internal<Prog>();
-				define_cycle<Prog>();
+			//	resolve_interval<Prog>();
+			//	define_internal<Prog>();
+			//	define_cycle<Prog>();
 			}
 
 			nik_ce void define_fold()
 			{
-				using Prog = T_chord_fold<size_type>;
+				T_fold_internal_routine<size_type>::define(this);
+				internal_defs_end();
 
-				resolve_interval<Prog>();
-				define_internal<Prog>();
-				define_cycle<Prog>();
+				T_fold_construct_routine<size_type>::define(this);
+				interval.reset();
 			}
 
 			nik_ce void define_find()
 			{
-				using Prog = T_chord_find<size_type>;
+			//	using Prog = T_chord_find<size_type>;
 
-				resolve_interval<Prog>();
-				define_internal<Prog>();
-				define_cycle<Prog>();
+			//	resolve_interval<Prog>();
+			//	define_internal<Prog>();
+			//	define_cycle<Prog>();
 			}
 
 			nik_ce void define_sift()
 			{
-				using Prog = T_chord_sift<size_type>;
+			//	using Prog = T_chord_sift<size_type>;
 
-				resolve_interval<Prog>();
-				define_internal<Prog>();
-				define_cycle<Prog>();
+			//	resolve_interval<Prog>();
+			//	define_internal<Prog>();
+			//	define_cycle<Prog>();
 			}
 	};
 

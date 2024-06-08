@@ -163,15 +163,43 @@ namespace chord {
 
 				// combine:
 
-					cyc_combine,
-					cyc_combine_rest2,
-					cyc_combine_rest1,
+					// fold:
+
+						cyc_fold_combine,
+						cyc_fold_combine_rest2,
+						cyc_fold_combine_rest1,
 
 				// action:
 
-					cyc_action,
-					cyc_action_defs,
-					cyc_action_rest,
+					// repeat:
+
+						cyc_repeat_action,
+						cyc_repeat_action_defs,
+						cyc_repeat_action_rest,
+
+					// map:
+
+						cyc_map_action,
+						cyc_map_action_defs,
+						cyc_map_action_rest,
+
+					// fold:
+
+						cyc_fold_action,
+						cyc_fold_action_defs,
+						cyc_fold_action_rest,
+
+					// find:
+
+						cyc_find_action,
+						cyc_find_action_defs,
+						cyc_find_action_rest,
+
+					// sift:
+
+						cyc_sift_action,
+						cyc_sift_action_defs,
+						cyc_sift_action_rest,
 
 				// mutate:
 
@@ -180,30 +208,35 @@ namespace chord {
 					cyc_mutate_rest2,
 					cyc_mutate_rest1,
 
-				// predicate:
+				// loop pred(icate):
 
-					cyc_predicate,
-					cyc_predicate_defs,
-					cyc_predicate_rest2,
-					cyc_predicate_rest1,
+					cyc_loop_pred,
+					cyc_loop_pred_defs,
+					cyc_loop_pred_rest2,
+					cyc_loop_pred_rest1,
 
 				// interval:
 
-					cyc_ival_fixed,
+					cyc_tone_empty,
+					cyc_tone_fixed,
+					cyc_tone_match,
+
 					cyc_ival_left_closed,
 					cyc_ival_left_open,
-					cyc_ival_init_closed,
-					cyc_ival_init_open,
-					cyc_ival_root_closed,
-					cyc_ival_root_open,
-					cyc_ival_rest_closed,
-					cyc_ival_rest_open,
+					cyc_ival_right_closed,
+					cyc_ival_right_open,
+					cyc_pre_ival_right_closed,
+					cyc_pre_ival_right_open,
+					cyc_root_right_closed,
+					cyc_root_right_open,
+					cyc_post_root_right_closed,
+					cyc_post_root_right_open,
 
-					cyc_ival_repeat,
-					cyc_ival_map,
-					cyc_ival_fold,
-					cyc_ival_find,
-					cyc_ival_sift,
+					cyc_resolve_repeat,
+					cyc_resolve_map,
+					cyc_resolve_fold,
+					cyc_resolve_find,
+					cyc_resolve_sift,
 
 				// note (iterator):
 
@@ -248,300 +281,341 @@ namespace chord {
 
 		nik_ces auto source() { return generator::context_free_grammar
 		(
-			// start:
-
-				"Start",
-
-			// assembly:
-
-				"Start  -> type Param Params \\; Main Body              ;"
-				"       -> Main Body                                    ;"
-				"Params -> Param Params                                 ;"
-				"       -> empty                                        ;"
-				"Param  -> identifier                      : param_type ;"
-
-				// main:
-
-					"Main     -> MainBeg MainArgs OpType MainEnd               ;"
-					"MainBeg  -> identifier                      : main_name   ;"
-					"MainEnd  -> \\;                                           ;"
-					"MainArgs -> MainArg MainArgs                              ;"
-					"         -> empty                                         ;"
-					"MainArg  -> identifier                      : main_arg    ;"
-					"MainRet  -> \\;                             : main_return ;"
-
-					"OpType -> \\-\\> OpPort                  ;"
-					"       -> empty                          ;"
-					"OpPort -> identifier    : op_port_lookup ;"
-
-				// body:
-
-					"Body -> Block RecBlock : main_begin ;"
-
-				// block:
-
-					"Block    -> LabelBeg LabelEnd Instrs               ;"
-					"RecBlock -> Block RecBlock                         ;"
-					"         -> empty                    : main_end    ;"
-					"LabelBeg -> label                    : label_value ;"
-					"LabelEnd -> \\;                                    ;"
-
-				// instruction:
-
-					"Instrs      -> Instr RecInstr                                   ;"
-					"            -> return UnitVal MainRet                           ;"
-					"RecInstr    -> Instr RecInstr                                   ;"
-					"            -> GotoBeg GotoVal GotoEnd                          ;"
-					"            -> return UnitVal MainRet                           ;"
-					"            -> empty                                            ;"
-					"Instr       -> DecBeg DecArg DecArgs DecEnd                     ;"
-					"            -> DefBeg DefArg DefArgs DefEnd                     ;"
-					"            -> LeftVal RightInstr                               ;"
-					"            -> TestInstr BranchInstr                            ;"
-					"            -> ! SwapBeg \\= SubOp SwapArg SubArgs SwapEnd      ;"
-					"            -> VoidBeg SubOp SubArgs VoidEnd                    ;"
-					"LeftVal     -> identifier                          : left_value ;"
-					"            -> .                                   : left_copy  ;"
-					"RightInstr  -> ApplyBeg SubOp SubArgs ApplyEnd                  ;"
-					"            -> AssignBeg UnitVal AssignEnd                      ;"
-					"TestInstr   -> TestBeg SubOp SubArgs TestEnd                    ;"
-					"BranchInstr -> BranchBeg BranchVal BranchEnd                    ;"
-
-				// jump:
-
-					"GotoBeg   -> goto                      ;"
-					"GotoVal   -> identifier : goto_delay   ;"
-					"GotoEnd   -> \\;                       ;"
-					"BranchBeg -> branch                    ;"
-					"BranchVal -> identifier : branch_delay ;"
-					"BranchEnd -> \\;                       ;"
-
-				// declare:
-
-					"DecBeg  -> declare                     ;"
-					"DecArgs -> DecArg DecArgs              ;"
-					"        -> empty                       ;"
-					"DecArg  -> identifier     : declare_op ;"
-					"DecEnd  -> \\;                         ;"
-
-				// define:
-
-					"DefBeg  -> define         : define_begin ;"
-					"DefArgs -> DefArg DefArgs                ;"
-					"        -> empty                         ;"
-					"DefArg  -> identifier     : define_arg   ;"
-					"DefEnd  -> \\;            : define_end   ;"
-
-				// application:
-
-					"SwapBeg  -> identifier : swap_begin ;"
-					"SwapArg  -> empty      : swap_value ;"
-					"SwapEnd  -> \\;        : apply_end  ;"
-					"VoidBeg  -> void       : side_begin ;"
-					"VoidEnd  -> \\;        : apply_end  ;"
-					"ApplyBeg -> \\=                     ;"
-					"ApplyEnd -> \\;        : apply_end  ;"
-					"TestBeg  -> test       : left_copy  ;"
-					"TestEnd  -> \\;        : apply_end  ;"
-
-				// assignment:
-
-					"AssignBeg ->   #              ;"
-					"AssignEnd -> \\; : assign_end ;"
-
-				// argument:
+		// start:
+
+			"Start",
+
+		// assembly:
+
+			"Start  -> type Param Params \\; Main Body              ;"
+			"       -> Main Body                                    ;"
+			"Params -> Param Params                                 ;"
+			"       -> empty                                        ;"
+			"Param  -> identifier                      : param_type ;"
+
+			// main:
+
+				"Main     -> MainBeg MainArgs OpType MainEnd               ;"
+				"MainBeg  -> identifier                      : main_name   ;"
+				"MainEnd  -> \\;                                           ;"
+				"MainArgs -> MainArg MainArgs                              ;"
+				"         -> empty                                         ;"
+				"MainArg  -> identifier                      : main_arg    ;"
+				"MainRet  -> \\;                             : main_return ;"
+
+				"OpType -> \\-\\> OpPort                  ;"
+				"       -> empty                          ;"
+				"OpPort -> identifier    : op_port_lookup ;"
+
+			// body:
+
+				"Body -> Block RecBlock : main_begin ;"
+
+			// block:
+
+				"Block    -> LabelBeg LabelEnd Instrs               ;"
+				"RecBlock -> Block RecBlock                         ;"
+				"         -> empty                    : main_end    ;"
+				"LabelBeg -> label                    : label_value ;"
+				"LabelEnd -> \\;                                    ;"
+
+			// instruction:
+
+				"Instrs      -> Instr RecInstr                                   ;"
+				"            -> return UnitVal MainRet                           ;"
+				"RecInstr    -> Instr RecInstr                                   ;"
+				"            -> GotoBeg GotoVal GotoEnd                          ;"
+				"            -> return UnitVal MainRet                           ;"
+				"            -> empty                                            ;"
+				"Instr       -> DecBeg DecArg DecArgs DecEnd                     ;"
+				"            -> DefBeg DefArg DefArgs DefEnd                     ;"
+				"            -> LeftVal RightInstr                               ;"
+				"            -> TestInstr BranchInstr                            ;"
+				"            -> ! SwapBeg \\= SubOp SwapArg SubArgs SwapEnd      ;"
+				"            -> VoidBeg SubOp SubArgs VoidEnd                    ;"
+				"LeftVal     -> identifier                          : left_value ;"
+				"            -> .                                   : left_copy  ;"
+				"RightInstr  -> ApplyBeg SubOp SubArgs ApplyEnd                  ;"
+				"            -> AssignBeg UnitVal AssignEnd                      ;"
+				"TestInstr   -> TestBeg SubOp SubArgs TestEnd                    ;"
+				"BranchInstr -> BranchBeg BranchVal BranchEnd                    ;"
+
+			// jump:
+
+				"GotoBeg   -> goto                      ;"
+				"GotoVal   -> identifier : goto_delay   ;"
+				"GotoEnd   -> \\;                       ;"
+				"BranchBeg -> branch                    ;"
+				"BranchVal -> identifier : branch_delay ;"
+				"BranchEnd -> \\;                       ;"
+
+			// declare:
+
+				"DecBeg  -> declare                     ;"
+				"DecArgs -> DecArg DecArgs              ;"
+				"        -> empty                       ;"
+				"DecArg  -> identifier     : declare_op ;"
+				"DecEnd  -> \\;                         ;"
+
+			// define:
+
+				"DefBeg  -> define         : define_begin ;"
+				"DefArgs -> DefArg DefArgs                ;"
+				"        -> empty                         ;"
+				"DefArg  -> identifier     : define_arg   ;"
+				"DefEnd  -> \\;            : define_end   ;"
+
+			// application:
+
+				"SwapBeg  -> identifier : swap_begin ;"
+				"SwapArg  -> empty      : swap_value ;"
+				"SwapEnd  -> \\;        : apply_end  ;"
+				"VoidBeg  -> void       : side_begin ;"
+				"VoidEnd  -> \\;        : apply_end  ;"
+				"ApplyBeg -> \\=                     ;"
+				"ApplyEnd -> \\;        : apply_end  ;"
+				"TestBeg  -> test       : left_copy  ;"
+				"TestEnd  -> \\;        : apply_end  ;"
+
+			// assignment:
+
+				"AssignBeg ->   #              ;"
+				"AssignEnd -> \\; : assign_end ;"
+
+			// argument:
 
-					"SubOp   -> identifier       : subop_value  ;"
-					"        -> _                : subop_paste  ;"
-					"        -> quote            : subop_quote  ;"
-					"SubArgs ->   SubArg SubArgs                ;"
-					"        -> ! MutArg SubArgs                ;"
-					"        -> empty                           ;"
-					"SubArg  -> Literal                         ;"
-					"        -> identifier       : subarg_value ;"
-					"        -> _                : subarg_paste ;"
-					"        -> quote            : subarg_quote ;"
-					"MutArg  -> identifier       : mutarg_value ;"
-
-				// unit:
+				"SubOp   -> identifier       : subop_value  ;"
+				"        -> _                : subop_paste  ;"
+				"        -> quote            : subop_quote  ;"
+				"SubArgs ->   SubArg SubArgs                ;"
+				"        -> ! MutArg SubArgs                ;"
+				"        -> empty                           ;"
+				"SubArg  -> Literal                         ;"
+				"        -> identifier       : subarg_value ;"
+				"        -> _                : subarg_paste ;"
+				"        -> quote            : subarg_quote ;"
+				"MutArg  -> identifier       : mutarg_value ;"
+
+			// unit:
 
-					"UnitVal -> Literal                 ;"
-					"        -> identifier : unit_value ;"
-					"        -> _          : unit_paste ;"
-					"        -> quote      : unit_quote ;"
-					"        -> Morph                   ;"
-					"        -> Cycle                   ;"
+				"UnitVal -> Literal                 ;"
+				"        -> identifier : unit_value ;"
+				"        -> _          : unit_paste ;"
+				"        -> quote      : unit_quote ;"
+				"        -> Morph                   ;"
+				"        -> Cycle                   ;"
 
-				// literal:
+			// literal:
 
-					"Literal -> Value Type                  ;"
-					"Value   -> n_number : literal_n_number ;"
-					"        -> r_number : literal_r_number ;"
-
-					"Type -> \\: Port                 ;"
-					"     -> empty      : port_deduce ;"
-					"Port -> identifier : port_lookup ;"
-
-			// compound:
+				"Literal -> Value Type                  ;"
+				"Value   -> n_number : literal_n_number ;"
+				"        -> r_number : literal_r_number ;"
+
+				"Type -> \\: Port                 ;"
+				"     -> empty      : port_deduce ;"
+				"Port -> identifier : port_lookup ;"
 
-				// arity:
-
-					"Arity  -> [ Number ]                     ;"
-					"       -> empty      : pound_arity_zero  ;"
-					"Number -> n_number   : pound_arity_value ;"
-
-			// morph:
+		// compound:
 
-				"Morph -> argpose Arity MorOpBeg MorOp    ArgposeVals MorOpEnd ;"
-				"      -> subpose Arity MorOpBeg MorOpRng SubposeVals MorOpEnd ;"
-				"      ->   curry Arity MorOpBeg MorOp      CurryVals MorOpEnd ;"
+			// arity:
 
-				// op:
-
-					"MorOpBeg -> {          : mor_op_begin ;"
-					"MorOpEnd -> }          : mor_op_end   ;"
-					"MorOp    -> identifier : mor_op       ;"
-					"         -> *          : mor_op       ;"
-					"         -> +          : mor_op       ;"
-					"         -> \\-        : mor_op       ;"
-					"         -> @          : mor_op       ;"
-					"MorOpRng -> MorOp      : mor_op_range ;"
-
-				// argpose:
-
-					"ArgposeVals -> ArgposeVal ArgposeVals                     ;"
-					"            -> empty                                      ;"
-					"ArgposeVal  -> n_number               : mor_argpose_value ;"
-
-				// subpose:
-
-					"SubposeVals -> SubposeVal SubposeVals                     ;"
-					"            -> empty                                      ;"
-					"SubposeVal  -> identifier             : mor_subpose_value ;"
-					"            -> *                      : mor_subpose_value ;"
-					"            -> +                      : mor_subpose_value ;"
-					"            -> \\-                    : mor_subpose_value ;"
-					"            -> @                      : mor_subpose_value ;"
-
-				// curry:
-
-					"CurryVals -> CurryVal CurryVals                   ;"
-					"          -> empty              : mor_curry_args  ;"
-					"CurryVal  -> identifier         : mor_curry_value ;"
-
-			// cycle:
-
-				"Cycle -> repeat Arity  AMP         LRMIval RepeatIvals ;"
-				"      -> map    Arity  AMP LRLIval LRMIval    MapIvals ;"
-				"      -> fold   Arity CAMP   FIval LRMIval   FoldIvals ;"
-				"      -> find   Arity  AMP   FIval LRMIval   FindIvals ;"
-				"      -> sift   Arity  AMP   FIval LRMIval   SiftIvals ;"
-
-				// routine:
-
-					"CAMP -> CRBeg Combine CRBar Action CRBar Mutate CRBar Predicate CREnd ;"
-					"AMP  -> CRBeg               Action CRBar Mutate CRBar Predicate CREnd ;"
-
-					"CRBeg -> { : cyc_rout_begin ;"
-					"CRBar -> | : cyc_rout_end   ;"
-					"CREnd -> } : cyc_rout_end   ;"
-
-					"CRMinOp -> identifier : cyc_rout_op    ;"
-					"        -> *          : cyc_rout_op    ;"
-					"        -> @          : cyc_rout_op    ;"
-					"CROp    -> CRMinOp                     ;"
-					"        -> +          : cyc_rout_op    ;"
-					"        -> \\-        : cyc_rout_op    ;"
-					"CRVal   -> identifier : cyc_rout_value ;"
-					"        -> *          : cyc_rout_value ;"
-					"        -> @          : cyc_rout_value ;"
-
-					// combine:
-
-						"Combine   -> CROp  CombRest2 : cyc_combine       ;"
-						"CombRest2 -> CRVal CombRest1                     ;"
-						"          -> empty           : cyc_combine_rest2 ;"
-						"CombRest1 -> CRVal                               ;"
-						"          -> empty           : cyc_combine_rest1 ;"
-
-					// action:
-
-						"Action  -> CRMinOp ActRest : cyc_action      ;"
-						"        -> empty           : cyc_action_defs ;"
-						"ActRest -> CRVal   ActRest                   ;"
-						"        -> empty           : cyc_action_rest ;"
-
-					// mutate:
-
-						"Mutate   -> CROp  MutRest2 : cyc_mutate       ;"
-						"         -> empty          : cyc_mutate_defs  ;"
-						"MutRest2 -> CRVal MutRest1                    ;"
-						"         -> empty          : cyc_mutate_rest2 ;"
-						"MutRest1 -> CRVal                             ;"
-						"         -> empty          : cyc_mutate_rest1 ;"
-
-					// predicate:
-
-						"Predicate -> CROp  PredRest2 : cyc_predicate       ;"
-						"          -> empty           : cyc_predicate_defs  ;"
-						"PredRest2 -> CRVal PredRest1                       ;"
-						"          -> empty           : cyc_predicate_rest2 ;"
-						"PredRest1 -> CRVal                                 ;"
-						"          -> empty           : cyc_predicate_rest1 ;"
-
-				// interval:
-
-					"LRLIval -> LIval NoteIter             RLIval ;"
-					"LRMIval -> LIval NoteIter , TonicIter RMIval ;"
-					"LRRIval -> LIval NoteIter             RRIval ;"
-
-					"FIval  -> < \\> : cyc_ival_fixed       ;"
-					"LIval  -> [     : cyc_ival_left_closed ;"
-					"       -> (     : cyc_ival_left_open   ;"
-					"RLIval -> ]     : cyc_ival_init_closed ;"
-					"       -> )     : cyc_ival_init_open   ;"
-					"RMIval -> ]     : cyc_ival_root_closed ;"
-					"       -> )     : cyc_ival_root_open   ;"
-					"RRIval -> ]     : cyc_ival_rest_closed ;"
-					"       -> )     : cyc_ival_rest_open   ;"
-
-					"RepeatIvals -> FIval RepeatIvals                   ;"
-					"            -> empty             : cyc_ival_repeat ;"
-					"MapIvals    -> Ival MapIvals                       ;"
-					"            -> empty             : cyc_ival_map    ;"
-					"FoldIvals   -> Ival FoldIvals                      ;"
-					"            -> empty             : cyc_ival_fold   ;"
-					"FindIvals   -> Ival FindIvals                      ;"
-					"            -> empty             : cyc_ival_find   ;"
-					"SiftIvals   -> Ival SiftIvals                      ;"
-					"            -> empty             : cyc_ival_sift   ;"
-
-					"Ival ->   FIval ;"
-					"     -> LRRIval ;"
-
-				// note (iterator):
-
-					"NoteIter ->   + | \\-           : cyc_note_inc_dec ;"
-					"         -> \\- |   +           : cyc_note_dec_inc ;"
-					"         -> NoteNext | NotePrev                    ;"
-					"         -> empty               : cyc_note_defs    ;"
-					"NoteNext -> identifier          : cyc_note_value   ;"
-					"         -> ^ NoteVoid                             ;"
-					"NoteVoid -> identifier          : cyc_note_void    ;"
-					"NotePrev -> NoteNext                               ;"
-					"         -> ~                   : cyc_note_none    ;"
-
-				// tonic (iterator):
-
-					"TonicIter ->   + | \\-             : cyc_tonic_inc_dec ;"
-					"          -> \\- |   +             : cyc_tonic_dec_inc ;"
-					"          -> TonicNext | TonicPrev                     ;"
-					"          -> empty                 : cyc_tonic_defs    ;"
-					"TonicNext -> identifier            : cyc_tonic_value   ;"
-					"          -> ^ TonicVoid                               ;"
-					"TonicVoid -> identifier            : cyc_tonic_void    ;"
-					"TonicPrev -> TonicNext                                 ;"
-					"          -> ~                     : cyc_tonic_none    ;"
+				"Arity  -> [ Number ]                     ;"
+				"       -> empty      : pound_arity_zero  ;"
+				"Number -> n_number   : pound_arity_value ;"
+
+		// morph:
+
+			"Morph -> argpose Arity MorOpBeg MorOp    ArgposeVals MorOpEnd ;"
+			"      -> subpose Arity MorOpBeg MorOpRng SubposeVals MorOpEnd ;"
+			"      ->   curry Arity MorOpBeg MorOp      CurryVals MorOpEnd ;"
+
+			// op:
+
+				"MorOpBeg -> {          : mor_op_begin ;"
+				"MorOpEnd -> }          : mor_op_end   ;"
+				"MorOp    -> identifier : mor_op       ;"
+				"         -> *          : mor_op       ;"
+				"         -> +          : mor_op       ;"
+				"         -> \\-        : mor_op       ;"
+				"         -> @          : mor_op       ;"
+				"MorOpRng -> MorOp      : mor_op_range ;"
+
+			// argpose:
+
+				"ArgposeVals -> ArgposeVal ArgposeVals                     ;"
+				"            -> empty                                      ;"
+				"ArgposeVal  -> n_number               : mor_argpose_value ;"
+
+			// subpose:
+
+				"SubposeVals -> SubposeVal SubposeVals                     ;"
+				"            -> empty                                      ;"
+				"SubposeVal  -> identifier             : mor_subpose_value ;"
+				"            -> *                      : mor_subpose_value ;"
+				"            -> +                      : mor_subpose_value ;"
+				"            -> \\-                    : mor_subpose_value ;"
+				"            -> @                      : mor_subpose_value ;"
+
+			// curry:
+
+				"CurryVals -> CurryVal CurryVals                   ;"
+				"          -> empty              : mor_curry_args  ;"
+				"CurryVal  -> identifier         : mor_curry_value ;"
+
+		// cycle:
+
+			"Cycle -> repeat Arity RepeatMod    Root   NoTone RepeatTones ;"
+			"      -> map    Arity    MapMod PreTone PostRoot    MapTones ;"
+			"      -> fold   Arity   FoldMod FixTone     Root   FoldTones ;"
+			"      -> find   Arity   FindMod MatTone     Root   FindTones ;"
+			"      -> sift   Arity   SiftMod MatTone     Root   SiftTones ;"
+
+			// routine:
+
+				"RepeatMod -> CRBeg                RepeatAct CRBar Mutate CRBar LoopPred CREnd ;"
+				"   MapMod -> CRBeg                   MapAct CRBar Mutate CRBar LoopPred CREnd ;"
+				"  FoldMod -> CRBeg FoldComb CRBar   FoldAct CRBar Mutate CRBar LoopPred CREnd ;"
+				"  FindMod -> CRBeg                  FindAct CRBar Mutate CRBar LoopPred CREnd ;"
+				"  SiftMod -> CRBeg                  SiftAct CRBar Mutate CRBar LoopPred CREnd ;"
+
+				"CRBeg -> { : cyc_rout_begin ;"
+				"CRBar -> | : cyc_rout_end   ;"
+				"CREnd -> } : cyc_rout_end   ;"
+
+				"CRMinOp -> identifier : cyc_rout_op    ;"
+				"        -> *          : cyc_rout_op    ;"
+				"        -> @          : cyc_rout_op    ;"
+				"CROp    -> CRMinOp                     ;"
+				"        -> +          : cyc_rout_op    ;"
+				"        -> \\-        : cyc_rout_op    ;"
+				"CRVal   -> identifier : cyc_rout_value ;"
+				"        -> *          : cyc_rout_value ;"
+				"        -> @          : cyc_rout_value ;"
+
+				// combine:
+
+					// fold:
+
+						"FoldComb  -> CROp  CombRest2 : cyc_fold_combine       ;"
+						"CombRest2 -> CRVal CombRest1                          ;"
+						"          -> empty           : cyc_fold_combine_rest2 ;"
+						"CombRest1 -> CRVal                                    ;"
+						"          -> empty           : cyc_fold_combine_rest1 ;"
+
+				// action:
+
+					// repeat:
+
+						"RepeatAct     -> CRMinOp RepeatActRest : cyc_repeat_action      ;"
+						"              -> empty                 : cyc_repeat_action_defs ;"
+						"RepeatActRest -> CRVal   RepeatActRest                          ;"
+						"              -> empty                 : cyc_repeat_action_rest ;"
+
+					// map:
+
+						"MapAct        -> CRMinOp    MapActRest : cyc_map_action      ;"
+						"              -> empty                 : cyc_map_action_defs ;"
+						"MapActRest    -> CRVal      MapActRest                       ;"
+						"              -> empty                 : cyc_map_action_rest ;"
+
+					// fold:
+
+						"FoldAct       -> CRMinOp   FoldActRest : cyc_fold_action      ;"
+						"              -> empty                 : cyc_fold_action_defs ;"
+						"FoldActRest   -> CRVal     FoldActRest                        ;"
+						"              -> empty                 : cyc_fold_action_rest ;"
+
+					// find:
+
+						"FindAct       -> CRMinOp   FindActRest : cyc_find_action      ;"
+						"              -> empty                 : cyc_find_action_defs ;"
+						"FindActRest   -> CRVal     FindActRest                        ;"
+						"              -> empty                 : cyc_find_action_rest ;"
+
+					// sift:
+
+						"SiftAct       -> CRMinOp   SiftActRest : cyc_sift_action      ;"
+						"              -> empty                 : cyc_sift_action_defs ;"
+						"SiftActRest   -> CRVal     SiftActRest                        ;"
+						"              -> empty                 : cyc_sift_action_rest ;"
+
+				// mutate:
+
+					"Mutate   -> CROp  MutRest2 : cyc_mutate       ;"
+					"         -> empty          : cyc_mutate_defs  ;"
+					"MutRest2 -> CRVal MutRest1                    ;"
+					"         -> empty          : cyc_mutate_rest2 ;"
+					"MutRest1 -> CRVal                             ;"
+					"         -> empty          : cyc_mutate_rest1 ;"
+
+				// loop pred(icate):
+
+					"LoopPred  -> CROp  PredRest2 : cyc_loop_pred       ;"
+					"          -> empty           : cyc_loop_pred_defs  ;"
+					"PredRest2 -> CRVal PredRest1                       ;"
+					"          -> empty           : cyc_loop_pred_rest2 ;"
+					"PredRest1 -> CRVal                                 ;"
+					"          -> empty           : cyc_loop_pred_rest1 ;"
+
+			// interval:
+
+				" LIval -> [ : cyc_ival_left_closed       ;"
+				"       -> ( : cyc_ival_left_open         ;"
+				" RIval -> ] : cyc_ival_right_closed      ;"
+				"       -> ) : cyc_ival_right_open        ;"
+				"PRIval -> ] : cyc_pre_ival_right_closed  ;"
+				"       -> ) : cyc_pre_ival_right_open    ;"
+				" RRoot -> ] : cyc_root_right_closed      ;"
+				"       -> ) : cyc_root_right_open        ;"
+				"PRRoot -> ] : cyc_post_root_right_closed ;"
+				"       -> ) : cyc_post_root_right_open   ;"
+
+				"    Tone -> LIval NoteIter              RIval ;"
+				" PreTone -> LIval NoteIter             PRIval ;"
+				"    Root -> LIval NoteIter , TonicIter  RRoot ;"
+				"PostRoot -> LIval NoteIter , TonicIter PRRoot ;"
+
+				" NoTone -> empty          : cyc_tone_empty ;"
+				"FixTone -> < \\>          : cyc_tone_fixed ;"
+				"MatTone -> [ NoteIter \\> : cyc_tone_match ;"
+
+				"RestTone -> Tone    ;"
+				"         -> FixTone ;"
+
+				"RepeatTones -> FixTone RepeatTones                      ;"
+				"            -> empty               : cyc_resolve_repeat ;"
+				"MapTones    -> RestTone MapTones                        ;"
+				"            -> empty               : cyc_resolve_map    ;"
+				"FoldTones   -> RestTone FoldTones                       ;"
+				"            -> empty               : cyc_resolve_fold   ;"
+				"FindTones   -> RestTone FindTones                       ;"
+				"            -> empty               : cyc_resolve_find   ;"
+				"SiftTones   -> RestTone SiftTones                       ;"
+				"            -> empty               : cyc_resolve_sift   ;"
+
+			// note (iterator):
+
+				"NoteIter ->   + | \\-           : cyc_note_inc_dec ;"
+				"         -> \\- |   +           : cyc_note_dec_inc ;"
+				"         -> NoteNext | NotePrev                    ;"
+				"         -> empty               : cyc_note_defs    ;"
+				"NoteNext -> identifier          : cyc_note_value   ;"
+				"         -> ^ NoteVoid                             ;"
+				"NoteVoid -> identifier          : cyc_note_void    ;"
+				"NotePrev -> NoteNext                               ;"
+				"         -> ~                   : cyc_note_none    ;"
+
+			// tonic (iterator):
+
+				"TonicIter ->   + | \\-             : cyc_tonic_inc_dec ;"
+				"          -> \\- |   +             : cyc_tonic_dec_inc ;"
+				"          -> TonicNext | TonicPrev                     ;"
+				"          -> empty                 : cyc_tonic_defs    ;"
+				"TonicNext -> identifier            : cyc_tonic_value   ;"
+				"          -> ^ TonicVoid                               ;"
+				"TonicVoid -> identifier            : cyc_tonic_void    ;"
+				"TonicPrev -> TonicNext                                 ;"
+				"          -> ~                     : cyc_tonic_none    ;"
 		);}
 
 		nik_ces auto map = cctmp::table
@@ -735,15 +809,43 @@ namespace chord {
 
 				// combine:
 
-					sxt_pair( "cyc_combine"       , ActName::cyc_combine       ),
-					sxt_pair( "cyc_combine_rest2" , ActName::cyc_combine_rest2 ),
-					sxt_pair( "cyc_combine_rest1" , ActName::cyc_combine_rest1 ),
+					// fold:
+
+						sxt_pair( "cyc_fold_combine"       , ActName::cyc_fold_combine       ),
+						sxt_pair( "cyc_fold_combine_rest2" , ActName::cyc_fold_combine_rest2 ),
+						sxt_pair( "cyc_fold_combine_rest1" , ActName::cyc_fold_combine_rest1 ),
 
 				// action:
 
-					sxt_pair( "cyc_action"      , ActName::cyc_action      ),
-					sxt_pair( "cyc_action_defs" , ActName::cyc_action_defs ),
-					sxt_pair( "cyc_action_rest" , ActName::cyc_action_rest ),
+					// repeat:
+
+						sxt_pair( "cyc_repeat_action"      , ActName::cyc_repeat_action      ),
+						sxt_pair( "cyc_repeat_action_defs" , ActName::cyc_repeat_action_defs ),
+						sxt_pair( "cyc_repeat_action_rest" , ActName::cyc_repeat_action_rest ),
+
+					// map:
+
+						sxt_pair( "cyc_map_action"      , ActName::cyc_map_action      ),
+						sxt_pair( "cyc_map_action_defs" , ActName::cyc_map_action_defs ),
+						sxt_pair( "cyc_map_action_rest" , ActName::cyc_map_action_rest ),
+
+					// fold:
+
+						sxt_pair( "cyc_fold_action"      , ActName::cyc_fold_action      ),
+						sxt_pair( "cyc_fold_action_defs" , ActName::cyc_fold_action_defs ),
+						sxt_pair( "cyc_fold_action_rest" , ActName::cyc_fold_action_rest ),
+
+					// find:
+
+						sxt_pair( "cyc_find_action"      , ActName::cyc_find_action      ),
+						sxt_pair( "cyc_find_action_defs" , ActName::cyc_find_action_defs ),
+						sxt_pair( "cyc_find_action_rest" , ActName::cyc_find_action_rest ),
+
+					// sift:
+
+						sxt_pair( "cyc_sift_action"      , ActName::cyc_sift_action      ),
+						sxt_pair( "cyc_sift_action_defs" , ActName::cyc_sift_action_defs ),
+						sxt_pair( "cyc_sift_action_rest" , ActName::cyc_sift_action_rest ),
 
 				// mutate:
 
@@ -752,30 +854,35 @@ namespace chord {
 					sxt_pair( "cyc_mutate_rest2" , ActName::cyc_mutate_rest2 ),
 					sxt_pair( "cyc_mutate_rest1" , ActName::cyc_mutate_rest1 ),
 
-				// predicate:
+				// loop pred(icate):
 
-					sxt_pair( "cyc_predicate"       , ActName::cyc_predicate       ),
-					sxt_pair( "cyc_predicate_defs"  , ActName::cyc_predicate_defs  ),
-					sxt_pair( "cyc_predicate_rest2" , ActName::cyc_predicate_rest2 ),
-					sxt_pair( "cyc_predicate_rest1" , ActName::cyc_predicate_rest1 ),
+					sxt_pair( "cyc_loop_pred"       , ActName::cyc_loop_pred       ),
+					sxt_pair( "cyc_loop_pred_defs"  , ActName::cyc_loop_pred_defs  ),
+					sxt_pair( "cyc_loop_pred_rest2" , ActName::cyc_loop_pred_rest2 ),
+					sxt_pair( "cyc_loop_pred_rest1" , ActName::cyc_loop_pred_rest1 ),
 
 				// interval:
 
-					sxt_pair( "cyc_ival_fixed"       , ActName::cyc_ival_fixed       ),
-					sxt_pair( "cyc_ival_left_closed" , ActName::cyc_ival_left_closed ),
-					sxt_pair( "cyc_ival_left_open"   , ActName::cyc_ival_left_open   ),
-					sxt_pair( "cyc_ival_init_closed" , ActName::cyc_ival_init_closed ),
-					sxt_pair( "cyc_ival_init_open"   , ActName::cyc_ival_init_open   ),
-					sxt_pair( "cyc_ival_root_closed" , ActName::cyc_ival_root_closed ),
-					sxt_pair( "cyc_ival_root_open"   , ActName::cyc_ival_root_open   ),
-					sxt_pair( "cyc_ival_rest_closed" , ActName::cyc_ival_rest_closed ),
-					sxt_pair( "cyc_ival_rest_open"   , ActName::cyc_ival_rest_open   ),
+					sxt_pair( "cyc_tone_empty" , ActName::cyc_tone_empty ),
+					sxt_pair( "cyc_tone_fixed" , ActName::cyc_tone_fixed ),
+					sxt_pair( "cyc_tone_match" , ActName::cyc_tone_match ),
 
-					sxt_pair( "cyc_ival_repeat" , ActName::cyc_ival_repeat ),
-					sxt_pair( "cyc_ival_map"    , ActName::cyc_ival_map    ),
-					sxt_pair( "cyc_ival_fold"   , ActName::cyc_ival_fold   ),
-					sxt_pair( "cyc_ival_find"   , ActName::cyc_ival_find   ),
-					sxt_pair( "cyc_ival_sift"   , ActName::cyc_ival_sift   ),
+					sxt_pair( "cyc_ival_left_closed"       , ActName::cyc_ival_left_closed       ),
+					sxt_pair( "cyc_ival_left_open"         , ActName::cyc_ival_left_open         ),
+					sxt_pair( "cyc_ival_right_closed"      , ActName::cyc_ival_right_closed      ),
+					sxt_pair( "cyc_ival_right_open"        , ActName::cyc_ival_right_open        ),
+					sxt_pair( "cyc_pre_ival_right_closed"  , ActName::cyc_pre_ival_right_closed  ),
+					sxt_pair( "cyc_pre_ival_right_open"    , ActName::cyc_pre_ival_right_open    ),
+					sxt_pair( "cyc_root_right_closed"      , ActName::cyc_root_right_closed      ),
+					sxt_pair( "cyc_root_right_open"        , ActName::cyc_root_right_open        ),
+					sxt_pair( "cyc_post_root_right_closed" , ActName::cyc_post_root_right_closed ),
+					sxt_pair( "cyc_post_root_right_open"   , ActName::cyc_post_root_right_open   ),
+
+					sxt_pair( "cyc_resolve_repeat" , ActName::cyc_resolve_repeat ),
+					sxt_pair( "cyc_resolve_map"    , ActName::cyc_resolve_map    ),
+					sxt_pair( "cyc_resolve_fold"   , ActName::cyc_resolve_fold   ),
+					sxt_pair( "cyc_resolve_find"   , ActName::cyc_resolve_find   ),
+					sxt_pair( "cyc_resolve_sift"   , ActName::cyc_resolve_sift   ),
 
 				// note (iterator):
 
