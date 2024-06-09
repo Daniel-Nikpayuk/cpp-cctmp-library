@@ -21,6 +21,29 @@
 
 namespace chord {
 
+	// progression paradigm:
+
+		// major: all intervals right open, tone notes align centre (with tonic note).
+		// augmented: root interval right open, at least one tone interval right closed.
+		//            right closed tone notes align left (of tonic note).
+				// there are 3 algorithm dispatch cases:
+					// 1) tonic: tonic note is reversible.
+						// a) move tonic note prev.
+						// b) march (move) root and tone notes.
+						// c) update (move) root and tone notes.
+						// d) update tonic note next.
+					// 2) tone: tonic note is not reversible,
+					//          but all left aligned tone notes are reversible.
+						// a) march root and tone notes.
+						// b) backdate (move) left aligned tone notes.
+					// 3) peek: tonic note is not reversible,
+					//          and at least one left aligned tone note is not reversible.
+						// a) peekmarch (move) root and tone notes.
+						// b) update root and tone notes.
+		// diminished: all intervals right closed, tone notes align centre (with tonic note).
+		// minor: root interval right closed, at least one tone interval right open.
+		//        right open tone notes align right (of tonic note).
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -41,7 +64,6 @@ namespace chord {
 		bool alt_mutate;
 
 		nik_ce T_chord_iterator() : contr_pos{}, alt_mutate{} { }
-	//	nik_ce T_chord_iterator(csize_type p, const bool m) : contr_pos{p}, alt_mutate{m} { }
 
 		nik_ce void reset() { push(0, false); }
 
@@ -421,61 +443,6 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// resolution:
-
-	// major: all intervals right open, tone notes align centre (with tonic note).
-	// augmented: root interval right open, at least one tone interval right closed.
-	//            right closed tone notes align left (of tonic note).
-			// there are 3 algorithm dispatch cases:
-				// 1) tonic: tonic note is reversible.
-					// a) move tonic note prev.
-					// b) march (move) root and tone notes.
-					// c) update (move) root and tone notes.
-					// d) update tonic note next.
-				// 2) tone: tonic note is not reversible,
-				//          but all left aligned tone notes are reversible.
-					// a) march root and tone notes.
-					// b) backdate (move) left aligned tone notes.
-				// 3) peek: tonic note is not reversible,
-				//          and at least one left aligned tone note is not reversible.
-					// a) peekmarch (move) root and tone notes.
-					// b) update root and tone notes.
-	// diminished: all intervals right closed, tone notes align centre (with tonic note).
-	// minor: root interval right closed, at least one tone interval right open.
-	//        right open tone notes align right (of tonic note).
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename SizeType>
-	struct T_chord_resolution
-	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		template<typename AST>
-		nik_ces auto has_right_action(AST *t)
-		{
-			if (t->interval.is_augmented()) return not t->interval.is_tone  ();
-			else                            return not t->interval.is_major ();
-		}
-
-		template<typename AST>
-		nik_ces auto has_right_next(AST *t)
-		{
-			if (t->interval.is_augmented()) return not t->interval.is_tone  ();
-			else                            return     t->interval.is_minor ();
-		}
-
-		template<typename AST>
-		nik_ces auto has_right_prev(AST *t) { return t->interval.is_augmented_tone(); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // internal (construct):
 
 /***********************************************************************************************************************/
@@ -510,17 +477,44 @@ namespace chord {
 				t->assembly_push_instr(AN::next, AT::id, ni);
 			}
 
-		// next note:
+		// tonic:
 
 			template<typename AST>
-			nik_ces void define_next_note(AST *t, csize_type ival_pos, csize_type arg_pos)
-				{ define_note(t, ival_pos, arg_pos, AST::Iter::next); }
+			nik_ces void define_tonic(AST *t, csize_type ival_pos, csize_type arg_pos, csize_type dir)
+			{
+				auto ni = t->interval.tonic_contr_pos(ival_pos, dir);
 
-		// prev note:
+				t->note_next_assembly(arg_pos);
+				t->assembly_push_instr(AN::next, AT::id, ni);
+			}
 
-			template<typename AST>
-			nik_ces void define_prev_note(AST *t, csize_type ival_pos, csize_type arg_pos)
-				{ define_note(t, ival_pos, arg_pos, AST::Iter::prev); }
+		// next:
+
+			// note:
+
+				template<typename AST>
+				nik_ces void define_next_note(AST *t, csize_type ival_pos, csize_type arg_pos)
+					{ define_note(t, ival_pos, arg_pos, AST::Iter::next); }
+
+			// tonic:
+
+				template<typename AST>
+				nik_ces void define_next_tonic(AST *t, csize_type ival_pos, csize_type arg_pos)
+					{ define_tonic(t, ival_pos, arg_pos, AST::Iter::next); }
+
+		// prev:
+
+			// note:
+
+				template<typename AST>
+				nik_ces void define_prev_note(AST *t, csize_type ival_pos, csize_type arg_pos)
+					{ define_note(t, ival_pos, arg_pos, AST::Iter::prev); }
+
+			// tonic:
+
+				template<typename AST>
+				nik_ces void define_prev_tonic(AST *t, csize_type ival_pos, csize_type arg_pos)
+					{ define_tonic(t, ival_pos, arg_pos, AST::Iter::prev); }
 	};
 
 /***********************************************************************************************************************/
@@ -541,39 +535,26 @@ namespace chord {
 		nik_ces void initialize_if(AST *t) { if (t->interval.has_left_next()) initialize(t); }
 
 		template<typename AST>
-		nik_ces void terminalize(AST *t) { base::terminalize(t); }
-
-		template<typename AST>
-		nik_ces void terminalize_if(AST *t) { if (t->interval.has_left_next()) terminalize(t); }
+		nik_ces void terminalize_if(AST *t) { if (t->interval.has_left_next()) base::terminalize(t); }
 
 		// next note:
 
 			template<typename AST>
-			nik_ces void define_next_note(AST *t, csize_type ival_pos, csize_type arg_pos)
-				{ base::define_next_note(t, ival_pos, arg_pos); }
-
-			template<typename AST>
 			nik_ces void define_next_note_if(AST *t, csize_type ival_pos, csize_type arg_pos)
-				{ if (t->interval.is_left_open(ival_pos)) define_next_note(t, ival_pos, arg_pos); }
-
-		// prev note:
-
-			template<typename AST>
-			nik_ces void define_prev_note(AST *t, csize_type ival_pos, csize_type arg_pos)
-				{ base::define_prev_note(t, ival_pos, arg_pos); }
+				{ if (t->interval.is_left_open(ival_pos)) base::define_next_note(t, ival_pos, arg_pos); }
 
 		// next notes:
 
 			template<typename AST>
-			nik_ces void define_next_notes(AST *t, csize_type ival_beg, size_type arg_pos)
+			nik_ces void define_next_note_ifs(AST *t, csize_type ival_beg, size_type arg_pos)
 			{
 				for (auto ival_pos = ival_beg; ival_pos != t->interval.size(); ++ival_pos)
 					define_next_note_if(t, ival_pos, arg_pos++);
 			}
 
 			template<typename AST>
-			nik_ces void define_next_notes_if(AST *t, csize_type ival_beg, size_type arg_pos)
-				{ if (t->interval.has_left_next()) define_next_notes(t, ival_beg, arg_pos); }
+			nik_ces void define_next_note_ifs_fast(AST *t, csize_type ival_beg, size_type arg_pos)
+				{ if (t->interval.has_left_next()) define_next_note_ifs(t, ival_beg, arg_pos); }
 	};
 
 /***********************************************************************************************************************/
@@ -590,23 +571,16 @@ namespace chord {
 		template<typename AST>
 		nik_ces void initialize(AST *t) { base::initialize(t, AST::Iterate::loop); }
 
-		template<typename AST>
-		nik_ces void terminalize(AST *t) { base::terminalize(t); }
-
 		// next note:
 
 			template<typename AST>
-			nik_ces void define_next_note(AST *t, csize_type ival_pos, csize_type arg_pos)
-				{ base::define_next_note(t, ival_pos, arg_pos); }
-
-			template<typename AST>
 			nik_ces void define_next_note_if(AST *t, csize_type ival_pos, csize_type arg_pos)
-				{ if (t->interval.not_fixed(ival_pos)) define_next_note(t, ival_pos, arg_pos); }
+				{ if (t->interval.not_fixed(ival_pos)) base::define_next_note(t, ival_pos, arg_pos); }
 
 		// next notes:
 
 			template<typename AST>
-			nik_ces void define_next_notes(AST *t, csize_type ival_beg, size_type arg_pos)
+			nik_ces void define_next_note_ifs(AST *t, csize_type ival_beg, size_type arg_pos)
 			{
 				for (auto ival_pos = ival_beg; ival_pos != t->interval.size(); ++ival_pos)
 					define_next_note_if(t, ival_pos, arg_pos++);
@@ -629,56 +603,134 @@ namespace chord {
 		template<typename AST>
 		nik_ces void initialize(AST *t) { base::initialize(t, AST::Iterate::postloop); }
 
-		template<typename AST>
-		nik_ces void initialize_if(AST *t) { if (resolution::has_right_next(t)) initialize(t); }
-
-		template<typename AST>
-		nik_ces void terminalize(AST *t) { base::terminalize(t); }
-
-		template<typename AST>
-		nik_ces void terminalize_if(AST *t) { if (resolution::has_right_next(t)) terminalize(t); }
-
 		// next note:
 
 			template<typename AST>
-			nik_ces void define_next_note(AST *t, csize_type ival_pos, csize_type arg_pos)
-				{ base::define_next_note(t, ival_pos, arg_pos); }
-
-			template<typename AST>
 			nik_ces void define_next_note_if(AST *t, csize_type ival_pos, csize_type arg_pos)
-				{ if (t->interval.is_right_open(ival_pos)) define_next_note(t, ival_pos, arg_pos); }
+				{ if (t->interval.is_right_open(ival_pos)) base::define_next_note(t, ival_pos, arg_pos); }
 
 		// prev note:
 
 			template<typename AST>
-			nik_ces void define_prev_note(AST *t, csize_type ival_pos, csize_type arg_pos)
-				{ base::define_prev_note(t, ival_pos, arg_pos); }
-
-			template<typename AST>
 			nik_ces void define_prev_note_if(AST *t, csize_type ival_pos, csize_type arg_pos)
-				{ if (t->interval.is_right_closed(ival_pos)) define_prev_note(t, ival_pos, arg_pos); }
+				{ if (t->interval.is_right_closed(ival_pos)) base::define_prev_note(t, ival_pos, arg_pos); }
 
 		// next notes:
 
 			template<typename AST>
-			nik_ces void define_next_notes(AST *t, csize_type ival_beg, size_type arg_pos)
+			nik_ces void define_next_note_ifs(AST *t, csize_type ival_beg, size_type arg_pos)
 			{
 				for (auto ival_pos = ival_beg; ival_pos != t->interval.size(); ++ival_pos)
 					define_next_note_if(t, ival_pos, arg_pos++);
 			}
 
-		//	template<typename AST>
-		//	nik_ces void define_next_notes_if(AST *t, csize_type ival_beg, size_type arg_pos)
-		//		{ if (resolution::has_right_next(t)) define_next_notes(t, ival_beg, arg_pos); }
-
 		// prev notes:
 
 			template<typename AST>
-			nik_ces void define_prev_notes(AST *t, csize_type ival_beg, size_type arg_pos)
+			nik_ces void define_prev_note_ifs(AST *t, csize_type ival_beg, size_type arg_pos)
 			{
 				for (auto ival_pos = ival_beg; ival_pos != t->interval.size(); ++ival_pos)
 					define_prev_note_if(t, ival_pos, arg_pos++);
 			}
+	};
+
+/***********************************************************************************************************************/
+
+// routine:
+
+	template<template<typename> typename Chord, typename SizeType>
+	struct T_internal_routine
+	{
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		using major		= typename Chord<SizeType>::major;
+		using tonic		= typename Chord<SizeType>::tonic;
+		using tone		= typename Chord<SizeType>::tone;
+		using peek		= typename Chord<SizeType>::peek;
+		using diminished	= typename Chord<SizeType>::diminished;
+		using minor		= typename Chord<SizeType>::minor;
+
+		// major:
+
+			template<typename AST>
+			nik_ces void define_major(AST *t)
+			{
+				major :: precycle  :: define(t);
+				major :: cycle     :: define(t);
+				major :: postcycle :: define(t);
+			}
+
+		// (augmented) tonic:
+
+			template<typename AST>
+			nik_ces void define_tonic(AST *t)
+			{
+				tonic :: precycle  :: define(t);
+				tonic :: cycle     :: define(t);
+				tonic :: postcycle :: define(t);
+			}
+
+		// (augmented) tone:
+
+			template<typename AST>
+			nik_ces void define_tone(AST *t)
+			{
+				tone :: precycle  :: define(t);
+				tone :: cycle     :: define(t);
+				tone :: postcycle :: define(t);
+			}
+
+		// (augmented) peek:
+
+			template<typename AST>
+			nik_ces void define_peek(AST *t)
+			{
+				peek :: precycle  :: define(t);
+				peek :: cycle     :: define(t);
+				peek :: postcycle :: define(t);
+			}
+
+		// augmented:
+
+			template<typename AST>
+			nik_ces void define_augmented(AST *t, csize_type root_pos)
+			{
+				t->interval.resolve_augment(root_pos);
+
+				if      (t->interval.is_tonic ()) define_tonic (t);
+				else if (t->interval.is_tone  ()) define_tone  (t);
+				else if (t->interval.is_peek  ()) define_peek  (t);
+			}
+
+		// diminished:
+
+			template<typename AST>
+			nik_ces void define_diminished(AST *t)
+			{
+				diminished :: precycle  :: define(t);
+				diminished :: cycle     :: define(t);
+				diminished :: postcycle :: define(t);
+			}
+
+		// minor:
+
+			template<typename AST>
+			nik_ces void define_minor(AST *t)
+			{
+				minor :: precycle  :: define(t);
+				minor :: cycle     :: define(t);
+				minor :: postcycle :: define(t);
+			}
+
+		template<typename AST>
+		nik_ces void define(AST *t, csize_type root_pos)
+		{
+			if      (t->interval.is_major      ()) define_major      (t);
+			else if (t->interval.is_augmented  ()) define_augmented  (t, root_pos);
+			else if (t->interval.is_diminished ()) define_diminished (t);
+			else if (t->interval.is_minor      ()) define_minor      (t);
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -689,27 +741,33 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
-// interface:
+// precycle:
 
 	template<typename SizeType>
-	struct T_construct
+	struct T_construct_precycle
 	{
 		using size_type		= SizeType;
 		using csize_type	= size_type const;
 
-	};
+		// notes:
 
-/***********************************************************************************************************************/
+			template<typename AST>
+			nik_ces void define_notes(AST *t)
+			{
+				auto ni = t->iterate[AST::Iterate::preloop];
 
-// precycle:
+				t->assembly_push_instr(AN::cycle, AT::front, ni);
+			}
 
-	template<typename SizeType>
-	struct T_construct_precycle : public T_construct<SizeType>
-	{
-		using base		= T_construct<SizeType>;
-		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
+			template<typename AST>
+			nik_ces void define_notes_if(AST *t)
+				{ if (t->interval.has_left_next()) define_notes(t); }
 
+		// prepack:
+
+			template<typename AST>
+			nik_ces void define_prepack(AST *t)
+				{ t->assembly_push_instr(AN::arg, AT::select, t->verse.size()); }
 	};
 
 /***********************************************************************************************************************/
@@ -717,12 +775,37 @@ namespace chord {
 // cycle:
 
 	template<typename SizeType>
-	struct T_construct_cycle : public T_construct<SizeType>
+	struct T_construct_cycle
 	{
-		using base		= T_construct<SizeType>;
-		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
 
+		// pred act mut:
+
+			template<typename AST>
+			nik_ces void define_pred_act_mut(AST *t, csize_type name)
+			{
+				auto ni = t->get_predicate ();
+				auto mi = t->get_action    ();
+				auto li = t->get_mutate    ();
+				auto ki = t->iterate[AST::Iterate::loop];
+
+				t->assembly_push_instr(name, AT::id, ni, mi, li, ki);
+			}
+
+		// pred act comb mut:
+
+			template<typename AST>
+			nik_ces void define_pred_act_comb_mut(AST *t, csize_type name)
+			{
+				auto ni = t->get_predicate ();
+				auto mi = t->get_action    ();
+				auto li = t->get_combine   ();
+				auto ki = t->get_mutate    ();
+				auto ji = t->iterate[AST::Iterate::loop];
+
+				t->assembly_push_instr(name, AT::id, ni, mi, li, ki, ji);
+			}
 	};
 
 /***********************************************************************************************************************/
@@ -730,12 +813,137 @@ namespace chord {
 // postcycle:
 
 	template<typename SizeType>
-	struct T_construct_postcycle : public T_construct<SizeType>
+	struct T_construct_postcycle
 	{
-		using base		= T_construct<SizeType>;
-		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
 
+		// notes:
+
+			template<typename AST>
+			nik_ces void define_notes(AST *t)
+			{
+				auto ni = t->iterate[AST::Iterate::postloop];
+
+				t->assembly_push_instr(AN::cycle, AT::back, ni);
+			}
+
+		// act mut:
+
+			template<typename AST>
+			nik_ces void define_act_mut(AST *t, csize_type name)
+			{
+				auto ni = t->get_action ();
+				auto mi = t->get_mutate ();
+
+				t->assembly_push_instr(name, AT::back, ni, mi);
+			}
+
+		// act comb mut:
+
+			template<typename AST>
+			nik_ces void define_act_comb_mut(AST *t, csize_type name)
+			{
+				auto ni = t->get_action  ();
+				auto mi = t->get_combine ();
+				auto li = t->get_mutate  ();
+
+				t->assembly_push_instr(name, AT::back, ni, mi, li);
+			}
+	};
+
+/***********************************************************************************************************************/
+
+// routine:
+
+	template<template<typename> typename Chord, typename SizeType>
+	struct T_construct_routine
+	{
+		using major		= typename Chord<SizeType>::major;
+		using tonic		= typename Chord<SizeType>::tonic;
+		using tone		= typename Chord<SizeType>::tone;
+		using peek		= typename Chord<SizeType>::peek;
+		using diminished	= typename Chord<SizeType>::diminished;
+		using minor		= typename Chord<SizeType>::minor;
+
+		// major:
+
+			template<typename AST>
+			nik_ces void define_major(AST *t)
+			{
+				major :: precycle  :: define(t);
+				major :: cycle     :: define(t);
+				major :: postcycle :: define(t);
+			}
+
+		// (augmented) tonic:
+
+			template<typename AST>
+			nik_ces void define_tonic(AST *t)
+			{
+				tonic :: precycle  :: define(t);
+				tonic :: cycle     :: define(t);
+				tonic :: postcycle :: define(t);
+			}
+
+		// (augmented) tone:
+
+			template<typename AST>
+			nik_ces void define_tone(AST *t)
+			{
+				tone :: precycle  :: define(t);
+				tone :: cycle     :: define(t);
+				tone :: postcycle :: define(t);
+			}
+
+		// (augmented) peek:
+
+			template<typename AST>
+			nik_ces void define_peek(AST *t)
+			{
+				peek :: precycle  :: define(t);
+				peek :: cycle     :: define(t);
+				peek :: postcycle :: define(t);
+			}
+
+		// augmented:
+
+			template<typename AST>
+			nik_ces void define_augmented(AST *t)
+			{
+				if      (t->interval.is_tonic ()) define_tonic (t);
+				else if (t->interval.is_tone  ()) define_tone  (t);
+				else if (t->interval.is_peek  ()) define_peek  (t);
+			}
+
+		// diminished:
+
+			template<typename AST>
+			nik_ces void define_diminished(AST *t)
+			{
+				diminished :: precycle  :: define(t);
+				diminished :: cycle     :: define(t);
+				diminished :: postcycle :: define(t);
+			}
+
+		// minor:
+
+			template<typename AST>
+			nik_ces void define_minor(AST *t)
+			{
+				minor :: precycle  :: define(t);
+				minor :: cycle     :: define(t);
+				minor :: postcycle :: define(t);
+			}
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			if      (t->interval.is_major      ()) define_major      (t);
+			else if (t->interval.is_augmented  ()) define_augmented  (t);
+			else if (t->interval.is_diminished ()) define_diminished (t);
+			else if (t->interval.is_minor      ()) define_minor      (t);
+		}
 	};
 
 /***********************************************************************************************************************/

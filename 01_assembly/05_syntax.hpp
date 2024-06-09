@@ -819,26 +819,34 @@ namespace assembly {
 
 		// apply:
 
-			nik_ce void apply_begin(const cselect & s, const bool is_side = false)
+			nik_ce void apply_begin(cindex status, const bool is_side)
 			{
-				auto is_pound = model.lookup_variable(s);
-				auto status   = is_pound ? Stage::compound : Stage::atomic;
-
-				if (is_pound) model.cache.push(model.inhabit.cvalue());
-
 				stage.side.push(is_side);
 				stage.procedure.push(status);
 				stage.current.push(stage.size());
 				stage.note.push(AT::back);
 			}
 
-			nik_ce void apply_begin(const bool is_side = false)
+			// atomic:
+
+				nik_ce void apply_atomic_begin(const bool is_side = false)
+					{ apply_begin(Stage::atomic, is_side); }
+
+			// pound:
+
+				nik_ce void apply_pound_begin(cindex contr_pos, const bool is_side = false)
+				{
+					model.cache.push(contr_pos);
+					apply_begin(Stage::compound, is_side);
+				}
+
+			nik_ce void apply_begin(const cselect & s, const bool is_side = false)
 			{
-				stage.side.push(is_side);
-				stage.procedure.push(Stage::defer);
-				stage.current.push(stage.size());
-				stage.note.push(AT::back);
+				if (model.lookup_variable(s)) apply_pound_begin(model.inhabit.cvalue());
+				else                          apply_atomic_begin(is_side);
 			}
+
+			nik_ce void apply_begin(const bool is_side = false) { apply_begin(Stage::defer, is_side); }
 
 			nik_ce void apply_end()
 			{

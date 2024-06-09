@@ -44,29 +44,6 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// resolution:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename SizeType>
-	struct T_chord_resolution_fold : public T_chord_resolution<SizeType>
-	{
-		using base		= T_chord_resolution<SizeType>;
-		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
-
-	//	template<typename AST>
-	//	nik_ces auto (AST *t)
-	//	{
-	//	}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // internal (construct):
 
 /***********************************************************************************************************************/
@@ -83,12 +60,12 @@ namespace chord {
 		using Sign		= T_fold_signature<size_type>;
 
 		template<typename AST>
-		nik_ces void define_if(AST *t)
+		nik_ces void define(AST *t)
 		{
-			base::initialize_if        (t);
-			base::define_next_note_if  (t, AST::Ival::in, Sign::in);
-			base::define_next_notes_if (t, AST::Ival::ins, Sign::ins);
-			base::terminalize_if       (t);
+			base::initialize_if             (t);
+			base::define_next_note_if       (t, AST::Ival::in, Sign::in);
+			base::define_next_note_ifs_fast (t, AST::Ival::ins, Sign::ins);
+			base::terminalize_if            (t);
 		}
 	};
 
@@ -106,13 +83,27 @@ namespace chord {
 		using Sign		= T_fold_signature<size_type>;
 
 		template<typename AST>
-		nik_ces void define_if(AST *t)
+		nik_ces void define(AST *t)
 		{
-			base::initialize        (t);
-			base::define_next_note  (t, AST::Ival::in, Sign::in);
-			base::define_next_notes (t, AST::Ival::ins, Sign::ins);
-			base::terminalize       (t);
+			base::initialize           (t);
+			base::define_next_note     (t, AST::Ival::in, Sign::in);
+			base::define_next_note_ifs (t, AST::Ival::ins, Sign::ins);
+			base::terminalize          (t);
 		}
+	};
+
+/***********************************************************************************************************************/
+
+// postcycle:
+
+	template<typename SizeType>
+	struct T_fold_internal_postcycle
+	{
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		template<typename AST>
+		nik_ces void define(AST *t) { } // do nothing.
 	};
 
 /***********************************************************************************************************************/
@@ -135,14 +126,7 @@ namespace chord {
 // postcycle:
 
 	template<typename SizeType>
-	struct T_fold_internal_major_postcycle
-	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		template<typename AST>
-		nik_ces void define_if(AST *t) { } // do nothing.
-	};
+	struct T_fold_internal_major_postcycle : public T_fold_internal_postcycle<SizeType> { };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -163,24 +147,20 @@ namespace chord {
 		using Sign		= T_fold_signature<size_type>;
 
 		template<typename AST>
-		nik_ces void define_if(AST *t)
+		nik_ces void define(AST *t)
 		{
 			base::initialize           (t);
 			base::define_next_note_if  (t, AST::Ival::in  , Sign::in  );
-			base::define_next_notes_if (t, AST::Ival::ins , Sign::ins );
-		//	base::define_prev_tonic    (t, AST::Ival::in  , Sign::end );
+			base::define_next_note_ifs (t, AST::Ival::ins , Sign::ins );
+			base::define_prev_tonic    (t, AST::Ival::in  , Sign::end );
 			base::terminalize          (t);
 		}
 	};
-
-/***********************************************************************************************************************/
 
 // cycle:
 
 	template<typename SizeType>
 	struct T_fold_internal_tonic_cycle : public T_fold_internal_cycle<SizeType> { };
-
-/***********************************************************************************************************************/
 
 // postcycle:
 
@@ -194,13 +174,13 @@ namespace chord {
 		using Sign		= T_fold_signature<size_type>;
 
 		template<typename AST>
-		nik_ces void define_if(AST *t)
+		nik_ces void define(AST *t)
 		{
-			base::initialize        (t);
-			base::define_next_note  (t, AST::Ival::in  , Sign::in  );
-			base::define_next_notes (t, AST::Ival::ins , Sign::ins );
-		//	base::define_next_tonic (t, AST::Ival::in  , Sign::end );
-			base::terminalize       (t);
+			base::initialize           (t);
+			base::define_next_note     (t, AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs (t, AST::Ival::ins , Sign::ins );
+			base::define_next_tonic    (t, AST::Ival::in  , Sign::end );
+			base::terminalize          (t);
 		}
 	};
 
@@ -213,16 +193,33 @@ namespace chord {
 
 // precycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_fold_internal_tone_precycle : public T_fold_internal_precycle<SizeType> { };
 
 // cycle:
 
 	template<typename SizeType>
 	struct T_fold_internal_tone_cycle : public T_fold_internal_cycle<SizeType> { };
 
-/***********************************************************************************************************************/
-
 // postcycle:
+
+	template<typename SizeType>
+	struct T_fold_internal_tone_postcycle : public T_internal_postcycle<SizeType>
+	{
+		using base		= T_internal_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		using Sign		= T_fold_signature<size_type>;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::initialize           (t);
+			base::define_prev_note_ifs (t, AST::Ival::ins , Sign::ins );
+			base::terminalize          (t);
+		}
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -233,13 +230,63 @@ namespace chord {
 
 // precycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_fold_internal_peek_precycle : public T_fold_internal_precycle<SizeType> { };
 
 // cycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_fold_internal_peek_cycle : public T_fold_internal_cycle<SizeType>
+	{
+		using base		= T_fold_internal_cycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		using Sign		= T_fold_signature<size_type>;
+
+		template<typename AST>
+		nik_ces void define(AST *t) // fix after dsl engine overhaul!
+		{
+		//	base::define(t);
+
+		//	auto pred_ni = t->get_predicate();
+		//	auto next_ni = t->interval.note_contr_pos(AST::Ival::in, AST::Iter::next);
+
+		//	nik_ce auto arity = 2;
+
+		//	t->set_predicate();
+		//	t->act_subpose_begin(arity);
+
+		//	t->set_routine();
+		//	t->apply_pound_begin(pred_ni);
+		//	t->lookup_return(s); // would need to be streamlined.
+
+		//	t->subpose_value(t->cselect_id());
+		//	t->subpose_value(t->cselect_id());
+		//	t->act_subpose_end();
+		}
+	};
 
 // postcycle:
+
+	template<typename SizeType>
+	struct T_fold_internal_peek_postcycle : public T_internal_postcycle<SizeType>
+	{
+		using base		= T_internal_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		using Sign		= T_fold_signature<size_type>;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::initialize           (t);
+			base::define_next_note     (t, AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs (t, AST::Ival::ins , Sign::ins );
+			base::terminalize          (t);
+		}
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -261,14 +308,7 @@ namespace chord {
 // postcycle:
 
 	template<typename SizeType>
-	struct T_fold_internal_diminished_postcycle
-	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		template<typename AST>
-		nik_ces void define_if(AST *t) { } // do nothing.
-	};
+	struct T_fold_internal_diminished_postcycle : public T_fold_internal_postcycle<SizeType> { };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -299,11 +339,11 @@ namespace chord {
 		using Sign		= T_fold_signature<size_type>;
 
 		template<typename AST>
-		nik_ces void define_if(AST *t)
+		nik_ces void define(AST *t)
 		{
-			base::initialize        (t);
-			base::define_next_notes (t, AST::Ival::ins, Sign::ins);
-			base::terminalize       (t);
+			base::initialize           (t);
+			base::define_next_note_ifs (t, AST::Ival::ins, Sign::ins);
+			base::terminalize          (t);
 		}
 	};
 
@@ -314,119 +354,95 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
+// major:
+
+	template<typename SizeType>
+	struct T_fold_internal_routine_major
+	{
+		using precycle		= T_fold_internal_major_precycle  <SizeType>;
+		using cycle		= T_fold_internal_major_cycle     <SizeType>;
+		using postcycle		= T_fold_internal_major_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// tonic:
+
+	template<typename SizeType>
+	struct T_fold_internal_routine_tonic
+	{
+		using precycle		= T_fold_internal_tonic_precycle  <SizeType>;
+		using cycle		= T_fold_internal_tonic_cycle     <SizeType>;
+		using postcycle		= T_fold_internal_tonic_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// tone:
+
+	template<typename SizeType>
+	struct T_fold_internal_routine_tone
+	{
+		using precycle		= T_fold_internal_tone_precycle  <SizeType>;
+		using cycle		= T_fold_internal_tone_cycle     <SizeType>;
+		using postcycle		= T_fold_internal_tone_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// peek:
+
+	template<typename SizeType>
+	struct T_fold_internal_routine_peek
+	{
+		using precycle		= T_fold_internal_peek_precycle  <SizeType>;
+		using cycle		= T_fold_internal_peek_cycle     <SizeType>;
+		using postcycle		= T_fold_internal_peek_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// diminished:
+
+	template<typename SizeType>
+	struct T_fold_internal_routine_diminished
+	{
+		using precycle		= T_fold_internal_diminished_precycle  <SizeType>;
+		using cycle		= T_fold_internal_diminished_cycle     <SizeType>;
+		using postcycle		= T_fold_internal_diminished_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// minor:
+
+	template<typename SizeType>
+	struct T_fold_internal_routine_minor
+	{
+		using precycle		= T_fold_internal_minor_precycle  <SizeType>;
+		using cycle		= T_fold_internal_minor_cycle     <SizeType>;
+		using postcycle		= T_fold_internal_minor_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
 // interface:
 
 	template<typename SizeType>
 	struct T_fold_internal_routine
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using major		= T_fold_internal_routine_major      <SizeType>;
 
-		// major:
+		using tonic		= T_fold_internal_routine_tonic      <SizeType>;
+		using tone		= T_fold_internal_routine_tone       <SizeType>;
+		using peek		= T_fold_internal_routine_peek       <SizeType>;
 
-			using major_precycle		= T_fold_internal_major_precycle  <SizeType>;
-			using major_cycle		= T_fold_internal_major_cycle     <SizeType>;
-			using major_postcycle		= T_fold_internal_major_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_major(AST *t)
-			{
-				major_precycle  ::define_if(t);
-				major_cycle     ::define_if(t);
-				major_postcycle ::define_if(t);
-			}
-
-		// (augmented) tonic:
-
-			using tonic_precycle		= T_fold_internal_tonic_precycle  <SizeType>;
-			using tonic_cycle		= T_fold_internal_tonic_cycle     <SizeType>;
-			using tonic_postcycle		= T_fold_internal_tonic_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_tonic(AST *t)
-			{
-				tonic_precycle  ::define_if(t);
-				tonic_cycle     ::define_if(t);
-				tonic_postcycle ::define_if(t);
-			}
-
-		// (augmented) tone:
-
-		//	using tone_precycle		= T_fold_internal_tone_precycle  <SizeType>;
-		//	using tone_cycle		= T_fold_internal_tone_cycle     <SizeType>;
-		//	using tone_postcycle		= T_fold_internal_tone_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_tone(AST *t)
-			{
-			//	tone_precycle  ::define_if(t);
-			//	tone_cycle     ::define_if(t);
-			//	tone_postcycle ::define_if(t);
-			}
-
-		// (augmented) peek:
-
-		//	using peek_precycle		= T_fold_internal_peek_precycle  <SizeType>;
-		//	using peek_cycle		= T_fold_internal_peek_cycle     <SizeType>;
-		//	using peek_postcycle		= T_fold_internal_peek_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_peek(AST *t)
-			{
-			//	peek_precycle  ::define_if(t);
-			//	peek_cycle     ::define_if(t);
-			//	peek_postcycle ::define_if(t);
-			}
-
-		// augmented:
-
-			template<typename AST>
-			nik_ces void define_augmented(AST *t)
-			{
-				t->interval.resolve_augment(AST::Ival::in);
-
-				if      (t->interval.is_tonic ()) define_tonic (t);
-				else if (t->interval.is_tone  ()) define_tone  (t);
-				else if (t->interval.is_peek  ()) define_peek  (t);
-			}
-
-		// diminished:
-
-			using diminished_precycle	= T_fold_internal_diminished_precycle  <SizeType>;
-			using diminished_cycle		= T_fold_internal_diminished_cycle     <SizeType>;
-			using diminished_postcycle	= T_fold_internal_diminished_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_diminished(AST *t)
-			{
-				diminished_precycle  ::define_if(t);
-				diminished_cycle     ::define_if(t);
-				diminished_postcycle ::define_if(t);
-			}
-
-		// minor:
-
-			using minor_precycle		= T_fold_internal_minor_precycle  <SizeType>;
-			using minor_cycle		= T_fold_internal_minor_cycle     <SizeType>;
-			using minor_postcycle		= T_fold_internal_minor_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_minor(AST *t)
-			{
-				minor_precycle  ::define_if(t);
-				minor_cycle     ::define_if(t);
-				minor_postcycle ::define_if(t);
-			}
-
-		template<typename AST>
-		nik_ces void define(AST *t)
-		{
-			if      (t->interval.is_major      ()) define_major      (t);
-			else if (t->interval.is_augmented  ()) define_augmented  (t);
-			else if (t->interval.is_diminished ()) define_diminished (t);
-			else if (t->interval.is_minor      ()) define_minor      (t);
-		}
+		using diminished	= T_fold_internal_routine_diminished <SizeType>;
+		using minor		= T_fold_internal_routine_minor      <SizeType>;
 	};
+
+	template<typename SizeType>
+	using T_fold_internal = T_internal_routine<T_fold_internal_routine, SizeType>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -439,25 +455,17 @@ namespace chord {
 // precycle:
 
 	template<typename SizeType>
-	struct T_fold_construct_precycle
+	struct T_fold_construct_precycle : public T_construct_precycle<SizeType>
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		template<typename AST>
-		nik_ces void define_notes(AST *t)
-		{
-			auto ni = t->iterate[AST::Iterate::preloop];
-
-			t->assembly_push_instr(AN::cycle, AT::front, ni);
-		}
+		using base		= T_construct_precycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
 
 		template<typename AST>
 		nik_ces void define(AST *t)
 		{
-			if (t->interval.has_left_next()) define_notes(t);
-
-			t->assembly_push_instr(AN::arg, AT::select, t->verse.size());
+			base::define_notes_if (t);
+			base::define_prepack  (t);
 		}
 	};
 
@@ -466,22 +474,14 @@ namespace chord {
 // cycle:
 
 	template<typename SizeType>
-	struct T_fold_construct_cycle
+	struct T_fold_construct_cycle : public T_construct_cycle<SizeType>
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using base		= T_construct_cycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
 
 		template<typename AST>
-		nik_ces void define(AST *t)
-		{
-			auto ni = t->get_predicate ();
-			auto mi = t->get_action    ();
-			auto li = t->get_combine   ();
-			auto ki = t->get_mutate    ();
-			auto ji = t->iterate[AST::Iterate::loop];
-
-			t->assembly_push_instr(AN::fold, AT::id, ni, mi, li, ki, ji);
-		}
+		nik_ces void define(AST *t) { base::define_pred_act_comb_mut(t, AN::fold); }
 	};
 
 /***********************************************************************************************************************/
@@ -489,19 +489,17 @@ namespace chord {
 // postcycle:
 
 	template<typename SizeType>
-	struct T_fold_construct_postcycle
+	struct T_fold_construct_postcycle : public T_construct_postcycle<SizeType>
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using base		= T_construct_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
 
 		template<typename AST>
 		nik_ces void define(AST *t)
 		{
-			auto ni = t->get_action  ();
-			auto mi = t->get_combine ();
-			auto li = t->get_mutate  ();
-
-			t->assembly_push_instr(AN::fold, AT::back, ni, mi, li);
+			base::define_act_comb_mut (t, AN::fold);
+			base::define_notes        (t);
 		}
 	};
 
@@ -543,13 +541,30 @@ namespace chord {
 
 // precycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_fold_construct_tonic_precycle : public T_construct_precycle<SizeType>
+	{
+		using base		= T_construct_precycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::define_notes   (t);
+			base::define_prepack (t);
+		}
+	};
 
 // cycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_fold_construct_tonic_cycle : public T_fold_construct_cycle<SizeType> { };
 
 // postcycle:
+
+	template<typename SizeType>
+	struct T_fold_construct_tonic_postcycle : public T_fold_construct_postcycle<SizeType> { };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -560,13 +575,26 @@ namespace chord {
 
 // precycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_fold_construct_tone_precycle : public T_fold_construct_precycle<SizeType> { };
 
 // cycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_fold_construct_tone_cycle : public T_fold_construct_cycle<SizeType> { };
 
 // postcycle:
+
+	template<typename SizeType>
+	struct T_fold_construct_tone_postcycle : public T_construct_postcycle<SizeType>
+	{
+		using base		= T_construct_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		template<typename AST>
+		nik_ces void define(AST *t) { base::define_notes(t); }
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -577,13 +605,18 @@ namespace chord {
 
 // precycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_fold_construct_peek_precycle : public T_fold_construct_precycle<SizeType> { };
 
 // cycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_fold_construct_peek_cycle : public T_fold_construct_cycle<SizeType> { };
 
 // postcycle:
+
+	template<typename SizeType>
+	struct T_fold_construct_peek_postcycle : public T_fold_construct_postcycle<SizeType> { };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -605,7 +638,15 @@ namespace chord {
 // postcycle:
 
 	template<typename SizeType>
-	struct T_fold_construct_diminished_postcycle : public T_fold_construct_postcycle<SizeType> { };
+	struct T_fold_construct_diminished_postcycle : public T_construct_postcycle<SizeType>
+	{
+		using base		= T_construct_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		template<typename AST>
+		nik_ces void define(AST *t) { base::define_act_comb_mut(t, AN::fold); }
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -627,13 +668,18 @@ namespace chord {
 // postcycle:
 
 	template<typename SizeType>
-	struct T_fold_construct_minor_postcycle
+	struct T_fold_construct_minor_postcycle : public T_construct_postcycle<SizeType>
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using base		= T_construct_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
 
 		template<typename AST>
-		nik_ces void define(AST *t) { } // do nothing.
+		nik_ces void define(AST *t)
+		{
+			base::define_act_comb_mut (t, AN::fold);
+			base::define_notes        (t);
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -643,117 +689,95 @@ namespace chord {
 
 /***********************************************************************************************************************/
 
+// major:
+
+	template<typename SizeType>
+	struct T_fold_construct_routine_major
+	{
+		using precycle		= T_fold_construct_major_precycle  <SizeType>;
+		using cycle		= T_fold_construct_major_cycle     <SizeType>;
+		using postcycle		= T_fold_construct_major_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// tonic:
+
+	template<typename SizeType>
+	struct T_fold_construct_routine_tonic
+	{
+		using precycle		= T_fold_construct_tonic_precycle  <SizeType>;
+		using cycle		= T_fold_construct_tonic_cycle     <SizeType>;
+		using postcycle		= T_fold_construct_tonic_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// tone:
+
+	template<typename SizeType>
+	struct T_fold_construct_routine_tone
+	{
+		using precycle		= T_fold_construct_tone_precycle  <SizeType>;
+		using cycle		= T_fold_construct_tone_cycle     <SizeType>;
+		using postcycle		= T_fold_construct_tone_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// peek:
+
+	template<typename SizeType>
+	struct T_fold_construct_routine_peek
+	{
+		using precycle		= T_fold_construct_peek_precycle  <SizeType>;
+		using cycle		= T_fold_construct_peek_cycle     <SizeType>;
+		using postcycle		= T_fold_construct_peek_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// diminished:
+
+	template<typename SizeType>
+	struct T_fold_construct_routine_diminished
+	{
+		using precycle		= T_fold_construct_diminished_precycle  <SizeType>;
+		using cycle		= T_fold_construct_diminished_cycle     <SizeType>;
+		using postcycle		= T_fold_construct_diminished_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// minor:
+
+	template<typename SizeType>
+	struct T_fold_construct_routine_minor
+	{
+		using precycle		= T_fold_construct_minor_precycle  <SizeType>;
+		using cycle		= T_fold_construct_minor_cycle     <SizeType>;
+		using postcycle		= T_fold_construct_minor_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
 // interface:
 
 	template<typename SizeType>
 	struct T_fold_construct_routine
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using major		= T_fold_construct_routine_major      <SizeType>;
 
-		// major:
+		using tonic		= T_fold_construct_routine_tonic      <SizeType>;
+		using tone		= T_fold_construct_routine_tone       <SizeType>;
+		using peek		= T_fold_construct_routine_peek       <SizeType>;
 
-			using major_precycle		= T_fold_construct_major_precycle  <SizeType>;
-			using major_cycle		= T_fold_construct_major_cycle     <SizeType>;
-			using major_postcycle		= T_fold_construct_major_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_major(AST *t)
-			{
-				major_precycle  ::define(t);
-				major_cycle     ::define(t);
-				major_postcycle ::define(t);
-			}
-
-		// (augmented) tonic:
-
-		//	using tonic_precycle		= T_fold_construct_tonic_precycle  <SizeType>;
-		//	using tonic_cycle		= T_fold_construct_tonic_cycle     <SizeType>;
-		//	using tonic_postcycle		= T_fold_construct_tonic_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_tonic(AST *t)
-			{
-			//	tonic_precycle  ::define(t);
-			//	tonic_cycle     ::define(t);
-			//	tonic_postcycle ::define(t);
-			}
-
-		// (augmented) tone:
-
-		//	using tone_precycle		= T_fold_construct_tone_precycle  <SizeType>;
-		//	using tone_cycle		= T_fold_construct_tone_cycle     <SizeType>;
-		//	using tone_postcycle		= T_fold_construct_tone_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_tone(AST *t)
-			{
-			//	tone_precycle  ::define(t);
-			//	tone_cycle     ::define(t);
-			//	tone_postcycle ::define(t);
-			}
-
-		// (augmented) peek:
-
-		//	using peek_precycle		= T_fold_construct_peek_precycle  <SizeType>;
-		//	using peek_cycle		= T_fold_construct_peek_cycle     <SizeType>;
-		//	using peek_postcycle		= T_fold_construct_peek_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_peek(AST *t)
-			{
-			//	peek_precycle  ::define(t);
-			//	peek_cycle     ::define(t);
-			//	peek_postcycle ::define(t);
-			}
-
-		// augmented:
-
-			template<typename AST>
-			nik_ces void define_augmented(AST *t)
-			{
-				if      (t->interval.is_tonic ()) define_tonic (t);
-				else if (t->interval.is_tone  ()) define_tone  (t);
-				else if (t->interval.is_peek  ()) define_peek  (t);
-			}
-
-		// diminished:
-
-			using diminished_precycle	= T_fold_construct_diminished_precycle  <SizeType>;
-			using diminished_cycle		= T_fold_construct_diminished_cycle     <SizeType>;
-			using diminished_postcycle	= T_fold_construct_diminished_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_diminished(AST *t)
-			{
-				diminished_precycle  ::define(t);
-				diminished_cycle     ::define(t);
-				diminished_postcycle ::define(t);
-			}
-
-		// minor:
-
-			using minor_precycle		= T_fold_construct_minor_precycle  <SizeType>;
-			using minor_cycle		= T_fold_construct_minor_cycle     <SizeType>;
-			using minor_postcycle		= T_fold_construct_minor_postcycle <SizeType>;
-
-			template<typename AST>
-			nik_ces void define_minor(AST *t)
-			{
-				minor_precycle  ::define(t);
-				minor_cycle     ::define(t);
-				minor_postcycle ::define(t);
-			}
-
-		template<typename AST>
-		nik_ces void define(AST *t)
-		{
-			if      (t->interval.is_major      ()) define_major      (t);
-			else if (t->interval.is_augmented  ()) define_augmented  (t);
-			else if (t->interval.is_diminished ()) define_diminished (t);
-			else if (t->interval.is_minor      ()) define_minor      (t);
-		}
+		using diminished	= T_fold_construct_routine_diminished <SizeType>;
+		using minor		= T_fold_construct_routine_minor      <SizeType>;
 	};
+
+	template<typename SizeType>
+	using T_fold_construct = T_construct_routine<T_fold_construct_routine, SizeType>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

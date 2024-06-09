@@ -378,10 +378,10 @@ namespace chord {
 
 			nik_ce void define_fold()
 			{
-				T_fold_internal_routine<size_type>::define(this);
+				T_fold_internal<size_type>::define(this, Ival::in);
 				internal_defs_end();
 
-				T_fold_construct_routine<size_type>::define(this);
+				T_fold_construct<size_type>::define(this);
 				interval.reset();
 			}
 
