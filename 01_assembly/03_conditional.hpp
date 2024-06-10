@@ -181,6 +181,30 @@ namespace assembly {
 	};
 
 /***********************************************************************************************************************/
+
+// drop:
+
+	template
+	<
+		template<auto...> typename B0, auto LU, auto... LUs, nik_vp(p0)(B0<LU, LUs...>*),
+		template<auto...> typename B1, auto OU, auto... IUs,
+		nik_vp(p1)(B1<OU, IUs...>*), auto... filler
+	>
+	struct T_assembly<AN::cycle, AT::drop, p0, p1, filler...>
+	{
+		using LT  = T_store_U<LU>;
+		using Out = T_store_U<OU>;
+
+		template<NIK_ASSEMBLY_PARAMS(c, i, l, t, r), typename... Ts>
+		nik_ces auto result(LT lv, T_store_U<LUs>... lvs, Out out, T_store_U<IUs>... ins)
+		{
+			return NIK_ASSEMBLY_TEMPLATE(c, i)
+				::NIK_ASSEMBLY_RESULT_4TS(c, i, l, t, r, Out, T_store_U<LUs>..., Out, T_store_U<IUs>...)
+					(out, lvs..., out, ins...);
+		}
+	};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // next:

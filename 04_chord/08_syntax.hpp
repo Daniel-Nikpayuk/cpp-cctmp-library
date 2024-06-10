@@ -358,22 +358,20 @@ namespace chord {
 
 			nik_ce void define_repeat()
 			{
-			//	using Prog = T_chord_repeat<size_type>;
+				T_repeat_internal<size_type>::define(this, Ival::out);
+				internal_defs_end();
 
-			//	define_internal<Prog>();
-			//	auto s = base::verse.size();
-			//	base::assembly_push_instr(AN::arg, AT::select, s);
-			//	define_cycle_loop<Prog>(); // debugging.
-			//	interval.reset();
+				T_repeat_construct<size_type>::define(this);
+				interval.reset();
 			}
 
 			nik_ce void define_map()
 			{
-			//	using Prog = T_chord_map<size_type>;
+				T_map_internal<size_type>::define(this, Ival::in);
+				internal_defs_end();
 
-			//	resolve_interval<Prog>();
-			//	define_internal<Prog>();
-			//	define_cycle<Prog>();
+				T_map_construct<size_type>::define(this);
+				interval.reset();
 			}
 
 			nik_ce void define_fold()
@@ -387,20 +385,10 @@ namespace chord {
 
 			nik_ce void define_find()
 			{
-			//	using Prog = T_chord_find<size_type>;
-
-			//	resolve_interval<Prog>();
-			//	define_internal<Prog>();
-			//	define_cycle<Prog>();
 			}
 
 			nik_ce void define_sift()
 			{
-			//	using Prog = T_chord_sift<size_type>;
-
-			//	resolve_interval<Prog>();
-			//	define_internal<Prog>();
-			//	define_cycle<Prog>();
 			}
 	};
 

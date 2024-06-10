@@ -63,8 +63,8 @@ namespace chord {
 		nik_ces void define(AST *t)
 		{
 			base::initialize_if             (t);
-			base::define_next_note_if       (t, AST::Ival::in, Sign::in);
-			base::define_next_note_ifs_fast (t, AST::Ival::ins, Sign::ins);
+			base::define_next_note_if       (t , AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs_fast (t , AST::Ival::ins , Sign::ins );
 			base::terminalize_if            (t);
 		}
 	};
@@ -86,8 +86,8 @@ namespace chord {
 		nik_ces void define(AST *t)
 		{
 			base::initialize           (t);
-			base::define_next_note     (t, AST::Ival::in, Sign::in);
-			base::define_next_note_ifs (t, AST::Ival::ins, Sign::ins);
+			base::define_next_note     (t , AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs (t , AST::Ival::ins , Sign::ins );
 			base::terminalize          (t);
 		}
 	};
@@ -150,9 +150,9 @@ namespace chord {
 		nik_ces void define(AST *t)
 		{
 			base::initialize           (t);
-			base::define_next_note_if  (t, AST::Ival::in  , Sign::in  );
-			base::define_next_note_ifs (t, AST::Ival::ins , Sign::ins );
-			base::define_prev_tonic    (t, AST::Ival::in  , Sign::end );
+			base::define_next_note_if  (t , AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs (t , AST::Ival::ins , Sign::ins );
+			base::define_prev_tonic    (t , AST::Ival::in  , Sign::end );
 			base::terminalize          (t);
 		}
 	};
@@ -177,9 +177,9 @@ namespace chord {
 		nik_ces void define(AST *t)
 		{
 			base::initialize           (t);
-			base::define_next_note     (t, AST::Ival::in  , Sign::in  );
-			base::define_next_note_ifs (t, AST::Ival::ins , Sign::ins );
-			base::define_next_tonic    (t, AST::Ival::in  , Sign::end );
+			base::define_next_note     (t , AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs (t , AST::Ival::ins , Sign::ins );
+			base::define_next_tonic    (t , AST::Ival::in  , Sign::end );
 			base::terminalize          (t);
 		}
 	};
@@ -216,7 +216,7 @@ namespace chord {
 		nik_ces void define(AST *t)
 		{
 			base::initialize           (t);
-			base::define_prev_note_ifs (t, AST::Ival::ins , Sign::ins );
+			base::define_prev_note_ifs (t , AST::Ival::ins , Sign::ins );
 			base::terminalize          (t);
 		}
 	};
@@ -282,8 +282,8 @@ namespace chord {
 		nik_ces void define(AST *t)
 		{
 			base::initialize           (t);
-			base::define_next_note     (t, AST::Ival::in  , Sign::in  );
-			base::define_next_note_ifs (t, AST::Ival::ins , Sign::ins );
+			base::define_next_note     (t , AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs (t , AST::Ival::ins , Sign::ins );
 			base::terminalize          (t);
 		}
 	};
@@ -342,7 +342,7 @@ namespace chord {
 		nik_ces void define(AST *t)
 		{
 			base::initialize           (t);
-			base::define_next_note_ifs (t, AST::Ival::ins, Sign::ins);
+			base::define_next_note_ifs (t , AST::Ival::ins , Sign::ins );
 			base::terminalize          (t);
 		}
 	};

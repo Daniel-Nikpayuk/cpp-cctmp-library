@@ -598,8 +598,6 @@ namespace chord {
 		using size_type		= typename base::size_type;
 		using csize_type	= typename base::csize_type;
 
-		using resolution	= T_chord_resolution<size_type>;
-
 		template<typename AST>
 		nik_ces void initialize(AST *t) { base::initialize(t, AST::Iterate::postloop); }
 
@@ -943,6 +941,8 @@ namespace chord {
 			else if (t->interval.is_augmented  ()) define_augmented  (t);
 			else if (t->interval.is_diminished ()) define_diminished (t);
 			else if (t->interval.is_minor      ()) define_minor      (t);
+
+			t->assembly_push_instr(AN::cycle, AT::drop);
 		}
 	};
 

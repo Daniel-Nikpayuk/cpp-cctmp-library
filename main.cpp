@@ -42,7 +42,7 @@
 #include"undef_macros.hpp"
 
 //#include"testing/chord/assembly/unit_test.hpp"
-//#include"testing/chord/progression/unit_test.hpp"
+#include"testing/chord/progression/unit_test.hpp"
 //#include"testing/hustle/unit_test.hpp"
 
 //#include"experimental/00_generic_printers.hpp"
@@ -107,27 +107,53 @@
 
 // chord:
 
+		//	"  chord_f # fold[1]{add|@ @||} <> [,)             ;"
+		//	"  chord_f # fold[2]{add * @|multiply||} <> (,] (] ;"
+
 /*
 	constexpr auto _chord_test_func()
 	{
 		return source
 		(
-			"main in end format                          ;"
+			"main out in end in1                               ;"
 
-			"vars:                                       ;"
-			"  declare arr_pr                            ;"
+			"vars:                                             ;"
+			"  declare chord_f                                 ;"
 
-			"defs:                                       ;"
-			"  arr_pr # repeat[1]{@ @|print * @|} [,) <> ;"
+			"defs:                                             ;"
+			"  chord_f # fold[2]{add * @|multiply||} <> [,] [] ;"
 
-			"body:                                       ;"
-			"  . = arr_pr !in end format                 ;"
-			"  return _                                  ;"
+			"body:                                             ;"
+			"  . = chord_f !out in end in1                     ;"
+			"  return _                                        ;"
+		);
+	}
+*/
+
+	constexpr auto _chord_test_func()
+	{
+		return source
+		(
+			"main out in end format                            ;"
+
+			"vars:                                             ;"
+			"  declare sq chord_f arr_pr                       ;"
+
+			"defs:                                             ;"
+			"  sq      # argpose[1]{multiply 0 0}              ;"
+			"  chord_f # map[1]{sq *||} [) [,)                 ;"
+			"  arr_pr  # repeat[1]{@ @|print * @|} [,) <>      ;"
+
+			"body:                                             ;"
+			"  . = chord_f !out in end                         ;"
+			"  . = arr_pr out _ format                         ;"
+			"  return _                                        ;"
 
 			, binding("print", _print_)
 		);
 	}
-*/
+
+/***********************************************************************************************************************/
 
 /*
 	constexpr auto _chord_print_v0()
@@ -147,7 +173,6 @@
 			"  return _                                  ;"
 
 			, binding("print", _print_)
-		//	, binding("format", strlit_type{"%d, "})
 		);
 	}
 */
@@ -158,46 +183,25 @@
 
 	// v0:
 
-	//	template<typename SizeType>
-	//	constexpr void unit_test_chord_print_v0()
-	//	{
-	//		using chord_rtn_type = int const;
-	//		using chord_arr_type = cctmp::sequence<int , 5>;
+/*
+		template<typename SizeType>
+		constexpr void unit_test_chord_print_v0()
+		{
+			using chord_rtn_type = int const;
+			using chord_arr_type = cctmp::sequence<int , 5>;
 
-	//		chord_arr_type s0({ 1, 2, 3, 4, 5 });
+			chord_arr_type s0({ 1, 2, 3, 4, 5 });
 
-	//		using T_chord_fast_apply = chord::T_apply
-	//		<
-	//		//	contr_object_chord_sum_v0<SizeType>,
-	//			_chord_print_v0, cctmp::null_env, chord_rtn_type
-	//		>;
+			using T_chord_fast_apply = chord::T_apply
+			<
+			//	contr_object_chord_sum_v0<SizeType>,
+				_chord_print_v0, cctmp::null_env, chord_rtn_type
+			>;
 
-	//		T_chord_fast_apply::result(s0.cbegin(), s0.cend(), strlit_type{"%d, "});
-	//		printf("\n");
-	//	}
-
-/***********************************************************************************************************************/
-
-		//	"  chord_f # fold[1]{add|@ @||} <> [,)             ;"
-		//	"  chord_f # fold[2]{add * @|multiply||} <> (,] (] ;"
-
-	constexpr auto _chord_test_func()
-	{
-		return source
-		(
-			"main out in end in1                               ;"
-
-			"vars:                                             ;"
-			"  declare chord_f                                 ;"
-
-			"defs:                                             ;"
-			"  chord_f # fold[2]{add * @|multiply||} <> [,] [] ;"
-
-			"body:                                             ;"
-			"  . = chord_f !out in end in1                     ;"
-			"  return _                                        ;"
-		);
-	}
+			T_chord_fast_apply::result(s0.cbegin(), s0.cend(), strlit_type{"%d, "});
+			printf("\n");
+		}
+*/
 
 /***********************************************************************************************************************/
 
@@ -205,19 +209,22 @@
 	{
 	//	unit_test_chord_print_v0<gindex_type>();
 
-		using chord_size_type = int;// const*;
+		using chord_size_type = int const*;
 		using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
 		using chord_arr_type  = sequence<int , 5>;
 
 		chord_arr_type s0({ 1, 2, 3, 4, 5 });
+		chord_arr_type s1({ 1, 2, 3, 4, 5 });
+
+		T_chord_apply::result(s0.begin(), s1.cbegin(), s1.cend(), strlit_type{"%d, "});
 
 		//
 
-		int val = 0;
+	//	int val = 0;
 
 	//	T_chord_apply::result(&val, s0.cbegin(), s0.cend());
-		T_chord_apply::result(&val, s0.cbegin(), s0.cend() - 1, s0.cbegin());
-		printf("%d\n", val);
+	//	T_chord_apply::result(&val, s0.cbegin(), s0.cend() - 1, s0.cbegin());
+	//	printf("%d\n", val);
 	//	fileput::print_assembly_controller<chord::metapile<_chord_test_func, null_env>>();
 
 		//
