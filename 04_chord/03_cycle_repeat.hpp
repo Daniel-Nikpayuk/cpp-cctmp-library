@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// repeat:
+// cycle repeat:
 
 namespace chord {
 
@@ -376,7 +376,7 @@ namespace chord {
 		using csize_type	= typename base::csize_type;
 
 		template<typename AST>
-		nik_ces void define(AST *t) { base::define_pred_act_mut(t, AN::repeat); }
+		nik_ces void define(AST *t) { base::define_pred_act_mut_note(t, AN::repeat); }
 	};
 
 /***********************************************************************************************************************/

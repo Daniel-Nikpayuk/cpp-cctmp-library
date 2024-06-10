@@ -199,8 +199,9 @@ namespace assembly {
 		nik_ces auto result(LT lv, T_store_U<LUs>... lvs, Out out, T_store_U<IUs>... ins)
 		{
 			return NIK_ASSEMBLY_TEMPLATE(c, i)
-				::NIK_ASSEMBLY_RESULT_4TS(c, i, l, t, r, Out, T_store_U<LUs>..., Out, T_store_U<IUs>...)
-					(out, lvs..., out, ins...);
+				::NIK_ASSEMBLY_RESULT_4TS(c, i, l, t, r,
+					Out, T_store_U<LUs>..., Out, T_store_U<IUs>...)
+						(out, lvs..., out, ins...);
 		}
 	};
 
@@ -649,7 +650,7 @@ namespace assembly {
 			nik_ce auto ni = AD<c>::pos(i);  // predicate
 			nik_ce auto mi = AD<c>::num(i);  // match
 			nik_ce auto li = AD<c>::aux0(i); // mutate
-			nik_ce auto ki = AD<c>::aux1(i); // tone next
+			nik_ce auto ki = AD<c>::aux1(i); // cond (next)
 			nik_ce auto ji = AD<c>::aux2(i); // next
 
 			bool match{false};
@@ -670,7 +671,7 @@ namespace assembly {
 
 					NIK_ASSEMBLY_TEMPLATE(c, ki)
 						::NIK_ASSEMBLY_RESULT_3TS(c, ki, l, t, r, LT, T_store_U<LUs>..., Out*)
-							(lv, lvs..., &out); // tone next
+							(lv, lvs..., &out); // cond (next)
 
 					match = true;
 					break;
@@ -711,7 +712,7 @@ namespace assembly {
 		{
 			nik_ce auto ni = AD<c>::pos(i);  // match
 			nik_ce auto mi = AD<c>::num(i);  // mutate
-			nik_ce auto li = AD<c>::aux0(i); // tone next
+			nik_ce auto li = AD<c>::aux0(i); // cond (next)
 
 			// no match
 			if (lv && NIK_ASSEMBLY_TEMPLATE_2WS(c, ni, p0, p1)
@@ -726,7 +727,7 @@ namespace assembly {
 
 				NIK_ASSEMBLY_TEMPLATE_2WS(c, li, p0, p1)
 					::NIK_ASSEMBLY_RESULT_3TS(c, li, l, t, r, LT, T_store_U<LUs>..., Out*)
-						(lv, lvs..., &out); // tone next
+						(lv, lvs..., &out); // cond (next)
 			}
 
 			return NIK_ASSEMBLY_TEMPLATE_2WS(c, i, p0, p1)
@@ -763,7 +764,7 @@ namespace assembly {
 			nik_ce auto ni = AD<c>::pos(i);  // predicate
 			nik_ce auto mi = AD<c>::num(i);  // match
 			nik_ce auto li = AD<c>::aux0(i); // mutate
-			nik_ce auto ki = AD<c>::aux1(i); // tone next
+			nik_ce auto ki = AD<c>::aux1(i); // cond (next)
 			nik_ce auto ji = AD<c>::aux2(i); // next
 
 			while (NIK_ASSEMBLY_TEMPLATE_2WS(c, ni, p0, p1)
@@ -782,7 +783,7 @@ namespace assembly {
 
 					NIK_ASSEMBLY_TEMPLATE(c, ki)
 						::NIK_ASSEMBLY_RESULT_2TS(c, ki, l, t, r, T_store_U<LUs>..., Out*)
-							(lvs..., &out); // tone next
+							(lvs..., &out); // cond (next)
 				}
 
 				NIK_ASSEMBLY_TEMPLATE(c, ji)
@@ -819,7 +820,7 @@ namespace assembly {
 		{
 			nik_ce auto ni = AD<c>::pos(i);  // match
 			nik_ce auto mi = AD<c>::num(i);  // mutate
-			nik_ce auto li = AD<c>::aux0(i); // tone next
+			nik_ce auto li = AD<c>::aux0(i); // cond (next)
 
 			if (NIK_ASSEMBLY_TEMPLATE_2WS(c, ni, p0, p1)
 				::NIK_ASSEMBLY_RESULT_3TS(c, ni, l, t, r,
@@ -833,7 +834,7 @@ namespace assembly {
 
 				NIK_ASSEMBLY_TEMPLATE_2WS(c, li, p0, p1)
 					::NIK_ASSEMBLY_RESULT_2TS(c, li, l, t, r, T_store_U<LUs>..., Out)
-						(lvs..., out); // tone next
+						(lvs..., out); // cond (next)
 			}
 
 			return NIK_ASSEMBLY_TEMPLATE_2WS(c, i, p0, p1)

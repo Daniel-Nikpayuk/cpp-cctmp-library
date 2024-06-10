@@ -577,7 +577,8 @@ namespace chord {
 
 				" NoTone -> empty          : cyc_tone_empty ;"
 				"FixTone -> < \\>          : cyc_tone_fixed ;"
-				"MatTone -> [ NoteIter \\> : cyc_tone_match ;"
+				"MatTone -> [ NoteIter \\> : cyc_tone_match ;"	// [> (cond interval) is intentional design:
+										// not left open, nor right open/closed.
 
 				"RestTone -> Tone    ;"
 				"         -> FixTone ;"

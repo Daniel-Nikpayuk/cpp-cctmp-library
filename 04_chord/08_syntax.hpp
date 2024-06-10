@@ -385,10 +385,20 @@ namespace chord {
 
 			nik_ce void define_find()
 			{
+				T_find_internal<size_type>::define(this, Ival::in);
+				internal_defs_end();
+
+				T_find_construct<size_type>::define(this);
+				interval.reset();
 			}
 
 			nik_ce void define_sift()
 			{
+				T_sift_internal<size_type>::define(this, Ival::in);
+				internal_defs_end();
+
+				T_sift_construct<size_type>::define(this);
+				interval.reset();
 			}
 	};
 

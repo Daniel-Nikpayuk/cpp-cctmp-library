@@ -130,6 +130,7 @@
 	}
 */
 
+/*
 	constexpr auto _chord_test_func()
 	{
 		return source
@@ -150,6 +151,28 @@
 			"  return _                                        ;"
 
 			, binding("print", _print_)
+		);
+	}
+*/
+
+	constexpr auto _chord_test_func()
+	{
+		return source
+		(
+			"main out in end                         ;"
+
+			"vars:                                   ;"
+			"  declare grthan2 chord_f               ;"
+
+			"defs:                                   ;"
+			"  grthan2 # curry[1]{less_than two}     ;" // yes, less than.
+			"  chord_f # find[1]{grthan2 *||} [> [,) ;"
+
+			"body:                                   ;"
+			"  . = chord_f !out in end               ;"
+			"  return _                              ;"
+
+			, binding("two", 2)
 		);
 	}
 
@@ -209,14 +232,18 @@
 	{
 	//	unit_test_chord_print_v0<gindex_type>();
 
-		using chord_size_type = int const*;
+		using chord_size_type = int**;
 		using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
 		using chord_arr_type  = sequence<int , 5>;
 
-		chord_arr_type s0({ 1, 2, 3, 4, 5 });
+		chord_arr_type s0({ 0, 1, 0, 4, 0 });
 		chord_arr_type s1({ 1, 2, 3, 4, 5 });
 
-		T_chord_apply::result(s0.begin(), s1.cbegin(), s1.cend(), strlit_type{"%d, "});
+		int* inhabit[1];
+
+		auto val = T_chord_apply::result(inhabit, s0.cbegin(), s0.cend());
+		printf("%s\n", (val != inhabit) ? "found" : "not found");
+		printf("(pos: %d, value: %d)\n", int(inhabit[0] - s0.cbegin()), *inhabit[0]);
 
 		//
 

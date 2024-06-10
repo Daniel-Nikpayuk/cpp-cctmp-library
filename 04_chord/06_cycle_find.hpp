@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// find:
+// cycle find:
 
 namespace chord {
 
@@ -85,6 +85,10 @@ namespace chord {
 		template<typename AST>
 		nik_ces void define(AST *t)
 		{
+			base::initialize_cond      (t);
+			base::define_next_note     (t , AST::Ival::out , Sign::out );
+			base::terminalize          (t);
+
 			base::initialize           (t);
 			base::define_next_note     (t , AST::Ival::in  , Sign::in  );
 			base::define_next_note_ifs (t , AST::Ival::ins , Sign::ins );
@@ -481,7 +485,7 @@ namespace chord {
 		using csize_type	= typename base::csize_type;
 
 		template<typename AST>
-		nik_ces void define(AST *t) { base::define_pred_act_comb_mut(t, AN::find); }
+		nik_ces void define(AST *t) { base::define_pred_mat_mut_cond_note(t, AN::find); }
 	};
 
 /***********************************************************************************************************************/
@@ -498,7 +502,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void define(AST *t)
 		{
-			base::define_act_comb_mut (t, AN::find);
+			base::define_mat_mut_cond (t, AN::find);
 			base::define_notes        (t);
 		}
 	};
@@ -645,7 +649,7 @@ namespace chord {
 		using csize_type	= typename base::csize_type;
 
 		template<typename AST>
-		nik_ces void define(AST *t) { base::define_act_comb_mut(t, AN::find); }
+		nik_ces void define(AST *t) { base::define_mat_mut_cond(t, AN::find); }
 	};
 
 /***********************************************************************************************************************/
@@ -677,7 +681,7 @@ namespace chord {
 		template<typename AST>
 		nik_ces void define(AST *t)
 		{
-			base::define_act_comb_mut (t, AN::find);
+			base::define_mat_mut_cond (t, AN::find);
 			base::define_notes        (t);
 		}
 	};

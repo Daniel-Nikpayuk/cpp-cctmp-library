@@ -180,6 +180,7 @@ namespace chord {
 			nik_ce auto not_left_fixed  () const { return (left_pt  != Point::fixed); }
 			nik_ce auto not_right_fixed () const { return (right_pt != Point::fixed); }
 			nik_ce auto not_fixed       () const { return (not_left_fixed() && not_right_fixed()); }
+								// [> (cond interval) is not fixed.
 
 			nik_ce auto is_left_open    () const { return (left_pt  == Point::open); }
 			nik_ce auto is_right_open   () const { return (right_pt == Point::open); }
@@ -357,8 +358,8 @@ namespace chord {
 
 				nik_ce void set_match()
 				{
-				//	interval.last()->set_left_closed();
-				//	interval.last()->set_right_fixed();
+					interval.last()->set_left_closed();
+					interval.last()->set_right_fixed();
 				}
 
 			// ival:
@@ -571,6 +572,9 @@ namespace chord {
 		template<typename AST>
 		nik_ces void initialize(AST *t) { base::initialize(t, AST::Iterate::loop); }
 
+		template<typename AST>
+		nik_ces void initialize_cond(AST *t) { base::initialize(t, AST::Iterate::cond); }
+
 		// next note:
 
 			template<typename AST>
@@ -778,10 +782,10 @@ namespace chord {
 		using size_type		= SizeType;
 		using csize_type	= size_type const;
 
-		// pred act mut:
+		// pred act mut note:
 
 			template<typename AST>
-			nik_ces void define_pred_act_mut(AST *t, csize_type name)
+			nik_ces void define_pred_act_mut_note(AST *t, csize_type name)
 			{
 				auto ni = t->get_predicate ();
 				auto mi = t->get_action    ();
@@ -791,15 +795,29 @@ namespace chord {
 				t->assembly_push_instr(name, AT::id, ni, mi, li, ki);
 			}
 
-		// pred act comb mut:
+		// pred act comb mut note:
 
 			template<typename AST>
-			nik_ces void define_pred_act_comb_mut(AST *t, csize_type name)
+			nik_ces void define_pred_act_comb_mut_note(AST *t, csize_type name)
 			{
 				auto ni = t->get_predicate ();
 				auto mi = t->get_action    ();
 				auto li = t->get_combine   ();
 				auto ki = t->get_mutate    ();
+				auto ji = t->iterate[AST::Iterate::loop];
+
+				t->assembly_push_instr(name, AT::id, ni, mi, li, ki, ji);
+			}
+
+		// pred mat mut cond note:
+
+			template<typename AST>
+			nik_ces void define_pred_mat_mut_cond_note(AST *t, csize_type name)
+			{
+				auto ni = t->get_predicate ();
+				auto mi = t->get_action    ();
+				auto li = t->get_mutate    ();
+				auto ki = t->iterate[AST::Iterate::cond];
 				auto ji = t->iterate[AST::Iterate::loop];
 
 				t->assembly_push_instr(name, AT::id, ni, mi, li, ki, ji);
@@ -815,16 +833,6 @@ namespace chord {
 	{
 		using size_type		= SizeType;
 		using csize_type	= size_type const;
-
-		// notes:
-
-			template<typename AST>
-			nik_ces void define_notes(AST *t)
-			{
-				auto ni = t->iterate[AST::Iterate::postloop];
-
-				t->assembly_push_instr(AN::cycle, AT::back, ni);
-			}
 
 		// act mut:
 
@@ -847,6 +855,28 @@ namespace chord {
 				auto li = t->get_mutate  ();
 
 				t->assembly_push_instr(name, AT::back, ni, mi, li);
+			}
+
+		// mat mut cond:
+
+			template<typename AST>
+			nik_ces void define_mat_mut_cond(AST *t, csize_type name)
+			{
+				auto ni = t->get_action ();
+				auto mi = t->get_mutate ();
+				auto li = t->iterate[AST::Iterate::cond];
+
+				t->assembly_push_instr(name, AT::back, ni, mi, li);
+			}
+
+		// notes:
+
+			template<typename AST>
+			nik_ces void define_notes(AST *t)
+			{
+				auto ni = t->iterate[AST::Iterate::postloop];
+
+				t->assembly_push_instr(AN::cycle, AT::back, ni);
 			}
 	};
 

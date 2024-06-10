@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// sift:
+// cycle sift:
 
 namespace chord {
 
@@ -25,7 +25,90 @@ namespace chord {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// translation:
+// spec:
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename SizeType>
+	struct T_sift_signature
+	{
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		enum : size_type { out, in, end, ins, dimension };
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// internal (construct):
+
+/***********************************************************************************************************************/
+
+// precycle:
+
+	template<typename SizeType>
+	struct T_sift_internal_precycle : public T_internal_precycle<SizeType>
+	{
+		using base		= T_internal_precycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		using Sign		= T_sift_signature<size_type>;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::initialize_if             (t);
+			base::define_next_note_if       (t , AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs_fast (t , AST::Ival::ins , Sign::ins );
+			base::terminalize_if            (t);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// cycle:
+
+	template<typename SizeType>
+	struct T_sift_internal_cycle : public T_internal_cycle<SizeType>
+	{
+		using base		= T_internal_cycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		using Sign		= T_sift_signature<size_type>;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::initialize_cond      (t);
+			base::define_next_note     (t , AST::Ival::out , Sign::out );
+			base::terminalize          (t);
+
+			base::initialize           (t);
+			base::define_next_note     (t , AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs (t , AST::Ival::ins , Sign::ins );
+			base::terminalize          (t);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// postcycle:
+
+	template<typename SizeType>
+	struct T_sift_internal_postcycle
+	{
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		template<typename AST>
+		nik_ces void define(AST *t) { } // do nothing.
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -36,64 +119,178 @@ namespace chord {
 
 // precycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_sift_internal_major_precycle : public T_sift_internal_precycle<SizeType> { };
 
 // cycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_sift_internal_major_cycle : public T_sift_internal_cycle<SizeType> { };
 
 // postcycle:
 
+	template<typename SizeType>
+	struct T_sift_internal_major_postcycle : public T_sift_internal_postcycle<SizeType> { };
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// augmented tonic:
+// (augmented) tonic:
 
 /***********************************************************************************************************************/
 
 // precycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_sift_internal_tonic_precycle : public T_internal_precycle<SizeType>
+	{
+		using base		= T_internal_precycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		using Sign		= T_sift_signature<size_type>;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::initialize           (t);
+			base::define_next_note_if  (t , AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs (t , AST::Ival::ins , Sign::ins );
+			base::define_prev_tonic    (t , AST::Ival::in  , Sign::end );
+			base::terminalize          (t);
+		}
+	};
 
 // cycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_sift_internal_tonic_cycle : public T_sift_internal_cycle<SizeType> { };
 
 // postcycle:
 
+	template<typename SizeType>
+	struct T_sift_internal_tonic_postcycle : public T_internal_postcycle<SizeType>
+	{
+		using base		= T_internal_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		using Sign		= T_sift_signature<size_type>;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::initialize           (t);
+			base::define_next_note     (t , AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs (t , AST::Ival::ins , Sign::ins );
+			base::define_next_tonic    (t , AST::Ival::in  , Sign::end );
+			base::terminalize          (t);
+		}
+	};
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// augmented tone:
+// (augmented) tone:
 
 /***********************************************************************************************************************/
 
 // precycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_sift_internal_tone_precycle : public T_sift_internal_precycle<SizeType> { };
 
 // cycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_sift_internal_tone_cycle : public T_sift_internal_cycle<SizeType> { };
 
 // postcycle:
 
+	template<typename SizeType>
+	struct T_sift_internal_tone_postcycle : public T_internal_postcycle<SizeType>
+	{
+		using base		= T_internal_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		using Sign		= T_sift_signature<size_type>;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::initialize           (t);
+			base::define_prev_note_ifs (t , AST::Ival::ins , Sign::ins );
+			base::terminalize          (t);
+		}
+	};
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// augmented peek:
+// (augmented) peek:
 
 /***********************************************************************************************************************/
 
 // precycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_sift_internal_peek_precycle : public T_sift_internal_precycle<SizeType> { };
 
 // cycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_sift_internal_peek_cycle : public T_sift_internal_cycle<SizeType>
+	{
+		using base		= T_sift_internal_cycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		using Sign		= T_sift_signature<size_type>;
+
+		template<typename AST>
+		nik_ces void define(AST *t) // fix after dsl engine overhaul!
+		{
+		//	base::define(t);
+
+		//	auto pred_ni = t->get_predicate();
+		//	auto next_ni = t->interval.note_contr_pos(AST::Ival::in, AST::Iter::next);
+
+		//	nik_ce auto arity = 2;
+
+		//	t->set_predicate();
+		//	t->act_subpose_begin(arity);
+
+		//	t->set_routine();
+		//	t->apply_pound_begin(pred_ni);
+		//	t->lookup_return(s); // would need to be streamlined.
+
+		//	t->subpose_value(t->cselect_id());
+		//	t->subpose_value(t->cselect_id());
+		//	t->act_subpose_end();
+		}
+	};
 
 // postcycle:
+
+	template<typename SizeType>
+	struct T_sift_internal_peek_postcycle : public T_internal_postcycle<SizeType>
+	{
+		using base		= T_internal_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		using Sign		= T_sift_signature<size_type>;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::initialize           (t);
+			base::define_next_note     (t , AST::Ival::in  , Sign::in  );
+			base::define_next_note_ifs (t , AST::Ival::ins , Sign::ins );
+			base::terminalize          (t);
+		}
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -104,13 +301,18 @@ namespace chord {
 
 // precycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_sift_internal_diminished_precycle : public T_sift_internal_precycle<SizeType> { };
 
 // cycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_sift_internal_diminished_cycle : public T_sift_internal_cycle<SizeType> { };
 
 // postcycle:
+
+	template<typename SizeType>
+	struct T_sift_internal_diminished_postcycle : public T_sift_internal_postcycle<SizeType> { };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -121,509 +323,465 @@ namespace chord {
 
 // precycle:
 
+	template<typename SizeType>
+	struct T_sift_internal_minor_precycle : public T_sift_internal_precycle<SizeType> { };
+
+// cycle:
+
+	template<typename SizeType>
+	struct T_sift_internal_minor_cycle : public T_sift_internal_cycle<SizeType> { };
+
+// postcycle:
+
+	template<typename SizeType>
+	struct T_sift_internal_minor_postcycle : public T_internal_postcycle<SizeType>
+	{
+		using base		= T_internal_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		using Sign		= T_sift_signature<size_type>;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::initialize           (t);
+			base::define_next_note_ifs (t , AST::Ival::ins , Sign::ins );
+			base::terminalize          (t);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// routine:
+
+/***********************************************************************************************************************/
+
+// major:
+
+	template<typename SizeType>
+	struct T_sift_internal_routine_major
+	{
+		using precycle		= T_sift_internal_major_precycle  <SizeType>;
+		using cycle		= T_sift_internal_major_cycle     <SizeType>;
+		using postcycle		= T_sift_internal_major_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// tonic:
+
+	template<typename SizeType>
+	struct T_sift_internal_routine_tonic
+	{
+		using precycle		= T_sift_internal_tonic_precycle  <SizeType>;
+		using cycle		= T_sift_internal_tonic_cycle     <SizeType>;
+		using postcycle		= T_sift_internal_tonic_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// tone:
+
+	template<typename SizeType>
+	struct T_sift_internal_routine_tone
+	{
+		using precycle		= T_sift_internal_tone_precycle  <SizeType>;
+		using cycle		= T_sift_internal_tone_cycle     <SizeType>;
+		using postcycle		= T_sift_internal_tone_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// peek:
+
+	template<typename SizeType>
+	struct T_sift_internal_routine_peek
+	{
+		using precycle		= T_sift_internal_peek_precycle  <SizeType>;
+		using cycle		= T_sift_internal_peek_cycle     <SizeType>;
+		using postcycle		= T_sift_internal_peek_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// diminished:
+
+	template<typename SizeType>
+	struct T_sift_internal_routine_diminished
+	{
+		using precycle		= T_sift_internal_diminished_precycle  <SizeType>;
+		using cycle		= T_sift_internal_diminished_cycle     <SizeType>;
+		using postcycle		= T_sift_internal_diminished_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// minor:
+
+	template<typename SizeType>
+	struct T_sift_internal_routine_minor
+	{
+		using precycle		= T_sift_internal_minor_precycle  <SizeType>;
+		using cycle		= T_sift_internal_minor_cycle     <SizeType>;
+		using postcycle		= T_sift_internal_minor_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename SizeType>
+	struct T_sift_internal_routine
+	{
+		using major		= T_sift_internal_routine_major      <SizeType>;
+
+		using tonic		= T_sift_internal_routine_tonic      <SizeType>;
+		using tone		= T_sift_internal_routine_tone       <SizeType>;
+		using peek		= T_sift_internal_routine_peek       <SizeType>;
+
+		using diminished	= T_sift_internal_routine_diminished <SizeType>;
+		using minor		= T_sift_internal_routine_minor      <SizeType>;
+	};
+
+	template<typename SizeType>
+	using T_sift_internal = T_internal_routine<T_sift_internal_routine, SizeType>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// construct:
+
+/***********************************************************************************************************************/
+
+// precycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_precycle : public T_construct_precycle<SizeType>
+	{
+		using base		= T_construct_precycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::define_notes_if (t);
+			base::define_prepack  (t);
+		}
+	};
+
 /***********************************************************************************************************************/
 
 // cycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_cycle : public T_construct_cycle<SizeType>
+	{
+		using base		= T_construct_cycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		template<typename AST>
+		nik_ces void define(AST *t) { base::define_pred_mat_mut_cond_note(t, AN::sift); }
+	};
 
 /***********************************************************************************************************************/
 
 // postcycle:
 
-/***********************************************************************************************************************/
+	template<typename SizeType>
+	struct T_sift_construct_postcycle : public T_construct_postcycle<SizeType>
+	{
+		using base		= T_construct_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::define_mat_mut_cond (t, AN::sift);
+			base::define_notes        (t);
+		}
+	};
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// one cycle:
+// major:
 
 /***********************************************************************************************************************/
 
-// repeat:
+// precycle:
 
 	template<typename SizeType>
-	struct T_chord_repeat
+	struct T_sift_construct_major_precycle : public T_sift_construct_precycle<SizeType> { };
+
+// cycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_major_cycle : public T_sift_construct_cycle<SizeType> { };
+
+// postcycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_major_postcycle
 	{
 		using size_type		= SizeType;
 		using csize_type	= size_type const;
 
-		using define_iter	= T_chord_define_iter    <size_type>;
-		using define_note	= T_chord_define_note    <size_type>;
-		using define_note_if	= T_chord_define_note_if <size_type>;
+		template<typename AST>
+		nik_ces void define(AST *t) { } // do nothing.
+	};
 
-		using left_open		= T_chord_predicate_is_left_open;
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-		nik_ces size_type name	= AN::repeat;
+// (augmented) tonic:
 
-		struct Ival { enum : size_type { out, root = out, ins, dimension }; };
-		struct Sign { enum : size_type { out, end, ins, dimension }; };
+/***********************************************************************************************************************/
 
-		// internal:
+// precycle:
 
-			// precycle:
+	template<typename SizeType>
+	struct T_sift_construct_tonic_precycle : public T_construct_precycle<SizeType>
+	{
+		using base		= T_construct_precycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
 
-				template<typename AST>
-				nik_ces void define_internal_precycle(AST *t)
-				{
-					// make conditional ?
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::define_notes   (t);
+			base::define_prepack (t);
+		}
+	};
 
-					define_iter    ::init(t, AST::Iterate::front);
-					define_note_if ::template next_out<left_open, T_chord_repeat>(t);
-					define_iter    ::term(t);
-				};
+// cycle:
 
-			// cycle:
+	template<typename SizeType>
+	struct T_sift_construct_tonic_cycle : public T_sift_construct_cycle<SizeType> { };
 
-				template<typename AST>
-				nik_ces void define_internal_cycle(AST *t)
-				{
-					define_iter ::init(t, AST::Iterate::loop);
-					define_note ::template next_out<T_chord_repeat>(t);
-					define_iter ::term(t);
-				};
+// postcycle:
 
-			// postcycle:
+	template<typename SizeType>
+	struct T_sift_construct_tonic_postcycle : public T_sift_construct_postcycle<SizeType> { };
 
-				// not required.
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-			// action:
+// (augmented) tone:
 
-				template<typename AST>
-				nik_ces void define_internal_action(AST *t)
-				{
-				//	define_internal_precycle (t);
-					define_internal_cycle    (t);
-				};
+/***********************************************************************************************************************/
 
-		// loop action:
+// precycle:
 
-			template<typename AST>
-			nik_ces void define_loop_action(AST *t)
-			{
-				auto ni = t->get_predicate ();
-				auto mi = t->get_action    ();
-				auto li = t->get_mutate    ();
-				auto ki = t->iterate[AST::Iterate::loop];
+	template<typename SizeType>
+	struct T_sift_construct_tone_precycle : public T_sift_construct_precycle<SizeType> { };
 
-				t->assembly_push_instr(name, AT::id, ni, mi, li, ki);
-			}
+// cycle:
 
-		// back action:
+	template<typename SizeType>
+	struct T_sift_construct_tone_cycle : public T_sift_construct_cycle<SizeType> { };
 
-			template<typename AST>
-			nik_ces void define_back_action(AST *t)
-			{
-				auto ni = t->get_action();
-				auto mi = t->get_mutate();
+// postcycle:
 
-				t->assembly_push_instr(name, AT::back, ni, mi);
-			}
+	template<typename SizeType>
+	struct T_sift_construct_tone_postcycle : public T_construct_postcycle<SizeType>
+	{
+		using base		= T_construct_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		template<typename AST>
+		nik_ces void define(AST *t) { base::define_notes(t); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// (augmented) peek:
+
+/***********************************************************************************************************************/
+
+// precycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_peek_precycle : public T_sift_construct_precycle<SizeType> { };
+
+// cycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_peek_cycle : public T_sift_construct_cycle<SizeType> { };
+
+// postcycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_peek_postcycle : public T_sift_construct_postcycle<SizeType> { };
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// diminished:
+
+/***********************************************************************************************************************/
+
+// precycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_diminished_precycle : public T_sift_construct_precycle<SizeType> { };
+
+// cycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_diminished_cycle : public T_sift_construct_cycle<SizeType> { };
+
+// postcycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_diminished_postcycle : public T_construct_postcycle<SizeType>
+	{
+		using base		= T_construct_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		template<typename AST>
+		nik_ces void define(AST *t) { base::define_mat_mut_cond(t, AN::sift); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// minor:
+
+/***********************************************************************************************************************/
+
+// precycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_minor_precycle : public T_sift_construct_precycle<SizeType> { };
+
+// cycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_minor_cycle : public T_sift_construct_cycle<SizeType> { };
+
+// postcycle:
+
+	template<typename SizeType>
+	struct T_sift_construct_minor_postcycle : public T_construct_postcycle<SizeType>
+	{
+		using base		= T_construct_postcycle<SizeType>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
+
+		template<typename AST>
+		nik_ces void define(AST *t)
+		{
+			base::define_mat_mut_cond (t, AN::sift);
+			base::define_notes        (t);
+		}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// routine:
+
+/***********************************************************************************************************************/
+
+// major:
+
+	template<typename SizeType>
+	struct T_sift_construct_routine_major
+	{
+		using precycle		= T_sift_construct_major_precycle  <SizeType>;
+		using cycle		= T_sift_construct_major_cycle     <SizeType>;
+		using postcycle		= T_sift_construct_major_postcycle <SizeType>;
 	};
 
 /***********************************************************************************************************************/
 
-// map:
+// tonic:
 
 	template<typename SizeType>
-	struct T_chord_map
+	struct T_sift_construct_routine_tonic
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		using define_iter	= T_chord_define_iter    <size_type>;
-		using define_note	= T_chord_define_note    <size_type>;
-		using define_note_if	= T_chord_define_note_if <size_type>;
-		using extend_pred_if	= T_chord_extend_pred_if <size_type>;
-
-		using not_fixed		= T_chord_predicate_not_fixed;
-		using left_open		= T_chord_predicate_is_left_open;
-		using right_open	= T_chord_predicate_is_right_open;
-		using right_closed	= T_chord_predicate_is_right_closed;
-		using aug_tonic		= T_chord_predicate_is_augmented_tonic;
-		using aug_peek		= T_chord_predicate_is_augmented_peek;
-
-		nik_ces size_type name	= AN::map;
-
-		struct Ival { enum : size_type { out, in, root = in, ins, dimension }; };
-		struct Sign { enum : size_type { out, in, end, ins, dimension }; };
-
-		// internal:
-
-			// precycle:
-
-				template<typename AST>
-				nik_ces void define_internal_precycle(AST *t)
-				{
-					define_iter    ::init(t, AST::Iterate::front);
-					define_note_if ::template next_out < left_open , T_chord_map >(t);
-					define_note_if ::template next_in  < left_open , T_chord_map >(t);
-					define_note_if ::template next_ins < left_open , T_chord_map >(t);
-					define_note_if ::template prev_end < aug_tonic , T_chord_map >(t);
-					define_iter    ::term(t);
-				};
-
-			// cycle:
-
-				template<typename AST>
-				nik_ces void define_internal_cycle(AST *t)
-				{
-					define_iter    ::init(t, AST::Iterate::loop);
-					define_note    ::template next_out<T_chord_map>(t);
-					define_note    ::template next_in<T_chord_map>(t);
-					define_note_if ::template next_ins<not_fixed, T_chord_map>(t);
-					define_iter    ::term(t);
-
-					extend_pred_if ::template peek_in<aug_peek, T_chord_map>(t);
-				};
-
-			// postcycle:
-
-				// augmented:
-
-					template<typename AST>
-					nik_ces void define_internal_augmented_tone(AST *t)
-						{ define_note_if::template prev_ins<right_closed, T_chord_map>(t); };
-
-					template<typename AST>
-					nik_ces void define_internal_augmented_not_tone(AST *t)
-					{
-						define_note_if ::template next_out<right_open, T_chord_map>(t);
-						define_note    ::template next_in<T_chord_map>(t);
-						define_note_if ::template next_ins<right_open, T_chord_map>(t);
-						define_note_if ::template next_end<aug_tonic, T_chord_map>(t);
-					};
-
-					template<typename AST>
-					nik_ces void define_internal_augmented(AST *t)
-					{
-						define_iter::init(t, AST::Iterate::back);
-
-						if (t->interval.is_tone()) define_internal_augmented_tone     (t);
-						else                       define_internal_augmented_not_tone (t);
-
-						define_iter::term(t);
-					};
-
-				// minor:
-
-					template<typename AST>
-					nik_ces void define_internal_minor(AST *t)
-					{
-						define_iter    ::init(t, AST::Iterate::back);
-						define_note_if ::template next_out<right_open, T_chord_map>(t);
-						define_note_if ::template next_ins<right_open, T_chord_map>(t);
-						define_iter    ::term(t);
-					};
-
-				template<typename AST>
-				nik_ces void define_internal_postcycle(AST *t)
-				{
-					if      (t->interval.is_augmented ()) define_internal_augmented (t);
-					else if (t->interval.is_minor     ()) define_internal_minor     (t);
-				};
-
-			// action:
-
-				template<typename AST>
-				nik_ces void define_internal_action(AST *t)
-				{
-					define_internal_precycle  (t);
-					define_internal_cycle     (t);
-					define_internal_postcycle (t);
-				};
-
-		// loop action:
-
-			template<typename AST>
-			nik_ces void define_loop_action(AST *t)
-			{
-				auto ni = t->get_predicate ();
-				auto mi = t->get_action    ();
-				auto li = t->get_mutate    ();
-				auto ki = t->iterate[AST::Iterate::loop];
-
-				t->assembly_push_instr(name, AT::id, ni, mi, li, ki);
-			}
-
-		// back action:
-
-			template<typename AST>
-			nik_ces void define_back_action(AST *t)
-			{
-				auto ni = t->get_action();
-				auto mi = t->get_mutate();
-
-				t->assembly_push_instr(name, AT::back, ni, mi);
-			}
+		using precycle		= T_sift_construct_tonic_precycle  <SizeType>;
+		using cycle		= T_sift_construct_tonic_cycle     <SizeType>;
+		using postcycle		= T_sift_construct_tonic_postcycle <SizeType>;
 	};
 
 /***********************************************************************************************************************/
 
-// find:
+// tone:
 
 	template<typename SizeType>
-	struct T_chord_find
+	struct T_sift_construct_routine_tone
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		using define_iter	= T_chord_define_iter    <size_type>;
-		using define_note	= T_chord_define_note    <size_type>;
-		using define_note_if	= T_chord_define_note_if <size_type>;
-		using extend_pred_if	= T_chord_extend_pred_if <size_type>;
-
-		using not_fixed		= T_chord_predicate_not_fixed;
-		using left_open		= T_chord_predicate_is_left_open;
-		using right_open	= T_chord_predicate_is_right_open;
-		using right_closed	= T_chord_predicate_is_right_closed;
-		using aug_tonic		= T_chord_predicate_is_augmented_tonic;
-		using aug_peek		= T_chord_predicate_is_augmented_peek;
-
-		nik_ces size_type name	= AN::find;
-
-		struct Ival { enum : size_type { out, in, root = in, ins, dimension }; };
-		struct Sign { enum : size_type { out, in, end, ins, dimension }; };
-
-		// internal:
-
-			// precycle:
-
-				template<typename AST>
-				nik_ces void define_internal_precycle(AST *t)
-				{
-					define_iter    ::init(t, AST::Iterate::front);
-					define_note_if ::template next_in  < left_open , T_chord_find >(t);
-					define_note_if ::template next_ins < left_open , T_chord_find >(t);
-					define_note_if ::template prev_end < aug_tonic , T_chord_find >(t);
-					define_iter    ::term(t);
-				};
-
-			// cycle:
-
-				template<typename AST>
-				nik_ces void define_internal_cycle(AST *t)
-				{
-					define_iter    ::init(t, AST::Iterate::loop);
-					define_note    ::template next_in<T_chord_find>(t);
-					define_note_if ::template next_ins<not_fixed, T_chord_find>(t);
-					define_iter    ::term(t);
-
-					extend_pred_if ::template peek_in<aug_peek, T_chord_find>(t);
-				};
-
-			// postcycle:
-
-				// augmented:
-
-					template<typename AST>
-					nik_ces void define_internal_augmented_tone(AST *t)
-						{ define_note_if::template prev_ins<right_closed, T_chord_find>(t); };
-
-					template<typename AST>
-					nik_ces void define_internal_augmented_not_tone(AST *t)
-					{
-						define_note    ::template next_in<T_chord_find>(t);
-						define_note_if ::template next_ins<right_open, T_chord_find>(t);
-						define_note_if ::template next_end<aug_tonic, T_chord_find>(t);
-					};
-
-					template<typename AST>
-					nik_ces void define_internal_augmented(AST *t)
-					{
-						define_iter::init(t, AST::Iterate::back);
-
-						if (t->interval.is_tone()) define_internal_augmented_tone     (t);
-						else                       define_internal_augmented_not_tone (t);
-
-						define_iter::term(t);
-					};
-
-				// minor:
-
-					template<typename AST>
-					nik_ces void define_internal_minor(AST *t)
-					{
-						define_iter    ::init(t, AST::Iterate::back);
-						define_note_if ::template next_ins<right_open, T_chord_find>(t);
-						define_iter    ::term(t);
-					};
-
-				template<typename AST>
-				nik_ces void define_internal_postcycle(AST *t)
-				{
-					if      (t->interval.is_augmented ()) define_internal_augmented (t);
-					else if (t->interval.is_minor     ()) define_internal_minor     (t);
-				};
-
-			// action:
-
-				template<typename AST>
-				nik_ces void define_internal_action(AST *t)
-				{
-					define_internal_precycle  (t);
-					define_internal_cycle     (t);
-					define_internal_postcycle (t);
-				};
-
-		// loop action:
-
-			template<typename AST>
-			nik_ces void define_loop_action(AST *t)
-			{
-				auto ni = t->get_predicate ();
-				auto mi = t->get_action    ();
-				auto li = t->get_mutate    ();
-				auto ki = t->iterate[AST::Iterate::loop]; // debugging, tone next (out).
-				auto ji = t->iterate[AST::Iterate::loop];
-
-				t->assembly_push_instr(name, AT::id, ni, mi, li, ki, ji);
-			}
-
-		// back action:
-
-			template<typename AST>
-			nik_ces void define_back_action(AST *t)
-			{
-				auto ni = t->get_action();
-				auto mi = t->get_mutate();
-				auto li = t->iterate[AST::Iterate::loop]; // debugging, tone next (out).
-
-				t->assembly_push_instr(name, AT::back, ni, mi, li);
-			}
+		using precycle		= T_sift_construct_tone_precycle  <SizeType>;
+		using cycle		= T_sift_construct_tone_cycle     <SizeType>;
+		using postcycle		= T_sift_construct_tone_postcycle <SizeType>;
 	};
 
 /***********************************************************************************************************************/
 
-// sift:
+// peek:
 
 	template<typename SizeType>
-	struct T_chord_sift
+	struct T_sift_construct_routine_peek
 	{
-		using size_type		= SizeType;
-		using csize_type	= size_type const;
-
-		using define_iter	= T_chord_define_iter    <size_type>;
-		using define_note	= T_chord_define_note    <size_type>;
-		using define_note_if	= T_chord_define_note_if <size_type>;
-		using extend_pred_if	= T_chord_extend_pred_if <size_type>;
-
-		using not_fixed		= T_chord_predicate_not_fixed;
-		using left_open		= T_chord_predicate_is_left_open;
-		using right_open	= T_chord_predicate_is_right_open;
-		using right_closed	= T_chord_predicate_is_right_closed;
-		using aug_tonic		= T_chord_predicate_is_augmented_tonic;
-		using aug_peek		= T_chord_predicate_is_augmented_peek;
-
-		nik_ces size_type name	= AN::sift;
-
-		struct Ival { enum : size_type { out, in, root = in, ins, dimension }; };
-		struct Sign { enum : size_type { out, in, end, ins, dimension }; };
-
-		// internal:
-
-			// precycle:
-
-				template<typename AST>
-				nik_ces void define_internal_precycle(AST *t)
-				{
-					define_iter    ::init(t, AST::Iterate::front);
-					define_note_if ::template next_in  < left_open , T_chord_sift >(t);
-					define_note_if ::template next_ins < left_open , T_chord_sift >(t);
-					define_note_if ::template prev_end < aug_tonic , T_chord_sift >(t);
-					define_iter    ::term(t);
-				};
-
-			// cycle:
-
-				template<typename AST>
-				nik_ces void define_internal_cycle(AST *t)
-				{
-					define_iter    ::init(t, AST::Iterate::loop);
-					define_note    ::template next_in<T_chord_sift>(t);
-					define_note_if ::template next_ins<not_fixed, T_chord_sift>(t);
-					define_iter    ::term(t);
-
-					extend_pred_if ::template peek_in<aug_peek, T_chord_sift>(t);
-				};
-
-			// postcycle:
-
-				// augmented:
-
-					template<typename AST>
-					nik_ces void define_internal_augmented_tone(AST *t)
-						{ define_note_if::template prev_ins<right_closed, T_chord_sift>(t); };
-
-					template<typename AST>
-					nik_ces void define_internal_augmented_not_tone(AST *t)
-					{
-						define_note    ::template next_in<T_chord_sift>(t);
-						define_note_if ::template next_ins<right_open, T_chord_sift>(t);
-						define_note_if ::template next_end<aug_tonic, T_chord_sift>(t);
-					};
-
-					template<typename AST>
-					nik_ces void define_internal_augmented(AST *t)
-					{
-						define_iter::init(t, AST::Iterate::back);
-
-						if (t->interval.is_tone()) define_internal_augmented_tone     (t);
-						else                       define_internal_augmented_not_tone (t);
-
-						define_iter::term(t);
-					};
-
-				// minor:
-
-					template<typename AST>
-					nik_ces void define_internal_minor(AST *t)
-					{
-						define_iter    ::init(t, AST::Iterate::back);
-						define_note_if ::template next_ins<right_open, T_chord_sift>(t);
-						define_iter    ::term(t);
-					};
-
-				template<typename AST>
-				nik_ces void define_internal_postcycle(AST *t)
-				{
-					if      (t->interval.is_augmented ()) define_internal_augmented (t);
-					else if (t->interval.is_minor     ()) define_internal_minor     (t);
-				};
-
-			// action:
-
-				template<typename AST>
-				nik_ces void define_internal_action(AST *t)
-				{
-					define_internal_precycle  (t);
-					define_internal_cycle     (t);
-					define_internal_postcycle (t);
-				};
-
-		// loop action:
-
-			template<typename AST>
-			nik_ces void define_loop_action(AST *t)
-			{
-				auto ni = t->get_predicate ();
-				auto mi = t->get_action    ();
-				auto li = t->get_mutate    ();
-				auto ki = t->iterate[AST::Iterate::loop]; // debugging, tone next (out).
-				auto ji = t->iterate[AST::Iterate::loop];
-
-				t->assembly_push_instr(name, AT::id, ni, mi, li, ki, ji);
-			}
-
-		// back action:
-
-			template<typename AST>
-			nik_ces void define_back_action(AST *t)
-			{
-				auto ni = t->get_action();
-				auto mi = t->get_mutate();
-				auto li = t->iterate[AST::Iterate::loop]; // debugging, tone next (out).
-
-				t->assembly_push_instr(name, AT::back, ni, mi, li);
-			}
+		using precycle		= T_sift_construct_peek_precycle  <SizeType>;
+		using cycle		= T_sift_construct_peek_cycle     <SizeType>;
+		using postcycle		= T_sift_construct_peek_postcycle <SizeType>;
 	};
+
+/***********************************************************************************************************************/
+
+// diminished:
+
+	template<typename SizeType>
+	struct T_sift_construct_routine_diminished
+	{
+		using precycle		= T_sift_construct_diminished_precycle  <SizeType>;
+		using cycle		= T_sift_construct_diminished_cycle     <SizeType>;
+		using postcycle		= T_sift_construct_diminished_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// minor:
+
+	template<typename SizeType>
+	struct T_sift_construct_routine_minor
+	{
+		using precycle		= T_sift_construct_minor_precycle  <SizeType>;
+		using cycle		= T_sift_construct_minor_cycle     <SizeType>;
+		using postcycle		= T_sift_construct_minor_postcycle <SizeType>;
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename SizeType>
+	struct T_sift_construct_routine
+	{
+		using major		= T_sift_construct_routine_major      <SizeType>;
+
+		using tonic		= T_sift_construct_routine_tonic      <SizeType>;
+		using tone		= T_sift_construct_routine_tone       <SizeType>;
+		using peek		= T_sift_construct_routine_peek       <SizeType>;
+
+		using diminished	= T_sift_construct_routine_diminished <SizeType>;
+		using minor		= T_sift_construct_routine_minor      <SizeType>;
+	};
+
+	template<typename SizeType>
+	using T_sift_construct = T_construct_routine<T_sift_construct_routine, SizeType>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
