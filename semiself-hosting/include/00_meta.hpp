@@ -17,10 +17,13 @@
 **
 ************************************************************************************************************************/
 
-#include"../01_assembly/00_space.hpp"
-#include"../01_assembly/01_constant.hpp"
-#include"../01_assembly/02_application.hpp"
-#include"../01_assembly/03_conditional.hpp"
-#include"../01_assembly/04_action.hpp"
-#include"../01_assembly/05_syntax.hpp"
+#include"../00_meta/00_grammar.hpp"
+#include"../00_meta/01_argument.hpp"
+#include"../00_meta/02_parameter.hpp"
+#include"../00_meta/03_variadic.hpp"
+//#include"../00_meta/04_scope.hpp"
+//#include"../00_meta/05_relation.hpp"
+//#include"../00_meta/06_algorithm.hpp"
+//#include"../00_meta/07_machine.hpp"
+//#include"../00_meta/08_graph.hpp"
 

@@ -3819,6 +3819,98 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+	// Note: this does not compile because
+	// it is attempting to recurse without
+	// knowing the return type beforehand.
+
+	constexpr auto _chord_test_func()
+	{
+		return source
+		(
+			"main x             ;"
+
+			"body:              ;"
+			" test equal x 0    ;"
+			" branch body       ;"
+			"  . = multiply x x ;"
+			" return _          ;"
+		);
+	}
+
+/***********************************************************************************************************************/
+
+	// compiles, but segfaults!
+
+	constexpr auto _chord_test_func()
+	{
+		return source
+		(
+			"type T             ;"
+			"factorial n -> T   ;"
+
+			"body:              ;"
+			"  test equal n 0   ;"
+			"  branch done      ;"
+			"  . = factorial n  ;"
+			"  return _         ;"
+
+			"done:              ;"
+			"  return 1:T       ;"
+		);
+	}
+
+/***********************************************************************************************************************/
+
+	// also compiles, and segfaults!
+
+	constexpr auto _chord_test_func()
+	{
+		return source
+		(
+			"type T             ;"
+			"factorial n -> T   ;"
+
+			"body:              ;"
+			"  test equal n 0   ;"
+			"  branch done      ;"
+			"  . = add n 1      ;"
+			"  . = factorial _  ;"
+			"  return _         ;"
+
+			"done:              ;"
+			"  return 1:T       ;"
+		);
+	}
+
+/***********************************************************************************************************************/
+
+	// works!
+
+	template<auto...> struct pack;
+
+	template<        auto U, auto V> auto operator + (pack<0, 0, U> &, pack<V> &) -> pack<  0, 0, U> &;
+	template<        auto U, auto V> auto operator + (pack<0, 1, U> &, pack<V> &) -> pack<  0, 0, V> &;
+	template<auto n, auto U, auto V> auto operator + (pack<n, 1, U> &, pack<V> &) -> pack<n-1, 1, U> &;
+
+	template<auto n, auto... Vs>
+	constexpr static auto at = U_store_T<decltype((*(pack<n, 1, 0>*) 0 + ... + *(pack<Vs>*) 0))>;
+
+/***********************************************************************************************************************/
+
+	// works!
+
+	template<auto...> struct pack;
+
+	template<        auto... Vs        > auto operator + (pack<0, Vs...> &, pack< > &) -> pack<     Vs...   >  ;
+	template<        auto... Vs, auto V> auto operator + (pack<0, Vs...> &, pack<V> &) -> pack<  0, Vs...   > &;
+	template<auto n, auto... Vs, auto V> auto operator + (pack<n, Vs...> &, pack<V> &) -> pack<n-1, Vs..., V> &;
+
+	template<auto n, auto... Vs>
+	constexpr auto left = U_store_T<decltype((*(pack<n>*) 0 + ... + *(pack<Vs>*) 0) + *(pack<>*) 0)>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 } // case studies

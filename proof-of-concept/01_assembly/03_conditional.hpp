@@ -664,10 +664,15 @@ namespace assembly {
 						LT, T_store_U<LUs>..., In, T_store_U<IUs>...)
 							(lv, lvs..., in, ins...)) // match
 				{
+				//	NIK_ASSEMBLY_TEMPLATE_2WS(c, li, p0, p1)
+				//		::NIK_ASSEMBLY_RESULT_5TS(c, li, l, t, r,
+				//			LT, T_store_U<LUs>..., Out, In, T_store_U<IUs>...)
+				//				(lv, lvs..., out, in, ins...); // mutate
+
 					NIK_ASSEMBLY_TEMPLATE_2WS(c, li, p0, p1)
-						::NIK_ASSEMBLY_RESULT_5TS(c, li, l, t, r,
-							LT, T_store_U<LUs>..., Out, In, T_store_U<IUs>...)
-								(lv, lvs..., out, in, ins...); // mutate
+						::NIK_ASSEMBLY_RESULT_4TS(c, li, l, t, r,
+							LT, T_store_U<LUs>..., Out, In)
+								(lv, lvs..., out, in); // mutate
 
 					NIK_ASSEMBLY_TEMPLATE(c, ki)
 						::NIK_ASSEMBLY_RESULT_3TS(c, ki, l, t, r, LT, T_store_U<LUs>..., Out*)

@@ -131,6 +131,8 @@ namespace assembly {
 	using MAN						= cctmp::MAN;
 	using MAT						= cctmp::MAT;
 
+	using instr_type					= cctmp::instr_type;
+
 	// syntactic sugar:
 
 		template<auto U>
@@ -161,6 +163,11 @@ namespace assembly {
 			go_to   , branch     , invert   , loop   ,			// 14
 			cycle   , next       , set      ,				// 18
 			repeat  , map        , fold     , find   , sift   ,		// 21
+
+		// symbolic:
+
+			variable , value ,						// 26
+
 			dimension
 		};
 	};
@@ -182,6 +189,11 @@ namespace assembly {
 			push    , pull      , drop     ,		// 11
 			verse   , side      , replace  ,		// 14
 			inc     , dec       ,				// 17
+
+		// symbolic:
+
+			t_number , universe , lookup   ,		// 19
+
 			dimension
 		};
 	};

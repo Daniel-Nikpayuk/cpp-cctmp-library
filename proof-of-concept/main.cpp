@@ -41,8 +41,10 @@
 
 #include"undef_macros.hpp"
 
+#include"kernel/unit.hpp"
+
 //#include"testing/chord/assembly/unit_test.hpp"
-#include"testing/chord/progression/unit_test.hpp"
+//#include"testing/chord/progression/unit_test.hpp"
 //#include"testing/hustle/unit_test.hpp"
 
 //#include"experimental/00_generic_printers.hpp"
@@ -155,6 +157,7 @@
 	}
 */
 
+/*
 	constexpr auto _chord_test_func()
 	{
 		return source
@@ -175,6 +178,7 @@
 			, binding("two", 2)
 		);
 	}
+*/
 
 /***********************************************************************************************************************/
 
@@ -232,18 +236,22 @@
 	{
 	//	unit_test_chord_print_v0<gindex_type>();
 
-		using chord_size_type = int**;
-		using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
-		using chord_arr_type  = sequence<int , 5>;
+	//	using chord_size_type = unsigned char;
+	//	using T_chord_apply   = chord::T_apply<_chord_test_func, null_env, chord_size_type>;
+	//	using chord_arr_type  = sequence<int , 5>;
 
-		chord_arr_type s0({ 0, 1, 0, 4, 0 });
-		chord_arr_type s1({ 1, 2, 3, 4, 5 });
+	//	chord_arr_type s0({ 1, 2, 3, 4, 5 });
+	//	chord_arr_type s1({ 1, 2, 3, 4, 5 });
 
-		int* inhabit[1];
+	//	auto val = kernel_different_v0<gindex_type>(s0.cbegin(), s0.cend(), s1.cbegin());
+	//	printf("%s\n", val ? "different" : "same");
 
-		auto val = T_chord_apply::result(inhabit, s0.cbegin(), s0.cend());
-		printf("%s\n", (val != inhabit) ? "found" : "not found");
-		printf("(pos: %d, value: %d)\n", int(inhabit[0] - s0.cbegin()), *inhabit[0]);
+	//	unsigned char diff = 0;
+
+	//	auto val = T_chord_apply::result(diff, s0.cbegin(), s0.cend(), s1.cbegin());
+	//	printf("%s\n", val ? "different" : "same");
+	//	printf("%s\n", (val != inhabit) ? "found" : "not found");
+	//	printf("(pos: %d, value: %d)\n", int(inhabit[0] - s0.cbegin()), *inhabit[0]);
 
 		//
 
