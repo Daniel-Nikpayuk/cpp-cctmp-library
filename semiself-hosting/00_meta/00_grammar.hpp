@@ -99,7 +99,7 @@ namespace cctmp {
 
 // auto:
 
-	template<auto...> struct T_pack_Vs { };
+	template<auto...> struct T_pack_Vs; // intentionally undefined.
 	using T_null_Vs = T_pack_Vs<>;
 
 	template<auto... Vs>

@@ -35,73 +35,52 @@
 
 /***********************************************************************************************************************/
 
-/*
-	template<auto...> struct pack;
+	// C++17 tuple implemented using lambdas (make, get value):
 
-	template<        auto U        > auto operator + (pack<0, 0, U> &, pack< > &) -> pack<        U>  ;
-	template<        auto U, auto V> auto operator + (pack<0, 0, U> &, pack<V> &) -> pack<  0, 0, U> &;
-	template<        auto U, auto V> auto operator + (pack<0, 1, U> &, pack<V> &) -> pack<  0, 0, V> &;
-	template<auto n, auto U, auto V> auto operator + (pack<n, 1, U> &, pack<V> &) -> pack<n-1, 1, U> &;
+		template<auto...> struct At;
 
-	template<auto n, auto... Vs>
-	constexpr auto at = U_store_T<decltype((*(pack<n, 1, 0>*) 0 + ... + *(pack<Vs>*) 0) + *(pack<>*) 0)>;
-*/
+		template
+		<
+			         auto... LUs, void(*p0)(T_pack_Vs<    LUs...>*),
+			auto RU, auto... RUs, void(*p1)(T_pack_Vs<RU, RUs...>*),
+			auto... filler
+		>
+		struct At<p0, p1, filler...>
+		{
+			using RT = T_store_U<RU>;
 
-/***********************************************************************************************************************/
+			constexpr static auto result(T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs) { return rv; }
+		};
 
-/*
-	template<auto...> struct pack;
+		template<auto n, typename... Ts>
+		constexpr auto at(void(*)(T_pack_Vs<n>*), Ts... vs)
+		{
+			constexpr auto p0 = left_  <n, U_store_T<Ts>...>;
+			constexpr auto p1 = right_ <n, U_store_T<Ts>...>;
 
-	template<        auto... Vs        > auto operator + (pack<0, Vs...> &, pack< > &) -> pack<     Vs...   >  ;
-	template<        auto... Vs, auto V> auto operator + (pack<0, Vs...> &, pack<V> &) -> pack<  0, Vs...   > &;
-	template<auto n, auto... Vs, auto V> auto operator + (pack<n, Vs...> &, pack<V> &) -> pack<n-1, Vs..., V> &;
+			return At<p0, p1>::result(vs...);
+		}
 
-	template<auto n, auto... Vs>
-	constexpr auto left = U_store_T<decltype((*(pack<n>*) 0 + ... + *(pack<Vs>*) 0) + *(pack<>*) 0)>;
-*/
+	// make:	
 
-/***********************************************************************************************************************/
+		template<typename... Ts>
+		constexpr auto make_tuple(Ts... vs)
+			{ return [=](auto v) { return at(U_restore_T<decltype(v)>, vs...); }; }
 
-/*
-	template<auto...> struct pack;
+	// get value:
 
-	template<                auto... Vs> auto operator + (pack< > &, pack<0, Vs...> &) -> pack<        Vs...>  ;
-	template<auto V,         auto... Vs> auto operator + (pack<V> &, pack<0, Vs...> &) -> pack<0  ,    Vs...> &;
-	template<auto V, auto n, auto... Vs> auto operator + (pack<V> &, pack<n, Vs...> &) -> pack<n-1, V, Vs...> &;
-
-	template<auto n, auto... Vs>
-	constexpr auto right = U_store_T
-	<
-		decltype(*(pack<>*) 0 + (*(pack<Vs>*) 0 + ... + *(pack<decltype(n)(sizeof...(Vs))-n>*) 0))
-	>;
-*/
+		template<auto n, typename T>
+		constexpr auto get_value(T v) { return v(U_pack_Vs<n>); }
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-	//	constexpr auto l0 = right_
-	//	<
-	//		0,
+		auto tup = make_tuple(1, 2.0, 'c');
 
-	//		0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
-	//		0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
-	//		0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
-	//		0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
-	//		0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
-
-	//		0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
-	//		0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
-	//		0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
-	//		0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
-	//		0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
-
-	//		0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 11, 2, 3, 4,  5, 6, 7, 8, 9
-	//	>;
-
-		constexpr auto l0 = segment_<200>;
-
-		printf("%d\n", l0);
+		printf("%d\n", get_value<0>(tup));
+		printf("%f\n", get_value<1>(tup));
+		printf("%c\n", get_value<2>(tup));
 
 		return 0;
 	}

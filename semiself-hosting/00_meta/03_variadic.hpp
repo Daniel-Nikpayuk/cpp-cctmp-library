@@ -179,21 +179,22 @@ namespace cctmp {
 
 		csize_type roll;
 		csize_type part;
+		csize_type size;
 		const bool block;
 
 		nik_ce variadic_remainder(csize_type index, csize_type length, csize_type _2_N) :
 
 			roll(index / _2_N),
 			part(index % _2_N),
+			size(1 + roll + 2), // left, right, segment only.
 			block{has_block(length, _2_N)}
 
 			{ }
 
-		nik_ce bool has_block(csize_type length, csize_type _2_N) const
-			{ return ((roll + 1) * _2_N <= length); }
+		private:
 
-		template<typename Policy>
-		nik_ce auto size() const { return 1 + Policy::size(roll); }
+			nik_ce bool has_block(csize_type length, csize_type _2_N) const
+				{ return ((roll + 1) * _2_N <= length); }
 	};
 
 /***********************************************************************************************************************/
@@ -235,7 +236,7 @@ namespace cctmp {
 		using remain_type	= variadic_remainder<size_type>;
 		nik_ces auto remain	= remain_type{index, length, Policy::_2_N};
 
-		using unroll_type	= variadic_unroller<roll_type, size_type, remain.template size<Policy>()>;
+		using unroll_type	= variadic_unroller<roll_type, size_type, remain.size>;
 		nik_ces auto unroll	= unroll_type{U_store_T<Policy>, remain};
 
 		nik_ces auto & value	= unroll.contr;
@@ -247,51 +248,45 @@ namespace cctmp {
 
 // dispatch:
 
-	// generalize gindex_type.
-
-	template<auto static_contr, auto _count = 0, auto _index = 0, auto _depth = 500, auto _size = _2_6>
+	template<auto static_contr>
 	struct VariadicDispatch
 	{
-		nik_ces auto & contr = member_value_U<static_contr>;
+		using size_type		= typename T_store_U<static_contr>::size_type;
+		using csize_type	= size_type const;
 
-		// defaults:
-
-			nik_ces gindex_type initial_count = _count;
-			nik_ces gindex_type initial_index = _index;
-			nik_ces gdepth_type initial_depth = _depth;
-			nik_ces gindex_type block_size    = _size;
+		nik_ces auto & contr	= member_value_U<static_contr>;
 
 		// accessors:
 
-			nik_ces const auto & instr (gcindex_type i) { return contr[i]; }
-			nik_ces gindex_type value  (gcindex_type i, gcindex_type n) { return contr[i][n]; }
+			nik_ces const auto & instr (csize_type i) { return contr[i]; }
+			nik_ces csize_type value   (csize_type i, csize_type n) { return contr[i][n]; }
 
-			nik_ces gindex_type pos  (gcindex_type i) { return value(i, VI::pos); }
-			nik_ces gindex_type num  (gcindex_type i) { return value(i, VI::num); }
+			nik_ces csize_type pos (csize_type i) { return value(i, VI::pos); }
+			nik_ces csize_type num (csize_type i) { return value(i, VI::num); }
 
 		// navigators:
 
-			nik_ces gkey_type next_name(gcdepth_type d, gcindex_type i)
+			nik_ces gkey_type next_name(csize_type d, csize_type i)
 			{
 				if (d == 0) return VN::halt;
 				else        return contr[i+1][VI::name];
 			}
 
-			nik_ces gkey_type next_note(gcdepth_type d, gcindex_type i)
+			nik_ces gkey_type next_note(csize_type d, csize_type i)
 			{
 				if (d == 0) return VT::pause;
 				else        return contr[i+1][VI::note];
 			}
 
-			nik_ces gdepth_type next_depth(gcdepth_type d)
+			nik_ces csize_type next_depth(csize_type d)
 				{ return d - bool{d != 0}; }
 
-			nik_ces gindex_type next_index(gcdepth_type d, gcindex_type i)
+			nik_ces csize_type next_index(csize_type d, csize_type i)
 				{ return i + bool{d != 0}; }
 	};
 
-	template<auto static_contr, auto _count = 0, auto _index = 0, auto _depth = 500, auto _size = _2_6>
-	using VD = VariadicDispatch<static_contr, _count, _index, _depth, _size>;
+	template<auto static_contr>
+	using VD = VariadicDispatch<static_contr>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -385,16 +380,12 @@ namespace cctmp {
 
 	struct T_variadic_start
 	{
+		nik_ces auto i = 0;
+		nik_ces auto j = 0;
+
 		template<auto d, auto c, auto... Vs, typename... Heaps>
-		nik_ces auto result(Heaps... Hs)
-		{
-			nik_ce auto i = VD<c>::initial_index;
-			nik_ce auto j = VD<c>::initial_count;
-
-			return NIK_VARIADIC(d, c, i, j, Vs)(Hs...);
-		}
-
-	}; // nik_ce auto U_variadic_start = U_custom_T<T_variadic_start>;
+		nik_ces auto result(Heaps... Hs) { return NIK_VARIADIC(d, c, i, j, Vs)(Hs...); }
+	};
 
 /***********************************************************************************************************************/
 
@@ -761,8 +752,6 @@ namespace cctmp {
 		nik_ces size_type pos	= 0;
 		nik_ces size_type _2_N	= BlockSize;
 
-		nik_ces auto size(csize_type roll) { return roll + 2; }
-
 		template<typename Contr, typename Remain>
 		nik_ces void rest(Contr & contr, const Remain & remain)
 		{
@@ -812,8 +801,6 @@ namespace cctmp {
 		nik_ces size_type name	= VN::right;
 		nik_ces size_type pos	= 0;
 		nik_ces size_type _2_N	= BlockSize;
-
-		nik_ces auto size(csize_type roll) { return roll + 2; }
 
 		template<typename Contr, typename Remain>
 		nik_ces void rest_has_block(Contr & contr, const Remain & remain)
@@ -878,8 +865,6 @@ namespace cctmp {
 		nik_ces size_type name	= VN::segment;
 		nik_ces size_type pos	= BlockSize;
 		nik_ces size_type _2_N	= BlockSize;
-
-		nik_ces auto size(csize_type roll) { return roll + 2; }
 
 		template<typename Contr, typename Remain>
 		nik_ces void rest(Contr & contr, const Remain & remain)
