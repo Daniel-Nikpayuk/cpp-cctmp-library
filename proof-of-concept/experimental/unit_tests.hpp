@@ -3885,18 +3885,23 @@ namespace cctmp_program
 
 /***********************************************************************************************************************/
 
+// at:
+
 	// works!
 
 	template<auto...> struct pack;
 
+	template<        auto U        > auto operator + (pack<0, 0, U> &, pack< > &) -> pack<        U>  ;
 	template<        auto U, auto V> auto operator + (pack<0, 0, U> &, pack<V> &) -> pack<  0, 0, U> &;
 	template<        auto U, auto V> auto operator + (pack<0, 1, U> &, pack<V> &) -> pack<  0, 0, V> &;
 	template<auto n, auto U, auto V> auto operator + (pack<n, 1, U> &, pack<V> &) -> pack<n-1, 1, U> &;
 
 	template<auto n, auto... Vs>
-	constexpr static auto at = U_store_T<decltype((*(pack<n, 1, 0>*) 0 + ... + *(pack<Vs>*) 0))>;
+	constexpr auto at = U_store_T<decltype((*(pack<n, 1, 0>*) 0 + ... + *(pack<Vs>*) 0) + *(pack<>*) 0)>;
 
 /***********************************************************************************************************************/
+
+// left:
 
 	// works!
 
@@ -3908,6 +3913,24 @@ namespace cctmp_program
 
 	template<auto n, auto... Vs>
 	constexpr auto left = U_store_T<decltype((*(pack<n>*) 0 + ... + *(pack<Vs>*) 0) + *(pack<>*) 0)>;
+
+/***********************************************************************************************************************/
+
+// right:
+
+	// works!
+
+	template<auto...> struct pack;
+
+	template<                auto... Vs> auto operator + (pack< > &, pack<0, Vs...> &) -> pack<        Vs...>  ;
+	template<auto V,         auto... Vs> auto operator + (pack<V> &, pack<0, Vs...> &) -> pack<0  ,    Vs...> &;
+	template<auto V, auto n, auto... Vs> auto operator + (pack<V> &, pack<n, Vs...> &) -> pack<n-1, V, Vs...> &;
+
+	template<auto n, auto... Vs>
+	constexpr auto right = U_store_T
+	<
+		decltype(*(pack<>*) 0 + (*(pack<Vs>*) 0 + ... + *(pack<decltype(n)(sizeof...(Vs))-n>*) 0))
+	>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

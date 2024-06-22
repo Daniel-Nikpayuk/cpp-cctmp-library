@@ -31,7 +31,7 @@ namespace cctmp {
 		// its value of interest, or a machination with the same structure as its input.
 		// It is expected that all other nest-resulted structs are defined from such liners.
 
-		// Both T_variadic and T_interpreter are implementations of such liners.
+		// T_variadic is an implementation of such liners.
 
 	template<typename Mach, typename Param, typename Heap>
 	struct machination
@@ -77,7 +77,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
-			halt, mach, count, left, segment,
+			halt, mach, left, right, segment,
 			dimension
 		};
 	};
@@ -93,9 +93,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			identity = 0, id = identity, // convenience for default params.
-			pause, debug, first, heap, front,
-			iter, copy, push, pull, proj,
-			roll, part, catenate,
+			pause, heap, join, bind, roll, part, block,
 			dimension
 		};
 	};
@@ -123,7 +121,6 @@ namespace cctmp {
 		using ctype_ref			= ctype &;
 		using size_type			= SizeType;
 		using csize_type		= size_type const;
-
 		using Index 			= VariadicIndex;
 
 		type initial[Index::dimension];
@@ -153,13 +150,8 @@ namespace cctmp {
 		using instr_ref			= instr_type &;
 		using cinstr_type		= instr_type const;
 		using cinstr_ref		= cinstr_type &;
-		using type			= typename instr_type::type;
-		using type_ref			= typename instr_type::type_ref;
-		using ctype			= typename instr_type::ctype;
-		using ctype_ref			= typename instr_type::ctype_ref;
 		using size_type			= typename instr_type::size_type;
 		using csize_type		= typename instr_type::csize_type;
-		using Index			= typename instr_type::Index;
 
 		nik_ces size_type length	= Size;
 
@@ -177,34 +169,54 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// remainder:
+
+	template<typename SizeType>
+	struct variadic_remainder
+	{
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		csize_type roll;
+		csize_type part;
+		const bool block;
+
+		nik_ce variadic_remainder(csize_type index, csize_type length, csize_type _2_N) :
+
+			roll(index / _2_N),
+			part(index % _2_N),
+			block{has_block(length, _2_N)}
+
+			{ }
+
+		nik_ce bool has_block(csize_type length, csize_type _2_N) const
+			{ return ((roll + 1) * _2_N <= length); }
+
+		template<typename Policy>
+		nik_ce auto size() const { return 1 + Policy::size(roll); }
+	};
+
+/***********************************************************************************************************************/
+
 // unroller:
 
 	template<typename Type, typename SizeType, SizeType Size>
 	struct variadic_unroller
 	{
-		using contr_type		= variadic_contr<Type, SizeType, Size>;
-		using type			= typename contr_type::type;
-		using type_ref			= typename contr_type::type_ref;
-		using ctype			= typename contr_type::ctype;
-		using ctype_ref			= typename contr_type::ctype_ref;
-		using size_type			= typename contr_type::size_type;
-		using csize_type		= typename contr_type::csize_type;
-		using Index			= typename contr_type::Index;
-
-		nik_ces size_type length	= Size;
+		using contr_type	= variadic_contr<Type, SizeType, Size>;
+		using size_type		= typename contr_type::size_type;
+		using csize_type	= typename contr_type::csize_type;
 
 		contr_type contr;
 
-		nik_ce variadic_unroller(csize_type n, csize_type r, csize_type p) { unroll(n, r, p); }
-
-		nik_ce void unroll(csize_type name, csize_type roll, csize_type part)
+		template<typename Policy, typename Remain>
+		nik_ce variadic_unroller(nik_avp(Policy*), Remain remain)
 		{
 			contr.push(VN::id, VT::id);
 
-			for (size_type k = 0; k != roll; ++k) contr.push(name, VT::roll);
+			for (size_type k = 0; k != remain.roll; ++k) contr.push(Policy::name, VT::roll, Policy::pos);
 
-			contr.push(name, VT::part, part);
-			contr.push(VN::halt, VT::catenate);
+			Policy::rest(contr, remain);
 		}
 	};
 
@@ -212,23 +224,24 @@ namespace cctmp {
 
 // static:
 
-	template<auto name, auto index, auto length, auto _2_N>
+	template<typename Policy, auto index, auto length>
 	struct T_variadic_static_contr
 	{
-		static_assert(index <= length);
+	//	static_assert(index <= length);
 
-		nik_ces auto roll	= index / _2_N;
-		nik_ces auto part	= index % _2_N;
-		nik_ces auto size	= 1 + roll + 2;
+		using roll_type		= typename Policy::roll_type;
+		using size_type		= typename Policy::size_type;
 
-						// generalize gindex_type:
-		using unroll_type	= variadic_unroller<gindex_type, gindex_type, size>;
-		nik_ces auto unroll	= unroll_type{name, roll, part};
+		using remain_type	= variadic_remainder<size_type>;
+		nik_ces auto remain	= remain_type{index, length, Policy::_2_N};
+
+		using unroll_type	= variadic_unroller<roll_type, size_type, remain.template size<Policy>()>;
+		nik_ces auto unroll	= unroll_type{U_store_T<Policy>, remain};
 
 		nik_ces auto & value	= unroll.contr;
 
-	}; template<auto n, auto i, auto l, auto _2_N>
-		nik_ce auto _variadic_contr_ = U_store_T<T_variadic_static_contr<n, i, l, _2_N>>;
+	}; template<typename P, auto i, auto l>
+		nik_ce auto _variadic_contr_ = U_store_T<T_variadic_static_contr<P, i, l>>;
 
 /***********************************************************************************************************************/
 
@@ -283,10 +296,10 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// algorithm:
+// praxis:
 
 	template<gkey_type, typename SizeType = gindex_type>
-	struct T_algorithm
+	struct T_praxis
 	{
 		using size_type = SizeType;
 
@@ -300,15 +313,26 @@ namespace cctmp {
 
 // fold:
 
-	// decltype:
+	// left:
 
 		template<typename T0, typename TN, typename... Ts>
-		using fold_decltype = decltype((*(T0*) 0 + ... + *(Ts*) 0) + *(TN*) 0);
-
-	// type:
+		using foldl_decltype = decltype((*(T0*) 0 + ... + *(Ts*) 0) + *(TN*) 0);
 
 		template<typename T, auto n, auto... Vs>
-		using fold_type = fold_decltype
+		using foldl_type = foldl_decltype
+		<
+			typename T::template match < n  >,
+			typename T::template pack  <    >,
+			typename T::template pack  < Vs >...
+		>;
+
+	// right:
+
+		template<typename T0, typename TN, typename... Ts>
+		using foldr_decltype = decltype(*(TN*) 0 + (*(Ts*) 0 + ... + *(T0*) 0));
+
+		template<typename T, auto n, auto... Vs>
+		using foldr_type = foldr_decltype
 		<
 			typename T::template match < n  >,
 			typename T::template pack  <    >,
@@ -319,7 +343,7 @@ namespace cctmp {
 
 // left:
 
-	using T_left = T_algorithm<VN::left>;
+	using T_left = T_praxis<VN::left>;
 
 	template<auto... Vs>
 	auto operator + (T_left::match<0, Vs...> &, T_left::pack< > &) -> T_pack_Vs<Vs...>;
@@ -329,6 +353,21 @@ namespace cctmp {
 
 	template<auto n, auto... Vs, auto V>
 	auto operator + (T_left::match<n, Vs...> &, T_left::pack<V> &) -> T_left::match<n-1, Vs..., V> &;
+
+/***********************************************************************************************************************/
+
+// right:
+
+	using T_right = T_praxis<VN::right>;
+
+	template<auto... Vs>
+	auto operator + (T_right::pack< > &, T_right::match<0, Vs...> &) -> T_pack_Vs<Vs...>;
+
+	template<auto V, auto... Vs>
+	auto operator + (T_right::pack<V> &, T_right::match<0, Vs...> &) -> T_right::match<0, Vs...> &;
+
+	template<auto V, auto n, auto... Vs>
+	auto operator + (T_right::pack<V> &, T_right::match<n, Vs...> &) -> T_right::match<n-1, V, Vs...> &;
 
 /***********************************************************************************************************************/
 
@@ -356,22 +395,6 @@ namespace cctmp {
 		}
 
 	}; // nik_ce auto U_variadic_start = U_custom_T<T_variadic_start>;
-
-/***********************************************************************************************************************/
-
-// jstart:
-
-	struct T_variadic_jstart
-	{
-		template<auto d, auto c, auto j, auto... Vs, typename... Heaps>
-		nik_ces auto result(Heaps... Hs)
-		{
-			nik_ce auto i = VD<c>::initial_index;
-
-			return NIK_VARIADIC(d, c, i, j, Vs)(Hs...);
-		}
-
-	}; // nik_ce auto U_variadic_jstart = U_custom_T<T_variadic_jstart>;
 
 /***********************************************************************************************************************/
 
@@ -432,67 +455,22 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// debug:
-
-/*
-	template<auto... filler>
-	struct T_variadic<VN::halt, VT::debug, filler...>
-	{
-		template<NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs, typename... Heaps>
-		nik_ces auto result(Heaps... Hs)
-		{
-			nik_ce auto cs = list_<d, c, i, j>;
-			nik_ce auto rs = list_<Vs...>;
-			nik_ce auto hs = list_<U_restore_T<Heaps>...>;
-
-			return list_<cs, rs, hs>;
-		}
-	};
-*/
-
-/***********************************************************************************************************************/
-
-// first:
-
-	template<auto... filler>
-	struct T_variadic<VN::halt, VT::first, filler...>
-	{
-		template<NIK_VARIADIC_CONTROLS(d, c, i, j), auto V, auto... Vs, typename... Heaps>
-		nik_ces auto result(Heaps... Hs) { return V; }
-	};
-
-/***********************************************************************************************************************/
-
 // heap:
 
 	template<auto... filler>
 	struct T_variadic<VN::halt, VT::heap, filler...>
 	{
-		template
-		<
-			NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs,
-			template<auto...> typename B0, auto... Ws, typename... Heaps
-		>
-		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs) { return U_store_T<B0<Vs...>>; }
+		template<NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs, typename Heap0, typename... Heaps>
+		nik_ces auto result(Heap0 H0, Heaps... Hs)
+			{ return H0; }
 	};
 
 /***********************************************************************************************************************/
 
-// front:
+// join:
 
 	template<auto... filler>
-	struct T_variadic<VN::halt, VT::front, filler...>
-	{
-		template<NIK_VARIADIC_PARAMS(d, c, i, j, Vs), typename Heap0, typename... Heaps>
-		nik_ces auto result(Heap0 H0, Heaps... Hs) { return H0; }
-	};
-
-/***********************************************************************************************************************/
-
-// catenate:
-
-	template<auto... filler>
-	struct T_variadic<VN::halt, VT::catenate, filler...>
+	struct T_variadic<VN::halt, VT::join, filler...>
 	{
 		template
 		<
@@ -503,6 +481,22 @@ namespace cctmp {
 		>
 		nik_ces auto result(nik_vp(H0)(B0<Ws0...>*), nik_vp(H1)(B1<Ws1...>*), Heaps... Hs)
 			{ return U_store_T<B0<Ws0..., Ws1...>>; }
+	};
+
+/***********************************************************************************************************************/
+
+// bind:
+
+	template<auto... filler>
+	struct T_variadic<VN::halt, VT::bind, filler...>
+	{
+		template
+		<
+			NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs,
+			template<auto...> typename B0, auto... Ws, typename... Heaps
+		>
+		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)
+			{ return U_store_T<B0<Ws..., Vs...>>; }
 	};
 
 /***********************************************************************************************************************/
@@ -574,54 +568,13 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// count:
-
-/***********************************************************************************************************************/
-
-// copy:
-
-	template<auto... filler>
-	struct T_variadic<VN::count, VT::copy, filler...>
-	{
-		template<NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs, typename... Heaps>
-		nik_ces auto result(Heaps... Hs)
-		{
-			return NIK_VARIADIC_BEGIN(d, c, i, j),
-
-				j, Vs...
-
-			NIK_VARIADIC_END(Hs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// proj:
-
-	template<auto... filler>
-	struct T_variadic<VN::count, VT::proj, filler...>
-	{
-		template<NIK_VARIADIC_CONTROLS(d, c, i, j), auto V0, auto... Vs, typename... Heaps>
-		nik_ces auto result(Heaps... Hs)
-		{
-			return NIK_VARIADIC_BEGIN(d, c, i, j),
-
-				j, Vs...
-
-			NIK_VARIADIC_END(Hs...);
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // left:
 
 /***********************************************************************************************************************/
 
 // 2^6:
 
-	// next:
+	// roll:
 
 		template<auto... filler>
 		struct T_variadic<VN::left, VT::roll, filler...>
@@ -644,7 +597,7 @@ namespace cctmp {
 			}
 		};
 
-	// last:
+	// part:
 
 		template<auto... filler>
 		struct T_variadic<VN::left, VT::part, filler...>
@@ -657,10 +610,79 @@ namespace cctmp {
 			nik_ces auto result(Heap0 H0, Heap1 H1, Heaps... Hs)
 			{
 				nik_ce auto n   = VD<c>::pos(i);
-				nik_ce auto nH1 = U_store_T<fold_type<T_left, n, Vs...>>;
+				nik_ce auto nH1 = U_store_T<foldl_type<T_left, n, Vs...>>;
 
 				return NIK_VARIADIC_BEGIN(d, c, i, j)
 					NIK_VARIADIC_END(H0, nH1, Hs...);
+			}
+		};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// right:
+
+/***********************************************************************************************************************/
+
+// 2^6:
+
+	// roll:
+
+		template<auto... filler>
+		struct T_variadic<VN::right, VT::roll, filler...>
+		{
+			template
+			<
+				NIK_VARIADIC_CONTROLS(d, c, i, j),
+				NIK_2_N_AUTO_VARS(6, NIK_V_1), auto... Vs, typename... Heaps
+			>
+			nik_ces auto result(Heaps... Hs)
+			{
+				return NIK_VARIADIC_BEGIN(d, c, i, j),
+
+					Vs...
+
+				NIK_VARIADIC_END(Hs...);
+			}
+		};
+
+	// part:
+
+		template<auto... filler>
+		struct T_variadic<VN::right, VT::part, filler...>
+		{
+			template<NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs, typename Heap0, typename... Heaps>
+			nik_ces auto result(Heap0 H0, Heaps... Hs)
+			{
+				nik_ce auto n   = sizeof...(Vs) - VD<c>::pos(i);
+				nik_ce auto nH0 = U_store_T<foldr_type<T_right, n, Vs...>>;
+
+				return NIK_VARIADIC_BEGIN(d, c, i, j)
+					NIK_VARIADIC_END(nH0, Hs...);
+			}
+		};
+
+	// block:
+
+		template<auto... filler>
+		struct T_variadic<VN::right, VT::block, filler...>
+		{
+			template
+			<
+				NIK_VARIADIC_CONTROLS(d, c, i, j),
+				NIK_2_N_AUTO_VARS(6, NIK_V_1), auto... Vs,
+				typename Heap0, typename... Heaps
+			>
+			nik_ces auto result(Heap0 H0, Heaps... Hs)
+			{
+				nik_ce auto n   = VD<c>::num(i) - VD<c>::pos(i);
+				nik_ce auto nH0 = U_store_T<foldr_type<T_right, n, NIK_2_N_VARS(6, NIK_V_1)>>;
+
+				return NIK_VARIADIC_BEGIN(d, c, i, j),
+
+					Vs...
+
+				NIK_VARIADIC_END(nH0, Hs...);
 			}
 		};
 
@@ -673,19 +695,43 @@ namespace cctmp {
 
 // 2^6:
 
-	// push:
+	// roll:
 
 		template<auto... filler>
 		struct T_variadic<VN::segment, VT::roll, filler...>
 		{
-			template<NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs, typename... Heaps>
-			nik_ces auto result(Heaps... Hs)
+			template
+			<
+				NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs,
+				template<auto...> typename B0, auto... Ws0,
+				template<auto...> typename B1, auto... Ws1,
+				typename... Heaps
+			>
+			nik_ces auto result(nik_vp(H0)(B0<Ws0...>*), nik_vp(H1)(B1<Ws1...>*), Heaps... Hs)
 			{
-				return NIK_VARIADIC_BEGIN(d, c, i, j + _2_6),
+				nik_ce auto n   = VD<c>::pos(i);
+				nik_ce auto nH0 = U_store_T<B0<Ws0..., j + Ws1...>>;
 
-					Vs..., NIK_2_N_SEGMENT_VARS(6, NIK_LJ) // NIK_LJ, or j directly ?
+				return NIK_VARIADIC(d, c, i, j + n, Vs)(nH0, H1, Hs...);
+			}
+		};
 
-				NIK_VARIADIC_END(Hs...);
+	// part:
+
+		template<auto... filler>
+		struct T_variadic<VN::segment, VT::part, filler...>
+		{
+			template
+			<
+				NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs,
+				typename Heap0, template<auto...> typename B1, auto... Ws, typename... Heaps
+			>
+			nik_ces auto result(Heap0 H0, nik_vp(H1)(B1<Ws...>*), Heaps... Hs)
+			{
+				nik_ce auto n   = VD<c>::pos(i);
+				nik_ce auto nH1 = U_store_T<foldl_type<T_left, n, j + Ws...>>;
+
+				return NIK_VARIADIC(d, c, i, j, Vs)(H0, nH1, Hs...);
 			}
 		};
 
@@ -693,16 +739,49 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// algorithm:
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // left:
 
-	template<gindex_type _2_N = _2_6>
+/***********************************************************************************************************************/
+
+// policy:
+
+	template<typename RollType, typename SizeType, SizeType BlockSize>
+	struct variadic_left_policy
+	{
+		using roll_type		= RollType;
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		nik_ces size_type name	= VN::left;
+		nik_ces size_type pos	= 0;
+		nik_ces size_type _2_N	= BlockSize;
+
+		nik_ces auto size(csize_type roll) { return roll + 2; }
+
+		template<typename Contr, typename Remain>
+		nik_ces void rest(Contr & contr, const Remain & remain)
+		{
+			contr.push(VN::left, VT::part, remain.part);
+			contr.push(VN::halt, VT::join);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename Type = gindex_type, typename SizeType = gindex_type, SizeType _2_N = _2_6>
 	struct T_variadic_left
 	{
+		using policy = variadic_left_policy<Type, SizeType, _2_N>;
+
 		template<auto n, auto l>
-		nik_ces auto contr = _variadic_contr_<VN::left, n, l, _2_N>;
+		nik_ces auto contr = _variadic_contr_<policy, n, l>;
 
 		template<auto d, auto n, auto... Vs>
 		nik_ces auto result = T_variadic_start::template
@@ -711,14 +790,128 @@ namespace cctmp {
 
 	// syntactic sugar:
 
-	//	nik_ce auto _dpar_left_ = U_custom_T<T_variadic_left<>>;
-	//	nik_ce auto  _par_left_ = _alias_<_dpar_left_, 500>;
-
-	//	template<auto p, auto n>
-	//	nik_ce auto left_ = unpack_<p, _dpar_left_, 500, n>;
-
 		template<auto n, auto... Vs>
 		nik_ce auto left_ = T_variadic_left<>::template result<500, n, Vs...>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// right:
+
+/***********************************************************************************************************************/
+
+// policy:
+
+	template<typename RollType, typename SizeType, SizeType BlockSize>
+	struct variadic_right_policy
+	{
+		using roll_type		= RollType;
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		nik_ces size_type name	= VN::right;
+		nik_ces size_type pos	= 0;
+		nik_ces size_type _2_N	= BlockSize;
+
+		nik_ces auto size(csize_type roll) { return roll + 2; }
+
+		template<typename Contr, typename Remain>
+		nik_ces void rest_has_block(Contr & contr, const Remain & remain)
+		{
+			contr.push(VN::right, VT::block, remain.part, _2_N);
+			contr.push(VN::halt, VT::bind);
+		}
+
+		template<typename Contr, typename Remain>
+		nik_ces void rest_lacks_block(Contr & contr, const Remain & remain)
+		{
+			contr.push(VN::right, VT::part, remain.part);
+			contr.push(VN::halt, VT::heap);
+		}
+
+		template<typename Contr, typename Remain>
+		nik_ces void rest(Contr & contr, const Remain & remain)
+		{
+			if (remain.block) rest_has_block   (contr, remain);
+			else              rest_lacks_block (contr, remain);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename Type = gindex_type, typename SizeType = gindex_type, SizeType _2_N = _2_6>
+	struct T_variadic_right
+	{
+		using policy = variadic_right_policy<Type, SizeType, _2_N>;
+
+		template<auto n, auto l>
+		nik_ces auto contr = _variadic_contr_<policy, n, l>;
+
+		template<auto d, auto n, auto... Vs>
+		nik_ces auto result = T_variadic_start::template
+					result<d, contr<n, sizeof...(Vs)>, Vs...>(U_null_Vs, U_null_Vs);
+	};
+
+	// syntactic sugar:
+
+		template<auto n, auto... Vs>
+		nik_ce auto right_ = T_variadic_right<>::template result<500, n, Vs...>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// segment:
+
+/***********************************************************************************************************************/
+
+// policy:
+
+	template<typename RollType, typename SizeType, SizeType BlockSize>
+	struct variadic_segment_policy
+	{
+		using roll_type		= RollType;
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		nik_ces size_type name	= VN::segment;
+		nik_ces size_type pos	= BlockSize;
+		nik_ces size_type _2_N	= BlockSize;
+
+		nik_ces auto size(csize_type roll) { return roll + 2; }
+
+		template<typename Contr, typename Remain>
+		nik_ces void rest(Contr & contr, const Remain & remain)
+		{
+			contr.push(VN::segment, VT::part, remain.part);
+			contr.push(VN::halt, VT::join);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename Type = gindex_type, typename SizeType = gindex_type, SizeType _2_N = _2_6>
+	struct T_variadic_segment
+	{
+		using policy = variadic_segment_policy<Type, SizeType, _2_N>;
+
+		nik_ces auto pack = U_pack_Vs<NIK_2_N_SEGMENT_VARS(6, NIK_EMPTY)>;
+
+		template<auto n, auto l>
+		nik_ces auto contr = _variadic_contr_<policy, n, l>;
+
+		template<auto d, auto n, auto... Vs>
+		nik_ces auto result = T_variadic_start::template
+					result<d, contr<n, sizeof...(Vs)>, Vs...>(U_null_Vs, pack);
+	};
+
+	// syntactic sugar:
+
+		template<auto n, auto... Vs>
+		nik_ce auto segment_ = T_variadic_segment<>::template result<500, n, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
