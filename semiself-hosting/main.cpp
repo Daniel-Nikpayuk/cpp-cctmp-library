@@ -35,52 +35,15 @@
 
 /***********************************************************************************************************************/
 
-	// C++17 tuple implemented using lambdas (make, get value):
-
-		template<auto...> struct At;
-
-		template
-		<
-			         auto... LUs, void(*p0)(T_pack_Vs<    LUs...>*),
-			auto RU, auto... RUs, void(*p1)(T_pack_Vs<RU, RUs...>*),
-			auto... filler
-		>
-		struct At<p0, p1, filler...>
-		{
-			using RT = T_store_U<RU>;
-
-			constexpr static auto result(T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs) { return rv; }
-		};
-
-		template<auto n, typename... Ts>
-		constexpr auto at(void(*)(T_pack_Vs<n>*), Ts... vs)
-		{
-			constexpr auto p0 = left_  <n, U_store_T<Ts>...>;
-			constexpr auto p1 = right_ <n, U_store_T<Ts>...>;
-
-			return At<p0, p1>::result(vs...);
-		}
-
-	// make:	
-
-		template<typename... Ts>
-		constexpr auto make_tuple(Ts... vs)
-			{ return [=](auto v) { return at(U_restore_T<decltype(v)>, vs...); }; }
-
-	// get value:
-
-		template<auto n, typename T>
-		constexpr auto get_value(T v) { return v(U_pack_Vs<n>); }
-
-/***********************************************************************************************************************/
-
 	int main(int argc, char *argv[])
 	{
-		auto tup = make_tuple(1, 2.0, 'c');
+		auto tup = LambdaTuple::make(1, 2.0, 'c');
 
-		printf("%d\n", get_value<0>(tup));
-		printf("%f\n", get_value<1>(tup));
-		printf("%c\n", get_value<2>(tup));
+		printf("%d\n", LambdaTuple::template value<0>(tup));
+		printf("%f\n", LambdaTuple::template value<1>(tup));
+		printf("%c\n", LambdaTuple::template value<2>(tup));
+
+		printf("%s\n", LambdaTuple::empty(tup) ? "is empty" : "not empty");
 
 		return 0;
 	}

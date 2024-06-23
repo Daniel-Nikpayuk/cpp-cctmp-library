@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// argument:
+// container:
 
 namespace cctmp {
 
@@ -25,34 +25,42 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// empty:
-
-	struct T_empty
-	{
-		template<typename... Ts>
-		nik_ces auto result(Ts... vs) { return (sizeof...(Ts) == 0); }
-
-	}; nik_ce auto U_empty = U_store_T<T_empty>;
+// environment:
 
 /***********************************************************************************************************************/
 
 // at:
 
-	template<auto...> struct T_at;
-
-	template
-	<
-		         auto... LUs, nik_vp(p0)(T_pack_Vs<    LUs...>*),
-		auto RU, auto... RUs, nik_vp(p1)(T_pack_Vs<RU, RUs...>*),
-		auto... filler
-	>
-	struct T_at<p0, p1, filler...>
+	template<auto n, auto... filler>
+	struct T_at<n, filler...>
 	{
-		nik_ces auto result(T_store_U<LUs>... lvs, T_store_U<RU> rv, T_store_U<RUs>... rvs)
-			{ return rv; }
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			nik_ce auto p0 = left_  <n, U_store_T<Ts>...>;
+			nik_ce auto p1 = right_ <n, U_store_T<Ts>...>;
 
-	}; template<auto... Vs>
-		nik_ce auto U_at = U_store_T<T_at<Vs...>>;
+			return T_at<p0, p1>::result(vs...);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// lambda tuple:
+
+	struct LambdaTuple
+	{
+		template<typename... Ts>
+		nik_ces auto make(Ts... vs)
+			{ return [vs...](auto U){ return T_restore_T<decltype(U)>::template result<Ts...>(vs...); }; }
+
+		template<        typename LT> nik_ces auto empty(LT lt) { return lt(U_empty); }
+		template<auto n, typename LT> nik_ces auto value(LT lt) { return lt(U_at<n>); }
+	};
+
+/***********************************************************************************************************************/
+
+// binding:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
