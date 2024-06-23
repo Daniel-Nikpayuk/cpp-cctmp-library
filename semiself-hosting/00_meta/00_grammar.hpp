@@ -277,7 +277,8 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			argument , parameter
+			argument , // parameter
+			dimension
 		};
 	};
 
@@ -290,12 +291,14 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			overload , higher_order ,
-			boolean  , number       , array    ,
-			selector , iterator     , sequence , subarray , pair ,
-			abstract , access       , list     ,
-			pointer  , reference    , function ,
+			overload , number , lambda_tuple ,
 			dimension
+
+		//	overload , higher_order ,
+		//	boolean  , number       , array    ,
+		//	selector , iterator     , sequence , subarray , pair ,
+		//	abstract , access       , list     ,
+		//	pointer  , reference    , function ,
 		};
 	};
 
@@ -318,111 +321,116 @@ namespace cctmp {
 
 // higher order:
 
-	template<auto... Vs> using T_arg_higher_order		= T_argument<Pattern::higher_order, Vs...>;
-	template<auto... Vs> nik_ce auto U_arg_higher_order	= U_argument<Pattern::higher_order, Vs...>;
+//	template<auto... Vs> using T_arg_higher_order		= T_argument<Pattern::higher_order, Vs...>;
+//	template<auto... Vs> nik_ce auto U_arg_higher_order	= U_argument<Pattern::higher_order, Vs...>;
 
 // boolean:
 
-	template<auto... Vs> using T_arg_boolean		= T_argument<Pattern::boolean, Vs...>;
-	template<auto... Vs> nik_ce auto U_arg_boolean		= U_argument<Pattern::boolean, Vs...>;
+//	template<auto... Vs> using T_arg_boolean		= T_argument<Pattern::boolean, Vs...>;
+//	template<auto... Vs> nik_ce auto U_arg_boolean		= U_argument<Pattern::boolean, Vs...>;
 
 // number:
 
 	template<auto... Vs> using T_arg_number			= T_argument<Pattern::number, Vs...>;
 	template<auto... Vs> nik_ce auto U_arg_number		= U_argument<Pattern::number, Vs...>;
 
+// lambda tuple:
+
+	template<auto... Vs> using T_arg_lambda_tuple		= T_argument<Pattern::lambda_tuple, Vs...>;
+	template<auto... Vs> nik_ce auto U_arg_lambda_tuple	= U_argument<Pattern::lambda_tuple, Vs...>;
+
 // array:
 
-	template<auto... Vs> using T_arg_array			= T_argument<Pattern::array, Vs...>;
-	template<auto... Vs> nik_ce auto U_arg_array		= U_argument<Pattern::array, Vs...>;
+//	template<auto... Vs> using T_arg_array			= T_argument<Pattern::array, Vs...>;
+//	template<auto... Vs> nik_ce auto U_arg_array		= U_argument<Pattern::array, Vs...>;
 
 // selector:
 
-	template<auto... Vs> using T_arg_selector		= T_argument<Pattern::selector, Vs...>;
-	template<auto... Vs> nik_ce auto U_arg_selector		= U_argument<Pattern::selector, Vs...>;
+//	template<auto... Vs> using T_arg_selector		= T_argument<Pattern::selector, Vs...>;
+//	template<auto... Vs> nik_ce auto U_arg_selector		= U_argument<Pattern::selector, Vs...>;
 
 // iterator:
 
-	template<auto... Vs> using T_arg_iterator		= T_argument<Pattern::iterator, Vs...>;
-	template<auto... Vs> nik_ce auto U_arg_iterator		= U_argument<Pattern::iterator, Vs...>;
+//	template<auto... Vs> using T_arg_iterator		= T_argument<Pattern::iterator, Vs...>;
+//	template<auto... Vs> nik_ce auto U_arg_iterator		= U_argument<Pattern::iterator, Vs...>;
 
 // sequence:
 
-	template<auto... Vs> using T_arg_sequence		= T_argument<Pattern::sequence, Vs...>;
-	template<auto... Vs> nik_ce auto U_arg_sequence		= U_argument<Pattern::sequence, Vs...>;
+//	template<auto... Vs> using T_arg_sequence		= T_argument<Pattern::sequence, Vs...>;
+//	template<auto... Vs> nik_ce auto U_arg_sequence		= U_argument<Pattern::sequence, Vs...>;
 
 // subarray:
 
-	template<auto... Vs> using T_arg_subarray		= T_argument<Pattern::subarray, Vs...>;
-	template<auto... Vs> nik_ce auto U_arg_subarray		= U_argument<Pattern::subarray, Vs...>;
+//	template<auto... Vs> using T_arg_subarray		= T_argument<Pattern::subarray, Vs...>;
+//	template<auto... Vs> nik_ce auto U_arg_subarray		= U_argument<Pattern::subarray, Vs...>;
 
 // pair:
 
-	template<auto... Vs> using T_arg_pair			= T_argument<Pattern::pair, Vs...>;
-	template<auto... Vs> nik_ce auto U_arg_pair		= U_argument<Pattern::pair, Vs...>;
+//	template<auto... Vs> using T_arg_pair			= T_argument<Pattern::pair, Vs...>;
+//	template<auto... Vs> nik_ce auto U_arg_pair		= U_argument<Pattern::pair, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // parameter:
 
-	template<gkey_type Key, gkey_type Op, auto... Vs>
-	struct T_grammar<Shape::parameter, Key, Op, Vs...> { }; // empty default definition.
+//	template<gkey_type Key, gkey_type Op, auto... Vs>
+//	struct T_grammar<Shape::parameter, Key, Op, Vs...> { }; // empty default definition.
 
-	template<auto Key, auto... Vs>       using T_parameter = T_grammar<Shape::parameter, Key, Vs...>;
-	template<auto Key, auto... Vs> nik_ce auto U_parameter = U_grammar<Shape::parameter, Key, Vs...>;
+//	template<auto Key, auto... Vs>       using T_parameter = T_grammar<Shape::parameter, Key, Vs...>;
+//	template<auto Key, auto... Vs> nik_ce auto U_parameter = U_grammar<Shape::parameter, Key, Vs...>;
 
 /***********************************************************************************************************************/
 
 // abstract:
 
-	template<auto... Vs> using T_par_abstract		= T_parameter<Pattern::abstract, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_abstract		= U_parameter<Pattern::abstract, Vs...>;
+//	template<auto... Vs> using T_par_abstract		= T_parameter<Pattern::abstract, Vs...>;
+//	template<auto... Vs> nik_ce auto U_par_abstract		= U_parameter<Pattern::abstract, Vs...>;
 
 // access:
 
-	template<auto... Vs> using T_par_access			= T_parameter<Pattern::access, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_access		= U_parameter<Pattern::access, Vs...>;
+//	template<auto... Vs> using T_par_access			= T_parameter<Pattern::access, Vs...>;
+//	template<auto... Vs> nik_ce auto U_par_access		= U_parameter<Pattern::access, Vs...>;
 
 // list:
 
-	template<auto... Vs> using T_par_list			= T_parameter<Pattern::list, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_list		= U_parameter<Pattern::list, Vs...>;
+//	template<auto... Vs> using T_par_list			= T_parameter<Pattern::list, Vs...>;
+//	template<auto... Vs> nik_ce auto U_par_list		= U_parameter<Pattern::list, Vs...>;
 
 // boolean:
 
-	template<auto... Vs> using T_par_boolean		= T_parameter<Pattern::boolean, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_boolean		= U_parameter<Pattern::boolean, Vs...>;
+//	template<auto... Vs> using T_par_boolean		= T_parameter<Pattern::boolean, Vs...>;
+//	template<auto... Vs> nik_ce auto U_par_boolean		= U_parameter<Pattern::boolean, Vs...>;
 
 // number:
 
-	template<auto... Vs> using T_par_number			= T_parameter<Pattern::number, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_number		= U_parameter<Pattern::number, Vs...>;
+//	template<auto... Vs> using T_par_number			= T_parameter<Pattern::number, Vs...>;
+//	template<auto... Vs> nik_ce auto U_par_number		= U_parameter<Pattern::number, Vs...>;
 
 // pointer:
 
-	template<auto... Vs> using T_par_pointer		= T_parameter<Pattern::pointer, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_pointer		= U_parameter<Pattern::pointer, Vs...>;
+//	template<auto... Vs> using T_par_pointer		= T_parameter<Pattern::pointer, Vs...>;
+//	template<auto... Vs> nik_ce auto U_par_pointer		= U_parameter<Pattern::pointer, Vs...>;
 
 // reference:
 
-	template<auto... Vs> using T_par_reference		= T_parameter<Pattern::reference, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_reference	= U_parameter<Pattern::reference, Vs...>;
+//	template<auto... Vs> using T_par_reference		= T_parameter<Pattern::reference, Vs...>;
+//	template<auto... Vs> nik_ce auto U_par_reference	= U_parameter<Pattern::reference, Vs...>;
 
 // array:
 
-	template<auto... Vs> using T_par_array			= T_parameter<Pattern::array, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_array		= U_parameter<Pattern::array, Vs...>;
+//	template<auto... Vs> using T_par_array			= T_parameter<Pattern::array, Vs...>;
+//	template<auto... Vs> nik_ce auto U_par_array		= U_parameter<Pattern::array, Vs...>;
 
 // function:
 
-	template<auto... Vs> using T_par_function		= T_parameter<Pattern::function, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_function		= U_parameter<Pattern::function, Vs...>;
+//	template<auto... Vs> using T_par_function		= T_parameter<Pattern::function, Vs...>;
+//	template<auto... Vs> nik_ce auto U_par_function		= U_parameter<Pattern::function, Vs...>;
 
 // identity:
 
-	template<auto... Vs> using T_par_identity		= T_parameter<Pattern::identity, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_identity		= U_parameter<Pattern::identity, Vs...>;
+//	template<auto... Vs> using T_par_identity		= T_parameter<Pattern::identity, Vs...>;
+//	template<auto... Vs> nik_ce auto U_par_identity		= U_parameter<Pattern::identity, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

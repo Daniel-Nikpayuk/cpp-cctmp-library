@@ -46,25 +46,6 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// lambda tuple:
-
-/***********************************************************************************************************************/
-
-// operators:
-
-	struct ArgLambdaTuple
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-			make , catenate ,
-			dimension
-		};
-	};
-
-/***********************************************************************************************************************/
 
 // lambda tuple:
 
@@ -72,6 +53,43 @@ namespace cctmp {
 
 		template<auto... filler>
 		struct T_grammar<Shape::argument, Pattern::lambda_tuple, ArgLambdaTuple::make, filler...>
+		{
+			template<typename... Ts>
+			nik_ces auto result(Ts... vs)
+			{
+				return [vs...](auto p, auto U, auto... xs)
+				{
+					using F = T_restore_T<decltype(U)>;
+
+					if (p) return F::template result<Ts..., decltype(xs)...>(vs..., xs...);
+					else   return F::template result<decltype(xs)..., Ts...>(xs..., vs...);
+				};
+			}
+
+		}; nik_ce auto _lambda_tuple_make_ = U_arg_lambda_tuple<ArgLambdaTuple::make>;
+
+	// lmake:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::lambda_tuple, ArgLambdaTuple::lmake, filler...>
+		{
+			template<typename... Ts>
+			nik_ces auto result(Ts... vs)
+			{
+				return [vs...](auto U, auto... xs)
+				{
+					using F = T_restore_T<decltype(U)>;
+
+					return F::template result<Ts..., decltype(xs)...>(vs..., xs...);
+				};
+			}
+
+		}; nik_ce auto _lambda_tuple_lmake_ = U_arg_lambda_tuple<ArgLambdaTuple::lmake>;
+
+	// rmake:
+
+		template<auto... filler>
+		struct T_grammar<Shape::argument, Pattern::lambda_tuple, ArgLambdaTuple::rmake, filler...>
 		{
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs)
@@ -84,33 +102,62 @@ namespace cctmp {
 				};
 			}
 
-		}; nik_ce auto _lambda_tuple_ = U_arg_lambda_tuple<ArgLambdaTuple::make>;
+		}; nik_ce auto _lambda_tuple_lmake_ = U_arg_lambda_tuple<ArgLambdaTuple::lmake>;
 
 	// catenate:
 
-		template<auto... filler>
-		struct T_grammar<Shape::argument, Pattern::lambda_tuple, ArgLambdaTuple::catenate, filler...>
-		{
-			template<typename LT, typename... Ts>
-			nik_ces auto result(LT lt, Ts... vs) { return lt(_lambda_tuple_, vs...); }
+	struct T_lambda_tuple_cat
+	{
+		template<typename LT, typename... Ts>
+		nik_ces auto result(LT lt, Ts... vs) { return lt(_lambda_tuple_, vs...); }
 
-		}; nik_ce auto _lambda_tuple_catenate_ = U_arg_lambda_tuple<ArgLambdaTuple::catenate>;
+	}; nik_ce auto _lambda_tuple_cat_ = U_store_T<T_lambda_tuple_cat>;
 
 /***********************************************************************************************************************/
 
-// message passing:
+// lambda tuple:
 
 	struct LambdaTuple
 	{
-		template<        typename LT> nik_ces auto empty (LT lt) { return lt(_empty_); }
-		template<        typename LT> nik_ces auto size  (LT lt) { return lt(_size_ ); }
-		template<auto n, typename LT> nik_ces auto value (LT lt) { return lt(_at_<n>); }
+		template<typename... Ts>
+		nik_ces auto make(Ts... vs)
+		{
+			return [vs...](auto U, auto... xs)
+			{
+				using F = T_restore_T<decltype(U)>;
+
+				return F::template result<Ts..., decltype(xs)...>(vs..., xs...);
+			};
+		}
 
 		template<typename... Ts>
-		nik_ces auto make(Ts... vs) { return T_store_U<_lambda_tuple_>::template result<Ts...>(vs...); }
+		nik_ces auto rmake(Ts... vs)
+		{
+			return [vs...](auto U, auto... xs)
+			{
+				using F = T_restore_T<decltype(U)>;
+
+				return F::template result<decltype(xs)..., Ts...>(xs..., vs...);
+			};
+		}
+
+		template<typename... Ts>
+		nik_ces auto comake(Ts... vs)
+		{
+			return [vs...](bool p, auto U, auto... xs)
+			{
+				using F = T_restore_T<decltype(U)>;
+
+				if (p) return F::template result<Ts..., decltype(xs)...>(vs..., xs...);
+				else   return F::template result<decltype(xs)..., Ts...>(xs..., vs...);
+			};
+		}
+
+		template<        typename LT> nik_ces auto empty(LT lt) { return lt(_empty_); }
+		template<auto n, typename LT> nik_ces auto value(LT lt) { return lt(_at_<n>); }
 
 		template<typename LT1, typename LT2>
-		nik_ces auto catenate(LT1 lt1, LT2 lt2) { return lt1(_lambda_tuple_catenate_, lt2); }
+		nik_ces auto cat(LT1 lt1, LT2 lt2) { return lt1(_lambda_tuple_cat_, lt2); }
 	};
 
 /***********************************************************************************************************************/
