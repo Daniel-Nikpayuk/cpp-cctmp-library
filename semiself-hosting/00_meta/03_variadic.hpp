@@ -113,29 +113,22 @@ namespace cctmp {
 // instr:
 
 	template<typename Type, typename SizeType>
-	struct variadic_instr
+	struct variadic_instr : public sequence<Type, SizeType, VariadicIndex::dimension>
 	{
-		using type			= Type;
-		using type_ref			= type &;
-		using ctype			= type const;
-		using ctype_ref			= ctype &;
-		using size_type			= SizeType;
-		using csize_type		= size_type const;
-		using Index 			= VariadicIndex;
+		using Index 		= VariadicIndex;
+		using base 		= sequence<Type, SizeType, Index::dimension>;
 
-		type initial[Index::dimension];
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
 
-		nik_ce variadic_instr() : initial{} { }
-
-		nik_ce ctype_ref operator [] (csize_type n) const { return initial[n]; }
-		nik_ce  type_ref operator [] (csize_type n)       { return initial[n]; }
+		nik_ce variadic_instr() : base{} { }
 
 		nik_ce void set(csize_type n, csize_type t, csize_type p, csize_type m)
 		{
-			initial[Index::name] = n;
-			initial[Index::note] = t;
-			initial[Index::pos ] = p;
-			initial[Index::num ] = m;
+			base::initial[Index::name] = n;
+			base::initial[Index::note] = t;
+			base::initial[Index::pos ] = p;
+			base::initial[Index::num ] = m;
 		}
 	};
 
@@ -144,27 +137,20 @@ namespace cctmp {
 // contr:
 
 	template<typename Type, typename SizeType, SizeType Size>
-	struct variadic_contr
+	struct variadic_contr : public sequence<variadic_instr<Type, SizeType>, SizeType, Size>
 	{
-		using instr_type		= variadic_instr<Type, SizeType>;
-		using instr_ref			= instr_type &;
-		using cinstr_type		= instr_type const;
-		using cinstr_ref		= cinstr_type &;
-		using size_type			= typename instr_type::size_type;
-		using csize_type		= typename instr_type::csize_type;
+		using instr_type	= variadic_instr<Type, SizeType>;
+		using base		= sequence<instr_type, SizeType, Size>;
+		using size_type		= typename base::size_type;
+		using csize_type	= typename base::csize_type;
 
-		nik_ces size_type length	= Size;
-
-		instr_type initial[length];
-		size_type current;
-
-		nik_ce variadic_contr() : initial{}, current{} { }
-
-		nik_ce cinstr_ref operator [] (csize_type n) const { return initial[n]; }
-		nik_ce  instr_ref operator [] (csize_type n)       { return initial[n]; }
+		nik_ce variadic_contr() : base{} { }
 
 		nik_ce void push(csize_type n, csize_type t, csize_type p = 0, csize_type m = 0)
-			{ initial[current++].set(n, t, p, m); }
+		{
+			base::upsize();
+			base::last()->set(n, t, p, m);
+		}
 	};
 
 /***********************************************************************************************************************/
@@ -340,6 +326,8 @@ namespace cctmp {
 
 	using T_left = T_praxis<VN::left>;
 
+		// overload operators + are intentionally undefined.
+
 	template<auto... Vs>
 	auto operator + (T_left::match<0, Vs...> &, T_left::pack< > &) -> T_pack_Vs<Vs...>;
 
@@ -355,6 +343,8 @@ namespace cctmp {
 
 	using T_right = T_praxis<VN::right>;
 
+		// overload operators + are intentionally undefined.
+
 	template<auto... Vs>
 	auto operator + (T_right::pack< > &, T_right::match<0, Vs...> &) -> T_pack_Vs<Vs...>;
 
@@ -363,10 +353,6 @@ namespace cctmp {
 
 	template<auto V, auto n, auto... Vs>
 	auto operator + (T_right::pack<V> &, T_right::match<n, Vs...> &) -> T_right::match<n-1, V, Vs...> &;
-
-/***********************************************************************************************************************/
-
-// segment:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

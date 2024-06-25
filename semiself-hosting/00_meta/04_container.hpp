@@ -25,7 +25,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// environment:
+// operators:
 
 /***********************************************************************************************************************/
 
@@ -116,6 +116,52 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // binding:
+
+	template<typename SizeType, typename CharType, SizeType N, typename T>
+	nik_ce auto binding(nik_avp(SizeType*), CharType (&variable)[N], T value)
+	{
+		using strlit_type = string_literal<CharType, SizeType>;
+
+		return LambdaTuple::make(strlit_type{variable}, value);
+	}
+
+	// syntactic sugar:
+
+		template<typename CharType, gindex_type N, typename T>
+		nik_ce auto gbinding(CharType (&variable)[N], T value)
+			{ return binding(U_gindex_type, variable, value); }
+
+/***********************************************************************************************************************/
+
+// frame:
+
+	template<typename CharType, typename SizeType, typename... Bindings>
+	nik_ce auto frame(nik_avp(CharType*), nik_avp(SizeType*), Bindings... bs)
+	{
+		using strlit_type   = string_literal<CharType, SizeType>;
+		using variable_type = sequence<strlit_type, SizeType, sizeof...(Bindings)>;
+
+		variable_type variables;
+		(variables.push(LambdaTuple::value<0>(bs)), ...);
+
+		auto values = LambdaTuple::make(LambdaTuple::value<1>(bs)...);
+
+		return LambdaTuple::make(variables, values);
+	}
+
+/***********************************************************************************************************************/
+
+// source:
+
+	template<typename SizeType, typename CharType, SizeType N, typename... Bindings>
+	nik_ce auto source(const CharType (&s)[N], const Bindings &... bs)
+	{
+		using strlit_type       = string_literal<CharType, SizeType>;
+		nik_ce auto U_char_type = U_store_T<CharType>;
+		nik_ce auto U_size_type = U_store_T<SizeType>;
+
+		return LambdaTuple::make(strlit_type{s}, frame(U_char_type, U_size_type, bs...));
+	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

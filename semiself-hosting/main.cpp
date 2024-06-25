@@ -18,7 +18,7 @@
 ************************************************************************************************************************/
 
 #include<cstdio>
-#include<cstdlib>
+//#include<cstdlib>
 
 /***********************************************************************************************************************/
 
@@ -37,31 +37,6 @@
 
 	int main(int argc, char *argv[])
 	{
-		constexpr auto lt1 = LambdaTuple::make(1, 2, 3);
-		constexpr auto lt2 = LambdaTuple::make(4, 5, 6);
-
-		constexpr auto cat = LambdaTuple::catenate(lt1, lt2);
-
-		printf("%lu\n", LambdaTuple::size(cat));
-
-		printf("%d\n", LambdaTuple::template value<0>(cat));
-		printf("%d\n", LambdaTuple::template value<1>(cat));
-		printf("%d\n", LambdaTuple::template value<2>(cat));
-		printf("%d\n", LambdaTuple::template value<3>(cat));
-		printf("%d\n", LambdaTuple::template value<4>(cat));
-		printf("%d\n", LambdaTuple::template value<5>(cat));
-
-		//
-
-		auto tup = LambdaTuple::make(1, 2.0, 'c');
-
-		printf("%d\n", LambdaTuple::template value<0>(tup));
-		printf("%f\n", LambdaTuple::template value<1>(tup));
-		printf("%c\n", LambdaTuple::template value<2>(tup));
-
-		printf("%lu\n", LambdaTuple::size(tup));
-		printf("%s\n", LambdaTuple::empty(tup) ? "is empty" : "not empty");
-
 		return 0;
 	}
 

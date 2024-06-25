@@ -188,7 +188,7 @@ namespace cctmp {
 
 			using char_type		= T_restore_T<CharType>;
 			using strlit_type	= string_literal<char_type>;
-			using base		= sequence<strlit_type, length>;
+		//	using base		= sequence<strlit_type, length>;
 			using tuple_type	= tuple<typename Bindings::value_type...>;
 
 		protected:

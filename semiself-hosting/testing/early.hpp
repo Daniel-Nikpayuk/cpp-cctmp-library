@@ -56,9 +56,49 @@
 
 // tuple:
 
-		auto tup = make_tuple(1, 2.0, 'c');
+	// make, value, size, empty:
 
-		printf("%d\n", get_value<0>(tup));
-		printf("%f\n", get_value<1>(tup));
-		printf("%c\n", get_value<2>(tup));
+		auto tup = LambdaTuple::make(1, 2.0, 'c');
+
+		printf("%d\n", LambdaTuple::template value<0>(tup));
+		printf("%f\n", LambdaTuple::template value<1>(tup));
+		printf("%c\n", LambdaTuple::template value<2>(tup));
+
+		printf("%lu\n", LambdaTuple::size(tup));
+		printf("%s\n", LambdaTuple::empty(tup) ? "is empty" : "not empty");
+
+	// make, catenate size, value:
+
+		constexpr auto lt1 = LambdaTuple::make(1, 2, 3);
+		constexpr auto lt2 = LambdaTuple::make(4, 5, 6);
+
+		constexpr auto cat = LambdaTuple::catenate(lt1, lt2);
+
+		printf("%lu\n", LambdaTuple::size(cat));
+
+		printf("%d\n", LambdaTuple::template value<0>(cat));
+		printf("%d\n", LambdaTuple::template value<1>(cat));
+		printf("%d\n", LambdaTuple::template value<2>(cat));
+		printf("%d\n", LambdaTuple::template value<3>(cat));
+		printf("%d\n", LambdaTuple::template value<4>(cat));
+		printf("%d\n", LambdaTuple::template value<5>(cat));
+
+/***********************************************************************************************************************/
+
+// frame:
+
+		constexpr auto f = frame
+		(
+			U_gcchar_type, U_gindex_type,
+
+			gbinding("zero"  , 0),
+			gbinding("one"   , 1),
+			gbinding("two"   , 2),
+			gbinding("three" , 3),
+			gbinding("four"  , 4),
+			gbinding("five"  , 5)
+		);
+
+		printf("%s\n", LambdaTuple::value<0>(f)[4].origin());
+		printf("%d\n", LambdaTuple::value<4>(LambdaTuple::value<1>(f)));
 
