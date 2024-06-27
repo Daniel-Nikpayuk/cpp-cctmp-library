@@ -25,6 +25,94 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// operators:
+
+/***********************************************************************************************************************/
+
+// at:
+
+	template<auto n, auto... filler>
+	struct T_grammar<Shape::argument, Pattern::overload, ArgOverload::at, n, filler...>
+	{
+		template<typename... Ts>
+		nik_ces auto result(Ts... vs)
+		{
+			nik_ce auto p0 = left_    <n, U_store_T<Ts>...>;
+			nik_ce auto p1 = right_   <n, U_store_T<Ts>...>;
+			nik_ce auto U  = _select_ <p0, p1>;
+
+			return T_store_U<U>::result(vs...);
+		}
+
+	}; template<auto n>
+		nik_ce auto _at_ = U_arg_overload<ArgOverload::at, n>;
+
+	// syntactic sugar:
+
+		template<auto n, auto... Vs>
+		nik_ce auto at_ = T_store_U<_at_<n>>::template result<decltype(Vs)...>(Vs...);
+
+		template<auto n, typename... Ts>
+		using type_at = T_store_U<at_<n, U_store_T<Ts>...>>;
+
+		template<auto... Vs, nik_vp(p)(T_pack_Vs<Vs...>*), auto n>
+		nik_ce auto at_<p, n> = T_store_U<_at_<n>>::template result<decltype(Vs)...>(Vs...);
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// ctuple:
+
+	template<typename, auto, typename...> struct ctuple;
+
+/***********************************************************************************************************************/
+
+// indexed value:
+
+	template<typename T, typename SizeType, SizeType>
+	struct indexed_value
+	{
+		T value;
+
+		nik_ce indexed_value(const T & v) : value{v} { }
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename SizeType, auto... Is, nik_vp(p)(T_pack_Vs<Is...>*), typename... Ts>
+	struct ctuple<SizeType, p, Ts...> : public indexed_value<Ts, SizeType, Is>...
+	{
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		nik_ce ctuple(Ts... vs) : indexed_value<Ts, size_type, Is>{vs}... { }
+
+		template<size_type n>
+		nik_ce const auto & cvalue() const
+		{
+			using T		= type_at<n, Ts...>;
+			using BasePtr	= indexed_value<T, size_type, n> const*;
+
+			return static_cast<BasePtr>(this)->value;
+		}
+	};
+
+	// syntactic sugar:
+
+		template<typename SizeType, typename... Ts>
+		nik_ces auto env_tuple(Ts... vs)
+		{
+			using frame_type = ctuple<SizeType, segment_<sizeof...(Ts)>, Ts...      >;
+			using env_type   = ctuple<SizeType, segment_<1            >, frame_type >;
+
+			return env_type{frame_type{vs...}};
+		}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // machine:
 
 	template<gkey_type, gkey_type, auto...> struct T_machine;
@@ -54,7 +142,6 @@ namespace cctmp {
 	};
 
 	using MN = MachineName;
-	using AN = MN; // temporary until semiself hosting is complete.
 
 /***********************************************************************************************************************/
 
@@ -81,7 +168,6 @@ namespace cctmp {
 	};
 
 	using MT = MachineNote;
-	using AT = MT; // temporary until semiself hosting is complete.
 
 /***********************************************************************************************************************/
 
@@ -90,7 +176,6 @@ namespace cctmp {
 	struct MachineIndex { enum : gkey_type { name, note, pos, num, aux0, aux1, aux2, next, dimension }; };
 
 	using MI = MachineIndex;
-	using AI = MI; // temporary until semiself hosting is complete.
 
 /***********************************************************************************************************************/
 
@@ -127,9 +212,6 @@ namespace cctmp {
 
 	template<auto static_contr>
 	using MD = MachineDispatch<static_contr>;
-
-	template<auto static_contr>
-	using AD = MD<static_contr>; // temporary until semiself hosting is complete.
 
 /***********************************************************************************************************************/
 

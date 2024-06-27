@@ -21,9 +21,8 @@
 #include"../00_kernel/01_argument.hpp"
 #include"../00_kernel/02_parameter.hpp"
 #include"../00_kernel/03_variadic.hpp"
-#include"../00_kernel/04_container.hpp"
-#include"../00_kernel/05_machine.hpp"
-#include"../00_kernel/06_constant.hpp"
-#include"../00_kernel/07_application.hpp"
-#include"../00_kernel/08_conditional.hpp"
+#include"../00_kernel/04_machine.hpp"
+#include"../00_kernel/05_constant.hpp"
+#include"../00_kernel/06_application.hpp"
+#include"../00_kernel/07_conditional.hpp"
 

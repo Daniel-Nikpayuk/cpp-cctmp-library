@@ -19,7 +19,7 @@
 
 // state:
 
-namespace assembly {
+namespace engine {
 
 	// instead of generic list, make specific varieties. Notably applications. Will we still require
 	// an unknown (indeterminate?) application for when the operator is a non-trivial expression?
@@ -318,5 +318,5 @@ namespace assembly {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace assembly
+} // namespace engine
 

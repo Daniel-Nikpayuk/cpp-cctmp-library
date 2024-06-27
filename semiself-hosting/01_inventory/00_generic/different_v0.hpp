@@ -24,8 +24,8 @@
 	{
 		using size_type = SizeType;
 
-		using AN = cctmp::AN;
-		using AT = cctmp::AT;
+		using AN = cctmp::MN;
+		using AT = cctmp::MT;
 
 		constexpr static size_type value[][8] =
 		{
@@ -165,15 +165,12 @@
 	template<typename SizeType>
 	struct T_static_env_chord_different_v0
 	{
-		constexpr static auto value = cctmp::LambdaTuple::template env_tuple<SizeType>
+		constexpr static auto value = cctmp::template env_tuple<SizeType>
 		(
-			cctmp::LambdaTuple::make
-			(
-				cctmp::_not_equal_   ,
-				cctmp::_dereference_ ,
-				cctmp::_first_       ,
-				cctmp::_id_
-			)
+			cctmp::_not_equal_   ,
+			cctmp::_dereference_ ,
+			cctmp::_first_       ,
+			cctmp::_id_
 		);
 
 	}; template<typename SizeType>
@@ -184,7 +181,7 @@
 // unit:
 
 	template<typename SizeType, typename In, typename End, typename In1>
-	constexpr bool kernel_different_v0(In in, End end, In1 in1)
+	constexpr bool inventory_different_v0(In in, End end, In1 in1)
 	{
 		using rtn_type = unsigned char;
 
@@ -202,6 +199,6 @@
 // same:
 
 	template<typename SizeType, typename In, typename End, typename In1>
-	constexpr bool kernel_same_v0(In in, End end, In1 in1)
-		{ return not kernel_different_v0<SizeType, In, End, In1>(in, end, in1); }
+	constexpr bool inventory_same_v0(In in, End end, In1 in1)
+		{ return not inventory_different_v0<SizeType, In, End, In1>(in, end, in1); }
 
