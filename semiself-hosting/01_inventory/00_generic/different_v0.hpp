@@ -24,8 +24,8 @@
 	{
 		using size_type = SizeType;
 
-		using AN = assembly::AN;
-		using AT = assembly::AT;
+		using AN = cctmp::AN;
+		using AT = cctmp::AT;
 
 		constexpr static size_type value[][8] =
 		{
@@ -157,4 +157,51 @@
 		<
 			T_contr_object_chord_different_v0<SizeType>
 		>;
+
+/***********************************************************************************************************************/
+
+// env:
+
+	template<typename SizeType>
+	struct T_static_env_chord_different_v0
+	{
+		constexpr static auto value = cctmp::LambdaTuple::template env_tuple<SizeType>
+		(
+			cctmp::LambdaTuple::make
+			(
+				cctmp::_not_equal_   ,
+				cctmp::_dereference_ ,
+				cctmp::_first_       ,
+				cctmp::_id_
+			)
+		);
+
+	}; template<typename SizeType>
+		nik_ce auto env_chord_different_v0 = cctmp::U_store_T<T_static_env_chord_different_v0<SizeType>>;
+
+/***********************************************************************************************************************/
+
+// unit:
+
+	template<typename SizeType, typename In, typename End, typename In1>
+	constexpr bool kernel_different_v0(In in, End end, In1 in1)
+	{
+		using rtn_type = unsigned char;
+
+		using T_apply = cctmp::T_metapile_apply
+		<
+			SizeType, contr_object_chord_different_v0<SizeType>,
+			env_chord_different_v0<SizeType>, cctmp::U_pack_Vs<cctmp::U_store_T<rtn_type>>
+		>;
+
+		return T_apply::result(rtn_type{0}, in, end, in1);
+	}
+
+/***********************************************************************************************************************/
+
+// same:
+
+	template<typename SizeType, typename In, typename End, typename In1>
+	constexpr bool kernel_same_v0(In in, End end, In1 in1)
+		{ return not kernel_different_v0<SizeType, In, End, In1>(in, end, in1); }
 

@@ -768,6 +768,9 @@ namespace cctmp {
 		template<auto n, auto... Vs>
 		nik_ce auto left_ = T_variadic_left<>::template result<500, n, Vs...>;
 
+		template<auto... Vs, nik_vp(p)(T_pack_Vs<Vs...>*), auto n>
+		nik_ce auto left_<p, n> = T_variadic_left<>::template result<500, n, Vs...>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -831,6 +834,9 @@ namespace cctmp {
 
 		template<auto n, auto... Vs>
 		nik_ce auto right_ = T_variadic_right<>::template result<500, n, Vs...>;
+
+		template<auto... Vs, nik_vp(p)(T_pack_Vs<Vs...>*), auto n>
+		nik_ce auto right_<p, n> = T_variadic_right<>::template result<500, n, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

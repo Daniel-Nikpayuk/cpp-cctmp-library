@@ -36,9 +36,9 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id,// convenience for default params.
-			nop         , empty     , size , first , at ,	// basis
-			upshift     , downshift ,			// bitwise
-			dereference , appoint   ,			// mutation
+			nop         , empty     , size , first , select , at ,	// basis
+			upshift     , downshift ,				// bitwise
+			dereference , appoint   ,				// mutation
 			dimension
 		};
 	};
@@ -97,7 +97,7 @@ namespace cctmp {
 
 		}; nik_ce auto _first_ = U_arg_overload<ArgOverload::first>;
 
-	// at:
+	// select:
 
 		template
 		<
@@ -105,13 +105,13 @@ namespace cctmp {
 			auto RU, auto... RUs, nik_vp(p1)(T_pack_Vs<RU, RUs...>*),
 			auto... filler
 		>
-		struct T_grammar<Shape::argument, Pattern::overload, ArgOverload::at, p0, p1, filler...>
+		struct T_grammar<Shape::argument, Pattern::overload, ArgOverload::select, p0, p1, filler...>
 		{
 			nik_ces auto result(T_store_U<LUs>... lvs, T_store_U<RU> rv, T_store_U<RUs>... rvs)
 				{ return rv; }
 
-		}; template<auto... Vs> // open to additional specialization.
-			nik_ce auto _at_ = U_arg_overload<ArgOverload::at, Vs...>;
+		}; template<auto p0, auto p1>
+			nik_ce auto _select_ = U_arg_overload<ArgOverload::select, p0, p1>;
 
 /***********************************************************************************************************************/
 

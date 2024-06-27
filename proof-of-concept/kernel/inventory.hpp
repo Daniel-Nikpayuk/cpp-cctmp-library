@@ -40,6 +40,11 @@
 				"body:                                            ;"
 				"  . = diff !out in end in1                       ;"
 				"  return _                                       ;"
+
+				, cctmp::binding( "not_equal" , cctmp::_not_equal_   )
+				, cctmp::binding( "*"         , cctmp::_dereference_ )
+				, cctmp::binding( "first"     , cctmp::_first_       )
+				, cctmp::binding( "@"         , cctmp::_id_          )
 			);
 		}
 

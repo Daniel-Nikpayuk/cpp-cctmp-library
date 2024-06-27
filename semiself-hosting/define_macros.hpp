@@ -342,75 +342,13 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// interpreter:
-
-/***********************************************************************************************************************/
-
-// controls:
-
-	#define NIK_INTERPRETER_CONTROLS(_d_, _m_, _c_, _i_)								\
-															\
-		auto _d_, auto _m_, auto _c_, auto _i_
-
-// params:
-
-	#define NIK_INTERPRETER_PARAMS(_d_, _m_, _c_, _i_, _v_)								\
-															\
-		NIK_INTERPRETER_CONTROLS(_d_, _m_, _c_, _i_), auto... _v_
-
-/***********************************************************************************************************************/
-
-// space:
-
-	#define NIK_INTERPRETER_L(_d_, _m_, _c_, _i_)									\
-															\
-		T_interpreter												\
-		<													\
-			ID::next_name(_d_, _m_, _c_, _i_),								\
-			ID::next_note(_d_, _m_, _c_, _i_)
-
-	#define NIK_INTERPRETER_M(_d_, _m_, _c_, _i_)									\
-															\
-		>::template result											\
-		<													\
-			ID::next_depth(_d_),										\
-			_m_, _c_,											\
-			ID::next_index(_d_, _m_, _i_)
-
-	#define NIK_INTERPRETER_R											\
-															\
-		>
-
-	#define NIK_INTERPRETER_BEGIN(_e_, _d_, _m_, _c_, _i_)								\
-															\
-		NIK_INTERPRETER_L(_d_, _m_, _c_, _i_), _e_ NIK_INTERPRETER_M(_d_, _m_, _c_, _i_)
-
-	#define NIK_INTERPRETER_END											\
-															\
-		NIK_INTERPRETER_R
-
-	#define NIK_INTERPRETER_TEMPLATE(_d_, _m_, _c_, _i_)								\
-															\
-		NIK_INTERPRETER_L(_d_, _m_, _c_, _i_)
-
-	#define NIK_INTERPRETER_RESULT(_d_, _m_, _c_, _i_, _v_)								\
-															\
-		NIK_INTERPRETER_M(_d_, _m_, _c_, _i_), _v_... NIK_INTERPRETER_R
-
-	#define NIK_INTERPRETER(_e_, _d_, _m_, _c_, _i_, _v_)								\
-															\
-		NIK_INTERPRETER_TEMPLATE(_d_, _m_, _c_, _i_), _e_ NIK_INTERPRETER_RESULT(_d_, _m_, _c_, _i_, _v_)
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// assembly:
+// machine:
 
 /***********************************************************************************************************************/
 
 // params:
 
-	#define NIK_ASSEMBLY_PARAMS(_c_, _i_, _l_, _t_, _r_)								\
+	#define NIK_MACHINE_PARAMS(_c_, _i_, _l_, _t_, _r_)								\
 															\
 		auto _c_, auto _i_, auto _l_, auto _t_, auto _r_
 
@@ -418,36 +356,36 @@
 
 // template:
 
-	#define NIK_ASSEMBLY_TEMPLATE_BEGIN(_c_, _i_)									\
+	#define NIK_MACHINE_TEMPLATE_BEGIN(_c_, _i_)									\
 															\
-		T_assembly												\
+		T_machine												\
 		<													\
 			AD<_c_>::next_name(_i_),									\
 			AD<_c_>::next_note(_i_)
 
-	#define NIK_ASSEMBLY_TEMPLATE_BEGIN_WS(_c_, _i_, ...)								\
+	#define NIK_MACHINE_TEMPLATE_BEGIN_WS(_c_, _i_, ...)								\
 															\
-		NIK_ASSEMBLY_TEMPLATE_BEGIN(_c_, _i_), __VA_ARGS__
+		NIK_MACHINE_TEMPLATE_BEGIN(_c_, _i_), __VA_ARGS__
 
-	#define NIK_ASSEMBLY_TEMPLATE_END										\
+	#define NIK_MACHINE_TEMPLATE_END										\
 															\
 		>
 
-	#define NIK_ASSEMBLY_TEMPLATE(_c_, _i_)										\
+	#define NIK_MACHINE_TEMPLATE(_c_, _i_)										\
 															\
-		NIK_ASSEMBLY_TEMPLATE_BEGIN(_c_, _i_)									\
-		NIK_ASSEMBLY_TEMPLATE_END
+		NIK_MACHINE_TEMPLATE_BEGIN(_c_, _i_)									\
+		NIK_MACHINE_TEMPLATE_END
 
-	#define NIK_ASSEMBLY_TEMPLATE_WS(_c_, _i_, ...)									\
+	#define NIK_MACHINE_TEMPLATE_WS(_c_, _i_, ...)									\
 															\
-		NIK_ASSEMBLY_TEMPLATE_BEGIN_WS(_c_, _i_, __VA_ARGS__)							\
-		NIK_ASSEMBLY_TEMPLATE_END
+		NIK_MACHINE_TEMPLATE_BEGIN_WS(_c_, _i_, __VA_ARGS__)							\
+		NIK_MACHINE_TEMPLATE_END
 
 /***********************************************************************************************************************/
 
 // result:
 
-	#define NIK_ASSEMBLY_RESULT_BEGIN(_c_, _i_, _l_, _t_, _r_)							\
+	#define NIK_MACHINE_RESULT_BEGIN(_c_, _i_, _l_, _t_, _r_)							\
 															\
 		template result												\
 		<													\
@@ -455,32 +393,32 @@
 			AD<_c_>::next_index(_i_),									\
 			_l_, _t_, _r_
 
-	#define NIK_ASSEMBLY_RESULT_BEGIN_TS(_c_, _i_, _l_, _t_, _r_, ...)						\
+	#define NIK_MACHINE_RESULT_BEGIN_TS(_c_, _i_, _l_, _t_, _r_, ...)						\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN(_c_, _i_, _l_, _t_, _r_), __VA_ARGS__
+		NIK_MACHINE_RESULT_BEGIN(_c_, _i_, _l_, _t_, _r_), __VA_ARGS__
 
-	#define NIK_ASSEMBLY_RESULT_END 										\
+	#define NIK_MACHINE_RESULT_END 											\
 															\
 		>
 
-	#define NIK_ASSEMBLY_RESULT(_c_, _i_, _l_, _t_, _r_)								\
+	#define NIK_MACHINE_RESULT(_c_, _i_, _l_, _t_, _r_)								\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN(_c_, _i_, _l_, _t_, _r_)							\
-		NIK_ASSEMBLY_RESULT_END
+		NIK_MACHINE_RESULT_BEGIN(_c_, _i_, _l_, _t_, _r_)							\
+		NIK_MACHINE_RESULT_END
 
-	#define NIK_ASSEMBLY_RESULT_TS(_c_, _i_, _l_, _t_, _r_, ...)							\
+	#define NIK_MACHINE_RESULT_TS(_c_, _i_, _l_, _t_, _r_, ...)							\
 															\
-		NIK_ASSEMBLY_RESULT_BEGIN_TS(_c_, _i_, _l_, _t_, _r_, __VA_ARGS__)					\
-		NIK_ASSEMBLY_RESULT_END
+		NIK_MACHINE_RESULT_BEGIN_TS(_c_, _i_, _l_, _t_, _r_, __VA_ARGS__)					\
+		NIK_MACHINE_RESULT_END
 
 /***********************************************************************************************************************/
 
 // interface:
 
-	#define NIK_ASSEMBLY_TS(_c_, _i_, _l_, _t_, _r_, ...)								\
+	#define NIK_MACHINE_TS(_c_, _i_, _l_, _t_, _r_, ...)								\
 															\
-		NIK_ASSEMBLY_TEMPLATE(_c_, _i_)										\
-			::NIK_ASSEMBLY_RESULT_TS(_c_, _i_, _l_, _t_, _r_, __VA_ARGS__)
+		NIK_MACHINE_TEMPLATE(_c_, _i_)										\
+			::NIK_MACHINE_RESULT_TS(_c_, _i_, _l_, _t_, _r_, __VA_ARGS__)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

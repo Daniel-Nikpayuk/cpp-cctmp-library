@@ -24,7 +24,8 @@
 
 #include"define_macros.hpp"
 
-#include"include/00_meta.hpp"
+#include"include/00_kernel.hpp"
+#include"include/01_inventory.hpp"
 
 #include"undef_macros.hpp"
 
@@ -35,8 +36,27 @@
 
 /***********************************************************************************************************************/
 
+	template<typename... Ts>
+	constexpr auto push_copy(Ts... vs)
+	{
+		using seq_type = sequence<int, gindex_type, sizeof...(Ts)>;
+
+		seq_type s;
+		(s.push(vs), ...);
+
+		return s;
+	}
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
+		constexpr auto s0 = push_copy(1, 2, 3, 4, 5);
+		constexpr auto s1 = push_copy(1, 2, 3, 4, 5);
+
+		auto val = kernel_different_v0<gindex_type>(s0.cbegin(), s0.cend(), s1.cbegin());
+		printf("%s\n", val ? "different" : "same");
+
 		return 0;
 	}
 

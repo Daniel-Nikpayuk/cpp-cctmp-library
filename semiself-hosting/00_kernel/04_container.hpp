@@ -37,11 +37,65 @@ namespace cctmp {
 		template<typename... Ts>
 		nik_ces auto result(Ts... vs)
 		{
-			nik_ce auto p0 = left_  <n, U_store_T<Ts>...>;
-			nik_ce auto p1 = right_ <n, U_store_T<Ts>...>;
-			nik_ce auto U  = _at_   <p0, p1>;
+			nik_ce auto p0 = left_    <n, U_store_T<Ts>...>;
+			nik_ce auto p1 = right_   <n, U_store_T<Ts>...>;
+			nik_ce auto U  = _select_ <p0, p1>;
 
 			return T_store_U<U>::result(vs...);
+		}
+
+	}; template<auto n>
+		nik_ce auto _at_ = U_arg_overload<ArgOverload::at, n>;
+
+	// syntactic sugar:
+
+		template<auto n, auto... Vs>
+		nik_ce auto at_ = T_store_U<_at_<n>>::template result<decltype(Vs)...>(Vs...);
+
+		template<auto n, typename... Ts>
+		using type_at = T_store_U<at_<n, U_store_T<Ts>...>>;
+
+		template<auto... Vs, nik_vp(p)(T_pack_Vs<Vs...>*), auto n>
+		nik_ce auto at_<p, n> = T_store_U<_at_<n>>::template result<decltype(Vs)...>(Vs...);
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// ctuple:
+
+	template<typename, auto, typename...> struct ctuple;
+
+/***********************************************************************************************************************/
+
+// indexed value:
+
+	template<typename T, typename SizeType, SizeType>
+	struct indexed_value
+	{
+		T value;
+
+		nik_ce indexed_value(const T & v) : value{v} { }
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename SizeType, auto... Is, nik_vp(p)(T_pack_Vs<Is...>*), typename... Ts>
+	struct ctuple<SizeType, p, Ts...> : public indexed_value<Ts, SizeType, Is>...
+	{
+		using size_type		= SizeType;
+		using csize_type	= size_type const;
+
+		nik_ce ctuple(Ts... vs) : indexed_value<Ts, size_type, Is>{vs}... { }
+
+		template<size_type n>
+		nik_ce const auto & cvalue() const
+		{
+			using T		= type_at<n, Ts...>;
+			using BasePtr	= indexed_value<T, size_type, n> const*;
+
+			return static_cast<BasePtr>(this)->value;
 		}
 	};
 
@@ -59,7 +113,7 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			make , catenate ,
+			make , catenate , env_tuple ,
 			dimension
 		};
 	};
@@ -96,6 +150,25 @@ namespace cctmp {
 
 		}; nik_ce auto _lambda_tuple_catenate_ = U_arg_lambda_tuple<ArgLambdaTuple::catenate>;
 
+	// env tuple:
+
+		template<auto U, auto... filler>
+		struct T_grammar<Shape::argument, Pattern::lambda_tuple, ArgLambdaTuple::env_tuple, U, filler...>
+		{
+			using size_type = T_store_U<U>;
+
+			template<typename... Ts>
+			nik_ces auto result(Ts... vs)
+			{
+				using frame_type = ctuple<size_type, segment_<sizeof...(Ts)>, Ts...      >;
+				using env_type   = ctuple<size_type, segment_<1            >, frame_type >;
+
+				return env_type{frame_type{vs...}};
+			}
+
+		}; template<auto U>
+			nik_ce auto _lambda_env_tuple_ = U_arg_lambda_tuple<ArgLambdaTuple::env_tuple, U>;
+
 /***********************************************************************************************************************/
 
 // message passing:
@@ -111,57 +184,10 @@ namespace cctmp {
 
 		template<typename LT1, typename LT2>
 		nik_ces auto catenate(LT1 lt1, LT2 lt2) { return lt1(_lambda_tuple_catenate_, lt2); }
+
+		template<typename SizeType, typename LT>
+		nik_ces auto env_tuple(LT lt) { return lt(_lambda_env_tuple_<U_store_T<SizeType>>); }
 	};
-
-/***********************************************************************************************************************/
-
-// binding:
-
-	template<typename SizeType, typename CharType, SizeType N, typename T>
-	nik_ce auto binding(nik_avp(SizeType*), CharType (&variable)[N], T value)
-	{
-		using strlit_type = string_literal<CharType, SizeType>;
-
-		return LambdaTuple::make(strlit_type{variable}, value);
-	}
-
-	// syntactic sugar:
-
-		template<typename CharType, gindex_type N, typename T>
-		nik_ce auto gbinding(CharType (&variable)[N], T value)
-			{ return binding(U_gindex_type, variable, value); }
-
-/***********************************************************************************************************************/
-
-// frame:
-
-	template<typename CharType, typename SizeType, typename... Bindings>
-	nik_ce auto frame(nik_avp(CharType*), nik_avp(SizeType*), Bindings... bs)
-	{
-		using strlit_type   = string_literal<CharType, SizeType>;
-		using variable_type = sequence<strlit_type, SizeType, sizeof...(Bindings)>;
-
-		variable_type variables;
-		(variables.push(LambdaTuple::value<0>(bs)), ...);
-
-		auto values = LambdaTuple::make(LambdaTuple::value<1>(bs)...);
-
-		return LambdaTuple::make(variables, values);
-	}
-
-/***********************************************************************************************************************/
-
-// source:
-
-	template<typename SizeType, typename CharType, SizeType N, typename... Bindings>
-	nik_ce auto source(const CharType (&s)[N], const Bindings &... bs)
-	{
-		using strlit_type       = string_literal<CharType, SizeType>;
-		nik_ce auto U_char_type = U_store_T<CharType>;
-		nik_ce auto U_size_type = U_store_T<SizeType>;
-
-		return LambdaTuple::make(strlit_type{s}, frame(U_char_type, U_size_type, bs...));
-	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

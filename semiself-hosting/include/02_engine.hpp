@@ -17,11 +17,5 @@
 **
 ************************************************************************************************************************/
 
-#include"../02_machine/00_space.hpp"
-#include"../02_machine/01_constant.hpp"
-#include"../02_machine/02_application.hpp"
-#include"../02_machine/03_conditional.hpp"
-//#include"../02_machine/04_variable.hpp"
-//#include"../02_machine/05_straticum.hpp"
-//#include"../02_machine/06_state.hpp"
+#include"../02_engine/00_container.hpp"
 
