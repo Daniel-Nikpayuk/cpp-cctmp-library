@@ -102,3 +102,87 @@
 		printf("%s\n", LambdaTuple::value<0>(f)[4].origin());
 		printf("%d\n", LambdaTuple::value<4>(LambdaTuple::value<1>(f)));
 
+/***********************************************************************************************************************/
+
+// different:
+
+		constexpr auto s0 = push_sequence(1, 2, 3, 4, 5);
+		constexpr auto s1 = push_sequence(1, 2, 3, 4, 5);
+
+		auto val = inventory_different_v0<gindex_type>(s0.cbegin(), s0.cend(), s1.cbegin());
+		printf("%s\n", val ? "different" : "same");
+
+/***********************************************************************************************************************/
+
+// stack:
+
+	// push:
+
+		template<typename... Ts>
+		constexpr auto push_stack(Ts... vs)
+		{
+			using stack_type = engine::T_stack<gindex_type, sizeof...(Ts)>;
+
+			stack_type s;
+			(s.push(vs), ...);
+
+			return s;
+		}
+
+	// print:
+
+		template<typename Stack>
+		constexpr void print_stack(const Stack & s)
+		{
+			for (auto k = s.cbegin(); k != s.cend(); k += 2) printf("%hu, ", *k);
+
+			printf("\n");
+		}
+
+	// pop print:
+
+		template<typename Stack>
+		constexpr void pop_print_stack(Stack & s)
+		{
+			while (s.not_empty()) printf("%hu, ", s.pop());
+
+			printf("\n");
+		}
+
+	// test:
+
+		constexpr auto s0 = push_stack(1, 2, 3, 4, 5);
+		          auto s1 = s0;
+
+		print_stack(s0);
+		pop_print_stack(s1);
+
+/***********************************************************************************************************************/
+
+// env:
+
+	// string ref, value:
+
+		using strlit_type	= engine::string_literal<const char, gindex_type>;
+		using env_type		= engine::T_model_environment_string_ref_number
+					<
+						strlit_type, gindex_type, gindex_type, 5, 20
+					>;
+
+		constexpr auto src	= strlit_type{"hi there, how are you there?"};
+
+		env_type env{src};
+
+		env.push_binding( 0,  2, 1); // hi
+		env.push_binding( 3,  8, 2); // there
+		env.push_binding(10, 13, 3); // how
+		env.push_binding(14, 17, 4); // are
+		env.push_binding(18, 21, 5); // you
+		env.push_binding(22, 27, 6); // there
+
+		auto record = env.find_value(strlit_type{"there"});
+
+		printf("%s\n", record.is_empty() ? "empty" : "not empty");
+		printf("%hu\n", *record);
+		printf("%hu\n", env.get_value(record));
+

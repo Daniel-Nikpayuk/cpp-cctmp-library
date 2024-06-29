@@ -39,12 +39,6 @@
 
 	int main(int argc, char *argv[])
 	{
-		constexpr auto s0 = push_sequence(1, 2, 3, 4, 5);
-		constexpr auto s1 = push_sequence(1, 2, 3, 4, 5);
-
-		auto val = inventory_different_v0<gindex_type>(s0.cbegin(), s0.cend(), s1.cbegin());
-		printf("%s\n", val ? "different" : "same");
-
 		return 0;
 	}
 

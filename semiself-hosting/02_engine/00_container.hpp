@@ -332,12 +332,14 @@ namespace engine {
 			using list_type			= size_type;
 			using clist_type		= list_type const;
 
+			using ctype_ptr			= csize_type *;
+
+			struct Entry { enum : size_type { car, cdr, dimension }; };
+
 		protected:
 
 			nik_ces size_type length	= Size;
 			nik_ces list_type null		= length;
-
-			struct Entry { enum : size_type { car, cdr, dimension }; };
 
 			size_type array[length];
 			size_type free;
@@ -359,8 +361,8 @@ namespace engine {
 
 			// array:
 
-				nik_ce auto cbegin () const { return array; }
-				nik_ce auto cend   () const { return array + length; }
+				nik_ce ctype_ptr cbegin () const { return array; }
+				nik_ce ctype_ptr cend   () const { return array + length; }
 
 				nik_ce csize_type get_value(csize_type p, csize_type n) const
 					{ return array[p + n]; }
@@ -397,13 +399,14 @@ namespace engine {
 // stack:
 
 	template<typename SizeType, SizeType Size>
-	class T_stack : public T_list_model<SizeType, Size>
+	class T_stack : public T_list_model<SizeType, (Size << 1)>
 	{
 		public:
 
-			using base		= T_list_model<SizeType, Size>;
+			using base		= T_list_model<SizeType, (Size << 1)>;
 			using size_type		= typename base::size_type;
 			using csize_type	= typename base::csize_type;
+			using ctype_ptr		= typename base::ctype_ptr;
 			using Entry		= typename base::Entry;
 
 		protected:
@@ -427,10 +430,9 @@ namespace engine {
 			nik_ce const bool is_full   () const { return base::is_model(current); }
 			nik_ce const bool not_full  () const { return base::not_model(current); }
 
-			nik_ce csize_type content() const { return base::car(current); }
+			nik_ce csize_type operator * () const { return base::array[current]; }
 
-			nik_ce csize_type cbegin () const { return current; }
-			nik_ce csize_type cend   () const { return base::null; }
+			nik_ce ctype_ptr cbegin () const { return base::cbegin() + current; }
 
 			nik_ce void push(csize_type v) { current = base::cons(v, current); }
 
