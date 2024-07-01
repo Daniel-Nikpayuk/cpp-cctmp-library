@@ -73,7 +73,7 @@ namespace engine {
 		using ctype_ref		= ctype&;
 
 		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using size_ctype	= size_type const;
 
 		ctype_ptr start;
 		ctype_ptr finish;
@@ -86,14 +86,14 @@ namespace engine {
 		nik_ce literal() : start{empty}, finish{empty} { }
 		nik_ce literal(ctype_cptr s, ctype_cptr f) : start{s}, finish{f} { }
 
-		nik_ce csize_type size   () const { return finish - start; }
-		nik_ce ctype_ptr  origin () const { return start; }
+		nik_ce size_type size   () const { return finish - start; }
+		nik_ce ctype_ptr origin () const { return start; }
 
 		nik_ce ctype_ptr cbegin () const { return start; }
 		nik_ce ctype_ptr clast  () const { return finish - 1; }
 		nik_ce ctype_ptr cend   () const { return finish; }
 
-		nik_ce ctype_ref operator [] (csize_type pos) const { return start[pos]; }
+		nik_ce ctype_ref operator [] (size_ctype pos) const { return start[pos]; }
 	};
 
 /***********************************************************************************************************************/
@@ -112,7 +112,7 @@ namespace engine {
 		using ctype_ref		= typename base::ctype_ref;
 
 		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
+		using size_ctype	= typename base::size_ctype;
 
 		template<auto N>
 		nik_ce string_literal(const Type (&s)[N]) : base{s, s + (N-1)} { }
@@ -264,11 +264,11 @@ namespace engine {
 		using base 		= cctmp::sequence<Type, SizeType, Index::dimension>;
 
 		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
+		using size_ctype	= typename base::size_ctype;
 
 		nik_ce machine_instr() : base{} { }
 
-		nik_ce void set(csize_type n, csize_type t, csize_type p, csize_type m)
+		nik_ce void set(size_ctype n, size_ctype t, size_ctype p, size_ctype m)
 		{
 			base::initial[Index::name] = n;
 			base::initial[Index::note] = t;
@@ -287,11 +287,11 @@ namespace engine {
 		using instr_type	= machine_instr<Type, SizeType>;
 		using base		= cctmp::sequence<instr_type, SizeType, Size>;
 		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
+		using size_ctype	= typename base::size_ctype;
 
 		nik_ce machine_contr() : base{} { }
 
-		nik_ce void push(csize_type n, csize_type t, csize_type p = 0, csize_type m = 0)
+		nik_ce void push(size_ctype n, size_ctype t, size_ctype p = 0, size_ctype m = 0)
 		{
 			base::upsize();
 			base::last()->set(n, t, p, m);
@@ -315,24 +315,24 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// list model:
+// model:
 
 /***********************************************************************************************************************/
 
-// interface:
+// list:
 
 	template<typename SizeType, SizeType Size>
-	class T_list_model
+	class model_list
 	{
 		public:
 
 			using size_type			= SizeType;
-			using csize_type		= size_type const;
+			using size_ctype		= size_type const;
 
 			using list_type			= size_type;
-			using clist_type		= list_type const;
+			using list_ctype		= list_type const;
 
-			using ctype_ptr			= csize_type *;
+			using ctype_ptr			= size_ctype *;
 
 			struct Entry { enum : size_type { car, cdr, dimension }; };
 
@@ -346,7 +346,7 @@ namespace engine {
 
 		public:
 
-			nik_ce T_list_model() : array{}, free{length} { }
+			nik_ce model_list() : array{}, free{length} { }
 
 		protected:
 
@@ -354,7 +354,7 @@ namespace engine {
 
 				nik_ce void clear() { free = length; }
 
-				nik_ce csize_type allocate(csize_type s = Entry::dimension)
+				nik_ce size_type allocate(size_ctype s = Entry::dimension)
 					{ return (free -= s); }
 
 		public:
@@ -364,28 +364,28 @@ namespace engine {
 				nik_ce ctype_ptr cbegin () const { return array; }
 				nik_ce ctype_ptr cend   () const { return array + length; }
 
-				nik_ce csize_type get_value(csize_type p, csize_type n) const
+				nik_ce size_type get_value(size_ctype p, size_ctype n) const
 					{ return array[p + n]; }
 
-				nik_ce void set_value(csize_type p, csize_type n, csize_type v)
+				nik_ce void set_value(size_ctype p, size_ctype n, size_ctype v)
 					{ array[p + n] = v; }
 
 			// list:
 
-				nik_ce const bool is_null  (clist_type l) const { return (l == null); }
-				nik_ce const bool not_null (clist_type l) const { return (l != null); }
+				nik_ce bool is_null  (list_ctype l) const { return (l == null); }
+				nik_ce bool not_null (list_ctype l) const { return (l != null); }
 
-				nik_ce const bool is_model  (clist_type l) const { return (l == 0); }
-				nik_ce const bool not_model (clist_type l) const { return (l != 0); }
+				nik_ce bool is_model  (list_ctype l) const { return (l == 0); }
+				nik_ce bool not_model (list_ctype l) const { return (l != 0); }
 
-				nik_ce clist_type null_list() const { return null; }
+				nik_ce list_type null_list() const { return null; }
 
-				nik_ce csize_type car(clist_type l) const { return get_value(l, Entry::car); }
-				nik_ce csize_type cdr(clist_type l) const { return get_value(l, Entry::cdr); }
+				nik_ce size_type car(list_ctype l) const { return get_value(l, Entry::car); }
+				nik_ce size_type cdr(list_ctype l) const { return get_value(l, Entry::cdr); }
 
-				nik_ce clist_type cons(csize_type v, clist_type l)
+				nik_ce list_type cons(size_ctype v, list_ctype l)
 				{
-					clist_type nl = allocate();
+					list_ctype nl = allocate();
 
 					set_value(nl, Entry::car, v);
 					set_value(nl, Entry::cdr, l);
@@ -399,13 +399,13 @@ namespace engine {
 // stack:
 
 	template<typename SizeType, SizeType Size>
-	class T_stack : public T_list_model<SizeType, (Size << 1)>
+	class stack : public model_list<SizeType, (Size << 1)>
 	{
 		public:
 
-			using base		= T_list_model<SizeType, (Size << 1)>;
+			using base		= model_list<SizeType, (Size << 1)>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 			using ctype_ptr		= typename base::ctype_ptr;
 			using Entry		= typename base::Entry;
 
@@ -415,30 +415,30 @@ namespace engine {
 
 		public:
 
-			nik_ce T_stack() : base{}, current{base::null} { }
+			nik_ce stack() : base{}, current{base::null} { }
 
 		protected:
 
-			nik_ce csize_type release(csize_type s = Entry::dimension)
+			nik_ce size_type release(size_ctype s = Entry::dimension)
 				{ return (base::free += s); }
 
 		public:
 
-			nik_ce const bool is_empty  () const { return base::is_null(current); }
-			nik_ce const bool not_empty () const { return base::not_null(current); }
+			nik_ce bool is_empty  () const { return base::is_null(current); }
+			nik_ce bool not_empty () const { return base::not_null(current); }
 
-			nik_ce const bool is_full   () const { return base::is_model(current); }
-			nik_ce const bool not_full  () const { return base::not_model(current); }
+			nik_ce bool is_full   () const { return base::is_model(current); }
+			nik_ce bool not_full  () const { return base::not_model(current); }
 
-			nik_ce csize_type operator * () const { return base::array[current]; }
+			nik_ce size_type operator * () const { return base::array[current]; }
 
 			nik_ce ctype_ptr cbegin () const { return base::cbegin() + current; }
 
-			nik_ce void push(csize_type v) { current = base::cons(v, current); }
+			nik_ce void push(size_ctype v) { current = base::cons(v, current); }
 
-			nik_ce csize_type pop()
+			nik_ce size_type pop()
 			{
-				csize_type v = base::car(current);
+				size_ctype v = base::car(current);
 				current      = base::cdr(current);
 
 				release();
@@ -458,7 +458,7 @@ namespace engine {
 // inhabit:
 
 	template<typename SizeType>
-	class T_inhabit : public T_stack<SizeType, 1> { };
+	class inhabit : public stack<SizeType, 1> { };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

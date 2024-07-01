@@ -644,8 +644,13 @@ namespace cctmp {
 		using In  = T_store_U<IU>;
 		using End = T_store_U<EU>;
 
+		using MIn = from_const<IU>; // currently a hack, requires improved type checking.
+
+			// error: modifying a const object ‘in’ is not allowed in a constant expression
+
 		template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
-		nik_ces auto result(LT lv, T_store_U<LUs>... lvs, Out out, In in, End end, T_store_U<IUs>... ins)
+		nik_ces auto result(LT lv, T_store_U<LUs>... lvs, Out out, MIn in, End end, from_const<IUs>... ins)
+	//	nik_ces auto result(LT lv, T_store_U<LUs>... lvs, Out out, In in, End end, T_store_U<IUs>... ins)
 		{
 			nik_ce auto ni = MD<c>::pos(i);  // predicate
 			nik_ce auto mi = MD<c>::num(i);  // match
@@ -664,11 +669,6 @@ namespace cctmp {
 						LT, T_store_U<LUs>..., In, T_store_U<IUs>...)
 							(lv, lvs..., in, ins...)) // match
 				{
-				//	NIK_MACHINE_TEMPLATE_WS(c, li, p0, p1)
-				//		::NIK_MACHINE_RESULT_TS(c, li, l, t, r,
-				//			LT, T_store_U<LUs>..., Out, In, T_store_U<IUs>...)
-				//				(lv, lvs..., out, in, ins...); // mutate
-
 					NIK_MACHINE_TEMPLATE_WS(c, li, p0, p1)
 						::NIK_MACHINE_RESULT_TS(c, li, l, t, r,
 							LT, T_store_U<LUs>..., Out, In)

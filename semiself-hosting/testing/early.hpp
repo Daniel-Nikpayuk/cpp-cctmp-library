@@ -161,28 +161,43 @@
 
 // env:
 
-	// string ref, value:
+	// string, value:
 
-		using strlit_type	= engine::string_literal<const char, gindex_type>;
-		using env_type		= engine::T_model_environment_string_ref_number
-					<
-						strlit_type, gindex_type, gindex_type, 5, 20
-					>;
+	template<typename StrLitType>
+	struct test_model_env_str_num
+	{
+		using strlit_type		= StrLitType;
+		using env_type			= engine::model_environment_string_number
+						<
+							char, gindex_type, gindex_type, 6, 21
+						>;
 
-		constexpr auto src	= strlit_type{"hi there, how are you there?"};
+		constexpr static auto word0	= strlit_type{ "hi"    };
+		constexpr static auto word1	= strlit_type{ "there" };
+		constexpr static auto word2	= strlit_type{ "how"   };
+		constexpr static auto word3	= strlit_type{ "are"   };
+		constexpr static auto word4	= strlit_type{ "you"   };
+		constexpr static auto word5	= strlit_type{ "there" };
 
-		env_type env{src};
+		env_type env;
 
-		env.push_binding( 0,  2, 1); // hi
-		env.push_binding( 3,  8, 2); // there
-		env.push_binding(10, 13, 3); // how
-		env.push_binding(14, 17, 4); // are
-		env.push_binding(18, 21, 5); // you
-		env.push_binding(22, 27, 6); // there
+		constexpr test_model_env_str_num()
+		{
+			env.push_binding(word0.cbegin(), word0.cend(), 1); // hi
+			env.push_binding(word1.cbegin(), word1.cend(), 2); // there
+			env.push_binding(word2.cbegin(), word2.cend(), 3); // how
+			env.push_binding(word3.cbegin(), word3.cend(), 4); // are
+			env.push_binding(word4.cbegin(), word4.cend(), 5); // you
+			env.push_binding(word5.cbegin(), word5.cend(), 6); // there
+		}
+	};
 
-		auto record = env.find_value(strlit_type{"there"});
+		using strlit_type = engine::string_literal<const char, gindex_type>;
+
+		constexpr auto test0  = test_model_env_str_num<strlit_type>{};
+		constexpr auto record = test0.env.find_value(strlit_type{"there"}.cbegin());
 
 		printf("%s\n", record.is_empty() ? "empty" : "not empty");
 		printf("%hu\n", *record);
-		printf("%hu\n", env.get_value(record));
+		printf("%hu\n", test0.env.get_value(record));
 

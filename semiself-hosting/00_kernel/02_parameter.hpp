@@ -339,6 +339,9 @@ namespace cctmp {
 // syntactic sugar:
 
 	template<auto U>
+	using from_const = T_store_U<eval<_from_const_, U>>;
+
+	template<auto U>
 	using from_cptr = T_store_U<eval<_from_const_, eval<_from_pointer_, U>>>;
 
 	template<auto U> // assumes U is a pointer type.

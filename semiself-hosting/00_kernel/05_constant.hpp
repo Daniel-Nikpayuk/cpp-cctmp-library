@@ -180,12 +180,12 @@ namespace cctmp {
 		nik_ces auto result(T v, Ts... vs)
 		{
 			using size_type  = T_store_U<r>;
-			using csize_type = size_type const;
+			using size_ctype = size_type const;
 
 			nik_ce size_type nv = MD<c>::pos(i);
 
 			return NIK_MACHINE_TEMPLATE(c, i)
-				::NIK_MACHINE_RESULT_TS(c, i, l, t, r, csize_type, Ts...)
+				::NIK_MACHINE_RESULT_TS(c, i, l, t, r, size_ctype, Ts...)
 					(nv, vs...);
 		}
 	};
@@ -201,12 +201,12 @@ namespace cctmp {
 		nik_ces auto result(Ts... vs)
 		{
 			using size_type  = T_store_U<r>;
-			using csize_type = size_type const;
+			using size_ctype = size_type const;
 
 			nik_ce size_type nv = MD<c>::pos(i);
 
 			return NIK_MACHINE_TEMPLATE(c, i)
-				::NIK_MACHINE_RESULT_TS(c, i, l, t, r, Ts..., csize_type)
+				::NIK_MACHINE_RESULT_TS(c, i, l, t, r, Ts..., size_ctype)
 					(vs..., nv);
 		}
 	};
@@ -227,7 +227,7 @@ namespace cctmp {
 		nik_ces auto result(T v, Ts... vs)
 		{
 			using size_type  = T_store_U<r>;
-			using csize_type = size_type const;
+			using size_ctype = size_type const;
 
 			nik_ce size_type nn = MD<c>::pos(i);
 			nik_ce size_type nm = MD<c>::num(i);
@@ -235,7 +235,7 @@ namespace cctmp {
 			nik_ce size_type nv = nn + nm/nd;
 
 			return NIK_MACHINE_TEMPLATE(c, i)
-				::NIK_MACHINE_RESULT_TS(c, i, l, t, r, csize_type, Ts...)
+				::NIK_MACHINE_RESULT_TS(c, i, l, t, r, size_ctype, Ts...)
 					(nv, vs...);
 		}
 	};
@@ -251,7 +251,7 @@ namespace cctmp {
 		nik_ces auto result(Ts... vs)
 		{
 			using size_type  = T_store_U<r>;
-			using csize_type = size_type const;
+			using size_ctype = size_type const;
 
 			nik_ce size_type nn = MD<c>::pos(i);
 			nik_ce size_type nm = MD<c>::num(i);
@@ -259,7 +259,7 @@ namespace cctmp {
 			nik_ce size_type nv = nn + nm/nd;
 
 			return NIK_MACHINE_TEMPLATE(c, i)
-				::NIK_MACHINE_RESULT_TS(c, i, l, t, r, Ts..., csize_type)
+				::NIK_MACHINE_RESULT_TS(c, i, l, t, r, Ts..., size_ctype)
 					(vs..., nv);
 		}
 	};

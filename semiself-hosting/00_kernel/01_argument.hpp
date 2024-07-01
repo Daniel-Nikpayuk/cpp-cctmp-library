@@ -354,8 +354,7 @@ namespace cctmp {
 		template<auto U>
 		struct T_grammar<Shape::argument, Pattern::number, ArgNumber::from_string, U>
 		{
-			using size_type  = T_store_U<U>;
-			using csize_type = size_type const;
+			using size_type = T_store_U<U>;
 
 			template<typename In, typename End>
 			nik_ces auto result(In in, End end) -> size_type

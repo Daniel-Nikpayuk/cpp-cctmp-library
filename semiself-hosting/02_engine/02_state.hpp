@@ -19,8 +19,6 @@
 
 // state:
 
-namespace engine {
-
 	// instead of generic list, make specific varieties. Notably applications. Will we still require
 	// an unknown (indeterminate?) application for when the operator is a non-trivial expression?
 	// should we wrap atomic operators as compound? If so, how to correct for when it's not treated
@@ -34,6 +32,8 @@ namespace engine {
 	// if atomic or compound, record it as a template parameter and dispatch accordingly during the apply?
 	// is this the best possible solution?
 
+namespace engine {
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -42,7 +42,7 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
-	struct T_verse
+	struct verse
 	{
 	};
 
@@ -53,7 +53,7 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
-	struct T_stage
+	struct stage
 	{
 	};
 
@@ -65,15 +65,15 @@ namespace engine {
 /***********************************************************************************************************************/
 
 	template<typename SizeType>
-	struct T_tree
+	struct tree
 	{
 		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using size_ctype	= size_type const;
 
 		// literal (boolean):
 
 			template<typename AST>
-			nik_ces void push_literal_boolean(AST* t, csize_type n)
+			nik_ces void push_literal_boolean(AST* t, size_ctype n)
 			{
 				t->assembly_push_instr( AN::id      , AT::id      , 0 , 0 , 0 , 0 , 0 , 1 );
 				t->assembly_push_instr( AN::type    , AT::boolean , 0 , 0 , 0 , 0 , 0 , 1 );
@@ -84,7 +84,7 @@ namespace engine {
 		// literal (character):
 
 			template<typename AST>
-			nik_ces void push_literal_character(AST* t, csize_type n)
+			nik_ces void push_literal_character(AST* t, size_ctype n)
 			{
 				t->assembly_push_instr( AN::id      , AT::id        , 0 , 0 , 0 , 0 , 0 , 1 );
 				t->assembly_push_instr( AN::type    , AT::character , 0 , 0 , 0 , 0 , 0 , 1 );
@@ -95,7 +95,7 @@ namespace engine {
 		// literal (n number):
 
 			template<typename AST>
-			nik_ces void push_literal_n_number(AST* t, csize_type n)
+			nik_ces void push_literal_n_number(AST* t, size_ctype n)
 			{
 				t->assembly_push_instr( AN::id      , AT::id       , 0 , 0 , 0 , 0 , 0 , 1 );
 				t->assembly_push_instr( AN::type    , AT::n_number , 0 , 0 , 0 , 0 , 0 , 1 );
@@ -106,7 +106,7 @@ namespace engine {
 		// literal (r number):
 
 			template<typename AST>
-			nik_ces void push_literal_r_number(AST* t, csize_type n, csize_type m)
+			nik_ces void push_literal_r_number(AST* t, size_ctype n, size_ctype m)
 			{
 				t->assembly_push_instr( AN::id       , AT::id       , 0 , 0 , 0 , 0 , 0 , 1 );
 				t->assembly_push_instr( AN::type     , AT::r_number , 0 , 0 , 0 , 0 , 0 , 1 );
@@ -117,7 +117,7 @@ namespace engine {
 		// literal (t number):
 
 			template<typename AST>
-			nik_ces void push_literal_t_number(AST* t, csize_type n)
+			nik_ces void push_literal_t_number(AST* t, size_ctype n)
 			{
 				t->assembly_push_instr( AN::id      , AT::id    , 0 , 0 , 0 , 0 , 0 , 1 );
 				t->assembly_push_instr( AN::type    , AT::push  , 0 , 0 , 0 , 0 , 0 , 1 );
@@ -128,7 +128,7 @@ namespace engine {
 		// variable (universe):
 
 			template<typename AST>
-			nik_ces void push_variable_universe(AST* t, csize_type n)
+			nik_ces void push_variable_universe(AST* t, size_ctype n)
 			{
 				t->assembly_push_instr( AN::id   , AT::id     , 0 , 0 , 0 , 0 , 0 , 1 );
 				t->assembly_push_instr( AN::arg  , AT::select , n , 0 , 0 , 0 , 0 , 1 );
@@ -157,17 +157,17 @@ namespace engine {
 // interface:
 
 	template<typename CharType, typename SizeType, SizeType Size>
-	class T_env_model : public T_list_model<SizeType, Size>
+	class env_model : public model_list<SizeType, Size>
 	{
 		public:
 
 			nik_ces SizeType length		= Size;
 
-			using base			= T_list_model<SizeType, length>;
+			using base			= model_list<SizeType, length>;
 			using size_type			= typename base::size_type;
-			using csize_type		= typename base::csize_type;
+			using size_ctype		= typename base::size_ctype;
 			using list_type			= typename base::list_type;
-			using clist_type		= typename base::clist_type;
+			using list_ctype		= typename base::list_ctype;
 			using inhabit_type		= unit_stack<size_type, 1>;
 			using Pair			= typename base::Pair;
 
@@ -187,10 +187,10 @@ namespace engine {
 
 			inhabit_type inhabit;
 
-			nik_ce T_env_model(cstrlit_ref s) : base{}, src{s} { }
+			nik_ce env_model(cstrlit_ref s) : base{}, src{s} { }
 
-			nik_ce auto get_value(csize_type n) const { return base::get_value(inhabit.cvalue(), n); }
-			nik_ce void set_value(csize_type n, csize_type v) { base::set_value(inhabit.cvalue(), n, v); }
+			nik_ce auto get_value(size_ctype n) const { return base::get_value(inhabit.cvalue(), n); }
+			nik_ce void set_value(size_ctype n, size_ctype v) { base::set_value(inhabit.cvalue(), n, v); }
 
 		protected:
 
@@ -201,15 +201,15 @@ namespace engine {
 
 			// env:
 
-				nik_ce auto get_frame   (clist_type env) const { return base::car(env); }
-				nik_ce auto get_binding (clist_type env) const { return base::car(get_frame(env)); }
-				nik_ce auto get_entry   (clist_type env) const { return base::cdr(get_binding(env)); }
+				nik_ce auto get_frame   (list_ctype env) const { return base::car(env); }
+				nik_ce auto get_binding (list_ctype env) const { return base::car(get_frame(env)); }
+				nik_ce auto get_entry   (list_ctype env) const { return base::cdr(get_binding(env)); }
 
 		public:
 
 			// name:
 
-				nik_ce auto get_name(csize_type binding) const
+				nik_ce auto get_name(size_ctype binding) const
 				{
 					auto variable = base::car(binding);
 					auto start    = base::get_value(variable, Pair::car);
@@ -222,13 +222,13 @@ namespace engine {
 
 			// lookup:
 
-				nik_ce void lookup_frame(ccselect_ref var, clist_type frame)
+				nik_ce void lookup_frame(ccselect_ref var, list_ctype frame)
 				{
 					for (auto k = frame; inhabit.is_empty() && base::not_null(k); k = base::cdr(k))
 						lookup_binding(var, base::car(k));
 				}
 
-				nik_ce void lookup_binding(ccselect_ref var, csize_type binding)
+				nik_ce void lookup_binding(ccselect_ref var, size_ctype binding)
 				{
 					if (apply<_subarray_same_<>>(var, get_name(binding)))
 						inhabit.push(base::cdr(binding));
@@ -238,7 +238,7 @@ namespace engine {
 
 				nik_ce auto set_binding_variable(ccselect_ref var)
 				{
-					csize_type p = base::allocate(Pair::dimension);
+					size_ctype p = base::allocate(Pair::dimension);
 
 					base::set_value(p, Pair::car, start(var));
 					base::set_value(p, Pair::cdr, finish(var));
@@ -249,7 +249,7 @@ namespace engine {
 				template<typename In, typename End>
 				nik_ce auto set_binding_value(In in, End end)
 				{
-					csize_type p = base::allocate(end - in);
+					size_ctype p = base::allocate(end - in);
 					size_type  k = 0;
 
 					while (in != end) base::set_value(p, k++, *in++);
@@ -257,7 +257,7 @@ namespace engine {
 					return p;
 				}
 
-				nik_ce void set_binding_entry(csize_type variable, csize_type value, clist_type env)
+				nik_ce void set_binding_entry(size_ctype variable, size_ctype value, list_ctype env)
 				{
 					auto frame   = base::car(env);
 					auto binding = base::cons(variable, value);
@@ -276,7 +276,7 @@ namespace engine {
 
 			// env:
 
-				nik_ce bool lookup_variable(ccselect_ref var, clist_type env)
+				nik_ce bool lookup_variable(ccselect_ref var, list_ctype env)
 				{
 					inhabit.clear();
 
@@ -287,7 +287,7 @@ namespace engine {
 				}
 
 				template<typename In, typename End>
-				nik_ce void define_variable(ccselect_ref var, In in, End end, clist_type env)
+				nik_ce void define_variable(ccselect_ref var, In in, End end, list_ctype env)
 				{
 					auto variable = set_binding_variable(var);
 					auto value    = set_binding_value(in, end);
@@ -296,11 +296,11 @@ namespace engine {
 				}
 
 				template<size_type N>
-				nik_ce void define_variable(ccselect_ref var, csize_type (&ent)[N], clist_type env)
+				nik_ce void define_variable(ccselect_ref var, size_ctype (&ent)[N], list_ctype env)
 					{ define_variable(var, ent, ent + N, env); }
 
 				template<typename In, typename End>
-				nik_ce void set_variable(ccselect_ref var, In in, End end, clist_type env)
+				nik_ce void set_variable(ccselect_ref var, In in, End end, list_ctype env)
 				{
 					lookup_variable(var, env);
 
@@ -311,7 +311,7 @@ namespace engine {
 					else { } // error.
 				}
 
-				nik_ce auto extend_env(clist_type env) { return base::cons(null_frame(), env); }
+				nik_ce auto extend_env(list_ctype env) { return base::cons(null_frame(), env); }
 	};
 
 /***********************************************************************************************************************/

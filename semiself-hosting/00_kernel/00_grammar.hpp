@@ -19,6 +19,9 @@
 
 // grammar:
 
+	// convention: classes/structs that begin with "T_" are meant
+	// to be associated with the auto ~ typename equivalence.
+
 namespace cctmp {
 
 /***********************************************************************************************************************/
@@ -374,7 +377,7 @@ namespace cctmp {
 			using ctype_ref		= ctype&;
 
 			using size_type		= SizeType;
-			using csize_type	= size_type const;
+			using size_ctype	= size_type const;
 
 		protected:
 
@@ -395,29 +398,33 @@ namespace cctmp {
 				nik_ce bool is_empty  () const { return (terminal == 0); }
 				nik_ce bool not_empty () const { return (terminal != 0); }
 
+				nik_ce ctype_ptr citer(size_ctype n) const { return initial + n; }
+
 				nik_ce auto left_size  (ctype_cptr i) const { return i - initial; }
-				nik_ce auto right_size (ctype_cptr i) const { return (initial + terminal) - i; }
+				nik_ce auto right_size (ctype_cptr i) const { return cend() - i; }
 
 				nik_ce ctype_ptr cbegin () const { return initial; }
-				nik_ce ctype_ptr clast  () const { return (initial + terminal) - 1; }
-				nik_ce ctype_ptr cend   () const { return initial + terminal; }
+				nik_ce ctype_ptr clast  () const { return cend(terminal) - 1; }
+				nik_ce ctype_ptr cend   () const { return citer(terminal); }
 
-				nik_ce ctype_ref operator [] (csize_type pos) const { return initial[pos]; }
+				nik_ce ctype_ref operator [] (size_ctype pos) const { return initial[pos]; }
 
 			// mutable:
 
+				nik_ce type_ptr iter(size_ctype n) { return initial + n; }
+
 				nik_ce void clear() { terminal = 0; }
 				nik_ce void fullsize() { terminal = Size; }
-				nik_ce void upsize(csize_type num = 1) { terminal += num; }
-				nik_ce void downsize(csize_type num = 1) { terminal -= num; }
-				nik_ce void push(ctype_ref v) { *(initial + terminal++) = v; }
-				nik_ce type pop() { return *(initial + --terminal); }
+				nik_ce void upsize(size_ctype num = 1) { terminal += num; }
+				nik_ce void downsize(size_ctype num = 1) { terminal -= num; }
+				nik_ce void push(ctype_ref v) { *iter(terminal++) = v; }
+				nik_ce type pop() { return *iter(--terminal); }
 
 				nik_ce type_ptr begin () { return initial; }
-				nik_ce type_ptr last  () { return (initial + terminal) - 1; }
-				nik_ce type_ptr end   () { return initial + terminal; }
+				nik_ce type_ptr last  () { return end() - 1; }
+				nik_ce type_ptr end   () { return iter(terminal); }
 
-				nik_ce type_ref operator [] (csize_type pos) { return initial[pos]; }
+				nik_ce type_ref operator [] (size_ctype pos) { return initial[pos]; }
 	};
 
 /***********************************************************************************************************************/

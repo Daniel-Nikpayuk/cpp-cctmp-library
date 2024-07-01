@@ -85,7 +85,7 @@ namespace cctmp {
 	struct ctuple<SizeType, p, Ts...> : public indexed_value<Ts, SizeType, Is>...
 	{
 		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using size_ctype	= size_type const;
 
 		nik_ce ctuple(Ts... vs) : indexed_value<Ts, size_type, Is>{vs}... { }
 
@@ -185,29 +185,29 @@ namespace cctmp {
 	struct MachineDispatch
 	{
 		using size_type		= typename T_store_U<static_contr>::size_type;
-		using csize_type	= size_type const;
+		using size_ctype	= size_type const;
 
 		nik_ces auto & contr	= member_value_U<static_contr>;
 
 		// accessors:
 
-			nik_ces const auto & instr (csize_type i) { return contr[i]; }
-			nik_ces csize_type value   (csize_type i, csize_type n) { return contr[i][n]; }
-			nik_ces csize_type peek    (csize_type i, csize_type m, csize_type n) { return contr[i + m][n]; }
+			nik_ces const auto & instr (size_ctype i) { return contr[i]; }
+			nik_ces size_type value    (size_ctype i, size_ctype n) { return contr[i][n]; }
+			nik_ces size_type peek     (size_ctype i, size_ctype m, size_ctype n) { return contr[i + m][n]; }
 
-			nik_ces csize_type pos  (csize_type i) { return value(i, MI::pos); }
-			nik_ces csize_type num  (csize_type i) { return value(i, MI::num); }
-			nik_ces csize_type aux0 (csize_type i) { return value(i, MI::aux0); }
-			nik_ces csize_type aux1 (csize_type i) { return value(i, MI::aux1); }
-			nik_ces csize_type aux2 (csize_type i) { return value(i, MI::aux2); }
+			nik_ces size_type pos  (size_ctype i) { return value(i, MI::pos); }
+			nik_ces size_type num  (size_ctype i) { return value(i, MI::num); }
+			nik_ces size_type aux0 (size_ctype i) { return value(i, MI::aux0); }
+			nik_ces size_type aux1 (size_ctype i) { return value(i, MI::aux1); }
+			nik_ces size_type aux2 (size_ctype i) { return value(i, MI::aux2); }
 
 		// navigators:
 
-			nik_ces csize_type next_offset (csize_type i) { return value(i, MI::next); }
-			nik_ces csize_type next_index  (csize_type i) { return i + next_offset(i); }
+			nik_ces size_type next_offset (size_ctype i) { return value(i, MI::next); }
+			nik_ces size_type next_index  (size_ctype i) { return i + next_offset(i); }
 
-			nik_ces gkey_type next_name (csize_type i) { return value(next_index(i), MI::name); }
-			nik_ces gkey_type next_note (csize_type i) { return value(next_index(i), MI::note); }
+			nik_ces gkey_type next_name (size_ctype i) { return value(next_index(i), MI::name); }
+			nik_ces gkey_type next_note (size_ctype i) { return value(next_index(i), MI::note); }
 	};
 
 	template<auto static_contr>

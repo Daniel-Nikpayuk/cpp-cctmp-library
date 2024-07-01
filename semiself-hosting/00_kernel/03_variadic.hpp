@@ -119,11 +119,11 @@ namespace cctmp {
 		using base 		= sequence<Type, SizeType, Index::dimension>;
 
 		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
+		using size_ctype	= typename base::size_ctype;
 
 		nik_ce variadic_instr() : base{} { }
 
-		nik_ce void set(csize_type n, csize_type t, csize_type p, csize_type m)
+		nik_ce void set(size_ctype n, size_ctype t, size_ctype p, size_ctype m)
 		{
 			base::initial[Index::name] = n;
 			base::initial[Index::note] = t;
@@ -142,11 +142,11 @@ namespace cctmp {
 		using instr_type	= variadic_instr<Type, SizeType>;
 		using base		= sequence<instr_type, SizeType, Size>;
 		using size_type		= typename base::size_type;
-		using csize_type	= typename base::csize_type;
+		using size_ctype	= typename base::size_ctype;
 
 		nik_ce variadic_contr() : base{} { }
 
-		nik_ce void push(csize_type n, csize_type t, csize_type p = 0, csize_type m = 0)
+		nik_ce void push(size_ctype n, size_ctype t, size_ctype p = 0, size_ctype m = 0)
 		{
 			base::upsize();
 			base::last()->set(n, t, p, m);
@@ -161,14 +161,14 @@ namespace cctmp {
 	struct variadic_remainder
 	{
 		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using size_ctype	= size_type const;
 
-		csize_type roll;
-		csize_type part;
-		csize_type size;
+		size_ctype roll;
+		size_ctype part;
+		size_ctype size;
 		const bool block;
 
-		nik_ce variadic_remainder(csize_type index, csize_type length, csize_type _2_N) :
+		nik_ce variadic_remainder(size_ctype index, size_ctype length, size_ctype _2_N) :
 
 			roll(index / _2_N),
 			part(index % _2_N),
@@ -179,7 +179,7 @@ namespace cctmp {
 
 		private:
 
-			nik_ce bool has_block(csize_type length, csize_type _2_N) const
+			nik_ce bool has_block(size_ctype length, size_ctype _2_N) const
 				{ return ((roll + 1) * _2_N <= length); }
 	};
 
@@ -192,7 +192,7 @@ namespace cctmp {
 	{
 		using contr_type	= variadic_contr<Type, SizeType, Size>;
 		using size_type		= typename contr_type::size_type;
-		using csize_type	= typename contr_type::csize_type;
+		using size_ctype	= typename contr_type::size_ctype;
 
 		contr_type contr;
 
@@ -238,36 +238,36 @@ namespace cctmp {
 	struct VariadicDispatch
 	{
 		using size_type		= typename T_store_U<static_contr>::size_type;
-		using csize_type	= size_type const;
+		using size_ctype	= size_type const;
 
 		nik_ces auto & contr	= member_value_U<static_contr>;
 
 		// accessors:
 
-			nik_ces const auto & instr (csize_type i) { return contr[i]; }
-			nik_ces csize_type value   (csize_type i, csize_type n) { return contr[i][n]; }
+			nik_ces const auto & instr (size_ctype i) { return contr[i]; }
+			nik_ces size_type value    (size_ctype i, size_ctype n) { return contr[i][n]; }
 
-			nik_ces csize_type pos (csize_type i) { return value(i, VI::pos); }
-			nik_ces csize_type num (csize_type i) { return value(i, VI::num); }
+			nik_ces size_type pos (size_ctype i) { return value(i, VI::pos); }
+			nik_ces size_type num (size_ctype i) { return value(i, VI::num); }
 
 		// navigators:
 
-			nik_ces gkey_type next_name(csize_type d, csize_type i)
+			nik_ces gkey_type next_name(size_ctype d, size_ctype i)
 			{
 				if (d == 0) return VN::halt;
 				else        return contr[i+1][VI::name];
 			}
 
-			nik_ces gkey_type next_note(csize_type d, csize_type i)
+			nik_ces gkey_type next_note(size_ctype d, size_ctype i)
 			{
 				if (d == 0) return VT::pause;
 				else        return contr[i+1][VI::note];
 			}
 
-			nik_ces csize_type next_depth(csize_type d)
+			nik_ces size_type next_depth(size_ctype d)
 				{ return d - bool{d != 0}; }
 
-			nik_ces csize_type next_index(csize_type d, csize_type i)
+			nik_ces size_type next_index(size_ctype d, size_ctype i)
 				{ return i + bool{d != 0}; }
 	};
 
@@ -732,7 +732,7 @@ namespace cctmp {
 	{
 		using roll_type		= RollType;
 		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using size_ctype	= size_type const;
 
 		nik_ces size_type name	= VN::left;
 		nik_ces size_type pos	= 0;
@@ -785,7 +785,7 @@ namespace cctmp {
 	{
 		using roll_type		= RollType;
 		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using size_ctype	= size_type const;
 
 		nik_ces size_type name	= VN::right;
 		nik_ces size_type pos	= 0;
@@ -852,7 +852,7 @@ namespace cctmp {
 	{
 		using roll_type		= RollType;
 		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using size_ctype	= size_type const;
 
 		nik_ces size_type name	= VN::segment;
 		nik_ces size_type pos	= BlockSize;

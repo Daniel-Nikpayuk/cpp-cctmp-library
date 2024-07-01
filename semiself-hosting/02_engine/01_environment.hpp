@@ -19,8 +19,6 @@
 
 // environment:
 
-namespace engine {
-
 	// design:
 
 		// environment : abstract away from binding variables and values. Only keep indices that point
@@ -34,6 +32,98 @@ namespace engine {
 			// otherwise that info is lost, and so having the straticum as record
 			// might become lossy.
 
+namespace engine {
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// model:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// expression:
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename Type, typename SizeType, SizeType WordSize, SizeType Size>
+	class model_expression
+	{
+		public:
+
+			using type		= Type;
+			using ctype		= type const;
+			using ctype_ref		= ctype &;
+			using ctype_ptr		= ctype *;
+			using ctype_cptr	= ctype_ptr const;
+
+			using size_type		= SizeType;
+			using size_ctype	= size_type const;
+
+			using expr_type		= cctmp::sequence<      type , size_type ,     Size >;
+			using word_type		= cctmp::sequence< size_type , size_type , WordSize >;
+
+			using inhabit_type	= inhabit<size_type>;
+			using inhabit_ctype	= inhabit_type const;
+
+		protected:
+
+			expr_type expression;
+			word_type word_init;
+			word_type word_term;
+
+		public:
+
+			nik_ce model_expression() { }
+
+			nik_ce size_type current_word() const { return word_init.max(); }
+
+			template<typename In, typename End>
+			nik_ce void push(In in, End end)
+			{
+				word_init.push(expression.size());
+
+				while (in != end) expression.push(*in++);
+
+				word_term.push(expression.size());
+			}
+
+			template<typename In1>
+			nik_ce bool same(size_ctype n, In1 in1) const
+			{
+				ctype_ptr in  = expression.citer(word_init[n]);
+				ctype_ptr end = expression.citer(word_term[n]);
+
+				return inventory_same_v0<size_type>(in, end, in1);
+			}
+
+		protected:
+
+			template<typename In1>
+			nik_ce bool find_same(inhabit_type & match, size_ctype n, In1 in1) const
+			{
+				if (same(n, in1)) match.push(n);
+
+				return match.not_empty();
+			}
+
+		public:
+
+			template<typename In1>
+			nik_ce inhabit_type find(In1 in1) const
+			{
+				inhabit_type match;
+
+				for (auto k = 0; k != word_init.size(); ++k)
+					if (find_same(match, k, in1)) break;
+
+				return match;
+			}
+	};
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -43,91 +133,31 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// string:
+// string sel(ection):
 
 /***********************************************************************************************************************/
 
 // interface:
 
-	template<typename SrcType, typename SizeType, SizeType Size>
-	class T_model_variable_string_ref
+	template<typename CharType, typename SizeType, SizeType WordSize, SizeType Size>
+	struct model_variable_string : public model_expression<CharType, SizeType, WordSize, Size>
 	{
-		public:
+		using base			= model_expression<CharType, SizeType, WordSize, Size>;
 
-			using src_type		= SrcType;
-			using src_citer		= typename src_type::ctype_cptr;
-			using csrc_type		= src_type const;
-			using csrc_ref		= csrc_type &;
+		using variable_type		= typename base::type;
+		using variable_ctype		= typename base::ctype;
+		using variable_ctype_ref	= typename base::ctype_ref;
+		using variable_ctype_ptr	= typename base::ctype_ptr;
+		using variable_ctype_cptr	= typename base::ctype_cptr;
 
-			using variable_type	= SizeType;
-			using cvariable_type	= variable_type const;
+		using size_type			= typename base::size_type;
+		using size_ctype		= typename base::size_ctype;
 
-			using size_type		= SizeType;
-			using csize_type	= size_type const;
+		using expr_type			= typename base::expr_type;
+		using word_type			= typename base::word_type;
 
-			using seq_type		= cctmp::sequence<variable_type, size_type, Size>;
-
-			using inhabit_type	= T_inhabit<size_type>;
-			using cinhabit_type	= inhabit_type const;
-
-		protected:
-
-			seq_type initial;
-			seq_type terminal;
-
-			csrc_ref src;
-
-		public:
-
-			nik_ce T_model_variable_string_ref(csrc_ref s) : src{s} { }
-
-			nik_ce csize_type current() const { return initial.max(); }
-
-			nik_ce void push(cvariable_type b, cvariable_type e)
-			{
-				initial.push(b);
-				terminal.push(e);
-			}
-
-		protected:
-
-			nik_ce src_citer citerator(csize_type n) const { return src.origin() + n; }
-
-			template<typename Iterator>
-			nik_ce const bool csame(csize_type n, Iterator b) const
-			{
-				src_citer begin = citerator(initial  [n]);
-				src_citer end   = citerator(terminal [n]);
-
-				return inventory_same_v0<size_type>(begin, end, b);
-			}
-
-		public:
-
-			template<typename T>
-			nik_ce const bool same(csize_type n, const T & variable) const
-				{ return csame(n, variable.cbegin()); }
-
-		protected:
-
-			nik_ce const bool find_same(inhabit_type & match, src_citer b, csize_type k) const
-			{
-				if (csame(k, b)) match.push(k);
-
-				return match.not_empty();
-			}
-
-		public:
-
-			nik_ce cinhabit_type find(cvariable_type b) const
-			{
-				inhabit_type match;
-
-				for (auto k = 0; k != initial.size(); ++k)
-					if (find_same(match, citerator(b), k)) break;
-
-				return match;
-			}
+		using inhabit_type		= typename base::inhabit_type;
+		using inhabit_ctype		= typename base::inhabit_ctype;
 	};
 
 /***********************************************************************************************************************/
@@ -146,20 +176,20 @@ namespace engine {
 // interface:
 
 	template<typename NumType, typename SizeType, SizeType Size>
-	class T_model_value_number
+	class model_value_number
 	{
 		public:
 
 			using value_type	= NumType;
-			using cvalue_type	= value_type const;
+			using value_ctype	= value_type const;
 
 			using size_type		= SizeType;
-			using csize_type	= size_type const;
+			using size_ctype	= size_type const;
 
 			using seq_type		= cctmp::sequence<value_type, size_type, Size>;
 
-			using inhabit_type	= T_inhabit<size_type>;
-			using cinhabit_type	= inhabit_type const;
+			using inhabit_type	= inhabit<size_type>;
+			using inhabit_ctype	= inhabit_type const;
 
 		protected:
 
@@ -167,17 +197,17 @@ namespace engine {
 
 		public:
 
-			nik_ce T_model_value_number() { }
+			nik_ce model_value_number() { }
 
-			nik_ce csize_type current() const { return seq.max(); }
+			nik_ce size_type current_word() const { return seq.max(); }
 
-			nik_ce cvalue_type operator [] (csize_type n) const { return seq[n]; }
+			nik_ce value_type operator [] (size_ctype n) const { return seq[n]; }
 
-			nik_ce void push(cvalue_type v) { seq.push(v); }
+			nik_ce void push(value_ctype v) { seq.push(v); }
 
 		protected:
 
-			nik_ce const bool find_same(inhabit_type & match, cvalue_type v, csize_type k) const
+			nik_ce bool find_same(inhabit_type & match, value_ctype v, size_ctype k) const
 			{
 				if (seq[k] == v) match.push(k);
 
@@ -186,7 +216,7 @@ namespace engine {
 
 		public:
 
-			nik_ce cinhabit_type find(cvalue_type v) const
+			nik_ce inhabit_type find(value_ctype v) const
 			{
 				inhabit_type match;
 
@@ -247,7 +277,7 @@ namespace engine {
 	struct Straticum
 	{
 		using size_type		= SizeType;
-		using csize_type	= size_type const;
+		using size_ctype	= size_type const;
 
 		struct Value
 		{
@@ -343,7 +373,7 @@ namespace engine {
 		{
 			using base		= cctmp::sequence<SizeType, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			using Index		= typename Straticum<size_type>::Value;
 
@@ -357,7 +387,7 @@ namespace engine {
 		{
 			using base		= cctmp::sequence<SizeType, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			using Index		= typename Straticum<size_type>::Assign;
 
@@ -371,7 +401,7 @@ namespace engine {
 		{
 			using base		= cctmp::sequence<SizeType, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			using Index		= typename Straticum<size_type>::Conditional;
 
@@ -385,7 +415,7 @@ namespace engine {
 		{
 			using base		= cctmp::sequence<SizeType, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			using Index		= typename Straticum<size_type>::Sequence;
 
@@ -399,7 +429,7 @@ namespace engine {
 		{
 			using base		= cctmp::sequence<SizeType, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			using Index		= typename Straticum<size_type>::Atomic;
 
@@ -413,7 +443,7 @@ namespace engine {
 		{
 			using base		= cctmp::sequence<SizeType, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			using Index		= typename Straticum<size_type>::Compound;
 
@@ -427,7 +457,7 @@ namespace engine {
 		{
 			using base		= cctmp::sequence<SizeType, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			using Index		= typename Straticum<size_type>::Define;
 
@@ -441,7 +471,7 @@ namespace engine {
 		{
 			using base		= cctmp::sequence<SizeType, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			using Index		= typename Straticum<size_type>::Halt;
 
@@ -460,48 +490,48 @@ namespace engine {
 			using value_type	= T_straticum_value<SizeType>;
 			using base		= cctmp::sequence<value_type, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			nik_ce T_straticum_level_value() : base{} { }
 
 			// literal (boolean):
 
-				nik_ce void push_literal_boolean(csize_type n)
+				nik_ce void push_literal_boolean(size_ctype n)
 				{
 					base::push({ MN::literal , MT::boolean , n , 0 , 0 , 0 , 0 , 1 });
 				}
 
 			// literal (character):
 
-				nik_ce void push_literal_character(csize_type n)
+				nik_ce void push_literal_character(size_ctype n)
 				{
 					base::push({ MN::literal , MT::character , n , 0 , 0 , 0 , 0 , 1 });
 				}
 
 			// literal (n number):
 
-				nik_ce void push_literal_n_number(csize_type n)
+				nik_ce void push_literal_n_number(size_ctype n)
 				{
 					base::push({ MN::literal , MT::n_number , n , 0 , 0 , 0 , 0 , 1 });
 				}
 
 			// literal (r number):
 
-				nik_ce void push_literal_r_number(csize_type n, csize_type m)
+				nik_ce void push_literal_r_number(size_ctype n, size_ctype m)
 				{
 					base::push({ MN::literal , MT::r_number , n , m , 0 , 0 , 0 , 1 });
 				}
 
 			// literal (t number):
 
-				nik_ce void push_literal_t_number(csize_type n)
+				nik_ce void push_literal_t_number(size_ctype n)
 				{
 					base::push({ MN::literal , MT::t_number , n , 0 , 0 , 0 , 0 , 1 });
 				}
 
 			// variable (universe):
 
-				nik_ce void push_variable_universe(csize_type n)
+				nik_ce void push_variable_universe(size_ctype n)
 				{
 					base::push({ MN::variable , MT::universe , n , 0 , 0 , 0 , 0 , 1 });
 				}
@@ -522,7 +552,7 @@ namespace engine {
 			using value_type	= T_straticum_conditional<SizeType>;
 			using base		= cctmp::sequence<value_type, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			nik_ce T_straticum_level_conditional() : base{} { }
 		};
@@ -535,7 +565,7 @@ namespace engine {
 			using value_type	= T_straticum_sequence<SizeType>;
 			using base		= cctmp::sequence<value_type, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			nik_ce T_straticum_level_sequence() : base{} { }
 		};
@@ -548,7 +578,7 @@ namespace engine {
 			using value_type	= T_straticum_atomic<SizeType>;
 			using base		= cctmp::sequence<value_type, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			nik_ce T_straticum_level_atomic() : base{} { }
 		};
@@ -561,7 +591,7 @@ namespace engine {
 			using value_type	= T_straticum_compound<SizeType>;
 			using base		= cctmp::sequence<value_type, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			nik_ce T_straticum_level_compound() : base{} { }
 		};
@@ -574,7 +604,7 @@ namespace engine {
 			using value_type	= T_straticum_define<SizeType>;
 			using base		= cctmp::sequence<value_type, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			nik_ce T_straticum_level_define() : base{} { }
 		};
@@ -587,7 +617,7 @@ namespace engine {
 			using value_type	= T_straticum_halt<SizeType>;
 			using base		= cctmp::sequence<value_type, SizeType, Size>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 
 			nik_ce T_straticum_level_halt() : base{} { }
 		};
@@ -600,7 +630,7 @@ namespace engine {
 	struct T_straticum_assembly
 	{
 		using size_type			= SizeType;
-		using csize_type		= size_type const;
+		using size_ctype		= size_type const;
 
 		nik_ces size_type length	= Size;
 
@@ -630,24 +660,28 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// scheme:
+// (scheme):
+
+	// size of { binding, frame, env } == 2 array positions.
+	// worst case scenario: each env has exactly one frame, each frame has exactly one binding.
+	// max size == 2*(binding size) + 2*(binding size) 2*(binding size) == 6*(binding size)
 
 /***********************************************************************************************************************/
 
 // interface:
 
-	template<typename SizeType, SizeType EnvSize, SizeType FrameSize>
-	struct T_model_environment_scheme : public T_list_model<SizeType, 2*(EnvSize + FrameSize)>
+	template<typename SizeType, SizeType WordSize>
+	struct model_environment : public model_list<SizeType, 6*WordSize>
 	{
 		public:
 
-			using base		= T_list_model<SizeType, 2*(EnvSize + FrameSize)>;
+			using base		= model_list<SizeType, 6*WordSize>;
 			using size_type		= typename base::size_type;
-			using csize_type	= typename base::csize_type;
+			using size_ctype	= typename base::size_ctype;
 			using Entry		= typename base::Entry;
 
-			using inhabit_type	= T_inhabit<size_type>;
-			using cinhabit_type	= inhabit_type const;
+			using inhabit_type	= inhabit<size_type>;
+			using inhabit_ctype	= inhabit_type const;
 
 		protected:
 
@@ -655,20 +689,20 @@ namespace engine {
 
 		public:
 
-			nik_ce T_model_environment_scheme() : base{}, current{base::null} { }
+			nik_ce model_environment() : base{}, current{base::null} { }
 
 		protected:
 
 			// frame:
 
-				nik_ce csize_type    null_frame () const { return base::null; }
-				nik_ce csize_type current_frame () const { return base::car(current); }
+				nik_ce size_type    null_frame () const { return base::null; }
+				nik_ce size_type current_frame () const { return base::car(current); }
 
 			// binding:
 
-				nik_ce csize_type make_binding(csize_type variable, csize_type value)
+				nik_ce size_type make_binding(size_ctype variable, size_ctype value)
 				{
-					csize_type binding = base::allocate();
+					size_ctype binding = base::allocate();
 
 					base::set_value(binding, Entry::car, variable);
 					base::set_value(binding, Entry::cdr, value   );
@@ -678,22 +712,22 @@ namespace engine {
 
 			// value:
 
-				template<typename Model, typename T>
-				nik_ce const bool find_binding(inhabit_type & match,
-					csize_type binding, const Model & model, const T & variable)
+				template<typename Model, typename In>
+				nik_ce bool find_binding(inhabit_type & match,
+					size_ctype binding, const Model & model, In in) const
 				{
-					if (model.same(base::car(binding), variable))
+					if (model.same(base::car(binding), in))
 						match.push(base::cdr(binding));
 
 					return match.not_empty();
 				}
 
-				template<typename Model, typename T>
-				nik_ce const bool find_frame(inhabit_type & match,
-					csize_type frame, const Model & model, const T & variable)
+				template<typename Model, typename In>
+				nik_ce bool find_frame(inhabit_type & match,
+					size_ctype frame, const Model & model, In in) const
 				{
 					for (size_type fr = frame; fr != base::null; fr = base::cdr(fr))
-						if (find_binding(match, base::car(fr), model, variable)) break;
+						if (find_binding(match, base::car(fr), model, in)) break;
 
 					return match.not_empty();
 				}
@@ -706,23 +740,23 @@ namespace engine {
 
 			// binding:
 
-				nik_ce void push_binding(csize_type variable, csize_type value)
+				nik_ce void push_binding(size_ctype variable, size_ctype value)
 				{
-					csize_type binding = make_binding(variable, value);
-					csize_type frame   = base::cons(binding, current_frame());
+					size_ctype binding = make_binding(variable, value);
+					size_ctype frame   = base::cons(binding, current_frame());
 
 					base::set_value(current, Entry::car, frame);
 				}
 
 			// value:
 
-				template<typename Model, typename T>
-				nik_ce cinhabit_type find_value(const Model & model, const T & variable)
+				template<typename Model, typename In>
+				nik_ce inhabit_type find_value(const Model & model, In in) const
 				{
 					inhabit_type match;
 
 					for (size_type env = current; env != base::null; env = base::cdr(env))
-						if (find_frame(match, base::car(env), model, variable)) break;
+						if (find_frame(match, base::car(env), model, in)) break;
 
 					return match;
 				}
@@ -737,26 +771,26 @@ namespace engine {
 
 // str(ing) val(ue):
 
-	template<typename SrcType, typename NumType, typename SizeType, SizeType EnvSize, SizeType FrameSize>
-	class T_model_environment_string_ref_number
+	template<typename CharType, typename NumType , typename SizeType, SizeType WordSize, SizeType VarSize>
+	class model_environment_string_number
 	{
 		public:
 
-			using src_type			= SrcType;
-			using csrc_type			= src_type const;
-			using csrc_ref			= csrc_type &;
+			using char_type			= CharType;
+			using num_type			= NumType;
 
 			using size_type			= SizeType;
-			using csize_type		= size_type const;
+			using size_ctype		= size_type const;
 
-			using variable_model		= T_model_variable_string_ref <  src_type, size_type, FrameSize >;
-			using value_model		= T_model_value_number        <   NumType, size_type, FrameSize >;
-			using env_model			= T_model_environment_scheme  < size_type,   EnvSize, FrameSize >;
+			using variable_model		= model_variable_string < char_type, size_type, WordSize , VarSize >;
+			using value_model		= model_value_number    <  num_type, size_type, WordSize >;
+			using env_model			= model_environment     <            size_type, WordSize >;
 
-			using cvariable_type		= typename variable_model::cvariable_type;
-			using cvalue_type		= typename value_model::cvalue_type;
-			using cinhabit_type		= typename env_model::cinhabit_type;
-			using cinhabit_ref		= cinhabit_type &;
+			using value_type		= typename value_model::value_type;
+			using value_ctype		= typename value_model::value_ctype;
+			using inhabit_type		= typename env_model::inhabit_type;
+			using inhabit_ctype		= typename env_model::inhabit_ctype;
+			using inhabit_ctype_ref		= inhabit_ctype &;
 
 		protected:
 
@@ -766,43 +800,45 @@ namespace engine {
 
 		public:
 
-			nik_ce T_model_environment_string_ref_number(csrc_ref s) : variable{s} { env.push_frame(); }
+			nik_ce model_environment_string_number() { env.push_frame(); }
 
 		protected:
 
-			nik_ce csize_type maybe_push_variable(cinhabit_ref record, cvariable_type b, cvariable_type e)
+			template<typename In, typename End>
+			nik_ce size_type maybe_push_variable(inhabit_ctype_ref record, In in, End end)
 			{
 				if (record.not_empty()) return *record;
-				else variable.push(b, e);
+				else variable.push(in, end);
 
-				return variable.current();
+				return variable.current_word();
 			}
 
-			nik_ce csize_type maybe_push_value(cinhabit_ref record, cvalue_type v)
+			nik_ce size_type maybe_push_value(inhabit_ctype_ref record, value_ctype v)
 			{
 				if (record.not_empty()) return *record;
 				else value.push(v);
 
-				return value.current();
+				return value.current_word();
 			}
 
 		public:
 
-			nik_ce void push_binding(cvariable_type b, cvariable_type e, cvalue_type v)
+			template<typename In, typename End>
+			nik_ce void push_binding(In in, End end, value_ctype v)
 			{
 				env.push_binding
 				(
-					maybe_push_variable (variable.find(b), b, e),
+					maybe_push_variable (variable.find(in), in, end),
 					maybe_push_value    (value.find(v), v)
 				);
 			}
 
-			template<typename T>
-			nik_ce cinhabit_type find_value(const T & var) { return env.find_value(variable, var); }
+			template<typename In>
+			nik_ce inhabit_type find_value(In in) const { return env.find_value(variable, in); }
 
-			nik_ce cvalue_type get_value(cinhabit_ref record) { return value[*record]; }
+			nik_ce value_type get_value(inhabit_ctype_ref record) const { return value[*record]; }
 
-			nik_ce void set_value(cinhabit_ref record, cvalue_type v) { value[*record] = v; }
+			nik_ce void set_value(inhabit_ctype_ref record, value_ctype v) { value[*record] = v; }
 	};
 
 /***********************************************************************************************************************/
@@ -814,9 +850,9 @@ namespace engine {
 
 // str(ing) strat(icum):
 
-	struct T_model_environment_string_ref_straticum
+	struct model_environment_string_straticum
 	{
-		nik_ce T_model_environment_string_ref_straticum() { }
+		nik_ce model_environment_string_straticum() { }
 	};
 
 /***********************************************************************************************************************/
