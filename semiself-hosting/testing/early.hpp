@@ -21,6 +21,42 @@
 
 /***********************************************************************************************************************/
 
+// rvalue reference:
+
+	template<auto N>
+	constexpr auto replace_then_add(int (&&arr)[N], int pos, int val)
+	{
+		int sum = 0;
+
+		arr[pos] = val;
+
+		for (auto k = arr; k != arr + N; ++k) sum += *k;
+
+		return sum;
+	}
+
+		printf("%d\n", replace_then_add({1, 2, 3, 4, 5}, 0, 10));
+
+/***********************************************************************************************************************/
+
+// sequence:
+
+	// rvalue:
+
+		constexpr auto s0 = sequence<int, gindex_type, 5>( {1, 2, 3, 4, 5} );
+
+	// lvalue:
+
+		constexpr int l0[] = {1, 2, 3, 4, 5};
+
+		sequence<int, gindex_type, 5> s0{l0};
+
+	// print:
+
+		printf("%d\n", s0.size());
+
+/***********************************************************************************************************************/
+
 // left:
 
 		constexpr auto l0 = right_
@@ -51,6 +87,16 @@
 		constexpr auto l0 = segment_<100>;
 
 		printf("%d\n", l0);
+
+/***********************************************************************************************************************/
+
+// different:
+
+		constexpr auto s0 = sequence<int, gindex_type, 5>( {1, 2, 3, 4, 5} );
+		constexpr auto s1 = sequence<int, gindex_type, 5>( {1, 2, 3, 4, 5} );
+
+		auto val = inventory_different_v0<gindex_type>(s0.cbegin(), s0.cend(), s1.cbegin());
+		printf("%s\n", val ? "different" : "same");
 
 /***********************************************************************************************************************/
 
@@ -87,30 +133,52 @@
 
 // frame:
 
-		constexpr auto f = frame
+		constexpr auto f = engine::frame
 		(
 			U_gcchar_type, U_gindex_type,
 
-			gbinding("zero"  , 0),
-			gbinding("one"   , 1),
-			gbinding("two"   , 2),
-			gbinding("three" , 3),
-			gbinding("four"  , 4),
-			gbinding("five"  , 5)
+			engine::gbinding("zero"  , 0),
+			engine::gbinding("one"   , 1),
+			engine::gbinding("two"   , 2),
+			engine::gbinding("three" , 3),
+			engine::gbinding("four"  , 4),
+			engine::gbinding("five"  , 5)
 		);
 
-		printf("%s\n", LambdaTuple::value<0>(f)[4].origin());
-		printf("%d\n", LambdaTuple::value<4>(LambdaTuple::value<1>(f)));
+		printf("%s\n", engine::LambdaTuple::value<0>(f)[4].origin());
+		printf("%d\n", engine::LambdaTuple::value<4>(engine::LambdaTuple::value<1>(f)));
 
 /***********************************************************************************************************************/
 
-// different:
+// table:
 
-		constexpr auto s0 = push_sequence(1, 2, 3, 4, 5);
-		constexpr auto s1 = push_sequence(1, 2, 3, 4, 5);
+		constexpr auto table0 = engine::table
+		(
+			U_gindex_type, U_auto_int, U_auto_int,
 
-		auto val = inventory_different_v0<gindex_type>(s0.cbegin(), s0.cend(), s1.cbegin());
-		printf("%s\n", val ? "different" : "same");
+			engine::pair(0, 5),
+			engine::pair(1, 4),
+			engine::pair(2, 3),
+			engine::pair(3, 2),
+			engine::pair(4, 1),
+			engine::pair(5, 0)
+		);
+
+		printf("left 0: %d\n", table0.lfind(0, 6));
+		printf("left 1: %d\n", table0.lfind(1, 6));
+		printf("left 2: %d\n", table0.lfind(2, 6));
+		printf("left 3: %d\n", table0.lfind(3, 6));
+		printf("left 4: %d\n", table0.lfind(4, 6));
+		printf("left 5: %d\n", table0.lfind(5, 6));
+		printf("left 6: %d\n", table0.lfind(6, 6));
+
+		printf("right 0: %d\n", table0.rfind(0, 6));
+		printf("right 1: %d\n", table0.rfind(1, 6));
+		printf("right 2: %d\n", table0.rfind(2, 6));
+		printf("right 3: %d\n", table0.rfind(3, 6));
+		printf("right 4: %d\n", table0.rfind(4, 6));
+		printf("right 5: %d\n", table0.rfind(5, 6));
+		printf("right 6: %d\n", table0.rfind(6, 6));
 
 /***********************************************************************************************************************/
 
@@ -118,13 +186,14 @@
 
 	// push:
 
-		template<typename... Ts>
-		constexpr auto push_stack(Ts... vs)
+		template<typename T, auto N>
+		constexpr auto push_stack(const T (&a)[N])
 		{
-			using stack_type = engine::T_stack<gindex_type, sizeof...(Ts)>;
+			using stack_type = engine::stack<T, N>;
 
 			stack_type s;
-			(s.push(vs), ...);
+
+			for (auto k = a; k != a + N; ++k) s.push(*k);
 
 			return s;
 		}
@@ -134,7 +203,7 @@
 		template<typename Stack>
 		constexpr void print_stack(const Stack & s)
 		{
-			for (auto k = s.cbegin(); k != s.cend(); k += 2) printf("%hu, ", *k);
+			for (auto k = s.cbegin(); k != s.cend(); k += 2) printf("%d, ", *k);
 
 			printf("\n");
 		}
@@ -144,14 +213,14 @@
 		template<typename Stack>
 		constexpr void pop_print_stack(Stack & s)
 		{
-			while (s.not_empty()) printf("%hu, ", s.pop());
+			while (s.not_empty()) printf("%d, ", s.pop());
 
 			printf("\n");
 		}
 
 	// test:
 
-		constexpr auto s0 = push_stack(1, 2, 3, 4, 5);
+		constexpr auto s0 = push_stack({1, 2, 3, 4, 5});
 		          auto s1 = s0;
 
 		print_stack(s0);

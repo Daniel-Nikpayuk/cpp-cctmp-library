@@ -388,6 +388,11 @@ namespace cctmp {
 
 			nik_ce sequence() : initial{}, terminal{} { }
 
+		//	nik_ce sequence(const sequence & s) : initial{}, terminal{} { push(s.cbegin(), s.cend()); }
+
+			template<typename T, auto N>
+			nik_ce sequence(const T (&s)[N]) : initial{}, terminal{} { push(s, s + N); }
+
 			// immutable:
 
 				nik_ce size_type length () const { return Size; }
@@ -425,22 +430,10 @@ namespace cctmp {
 				nik_ce type_ptr end   () { return iter(terminal); }
 
 				nik_ce type_ref operator [] (size_ctype pos) { return initial[pos]; }
+
+				template<typename In, typename End>
+				nik_ce void push(In in, End end) { while (in != end) push(*in++); }
 	};
-
-/***********************************************************************************************************************/
-
-// push:
-
-	template<typename... Ts>
-	constexpr auto push_sequence(Ts... vs)
-	{
-		using seq_type = sequence<int, gindex_type, sizeof...(Ts)>;
-
-		seq_type s;
-		(s.push(vs), ...);
-
-		return s;
-	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

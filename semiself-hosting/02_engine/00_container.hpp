@@ -38,6 +38,8 @@ namespace engine {
 
 	using gkey_type							= cctmp::gkey_type;
 	using gindex_type						= cctmp::gindex_type;
+	using gchar_type						= cctmp::gchar_type;
+	using gcchar_type						= cctmp::gcchar_type;
 
 	nik_ce auto U_gindex_type					= cctmp::U_gindex_type;
 
@@ -80,11 +82,11 @@ namespace engine {
 
 		nik_ces ctype empty[] = { };
 
-		template<auto N>
-		nik_ce literal(const Type (&s)[N]) : start{s}, finish{s + N} { }
-
 		nik_ce literal() : start{empty}, finish{empty} { }
 		nik_ce literal(ctype_cptr s, ctype_cptr f) : start{s}, finish{f} { }
+
+		template<auto N>
+		nik_ce literal(const Type (&s)[N]) : start{s}, finish{s + N} { }
 
 		nik_ce size_type size   () const { return finish - start; }
 		nik_ce ctype_ptr origin () const { return start; }
@@ -94,6 +96,16 @@ namespace engine {
 		nik_ce ctype_ptr cend   () const { return finish; }
 
 		nik_ce ctype_ref operator [] (size_ctype pos) const { return start[pos]; }
+
+		nik_ce bool operator != (const literal & l) const
+		{
+			for (auto j = cbegin(), k = l.cbegin(); k != l.cend(); ++j, ++k)
+				if (*j != *k) return true;
+
+			return false;
+		}
+
+		nik_ce bool operator == (const literal & l) const { return not operator != (l); }
 	};
 
 /***********************************************************************************************************************/
@@ -203,9 +215,11 @@ namespace engine {
 
 	struct LambdaTuple
 	{
-		template<        typename LT> nik_ces auto empty (LT lt) { return lt(_empty_); }
-		template<        typename LT> nik_ces auto size  (LT lt) { return lt(_size_ ); }
-		template<auto n, typename LT> nik_ces auto value (LT lt) { return lt(_at_<n>); }
+		template<        typename LT> nik_ces auto empty  (LT lt) { return lt(_empty_); }
+		template<        typename LT> nik_ces auto size   (LT lt) { return lt(_size_ ); }
+		template<        typename LT> nik_ces auto first  (LT lt) { return lt(_at_<0>); }
+		template<        typename LT> nik_ces auto second (LT lt) { return lt(_at_<1>); }
+		template<auto n, typename LT> nik_ces auto value  (LT lt) { return lt(_at_<n>); }
 
 		template<typename... Ts>
 		nik_ces auto make(Ts... vs) { return T_store_U<_lambda_tuple_>::template result<Ts...>(vs...); }
@@ -220,6 +234,8 @@ namespace engine {
 /***********************************************************************************************************************/
 
 // binding:
+
+		// static assert: size_type is_ref ?
 
 	template<typename SizeType, typename CharType, SizeType N, typename T>
 	nik_ce auto binding(nik_avp(SizeType*), CharType (&variable)[N], T value)
@@ -239,16 +255,16 @@ namespace engine {
 
 // frame:
 
+		// static assert: size_type is_ref ?
+
 	template<typename CharType, typename SizeType, typename... Bindings>
 	nik_ce auto frame(nik_avp(CharType*), nik_avp(SizeType*), Bindings... bs)
 	{
 		using strlit_type   = string_literal<CharType, SizeType>;
 		using variable_type = cctmp::sequence<strlit_type, SizeType, sizeof...(Bindings)>;
 
-		variable_type variables;
-		(variables.push(LambdaTuple::template value<0>(bs)), ...);
-
-		auto values = LambdaTuple::make(LambdaTuple::template value<1>(bs)...);
+		auto variables      = variable_type{   {LambdaTuple::first  (bs)...}};
+		auto values         = LambdaTuple::make(LambdaTuple::second (bs)...);
 
 		return LambdaTuple::make(variables, values);
 	}
@@ -311,6 +327,74 @@ namespace engine {
 
 		return LambdaTuple::make(strlit_type{s}, frame(U_char_type, U_size_type, bs...));
 	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// ctable:
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename Type0, typename Type1, typename SizeType, SizeType Size>
+	class ctable
+	{
+		public:
+
+			using size_type		= SizeType;
+			using size_ctype	= size_type const;
+
+			using left_type		= cctmp::sequence<Type0, size_type, Size>;
+			using right_type	= cctmp::sequence<Type1, size_type, Size>;
+
+		protected:
+
+			left_type left;
+			right_type right;
+
+		public:
+
+			nik_ce ctable() { }
+
+			template<typename T0, typename T1, auto N>
+			nik_ce ctable(const T0 (&l)[N], const T1 (&r)[N]) : left{l}, right{r} { }
+
+			nik_ce const Type1 & lfind(const Type0 & v0, const Type1 & v1) const
+			{
+				for (size_type k = 0; k != Size; ++k) 
+					if (left[k] == v0) return right[k];
+
+				return v1;
+			}
+
+			nik_ce const Type0 & rfind(const Type1 & v1, const Type0 & v0) const
+			{
+				for (size_type k = 0; k != Size; ++k) 
+					if (right[k] == v1) return left[k];
+
+				return v0;
+			}
+	};
+
+	// syntactic sugar:
+
+		template<typename T0, typename T1>
+		nik_ce auto pair(T0 t0, T1 t1) { return LambdaTuple::make(t0, t1); }
+
+		template<typename SizeType, typename TU0, typename TU1, typename... Pairs>
+		nik_ce auto table(nik_avp(SizeType*), TU0, TU1, Pairs... ps)
+		{
+			using T0         = T_restore_T<TU0>;
+			using T1         = T_restore_T<TU1>;
+			using table_type = ctable<T0, T1, SizeType, sizeof...(Pairs)>;
+
+			return table_type
+			{
+				{LambdaTuple::first(ps)...},
+				{LambdaTuple::second(ps)...}
+			};
+		}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

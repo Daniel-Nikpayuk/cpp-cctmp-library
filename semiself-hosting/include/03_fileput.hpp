@@ -17,15 +17,5 @@
 **
 ************************************************************************************************************************/
 
-//#include"../01_inventory/00_chord_assembly/different_v0.hpp"
-
-//#include"../01_inventory/01_hustle_assembly/.hpp"
-
-//#include"../01_inventory/02_lexer_table/00_chord.hpp"
-#include"../01_inventory/02_lexer_table/01_hustle.hpp"
-//#include"../01_inventory/02_lexer_table/02_generator.hpp"
-
-//#include"../01_inventory/03_parser_table/00_chord.hpp"
-//#include"../01_inventory/03_parser_table/01_hustle.hpp"
-//#include"../01_inventory/03_parser_table/02_generator.hpp"
+//#include"../03_fileput/00_.hpp"
 
