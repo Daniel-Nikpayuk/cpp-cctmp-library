@@ -22,9 +22,11 @@
 
 #define NIK_PARSER_GENERATOR_PARSER_OBJ "../object/00_parser_generator_parser.hpp"
 #define NIK_CHORD_PARSER_OBJ            "../object/01_chord_parser.hpp"
+#define NIK_HUSTLE_PARSER_OBJ           "../object/02_hustle_parser.hpp"
 
 #define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
 #define NIK_CHORD_PARSER
+#define NIK_HUSTLE_PARSER
 
 /***********************************************************************************************************************/
 
@@ -35,6 +37,7 @@
 #include"../include/02_generator.h"
 #include"../include/03_fileput.h"
 #include"../include/04_chord.h"
+#include"../include/05_hustle.h"
 
 #include"../undef_macros.hpp"
 
@@ -43,21 +46,27 @@
 /***********************************************************************************************************************/
 
 	template<auto callable_source, auto initial_env>
-	constexpr auto metapile = chord::metapile<callable_source, initial_env>;
+//	constexpr auto metapile = chord::metapile<callable_source, initial_env>;
+	constexpr auto metapile = hustle::metapile<callable_source, initial_env>;
 
 	constexpr auto null_env = cctmp::null_env;
 
 /***********************************************************************************************************************/
 
-	constexpr auto contr_chord_different_v0         = metapile< _chord_different_v0 , null_env >;
+//	constexpr auto contr_chord_different_v0         = metapile< _chord_different_v0    , null_env >;
+
+	constexpr auto contr_hustle_square_root_v0      = metapile< _hustle_square_root_v0 , null_env >;
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		constexpr char dsl[] = "chord";
+	//	constexpr char dsl[] = "chord";
+		constexpr char dsl[] = "hustle";
 
-		fileput::write_assembly_controller< contr_chord_different_v0 >(dsl, "different_v0" );
+	//	fileput::write_assembly_controller< contr_chord_different_v0 >(dsl, "different_v0" );
+
+		fileput::write_assembly_controller< contr_hustle_square_root_v0 >(dsl, "square_root_v0" );
 
 		return 0;
 	}

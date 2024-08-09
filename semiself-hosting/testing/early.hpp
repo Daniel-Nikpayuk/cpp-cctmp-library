@@ -39,29 +39,113 @@
 
 /***********************************************************************************************************************/
 
-// sequence:
+// array literal:
+
+	struct contr
+	{
+		using lit_type = array_literal<int, gindex_type>;
+
+		constexpr static int arr[] =
+		{
+			2, 7, 3, 4, 9, 5,
+			1, 9, 3, 8, 7, 0,
+			2, 2, 3, 3, 4, 5
+		};
+
+		constexpr static auto x = lit_type{arr};
+	};
+
+		printf("%d\n", contr::x[ 1]);
+		printf("%d\n", contr::x[ 7]);
+		printf("%d\n", contr::x[13]);
+
+/***********************************************************************************************************************/
+
+// array:
+
+		using seq_type = array<int, gindex_type, 5>;
 
 	// rvalue:
 
-		constexpr auto s0 = sequence<int, gindex_type, 5>( {1, 2, 3, 4, 5} );
+		constexpr auto s0 = seq_type{{1, 2, 3, 4, 5}};
 
 	// lvalue:
 
 		constexpr int l0[] = {1, 2, 3, 4, 5};
 
-		sequence<int, gindex_type, 5> s0{l0};
+		seq_type s1{l0};
+
+	// mutable:
+
+		s1[4] = 6;
+		s1.downsize();
+		s1.push(5);
 
 	// print:
 
 		printf("%d\n", s0.size());
 
+		printf("%s\n", (s0 == s1) ? "equal" : "not equal");
+
+		printf("%d\n", s0.origin()[3]);
+		printf("%d\n", s0.size());
+		printf("%d\n", s0[0]);
+		printf("%d\n", s0[1]);
+		printf("%d\n", s0[2]);
+		printf("%d\n", s0[3]);
+		printf("%d\n", s0[4]);
+
+/***********************************************************************************************************************/
+
+// table literal:
+
+	struct contr
+	{
+		using lit_type = table_literal<int, gindex_type, 3, 6>;
+
+		constexpr static int arr[] =
+		{
+			2, 7, 3, 4, 9, 5,
+			1, 9, 3, 8, 7, 0,
+			2, 2, 3, 3, 4, 5
+		};
+
+		constexpr static auto x = lit_type{arr};
+	};
+
+		printf("%d\n", contr::x[0][1]);
+		printf("%d\n", contr::x[1][1]);
+		printf("%d\n", contr::x[2][1]);
+
+/***********************************************************************************************************************/
+
+// table:
+
+		using table_type = table<int, gindex_type, 3, 6>;
+
+		int arr[] =
+		{
+			2, 7, 3, 4, 9, 5,
+			1, 9, 3, 8, 7, 0,
+			2, 2, 3, 3, 4, 5
+		};
+
+		auto x = table_type{arr};
+
+		x[1][1] = 5;
+
+		printf("%d\n", x[0][1]);
+		printf("%d\n", x[1][1]);
+		printf("%d\n", x[2][1]);
+
 /***********************************************************************************************************************/
 
 // left:
 
-		constexpr auto l0 = right_
+		template<auto n>
+		constexpr auto l0 = left_
 		<
-			0,
+			n,
 
 			0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
 			0, 1, 2, 3, 4,  5, 6, 7, 8, 9,    0, 1, 2, 3, 4,  5, 6, 7, 8, 9,
@@ -92,8 +176,8 @@
 
 // different:
 
-		constexpr auto s0 = sequence<int, gindex_type, 5>( {1, 2, 3, 4, 5} );
-		constexpr auto s1 = sequence<int, gindex_type, 5>( {1, 2, 3, 4, 5} );
+		constexpr auto s0 = array<int, gindex_type, 5>( {1, 2, 3, 4, 5} );
+		constexpr auto s1 = array<int, gindex_type, 5>( {1, 2, 3, 4, 5} );
 
 		auto val = inventory_different_v0<gindex_type>(s0.cbegin(), s0.cend(), s1.cbegin());
 		printf("%s\n", val ? "different" : "same");
@@ -150,9 +234,9 @@
 
 /***********************************************************************************************************************/
 
-// table:
+// lookup:
 
-		constexpr auto table0 = engine::table
+		constexpr auto lookup0 = engine::lookup
 		(
 			U_gindex_type, U_auto_int, U_auto_int,
 
@@ -164,21 +248,21 @@
 			engine::pair(5, 0)
 		);
 
-		printf("left 0: %d\n", table0.lfind(0, 6));
-		printf("left 1: %d\n", table0.lfind(1, 6));
-		printf("left 2: %d\n", table0.lfind(2, 6));
-		printf("left 3: %d\n", table0.lfind(3, 6));
-		printf("left 4: %d\n", table0.lfind(4, 6));
-		printf("left 5: %d\n", table0.lfind(5, 6));
-		printf("left 6: %d\n", table0.lfind(6, 6));
+		printf("left 0: %d\n", lookup0.lfind(0, 6));
+		printf("left 1: %d\n", lookup0.lfind(1, 6));
+		printf("left 2: %d\n", lookup0.lfind(2, 6));
+		printf("left 3: %d\n", lookup0.lfind(3, 6));
+		printf("left 4: %d\n", lookup0.lfind(4, 6));
+		printf("left 5: %d\n", lookup0.lfind(5, 6));
+		printf("left 6: %d\n", lookup0.lfind(6, 6));
 
-		printf("right 0: %d\n", table0.rfind(0, 6));
-		printf("right 1: %d\n", table0.rfind(1, 6));
-		printf("right 2: %d\n", table0.rfind(2, 6));
-		printf("right 3: %d\n", table0.rfind(3, 6));
-		printf("right 4: %d\n", table0.rfind(4, 6));
-		printf("right 5: %d\n", table0.rfind(5, 6));
-		printf("right 6: %d\n", table0.rfind(6, 6));
+		printf("right 0: %d\n", lookup0.rfind(0, 6));
+		printf("right 1: %d\n", lookup0.rfind(1, 6));
+		printf("right 2: %d\n", lookup0.rfind(2, 6));
+		printf("right 3: %d\n", lookup0.rfind(3, 6));
+		printf("right 4: %d\n", lookup0.rfind(4, 6));
+		printf("right 5: %d\n", lookup0.rfind(5, 6));
+		printf("right 6: %d\n", lookup0.rfind(6, 6));
 
 /***********************************************************************************************************************/
 
@@ -186,10 +270,10 @@
 
 	// push:
 
-		template<typename T, auto N>
+		template<typename S, typename T, auto N>
 		constexpr auto push_stack(const T (&a)[N])
 		{
-			using stack_type = engine::stack<T, N>;
+			using stack_type = engine::stack<T, S, N>;
 
 			stack_type s;
 
@@ -203,7 +287,7 @@
 		template<typename Stack>
 		constexpr void print_stack(const Stack & s)
 		{
-			for (auto k = s.cbegin(); k != s.cend(); k += 2) printf("%d, ", *k);
+			for (auto k = s.cbegin(); k != s.cend(); ++k) printf("%d, ", k->car);
 
 			printf("\n");
 		}
@@ -220,7 +304,7 @@
 
 	// test:
 
-		constexpr auto s0 = push_stack({1, 2, 3, 4, 5});
+		constexpr auto s0 = push_stack<short>({1, 2, 3, 4, 5});
 		          auto s1 = s0;
 
 		print_stack(s0);
@@ -269,4 +353,89 @@
 		printf("%s\n", record.is_empty() ? "empty" : "not empty");
 		printf("%hu\n", *record);
 		printf("%hu\n", test0.env.get_value(record));
+
+/***********************************************************************************************************************/
+
+// lexer hustle:
+
+		using size_type		= gindex_type;
+		using lit_type		= engine::literal<size_type, size_type>;
+		using strlit_type	= engine::string_literal<const char, size_type>;
+
+		using lexer_table_type	= inventory::lexer_transition_table_hustle<size_type>;
+		using lexer_state_type	= engine::lexer_state
+					<
+						typename lexer_table_type::State,
+						typename lexer_table_type::Charset,
+						const char*, size_type
+					>;
+		using lexer_token_type  = hustle::lexer_token<size_type>;
+		using lexer_policy_type	= hustle::lexer_policy
+					<
+						typename lexer_table_type::State,
+						typename lexer_table_type::Charset,
+						typename lexer_token_type::Token,
+						char, size_type
+					>;
+
+		constexpr auto table	= lit_type
+					{
+						lexer_table_type::value,
+						lexer_table_type::value + lexer_table_type::seq.size()
+					};
+		constexpr auto strlit0	= strlit_type{"hi there everybody!"};
+
+		auto lexer = lexer_state_type{table, strlit0.cbegin(), strlit0.cend()};
+
+		while (lexer.not_end())
+		{
+			lexer.initialize();
+			if (lexer.template find<lexer_policy_type>())
+				for (auto k = lexer.cbegin(); k != lexer.ccurrent(); ++k)
+					printf("%c", *k);
+
+			printf("\n");
+		}
+
+/***********************************************************************************************************************/
+
+// hustle keyword:
+
+		using size_type          = gindex_type;
+		using strlit_type        = engine::string_literal<char, size_type>;
+		using lexer_token_type   = hustle::lexer_token<size_type>;
+		using lexer_keyword_type = hustle::lexer_keyword<typename lexer_token_type::Token, char, size_type>;
+
+		constexpr auto if_str    = strlit_type{"if"};
+
+		printf("%d\n", lexer_keyword_type::eq_.match(if_str.cbegin(), if_str.cend()));
+
+/***********************************************************************************************************************/
+
+// hustle lexer:
+
+		using lexer_trait	= hustle::lexer_trait<char, gindex_type>;
+		using lexer_table_type	= inventory::lexer_transition_table_hustle<lexer_trait>;
+		using lexer_type	= hustle::lexer<lexer_trait>;
+
+		using lit_type		= typename lexer_type::lit_type;
+		using strlit_type	= engine::string_literal<typename lexer_type::char_ctype, typename lexer_type::size_type>;
+
+		constexpr auto table	= lit_type
+					{
+						lexer_table_type::value,
+						lexer_table_type::value + lexer_table_type::seq.size()
+					};
+		constexpr auto strlit0	= strlit_type{"hi there everybody!"};
+
+		auto lexer = lexer_type{table, strlit0.cbegin(), strlit0.cend()};
+
+		while (lexer.not_end())
+		{
+			if (lexer.find())
+				for (auto k = lexer.cbegin(); k != lexer.ccurrent(); ++k)
+					printf("%c", *k);
+
+			printf("\n");
+		}
 

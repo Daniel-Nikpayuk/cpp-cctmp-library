@@ -184,16 +184,19 @@ namespace cctmp {
 	template<auto static_contr>
 	struct MachineDispatch
 	{
+		nik_ces auto rowsize	= T_store_U<static_contr>::rowsize;
+		nik_ces auto colsize	= MachineIndex::dimension;
+
 		using size_type		= typename T_store_U<static_contr>::size_type;
 		using size_ctype	= size_type const;
+		using tablit_type	= table_literal<size_type, size_type, rowsize, colsize>;
 
-		nik_ces auto & contr	= member_value_U<static_contr>;
+		nik_ces auto contr	= tablit_type{member_value_U<static_contr>};
 
 		// accessors:
 
-			nik_ces const auto & instr (size_ctype i) { return contr[i]; }
-			nik_ces size_type value    (size_ctype i, size_ctype n) { return contr[i][n]; }
-			nik_ces size_type peek     (size_ctype i, size_ctype m, size_ctype n) { return contr[i + m][n]; }
+			nik_ces size_type value (size_ctype i, size_ctype n) { return contr[i][n]; }
+			nik_ces size_type peek  (size_ctype i, size_ctype m, size_ctype n) { return contr[i + m][n]; }
 
 			nik_ces size_type pos  (size_ctype i) { return value(i, MI::pos); }
 			nik_ces size_type num  (size_ctype i) { return value(i, MI::num); }

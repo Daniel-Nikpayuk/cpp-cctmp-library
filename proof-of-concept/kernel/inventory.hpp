@@ -48,3 +48,56 @@
 			);
 		}
 
+/***********************************************************************************************************************/
+
+// square root:
+
+	// subtract:
+
+		struct T_hustle_subtract
+		{
+			using F = cctmp::T_store_U<cctmp::_subtract_>;
+
+			template<typename T>
+			constexpr static auto result(T v) { return -v; }
+
+			template<typename... Ts>
+			constexpr static auto result(Ts... vs) { return F::template result<Ts...>(vs...); }
+
+		}; constexpr auto _hustle_subtract_ = cctmp::U_store_T<T_hustle_subtract>;
+
+	// v0:
+
+		constexpr auto _hustle_square_root_v0()
+		{
+			return cctmp::source
+		        (
+				"(type T                                                                    "
+				"  (define (sqrt x)                                                         "
+
+				"    (define (square y) (* y y))                                            "
+				"    (define (abs y) (if (< y 0) (- y) y))                                  "
+				"    (define (good-enough? guess) (< (abs (- (square guess) x)) tolerance)) "
+
+				"    (define (average y z) (/ (+ y z) 2))                                   "
+				"    (define (improve guess) (average guess (/ x guess)) )                  "
+
+				"    (define (sqrt-iter guess) -> T                                         "
+				"      (if (good-enough? guess) guess (sqrt-iter (improve guess)))          "
+				"    )                                                                      "
+
+				"    (sqrt-iter 1:T)                                                        "
+				"  )                                                                        "
+				")                                                                          "
+
+				, cctmp::binding( "<"         , cctmp::_less_than_       )
+
+				, cctmp::binding( "+"         , cctmp::_add_             )
+				, cctmp::binding( "-"         ,        _hustle_subtract_ )
+				, cctmp::binding( "*"         , cctmp::_multiply_        )
+				, cctmp::binding( "/"         , cctmp::_divide_          )
+
+				, cctmp::binding( "tolerance" , 0.0001                   )
+			);
+		}
+

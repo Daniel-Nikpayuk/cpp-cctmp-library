@@ -71,7 +71,7 @@ namespace hustle {
 			cctmp::binding( ">="         , cctmp::_greater_than_or_equal_ ),
 
 			cctmp::binding( "+"          , cctmp::_add_                   ),
-			cctmp::binding( "-"          , _hustle_subtract_              ),
+			cctmp::binding( "-"          ,        _hustle_subtract_       ),
 			cctmp::binding( "*"          , cctmp::_multiply_              ),
 			cctmp::binding( "/"          , cctmp::_divide_                ),
 			cctmp::binding( "%"          , cctmp::_modulo_                )

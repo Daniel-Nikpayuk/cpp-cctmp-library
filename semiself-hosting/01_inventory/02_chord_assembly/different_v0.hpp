@@ -174,7 +174,7 @@
 		);
 
 	}; template<typename SizeType>
-		nik_ce auto env_chord_different_v0 = cctmp::U_store_T<T_static_env_chord_different_v0<SizeType>>;
+		constexpr auto env_chord_different_v0 = cctmp::U_store_T<T_static_env_chord_different_v0<SizeType>>;
 
 /***********************************************************************************************************************/
 
@@ -188,7 +188,7 @@
 		using T_apply = cctmp::T_metapile_apply
 		<
 			SizeType, contr_object_chord_different_v0<SizeType>,
-			env_chord_different_v0<SizeType>, cctmp::U_pack_Vs<cctmp::U_store_T<rtn_type>>
+			env_chord_different_v0<SizeType>, cctmp::U_pack_Ts<rtn_type>
 		>;
 
 		return T_apply::result(rtn_type{0}, in, end, in1);

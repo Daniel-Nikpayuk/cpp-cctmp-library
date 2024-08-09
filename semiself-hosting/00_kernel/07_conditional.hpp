@@ -690,7 +690,7 @@ namespace cctmp {
 
 			return NIK_MACHINE_TEMPLATE_WS(c, i, p0, p1)
 				::NIK_MACHINE_RESULT_TS(c, i, l, t, r,
-					gcbool_type, T_store_U<LUs>..., Out, In, End, T_store_U<IUs>...)
+					gbool_ctype, T_store_U<LUs>..., Out, In, End, T_store_U<IUs>...)
 						(not match, lvs..., out, in, end, ins...);
 		}
 	};

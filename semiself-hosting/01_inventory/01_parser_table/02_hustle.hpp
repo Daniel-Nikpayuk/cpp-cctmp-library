@@ -57,7 +57,7 @@
 
 		using prod_type			= generator::Production<prod_size>;
 		using cprod_type		= prod_type const;
-		using list_type			= cctmp::sequence<prod_type, row_size * col_size>;
+		using list_type			= cctmp::array<prod_type, row_size * col_size>;
 
 		list_type list; // list instead of table due to clang bug.
 		bool ambiguous;

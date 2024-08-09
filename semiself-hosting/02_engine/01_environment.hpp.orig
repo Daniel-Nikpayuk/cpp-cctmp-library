@@ -54,21 +54,17 @@ namespace engine {
 	{
 		public:
 
-			using type		= typename using_type<Type>::type;
-			using type_ptr		= typename using_type<Type>::type_ptr;
-			using type_cptr		= typename using_type<Type>::type_cptr;
-			using type_ref		= typename using_type<Type>::type_ref;
+			using type		= Type;
+			using ctype		= type const;
+			using ctype_ref		= ctype &;
+			using ctype_ptr		= ctype *;
+			using ctype_cptr	= ctype_ptr const;
 
-			using ctype		= typename using_type<Type>::ctype;
-			using ctype_ptr		= typename using_type<Type>::ctype_ptr;
-			using ctype_cptr	= typename using_type<Type>::ctype_cptr;
-			using ctype_ref		= typename using_type<Type>::ctype_ref;
+			using size_type		= SizeType;
+			using size_ctype	= size_type const;
 
-			using size_type		= typename using_size<SizeType>::type;
-			using size_ctype	= typename using_size<SizeType>::ctype;
-
-			using word_type		= cctmp::array< size_type , size_type , WordSize >;
-			using symbol_type	= cctmp::array<      type , size_type ,     Size >;
+			using word_type		= cctmp::sequence< size_type , size_type , WordSize >;
+			using symbol_type	= cctmp::sequence<      type , size_type ,     Size >;
 
 			using inhabit_type	= inhabit<size_type>;
 			using inhabit_ctype	= inhabit_type const;
@@ -153,7 +149,7 @@ namespace engine {
 			using size_type		= SizeType;
 			using size_ctype	= size_type const;
 
-			using seq_type		= cctmp::array<type, size_type, Size>;
+			using seq_type		= cctmp::sequence<type, size_type, Size>;
 
 			using inhabit_type	= inhabit<size_type>;
 			using inhabit_ctype	= inhabit_type const;
@@ -435,23 +431,11 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
-// binding:
-
-/***********************************************************************************************************************/
-
-// frame:
-
-/***********************************************************************************************************************/
-
 // (scheme):
 
 		// size of { binding, frame, env } == 2 array positions.
 		// worst case scenario: each env has exactly one frame, each frame has exactly one binding.
 		// max size == 2*(binding size) + 2*(binding size) 2*(binding size) == 6*(binding size)
-
-	// reimplement as a list model of frames, where each frame is a stack(?) of bindings.
-
-	// is this the best way? Or is the another?
 
 	template<typename SizeType, SizeType WordSize>
 	struct model_environment : public model_list<SizeType, 6*WordSize>

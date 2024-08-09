@@ -25,11 +25,13 @@
 #include"define_macros.hpp"
 
 #include"include/00_kernel.hpp"
-#include"include/01_inventory.hpp"
-#include"include/02_engine.hpp"
-#include"include/03_fileput.hpp"
-#include"include/04_chord.hpp"
-#include"include/05_hustle.hpp"
+//#include"include/01_inventory.hpp"
+//#include"include/02_engine.hpp"
+//#include"include/03_fileput.hpp"
+//#include"include/04_lexer.hpp"
+//#include"include/05_parser.hpp"
+//#include"include/06_chord.hpp"
+//#include"include/07_hustle.hpp"
 
 #include"undef_macros.hpp"
 
@@ -42,42 +44,12 @@
 
 	int main(int argc, char *argv[])
 	{
-		using size_type		= gindex_type;
-		using literal_type	= engine::literal<size_type, size_type>;
-		using strlit_type	= engine::string_literal<const char, size_type>;
+	//	printf("%f\n", inventory_square_root_v0<gindex_type>(2.0));
 
-		using lexer_table_type	= inventory::lexer_transition_table_hustle<size_type>;
-		using lexer_state_type	= engine::lexer_state
-					<
-						typename lexer_table_type::State,
-						typename lexer_table_type::Charset,
-						const char*, size_type
-					>;
-		using lexer_policy_type	= hustle::lexer_policy
-					<
-						typename lexer_table_type::State,
-						typename lexer_table_type::Charset,
-						char, size_type
-					>;
+	//	auto arr0 = array<int, gindex_type, 5>{{1, 2, 3, 4, 5}};
+	//	auto arr1 = array<int, gindex_type, 5>{{1, 2, 3, 0, 5}};
 
-		constexpr auto table	= literal_type
-					{
-						lexer_table_type::value,
-						lexer_table_type::value + lexer_table_type::seq.size()
-					};
-		constexpr auto strlit0	= strlit_type{"hi there everybody!"};
-
-		auto lexer = lexer_state_type{table, strlit0.cbegin(), strlit0.cend()};
-
-		while (lexer.not_end())
-		{
-			lexer.template lex<lexer_policy_type>();
-
-			for (auto k = lexer.cbegin(); k != lexer.ccurrent(); ++k)
-				printf("%c", *k);
-
-			printf("\n");
-		}
+	//	printf("%d\n", inventory_different_v0<gindex_type>(arr0.cbegin(), arr0.cend(), arr1.cbegin()));
 
 		return 0;
 	}

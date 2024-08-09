@@ -25,311 +25,209 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-	template<auto Op, typename T>
-	using modify_type						= cctmp::modify_type<Op, T>;
-
-	nik_ce auto _from_reference_					= cctmp::_from_reference_;
-
-	using strlit_type						= cctmp::strlit_type;
-	using cstrlit_ref						= cctmp::cstrlit_ref;
-
-	nik_ce auto U_strlit_type					= cctmp::U_strlit_type;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// :
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// context-free grammar:
-
-	template<typename CharType, auto M, auto N>
-	nik_ce auto context_free_grammar(const CharType (&srt)[M], const CharType (&str)[N])
-	{
-		return cctmp::pair(cctmp::string_literal(srt), cctmp::string_literal(str));
-	}
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// generic transition table:
+// pushdown automata:
 
 /***********************************************************************************************************************/
 
 // symbol:
 
-	class Symbol
+	template<typename SizeType>
+	class parser_symbol
 	{
-		bool nonterminal;
-		token_type order;
+		public:
+
+			using size_type		= SizeType;
+			using size_ctype	= size_type const;
+
+			nik_ces auto terminal    (size_ctype n) { return parser_symbol{false , n}; }
+			nik_ces auto nonterminal (size_ctype n) { return parser_symbol{true  , n}; }
+
+		protected:
+
+			bool order;
+			size_type position;
 
 		public:
 
-			nik_ce Symbol() : nonterminal{}, order{} { }
-			nik_ce Symbol(bool n, token_type o) : nonterminal{n}, order{o} { }
-			nik_ce Symbol(csign_type n, ctoken_type o) : // defaults to terminal.
-				nonterminal{Sign::is_nonterminal(n)}, order{o} { }
+			nik_ce parser_symbol() : order{}, position{} { }
+			nik_ce parser_symbol(const bool o, size_ctype p) : order{o}, position{p} { }
 
-			nik_ce bool is_terminal() const { return !nonterminal; }
-			nik_ce bool is_nonterminal() const { return nonterminal; }
+			nik_ce bool is_nonterminal() const { return order; }
+			nik_ce bool is_terminal() const { return !order; }
 
-			nik_ce token_type token() const { return order; }
+			nik_ce size_type index() const { return position; }
 
-			nik_ce bool operator == (const Symbol & s) const
-				{ return (s.nonterminal == nonterminal) && (s.order == order); }
+			nik_ce bool operator == (const parser_symbol & s) const
+				{ return (s.order == order) && (s.position == position); }
 
-			nik_ce bool operator != (const Symbol & s) const
-				{ return (s.nonterminal != nonterminal) || (s.order != order); }
+			nik_ce bool operator != (const parser_symbol & s) const
+				{ return (s.order != order) || (s.position != position); }
 	};
-
-	using symbol_type		= Symbol;
-	using symbol_ref		= symbol_type&;
-	using csymbol_type		= symbol_type const;
-	using csymbol_ref		= csymbol_type&;
-	nik_ce auto U_symbol_type	= U_store_T<symbol_type>;
-	nik_ce auto U_csymbol_type	= U_store_T<csymbol_type>;
-
-/***********************************************************************************************************************/
-
-// production:
-
-	template<gindex_type Size>
-	struct Production : public sequence<symbol_type, Size>
-	{
-		using base = sequence<symbol_type, Size>;
-
-		bool valid;
-		action_type action;
-
-		nik_ce Production() : base{}, valid{}, action{AN::nop} { }
-
-		template<typename F>
-		nik_ce void map(cguider g, caction_type act)
-		{
-			while (g.not_end()) base::push(F::result(g++));
-
-			valid  = true;
-			action = act;
-		}
-
-		template<typename F>
-		nik_ce void map(cstrlit_ref str, caction_type act)
-		{
-			for (auto k = str.cbegin(); k != str.cend(); ++k) base::push(F::result(*k));
-
-			valid  = true;
-			action = act;
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// ll(1):
 
 /***********************************************************************************************************************/
 
 // stack:
 
-	template<gindex_type Size>
-	struct Stack : public sequence<symbol_type, Size>
+	template<typename SizeType, SizeType Size>
+	class parser_stack
 	{
-		using base		= sequence<symbol_type, Size>;
-		using cselector_type	= typename base::cselector_type;
+		public:
 
-		nik_ce Stack(csymbol_ref s, csymbol_ref f) : base{}
-		{
-			base::push(f);
-			front() = s;
-		}
+			using symbol_type		= parser_symbol<SizeType>;
+			using symbol_ctype		= symbol_type const;
+			using symbol_ctype_ref		= symbol_ctype &;
 
-		nik_ce csymbol_ref front() const { return *base::cend(); }
-		nik_ce  symbol_ref front()       { return *base::end(); }
+			using size_type			= typename symbol_type::size_type;
+			using size_ctype		= typename symbol_type::size_ctype;
 
-		nik_ce void pop() { if (base::not_empty()) base::downsize(); }
+			using stack_type		= stack<symbol_type, SizeType, Size>;
 
-		nik_ce void push(const cselector_type & s)
-			{ for (auto e = s.cend(); e != s.cbegin();) *++base::terminal = *--e; }
+		protected:
+
+			stack_type stack;
+
+		public:
+
+			nik_ce parser_stack(size_ctype start) { stack.push(symbol_type::nonterminal(start)); }
+
+			nik_ce bool is_nonterminal () const { return (*stack).is_nonterminal(); }
+			nik_ce bool is_terminal    () const { return (*stack).is_terminal(); }
+
+			nik_ce size_type row() const { return (*stack).index(); }
+
+			nik_ce void push(symbol_ctype_ref s) { stack.push(s); }
+
+			template<typename In, typename End>
+			nik_ce void replace(In in, End end)
+			{
+				stack.pull();
+
+				while (in != end) stack.push(*--in);
+			}
 	};
 
 /***********************************************************************************************************************/
 
-// parseme:
+// table:
 
-	template<typename T_ast>
-	struct T_parseme
+		// a table should have 3 components:
+
+			// a table that indexes entries, 0 being the no entry.
+			// an array of entries, consisting of body { start , finish },
+			//   and an action index, 0 being the nop action.
+			// an array of production symbols, representing dynamic length production bodies,
+			//   symbols consisting of a terminality index, and name index.
+
+	template<typename TableLiteralType, typename ProductionLiteralType, typename SizeType>
+	class parser_table
 	{
-		using cselector_type	= cselector<char>;
-		using ccselector_type	= cselector_type const;
-		using ccselector_ref	= ccselector_type&;
+		public:
 
-		cselector_type str;
-		lexeme word;
-		T_ast tree;
+			using tablit_type		= TableLiteralType;
+			using tablit_ctype		= tablit_type const;
+			using tablit_ctype_ref		= tablit_ctype &;
 
-		nik_ce T_parseme() { }
-		nik_ce T_parseme(ccselector_ref s) : str{s}, word{s} { }
+			using prodlit_type		= ProductionLiteralType;
+			using prodlit_ctype		= prodlit_type const;
+			using prodlit_ctype_ref		= prodlit_ctype &;
+
+			using size_type			= SizeType;
+			using size_ctype		= size_type const;
+
+		protected:
+
+			tablit_ctype table;
+			prodlit_ctype production;
+
+		public:
+
+			nik_ce parser_table(tablit_ctype_ref t, prodlit_ctype_ref p) :
+				table{t}, production{p}
+					{ }
+
+		protected:
+
+		public:
+
+			nik_ce bool is_valid(size_ctype n) const { return ; }
+			nik_ce size_type action_index(size_ctype n) const { return ; }
 	};
 
 /***********************************************************************************************************************/
 
-// parsoid:
+// action:
 
-	template<gindex_type StackSize, gindex_type ProdSize>
-	struct T_parsoid
+	class parser_action
 	{
-		using stack_type	= Stack<StackSize>;
-		using prod_type		= Production<ProdSize> const*;
+		public:
 
-		stack_type stack;
-		prod_type prod;
-		action_type action;
+		protected:
 
-		nik_ce T_parsoid(csymbol_ref stack_start, csymbol_ref stack_finish) :
+		//	lookup_type lookup[Size];
+		//	tree_type tree;
 
-			stack{stack_start, stack_finish}, prod{}, action{} { }
+		public:
+
+			nik_ce parser_action() { }
+
 	};
 
 /***********************************************************************************************************************/
 
-// interface:
+// state:
 
-	template<typename T_action, typename T_pda>
-	struct T_generic_parser
+		// we need a stack class to update its productions, and direct us to the transition table row.
+		// we need a lexer class to handle the current word and direct us to the transition table column.
+		// we need an action class with an action lookup table and a tree to apply the action to the word.
+
+		// do we need a table class on its own? Given the production indirection, it seems reasonable.
+
+		// Once we have the current table entry, we check if the entry is valid, if so we update the stack,
+		// and apply an action if there is one.
+		// add a Table { position } enum class to keep the table access generic.
+
+/*
+	template<typename LexerType, typename TableType, typename ActionType, typename SizeType, SizeType Size>
+	class parser_state
 	{
-		nik_ces auto & act	= member_value_T<T_action>;
-		nik_ces auto pda	= T_pda{};
+		public:
 
-		using T_ast		= typename T_action::T_ast;
-		using T_lexer		= typename T_pda::T_lexer;
-		using ActName		= typename T_pda::ActName;
+			using size_type		= SizeType;
+			using size_ctype	= size_type const;
 
-		using parseme_type	= T_parseme<T_ast>;
-		using parseme_ref	= parseme_type&;
-		using cparseme_type	= parseme_type const;
-		using cparseme_ref	= cparseme_type&;
+			using stack_type	= parser_stack<size_type, Size>;
 
-		using parsoid_type	= T_parsoid<T_pda::stack_size, T_pda::prod_size>;
-		using parsoid_ref	= parsoid_type&;
-		using cparsoid_type	= parsoid_type const;
-		using cparsoid_ref	= cparsoid_type&;
+			using lexer_type	= LexerType;
+			using lexer_ctype	= lexer_type const;
+			using lexer_ctype_ref	= lexer_ctype &;
 
-		enum End : gkey_type { string_only = 0, stack_only, both, dimension };
+			using table_type	= TableType;
+			using table_ctype	= table_type const;
+			using table_ctype_ref	= table_ctype &;
 
-		nik_ces void parse(parseme_ref p, parsoid_ref q)
-		{
-			T_lexer::lex(p.word);
+			using action_type	= ActionType;
+			using action_ctype	= action_type const;
+			using action_ctype_ref	= action_ctype &;
 
-			while (not_string_end(p) && not_stack_end(q)) dispatch(p, q);
+		protected:
 
-			end_dispatch(p, q);
-		}
+			stack_type stack;
+			lexer_type lexer;
+			table_ctype table;
+			action_type action;
 
-		nik_ces bool  is_string_end (cparseme_ref p) { return p.word.is_empty(); }
-		nik_ces bool not_string_end (cparseme_ref p) { return p.word.not_empty(); }
+		public:
 
-		nik_ces bool  is_stack_end (cparsoid_ref q) { return q.stack.is_empty(); }
-		nik_ces bool not_stack_end (cparsoid_ref q) { return q.stack.not_empty(); }
+			nik_ce parser_state(lexer_ctype_ref l, table_ctype_ref t, action_ctype_ref a) :
+				lexer{l}, table{t}, action{a}
+					{ }
 
-		nik_ces void dispatch(parseme_ref p, parsoid_ref q)
-		{
-			if (q.stack.front().is_nonterminal()) nonterminal(p, q);
-			else terminal(p, q);
-		}
+		protected:
 
-		nik_ces auto end_dispatch_index(cparseme_ref p, cparsoid_ref q)
-			{ return (is_string_end(p) + 2*is_stack_end(q)) - 1; }
+		public:
 
-		nik_ces void end_dispatch(parseme_ref p, parsoid_ref q)
-		{
-			switch (end_dispatch_index(p, q))
-			{
-				case End::string_only : { end_dispatch_string_only (p, q); break; }
-				case End::stack_only  : { end_dispatch_stack_only  (p, q); break; }
-				case End::both        : { end_dispatch_both        (p, q); break; }
-			}
-		}
-
-		nik_ces void end_dispatch_string_only(parseme_ref p, parsoid_ref q)
-		{
-			p.word.token = T_lexer::Token::prompt;
-			while (not_stack_end(q)) dispatch(p, q);
-
-			// (q.stack.front() == T_pda::stack_finish);
-		}
-
-		nik_ces void end_dispatch_stack_only(parseme_ref p, parsoid_ref q)
-		{
-		}
-
-		nik_ces void end_dispatch_both(parseme_ref p, parsoid_ref q)
-		{
-		}
-
-		// nonterminal:
-
-			nik_ces bool is_nonterminal_err(cparsoid_ref q)
-				{ return !q.prod->valid; }
-
-			nik_ces void nonterminal(parseme_ref p, parsoid_ref q)
-			{
-				update_production(p, q);
-
-				if (is_nonterminal_err(q)) nonterminal_report(p, q);
-				else
-				{
-					nonterminal_update_stack(q);
-					nonterminal_update_action(p, q);
-				}
-			}
-
-			nik_ces void update_production(cparseme_ref p, parsoid_ref q)
-				{ q.prod = &pda.production(q.stack.front(), p.word.token); }
-
-			nik_ces void nonterminal_update_stack(parsoid_ref q)
-			{
-				q.stack.pop();
-				q.stack.push(q.prod->cselect());
-			}
-
-			nik_ces void nonterminal_update_action(parseme_ref p, cparsoid_ref q)
-			{
-				caction_type n = q.prod->action;
-
-				if (n > ActName::nop) act.apply(n, p.tree, p.word);
-			}
-
-			nik_ces void nonterminal_report(cparseme_ref p, cparsoid_ref q)
-				{ } // nothing yet.
-
-		// terminal:
-
-			nik_ces bool is_terminal_err(cparseme_ref p, cparsoid_ref q)
-				{ return (p.word.token != q.stack.front().token()); }
-
-			nik_ces void terminal(parseme_ref p, parsoid_ref q)
-			{
-				if (is_terminal_err(p, q)) terminal_report(p, q);
-				else
-				{
-					update_word(p);
-					terminal_update_stack(q);
-				}
-			}
-
-			nik_ces void update_word(parseme_ref p)
-				{ T_lexer::lex(p.word.retract()); }
-
-			nik_ces void terminal_update_stack(parsoid_ref q)
-				{ q.stack.pop(); }
-
-			nik_ces void terminal_report(cparseme_ref p, cparsoid_ref q)
-				{ } // nothing yet.
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -185,17 +185,17 @@ namespace cctmp {
 
 		using global_bool_type		= bool;
 		using gbool_type		= global_bool_type;
-		using gcbool_type		= global_bool_type const;
+		using gbool_ctype		= global_bool_type const;
 		nik_ce auto U_gbool_type	= U_store_T<gbool_type>;
-		nik_ce auto U_gcbool_type	= U_store_T<gcbool_type>;
+		nik_ce auto U_gbool_ctype	= U_store_T<gbool_ctype>;
 
 	// [0-10]:
 
 		using global_key_type		= unsigned char;
 		using gkey_type			= global_key_type;
-		using gckey_type		= global_key_type const;
+		using gkey_ctype		= global_key_type const;
 		nik_ce auto U_gkey_type		= U_store_T<gkey_type>;
-		nik_ce auto U_gckey_type	= U_store_T<gckey_type>;
+		nik_ce auto U_gkey_ctype	= U_store_T<gkey_ctype>;
 
 		nik_ce gkey_type _zero		=   0;
 		nik_ce gkey_type _one		=   1;
@@ -213,9 +213,9 @@ namespace cctmp {
 
 		using global_index_type		= unsigned short;
 		using gindex_type		= global_index_type;
-		using gcindex_type		= global_index_type const;
+		using gindex_ctype		= global_index_type const;
 		nik_ce auto U_gindex_type	= U_store_T<gindex_type>;
-		nik_ce auto U_gcindex_type	= U_store_T<gcindex_type>;
+		nik_ce auto U_gindex_ctype	= U_store_T<gindex_ctype>;
 
 		nik_ce gindex_type _2_0		=   1;
 		nik_ce gindex_type _2_1		=   2;
@@ -230,9 +230,9 @@ namespace cctmp {
 
 		using global_depth_type		= unsigned short;
 		using gdepth_type		= global_depth_type;
-		using gcdepth_type		= global_depth_type const;
+		using gdepth_ctype		= global_depth_type const;
 		nik_ce auto U_gdepth_type	= U_store_T<gdepth_type>;
-		nik_ce auto U_gcdepth_type	= U_store_T<gcdepth_type>;
+		nik_ce auto U_gdepth_ctype	= U_store_T<gdepth_ctype>;
 
 /***********************************************************************************************************************/
 
@@ -240,18 +240,9 @@ namespace cctmp {
 
 	using global_char_type		= char;
 	using gchar_type		= global_char_type;
-	using gcchar_type		= global_char_type const;
+	using gchar_ctype		= global_char_type const;
 	nik_ce auto U_gchar_type	= U_store_T<gchar_type>;
-	nik_ce auto U_gcchar_type	= U_store_T<gcchar_type>;
-
-/***********************************************************************************************************************/
-
-// array:
-
-	template<typename Type, Type... Vs>
-	nik_ce Type array[] = { Vs... };
-
-	nik_ce gindex_type array_2_N[] = { _2_0, _2_1, _2_2, _2_3, _2_4, _2_5, _2_6, _2_7, _2_8, _2_9 };
+	nik_ce auto U_gchar_ctype	= U_store_T<gchar_ctype>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -354,85 +345,346 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // structure:
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// sequence:
+// alias:
 
-	template<typename Type, typename SizeType, SizeType Size>
-	class sequence
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename Type>
+	struct alias
+	{
+		using type		= Type;
+		using type_ptr		= type*;
+		using type_cptr		= type_ptr const;
+		using type_ref		= type&;
+
+		using ctype		= type const;
+		using ctype_ptr		= ctype*;
+		using ctype_cptr	= ctype_ptr const;
+		using ctype_ref		= ctype&;
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// array:
+
+/***********************************************************************************************************************/
+
+// proto:
+
+	template<typename Type, typename SizeType, typename Model>
+	class protoarray
 	{
 		public:
 
-			using type		= Type;
-			using type_ptr		= type*;
-			using type_cptr		= type_ptr const;
-			using type_ref		= type&;
+			using type		= typename alias<Type>::type;
+			using type_ptr		= typename alias<Type>::type_ptr;
+			using type_cptr		= typename alias<Type>::type_cptr;
+			using type_ref		= typename alias<Type>::type_ref;
 
-			using ctype		= type const;
-			using ctype_ptr		= ctype*;
-			using ctype_cptr	= ctype_ptr const;
-			using ctype_ref		= ctype&;
+			using ctype		= typename alias<Type>::ctype;
+			using ctype_ptr		= typename alias<Type>::ctype_ptr;
+			using ctype_cptr	= typename alias<Type>::ctype_cptr;
+			using ctype_ref		= typename alias<Type>::ctype_ref;
 
-			using size_type		= SizeType;
-			using size_ctype	= size_type const;
+			using size_type		= typename alias<SizeType>::type;
+			using size_ctype	= typename alias<SizeType>::ctype;
+
+			using model_type	= Model;
 
 		protected:
 
-			type initial[Size];
+			Model initial;      // compile time compatible.
 			size_type terminal; // compile time compatible.
 
 		public:
 
-			nik_ce sequence() : initial{}, terminal{} { }
+			nik_ce protoarray() : initial{}, terminal{} { }
 
-		//	nik_ce sequence(const sequence & s) : initial{}, terminal{} { push(s.cbegin(), s.cend()); }
+			// initial:
 
-			template<typename T, auto N>
-			nik_ce sequence(const T (&s)[N]) : initial{}, terminal{} { push(s, s + N); }
-
-			// immutable:
-
-				nik_ce size_type length () const { return Size; }
 				nik_ce ctype_ptr origin () const { return initial; }
-				nik_ce size_type size   () const { return terminal; }
-				nik_ce size_type max    () const { return size() - 1; }
+				nik_ce ctype_ptr cbegin () const { return initial; }
+
+				nik_ce ctype_ptr citer     (size_ctype n) const { return initial + n; }
+				nik_ce size_type left_size (ctype_cptr i) const { return i - initial; }
+
+				nik_ce ctype_ref operator [] (size_ctype n) const { return initial[n]; }
+
+				template<typename In, typename End>
+				nik_ce bool not_equal(size_ctype n, In in, End end) const
+				{
+					for (ctype_ptr out = citer(n); in != end; ++out, ++in)
+						if (*out != *in) return true;
+
+					return false;
+				}
+
+				template<typename In, typename End>
+				nik_ce bool equal(size_ctype n, In in, End end) const
+					{ return not not_equal(n, in, end); }
+
+			// terminal:
 
 				nik_ce bool is_empty  () const { return (terminal == 0); }
 				nik_ce bool not_empty () const { return (terminal != 0); }
 
-				nik_ce ctype_ptr citer(size_ctype n) const { return initial + n; }
+				nik_ce size_type size () const { return terminal; }
+				nik_ce size_type max  () const { return size() - 1; }
 
-				nik_ce auto left_size  (ctype_cptr i) const { return i - initial; }
-				nik_ce auto right_size (ctype_cptr i) const { return cend() - i; }
+				nik_ce ctype_ptr cend  () const { return citer(terminal); }
+				nik_ce ctype_ptr clast () const { return cend() - 1; }
 
-				nik_ce ctype_ptr cbegin () const { return initial; }
-				nik_ce ctype_ptr clast  () const { return cend(terminal) - 1; }
-				nik_ce ctype_ptr cend   () const { return citer(terminal); }
+				nik_ce size_type right_size (ctype_cptr i) const { return cend() - i; }
+	};
 
-				nik_ce ctype_ref operator [] (size_ctype pos) const { return initial[pos]; }
+/***********************************************************************************************************************/
+
+// literal:
+
+	template<typename Type, typename SizeType>
+	class array_literal : public protoarray<Type, SizeType, Type const*>
+	{
+		public:
+
+			using base		= protoarray<Type, SizeType, Type const*>;
+
+			using type		= typename base::type;
+			using type_ptr		= typename base::type_ptr;
+			using type_cptr		= typename base::type_cptr;
+			using type_ref		= typename base::type_ref;
+
+			using ctype		= typename base::ctype;
+			using ctype_ptr		= typename base::ctype_ptr;
+			using ctype_cptr	= typename base::ctype_cptr;
+			using ctype_ref		= typename base::ctype_ref;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		protected:
+
+			nik_ces ctype empty[]	= { };
+
+		public:
+
+			nik_ce array_literal() { set(empty, 0); }
+			nik_ce array_literal(ctype_cptr i, size_ctype t) { set(i, t); }
+
+			template<auto N>
+			nik_ce array_literal(const Type (&a)[N]) { set(a, N); }
+
+			nik_ce void set(ctype_cptr i, size_ctype t)
+			{
+				base::initial  = i;
+				base::terminal = t;
+			}
+
+			nik_ce bool operator != (const array_literal & l) const
+				{ return base::not_equal(0, l.cbegin(), l.cend()); }
+
+			nik_ce bool operator == (const array_literal & l) const
+				{ return base::equal(0, l.cbegin(), l.cend()); }
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename Type, typename SizeType, SizeType Size>
+	class array : public protoarray<Type, SizeType, Type[Size]>
+	{
+		public:
+
+			using base		= protoarray<Type, SizeType, Type[Size]>;
+
+			using type		= typename base::type;
+			using type_ptr		= typename base::type_ptr;
+			using type_cptr		= typename base::type_cptr;
+			using type_ref		= typename base::type_ref;
+
+			using ctype		= typename base::ctype;
+			using ctype_ptr		= typename base::ctype_ptr;
+			using ctype_cptr	= typename base::ctype_cptr;
+			using ctype_ref		= typename base::ctype_ref;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce array() { }
+
+			template<typename T, auto N>
+			nik_ce array(const T (&a)[N]) { push(a, a + N); }
+
+			// immutable:
+
+				nik_ce size_type length () const { return Size; }
+
+				nik_ce bool operator != (const array & s) const
+					{ return base::not_equal(0, s.cbegin(), s.cend()); }
+
+				nik_ce bool operator == (const array & s) const
+					{ return base::equal(0, s.cbegin(), s.cend()); }
+
+				using base::operator [];
 
 			// mutable:
 
-				nik_ce type_ptr iter(size_ctype n) { return initial + n; }
+				nik_ce type_ptr iter(size_ctype n) { return base::initial + n; }
 
-				nik_ce void clear() { terminal = 0; }
-				nik_ce void fullsize() { terminal = Size; }
-				nik_ce void upsize(size_ctype num = 1) { terminal += num; }
-				nik_ce void downsize(size_ctype num = 1) { terminal -= num; }
-				nik_ce void push(ctype_ref v) { *iter(terminal++) = v; }
-				nik_ce type pop() { return *iter(--terminal); }
+				nik_ce void push(ctype_ref v) { *iter(base::terminal++) = v; }
+				nik_ce type pop() { return *iter(--base::terminal); }
 
-				nik_ce type_ptr begin () { return initial; }
+				nik_ce type_ptr begin () { return base::initial; }
+				nik_ce type_ptr end   () { return iter(base::terminal); }
 				nik_ce type_ptr last  () { return end() - 1; }
-				nik_ce type_ptr end   () { return iter(terminal); }
 
-				nik_ce type_ref operator [] (size_ctype pos) { return initial[pos]; }
+				nik_ce type_ref operator [] (size_ctype n) { return base::initial[n]; }
+
+				nik_ce void clear() { base::terminal = 0; }
+				nik_ce void fullsize() { base::terminal = Size; }
+				nik_ce void upsize(size_ctype num = 1) { base::terminal += num; }
+				nik_ce void downsize(size_ctype num = 1) { base::terminal -= num; }
 
 				template<typename In, typename End>
 				nik_ce void push(In in, End end) { while (in != end) push(*in++); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// table:
+
+/***********************************************************************************************************************/
+
+// proto:
+
+	template<typename SizeType, SizeType RowSize, SizeType ColSize, typename Base>
+	class prototable : public Base
+	{
+		public:
+
+			using base		= Base;
+
+			using type		= typename base::type;
+			using type_ptr		= typename base::type_ptr;
+			using type_cptr		= typename base::type_cptr;
+			using type_ref		= typename base::type_ref;
+
+			using ctype		= typename base::ctype;
+			using ctype_ptr		= typename base::ctype_ptr;
+			using ctype_cptr	= typename base::ctype_cptr;
+			using ctype_ref		= typename base::ctype_ref;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce prototable() { }
+
+			template<typename T, auto N>
+			nik_ce prototable(const T (&a)[N]) : base{a} { }
+
+			nik_ce size_type rowlength () const { return RowSize; }
+			nik_ce size_type collength () const { return ColSize; }
+
+			nik_ce ctype_ptr cbegin (size_ctype n) const { return base::initial + n * ColSize; }
+			nik_ce ctype_ptr clast  (size_ctype n) const { return cend(n) - 1; }
+			nik_ce ctype_ptr cend   (size_ctype n) const { return cbegin(n + 1); }
+
+			nik_ce ctype_ptr operator [] (size_ctype n) const { return cbegin(n); }
+	};
+
+/***********************************************************************************************************************/
+
+// literal:
+
+	template<typename Type, typename SizeType, SizeType RowSize, SizeType ColSize>
+	class table_literal : public prototable<SizeType, RowSize, ColSize, array_literal<Type, SizeType>>
+	{
+		public:
+
+			using subbase		= array_literal<Type, SizeType>;
+			using base		= prototable<SizeType, RowSize, ColSize, subbase>;
+
+			using type		= typename base::type;
+			using type_ptr		= typename base::type_ptr;
+			using type_cptr		= typename base::type_cptr;
+			using type_ref		= typename base::type_ref;
+
+			using ctype		= typename base::ctype;
+			using ctype_ptr		= typename base::ctype_ptr;
+			using ctype_cptr	= typename base::ctype_cptr;
+			using ctype_ref		= typename base::ctype_ref;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce table_literal() { }
+
+			template<typename T, auto N>
+			nik_ce table_literal(const T (&a)[N]) : base{a} { }
+
+			nik_ce bool operator != (const table_literal & l) const
+				{ return base::not_equal(0, l.cbegin(), l.cend()); }
+
+			nik_ce bool operator == (const table_literal & l) const
+				{ return base::equal(0, l.cbegin(), l.cend()); }
+	};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename Type, typename SizeType, SizeType RowSize, SizeType ColSize>
+	class table : public prototable<SizeType, RowSize, ColSize, array<Type, SizeType, RowSize * ColSize>>
+	{
+		public:
+
+			using subbase		= array<Type, SizeType, RowSize * ColSize>;
+			using base		= prototable<SizeType, RowSize, ColSize, subbase>;
+
+			using type		= typename base::type;
+			using type_ptr		= typename base::type_ptr;
+			using type_cptr		= typename base::type_cptr;
+			using type_ref		= typename base::type_ref;
+
+			using ctype		= typename base::ctype;
+			using ctype_ptr		= typename base::ctype_ptr;
+			using ctype_cptr	= typename base::ctype_cptr;
+			using ctype_ref		= typename base::ctype_ref;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce table() { }
+
+			template<typename T, auto N>
+			nik_ce table(const T (&a)[N]) : base{a} { }
+
+			using base::operator [];
+
+			nik_ce type_ptr begin (size_ctype n) { return base::initial + n * ColSize; }
+			nik_ce type_ptr last  (size_ctype n) { return end(n) - 1; }
+			nik_ce type_ptr end   (size_ctype n) { return begin(n + 1); }
+
+			nik_ce type_ptr operator [] (size_ctype n) { return begin(n); }
 	};
 
 /***********************************************************************************************************************/

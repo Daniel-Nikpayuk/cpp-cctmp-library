@@ -41,17 +41,76 @@ namespace inventory {
 
 		struct State
 		{
+			enum : size_type
+			{
+				empty      ,
+				initial    ,
+				any        ,
+				dash       ,
+				rangle     ,
+				equal      ,
+				colon      ,
+				semicolon  ,
+				backslash  ,
+				whitespace ,
+
+				dimension
+			};
 		};
 
 		struct Charset
 		{
+			enum : size_type
+			{
+				any        ,
+				dash       ,
+				rangle     ,
+				equal      ,
+				colon      ,
+				semicolon  ,
+				backslash  ,
+				whitespace ,
+
+				dimension
+			};
 		};
 
-		constexpr static auto table()
+		template<typename Seq>
+		constexpr static void set(Seq & seq, size_ctype row, size_ctype col, size_ctype val)
+			{ seq[row * Charset::dimension + col] = val; }
+
+		constexpr static auto make()
 		{
+			constexpr size_type size = State::dimension * Charset::dimension;
+			using seq_type           = cctmp::array<size_type, size_type, size>;
+
+			seq_type seq;
+			for (size_type k = seq.length(); k != 0; --k) seq.push(State::empty);
+
+			set( seq , State::initial   , Charset::any       , State::any       );
+			set( seq , State::initial   , Charset::dash      , State::dash      );
+			set( seq , State::initial   , Charset::equal     , State::equal     );
+			set( seq , State::initial   , Charset::colon     , State::colon     );
+			set( seq , State::initial   , Charset::semicolon , State::semicolon );
+			set( seq , State::initial   , Charset::backslash , State::backslash );
+
+			set( seq , State::any       , Charset::any       , State::any       );
+			set( seq , State::any       , Charset::backslash , State::backslash );
+
+			set( seq , State::backslash , Charset::dash      , State::any       );
+			set( seq , State::backslash , Charset::rangle    , State::any       );
+			set( seq , State::backslash , Charset::equal     , State::any       );
+			set( seq , State::backslash , Charset::colon     , State::any       );
+			set( seq , State::backslash , Charset::semicolon , State::any       );
+			set( seq , State::backslash , Charset::backslash , State::any       );
+
+			set( seq , State::dash      , Charset::rangle    , State::rangle    );
+
+			return seq;
 		}
 
-		constexpr static auto value = table();
+		constexpr static auto seq   = make();
+		constexpr static auto value = seq.origin();
 	};
 
 /***********************************************************************************************************************/

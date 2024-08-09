@@ -53,3 +53,22 @@
 		constexpr bool kernel_same_v0(In in, End end, In1 in1)
 			{ return not kernel_different_v0<SizeType, In, End, In1>(in, end, in1); }
 
+/***********************************************************************************************************************/
+
+// square root:
+
+	// v0:
+
+		template<typename SizeType, typename T>
+		constexpr void unit_test_hustle_square_root_v0(T x)
+		{
+			using T_hustle_fast_apply = hustle::T_fast_apply
+			<
+				contr_object_hustle_square_root_v0<SizeType>,
+				_hustle_square_root_v0, cctmp::null_env, T
+			>;
+
+			auto val = T_hustle_fast_apply::result(x);
+			printf("%1.11f\n", val);
+		}
+

@@ -41,9 +41,6 @@ namespace engine {
 	using gchar_type						= cctmp::gchar_type;
 	using gchar_ctype						= cctmp::gchar_ctype;
 
-	template<typename T>
-	using alias							= cctmp::alias<T>;
-
 	nik_ce auto U_gindex_type					= cctmp::U_gindex_type;
 
 	nik_ce auto _empty_						= cctmp::_empty_;
@@ -66,18 +63,61 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
-// string:
+// interface:
 
 	template<typename Type, typename SizeType>
-	struct string_literal : public cctmp::array_literal<Type, SizeType>
+	struct literal
 	{
-		using base		= cctmp::array_literal<Type, SizeType>;
+		using type		= Type;
+		using ctype		= type const;
+		using ctype_ptr		= ctype*;
+		using ctype_cptr	= ctype_ptr const;
+		using ctype_ref		= ctype&;
+
+		using size_type		= SizeType;
+		using size_ctype	= size_type const;
+
+		ctype_ptr start;
+		ctype_ptr finish;
+
+		nik_ces ctype empty[] = { };
+
+		nik_ce literal() : start{empty}, finish{empty} { }
+		nik_ce literal(ctype_cptr s, ctype_cptr f) : start{s}, finish{f} { }
+
+		template<auto N>
+		nik_ce literal(const Type (&s)[N]) : start{s}, finish{s + N} { }
+
+		nik_ce size_type size   () const { return finish - start; }
+		nik_ce ctype_ptr origin () const { return start; }
+
+		nik_ce ctype_ptr cbegin () const { return start; }
+		nik_ce ctype_ptr clast  () const { return finish - 1; }
+		nik_ce ctype_ptr cend   () const { return finish; }
+
+		nik_ce ctype_ref operator [] (size_ctype pos) const { return start[pos]; }
+
+		nik_ce bool operator != (const literal & l) const
+		{
+			for (auto j = cbegin(), k = l.cbegin(); k != l.cend(); ++j, ++k)
+				if (*j != *k) return true;
+
+			return false;
+		}
+
+		nik_ce bool operator == (const literal & l) const { return not operator != (l); }
+	};
+
+/***********************************************************************************************************************/
+
+// string literal:
+
+	template<typename Type, typename SizeType>
+	struct string_literal : public literal<Type, SizeType>
+	{
+		using base		= literal<Type, SizeType>;
 
 		using type		= typename base::type;
-		using type_ptr		= typename base::type_ptr;
-		using type_cptr		= typename base::type_cptr;
-		using type_ref		= typename base::type_ref;
-
 		using ctype		= typename base::ctype;
 		using ctype_ptr		= typename base::ctype_ptr;
 		using ctype_cptr	= typename base::ctype_cptr;
@@ -87,179 +127,10 @@ namespace engine {
 		using size_ctype	= typename base::size_ctype;
 
 		template<auto N>
-		nik_ce string_literal(const Type (&s)[N]) : base{s, N-1} { }
+		nik_ce string_literal(const Type (&s)[N]) : base{s, s + (N-1)} { }
 
 		nik_ce string_literal() : base{} { } // maybe.
 	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// plot:
-
-/***********************************************************************************************************************/
-
-// proto:
-
-	template<typename Interval, typename Base>
-	class protoplot : public Base
-	{
-		public:
-
-			using base		= Base;
-
-			using type		= typename base::type;
-			using type_ptr		= typename base::type_ptr;
-			using type_cptr		= typename base::type_cptr;
-			using type_ref		= typename base::type_ref;
-
-			using ctype		= typename base::ctype;
-			using ctype_ptr		= typename base::ctype_ptr;
-			using ctype_cptr	= typename base::ctype_cptr;
-			using ctype_ref		= typename base::ctype_ref;
-
-			using size_type		= typename base::size_type;
-			using size_ctype	= typename base::size_ctype;
-
-			using interval_type	= Interval;
-
-		protected:
-
-			interval_type interval;
-
-			nik_ce size_type start  (size_ctype n) const { return interval[n].start(); }
-			nik_ce size_type finish (size_ctype n) const { return interval[n].finish(); }
-
-		public:
-
-			nik_ce protoplot() { }
-
-			// initial:
-
-				nik_ce ctype_ptr origin(size_ctype n) const { return base::citer(start(n)); }
-				nik_ce ctype_ptr cbegin(size_ctype n) const { return base::citer(start(n)); }
-
-				nik_ce ctype_ptr citer(size_ctype n, size_ctype m) const
-					{ return origin(n) + m; }
-
-				nik_ce size_type left_size(size_ctype n, ctype_cptr i) const
-					{ return i - origin(n); }
-
-				nik_ce ctype_ref at(size_ctype n, size_ctype m) const { return origin(n)[m]; }
-
-				template<typename In, typename End>
-				nik_ce bool not_equal(size_ctype n, In in, End end) const
-					{ return base::not_equal(start(n), in, end); }
-
-				template<typename In, typename End>
-				nik_ce bool equal(size_ctype n, In in, End end) const
-					{ return base::equal(start(n), in, end); }
-
-			// terminal:
-
-				nik_ce size_type size (size_ctype n) const { return finish(n) - start(n); }
-				nik_ce size_type max  (size_ctype n) const { return size(n) - 1; }
-
-				nik_ce bool is_empty  (size_ctype n) const { return (size(n) == 0); }
-				nik_ce bool not_empty (size_ctype n) const { return (size(n) != 0); }
-
-				nik_ce ctype_ptr cend  (size_ctype n) const { return base::citer(finish(n)); }
-				nik_ce ctype_ptr clast (size_ctype n) const { return cend(n) - 1; }
-
-				nik_ce size_type right_size (size_ctype n, ctype_cptr i) const { return cend(n) - i; }
-	};
-
-/***********************************************************************************************************************/
-
-// literal:
-
-/*
-	template<typename Table, typename Type, typename SizeType, SizeType Size>
-	class plot_literal : public protoplot<>
-	{
-	};
-*/
-
-/***********************************************************************************************************************/
-
-// interface:
-
-/*
-	template<typename Table, typename Type, typename SizeType, SizeType Size>
-	class plot : public protoplot<>
-	{
-	};
-*/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// plot table:
-
-/***********************************************************************************************************************/
-
-// pretable:
-
-/***********************************************************************************************************************/
-
-// literal:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// institute:
-
-/***********************************************************************************************************************/
-
-// proto:
-
-/*
-	template<typename Partition, typename Interval, typename Kind, typename Type, typename SizeType>
-	class protoinstitute : public protoplot<Interval, Kind, Type, SizeType>
-	{
-		public:
-
-			using base		= protoplot<Interval, Kind, Type, SizeType>;
-
-			using type		= typename base::type;
-			using type_ptr		= typename base::type_ptr;
-			using type_cptr		= typename base::type_cptr;
-			using type_ref		= typename base::type_ref;
-
-			using ctype		= typename base::ctype;
-			using ctype_ptr		= typename base::ctype_ptr;
-			using ctype_cptr	= typename base::ctype_cptr;
-			using ctype_ref		= typename base::ctype_ref;
-
-			using size_type		= typename base::size_type;
-			using size_ctype	= typename base::size_ctype;
-
-			using partition_type	= Partition;
-
-		protected:
-
-			partition_type partition;
-
-		public:
-
-			nik_ce protoinstitute() : base{} { }
-
-		//	nik_ce ctype_ptr cbegin(size_ctype m, size_ctype n) const
-		//		{ return base::citer(interval[n].start()); }
-	};
-*/
-
-/***********************************************************************************************************************/
-
-// literal:
-
-/***********************************************************************************************************************/
-
-// interface:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -390,7 +261,7 @@ namespace engine {
 	nik_ce auto frame(nik_avp(CharType*), nik_avp(SizeType*), Bindings... bs)
 	{
 		using strlit_type   = string_literal<CharType, SizeType>;
-		using variable_type = cctmp::array<strlit_type, SizeType, sizeof...(Bindings)>;
+		using variable_type = cctmp::sequence<strlit_type, SizeType, sizeof...(Bindings)>;
 
 		auto variables      = variable_type{   {LambdaTuple::first  (bs)...}};
 		auto values         = LambdaTuple::make(LambdaTuple::second (bs)...);
@@ -403,10 +274,10 @@ namespace engine {
 // instr:
 
 	template<typename Type, typename SizeType>
-	struct machine_instr : public cctmp::array<Type, SizeType, MachineIndex::dimension>
+	struct machine_instr : public cctmp::sequence<Type, SizeType, MachineIndex::dimension>
 	{
 		using Index 		= MachineIndex;
-		using base 		= cctmp::array<Type, SizeType, Index::dimension>;
+		using base 		= cctmp::sequence<Type, SizeType, Index::dimension>;
 
 		using size_type		= typename base::size_type;
 		using size_ctype	= typename base::size_ctype;
@@ -427,10 +298,10 @@ namespace engine {
 // contr:
 
 	template<typename Type, typename SizeType, SizeType Size>
-	struct machine_contr : public cctmp::array<machine_instr<Type, SizeType>, SizeType, Size>
+	struct machine_contr : public cctmp::sequence<machine_instr<Type, SizeType>, SizeType, Size>
 	{
 		using instr_type	= machine_instr<Type, SizeType>;
-		using base		= cctmp::array<instr_type, SizeType, Size>;
+		using base		= cctmp::sequence<instr_type, SizeType, Size>;
 		using size_type		= typename base::size_type;
 		using size_ctype	= typename base::size_ctype;
 
@@ -460,22 +331,22 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// clookup:
+// ctable:
 
 /***********************************************************************************************************************/
 
 // interface:
 
 	template<typename Type0, typename Type1, typename SizeType, SizeType Size>
-	class clookup
+	class ctable
 	{
 		public:
 
 			using size_type		= SizeType;
 			using size_ctype	= size_type const;
 
-			using left_type		= cctmp::array<Type0, size_type, Size>;
-			using right_type	= cctmp::array<Type1, size_type, Size>;
+			using left_type		= cctmp::sequence<Type0, size_type, Size>;
+			using right_type	= cctmp::sequence<Type1, size_type, Size>;
 
 		protected:
 
@@ -484,10 +355,10 @@ namespace engine {
 
 		public:
 
-			nik_ce clookup() { }
+			nik_ce ctable() { }
 
 			template<typename T0, typename T1, auto N>
-			nik_ce clookup(const T0 (&l)[N], const T1 (&r)[N]) : left{l}, right{r} { }
+			nik_ce ctable(const T0 (&l)[N], const T1 (&r)[N]) : left{l}, right{r} { }
 
 			nik_ce const Type1 & lfind(const Type0 & v0, const Type1 & v1) const
 			{
@@ -512,13 +383,13 @@ namespace engine {
 		nik_ce auto pair(T0 t0, T1 t1) { return LambdaTuple::make(t0, t1); }
 
 		template<typename SizeType, typename TU0, typename TU1, typename... Pairs>
-		nik_ce auto lookup(nik_avp(SizeType*), TU0, TU1, Pairs... ps)
+		nik_ce auto table(nik_avp(SizeType*), TU0, TU1, Pairs... ps)
 		{
 			using T0         = T_restore_T<TU0>;
 			using T1         = T_restore_T<TU1>;
-			using lookup_type = clookup<T0, T1, SizeType, sizeof...(Pairs)>;
+			using table_type = ctable<T0, T1, SizeType, sizeof...(Pairs)>;
 
-			return lookup_type
+			return table_type
 			{
 				{LambdaTuple::first(ps)...},
 				{LambdaTuple::second(ps)...}
@@ -532,53 +403,33 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
-// entry:
-
-	template<typename Type, typename SizeType>
-	struct model_entry
-	{
-		using type		= typename alias<Type>::type;
-		using ctype		= typename alias<Type>::ctype;
-		using ctype_ref		= typename alias<Type>::ctype_ref;
-
-		using size_type		= typename alias<SizeType>::type;
-		using size_ctype	= typename alias<SizeType>::ctype;
-
-		type car;
-		size_type cdr;
-
-		nik_ce model_entry() : car{}, cdr{} { }
-	};
-
-/***********************************************************************************************************************/
-
 // list:
+
+		// sizeof(Type) >= sizeof(SizeType)
 
 	template<typename Type, typename SizeType, SizeType Size>
 	class model_list
 	{
 		public:
 
-			using entry_type		= model_entry<Type, SizeType>;
-			using entry_ctype		= typename alias<entry_type>::ctype;
-			using entry_ctype_ptr		= typename alias<entry_type>::ctype_ptr;
+			using type			= Type;
+			using ctype			= type const;
+			using ctype_ptr			= ctype *;
 
-			using type			= typename entry_type::type;
-			using ctype			= typename entry_type::ctype;
-			using ctype_ref			= typename entry_type::ctype_ref;
-
-			using size_type			= typename entry_type::size_type;
-			using size_ctype		= typename entry_type::size_ctype;
+			using size_type			= SizeType;
+			using size_ctype		= size_type const;
 
 			using list_type			= size_type;
-			using list_ctype		= size_ctype;
+			using list_ctype		= list_type const;
+
+			struct Entry { enum : size_type { car, cdr, dimension }; };
 
 		protected:
 
 			nik_ces size_type length	= Size;
 			nik_ces list_type null		= length;
 
-			entry_type array[length];
+			type array[length];
 			size_type free;
 
 		public:
@@ -591,20 +442,21 @@ namespace engine {
 
 				nik_ce void clear() { free = length; }
 
-				nik_ce size_type allocate() { return --free; }
+				nik_ce size_type allocate(size_ctype s = Entry::dimension)
+					{ return (free -= s); }
 
 		public:
 
 			// array:
 
-				nik_ce entry_ctype_ptr cbegin () const { return array; }
-				nik_ce entry_ctype_ptr cend   () const { return array + length; }
+				nik_ce ctype_ptr cbegin () const { return array; }
+				nik_ce ctype_ptr cend   () const { return array + length; }
 
-				nik_ce ctype_ref get_car(size_ctype n) const { return array[n].car; }
-				nik_ce void set_car(size_ctype n, ctype_ref v) { array[n].car = v; }
+				nik_ce type get_value(size_ctype p, size_ctype n) const
+					{ return array[p + n]; }
 
-				nik_ce size_type get_cdr(size_ctype n) const { return array[n].cdr; }
-				nik_ce void set_cdr(size_ctype n, list_ctype v) { array[n].cdr = v; }
+				nik_ce void set_value(size_ctype p, size_ctype n, ctype v)
+					{ array[p + n] = v; }
 
 			// list:
 
@@ -616,12 +468,15 @@ namespace engine {
 
 				nik_ce list_type null_list() const { return null; }
 
-				nik_ce list_type cons(ctype_ref v, list_ctype l)
+				nik_ce type car(list_ctype l) const { return get_value(l, Entry::car); }
+				nik_ce type cdr(list_ctype l) const { return get_value(l, Entry::cdr); }
+
+				nik_ce list_type cons(ctype v, list_ctype l)
 				{
 					list_ctype nl = allocate();
 
-					set_car(nl, v);
-					set_cdr(nl, l);
+					set_value(nl, Entry::car, v);
+					set_value(nl, Entry::cdr, l);
 
 					return nl;
 				}
@@ -631,23 +486,20 @@ namespace engine {
 
 // stack:
 
+		// sizeof(Type) >= sizeof(SizeType)
+
 	template<typename Type, typename SizeType, SizeType Size>
-	class stack : public model_list<Type, SizeType, Size>
+	class stack : public model_list<Type, SizeType, (Size << 1)>
 	{
 		public:
 
-			using base		= model_list<Type, SizeType, Size>;
-
-			using entry_type	= typename base::entry_type;
-			using entry_ctype	= typename base::entry_ctype;
-			using entry_ctype_ptr	= typename base::entry_ctype_ptr;
-
+			using base		= model_list<Type, SizeType, (Size << 1)>;
 			using type		= typename base::type;
 			using ctype		= typename base::ctype;
-			using ctype_ref		= typename base::ctype_ref;
-
+			using ctype_ptr		= typename base::ctype_ptr;
 			using size_type		= typename base::size_type;
 			using size_ctype	= typename base::size_ctype;
+			using Entry		= typename base::Entry;
 
 		protected:
 
@@ -659,7 +511,8 @@ namespace engine {
 
 		protected:
 
-			nik_ce size_type release() { return ++base::free; }
+			nik_ce size_type release(size_ctype s = Entry::dimension)
+				{ return (base::free += s); }
 
 		public:
 
@@ -669,22 +522,22 @@ namespace engine {
 			nik_ce bool is_full   () const { return base::is_model(current); }
 			nik_ce bool not_full  () const { return base::not_model(current); }
 
-			nik_ce ctype_ref operator * () const { return base::get_car(current); }
+			nik_ce type operator * () const { return base::array[current]; }
 
-			nik_ce entry_ctype_ptr cbegin() const { return base::cbegin() + current; }
+			nik_ce ctype_ptr cbegin () const { return base::cbegin() + current; }
 
-			nik_ce void push(ctype_ref v) { current = base::cons(v, current); }
+			nik_ce void push(ctype v) { current = base::cons(v, current); }
 
 			nik_ce void pull()
 			{
-				current = base::get_cdr(current);
+				current = base::cdr(current);
 
 				release();
 			}
 
-			nik_ce ctype_ref pop()
+			nik_ce type pop()
 			{
-				ctype_ref v = base::get_car(current);
+				ctype v = base::car(current);
 
 				pull();
 
@@ -701,6 +554,8 @@ namespace engine {
 /***********************************************************************************************************************/
 
 // inhabit:
+
+		// sizeof(Type) >= sizeof(unsigned char)
 
 	template<typename Type>
 	class inhabit : public stack<Type, unsigned char, 1> { };

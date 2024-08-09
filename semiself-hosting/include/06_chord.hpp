@@ -17,15 +17,5 @@
 **
 ************************************************************************************************************************/
 
-//#include"../01_inventory/00_lexer_table/00_generator.hpp"
-//#include"../01_inventory/00_lexer_table/01_chord.hpp"
-//#include"../01_inventory/00_lexer_table/02_hustle.hpp"
-
-//#include"../01_inventory/01_parser_table/00_generator.hpp"
-//#include"../01_inventory/01_parser_table/01_chord.hpp"
-//#include"../01_inventory/01_parser_table/02_hustle.hpp"
-
-//#include"../01_inventory/02_chord_assembly/different_v0.hpp"
-
-//#include"../01_inventory/03_hustle_assembly/square_root_v0.hpp"
+//#include"../06_chord/00_.hpp"
 

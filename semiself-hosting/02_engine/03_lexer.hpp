@@ -27,11 +27,11 @@ namespace engine {
 
 // character sets:
 
-	using global_string_type	= gcchar_type*;
+	using global_string_type	= gchar_ctype*;
 	using gstring_type		= global_string_type;
-	using gcstring_type		= global_string_type const;
+	using gstring_ctype		= global_string_type const;
 	nik_ce auto U_gstring_type	= U_store_T<gstring_type>;
-	nik_ce auto U_gcstring_type	= U_store_T<gcstring_type>;
+	nik_ce auto U_gstring_ctype	= U_store_T<gstring_ctype>;
 
 /***********************************************************************************************************************/
 
@@ -93,10 +93,10 @@ namespace engine {
 // matches:
 
 	template<auto Size>
-	nik_ce auto matches_charset(gcchar_type c, gcchar_type (&charset)[Size])
+	nik_ce auto matches_charset(gchar_ctype c, gchar_ctype (&charset)[Size])
 	{
-		gcstring_type e = charset + Size;
-		gcstring_type k = numeric_find(c, charset, e);
+		gstring_ctype e = charset + Size;
+		gstring_ctype k = numeric_find(c, charset, e);
 
 		return (k != e);
 	}
@@ -107,23 +107,23 @@ namespace engine {
 
 	// whitespace:
 
-		nik_ce bool matches_whitespace(gcchar_type c) { return matches_charset(c, whitespace); }
+		nik_ce bool matches_whitespace(gchar_ctype c) { return matches_charset(c, whitespace); }
 
 	// digit (optimization):
 
-		nik_ce bool matches_digit(gcchar_type c) { return ('0' <= c) && (c <= '9'); }
+		nik_ce bool matches_digit(gchar_ctype c) { return ('0' <= c) && (c <= '9'); }
 
 	// underscore:
 
-		nik_ce bool matches_underscore(gcchar_type c) { return (c == '_'); }
+		nik_ce bool matches_underscore(gchar_ctype c) { return (c == '_'); }
 
 	// latin lowercase:
 
-		nik_ce bool matches_latin_lowercase(gcchar_type c) { return matches_charset(c, latin_lowercase); }
+		nik_ce bool matches_latin_lowercase(gchar_ctype c) { return matches_charset(c, latin_lowercase); }
 
 	// latin uppercase:
 
-		nik_ce bool matches_latin_uppercase(gcchar_type c) { return matches_charset(c, latin_uppercase); }
+		nik_ce bool matches_latin_uppercase(gchar_ctype c) { return matches_charset(c, latin_uppercase); }
 
 /***********************************************************************************************************************/
 
@@ -131,20 +131,20 @@ namespace engine {
 
 	// latin alphabet:
 
-		nik_ce bool matches_la(gcchar_type c)
+		nik_ce bool matches_la(gchar_ctype c)
 			{ return matches_latin_lowercase(c) || matches_latin_uppercase(c); }
 
 	// latin alphanumeric:
 
-		nik_ce bool matches_lan(gcchar_type c) { return matches_digit(c) || matches_la(c); }
+		nik_ce bool matches_lan(gchar_ctype c) { return matches_digit(c) || matches_la(c); }
 
 	// underscore latin alphabet:
 
-		nik_ce bool matches_ula(gcchar_type c) { return matches_underscore(c) || matches_la(c); }
+		nik_ce bool matches_ula(gchar_ctype c) { return matches_underscore(c) || matches_la(c); }
 
 	// underscore latin alphanumeric:
 
-		nik_ce bool matches_ulan(gcchar_type c) { return matches_digit(c) || matches_ula(c); }
+		nik_ce bool matches_ulan(gchar_ctype c) { return matches_digit(c) || matches_ula(c); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -153,47 +153,90 @@ namespace engine {
 // deterministic finite automata:
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
-// state:
+// keyword:
 
-	template<typename State, typename Charset, typename IterType, typename SizeType>
-	class lexer_state
+	template<typename CharType, typename SizeType>
+	class lexer_keyword
 	{
 		public:
 
-			using iter_type			= IterType;
-			using iter_ctype		= iter_type const;
+			using char_type			= CharType;
+			using char_ctype		= char_type const;
 
 			using size_type			= SizeType;
 			using size_ctype		= size_type const;
 
-			using literal_type		= literal<size_type, size_type>;
-			using literal_ctype		= literal_type const;
-			using literal_ctype_ref		= literal_ctype &;
+			using strlit_type		= string_literal<char_type, size_type>;
+			using strlit_ctype		= strlit_type const;
+			using strlit_ctype_ref		= strlit_ctype &;
 
 		protected:
 
-			literal_ctype table;
+			strlit_ctype keyword;
+
+		public:
+
+			size_ctype token;
+
+			nik_ce lexer_keyword(strlit_ctype_ref k, size_ctype t) : keyword{k}, token{t} { }
+
+			template<typename In, typename End>
+			nik_ce bool match(In in, End end) const
+			{
+				for (auto k = keyword.cbegin(); k != keyword.cend(); ++k, ++in)
+					if (*k != *in) break;
+
+				return (in == end);
+			}
+	};
+
+/***********************************************************************************************************************/
+
+// automaton:
+
+	template<typename State, typename Charset, typename IterType, typename SizeType>
+	class lexer_automaton
+	{
+		public:
+
+			using iter_type		= IterType;
+			using iter_ctype	= iter_type const;
+
+			using size_type		= SizeType;
+			using size_ctype	= size_type const;
+
+			using lit_type		= literal<size_type, size_type>;
+			using lit_ctype		= lit_type const;
+			using lit_ctype_ref	= lit_ctype &;
+
+		protected:
+
+			lit_ctype table;
 
 			iter_type start;
 			iter_type current;
 			iter_type finish;
 
-			size_type state;
+			size_type mode;
 
 		public:
 
-			nik_ce lexer_state(literal_ctype_ref t, iter_ctype s, iter_ctype f) :
-				table{t}, start{s}, current{s}, finish{f}, state{}
+			nik_ce lexer_automaton(lit_ctype_ref t, iter_ctype s, iter_ctype f) :
+				table{t}, start{s}, current{s}, finish{f}, mode{}
 					{ }
+
+			nik_ce size_type left_size() const { return current - start; }
 
 			nik_ce bool not_begin () const { return (current != start); }
 			nik_ce bool not_end   () const { return (current != finish); }
 
-			nik_ce auto cbegin   () const { return start; }
-			nik_ce auto ccurrent () const { return current; }
-			nik_ce auto cend     () const { return finish; }
+			nik_ce auto cbegin    () const { return start; }
+			nik_ce auto cprevious () const { return current - 1; }
+			nik_ce auto ccurrent  () const { return current; }
+			nik_ce auto cend      () const { return finish; }
+
+			nik_ce size_type state() const { return mode; }
 
 		protected:
 
@@ -204,170 +247,41 @@ namespace engine {
 				return current;
 			}
 
-			nik_ce void reinitialize()
-			{
-				start = skip_whitespace();
-				state = State::initial;
-			}
-
 			nik_ce size_type table_at(size_ctype row, size_ctype col) const
 				{ return table[row * Charset::dimension + col]; }
 
-			nik_ce bool find(size_ctype col)
+			nik_ce bool find_empty(size_type & peek, size_ctype col)
 			{
-				state = table_at(state, col);
+				peek = table_at(mode, col);
 
-				return (state == State::empty);
+				return (peek == State::empty);
 			}
+
+			nik_ce void increment(size_ctype next) { mode = next; }
 
 		public:
 
-			template<typename Policy>
-			nik_ce bool lex()
+			nik_ce void initialize()
 			{
-				reinitialize();
+				start = skip_whitespace();
+				mode  = State::initial;
+			}
+
+			template<typename Policy>
+			nik_ce bool find()
+			{
+				size_type peek;
 
 				while (not_end())
-					if (find(Policy::map(*current))) break;
-					else ++current;
+				{
+					if (find_empty(peek, Policy::map(*current++))) break;
+
+					increment(peek);
+				}
 
 				return not_begin();
 			}
 	};
-
-/***********************************************************************************************************************/
-
-// recognizes:
-
-/*
-	template<typename T_lexer>
-	nik_ce gcbool_type recognizes(const cselector<char> & s)
-	{
-		lexeme l{s};
-
-		T_lexer::lex(l);
-
-		return (l.token != TokenName::invalid);
-	}
-*/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// (generic) keyword:
-
-/***********************************************************************************************************************/
-
-// dfa charset:
-
-/*
-	template<typename CharType, auto Size>
-	struct dfa_charset
-	{
-		using char_type			= CharType;
-		using string_type		= char_type const*;
-		using size_type			= decltype(Size);
-
-		nik_ces size_type length	= Size - 1;
-
-		string_type string;
-		char_type unique[length];
-		char_type column[length];
-		size_type size;
-
-		nik_ce dfa_charset(const CharType (&s)[Size]) : string{s}, unique{}, column{}, size{}
-		{
-			string_type end = string + length;
-
-			for (string_type j = string; j != end; ++j)
-			{
-				gcstring_type e = unique + size;
-				gcstring_type k = numeric_find(*j, unique, e);
-
-				if (k == e) unique[size++] = *j;
-			}
-
-			char_type *k = column;
-
-			for (string_type j = string; j != end; ++j, ++k) *k = map(*j);
-		}
-
-			// Assumes map will return a non-zero index for each
-			// character (equivalence) class, and will otherwise return
-			// zero (for any other character).
-
-		nik_ce gkey_type map(gcchar_type c) const
-		{
-			auto k = numeric_find_pos(c, unique, unique + size);
-
-			if (k != size) return k + 1;
-			else           return _zero;
-		}
-	};
-*/
-
-/***********************************************************************************************************************/
-
-// transition table:
-
-/*
-	template<auto CharsetCallable>
-	struct T_keyword_dftt
-	{
-		nik_ces auto static_charset		= _static_callable_<CharsetCallable>;
-		nik_ces auto & charset			= member_value_U<static_charset>;
-		nik_ces gkey_type state_size		= charset.length + 2;
-		nik_ces gkey_type charset_size		= charset.size + 1;
-
-		state_type table[state_size][charset_size];
-
-		nik_ce T_keyword_dftt() : table{} // initializes the empty state.
-		{
-			for (gkey_type pos = StateName::initial; pos != charset.length + 1; ++pos)
-				table[pos][charset.column[pos - 1]] = pos + 1;
-		}
-
-		nik_ce cstate_type & move(cstate_type s, gcchar_type c) const
-		{
-			return table[s][charset.map(c)];
-		}
-	};
-*/
-
-/***********************************************************************************************************************/
-
-// automaton:
-
-/*
-	template<auto CharsetCallable>
-	struct T_keyword_dfa
-	{
-		nik_ces auto value  = T_keyword_dftt<CharsetCallable>{};
-		nik_ces auto accept = value.charset.length + 1;
-	};
-*/
-
-/***********************************************************************************************************************/
-
-// interface:
-
-/*
-	template<auto CharsetCallable, token_type Token>
-	struct T_keyword_lexer
-	{
-		using T_dfa		= T_keyword_dfa<CharsetCallable>;
-		nik_ces auto token	= Token;
-
-		nik_ces void lex(lexeme & l)
-		{
-			T_generic_lexer<T_dfa>::lex(l);
-
-			token_type t = (l.token == T_dfa::accept) ? Token : TokenName::invalid;
-
-			l.token = static_cast<token_type>(t);
-		}
-	};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

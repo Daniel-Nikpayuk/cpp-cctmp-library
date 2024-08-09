@@ -110,37 +110,14 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// instr:
-
-	template<typename Type, typename SizeType>
-	struct variadic_instr : public sequence<Type, SizeType, VariadicIndex::dimension>
-	{
-		using Index 		= VariadicIndex;
-		using base 		= sequence<Type, SizeType, Index::dimension>;
-
-		using size_type		= typename base::size_type;
-		using size_ctype	= typename base::size_ctype;
-
-		nik_ce variadic_instr() : base{} { }
-
-		nik_ce void set(size_ctype n, size_ctype t, size_ctype p, size_ctype m)
-		{
-			base::initial[Index::name] = n;
-			base::initial[Index::note] = t;
-			base::initial[Index::pos ] = p;
-			base::initial[Index::num ] = m;
-		}
-	};
-
-/***********************************************************************************************************************/
-
 // contr:
 
-	template<typename Type, typename SizeType, SizeType Size>
-	struct variadic_contr : public sequence<variadic_instr<Type, SizeType>, SizeType, Size>
+	template<typename Type, typename SizeType, SizeType RowSize>
+	struct variadic_contr : public table<Type, SizeType, RowSize, VariadicIndex::dimension>
 	{
-		using instr_type	= variadic_instr<Type, SizeType>;
-		using base		= sequence<instr_type, SizeType, Size>;
+		using Index 		= VariadicIndex;
+		using base 		= table<Type, SizeType, RowSize, Index::dimension>;
+
 		using size_type		= typename base::size_type;
 		using size_ctype	= typename base::size_ctype;
 
@@ -148,8 +125,10 @@ namespace cctmp {
 
 		nik_ce void push(size_ctype n, size_ctype t, size_ctype p = 0, size_ctype m = 0)
 		{
-			base::upsize();
-			base::last()->set(n, t, p, m);
+			base::push(n);
+			base::push(t);
+			base::push(p);
+			base::push(m);
 		}
 	};
 
@@ -244,8 +223,7 @@ namespace cctmp {
 
 		// accessors:
 
-			nik_ces const auto & instr (size_ctype i) { return contr[i]; }
-			nik_ces size_type value    (size_ctype i, size_ctype n) { return contr[i][n]; }
+			nik_ces size_type value (size_ctype i, size_ctype n) { return contr[i][n]; }
 
 			nik_ces size_type pos (size_ctype i) { return value(i, VI::pos); }
 			nik_ces size_type num (size_ctype i) { return value(i, VI::num); }
@@ -297,7 +275,10 @@ namespace cctmp {
 	// left:
 
 		template<typename T0, typename TN, typename... Ts>
-		using foldl_decltype = decltype((*(T0*) 0 + ... + *(Ts*) 0) + *(TN*) 0);
+		using foldl_decltype = decltype
+		(
+			(*static_cast<T0*>(0) + ... + *static_cast<Ts*>(0)) + *static_cast<TN*>(0)
+		);
 
 		template<typename T, auto n, auto... Vs>
 		using foldl_type = foldl_decltype
@@ -310,7 +291,10 @@ namespace cctmp {
 	// right:
 
 		template<typename T0, typename TN, typename... Ts>
-		using foldr_decltype = decltype(*(TN*) 0 + (*(Ts*) 0 + ... + *(T0*) 0));
+		using foldr_decltype = decltype
+		(
+			*static_cast<TN*>(0) + (*static_cast<Ts*>(0) + ... + *static_cast<T0*>(0))
+		);
 
 		template<typename T, auto n, auto... Vs>
 		using foldr_type = foldr_decltype
