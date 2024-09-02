@@ -26,10 +26,10 @@
 
 #include"include/00_kernel.hpp"
 //#include"include/01_inventory.hpp"
-//#include"include/02_engine.hpp"
+#include"include/02_engine.hpp"
 //#include"include/03_fileput.hpp"
 //#include"include/04_lexer.hpp"
-//#include"include/05_parser.hpp"
+#include"include/05_parser.hpp"
 //#include"include/06_chord.hpp"
 //#include"include/07_hustle.hpp"
 

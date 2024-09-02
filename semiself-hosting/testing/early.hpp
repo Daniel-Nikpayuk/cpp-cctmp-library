@@ -20,6 +20,11 @@
 // early:
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// experimental:
+
+/***********************************************************************************************************************/
 
 // rvalue reference:
 
@@ -36,6 +41,11 @@
 	}
 
 		printf("%d\n", replace_then_add({1, 2, 3, 4, 5}, 0, 10));
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// cctmp:
 
 /***********************************************************************************************************************/
 
@@ -173,6 +183,11 @@
 		printf("%d\n", l0);
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// inventory:
+
+/***********************************************************************************************************************/
 
 // different:
 
@@ -181,6 +196,97 @@
 
 		auto val = inventory_different_v0<gindex_type>(s0.cbegin(), s0.cend(), s1.cbegin());
 		printf("%s\n", val ? "different" : "same");
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// grammar test:
+
+	struct entry
+	{
+		int x;
+		int y;
+
+		constexpr entry() : x{}, y{} { }
+
+		template<typename T>
+		constexpr entry(const T (&a)[2]) : x{a[0]}, y{a[1]} { }
+	};
+
+	struct plot
+	{
+		using array_type = array<entry, unsigned long, 3>;
+
+		array_type arr;
+
+		template<typename T>
+		constexpr plot(const T (&a)[3]) : arr{a} { }
+	};
+
+	constexpr int arrlit0[][2] =
+	{
+		{ 0 , 1 },
+		{ 2 , 3 },
+		{ 4 , 5 }
+	};
+
+		plot p0{arrlit0};
+
+		printf("%d\n", p0.arr[1].y);
+
+/***********************************************************************************************************************/
+
+// protoplot:
+
+/***********************************************************************************************************************/
+
+// plot literal:
+
+		struct plot_lit0
+		{
+			using char_type		= char;
+			using size_type		= unsigned;
+			using entry_type	= engine::plot_entry<size_type>;
+			using plotlit_type	= engine::plot_literal<entry_type, char_type, size_type>;
+
+			constexpr static entry_type entry[] =
+			{
+				entry_type{ 0,  2},
+				entry_type{ 2,  7},
+				entry_type{ 7, 10},
+				entry_type{10, 13},
+				entry_type{13, 17}
+			};
+
+			constexpr static char_type value[] =
+			{
+				'h', 'i',
+				't', 'h', 'e', 'r', 'e',
+				'h', 'o', 'w',
+				'a', 'r', 'e',
+				'y', 'o', 'u', '?'
+			};
+
+			constexpr static auto strlist = plotlit_type{entry, value};
+		};
+
+		constexpr auto & strlist0 = plot_lit0::strlist;
+
+		printf("%u\n", strlist0.size(0));
+		printf("%u\n", strlist0.size(1));
+		printf("%u\n", strlist0.size(2));
+		printf("%u\n", strlist0.size(3));
+		printf("%u\n", strlist0.size(4));
+
+		for (auto k = 0; k != 5; ++k)
+		{
+			for (auto j = strlist0.cbegin(k); j != strlist0.cend(k); ++j)
+			{
+				printf("%c", *j);
+			}
+
+			printf("\n");
+		}
 
 /***********************************************************************************************************************/
 
@@ -353,6 +459,27 @@
 		printf("%s\n", record.is_empty() ? "empty" : "not empty");
 		printf("%hu\n", *record);
 		printf("%hu\n", test0.env.get_value(record));
+
+/***********************************************************************************************************************/
+
+// parser generator:
+
+	// transition table:
+
+		for (auto row = 0; row != parser::lltr_table::value.row_length(); ++row)
+		{
+			for (auto col = 0; col != parser::lltr_table::value.col_length(); ++col)
+			{
+				printf(" ");
+				printf("%d, ", parser::lltr_table::value[row][col].is_valid ());
+				printf("%d, ", parser::lltr_table::value[row][col].start    ());
+				printf("%d, ", parser::lltr_table::value[row][col].finish   ());
+				printf("%d, ", parser::lltr_table::value[row][col].action   ());
+				printf("\n");
+			}
+
+			printf("\n");
+		}
 
 /***********************************************************************************************************************/
 

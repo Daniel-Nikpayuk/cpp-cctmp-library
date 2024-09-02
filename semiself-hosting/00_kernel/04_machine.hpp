@@ -152,12 +152,13 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			id = 0, identity = id, // convenience for default params.
-			none    , first     , front    , back     ,	//  1
-			boolean , character , n_number , r_number ,	//  5
-			port    , select    ,				//  9
-			push    , pull      , drop     ,		// 11
-			verse   , side      , replace  ,		// 14
-			inc     , dec       ,				// 17
+			none    , first     , pause    ,                //  1
+			front   , back      ,				//  4
+			boolean , character , n_number , r_number ,	//  6
+			port    , select    ,				// 10
+			push    , pull      , drop     ,		// 12
+			verse   , side      , replace  ,		// 15
+			inc     , dec       ,				// 18
 
 		// symbolic:
 

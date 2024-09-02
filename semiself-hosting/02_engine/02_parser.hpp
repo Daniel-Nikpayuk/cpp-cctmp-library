@@ -25,12 +25,212 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// plot table:
+
+/***********************************************************************************************************************/
+
+// stance:
+
+	template<typename SizeType>
+	class parse_table_stance
+	{
+		public:
+
+			using size_type		= typename alias<SizeType>::type;
+			using size_ctype	= typename alias<SizeType>::ctype;
+
+		protected:
+
+			bool nonterm;
+			size_type index;
+
+		public:
+
+			nik_ce parse_table_stance() : nonterm{}, index{} { }
+			nik_ce parse_table_stance(bool const n, size_ctype i) : nonterm{n}, index{i} { }
+
+			nik_ce bool is_nonterminal () const { return nonterm; }
+			nik_ce size_type symbol    () const { return index; }
+
+			nik_ce void set_terminality (bool const n) { nonterm = n; }
+			nik_ce void set_symbol      (size_ctype i) { index = i; }
+	};
+
+/***********************************************************************************************************************/
+
+// entry:
+
+	template<typename SizeType>
+	class parse_table_entry : public plot_entry<SizeType>
+	{
+		public:
+
+			using base		= plot_entry<SizeType>;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		protected:
+
+			bool valid;
+			size_type act_pos;
+
+		public:
+
+			nik_ce parse_table_entry() : base{}, valid{}, act_pos{} { }
+
+			nik_ce bool is_valid    () const { return valid; }
+			nik_ce size_type action () const { return act_pos; }
+
+			nik_ce void set_valid  (            ) { valid = true; }
+			nik_ce void set_action (size_ctype a) { act_pos = a; }
+	};
+
+/***********************************************************************************************************************/
+
+// proto:
+
+/*
+	template<typename SizeType, SizeType RowSize, SizeType ColSize, typename Base>
+	class protoplot_table : public Base
+	{
+		public:
+
+			using base		= Base;
+
+			using type		= typename base::type;
+			using type_ptr		= typename base::type_ptr;
+			using type_cptr		= typename base::type_cptr;
+			using type_ref		= typename base::type_ref;
+
+			using ctype		= typename base::ctype;
+			using ctype_ptr		= typename base::ctype_ptr;
+			using ctype_cptr	= typename base::ctype_cptr;
+			using ctype_ref		= typename base::ctype_ref;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+			using entry_type	= typename base::entry_type;
+			using entry_ctype	= typename base::entry_ctype;
+			using entry_ctype_ref	= typename base::entry_ctype_ref;
+
+		public:
+
+			nik_ce protoplot_table() { }
+
+			template<typename E, auto N, typename T, auto M>
+			nik_ce protoplot_table(const E (&e)[N], const T (&v)[M]) : base{e, v} { }
+
+			nik_ce size_type rowlength () const { return RowSize; }
+			nik_ce size_type collength () const { return ColSize; }
+	};
+*/
+
+/***********************************************************************************************************************/
+
+// literal:
+
+/*
+	template<typename Entry, typename Type, typename SizeType, SizeType RowSize, SizeType ColSize>
+	using plot_table_literal_base = protoplot_table<SizeType, RowSize, ColSize, plot_literal<Entry, Type, SizeType>>;
+
+	template<typename Entry, typename Type, typename SizeType, SizeType RowSize, SizeType ColSize, SizeType Size>
+	class plot_table_literal : public plot_table_literal_base<Entry, Type, SizeType, RowSize, ColSize>
+	{
+		public:
+
+			using base		= plot_table_literal_base<Entry, Type, SizeType, RowSize, ColSize>;
+
+			using type		= typename base::type;
+			using type_ptr		= typename base::type_ptr;
+			using type_cptr		= typename base::type_cptr;
+			using type_ref		= typename base::type_ref;
+
+			using ctype		= typename base::ctype;
+			using ctype_ptr		= typename base::ctype_ptr;
+			using ctype_cptr	= typename base::ctype_cptr;
+			using ctype_ref		= typename base::ctype_ref;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+			using entry_type	= typename base::entry_type;
+			using entry_ctype	= typename base::entry_ctype;
+			using entry_ctype_ref	= typename base::entry_ctype_ref;
+
+		public:
+
+			nik_ce plot_table_literal() { }
+
+			template<auto N, auto M>
+			nik_ce plot_table_literal(const Entry (&e)[N], const Type (&v)[M]) : base{e, v} { }
+	};
+*/
+
+/***********************************************************************************************************************/
+
+// interface:
+
+/*
+	template<typename Entry, typename Type, typename SizeType, SizeType RowSize, SizeType ColSize, SizeType Size>
+	using plot_table_base = protoplot_table<SizeType, RowSize, ColSize, plot<Entry, Type, SizeType, Size>>;
+
+	template<typename Entry, typename Type, typename SizeType, SizeType RowSize, SizeType ColSize, SizeType Size>
+	class plot_table : public plot_table_base<Entry, Type, SizeType, RowSize, ColSize, Size>
+	{
+		public:
+
+			using base		= plot_table_base<Entry, Type, SizeType, RowSize, ColSize, Size>;
+
+			using type		= typename base::type;
+			using type_ptr		= typename base::type_ptr;
+			using type_cptr		= typename base::type_cptr;
+			using type_ref		= typename base::type_ref;
+
+			using ctype		= typename base::ctype;
+			using ctype_ptr		= typename base::ctype_ptr;
+			using ctype_cptr	= typename base::ctype_cptr;
+			using ctype_ref		= typename base::ctype_ref;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+			using entry_type	= typename base::entry_type;
+			using entry_ctype	= typename base::entry_ctype;
+			using entry_ctype_ref	= typename base::entry_ctype_ref;
+
+		public:
+
+			nik_ce plot_table() { base::fullsize(); }
+
+			template<auto N, auto M>
+			nik_ce plot_table(const Entry (&e)[N], const Type (&v)[M]) : base{e, v} { }
+
+			template<typename In, typename End>
+			nik_ce void set(size_ctype row, size_ctype col, In in, End end)
+			{
+				size_ctype start = base::size();
+
+				base::push(in, end);
+
+				size_ctype finish = base::size();
+
+				base::entry[row * base::collength() + col].set_word(start, finish);
+			}
+	};
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // pushdown automata:
 
 /***********************************************************************************************************************/
 
 // symbol:
 
+/*
 	template<typename SizeType>
 	class parser_symbol
 	{
@@ -63,11 +263,13 @@ namespace engine {
 			nik_ce bool operator != (const parser_symbol & s) const
 				{ return (s.order != order) || (s.position != position); }
 	};
+*/
 
 /***********************************************************************************************************************/
 
 // stack:
 
+/*
 	template<typename SizeType, SizeType Size>
 	class parser_stack
 	{
@@ -105,6 +307,7 @@ namespace engine {
 				while (in != end) stack.push(*--in);
 			}
 	};
+*/
 
 /***********************************************************************************************************************/
 
@@ -118,6 +321,7 @@ namespace engine {
 			// an array of production symbols, representing dynamic length production bodies,
 			//   symbols consisting of a terminality index, and name index.
 
+/*
 	template<typename TableLiteralType, typename ProductionLiteralType, typename SizeType>
 	class parser_table
 	{
@@ -152,11 +356,13 @@ namespace engine {
 			nik_ce bool is_valid(size_ctype n) const { return ; }
 			nik_ce size_type action_index(size_ctype n) const { return ; }
 	};
+*/
 
 /***********************************************************************************************************************/
 
 // action:
 
+/*
 	class parser_action
 	{
 		public:
@@ -171,6 +377,7 @@ namespace engine {
 			nik_ce parser_action() { }
 
 	};
+*/
 
 /***********************************************************************************************************************/
 

@@ -475,6 +475,12 @@ namespace cctmp {
 
 			nik_ces ctype empty[]	= { };
 
+			nik_ce void set(ctype_cptr i, size_ctype t)
+			{
+				base::initial  = i;
+				base::terminal = t;
+			}
+
 		public:
 
 			nik_ce array_literal() { set(empty, 0); }
@@ -482,12 +488,6 @@ namespace cctmp {
 
 			template<auto N>
 			nik_ce array_literal(const Type (&a)[N]) { set(a, N); }
-
-			nik_ce void set(ctype_cptr i, size_ctype t)
-			{
-				base::initial  = i;
-				base::terminal = t;
-			}
 
 			nik_ce bool operator != (const array_literal & l) const
 				{ return base::not_equal(0, l.cbegin(), l.cend()); }
@@ -529,6 +529,8 @@ namespace cctmp {
 
 			// immutable:
 
+				using base::operator [];
+
 				nik_ce size_type length () const { return Size; }
 
 				nik_ce bool operator != (const array & s) const
@@ -536,8 +538,6 @@ namespace cctmp {
 
 				nik_ce bool operator == (const array & s) const
 					{ return base::equal(0, s.cbegin(), s.cend()); }
-
-				using base::operator [];
 
 			// mutable:
 
@@ -554,11 +554,15 @@ namespace cctmp {
 
 				nik_ce void clear() { base::terminal = 0; }
 				nik_ce void fullsize() { base::terminal = Size; }
-				nik_ce void upsize(size_ctype num = 1) { base::terminal += num; }
-				nik_ce void downsize(size_ctype num = 1) { base::terminal -= num; }
+				nik_ce void upsize(size_ctype n = 1) { base::terminal += n; }
+				nik_ce void downsize(size_ctype n = 1) { base::terminal -= n; }
 
 				template<typename In, typename End>
 				nik_ce void push(In in, End end) { while (in != end) push(*in++); }
+
+				template<typename F, typename In, typename End>
+				nik_ce void pushmap(F, In in, End end)
+					{ while (in != end) push(T_restore_T<F>::result(*in++)); }
 	};
 
 /***********************************************************************************************************************/
@@ -597,14 +601,14 @@ namespace cctmp {
 			template<typename T, auto N>
 			nik_ce prototable(const T (&a)[N]) : base{a} { }
 
-			nik_ce size_type rowlength () const { return RowSize; }
-			nik_ce size_type collength () const { return ColSize; }
+			nik_ce size_type row_length () const { return RowSize; }
+			nik_ce size_type col_length () const { return ColSize; }
 
-			nik_ce ctype_ptr cbegin (size_ctype n) const { return base::initial + n * ColSize; }
-			nik_ce ctype_ptr clast  (size_ctype n) const { return cend(n) - 1; }
-			nik_ce ctype_ptr cend   (size_ctype n) const { return cbegin(n + 1); }
+			nik_ce ctype_ptr row_cbegin (size_ctype n) const { return base::citer(n * ColSize); }
+			nik_ce ctype_ptr row_cend   (size_ctype n) const { return row_cbegin(n + 1); }
+			nik_ce ctype_ptr row_clast  (size_ctype n) const { return row_cend(n) - 1; }
 
-			nik_ce ctype_ptr operator [] (size_ctype n) const { return cbegin(n); }
+			nik_ce ctype_ptr operator [] (size_ctype n) const { return row_cbegin(n); }
 	};
 
 /***********************************************************************************************************************/
@@ -680,11 +684,11 @@ namespace cctmp {
 
 			using base::operator [];
 
-			nik_ce type_ptr begin (size_ctype n) { return base::initial + n * ColSize; }
-			nik_ce type_ptr last  (size_ctype n) { return end(n) - 1; }
-			nik_ce type_ptr end   (size_ctype n) { return begin(n + 1); }
+			nik_ce type_ptr row_begin (size_ctype n) { return base::iter(n * ColSize); }
+			nik_ce type_ptr row_end   (size_ctype n) { return row_begin(n + 1); }
+			nik_ce type_ptr row_last  (size_ctype n) { return row_end(n) - 1; }
 
-			nik_ce type_ptr operator [] (size_ctype n) { return begin(n); }
+			nik_ce type_ptr operator [] (size_ctype n) { return row_begin(n); }
 	};
 
 /***********************************************************************************************************************/

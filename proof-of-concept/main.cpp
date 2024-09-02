@@ -35,13 +35,13 @@
 #include"include/00_cctmp.h"
 #include"include/01_assembly.h"
 #include"include/02_generator.h"
-#include"include/03_fileput.h"
+//#include"include/03_fileput.h"
 #include"include/04_chord.h"
-#include"include/05_hustle.h"
+//#include"include/05_hustle.h"
 
 #include"undef_macros.hpp"
 
-#include"kernel/unit.hpp"
+//#include"kernel/unit.hpp"
 
 //#include"testing/chord/assembly/unit_test.hpp"
 //#include"testing/chord/progression/unit_test.hpp"
@@ -58,22 +58,27 @@
 
 /***********************************************************************************************************************/
 
+/*
 	using chord_grammar			= chord::T_chord_grammar;
 	using hustle_grammar			= hustle::T_hustle_grammar;
 	constexpr auto static_grammar		= U_store_T<chord_grammar>;
+*/
 
 /***********************************************************************************************************************/
 
+/*
 	struct T_atoi
 	{
 		template<typename CharPtr>
 		constexpr static auto result(CharPtr c) { return atoi(c); }
 
 	}; constexpr auto _atoi_ = U_store_T<T_atoi>;
+*/
 
 /***********************************************************************************************************************/
 
-	unsigned long main_at(unsigned long n, int argc, char *argv[], unsigned long def = 0)
+	template<typename T>
+	auto main_at(T n, int argc, char *argv[], T def = 0) -> T
 	{
 		auto pos = n + 1;
 
@@ -81,6 +86,7 @@
 		else            return def;
 	}
 
+/*
 	unsigned long main_sum(int argc, char *argv[])
 	{
 		auto sum = 0;
@@ -90,11 +96,13 @@
 
 		return sum;
 	}
+*/
 
 /***********************************************************************************************************************/
 
 // hustle:
 
+/*
 	constexpr auto _hustle_test_func()
 	{
 		return source
@@ -104,6 +112,7 @@
 			")                        "
 		);
 	}
+*/
 
 /***********************************************************************************************************************/
 
@@ -157,6 +166,7 @@
 	}
 */
 
+/*
 	constexpr auto _chord_test_func()
 	{
 		return source
@@ -177,6 +187,7 @@
 			, binding("two", 2)
 		);
 	}
+*/
 
 /***********************************************************************************************************************/
 
@@ -228,10 +239,36 @@
 		}
 */
 
+	constexpr auto _chord_test_func()
+	{
+		return source
+		(
+			"main p n         ;"
+
+			"loop:            ;"
+			"test is_zero n   ;"
+			"branch done      ;"
+			"p = multiply p n ;"
+			"n = decrement n  ;"
+			"goto loop        ;"
+
+			"done:            ;"
+			"return p         ;"
+		);
+	}
+
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
+		using T_chord_apply = chord::T_apply<_chord_test_func, null_env, int>;
+
+		printf("%d\n", T_chord_apply::result(1, main_at(0, argc, argv)));
+
+	//	static_assert(T_chord_apply::result(9) == 362880);
+
+		//
+
 	//	unit_test_chord_print_v0<gindex_type>();
 
 	//	using chord_size_type = unsigned char;
