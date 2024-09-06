@@ -11,7 +11,9 @@ I have set up simple main.cpp template files named main.cpp.chord, main.cpp.hust
 If you want to read through other DSL source code samples, they are located in the following directories:
 
 [chord assembly](testing/chord/assembly/inventory.hpp)
+
 [chord progression](testing/chord/progression/inventory.hpp)
+
 [hustle](testing/hustle/inventory.hpp)
 
 Thank you.
