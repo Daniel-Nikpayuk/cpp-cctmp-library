@@ -1,0 +1,85 @@
+/************************************************************************************************************************
+**
+** Copyright 2022-2024 Daniel Nikpayuk, Inuit Nunangat, The Inuit Nation
+**
+** This file is part of cpp_cctmp_library.
+**
+** cpp_cctmp_library is free software: you can redistribute it and/or modify it under the terms
+** of the GNU General Public License as published by the Free Software Foundation, either version 3
+** of the License, or (at your option) any later version.
+**
+** cpp_cctmp_library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+** without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+** See the GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License along with cpp_cctmp_library.
+** If not, see <http://www.gnu.org/licenses/>.
+**
+************************************************************************************************************************/
+
+#include<cstdio>
+#include<cstdlib>
+
+#define NIK_PARSER_GENERATOR_PARSER_OBJ "../object/00_parser_generator_parser.hpp"
+#define NIK_CHORD_PARSER_OBJ            "../object/01_chord_parser.hpp"
+
+#define NIK_PARSER_GENERATOR_PARSER // bug: currently all need to be on or all off.
+#define NIK_CHORD_PARSER
+
+/***********************************************************************************************************************/
+
+#include"define_macros.hpp"
+
+#include"include/00_cctmp.h"
+#include"include/01_assembly.h"
+#include"include/02_generator.h"
+#include"include/04_chord.h"
+
+#include"undef_macros.hpp"
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+	using namespace cctmp;
+
+/***********************************************************************************************************************/
+
+	template<typename T>
+	auto main_at(T n, int argc, char *argv[], T def = 0) -> T
+	{
+		auto pos = n + 1;
+
+		if (pos < argc) return atoi(argv[pos]);
+		else            return def;
+	}
+
+/***********************************************************************************************************************/
+
+// chord:
+
+	constexpr auto _chord_test_func()
+	{
+		return source
+		(
+			"main x            ;"
+
+			"body:             ;"
+			" . = multiply x x ;"
+
+			"return _          ;"
+		);
+	}
+
+/***********************************************************************************************************************/
+
+	int main(int argc, char *argv[])
+	{
+		using T_chord_apply = chord::T_apply<_chord_test_func, null_env, int>;
+
+		static_assert(T_chord_apply::result(9) == 81);
+
+		printf("%d\n", T_chord_apply::result(main_at(0, argc, argv)));
+
+		return 0;
+	}
+

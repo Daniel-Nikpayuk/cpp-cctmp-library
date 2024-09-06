@@ -36,14 +36,16 @@ namespace cctmp {
 
 	template<typename T> nik_ce void store(T) { }
 
-	template<typename T> nik_ce auto U_store_T     = store<T*>;
-	template<typename T> nik_ce auto U_store_T<T&> = store<T&>;
+	template<typename T> nik_ce auto U_store_T      = store<T*>;
+	template<typename T> nik_ce auto U_store_T<T&>  = store<T&>;
+	template<typename T> nik_ce auto U_store_T<T&&> = store<T&&>;
 
 // U -> T:
 
-	template<typename T> struct store_match                    { using result = T; };
-	template<typename T> struct store_match<void(*const&)(T&)> { using result = T&; };
-	template<typename T> struct store_match<void(*const&)(T*)> { using result = T; };
+	template<typename T> struct store_match                     { using result = T; };
+	template<typename T> struct store_match<void(*const&)(T&&)> { using result = T&&; };
+	template<typename T> struct store_match<void(*const&)(T&)>  { using result = T&; };
+	template<typename T> struct store_match<void(*const&)(T*)>  { using result = T; };
 
 	template<typename T>
 	using T_restore_T = typename store_match<T const&>::result;
