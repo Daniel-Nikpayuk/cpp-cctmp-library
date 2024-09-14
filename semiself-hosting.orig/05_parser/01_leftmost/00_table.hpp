@@ -27,16 +27,18 @@ namespace parser {
 
 // cctmp:
 
-	using cctmp::U_store_T;
+	template<typename T>
+	nik_ce auto U_store_T						= cctmp::U_store_T<T>;
 
-	using cctmp::gindex_type;
-	using cctmp::gchar_type;
+	using gindex_type						= cctmp::gindex_type;
+	using gchar_type						= cctmp::gchar_type;
 
-	using cctmp::alias;
+	template<typename T>
+	using alias							= cctmp::alias<T>;
 
 // engine:
 
-	using engine::LambdaTuple;
+	using LambdaTuple						= engine::LambdaTuple;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -29,25 +29,37 @@ namespace engine {
 
 	using cctmp::U_store_T;
 
-	using cctmp::T_restore_T;
-	using cctmp::T_store_U;
+//	template<typename T>
+//	nik_ce auto U_store_T						= cctmp::U_store_T<T>;
 
-	using cctmp::gkey_type;
-	using cctmp::gindex_type;
-	using cctmp::gchar_type;
-	using cctmp::gchar_ctype;
+	template<typename T>
+	using T_restore_T						= cctmp::T_restore_T<T>;
 
-	using cctmp::alias;
+	template<auto U>
+	using T_store_U							= cctmp::T_store_U<U>;
 
-	using cctmp::U_gindex_type;
-	using cctmp::_empty_;
-	using cctmp::_size_;
-	using cctmp::_at_;
-	using cctmp::segment_;
+	using gkey_type							= cctmp::gkey_type;
+	using gindex_type						= cctmp::gindex_type;
+	using gchar_type						= cctmp::gchar_type;
+	using gchar_ctype						= cctmp::gchar_ctype;
 
-	using cctmp::MachineIndex;
-	using cctmp::MN;
-	using cctmp::MT;
+	template<typename T>
+	using alias							= cctmp::alias<T>;
+
+	nik_ce auto U_gindex_type					= cctmp::U_gindex_type;
+
+	nik_ce auto _empty_						= cctmp::_empty_;
+	nik_ce auto _size_						= cctmp::_size_;
+
+	template<auto n>
+	nik_ce auto _at_						= cctmp::_at_<n>;
+
+	template<auto n>
+	nik_ce auto segment_						= cctmp::segment_<n>;
+
+	using MachineIndex						= cctmp::MachineIndex;
+	using MN							= cctmp::MN;
+	using MT							= cctmp::MT;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

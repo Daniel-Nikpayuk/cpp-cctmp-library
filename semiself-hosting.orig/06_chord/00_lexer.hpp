@@ -27,11 +27,12 @@ namespace chord {
 
 // cctmp:
 
-	using cctmp::U_store_T;
+	template<typename T>
+	nik_ce auto U_store_T						= cctmp::U_store_T<T>;
 
-	using cctmp::gkey_type;
+	using gkey_type							= cctmp::gkey_type;
 
-	using cctmp::U_gkey_type;
+	nik_ce auto U_gkey_type						= cctmp::U_gkey_type;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

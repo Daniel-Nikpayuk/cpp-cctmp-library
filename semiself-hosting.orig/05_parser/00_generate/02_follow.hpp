@@ -25,16 +25,15 @@ namespace parser {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// cctmp:
+	template<auto Op, typename T>
+	using modify_type						= cctmp::modify_type<Op, T>;
 
-	using cctmp::modify_type;
+	nik_ce auto _from_reference_					= cctmp::_from_reference_;
 
-	using cctmp::_from_reference_;
+	using strlit_type						= cctmp::strlit_type;
+	using cstrlit_ref						= cctmp::cstrlit_ref;
 
-	using cctmp::strlit_type;
-	using cctmp::cstrlit_ref;
-
-	using cctmp::U_strlit_type;
+	nik_ce auto U_strlit_type					= cctmp::U_strlit_type;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
