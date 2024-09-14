@@ -38,62 +38,6 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// institute:
-
-	// assembly? (except assembly code is already a thing!)
-
-/***********************************************************************************************************************/
-
-// proto:
-
-/*
-	template<typename Partition, typename Interval, typename Kind, typename Type, typename SizeType>
-	class protoinstitute : public protoplot<Interval, Kind, Type, SizeType>
-	{
-		public:
-
-			using base		= protoplot<Interval, Kind, Type, SizeType>;
-
-			using type		= typename base::type;
-			using type_ptr		= typename base::type_ptr;
-			using type_cptr		= typename base::type_cptr;
-			using type_ref		= typename base::type_ref;
-
-			using ctype		= typename base::ctype;
-			using ctype_ptr		= typename base::ctype_ptr;
-			using ctype_cptr	= typename base::ctype_cptr;
-			using ctype_ref		= typename base::ctype_ref;
-
-			using size_type		= typename base::size_type;
-			using size_ctype	= typename base::size_ctype;
-
-			using partition_type	= Partition;
-
-		protected:
-
-			partition_type partition;
-
-		public:
-
-			nik_ce protoinstitute() : base{} { }
-
-		//	nik_ce ctype_ptr cbegin(size_ctype m, size_ctype n) const
-		//		{ return base::citer(interval[n].start()); }
-	};
-*/
-
-/***********************************************************************************************************************/
-
-// literal:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // model:
 
 /***********************************************************************************************************************/

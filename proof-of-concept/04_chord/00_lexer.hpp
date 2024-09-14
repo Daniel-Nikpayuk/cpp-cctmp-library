@@ -27,114 +27,92 @@ namespace chord {
 
 // cctmp:
 
-	template<auto U>
-	using T_store_U						= cctmp::T_store_U<U>;
+	using cctmp::T_store_U;
+	using cctmp::T_pack_Vs;
 
-	template<auto... Vs>
-	using T_pack_Vs						= cctmp::T_pack_Vs<Vs...>;
+	using cctmp::U_store_T;
+	using cctmp::U_store_B;
+	using cctmp::U_pack_Ts;
+	using cctmp::_static_callable_;
+	using cctmp::member_value_U;
 
-	template<typename T>
-	nik_ce auto U_store_T					= cctmp::U_store_T<T>;
+	using cctmp::gkey_type;
+	using cctmp::gckey_type;
+	using cctmp::gchar_type;
+	using cctmp::gcchar_type;
+	using cctmp::gindex_type;
+	using cctmp::gcindex_type;
 
-	template<template<auto...> typename B>
-	nik_ce auto U_store_B					= cctmp::U_store_B<B>;
+	using cctmp::U_gkey_type;
+	using cctmp::U_gchar_type;
 
-	template<typename... Ts>
-	nik_ce auto U_pack_Ts					= cctmp::U_pack_Ts<Ts...>;
+	using cctmp::_zero;
+	using cctmp::_one;
+	using cctmp::_two;
+	using cctmp::_three;
+	using cctmp::_four;
+	using cctmp::_five;
+	using cctmp::_six;
+	using cctmp::_seven;
+	using cctmp::_eight;
+	using cctmp::_nine;
+	using cctmp::_ten;
 
-	template<auto V> nik_ce auto _static_callable_		= cctmp::_static_callable_<V>;
+	using cctmp::_subarray_same_;
+	using cctmp::_wrap_;
+	using cctmp::modify_type;
+	using cctmp::_from_const_;
+	using cctmp::_from_reference_;
 
-	template<auto U>
-	nik_ce auto & member_value_U				= cctmp::member_value_U<U>;
+	using cctmp::car_;
+	using cctmp::cdr_;
+	using cctmp::push_;
+	using cctmp::unpack_;
+	using cctmp::map_;
 
-	using gkey_type						= cctmp::gkey_type;
-	using gckey_type					= cctmp::gckey_type;
-	using gchar_type					= cctmp::gchar_type;
-	using gcchar_type					= cctmp::gcchar_type;
-	using gindex_type					= cctmp::gindex_type;
-	using gcindex_type					= cctmp::gcindex_type;
-
-	nik_ce auto U_gkey_type					= cctmp::U_gkey_type;
-	nik_ce auto U_gchar_type				= cctmp::U_gchar_type;
-
-	nik_ce auto _zero					= cctmp::_zero;
-	nik_ce auto _one					= cctmp::_one;
-	nik_ce auto _two					= cctmp::_two;
-	nik_ce auto _three					= cctmp::_three;
-	nik_ce auto _four					= cctmp::_four;
-	nik_ce auto _five					= cctmp::_five;
-	nik_ce auto _six					= cctmp::_six;
-	nik_ce auto _seven					= cctmp::_seven;
-	nik_ce auto _eight					= cctmp::_eight;
-	nik_ce auto _nine					= cctmp::_nine;
-	nik_ce auto _ten					= cctmp::_ten;
-
-	template<auto... Vs>
-	nik_ce auto _subarray_same_				= cctmp::_subarray_same_<Vs...>;
-
-	template<auto f>
-	nik_ce auto _wrap_					= cctmp::_wrap_<f>;
-
-	template<auto Op, typename T>
-	using modify_type					= cctmp::modify_type<Op, T>;
-
-	nik_ce auto _from_const_				= cctmp::_from_const_;
-	nik_ce auto _from_reference_				= cctmp::_from_reference_;
-
-	template<auto... Vs> nik_ce auto car_			= cctmp::car_<Vs...>;
-	template<auto... Vs> nik_ce auto cdr_			= cctmp::cdr_<Vs...>;
-	template<auto... Vs> nik_ce auto push_			= cctmp::push_<Vs...>;
-	template<auto... Vs> nik_ce auto unpack_		= cctmp::unpack_<Vs...>;
-	template<auto... Vs> nik_ce auto map_			= cctmp::map_<Vs...>;
-
-	using strlit_type					= cctmp::strlit_type;
-	nik_ce auto U_strlit_type				= cctmp::U_strlit_type;
-
-	template<typename T, typename S = gindex_type>
-	using cselector						= cctmp::cselector<T, S>;
-
-	template<typename Type, auto Size>
-	using sequence						= cctmp::sequence<Type, Size>;
+	using cctmp::strlit_type;
+	using cctmp::U_strlit_type;
+	using cctmp::cselector;
+	using cctmp::sequence;
 
 // assembly:
 
-	using AN						= assembly::AN;
-	using AT						= assembly::AT;
-	using AAN						= assembly::AAN;
-	using AAT						= assembly::AAT;
+	using assembly::AN;
+	using assembly::AT;
+	using assembly::AAN;
+	using assembly::AAT;
 
-	template<auto... Vs>
-	using T_assembly_compound				= assembly::T_assembly_compound<Vs...>;
+	using assembly::T_assembly_compound;
 
 // generator:
 
-	using gstring_type					= generator::gstring_type;
-	using gcstring_type					= generator::gcstring_type;
+	using generator::gstring_type;
+	using generator::gcstring_type;
 
-	using state_type					= generator::state_type;
-	using cstate_type					= generator::cstate_type;
-	using token_type					= generator::token_type;
-	using ctoken_type					= generator::ctoken_type;
+	using generator::state_type;
+	using generator::cstate_type;
+	using generator::token_type;
+	using generator::ctoken_type;
 
-	using StateName						= generator::StateName;
-	using TokenName						= generator::TokenName;
+	using generator::StateName;
+	using generator::TokenName;
 
-	nik_ce auto U_state_type				= generator::U_state_type;
-	nik_ce auto U_token_type				= generator::U_token_type;
+	using generator::U_state_type;
+	using generator::U_token_type;
 
-	using lexeme						= generator::lexeme;
-	using clexeme						= generator::clexeme;
+	using generator::lexeme;
+	using generator::clexeme;
 
-	using action_type					= generator::action_type;
-	nik_ce auto U_action_type				= generator::U_action_type;
+	using generator::action_type;
+	using generator::U_action_type;
 
-	using symbol_type					= generator::symbol_type;
-	using csymbol_type					= generator::csymbol_type;
+	using generator::symbol_type;
+	using generator::csymbol_type;
 
 	// syntactic sugar:
 
-		using sxt_pair					= cctmp::pair<strlit_type, token_type>;
-		using sxa_pair					= cctmp::pair<strlit_type, action_type>;
+		using sxt_pair = cctmp::pair<strlit_type, token_type>;
+		using sxa_pair = cctmp::pair<strlit_type, action_type>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

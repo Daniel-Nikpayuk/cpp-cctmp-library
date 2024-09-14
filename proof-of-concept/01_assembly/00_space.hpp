@@ -27,111 +27,68 @@ namespace assembly {
 
 // cctmp:
 
-	template<typename T>
-	nik_ce auto U_store_T					= cctmp::U_store_T<T>;
+	using cctmp::U_store_T;
+	using cctmp::T_store_U;
+	using cctmp::U_store_B;
+	using cctmp::T_restore_T;
+	using cctmp::U_pack_Vs;
+	using cctmp::U_null_Vs;
 
-	template<auto U>
-	using T_store_U						= cctmp::T_store_U<U>;
+	using cctmp::member_type_U;
+	using cctmp::member_value_U;
+	using cctmp::H_id;
 
-	template<template<auto...> typename B>
-	nik_ce auto U_store_B					= cctmp::U_store_B<B>;
+	using cctmp::_static_callable_;
+	using cctmp::_static_car_;
+	using cctmp::_static_cdr_;
 
-	template<typename T>
-	using T_restore_T					= cctmp::T_restore_T<T>;
+	using cctmp::gcbool_type;
+	using cctmp::gchar_type;
+	using cctmp::gcchar_type;
+	using cctmp::gkey_type;
+	using cctmp::gindex_type;
+	using cctmp::gcindex_type;
 
-	template<auto... Vs>
-	nik_ce auto U_pack_Vs					= cctmp::U_pack_Vs<Vs...>;
+	using cctmp::U_gindex_type;
+	using cctmp::U_auto_bool;
+	using cctmp::U_auto_char;
+	using cctmp::U_auto_int;
+	using cctmp::U_auto_float;
 
-	nik_ce auto U_null_Vs					= cctmp::U_null_Vs;
+	using cctmp::_cast_;
+	using cctmp::_subarray_match_;
+	using cctmp::_string_to_builtin_;
+	using cctmp::eval;
 
-	template<auto U>
-	using member_type_U					= cctmp::member_type_U<U>;
+	using cctmp::modify_type;
 
-	nik_ce auto H_id					= cctmp::H_id;
+	using cctmp::_from_const_;
+	using cctmp::_from_pointer_;
+	using cctmp::_from_reference_;
+	using cctmp::_to_list_;
+	using cctmp::_cons_;
 
-	template<auto V> nik_ce auto _static_callable_		= cctmp::_static_callable_<V>;
-	template<auto V> nik_ce auto _static_car_		= cctmp::_static_car_<V>;
-	template<auto V> nik_ce auto _static_cdr_		= cctmp::_static_cdr_<V>;
+	using cctmp::unpack_;
+	using cctmp::is_null_;
+	using cctmp::car_;
+	using cctmp::stem_;
+	using cctmp::U_custom_T;
 
-	template<auto U>
-	nik_ce auto & member_value_U				= cctmp::member_value_U<U>;
+	using cctmp::sequence;
+	using cctmp::unit_stack;
 
-	using gcbool_type					= cctmp::gcbool_type;
-	using gchar_type					= cctmp::gchar_type;
-	using gcchar_type					= cctmp::gcchar_type;
-	using gkey_type						= cctmp::gkey_type;
-	using gindex_type					= cctmp::gindex_type;
-	using gcindex_type					= cctmp::gcindex_type;
+	using cctmp::_par_left_;
+	using cctmp::_par_right_;
+	using cctmp::at_;
+	using cctmp::segment_;
+	using cctmp::H_env_lookup;
+	using cctmp::H_env_tuple;
 
-	nik_ce auto U_gindex_type				= cctmp::U_gindex_type;
-	nik_ce auto U_auto_bool					= cctmp::U_auto_bool;
-	nik_ce auto U_auto_char					= cctmp::U_auto_char;
-	nik_ce auto U_auto_int					= cctmp::U_auto_int;
-	nik_ce auto U_auto_float				= cctmp::U_auto_float;
-
-	template<auto U>
-	nik_ce auto _cast_					= cctmp::_cast_<U>;
-
-	template<auto... Vs>
-	nik_ce auto _subarray_match_				= cctmp::_subarray_match_<Vs...>;
-
-	template<auto... Us>
-	nik_ce auto _string_to_builtin_				= cctmp::_string_to_builtin_<Us...>;
-
-	template<auto... Vs>
-	nik_ce auto eval					= cctmp::eval<Vs...>;
-
-	template<auto Op, typename T>
-	using modify_type					= cctmp::modify_type<Op, T>;
-
-	nik_ce auto _from_const_				= cctmp::_from_const_;
-	nik_ce auto _from_pointer_				= cctmp::_from_pointer_;
-	nik_ce auto _from_reference_				= cctmp::_from_reference_;
-	nik_ce auto _to_list_					= cctmp::_to_list_;
-	nik_ce auto _cons_					= cctmp::_cons_;
-
-	template<auto... Vs>
-	nik_ce auto unpack_					= cctmp::unpack_<Vs...>;
-
-	template<auto V>
-	nik_ce auto is_null_					= cctmp::is_null_<V>;
-
-	template<auto V>
-	nik_ce auto car_					= cctmp::car_<V>;
-
-	template<auto... Vs> nik_ce auto stem_			= cctmp::stem_<Vs...>;
-
-	template<typename T>
-	nik_ce auto U_custom_T					= cctmp::U_custom_T<T>;
-
-	template<typename T, auto S>
-	using sequence						= cctmp::sequence<T, S>;
-
-	template<typename T, auto S>
-	using unit_stack					= cctmp::unit_stack<T, S>;
-
-	nik_ce auto _par_left_					= cctmp::_par_left_;
-	nik_ce auto _par_right_					= cctmp::_par_right_;
-
-	template<auto... Vs>
-	nik_ce auto at_						= cctmp::at_<Vs...>;
-
-	template<auto... Vs>
-	nik_ce auto segment_					= cctmp::segment_<Vs...>;
-
-	nik_ce auto H_env_lookup				= cctmp::H_env_lookup;
-	nik_ce auto H_env_tuple					= cctmp::H_env_tuple;
-
-	template<auto... Vs>
-	using T_machine_contr					= cctmp::T_machine_contr<Vs...>;
-
-	template<auto... Vs>
-	using T_machine_action					= cctmp::T_machine_action<Vs...>;
-
-	using MAN						= cctmp::MAN;
-	using MAT						= cctmp::MAT;
-
-	using instr_type					= cctmp::instr_type;
+	using cctmp::T_machine_contr;
+	using cctmp::T_machine_action;
+	using cctmp::MAN;
+	using cctmp::MAT;
+	using cctmp::instr_type;
 
 	// syntactic sugar:
 

@@ -500,6 +500,34 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// string:
+
+	template<typename Type, typename SizeType>
+	struct string_literal : public array_literal<Type, SizeType>
+	{
+		using base		= array_literal<Type, SizeType>;
+
+		using type		= typename base::type;
+		using type_ptr		= typename base::type_ptr;
+		using type_cptr		= typename base::type_cptr;
+		using type_ref		= typename base::type_ref;
+
+		using ctype		= typename base::ctype;
+		using ctype_ptr		= typename base::ctype_ptr;
+		using ctype_cptr	= typename base::ctype_cptr;
+		using ctype_ref		= typename base::ctype_ref;
+
+		using size_type		= typename base::size_type;
+		using size_ctype	= typename base::size_ctype;
+
+		template<auto N>
+		nik_ce string_literal(const Type (&s)[N]) : base{s, N-1} { }
+
+		nik_ce string_literal() : base{} { } // maybe.
+	};
+
+/***********************************************************************************************************************/
+
 // interface:
 
 	template<typename Type, typename SizeType, SizeType Size>

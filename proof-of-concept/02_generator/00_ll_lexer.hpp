@@ -25,46 +25,33 @@ namespace generator {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-	template<typename T>
-	nik_ce auto U_store_T						= cctmp::U_store_T<T>;
+// cctmp:
 
-	template<auto U>
-	using T_store_U							= cctmp::T_store_U<U>;
+	using cctmp::U_store_T;
 
-	template<typename T>
-	nik_ce auto & member_value_T					= cctmp::member_value_T<T>;
+	using cctmp::T_store_U;
 
-	template<auto U>
-	nik_ce auto & member_value_U					= cctmp::member_value_U<U>;
+	using cctmp::member_value_T;
+	using cctmp::member_value_U;
+	using cctmp::_static_callable_;
 
-	template<auto V>
-	nik_ce auto _static_callable_					= cctmp::_static_callable_<V>;
+	using cctmp::gcbool_type;
+	using cctmp::gkey_type;
+	using cctmp::gindex_type;
+	using cctmp::gchar_type;
+	using cctmp::gcchar_type;
 
-	using gcbool_type						= cctmp::gcbool_type;
-	using gkey_type							= cctmp::gkey_type;
-	using gindex_type						= cctmp::gindex_type;
-	using gchar_type						= cctmp::gchar_type;
-	using gcchar_type						= cctmp::gcchar_type;
+	using cctmp::U_gkey_type;
+	using cctmp::U_gchar_type;
+	using cctmp::_zero;
 
-	nik_ce auto U_gkey_type						= cctmp::U_gkey_type;
-	nik_ce auto U_gchar_type					= cctmp::U_gchar_type;
+	using cctmp::sequence;
+	using cctmp::cselector;
+	using cctmp::citerator;
 
-	nik_ce auto _zero						= cctmp::_zero;
-
-	template<typename T, auto S>
-	using sequence							= cctmp::sequence<T, S>;
-
-	template<typename... Ts>
-	using cselector							= cctmp::cselector<Ts...>;
-
-	template<typename... Ts>
-	using citerator							= cctmp::citerator<Ts...>;
-
-	using cguider							= cctmp::cguider;
-	using cguider_ctype_ref						= cctmp::cguider_ctype_ref;
-
-	template<auto... Vs>
-	using T_hierarchy						= cctmp::T_hierarchy<Vs...>;
+	using cctmp::cguider;
+	using cctmp::cguider_ctype_ref;
+	using cctmp::T_hierarchy;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

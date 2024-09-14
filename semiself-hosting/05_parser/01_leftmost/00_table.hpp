@@ -107,7 +107,7 @@ namespace parser {
 			using size_type			= typename alias<SizeType>::type;
 			using size_ctype		= typename alias<SizeType>::ctype;
 
-			using strlit_type		= engine::string_literal<char_ctype, size_type>;
+			using strlit_type		= cctmp::string_literal<char_ctype, size_type>;
 
 			using    row_array_type		= cctmp::array < size_type   , size_type , Size >;
 			using column_array_type		= cctmp::array < size_type   , size_type , Size >;
@@ -247,7 +247,7 @@ namespace parser {
 
 		// table:
 
-			using strlit_type		= engine::string_literal<char_ctype, size_type>;
+			using strlit_type		= cctmp::string_literal<char_ctype, size_type>;
 			using strlit_ctype_ref		= typename alias<strlit_type>::ctype_ref;
 
 			nik_ces size_type row_size	= Nonterminal::dimension;

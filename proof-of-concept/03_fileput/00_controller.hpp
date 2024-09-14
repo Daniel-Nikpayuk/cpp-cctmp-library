@@ -27,31 +27,26 @@ namespace fileput {
 
 // cctmp:
 
-	using gchar_type					= cctmp::gchar_type;
-	using gindex_type					= cctmp::gindex_type;
+	using cctmp::gchar_type;
+	using cctmp::gindex_type;
 
-	nik_ce auto U_gindex_type				= cctmp::U_gindex_type;
+	using cctmp::U_gindex_type;
+	using cctmp::member_value_U;
 
-	template<auto U>
-	nik_ce auto & member_value_U				= cctmp::member_value_U<U>;
+	using cctmp::strlit_type;
+	using cctmp::U_strlit_type;
 
-	using strlit_type					= cctmp::strlit_type;
-
-	nik_ce auto U_strlit_type				= cctmp::U_strlit_type;
-
-	template<typename T, auto S>
-	using sequence						= cctmp::sequence<T, S>;
-
-	using Instr						= cctmp::Instr;
+	using cctmp::sequence;
+	using cctmp::Instr;
 
 	// syntactic sugar:
 
-		using ixs_pair					= cctmp::pair<gindex_type, strlit_type>;
+		using ixs_pair = cctmp::pair<gindex_type, strlit_type>;
 
 // assembly:
 
-	using AN						= assembly::AN;
-	using AT						= assembly::AT;
+	using assembly::AN;
+	using assembly::AT;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

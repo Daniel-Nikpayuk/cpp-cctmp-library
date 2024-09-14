@@ -25,19 +25,15 @@ namespace generator {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-	template<auto... Vs>
-	using T_pack_Vs							= cctmp::T_pack_Vs<Vs...>;
+// cctmp:
 
-	template<auto U>
-	using member_type_U						= cctmp::member_type_U<U>;
+	using cctmp::T_pack_Vs;
+	using cctmp::member_type_U;
+	using cctmp::gckey_type;
+	using cctmp::gcindex_type;
 
-	using gckey_type						= cctmp::gckey_type;
-	using gcindex_type						= cctmp::gcindex_type;
-
-	nik_ce auto _two						= cctmp::_two;
-
-	template<auto... Vs>
-	nik_ce auto segment_						= cctmp::segment_<Vs...>;
+	using cctmp::_two;
+	using cctmp::segment_;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
