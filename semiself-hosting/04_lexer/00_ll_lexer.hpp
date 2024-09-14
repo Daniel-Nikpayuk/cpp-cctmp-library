@@ -19,50 +19,8 @@
 
 // ll(1) lexer:
 
-namespace generator {
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// cctmp:
-
-	using cctmp::U_store_T;
-	using cctmp::T_store_U;
-	using cctmp::T_pack_Vs;
-
-	using cctmp::member_value_T;
-	using cctmp::member_value_U;
-	using cctmp::_static_callable_;
-
-	using cctmp::gcbool_type;
-	using cctmp::gkey_type;
-	using cctmp::gindex_type;
-	using cctmp::gchar_type;
-	using cctmp::gcchar_type;
-
-	using cctmp::U_gkey_type;
-	using cctmp::U_gchar_type;
-
-	using cctmp::_zero;
-
-	using cctmp::sequence;
-	using cctmp::cselector;
-	using cctmp::citerator;
-
-	using cctmp::cguider;
-	using cctmp::cguider_ctype_ref;
-
-	using cctmp::T_hierarchy;
-
-	using cctmp::member_type_U;
-
-	using cctmp::gckey_type;
-	using cctmp::gcindex_type;
-
-	using cctmp::_two;
-
-	using cctmp::segment_;
+namespace cctmp {
+namespace lexer {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -731,5 +689,5 @@ namespace generator {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace generator
+}} // namespace cctmp::lexer
 

@@ -32,6 +32,7 @@
 	// if atomic or compound, record it as a template parameter and dispatch accordingly during the apply?
 	// is this the best possible solution?
 
+namespace cctmp  {
 namespace engine {
 
 /***********************************************************************************************************************/
@@ -151,5 +152,5 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace engine
+}} // namespace cctmp::engine
 
