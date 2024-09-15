@@ -383,10 +383,12 @@ namespace cctmp {
 
 // proto:
 
-	template<typename Type, typename SizeType, typename Model>
+	template<typename Model, typename Type, typename SizeType>
 	class protoarray
 	{
 		public:
+
+			using model_type	= Model;
 
 			using type		= typename alias<Type>::type;
 			using type_ptr		= typename alias<Type>::type_ptr;
@@ -401,11 +403,9 @@ namespace cctmp {
 			using size_type		= typename alias<SizeType>::type;
 			using size_ctype	= typename alias<SizeType>::ctype;
 
-			using model_type	= Model;
-
 		protected:
 
-			Model initial;      // compile time compatible.
+			model_type initial; // compile time compatible.
 			size_type terminal; // compile time compatible.
 
 		public:
@@ -454,11 +454,11 @@ namespace cctmp {
 // literal:
 
 	template<typename Type, typename SizeType>
-	class array_literal : public protoarray<Type, SizeType, Type const*>
+	class array_literal : public protoarray<Type const*, Type, SizeType>
 	{
 		public:
 
-			using base		= protoarray<Type, SizeType, Type const*>;
+			using base		= protoarray<Type const*, Type, SizeType>;
 
 			using type		= typename base::type;
 			using type_ptr		= typename base::type_ptr;
@@ -531,11 +531,11 @@ namespace cctmp {
 // interface:
 
 	template<typename Type, typename SizeType, SizeType Size>
-	class array : public protoarray<Type, SizeType, Type[Size]>
+	class array : public protoarray<Type[Size], Type, SizeType>
 	{
 		public:
 
-			using base		= protoarray<Type, SizeType, Type[Size]>;
+			using base		= protoarray<Type[Size], Type, SizeType>;
 
 			using type		= typename base::type;
 			using type_ptr		= typename base::type_ptr;
@@ -604,7 +604,7 @@ namespace cctmp {
 
 // proto:
 
-	template<typename SizeType, SizeType RowSize, SizeType ColSize, typename Base>
+	template<typename Base, typename SizeType, SizeType RowSize, SizeType ColSize>
 	class prototable : public Base
 	{
 		public:
@@ -646,12 +646,12 @@ namespace cctmp {
 // literal:
 
 	template<typename Type, typename SizeType, SizeType RowSize, SizeType ColSize>
-	class table_literal : public prototable<SizeType, RowSize, ColSize, array_literal<Type, SizeType>>
+	class table_literal : public prototable<array_literal<Type, SizeType>, SizeType, RowSize, ColSize>
 	{
 		public:
 
 			using subbase		= array_literal<Type, SizeType>;
-			using base		= prototable<SizeType, RowSize, ColSize, subbase>;
+			using base		= prototable<subbase, SizeType, RowSize, ColSize>;
 
 			using type		= typename base::type;
 			using type_ptr		= typename base::type_ptr;
@@ -685,12 +685,12 @@ namespace cctmp {
 // interface:
 
 	template<typename Type, typename SizeType, SizeType RowSize, SizeType ColSize>
-	class table : public prototable<SizeType, RowSize, ColSize, array<Type, SizeType, RowSize * ColSize>>
+	class table : public prototable<array<Type, SizeType, RowSize * ColSize>, SizeType, RowSize, ColSize>
 	{
 		public:
 
 			using subbase		= array<Type, SizeType, RowSize * ColSize>;
-			using base		= prototable<SizeType, RowSize, ColSize, subbase>;
+			using base		= prototable<subbase, SizeType, RowSize, ColSize>;
 
 			using type		= typename base::type;
 			using type_ptr		= typename base::type_ptr;

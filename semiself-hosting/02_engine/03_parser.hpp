@@ -30,39 +30,10 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
-// stance:
+// page:
 
 	template<typename SizeType>
-	class parse_table_stance
-	{
-		public:
-
-			using size_type		= typename alias<SizeType>::type;
-			using size_ctype	= typename alias<SizeType>::ctype;
-
-		protected:
-
-			bool nonterm;
-			size_type index;
-
-		public:
-
-			nik_ce parse_table_stance() : nonterm{}, index{} { }
-			nik_ce parse_table_stance(bool const n, size_ctype i) : nonterm{n}, index{i} { }
-
-			nik_ce bool is_nonterminal () const { return nonterm; }
-			nik_ce size_type symbol    () const { return index; }
-
-			nik_ce void set_terminality (bool const n) { nonterm = n; }
-			nik_ce void set_symbol      (size_ctype i) { index = i; }
-	};
-
-/***********************************************************************************************************************/
-
-// entry:
-
-	template<typename SizeType>
-	class parse_table_entry : public plot_entry<SizeType>
+	class parse_table_page : public plot_entry<SizeType>
 	{
 		public:
 
@@ -78,13 +49,42 @@ namespace engine {
 
 		public:
 
-			nik_ce parse_table_entry() : base{}, valid{}, act_pos{} { }
+			nik_ce parse_table_page() : base{}, valid{}, act_pos{} { }
 
 			nik_ce bool is_valid    () const { return valid; }
 			nik_ce size_type action () const { return act_pos; }
 
 			nik_ce void set_valid  (            ) { valid = true; }
 			nik_ce void set_action (size_ctype a) { act_pos = a; }
+	};
+
+/***********************************************************************************************************************/
+
+// text:
+
+	template<typename SizeType>
+	class parse_table_text
+	{
+		public:
+
+			using size_type		= typename alias<SizeType>::type;
+			using size_ctype	= typename alias<SizeType>::ctype;
+
+		protected:
+
+			bool nonterm;
+			size_type index;
+
+		public:
+
+			nik_ce parse_table_text() : nonterm{}, index{} { }
+			nik_ce parse_table_text(bool const n, size_ctype i) : nonterm{n}, index{i} { }
+
+			nik_ce bool is_nonterminal () const { return nonterm; }
+			nik_ce size_type symbol    () const { return index; }
+
+			nik_ce void set_terminality (bool const n) { nonterm = n; }
+			nik_ce void set_symbol      (size_ctype i) { index = i; }
 	};
 
 /***********************************************************************************************************************/

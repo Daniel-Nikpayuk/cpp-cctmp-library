@@ -243,18 +243,21 @@ namespace parser {
 			nik_ces size_type row_size	= Nonterminal::dimension;
 			nik_ces size_type col_size	=    Terminal::dimension;
 
-			using stance_type		= engine::parse_table_stance < size_type >;
-			using entry_type		= engine::parse_table_entry  < size_type >;
+			using page_type			= engine::parse_table_page < size_type >;
+			using text_type			= engine::parse_table_text < size_type >;
 			using table_type		= engine::plottable
 							<
-								stance_type, entry_type, size_type, row_size, col_size
+								page_type, text_type, size_type, row_size, col_size
 							>;
 			nik_ces auto char_to_symbol	= _leftmost_char_to_parse_symbol_
 							<
-								stance_type, leftmost_transition_table
+								text_type, leftmost_transition_table
 							>;
 
-			nik_ces auto entry(char_ctype row_c, char_ctype col_c, strlit_ctype_ref str, size_ctype act = Action::nop)
+			nik_ces auto entry
+			(
+				char_ctype row_c, char_ctype col_c, strlit_ctype_ref str, size_ctype act = Action::nop
+			)
 			{
 				size_ctype row = nonterminal.lfind(row_c, Nonterminal::invalid);
 				size_ctype col =    terminal.lfind(col_c,    Terminal::invalid);
