@@ -203,19 +203,19 @@ namespace engine {
 
 // interface:
 
-	template<typename Page, typename Text, typename SizeType, SizeType Size>
-	class plot	: public protoplot // array_size(Page) <= array_size(Text)
+	template<typename Page, typename Text, typename SizeType, SizeType PageSize, SizeType TextSize = PageSize>
+	class plot	: public protoplot // PageSize <= TextSize
 			<
-				cctmp::array < Page , SizeType , Size >,
-				cctmp::array < Text , SizeType , Size >
+				cctmp::array < Page , SizeType , PageSize >,
+				cctmp::array < Text , SizeType , TextSize >
 			>
 	{
 		public:
 
 			using base		= protoplot
 						<
-							cctmp::array < Page , SizeType , Size >,
-							cctmp::array < Text , SizeType , Size >
+							cctmp::array < Page , SizeType , PageSize >,
+							cctmp::array < Text , SizeType , TextSize >
 						>;
 
 			using type		= typename base::type;
@@ -697,9 +697,9 @@ namespace engine {
 	template
 	<
 		typename Body, typename Page, typename Text, typename SizeType,
-		SizeType BodySize, SizeType PageSize, SizeType TextSize
+		SizeType BodySize, SizeType PageSize, SizeType TextSize = PageSize
 	>
-	class corpus	: public protocorpus // array_size(Page) <= array_size(Text)
+	class corpus	: public protocorpus // PageSize <= TextSize
 			<
 				cctmp::array < Body , SizeType , BodySize >,
 				cctmp::array < Page , SizeType , PageSize >,
@@ -766,7 +766,7 @@ namespace engine {
 
 		public:
 
-			nik_ce corpus() { }
+			nik_ce corpus() { base::page.fullsize(); }
 
 			template<typename B, auto N, typename P, auto M, typename T, auto L>
 			nik_ce corpus(const B (&b)[N], const P (&p)[M], const T (&t)[L]) : base{b, p, t} { }
