@@ -476,11 +476,18 @@
 		{
 			for (auto col = 0; col != parser::lltr_table::value.col_length(); ++col)
 			{
+				const bool is_valid = parser::lltr_table::value.not_none(row, col);
+
 				printf(" ");
-				printf("%d, ", parser::lltr_table::value[row][col].is_valid ());
-				printf("%d, ", parser::lltr_table::value[row][col].start    ());
-				printf("%d, ", parser::lltr_table::value[row][col].finish   ());
-				printf("%d, ", parser::lltr_table::value[row][col].action   ());
+				printf("%d, ", is_valid);
+
+				if (is_valid)
+				{
+					printf("%d, ", parser::lltr_table::value.cat(row, col).start    ());
+					printf("%d, ", parser::lltr_table::value.cat(row, col).finish   ());
+					printf("%d, ", parser::lltr_table::value.cat(row, col).action   ());
+				}
+
 				printf("\n");
 			}
 

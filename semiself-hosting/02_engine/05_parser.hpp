@@ -26,7 +26,12 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// plot table:
+// pushdown automata:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// parse table:
 
 /***********************************************************************************************************************/
 
@@ -44,18 +49,15 @@ namespace engine {
 
 		protected:
 
-			bool valid;
 			size_type act_pos;
 
 		public:
 
-			nik_ce parse_table_page() : base{}, valid{}, act_pos{} { }
+			nik_ce parse_table_page() : base{}, act_pos{} { }
 
-			nik_ce bool is_valid    () const { return valid; }
-			nik_ce size_type action () const { return act_pos; }
+			nik_ce size_type action() const { return act_pos; }
 
-			nik_ce void set_valid  (            ) { valid = true; }
-			nik_ce void set_action (size_ctype a) { act_pos = a; }
+			nik_ce void set_action(size_ctype a) { act_pos = a; }
 	};
 
 /***********************************************************************************************************************/
@@ -85,153 +87,117 @@ namespace engine {
 
 			nik_ce void set_terminality (bool const n) { nonterm = n; }
 			nik_ce void set_symbol      (size_ctype i) { index = i; }
+
+			nik_ce bool operator == (const parse_table_text & t) const
+				{ return (t.nonterm == nonterm) && (t.index == index); }
+
+			nik_ce bool operator != (const parse_table_text & t) const
+				{ return (t.nonterm != nonterm) || (t.index != index); }
 	};
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
-// pushdown automata:
+// interface:
 
-/***********************************************************************************************************************/
+	// instead of inheriting directly from plottable, create a sparse plot -> sparse plottable.
 
-// symbol:
-
-/*
-	template<typename SizeType>
-	class parser_symbol
+	template<typename SizeType, SizeType RowSize, SizeType ColSize>
+	class parse_table	: public sparse_plottable
+				<
+					parse_table_page<SizeType>,
+					parse_table_text<SizeType>,
+					SizeType, RowSize, ColSize
+				>
 	{
 		public:
 
-			using size_type		= SizeType;
-			using size_ctype	= size_type const;
+			using base		= sparse_plottable
+						<
+							parse_table_page<SizeType>,
+							parse_table_text<SizeType>,
+							SizeType, RowSize, ColSize
+						>;
 
-			nik_ces auto terminal    (size_ctype n) { return parser_symbol{false , n}; }
-			nik_ces auto nonterminal (size_ctype n) { return parser_symbol{true  , n}; }
-
-		protected:
-
-			bool order;
-			size_type position;
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
 
 		public:
 
-			nik_ce parser_symbol() : order{}, position{} { }
-			nik_ce parser_symbol(const bool o, size_ctype p) : order{o}, position{p} { }
+			nik_ce parse_table() : base{} { }
 
-			nik_ce bool is_nonterminal() const { return order; }
-			nik_ce bool is_terminal() const { return !order; }
-
-			nik_ce size_type index() const { return position; }
-
-			nik_ce bool operator == (const parser_symbol & s) const
-				{ return (s.order == order) && (s.position == position); }
-
-			nik_ce bool operator != (const parser_symbol & s) const
-				{ return (s.order != order) || (s.position != position); }
+			template<typename I, auto N, typename P, auto M, typename T, auto L>
+			nik_ce parse_table(const I (&i)[N], const P (&p)[M], const T (&t)[L]) : base{i, p, t} { }
 	};
-*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// parser:
 
 /***********************************************************************************************************************/
 
 // stack:
 
-/*
 	template<typename SizeType, SizeType Size>
-	class parser_stack
+	class parser_stack : public stack<parse_table_text<SizeType>, SizeType, Size>
 	{
 		public:
 
-			using symbol_type		= parser_symbol<SizeType>;
-			using symbol_ctype		= symbol_type const;
-			using symbol_ctype_ref		= symbol_ctype &;
+			using text_type			= parse_table_text<SizeType>;
+			using base			= stack<text_type, SizeType, Size>;
 
-			using size_type			= typename symbol_type::size_type;
-			using size_ctype		= typename symbol_type::size_ctype;
-
-			using stack_type		= stack<symbol_type, SizeType, Size>;
-
-		protected:
-
-			stack_type stack;
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
 
 		public:
 
-			nik_ce parser_stack(size_ctype start) { stack.push(symbol_type::nonterminal(start)); }
+			nik_ce parser_stack(size_ctype start) { base::push(text_type{true, start}); }
 
-			nik_ce bool is_nonterminal () const { return (*stack).is_nonterminal(); }
-			nik_ce bool is_terminal    () const { return (*stack).is_terminal(); }
+			nik_ce bool is_nonterminal() const { return base::operator * ().is_nonterminal(); }
 
-			nik_ce size_type row() const { return (*stack).index(); }
-
-			nik_ce void push(symbol_ctype_ref s) { stack.push(s); }
+			nik_ce size_type row() const { return base::operator * ().symbol(); }
 
 			template<typename In, typename End>
 			nik_ce void replace(In in, End end)
 			{
-				stack.pull();
+				base::pull();
 
-				while (in != end) stack.push(*--in);
+				while (in != end) base::push(*--in);
 			}
 	};
-*/
 
 /***********************************************************************************************************************/
 
-// table:
+		// a single type array with variable length elements:
 
-		// a table should have 3 components:
+			// array[n] = void lambda(memory_structure m) { ... }
 
-			// a table that indexes entries, 0 being the no entry.
-			// an array of entries, consisting of body { start , finish },
-			//   and an action index, 0 being the nop action.
-			// an array of production symbols, representing dynamic length production bodies,
-			//   symbols consisting of a terminality index, and name index.
+		// and if we use this idea to generate:
 
-/*
-	template<typename TableLiteralType, typename ProductionLiteralType, typename SizeType>
-	class parser_table
-	{
-		public:
+			// abstract_machine_state[n] = void lambda(memory_structure m) { ... }
 
-			using tablit_type		= TableLiteralType;
-			using tablit_ctype		= tablit_type const;
-			using tablit_ctype_ref		= tablit_ctype &;
+		// it then leads to:
 
-			using prodlit_type		= ProductionLiteralType;
-			using prodlit_ctype		= prodlit_type const;
-			using prodlit_ctype_ref		= prodlit_ctype &;
-
-			using size_type			= SizeType;
-			using size_ctype		= size_type const;
-
-		protected:
-
-			tablit_ctype table;
-			prodlit_ctype production;
-
-		public:
-
-			nik_ce parser_table(tablit_ctype_ref t, prodlit_ctype_ref p) :
-				table{t}, production{p}
-					{ }
-
-		protected:
-
-		public:
-
-			nik_ce bool is_valid(size_ctype n) const { return ; }
-			nik_ce size_type action_index(size_ctype n) const { return ; }
-	};
-*/
-
-/***********************************************************************************************************************/
+			// parser_transition_table[m, n] = void lambda(syntax_tree t) { ... }
 
 // action:
 
-/*
+		// keep generic (defer) within the parser itself.
+		// this is so the tree and action array stay modular.
+
+		// as for semantic clusters, design to pass actions into inherited tree.
+		// this is so we can build actions external to the class itself (for example using a DSL).
+		// how best to do this though?
+
+	template<typename Tree, typename SizeType>
 	class parser_action
 	{
 		public:
+
+			using tree_type		= typename alias<Tree>::type;
+
+			using size_type		= typename alias<SizeType>::type;
+			using size_ctype	= typename alias<SizeType>::ctype;
 
 		protected:
 
@@ -241,9 +207,7 @@ namespace engine {
 		public:
 
 			nik_ce parser_action() { }
-
 	};
-*/
 
 /***********************************************************************************************************************/
 

@@ -134,14 +134,14 @@ namespace parser {
 
 // char to parse symbol:
 
-	template<typename Stance, typename Table>
+	template<typename Text, typename Table>
 	struct T_leftmost_char_to_parse_symbol
 	{
 		using    Terminal = typename Table::Terminal;
 		using Nonterminal = typename Table::Nonterminal;
 
 		template<typename CharType>
-		nik_ces auto result(CharType c) -> Stance
+		nik_ces auto result(CharType c) -> Text
 		{
 			bool s = false;
 			auto t = Table::terminal.lfind(c, Terminal::invalid);
@@ -152,11 +152,11 @@ namespace parser {
 				t = Table::nonterminal.lfind(c, Nonterminal::invalid);
 			}
 
-			return Stance{s, t};
+			return Text{s, t};
 		}
 
-	}; template<typename Stance, typename Table>
-		nik_ce auto _leftmost_char_to_parse_symbol_ = U_store_T<T_leftmost_char_to_parse_symbol<Stance, Table>>;
+	}; template<typename Text, typename Table>
+		nik_ce auto _leftmost_char_to_parse_symbol_ = U_store_T<T_leftmost_char_to_parse_symbol<Text, Table>>;
 
 /***********************************************************************************************************************/
 
@@ -243,27 +243,12 @@ namespace parser {
 			nik_ces size_type row_size	= Nonterminal::dimension;
 			nik_ces size_type col_size	=    Terminal::dimension;
 
-			using page_type			= engine::parse_table_page < size_type >;
-			using text_type			= engine::parse_table_text < size_type >;
-			using table_type		= engine::plottable
-							<
-								page_type, text_type, size_type, row_size, col_size
-							>;
+			using table_type		= engine::parse_table<size_type, row_size, col_size>;
 			nik_ces auto char_to_symbol	= _leftmost_char_to_parse_symbol_
 							<
-								text_type, leftmost_transition_table
+								typename table_type::text_type,
+								leftmost_transition_table
 							>;
-
-			nik_ces auto entry
-			(
-				char_ctype row_c, char_ctype col_c, strlit_ctype_ref str, size_ctype act = Action::nop
-			)
-			{
-				size_ctype row = nonterminal.lfind(row_c, Nonterminal::invalid);
-				size_ctype col =    terminal.lfind(col_c,    Terminal::invalid);
-
-				return LambdaTuple::template make(row, col, str, act);
-			}
 
 			template<typename... Entries>
 			nik_ces auto make_table(Entries... ents)
@@ -282,12 +267,22 @@ namespace parser {
 					auto       cend   = repack_table.cend   (k);
 					size_ctype action = repack_table.action (k);
 
-					trans_table[row][col].set_valid();
-					trans_table[row][col].set_action(action);
+					trans_table.at(row, col).set_action(action);
 					trans_table.setmap(row, col, char_to_symbol, cin, cend);
 				}
 
 				return trans_table;
+			}
+
+			nik_ces auto entry
+			(
+				char_ctype row_c, char_ctype col_c, strlit_ctype_ref str, size_ctype act = Action::nop
+			)
+			{
+				size_ctype row = nonterminal.lfind(row_c, Nonterminal::invalid);
+				size_ctype col =    terminal.lfind(col_c,    Terminal::invalid);
+
+				return LambdaTuple::template make(row, col, str, act);
 			}
 
 			nik_ces auto value = make_table

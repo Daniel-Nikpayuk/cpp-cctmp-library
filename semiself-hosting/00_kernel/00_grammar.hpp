@@ -417,10 +417,14 @@ namespace cctmp {
 				nik_ce ctype_ptr origin () const { return initial; }
 				nik_ce ctype_ptr cbegin () const { return initial; }
 
-				nik_ce ctype_ptr citer     (size_ctype n) const { return initial + n; }
-				nik_ce size_type left_size (ctype_cptr i) const { return i - initial; }
+				nik_ce size_type left_size(ctype_cptr i) const { return i - initial; }
 
-				nik_ce ctype_ref operator [] (size_ctype n) const { return initial[n]; }
+				nik_ce ctype_ptr citer (size_ctype n) const { return initial + n; }
+				nik_ce ctype_ref cat   (size_ctype n) const { return initial[n]; }
+
+				template<typename In, typename End>
+				nik_ce bool equal(size_ctype n, In in, End end) const
+					{ return not not_equal(n, in, end); }
 
 				template<typename In, typename End>
 				nik_ce bool not_equal(size_ctype n, In in, End end) const
@@ -431,14 +435,9 @@ namespace cctmp {
 					return false;
 				}
 
-				template<typename In, typename End>
-				nik_ce bool equal(size_ctype n, In in, End end) const
-					{ return not not_equal(n, in, end); }
+				nik_ce ctype_ref operator [] (size_ctype n) const { return cat(n); }
 
 			// terminal:
-
-				nik_ce bool is_empty  () const { return (terminal == 0); }
-				nik_ce bool not_empty () const { return (terminal != 0); }
 
 				nik_ce size_type size () const { return terminal; }
 				nik_ce size_type max  () const { return size() - 1; }
@@ -446,7 +445,10 @@ namespace cctmp {
 				nik_ce ctype_ptr cend  () const { return citer(terminal); }
 				nik_ce ctype_ptr clast () const { return cend() - 1; }
 
-				nik_ce size_type right_size (ctype_cptr i) const { return cend() - i; }
+				nik_ce size_type right_size(ctype_cptr i) const { return cend() - i; }
+
+				nik_ce bool is_empty  () const { return (terminal == 0); }
+				nik_ce bool not_empty () const { return (terminal != 0); }
 	};
 
 /***********************************************************************************************************************/
@@ -491,11 +493,11 @@ namespace cctmp {
 			template<auto N>
 			nik_ce array_literal(const Type (&a)[N]) { set(a, N); }
 
-			nik_ce bool operator != (const array_literal & l) const
-				{ return base::not_equal(0, l.cbegin(), l.cend()); }
-
 			nik_ce bool operator == (const array_literal & l) const
 				{ return base::equal(0, l.cbegin(), l.cend()); }
+
+			nik_ce bool operator != (const array_literal & l) const
+				{ return base::not_equal(0, l.cbegin(), l.cend()); }
 	};
 
 /***********************************************************************************************************************/
@@ -561,31 +563,33 @@ namespace cctmp {
 
 				using base::operator [];
 
-				nik_ce size_type length () const { return Size; }
-
-				nik_ce bool operator != (const array & s) const
-					{ return base::not_equal(0, s.cbegin(), s.cend()); }
+				nik_ce size_type length() const { return Size; }
 
 				nik_ce bool operator == (const array & s) const
 					{ return base::equal(0, s.cbegin(), s.cend()); }
 
+				nik_ce bool operator != (const array & s) const
+					{ return base::not_equal(0, s.cbegin(), s.cend()); }
+
 			// mutable:
 
-				nik_ce type_ptr iter(size_ctype n) { return base::initial + n; }
-
-				nik_ce void push(ctype_ref v) { *iter(base::terminal++) = v; }
-				nik_ce type pop() { return *iter(--base::terminal); }
-
 				nik_ce type_ptr begin () { return base::initial; }
-				nik_ce type_ptr end   () { return iter(base::terminal); }
-				nik_ce type_ptr last  () { return end() - 1; }
 
-				nik_ce type_ref operator [] (size_ctype n) { return base::initial[n]; }
+				nik_ce type_ptr iter (size_ctype n) { return base::initial + n; }
+				nik_ce type_ref at   (size_ctype n) { return base::initial[n]; }
+
+				nik_ce type_ptr end  () { return iter(base::terminal); }
+				nik_ce type_ptr last () { return end() - 1; }
+
+				nik_ce type_ref operator [] (size_ctype n) { return at(n); }
 
 				nik_ce void clear() { base::terminal = 0; }
 				nik_ce void fullsize() { base::terminal = Size; }
 				nik_ce void upsize(size_ctype n = 1) { base::terminal += n; }
 				nik_ce void downsize(size_ctype n = 1) { base::terminal -= n; }
+
+				nik_ce void push(ctype_ref v) { *iter(base::terminal++) = v; }
+				nik_ce type pop() { return *iter(--base::terminal); }
 
 				template<typename In, typename End>
 				nik_ce void push(In in, End end) { while (in != end) push(*in++); }
@@ -673,11 +677,11 @@ namespace cctmp {
 			template<typename T, auto N>
 			nik_ce table_literal(const T (&a)[N]) : base{a} { }
 
-			nik_ce bool operator != (const table_literal & l) const
-				{ return base::not_equal(0, l.cbegin(), l.cend()); }
-
 			nik_ce bool operator == (const table_literal & l) const
 				{ return base::equal(0, l.cbegin(), l.cend()); }
+
+			nik_ce bool operator != (const table_literal & l) const
+				{ return base::not_equal(0, l.cbegin(), l.cend()); }
 	};
 
 /***********************************************************************************************************************/
