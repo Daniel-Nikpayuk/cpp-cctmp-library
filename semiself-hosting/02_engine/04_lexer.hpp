@@ -207,7 +207,7 @@ namespace engine {
 			using size_type		= SizeType;
 			using size_ctype	= size_type const;
 
-			using lit_type		= literal<size_type, size_type>;
+			using lit_type		= cctmp::array_literal<size_type, size_type>;
 			using lit_ctype		= lit_type const;
 			using lit_ctype_ref	= lit_ctype &;
 

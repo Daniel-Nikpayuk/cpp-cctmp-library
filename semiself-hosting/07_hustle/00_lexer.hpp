@@ -164,80 +164,79 @@ namespace hustle {
 
 // policy:
 
-	template<typename LexerTrait>
+	template<typename Trait>
 	struct lexer_policy
 	{
-		using trait			= LexerTrait;
-		using token_name		= typename trait::Token;
-		using state_name		= typename trait::State;
-		using charset_name		= typename trait::Charset;
+		using Token			= typename Trait::Token;
+		using State			= typename Trait::State;
+		using Charset			= typename Trait::Charset;
 
-		using char_type			= typename trait::char_type;
-		using char_ctype		= typename trait::char_ctype;
+		using char_type			= typename Trait::char_type;
+		using char_ctype		= typename Trait::char_ctype;
 
-		using size_type			= typename trait::size_type;
-		using size_ctype		= typename trait::size_ctype;
+		using size_type			= typename Trait::size_type;
+		using size_ctype		= typename Trait::size_ctype;
 
 		nik_ces auto U_char_type	= U_store_T<char_type>;
 		nik_ces auto U_size_type	= U_store_T<size_type>;
 
-		nik_ces auto accept = engine::table
+		nik_ces auto accept = engine::lookup
 		(
 			U_size_type, U_size_type, U_size_type,
 
-			engine::pair( state_name::l_paren    , token_name::l_expr     ),
-			engine::pair( state_name::r_paren    , token_name::r_expr     ),
-			engine::pair( state_name::arrow      , token_name::op_type    ),
-			engine::pair( state_name::colon      , token_name::arg_type   ),
+			engine::pair( State::l_paren    , Token::l_expr     ),
+			engine::pair( State::r_paren    , Token::r_expr     ),
+			engine::pair( State::arrow      , Token::op_type    ),
+			engine::pair( State::colon      , Token::arg_type   ),
 
-			engine::pair( state_name::identifier , token_name::identifier ),
-			engine::pair( state_name::boolean    , token_name::boolean    ),
-			engine::pair( state_name::n_numeral  , token_name::n_number   ),
-			engine::pair( state_name::r_numeral  , token_name::r_number   ),
-			engine::pair( state_name::period     , token_name::r_number   ),
-			engine::pair( state_name::character  , token_name::character  ),
-			engine::pair( state_name::string     , token_name::string     ),
+			engine::pair( State::identifier , Token::identifier ),
+			engine::pair( State::boolean    , Token::boolean    ),
+			engine::pair( State::n_numeral  , Token::n_number   ),
+			engine::pair( State::r_numeral  , Token::r_number   ),
+			engine::pair( State::period     , Token::r_number   ),
+			engine::pair( State::character  , Token::character  ),
+			engine::pair( State::string     , Token::string     ),
 
-			engine::pair( state_name::equal      , token_name::equal      ),
-			engine::pair( state_name::compare_lt , token_name::compare_lt ),
-			engine::pair( state_name::compare_le , token_name::compare_le ),
-			engine::pair( state_name::compare_gt , token_name::compare_gt ),
-			engine::pair( state_name::compare_ge , token_name::compare_ge ),
-			engine::pair( state_name::plus       , token_name::add        ),
-			engine::pair( state_name::star       , token_name::multiply   ),
-			engine::pair( state_name::dash       , token_name::subtract   ),
-			engine::pair( state_name::slash      , token_name::divide     )
+			engine::pair( State::equal      , Token::equal      ),
+			engine::pair( State::compare_lt , Token::compare_lt ),
+			engine::pair( State::compare_le , Token::compare_le ),
+			engine::pair( State::compare_gt , Token::compare_gt ),
+			engine::pair( State::compare_ge , Token::compare_ge ),
+			engine::pair( State::plus       , Token::add        ),
+			engine::pair( State::star       , Token::multiply   ),
+			engine::pair( State::dash       , Token::subtract   ),
+			engine::pair( State::slash      , Token::divide     )
 		);
 
-		nik_ces auto charmap = engine::table
+		nik_ces auto charmap = engine::lookup
 		(
 			U_size_type, U_char_type, U_gkey_type,
 
-			engine::pair( '\'' , charset_name::quote       ),
-			engine::pair( ':'  , charset_name::colon       ),
-			engine::pair( '.'  , charset_name::period      ),
-			engine::pair( '('  , charset_name::l_paren     ),
-			engine::pair( ')'  , charset_name::r_paren     ),
-			engine::pair( '?'  , charset_name::question    ),
-			engine::pair( '#'  , charset_name::octothorpe  ),
-			engine::pair( '!'  , charset_name::punctuation ),
+			engine::pair( '\'' , Charset::quote       ),
+			engine::pair( ':'  , Charset::colon       ),
+			engine::pair( '.'  , Charset::period      ),
+			engine::pair( '('  , Charset::l_paren     ),
+			engine::pair( ')'  , Charset::r_paren     ),
+			engine::pair( '?'  , Charset::question    ),
+			engine::pair( '#'  , Charset::octothorpe  ),
+			engine::pair( '!'  , Charset::punctuation ),
 
-			engine::pair( '='  , charset_name::equal       ),
-			engine::pair( '<'  , charset_name::l_angle     ),
-			engine::pair( '>'  , charset_name::r_angle     ),
-			engine::pair( '+'  , charset_name::plus        ),
-			engine::pair( '*'  , charset_name::star        ),
-			engine::pair( '-'  , charset_name::dash        ),
-			engine::pair( '/'  , charset_name::slash       ),
+			engine::pair( '='  , Charset::equal       ),
+			engine::pair( '<'  , Charset::l_angle     ),
+			engine::pair( '>'  , Charset::r_angle     ),
+			engine::pair( '+'  , Charset::plus        ),
+			engine::pair( '*'  , Charset::star        ),
+			engine::pair( '-'  , Charset::dash        ),
+			engine::pair( '/'  , Charset::slash       ),
 
-			engine::pair( '\\' , charset_name::backslash   )
+			engine::pair( '\\' , Charset::backslash   )
 		);
 
 		nik_ces gkey_type map(char_ctype c)
 		{
-			if      (engine::matches_ula(c))   return charset_name::ula;
-			else if (engine::matches_digit(c)) return charset_name::digit;
-			else                               return charmap.lfind(c, charset_name::other);
+			if      (engine::matches_ula(c))   return Charset::ula;
+			else if (engine::matches_digit(c)) return Charset::digit;
+			else                               return charmap.lfind(c, Charset::other);
 		}
 	};
 
@@ -245,17 +244,16 @@ namespace hustle {
 
 // keyword:
 
-	template<typename LexerTrait>
+	template<typename Trait>
 	struct lexer_keyword
 	{
-		using trait			= LexerTrait;
-		using token_name		= typename trait::Token;
+		using Token			= typename Trait::Token;
 
-		using char_type			= typename trait::char_type;
-		using char_ctype		= typename trait::char_ctype;
+		using char_type			= typename Trait::char_type;
+		using char_ctype		= typename Trait::char_ctype;
 
-		using size_type			= typename trait::size_type;
-		using size_ctype		= typename trait::size_ctype;
+		using size_type			= typename Trait::size_type;
+		using size_ctype		= typename Trait::size_ctype;
 
 		using lexer_if_			= engine::lexer_keyword< char_type , size_type >;
 		using lexer_eq_			= engine::lexer_keyword< char_type , size_type >;
@@ -271,53 +269,121 @@ namespace hustle {
 		using lexer_define		= engine::lexer_keyword< char_type , size_type >;
 		using lexer_lambda		= engine::lexer_keyword< char_type , size_type >;
 
-		nik_ces auto if_		= lexer_if_    { "if"     , token_name::if_    };
-		nik_ces auto eq_		= lexer_eq_    { "eq"     , token_name::eq_    };
-		nik_ces auto let		= lexer_let    { "let"    , token_name::let    };
-		nik_ces auto car		= lexer_car    { "car"    , token_name::car    };
-		nik_ces auto cdr		= lexer_cdr    { "cdr"    , token_name::cdr    };
-		nik_ces auto type		= lexer_type   { "type"   , token_name::type   };
-		nik_ces auto set_		= lexer_set_   { "set"    , token_name::set_   };
-		nik_ces auto cons		= lexer_cons   { "cons"   , token_name::cons   };
-		nik_ces auto list		= lexer_list   { "list"   , token_name::list   };
-		nik_ces auto begin		= lexer_begin  { "begin"  , token_name::begin  };
-		nik_ces auto quote		= lexer_quote  { "quote"  , token_name::quote  };
-		nik_ces auto define		= lexer_define { "define" , token_name::define };
-		nik_ces auto lambda		= lexer_lambda { "lambda" , token_name::lambda };
+		nik_ces auto if_		= lexer_if_    { "if"     , Token::if_    };
+		nik_ces auto eq_		= lexer_eq_    { "eq"     , Token::eq_    };
+		nik_ces auto let		= lexer_let    { "let"    , Token::let    };
+		nik_ces auto car		= lexer_car    { "car"    , Token::car    };
+		nik_ces auto cdr		= lexer_cdr    { "cdr"    , Token::cdr    };
+		nik_ces auto type		= lexer_type   { "type"   , Token::type   };
+		nik_ces auto set_		= lexer_set_   { "set"    , Token::set_   };
+		nik_ces auto cons		= lexer_cons   { "cons"   , Token::cons   };
+		nik_ces auto list		= lexer_list   { "list"   , Token::list   };
+		nik_ces auto begin		= lexer_begin  { "begin"  , Token::begin  };
+		nik_ces auto quote		= lexer_quote  { "quote"  , Token::quote  };
+		nik_ces auto define		= lexer_define { "define" , Token::define };
+		nik_ces auto lambda		= lexer_lambda { "lambda" , Token::lambda };
+	};
+
+/***********************************************************************************************************************/
+
+// (transition) table:
+
+	template<typename Trait>
+	struct lexer_table
+	{
+		using State		= typename Trait::State;
+		using Charset		= typename Trait::Charset;
+
+		using size_type		= typename Trait::size_type;
+		using size_ctype	= typename Trait::size_ctype;
+
+		using table_type	= cctmp::table<size_type, size_type, State::dimension, Charset::dimension>;
+
+		constexpr static auto make()
+		{
+			table_type tab;
+			for (size_type k = tab.length(); k != 0; --k) tab.push(State::empty);
+
+			tab [ State::initial    ][ Charset::ula         ] = State::identifier ;
+			tab [ State::initial    ][ Charset::l_paren     ] = State::l_paren    ;
+			tab [ State::initial    ][ Charset::r_paren     ] = State::r_paren    ;
+			tab [ State::initial    ][ Charset::colon       ] = State::colon      ;
+			tab [ State::initial    ][ Charset::octothorpe  ] = State::hash       ;
+			tab [ State::initial    ][ Charset::digit       ] = State::n_numeral  ;
+			tab [ State::initial    ][ Charset::period      ] = State::period     ;
+			tab [ State::initial    ][ Charset::quote       ] = State::l_quote    ;
+			tab [ State::initial    ][ Charset::equal       ] = State::equal      ;
+			tab [ State::initial    ][ Charset::l_angle     ] = State::compare_lt ;
+			tab [ State::initial    ][ Charset::r_angle     ] = State::compare_gt ;
+			tab [ State::initial    ][ Charset::plus        ] = State::plus       ;
+			tab [ State::initial    ][ Charset::star        ] = State::star       ;
+			tab [ State::initial    ][ Charset::dash        ] = State::dash       ;
+			tab [ State::initial    ][ Charset::slash       ] = State::slash      ;
+
+			tab [ State::identifier ][ Charset::ula         ] = State::identifier ;
+			tab [ State::identifier ][ Charset::digit       ] = State::identifier ;
+			tab [ State::identifier ][ Charset::dash        ] = State::identifier ;
+			tab [ State::identifier ][ Charset::question    ] = State::identifier ;
+			tab [ State::identifier ][ Charset::punctuation ] = State::identifier ;
+
+			tab [ State::hash       ][ Charset::ula         ] = State::boolean    ;
+
+			tab [ State::n_numeral  ][ Charset::digit       ] = State::n_numeral  ;
+			tab [ State::n_numeral  ][ Charset::period      ] = State::period     ;
+
+			tab [ State::r_numeral  ][ Charset::digit       ] = State::r_numeral  ;
+
+			tab [ State::period     ][ Charset::digit       ] = State::r_numeral  ;
+
+			tab [ State::l_quote    ][ Charset::ula         ] = State::character  ;
+
+			tab [ State::character  ][ Charset::ula         ] = State::string     ;
+
+			tab [ State::string     ][ Charset::ula         ] = State::string     ;
+
+			tab [ State::compare_lt ][ Charset::equal       ] = State::compare_le ;
+
+			tab [ State::compare_gt ][ Charset::equal       ] = State::compare_ge ;
+
+			tab [ State::dash       ][ Charset::r_angle     ] = State::arrow      ;
+
+			return tab;
+		}
+
+		nik_ces auto value = make();
 	};
 
 /***********************************************************************************************************************/
 
 // interface:
 
-	template<typename LexerTrait>
+	template<typename Trait>
 	class lexer : public engine::lexer_automaton
 	<
-		typename LexerTrait::State,
-		typename LexerTrait::Charset,
-		typename LexerTrait::iter_type,
-		typename LexerTrait::size_type
+		typename Trait::State,
+		typename Trait::Charset,
+		typename Trait::iter_type,
+		typename Trait::size_type
 	>
 	{
 		public:
 
-			using trait		= LexerTrait;
-			using token_name	= typename trait::Token;
-			using state_name	= typename trait::State;
-			using charset_name	= typename trait::Charset;
+			using Token		= typename Trait::Token;
+			using State		= typename Trait::State;
+			using Charset		= typename Trait::Charset;
 
-			using char_type		= typename trait::char_type;
-			using char_ctype	= typename trait::char_ctype;
+			using char_type		= typename Trait::char_type;
+			using char_ctype	= typename Trait::char_ctype;
 
-			using iter_type		= typename trait::iter_type;
-			using iter_ctype	= typename trait::iter_ctype;
+			using iter_type		= typename Trait::iter_type;
+			using iter_ctype	= typename Trait::iter_ctype;
 
-			using size_type		= typename trait::size_type;
-			using size_ctype	= typename trait::size_ctype;
+			using size_type		= typename Trait::size_type;
+			using size_ctype	= typename Trait::size_ctype;
 
-			using base		= engine::lexer_automaton<state_name, charset_name, iter_type, size_type>;
-			using policy		= lexer_policy<trait>;
-			using keyword		= lexer_keyword<trait>;
+			using base		= engine::lexer_automaton<State, Charset, iter_type, size_type>;
+			using policy		= lexer_policy<Trait>;
+			using keyword		= lexer_keyword<Trait>;
 
 			using lit_type		= typename base::lit_type;
 			using lit_ctype		= typename base::lit_ctype;
@@ -325,47 +391,47 @@ namespace hustle {
 
 		protected:
 
-			size_type token;
+			size_type symbol;
 
 		public:
 
 			nik_ce lexer(lit_ctype_ref t, iter_ctype s, iter_ctype f) :
-				base{t, s, f}, token{token_name::invalid}
+				base{t, s, f}, symbol{Token::invalid}
 					{ }
 
-			nik_ce size_type column() const { return token; }
+			nik_ce size_type column() const { return symbol; }
 
 			nik_ce bool find()
 			{
 				base::initialize();
 
 				if (base::template find<policy>())
-					refine_token(policy::accept.lfind(base::state(), token_name::invalid));
+					refine_symbol(policy::accept.lfind(base::state(), Token::invalid));
 
-				return (token != token_name::invalid);
+				return (symbol != Token::invalid);
 			}
 
 			// refine:
 
-				nik_ce void refine_token(size_ctype t)
+				nik_ce void refine_symbol(size_ctype s)
 				{
-					if      (t == token_name::identifier) refine_identifier (t);
-					else if (t == token_name::boolean   ) refine_boolean    ( );
+					if      (s == Token::identifier) refine_identifier (s);
+					else if (s == Token::boolean   ) refine_boolean    ( );
 				}
 
-				nik_ce void refine_identifier(size_type t)
+				nik_ce void refine_identifier(size_type s)
 				{
-					t = check_keyword(base::cbegin(), base::ccurrent());
-					token = (t != token_name::invalid) ? t : token_name::identifier;
+					s = check_keyword(base::cbegin(), base::ccurrent());
+					symbol = (s != Token::invalid) ? s : Token::identifier;
 				}
 
 				nik_ce void refine_boolean()
 				{
 					switch (*base::cprevious())
 					{
-						case 'f' : { token = token_name::bool_f  ; break; }
-						case 't' : { token = token_name::bool_t  ; break; }
-						default  : { token = token_name::invalid ; break; }
+						case 'f' : { symbol = Token::bool_f  ; break; }
+						case 't' : { symbol = Token::bool_t  ; break; }
+						default  : { symbol = Token::invalid ; break; }
 					}
 				}
 
@@ -373,7 +439,7 @@ namespace hustle {
 
 				nik_ce size_type check_keyword(iter_ctype in, iter_ctype end) const
 				{
-					size_type val = token_name::invalid;
+					size_type val = Token::invalid;
 
 					switch (base::left_size())
 					{
@@ -390,7 +456,7 @@ namespace hustle {
 				nik_ce size_type check_keyword_2(iter_ctype in, iter_ctype end) const
 				{
 					if (keyword::if_.match(in, end)) return keyword::if_.token;
-					else                             return token_name::invalid;
+					else                             return Token::invalid;
 				}
 
 				nik_ce size_type check_keyword_3(iter_ctype in, iter_ctype end) const
@@ -399,7 +465,7 @@ namespace hustle {
 					else if (keyword::let.match(in, end)) return keyword::let.token;
 					else if (keyword::car.match(in, end)) return keyword::car.token;
 					else if (keyword::cdr.match(in, end)) return keyword::cdr.token;
-					else                                  return token_name::invalid;
+					else                                  return Token::invalid;
 				}
 
 				nik_ce size_type check_keyword_4(iter_ctype in, iter_ctype end) const
@@ -408,22 +474,36 @@ namespace hustle {
 					else if (keyword::set_.match(in, end)) return keyword::set_.token;
 					else if (keyword::cons.match(in, end)) return keyword::cons.token;
 					else if (keyword::list.match(in, end)) return keyword::list.token;
-					else                                   return token_name::invalid;
+					else                                   return Token::invalid;
 				}
 
 				nik_ce size_type check_keyword_5(iter_ctype in, iter_ctype end) const
 				{
 					if      (keyword::begin.match(in, end)) return keyword::begin.token;
 					else if (keyword::quote.match(in, end)) return keyword::quote.token;
-					else                                    return token_name::invalid;
+					else                                    return Token::invalid;
 				}
 
 				nik_ce size_type check_keyword_6(iter_ctype in, iter_ctype end) const
 				{
 					if      (keyword::define.match(in, end)) return keyword::define.token;
 					else if (keyword::lambda.match(in, end)) return keyword::lambda.token;
-					else                                     return token_name::invalid;
+					else                                     return Token::invalid;
 				}
+	};
+
+/***********************************************************************************************************************/
+
+// syntactic sugar:
+
+	template<typename CharType, typename SizeType, typename In, typename End>
+	nik_ce auto make_lexer(In in, End end)
+	{
+		using trait_type		= lexer_trait<CharType, SizeType>;
+		using table_type		= lexer_table<trait_type>;
+		using lexer_type		= lexer<trait_type>;
+
+		return lexer_type{table_type::value.origin(), in, end};
 	};
 
 /***********************************************************************************************************************/

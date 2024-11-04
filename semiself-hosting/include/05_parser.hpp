@@ -17,5 +17,7 @@
 **
 ************************************************************************************************************************/
 
-#include"../05_parser/01_leftmost/00_table.hpp"
+#include"../05_parser/01_leftmost/00_lexer.hpp"
+//#include"../05_parser/01_leftmost/01_parser.hpp"
+//#include"../05_parser/01_leftmost/02_targeter.hpp"
 

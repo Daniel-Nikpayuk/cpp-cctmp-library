@@ -431,7 +431,9 @@ namespace engine {
 			nik_ce bool is_full   () const { return base::is_model(current); }
 			nik_ce bool not_full  () const { return base::not_model(current); }
 
-			nik_ce ctype_ref operator * () const { return base::get_car(current); }
+			nik_ce ctype_ref value() const { return base::get_car(current); }
+
+			nik_ce ctype_ref operator * () const { return value(); }
 
 			nik_ce entry_ctype_ptr cbegin() const { return base::cbegin() + current; }
 

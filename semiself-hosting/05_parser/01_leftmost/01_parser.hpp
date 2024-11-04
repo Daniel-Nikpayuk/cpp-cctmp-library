@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// (generate) table:
+// parser:
 
 namespace cctmp  {
 namespace parser {
@@ -33,7 +33,7 @@ namespace parser {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// transition table:
+// parser table:
 
 /***********************************************************************************************************************/
 
@@ -163,7 +163,7 @@ namespace parser {
 // leftmost:
 
 	template<typename Token, typename Action, typename CharType, typename SizeType>
-	struct leftmost_transition_table
+	struct leftmost_parser_table
 	{
 		using char_type			= typename alias<CharType>::type;
 		using char_ctype		= typename alias<CharType>::ctype;
@@ -247,7 +247,7 @@ namespace parser {
 			nik_ces auto char_to_symbol	= _leftmost_char_to_parse_symbol_
 							<
 								typename table_type::text_type,
-								leftmost_transition_table
+								leftmost_parser_table
 							>;
 
 			template<typename... Entries>
@@ -313,7 +313,7 @@ namespace parser {
 			);
 	};
 
-	using lltr_table = leftmost_transition_table
+	using ll_parser_table = leftmost_parser_table
 	<
 		LeftmostToken<gindex_type>  ,
 		LeftmostAction<gindex_type> ,

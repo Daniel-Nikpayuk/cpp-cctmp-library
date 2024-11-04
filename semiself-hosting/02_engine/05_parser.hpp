@@ -99,8 +99,6 @@ namespace engine {
 
 // interface:
 
-	// instead of inheriting directly from plottable, create a sparse plot -> sparse plottable.
-
 	template<typename SizeType, SizeType RowSize, SizeType ColSize>
 	class parse_table	: public sparse_plottable
 				<
@@ -111,12 +109,9 @@ namespace engine {
 	{
 		public:
 
-			using base		= sparse_plottable
-						<
-							parse_table_page<SizeType>,
-							parse_table_text<SizeType>,
-							SizeType, RowSize, ColSize
-						>;
+			using page_type		= parse_table_page < SizeType >;
+			using text_type		= parse_table_text < SizeType >;
+			using base		= sparse_plottable<page_type, text_type, SizeType, RowSize, ColSize>;
 
 			using size_type		= typename base::size_type;
 			using size_ctype	= typename base::size_ctype;
@@ -153,9 +148,9 @@ namespace engine {
 
 			nik_ce parser_stack(size_ctype start) { base::push(text_type{true, start}); }
 
-			nik_ce bool is_nonterminal() const { return base::operator * ().is_nonterminal(); }
+			nik_ce bool is_nonterminal() const { return base::value().is_nonterminal(); }
 
-			nik_ce size_type row() const { return base::operator * ().symbol(); }
+			nik_ce size_type row() const { return base::value().symbol(); }
 
 			template<typename In, typename End>
 			nik_ce void replace(In in, End end)
@@ -168,50 +163,70 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
-		// a single type array with variable length elements:
+// tree:
 
-			// array[n] = void lambda(memory_structure m) { ... }
-
-		// and if we use this idea to generate:
-
-			// abstract_machine_state[n] = void lambda(memory_structure m) { ... }
-
-		// it then leads to:
-
-			// parser_transition_table[m, n] = void lambda(syntax_tree t) { ... }
-
-// action:
-
-		// keep generic (defer) within the parser itself.
-		// this is so the tree and action array stay modular.
-
-		// as for semantic clusters, design to pass actions into inherited tree.
-		// this is so we can build actions external to the class itself (for example using a DSL).
-		// how best to do this though?
-
-	template<typename Tree, typename SizeType>
-	class parser_action
+	template<typename Tree, typename SizeType, SizeType Size>
+	class parser_tree
 	{
 		public:
 
-			using tree_type		= typename alias<Tree>::type;
+			using tree_type			= typename alias<Tree>::type;
+			using tree_type_ptr		= typename alias<Tree>::type_ptr;
+			using tree_type_cptr		= typename alias<Tree>::type_cptr;
+			using tree_type_ref		= typename alias<Tree>::type_ref;
 
-			using size_type		= typename alias<SizeType>::type;
-			using size_ctype	= typename alias<SizeType>::ctype;
+			using tree_ctype		= typename alias<Tree>::ctype;
+			using tree_ctype_ptr		= typename alias<Tree>::ctype_ptr;
+			using tree_ctype_cptr		= typename alias<Tree>::ctype_cptr;
+			using tree_ctype_ref		= typename alias<Tree>::ctype_ref;
+
+			using lexeme_type		= typename tree_type::lexeme_type;
+			using lexeme_type_ptr		= typename tree_type::lexeme_type_ptr;
+			using lexeme_type_cptr		= typename tree_type::lexeme_type_cptr;
+			using lexeme_type_ref		= typename tree_type::lexeme_type_ref;
+
+			using lexeme_ctype		= typename tree_type::lexeme_ctype;
+			using lexeme_ctype_ptr		= typename tree_type::lexeme_ctype_ptr;
+			using lexeme_ctype_cptr		= typename tree_type::lexeme_ctype_cptr;
+			using lexeme_ctype_ref		= typename tree_type::lexeme_ctype_ref;
+
+			using Action			= void(*)(tree_type_ref, lexeme_ctype_ref);
+
+			using action_type		= typename alias<Action>::type;
+			using action_type_ptr		= typename alias<Action>::type_ptr;
+			using action_type_cptr		= typename alias<Action>::type_cptr;
+			using action_type_ref		= typename alias<Action>::type_ref;
+
+			using action_ctype		= typename alias<Action>::ctype;
+			using action_ctype_ptr		= typename alias<Action>::ctype_ptr;
+			using action_ctype_cptr		= typename alias<Action>::ctype_cptr;
+			using action_ctype_ref		= typename alias<Action>::ctype_ref;
+
+			using action_array_type		= cctmp::array<action_ctype, SizeType, Size>;
+			using action_array_type_ptr	= typename alias<action_array_type>::type_ptr;
+			using action_array_type_cptr	= typename alias<action_array_type>::type_cptr;
+			using action_array_type_ref	= typename alias<action_array_type>::type_ref;
+
+			using size_type			= typename alias<SizeType>::type;
+			using size_ctype		= typename alias<SizeType>::ctype;
 
 		protected:
 
-		//	lookup_type lookup[Size];
-		//	tree_type tree;
+			tree_type tree;
+			action_array_type action;
 
 		public:
 
-			nik_ce parser_action() { }
+			nik_ce parser_tree(action_ctype (&a)[Size]) : action{a} { }
+
+			nik_ce void apply_action(size_ctype n, lexeme_ctype_ref l) { action[n](*this, l); }
 	};
 
 /***********************************************************************************************************************/
 
 // state:
+
+	// how best to implement the lexer relative to the parser?
 
 		// we need a stack class to update its productions, and direct us to the transition table row.
 		// we need a lexer class to handle the current word and direct us to the transition table column.
@@ -224,44 +239,84 @@ namespace engine {
 		// add a Table { position } enum class to keep the table access generic.
 
 /*
-	template<typename LexerType, typename TableType, typename ActionType, typename SizeType, SizeType Size>
+	template<typename Table, typename Lexer, typename Tree, typename Stack, typename SizeType, SizeType Size>
 	class parser_state
 	{
 		public:
 
-			using size_type		= SizeType;
-			using size_ctype	= size_type const;
+			using lexer_type		= parser_lexer<Lexer, SizeType>;
+			using lexer_type_ptr		= typename alias<lexer_type>::type_ptr;
+			using lexer_type_cptr		= typename alias<lexer_type>::type_cptr;
+			using lexer_type_ref		= typename alias<lexer_type>::type_ref;
 
-			using stack_type	= parser_stack<size_type, Size>;
+			using lexer_ctype		= typename alias<lexer_type>::ctype;
+			using lexer_ctype_ptr		= typename alias<lexer_type>::ctype_ptr;
+			using lexer_ctype_cptr		= typename alias<lexer_type>::ctype_cptr;
+			using lexer_ctype_ref		= typename alias<lexer_type>::ctype_ref;
 
-			using lexer_type	= LexerType;
-			using lexer_ctype	= lexer_type const;
-			using lexer_ctype_ref	= lexer_ctype &;
+		//	using strlit_type		= typename lexer_type::strlit_type;
+		//	using strlit_type_ptr		= typename lexer_type::strlit_type_ptr;
+		//	using strlit_type_cptr		= typename lexer_type::strlit_type_cptr;
+		//	using strlit_type_ref		= typename lexer_type::strlit_type_ref;
 
-			using table_type	= TableType;
-			using table_ctype	= table_type const;
-			using table_ctype_ref	= table_ctype &;
+		//	using strlit_ctype		= typename lexer_type::strlit_ctype;
+		//	using strlit_ctype_ptr		= typename lexer_type::strlit_ctype_ptr;
+		//	using strlit_ctype_cptr		= typename lexer_type::strlit_ctype_cptr;
+		//	using strlit_ctype_ref		= typename lexer_type::strlit_ctype_ref;
 
-			using action_type	= ActionType;
-			using action_ctype	= action_type const;
-			using action_ctype_ref	= action_ctype &;
+			using stack_type		= parser_stack<SizeType, Size>;
+			using stack_type_ptr		= typename alias<stack_type>::type_ptr;
+			using stack_type_cptr		= typename alias<stack_type>::type_cptr;
+			using stack_type_ref		= typename alias<stack_type>::type_ref;
+
+			using stack_ctype		= typename alias<stack_type>::ctype;
+			using stack_ctype_ptr		= typename alias<stack_type>::ctype_ptr;
+			using stack_ctype_cptr		= typename alias<stack_type>::ctype_cptr;
+			using stack_ctype_ref		= typename alias<stack_type>::ctype_ref;
+
+			using tree_type			= parser_tree<Tree, SizeType, Size>;
+			using tree_type_ptr		= typename alias<tree_type>::type_ptr;
+			using tree_type_cptr		= typename alias<tree_type>::type_cptr;
+			using tree_type_ref		= typename alias<tree_type>::type_ref;
+
+			using tree_ctype		= typename alias<tree_type>::ctype;
+			using tree_ctype_ptr		= typename alias<tree_type>::ctype_ptr;
+			using tree_ctype_cptr		= typename alias<tree_type>::ctype_cptr;
+			using tree_ctype_ref		= typename alias<tree_type>::ctype_ref;
+
+			using size_type			= typename alias<SizeType>::type;
+			using size_ctype		= typename alias<SizeType>::ctype;
 
 		protected:
 
-			stack_type stack;
 			lexer_type lexer;
-			table_ctype table;
-			action_type action;
+			 tree_type tree;
+			stack_type stack;
 
 		public:
 
-			nik_ce parser_state(lexer_ctype_ref l, table_ctype_ref t, action_ctype_ref a) :
-				lexer{l}, table{t}, action{a}
-					{ }
+			nik_ce parser_state() { }
 
-		protected:
+		//	nik_ce parser_state(strlit_ctype_ref strlit) :
+		//		lexer{strlit.cbegin(), strlit.cend()}
+		//			{ }
+
+			template<typename In, typename End>
+			nik_ce parser_state(In in, End end) : lexer{in, end} { }
 
 		public:
+
+			nik_ce void translate()
+			{
+	//			while (lexer.not_end())
+	//			{
+	//				if (lexer.find())
+	//					for (auto k = lexer.cbegin(); k != lexer.ccurrent(); ++k)
+	//						printf("%c", *k);
+
+	//				printf("\n");
+	//			}
+			}
 
 	};
 */
