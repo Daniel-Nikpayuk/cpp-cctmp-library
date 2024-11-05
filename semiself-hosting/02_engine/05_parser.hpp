@@ -26,6 +26,17 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// context-free grammar:
+
+//	template<typename CharType, auto M, auto N>
+//	nik_ce auto context_free_grammar(const CharType (&srt)[M], const CharType (&str)[N])
+//	{
+//		return cctmp::pair(cctmp::string_literal(srt), cctmp::string_literal(str));
+//	}
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // pushdown automata:
 
 /***********************************************************************************************************************/
@@ -116,12 +127,34 @@ namespace engine {
 			using size_type		= typename base::size_type;
 			using size_ctype	= typename base::size_ctype;
 
+		protected:
+
+			size_type row_pos;
+			size_type col_pos;
+
 		public:
 
-			nik_ce parse_table() : base{} { }
+			nik_ce parse_table() : base{}, row_pos{}, col_pos{} { }
 
 			template<typename I, auto N, typename P, auto M, typename T, auto L>
 			nik_ce parse_table(const I (&i)[N], const P (&p)[M], const T (&t)[L]) : base{i, p, t} { }
+
+			nik_ce bool  is_valid () const { return base:: not_none (row_pos, col_pos); }
+			nik_ce bool not_valid () const { return base::  is_none (row_pos, col_pos); }
+
+			nik_ce size_type row () const { return row_pos; }
+			nik_ce size_type col () const { return col_pos; }
+
+			nik_ce auto action () const { return base::cat(row_pos, col_pos).action(); }
+
+			nik_ce auto cbegin () const { return base::cbegin (row_pos, col_pos); }
+			nik_ce auto cend   () const { return base::cend   (row_pos, col_pos); }
+
+			nik_ce void move(size_ctype n, size_ctype m)
+			{
+				row_pos = n;
+				col_pos = m;
+			}
 	};
 
 /***********************************************************************************************************************/
@@ -131,41 +164,9 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
-// stack:
-
-	template<typename SizeType, SizeType Size>
-	class parser_stack : public stack<parse_table_text<SizeType>, SizeType, Size>
-	{
-		public:
-
-			using text_type			= parse_table_text<SizeType>;
-			using base			= stack<text_type, SizeType, Size>;
-
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
-
-		public:
-
-			nik_ce parser_stack(size_ctype start) { base::push(text_type{true, start}); }
-
-			nik_ce bool is_nonterminal() const { return base::value().is_nonterminal(); }
-
-			nik_ce size_type row() const { return base::value().symbol(); }
-
-			template<typename In, typename End>
-			nik_ce void replace(In in, End end)
-			{
-				base::pull();
-
-				while (in != end) base::push(*--in);
-			}
-	};
-
-/***********************************************************************************************************************/
-
 // tree:
 
-	template<typename Tree, typename SizeType, SizeType Size>
+	template<typename Tree, typename Lexer, typename SizeType, SizeType Size>
 	class parser_tree
 	{
 		public:
@@ -180,17 +181,17 @@ namespace engine {
 			using tree_ctype_cptr		= typename alias<Tree>::ctype_cptr;
 			using tree_ctype_ref		= typename alias<Tree>::ctype_ref;
 
-			using lexeme_type		= typename tree_type::lexeme_type;
-			using lexeme_type_ptr		= typename tree_type::lexeme_type_ptr;
-			using lexeme_type_cptr		= typename tree_type::lexeme_type_cptr;
-			using lexeme_type_ref		= typename tree_type::lexeme_type_ref;
+			using lexer_type		= typename alias<Lexer>::type;
+			using lexer_type_ptr		= typename alias<Lexer>::type_ptr;
+			using lexer_type_cptr		= typename alias<Lexer>::type_cptr;
+			using lexer_type_ref		= typename alias<Lexer>::type_ref;
 
-			using lexeme_ctype		= typename tree_type::lexeme_ctype;
-			using lexeme_ctype_ptr		= typename tree_type::lexeme_ctype_ptr;
-			using lexeme_ctype_cptr		= typename tree_type::lexeme_ctype_cptr;
-			using lexeme_ctype_ref		= typename tree_type::lexeme_ctype_ref;
+			using lexer_ctype		= typename alias<Lexer>::ctype;
+			using lexer_ctype_ptr		= typename alias<Lexer>::ctype_ptr;
+			using lexer_ctype_cptr		= typename alias<Lexer>::ctype_cptr;
+			using lexer_ctype_ref		= typename alias<Lexer>::ctype_ref;
 
-			using Action			= void(*)(tree_type_ref, lexeme_ctype_ref);
+			using Action			= void(*)(tree_type_ref, lexer_ctype_ref);
 
 			using action_type		= typename alias<Action>::type;
 			using action_type_ptr		= typename alias<Action>::type_ptr;
@@ -219,50 +220,86 @@ namespace engine {
 
 			nik_ce parser_tree(action_ctype (&a)[Size]) : action{a} { }
 
-			nik_ce void apply_action(size_ctype n, lexeme_ctype_ref l) { action[n](*this, l); }
+			nik_ce bool  is_nop (size_ctype n) const { return (n == 0); }
+			nik_ce bool not_nop (size_ctype n) const { return (n != 0); }
+
+			nik_ce void fast_apply(size_ctype n, lexer_ctype_ref l) { action[n](tree, l); }
+
+			nik_ce void apply(size_ctype n, lexer_ctype_ref l)
+				{ if (not_nop(n)) fast_apply(n, l); }
+	};
+
+/***********************************************************************************************************************/
+
+// stack:
+
+	template<typename SizeType, SizeType Size>
+	class parser_stack : public stack<parse_table_text<SizeType>, SizeType, Size>
+	{
+		public:
+
+			using text_type			= parse_table_text<SizeType>;
+			using base			= stack<text_type, SizeType, Size>;
+
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+		public:
+
+			nik_ce parser_stack(size_ctype start) { base::push(text_type{true, start}); }
+
+			nik_ce bool is_nonterminal() const { return base::value().is_nonterminal(); }
+
+			nik_ce size_type token () const { return base::value().symbol(); }
+			nik_ce size_type row   () const { return token(); }
+
+			template<typename In, typename End>
+			nik_ce void replace(In in, End end)
+			{
+				base::pull();
+
+				while (in != end) base::push(*--in);
+			}
 	};
 
 /***********************************************************************************************************************/
 
 // state:
 
-	// how best to implement the lexer relative to the parser?
-
-		// we need a stack class to update its productions, and direct us to the transition table row.
-		// we need a lexer class to handle the current word and direct us to the transition table column.
-		// we need an action class with an action lookup table and a tree to apply the action to the word.
-
-		// do we need a table class on its own? Given the production indirection, it seems reasonable.
-
-		// Once we have the current table entry, we check if the entry is valid, if so we update the stack,
-		// and apply an action if there is one.
-		// add a Table { position } enum class to keep the table access generic.
-
-/*
-	template<typename Table, typename Lexer, typename Tree, typename Stack, typename SizeType, SizeType Size>
+	template<typename Table, typename Lexer, typename Tree, typename SizeType, SizeType Size>
 	class parser_state
 	{
 		public:
 
-			using lexer_type		= parser_lexer<Lexer, SizeType>;
-			using lexer_type_ptr		= typename alias<lexer_type>::type_ptr;
-			using lexer_type_cptr		= typename alias<lexer_type>::type_cptr;
-			using lexer_type_ref		= typename alias<lexer_type>::type_ref;
+			using table_type		= typename alias<Table>::type;
+			using table_type_ptr		= typename alias<Table>::type_ptr;
+			using table_type_cptr		= typename alias<Table>::type_cptr;
+			using table_type_ref		= typename alias<Table>::type_ref;
 
-			using lexer_ctype		= typename alias<lexer_type>::ctype;
-			using lexer_ctype_ptr		= typename alias<lexer_type>::ctype_ptr;
-			using lexer_ctype_cptr		= typename alias<lexer_type>::ctype_cptr;
-			using lexer_ctype_ref		= typename alias<lexer_type>::ctype_ref;
+			using table_ctype		= typename alias<Table>::ctype;
+			using table_ctype_ptr		= typename alias<Table>::ctype_ptr;
+			using table_ctype_cptr		= typename alias<Table>::ctype_cptr;
+			using table_ctype_ref		= typename alias<Table>::ctype_ref;
 
-		//	using strlit_type		= typename lexer_type::strlit_type;
-		//	using strlit_type_ptr		= typename lexer_type::strlit_type_ptr;
-		//	using strlit_type_cptr		= typename lexer_type::strlit_type_cptr;
-		//	using strlit_type_ref		= typename lexer_type::strlit_type_ref;
+			using lexer_type		= typename alias<Lexer>::type;
+			using lexer_type_ptr		= typename alias<Lexer>::type_ptr;
+			using lexer_type_cptr		= typename alias<Lexer>::type_cptr;
+			using lexer_type_ref		= typename alias<Lexer>::type_ref;
 
-		//	using strlit_ctype		= typename lexer_type::strlit_ctype;
-		//	using strlit_ctype_ptr		= typename lexer_type::strlit_ctype_ptr;
-		//	using strlit_ctype_cptr		= typename lexer_type::strlit_ctype_cptr;
-		//	using strlit_ctype_ref		= typename lexer_type::strlit_ctype_ref;
+			using lexer_ctype		= typename alias<Lexer>::ctype;
+			using lexer_ctype_ptr		= typename alias<Lexer>::ctype_ptr;
+			using lexer_ctype_cptr		= typename alias<Lexer>::ctype_cptr;
+			using lexer_ctype_ref		= typename alias<Lexer>::ctype_ref;
+
+			using tree_type			= typename alias<Tree>::type;
+			using tree_type_ptr		= typename alias<Tree>::type_ptr;
+			using tree_type_cptr		= typename alias<Tree>::type_cptr;
+			using tree_type_ref		= typename alias<Tree>::type_ref;
+
+			using tree_ctype		= typename alias<Tree>::ctype;
+			using tree_ctype_ptr		= typename alias<Tree>::ctype_ptr;
+			using tree_ctype_cptr		= typename alias<Tree>::ctype_cptr;
+			using tree_ctype_ref		= typename alias<Tree>::ctype_ref;
 
 			using stack_type		= parser_stack<SizeType, Size>;
 			using stack_type_ptr		= typename alias<stack_type>::type_ptr;
@@ -274,21 +311,14 @@ namespace engine {
 			using stack_ctype_cptr		= typename alias<stack_type>::ctype_cptr;
 			using stack_ctype_ref		= typename alias<stack_type>::ctype_ref;
 
-			using tree_type			= parser_tree<Tree, SizeType, Size>;
-			using tree_type_ptr		= typename alias<tree_type>::type_ptr;
-			using tree_type_cptr		= typename alias<tree_type>::type_cptr;
-			using tree_type_ref		= typename alias<tree_type>::type_ref;
-
-			using tree_ctype		= typename alias<tree_type>::ctype;
-			using tree_ctype_ptr		= typename alias<tree_type>::ctype_ptr;
-			using tree_ctype_cptr		= typename alias<tree_type>::ctype_cptr;
-			using tree_ctype_ref		= typename alias<tree_type>::ctype_ref;
-
 			using size_type			= typename alias<SizeType>::type;
 			using size_ctype		= typename alias<SizeType>::ctype;
 
 		protected:
 
+			enum Exit : size_type		{ none, lexer_only, stack_only, both, dimension };
+
+			table_type table;
 			lexer_type lexer;
 			 tree_type tree;
 			stack_type stack;
@@ -297,29 +327,122 @@ namespace engine {
 
 			nik_ce parser_state() { }
 
-		//	nik_ce parser_state(strlit_ctype_ref strlit) :
-		//		lexer{strlit.cbegin(), strlit.cend()}
-		//			{ }
-
-			template<typename In, typename End>
-			nik_ce parser_state(In in, End end) : lexer{in, end} { }
+			nik_ce parser_state(table_ctype_ref t, lexer_ctype_ref l, tree_ctype_ref r, size_ctype s) :
+				table{t}, lexer{l}, tree{r}, stack{s} { }
 
 		public:
 
 			nik_ce void translate()
 			{
-	//			while (lexer.not_end())
-	//			{
-	//				if (lexer.find())
-	//					for (auto k = lexer.cbegin(); k != lexer.ccurrent(); ++k)
-	//						printf("%c", *k);
+				lexer.find();
 
-	//				printf("\n");
-	//			}
+				while (lexer.not_end() && stack.not_empty()) dispatch();
+
+				exit();
 			}
 
+			nik_ce void dispatch()
+			{
+				if (stack.is_nonterminal()) nonterminal ();
+				else                           terminal ();
+			}
+
+			// nonterminal:
+
+				nik_ce bool is_nonterminal_err() const
+					{ return table.not_valid(); }
+
+				nik_ce void nonterminal()
+				{
+					table.move(stack.row(), lexer.column());
+
+					if (is_nonterminal_err()) nonterminal_report();
+					else
+					{
+						nonterminal_stack  ();
+						nonterminal_action ();
+					}
+				}
+
+				nik_ce void nonterminal_report()
+					{ } // nothing yet.
+
+				nik_ce void nonterminal_stack()
+					{ stack.replace(table.cbegin(), table.cend()); }
+
+				nik_ce void nonterminal_action()
+					{ tree.apply(table.action(), lexer); }
+
+			// terminal:
+
+				nik_ce bool is_terminal_err() const
+					{ return (lexer.token() != stack.token()); }
+
+				nik_ce void terminal()
+				{
+					if (is_terminal_err()) terminal_report();
+					else
+					{
+						terminal_stack ();
+						terminal_lexer ();
+					}
+				}
+
+				nik_ce void terminal_report()
+					{ } // nothing yet.
+
+				nik_ce void terminal_stack () { stack.pull(); }
+				nik_ce void terminal_lexer () { lexer.find(); }
+
+			// exit:
+
+				nik_ce size_type exit_index() const
+				{
+					if (lexer.not_empty()) return exit_index_lexer ();
+					else                   return exit_index_stack ();
+				}
+
+				nik_ce size_type exit_index_lexer() const
+				{
+					if (stack.not_empty()) return Exit::both;
+					else                   return Exit::lexer_only;
+				}
+
+				nik_ce size_type exit_index_stack() const
+				{
+					if (stack.not_empty()) return Exit::stack_only;
+					else                   return Exit::none;
+				}
+
+				nik_ce void exit()
+				{
+					switch (exit_index())
+					{
+						case Exit::lexer_only : { exit_string_only (); break; }
+						case Exit::stack_only : { exit_stack_only  (); break; }
+						case Exit::both       : { exit_both        (); break; }
+						case Exit::none       : { exit_none        (); break; }
+					}
+				}
+
+				nik_ce void exit_lexer_only()
+				{
+				}
+
+				nik_ce void exit_stack_only()
+				{
+				//	lexer.set_token(Token::prompt);
+				//	while (stack.not_empty()) dispatch();
+
+					// (stack.front() == ::stack_finish);
+				}
+
+				nik_ce void exit_both()
+					{ } // nothing yet.
+
+				nik_ce void exit_none()
+					{ } // nothing yet.
 	};
-*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

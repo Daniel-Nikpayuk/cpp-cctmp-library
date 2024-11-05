@@ -262,7 +262,8 @@ namespace parser {
 				base{t, s, f}, symbol{Token::invalid}
 					{ }
 
-			nik_ce size_type column() const { return symbol; }
+			nik_ce size_type token  () const { return symbol; }
+			nik_ce size_type column () const { return token(); }
 
 			nik_ce bool find()
 			{

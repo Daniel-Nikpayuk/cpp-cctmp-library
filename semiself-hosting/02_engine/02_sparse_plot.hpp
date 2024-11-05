@@ -518,6 +518,12 @@ namespace engine {
 
 			nik_ce page_ctype_ref cat(size_ctype n, size_ctype m) const
 				{ return cpage().cat(page_position(n, m)); }
+
+			nik_ce page_ctype_ref cbegin(size_ctype n, size_ctype m) const
+				{ return carc().cbegin(page_position(n, m)); }
+
+			nik_ce page_ctype_ref cend(size_ctype n, size_ctype m) const
+				{ return carc().cend(page_position(n, m)); }
 	};
 
 /***********************************************************************************************************************/
