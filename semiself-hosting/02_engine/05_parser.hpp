@@ -418,10 +418,10 @@ namespace engine {
 				{
 					switch (exit_index())
 					{
-						case Exit::lexer_only : { exit_string_only (); break; }
-						case Exit::stack_only : { exit_stack_only  (); break; }
-						case Exit::both       : { exit_both        (); break; }
-						case Exit::none       : { exit_none        (); break; }
+						case Exit::lexer_only : { exit_lexer_only (); break; }
+						case Exit::stack_only : { exit_stack_only (); break; }
+						case Exit::both       : { exit_both       (); break; }
+						case Exit::none       : { exit_none       (); break; }
 					}
 				}
 

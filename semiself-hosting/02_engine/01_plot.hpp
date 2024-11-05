@@ -60,7 +60,7 @@ namespace engine {
 
 // proto:
 
-		// text: circumstantial semantics separate from base.
+		// text: circumstantial semantics separate from page.
 
 	template<typename PageArray, typename TextArray>
 	class protoplot
