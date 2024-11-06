@@ -26,9 +26,57 @@ namespace parser {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// engine:
+// parser generator grammar:
 
-	using engine::LambdaTuple;
+/***********************************************************************************************************************/
+
+	// tree := (head plot, body corpus, action corpus)
+
+	// " Start      -> Line RecLine                                                    ;"
+	// " RecLine    -> Line RecLine                                                    ;"
+	// "            -> empty                                                           ;"
+	// " Line       -> Head arrow Body Action semicolon                                ;"
+	// " Head       -> identifier                       : push_unique_head             ;"
+	// "            -> empty                                                           ;"
+	// " Body       -> Symbol RecBody                                                  ;"
+	// "            -> empty_body                       : push_empty_next_body         ;"
+	// " RecBody    -> Symbol RecBody                                                  ;"
+	// "            -> empty                            : push_next_body               ;"
+	// " Symbol     -> identifier                       : push_identifier_current_body ;"
+	// " Action     -> colon Expression                                                ;"
+	// "            -> empty                            : push_next_action             ;"
+	// " Expression -> identifier                       : push_identifier_next_action  ;"
+	// "            -> literal                          : push_literal_next_action     ;"
+
+  /*---------------------------------*/  /*---------------------------------*/  /*---------------------------------*/
+  /* terminals (tokens):             */  /* nonterminals:                   */  /* context-free grammar (CFG):     */
+  /*                                 */  /*                                 */  /*                                 */
+  /*  e - empty (generator)          */  /* S - Start                       */  /* S -> LM                         */
+  /*  a - arrow (right)              */  /* L - Line                        */  /* M -> LM    | e                  */
+  /*  s - semicolon                  */  /* M - Line (recursive)            */  /* L -> HaBAs                      */
+  /*  i - identifier                 */  /* H - Head                        */  /* H -> i     | e                  */
+  /*  m - empty_body (generated)     */  /* B - Body                        */  /* B -> YC    | m                  */
+  /*  c - colon                      */  /* C - Body (recursive)            */  /* C -> YC    | e                  */
+  /*  l - literal                    */  /* A - Action                      */  /* Y -> i                          */
+  /*---------------------------------*/  /* Y - Symbol                      */  /* A -> cE    | e                  */
+                                         /* E - Expression                  */  /* E -> i     | l                  */
+                                         /*---------------------------------*/  /* --------------------------------*/
+
+  /*------------------------------------------------------------------------------------------------*/
+  /* parse table:                                                                                   */
+  /*                                                                                                */
+  /* n\t | i          | a          | s          | c          | m          | l          | $          */
+  /*------------------------------------------------------------------------------------------------*/
+  /*   S | S -> LM    | S -> LM    |            |            |            |            |            */
+  /*   M | M -> LM    | M -> LM    |            |            |            |            | M -> e     */
+  /*   L | L -> HaBAs | L -> HaBAs |            |            |            |            |            */
+  /*   H | H -> i     | H -> e     |            |            |            |            |            */
+  /*   B | B -> YC    |            |            |            | B -> m     |            |            */
+  /*   C | C -> YC    |            | C -> e     | C -> e     |            |            |            */
+  /*   Y | Y -> i     |            |            |            |            |            |            */
+  /*   A |            |            | A -> e     | A -> cE    |            |            |            */
+  /*   E | E -> i     |            |            |            |            | E -> l     |            */
+  /*------------------------------------------------------------------------------------------------*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -37,36 +85,10 @@ namespace parser {
 
 /***********************************************************************************************************************/
 
-// token:
-
-	template<typename SizeType>
-	struct LeftmostToken
-	{
-		using size_type		= typename alias<SizeType>::type;
-		using size_ctype	= typename alias<SizeType>::ctype;
-
-		enum : size_type
-		{
-			invalid    ,
-			empty      ,
-			prompt     ,
-			identifier ,
-			none       ,
-			arrow      ,
-			equal      ,
-			colon      ,
-			semicolon  ,
-
-			dimension
-		};
-	};
-
-/***********************************************************************************************************************/
-
 // action:
 
 	template<typename SizeType>
-	struct LeftmostAction
+	struct leftmost_action
 	{
 		using size_type		= typename alias<SizeType>::type;
 		using size_ctype	= typename alias<SizeType>::ctype;
@@ -75,8 +97,13 @@ namespace parser {
 		{
 			nop,
 
-			l_value , r_value , m_value , a_value ,
-			front   , head    , body    , accept  ,
+			push_unique_head             ,
+			push_empty_next_body         ,
+			push_next_body               ,
+			push_identifier_current_body ,
+			push_next_action             ,
+			push_identifier_next_action  ,
+			push_literal_next_action     ,
 
 			dimension
 		};
@@ -176,26 +203,23 @@ namespace parser {
 
 		// grammar:
 
-			using Terminal		= Token;
+			using Terminal = Token;
 
 			struct Nonterminal
 			{
 				enum : size_type
 				{
-					start         ,
-					rec_declare   ,
-					front_declare ,
-					head_declare  ,
-					body_declare  ,
-					disp_name     ,
-					rec_name      ,
-					tok_name      ,
-					action        ,
-					call          ,
-					rec_alias     ,
-					tok_alias     ,
-					end_alias     ,
-					invalid       ,
+					invalid,
+
+					start          ,
+					line           ,
+					line_recursive ,
+					head           ,
+					body           ,
+					body_recursive ,
+					action         ,
+					symbol         ,
+					expression     ,
 
 					dimension
 				};
@@ -206,12 +230,12 @@ namespace parser {
 				U_size_type,
 				U_char_type, U_size_type,
 
-				engine::pair( 'i' , Terminal::identifier ),
 				engine::pair( 'a' , Terminal::arrow      ),
 				engine::pair( ';' , Terminal::semicolon  ),
+				engine::pair( 'i' , Terminal::identifier ),
+				engine::pair( 'm' , Terminal::empty_body ),
 				engine::pair( ':' , Terminal::colon      ),
-				engine::pair( 'm' , Terminal::empty      ), // empty, not none.
-				engine::pair( '=' , Terminal::equal      ),
+				engine::pair( 'l' , Terminal::literal    ),
 				engine::pair( '$' , Terminal::prompt     )
 			);
 
@@ -220,19 +244,15 @@ namespace parser {
 				U_size_type,
 				U_char_type, U_size_type,
 
-				engine::pair( 'S' , Nonterminal::start         ),
-				engine::pair( 'D' , Nonterminal::rec_declare   ),
-				engine::pair( 'F' , Nonterminal::front_declare ),
-				engine::pair( 'H' , Nonterminal::head_declare  ),
-				engine::pair( 'B' , Nonterminal::body_declare  ),
-				engine::pair( 'M' , Nonterminal::disp_name     ),
-				engine::pair( 'N' , Nonterminal::rec_name      ),
-				engine::pair( 'T' , Nonterminal::tok_name      ),
-				engine::pair( 'A' , Nonterminal::action        ),
-				engine::pair( 'C' , Nonterminal::call          ),
-				engine::pair( 'J' , Nonterminal::rec_alias     ),
-				engine::pair( 'I' , Nonterminal::tok_alias     ),
-				engine::pair( 'K' , Nonterminal::end_alias     )
+				engine::pair( 'S' , Nonterminal::start          ),
+				engine::pair( 'L' , Nonterminal::line           ),
+				engine::pair( 'M' , Nonterminal::line_recursive ),
+				engine::pair( 'H' , Nonterminal::head           ),
+				engine::pair( 'B' , Nonterminal::body           ),
+				engine::pair( 'C' , Nonterminal::body_recursive ),
+				engine::pair( 'A' , Nonterminal::action         ),
+				engine::pair( 'Y' , Nonterminal::symbol         ),
+				engine::pair( 'E' , Nonterminal::expression     )
 			);
 
 		// table:
@@ -287,48 +307,27 @@ namespace parser {
 
 			nik_ces auto value = make_table
 			(
-				entry( 'S' , 'i' , "iFD"   , Action::l_value ),
-				entry( 'D' , 'i' , "iHD"   , Action::l_value ),
-				entry( 'D' , '$' , ""      , Action::accept  ),
-				entry( 'F' , 'a' , "aMA;B" , Action::front   ),
-				entry( 'F' , '=' , "=IJK"                    ),
-				entry( 'H' , 'a' , "aMA;B" , Action::head    ),
-				entry( 'H' , '=' , "=IJK"                    ),
-				entry( 'B' , 'i' , ""                        ),
-				entry( 'B' , 'a' , "aMA;B" , Action::body    ),
-				entry( 'B' , '$' , ""                        ),
-				entry( 'M' , 'i' , "TN"                      ),
-				entry( 'M' , 'm' , "m"     , Action::m_value ),
-				entry( 'N' , 'i' , "TN"                      ),
-				entry( 'N' , ';' , ""                        ),
-				entry( 'N' , ':' , ""                        ),
-				entry( 'T' , 'i' , "i"     , Action::r_value ),
-				entry( 'A' , ';' , ""                        ),
-				entry( 'A' , ':' , ":C"                      ),
-				entry( 'C' , 'i' , "i"     , Action::a_value ),
-				entry( 'J' , 'i' , "IJ"                      ),
-				entry( 'J' , ';' , ""                        ),
-				entry( 'I' , 'i' , "i"                       ),
-				entry( 'K' , ';' , ";"                       )
+				entry( 'S' , 'i' , "LM"                                           ),
+				entry( 'S' , 'a' , "LM"                                           ),
+				entry( 'M' , 'i' , "LM"                                           ),
+				entry( 'M' , 'a' , "LM"                                           ),
+				entry( 'M' , '$' , ""                                             ),
+				entry( 'L' , 'i' , "HaBAs"                                        ),
+				entry( 'L' , 'a' , "HaBAs"                                        ),
+				entry( 'H' , 'i' , "i"     , Action::push_unique_head             ),
+				entry( 'H' , 'a' , ""                                             ),
+				entry( 'B' , 'i' , "YC"                                           ),
+				entry( 'B' , 'm' , "m"     , Action::push_empty_next_body         ),
+				entry( 'C' , 'i' , "YC"                                           ),
+				entry( 'C' , 's' , ""      , Action::push_next_body               ),
+				entry( 'C' , 'c' , ""      , Action::push_next_body               ),
+				entry( 'Y' , 'i' , "i"     , Action::push_identifier_current_body ),
+				entry( 'A' , 's' , ""      , Action::push_next_action             ),
+				entry( 'A' , 'c' , "cE"                                           ),
+				entry( 'E' , 'i' , "i"     , Action::push_identifier_next_action  ),
+				entry( 'E' , 'l' , "l"     , Action::push_literal_next_action     )
 			);
 	};
-
-	using ll_parser_table = leftmost_parser_table
-	<
-		LeftmostToken<gindex_type>  ,
-		LeftmostAction<gindex_type> ,
-		gchar_type                  ,
-		gindex_type
-	>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// :
-
-/***********************************************************************************************************************/
-
-	//	for (auto k = lexer.cbegin(); k != lexer.ccurrent(); ++k)
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -18,6 +18,8 @@
 ************************************************************************************************************************/
 
 #include"../05_parser/01_leftmost/00_lexer.hpp"
-//#include"../05_parser/01_leftmost/01_parser.hpp"
-//#include"../05_parser/01_leftmost/02_targeter.hpp"
+#include"../05_parser/01_leftmost/01_table.hpp"
+#include"../05_parser/01_leftmost/02_action.hpp"
+#include"../05_parser/01_leftmost/03_script.hpp"
+//#include"../05_parser/01_leftmost/04_target.hpp"
 

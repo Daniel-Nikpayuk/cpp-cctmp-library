@@ -26,6 +26,13 @@ namespace parser {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// engine:
+
+	using engine::LambdaTuple;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // space:
 
 /***********************************************************************************************************************/
@@ -48,15 +55,16 @@ namespace parser {
 		{
 			enum : size_type
 			{
-				invalid    ,
+				invalid,
+
 				empty      ,
-				prompt     ,
-				identifier ,
-				none       ,
 				arrow      ,
-				equal      ,
-				colon      ,
 				semicolon  ,
+				identifier ,
+				empty_body ,
+				colon      ,
+				literal    ,
+				prompt     ,
 
 				dimension
 			};
@@ -67,12 +75,14 @@ namespace parser {
 			enum : size_type
 			{
 				empty      ,
+
 				initial    ,
-				any        ,
+				identifier ,
 				dash       ,
 				rangle     ,
-				equal      ,
 				colon      ,
+				any        ,
+				literal    ,
 				semicolon  ,
 				backslash  ,
 				whitespace ,
@@ -85,11 +95,11 @@ namespace parser {
 		{
 			enum : size_type
 			{
-				any        ,
+				character  ,
 				dash       ,
 				rangle     ,
-				equal      ,
 				colon      ,
+				quote      ,
 				semicolon  ,
 				backslash  ,
 				whitespace ,
@@ -123,11 +133,11 @@ namespace parser {
 		(
 			U_size_type, U_size_type, U_size_type,
 
-			engine::pair( State::any       , Token::identifier ),
-			engine::pair( State::rangle    , Token::arrow      ),
-			engine::pair( State::equal     , Token::equal      ),
-			engine::pair( State::colon     , Token::colon      ),
-			engine::pair( State::semicolon , Token::semicolon  )
+			engine::pair( State::identifier , Token::identifier ),
+			engine::pair( State::rangle     , Token::arrow      ),
+			engine::pair( State::colon      , Token::colon      ),
+			engine::pair( State::literal    , Token::literal    ),
+			engine::pair( State::semicolon  , Token::semicolon  )
 		);
 
 		nik_ces auto charmap = engine::lookup
@@ -136,8 +146,8 @@ namespace parser {
 
 			engine::pair( '-'  , Charset::dash      ),
 			engine::pair( '>'  , Charset::rangle    ),
-			engine::pair( '='  , Charset::equal     ),
 			engine::pair( ':'  , Charset::colon     ),
+			engine::pair( '\'' , Charset::quote     ),
 			engine::pair( ';'  , Charset::semicolon ),
 			engine::pair( '\\' , Charset::backslash )
 		);
@@ -145,7 +155,7 @@ namespace parser {
 		nik_ces gkey_type map(char_ctype c)
 		{
 			if (engine::matches_whitespace(c)) return Charset::whitespace;
-			else                               return charmap.lfind(c, Charset::any);
+			else                               return charmap.lfind(c, Charset::character);
 		}
 	};
 
@@ -191,24 +201,33 @@ namespace parser {
 			table_type tab;
 			for (size_type k = tab.length(); k != 0; --k) tab.push(State::empty);
 
-			tab [ State::initial   ][ Charset::any       ] = State::any       ;
-			tab [ State::initial   ][ Charset::dash      ] = State::dash      ;
-			tab [ State::initial   ][ Charset::equal     ] = State::equal     ;
-			tab [ State::initial   ][ Charset::colon     ] = State::colon     ;
-			tab [ State::initial   ][ Charset::semicolon ] = State::semicolon ;
-			tab [ State::initial   ][ Charset::backslash ] = State::backslash ;
+			tab [ State::initial    ][ Charset::character  ] = State::identifier ;
+			tab [ State::initial    ][ Charset::dash       ] = State::dash       ;
+			tab [ State::initial    ][ Charset::colon      ] = State::colon      ;
+			tab [ State::initial    ][ Charset::quote      ] = State::any        ;
+			tab [ State::initial    ][ Charset::semicolon  ] = State::semicolon  ;
+			tab [ State::initial    ][ Charset::backslash  ] = State::backslash  ;
 
-			tab [ State::any       ][ Charset::any       ] = State::any       ;
-			tab [ State::any       ][ Charset::backslash ] = State::backslash ;
+			tab [ State::identifier ][ Charset::character  ] = State::identifier ;
+			tab [ State::identifier ][ Charset::backslash  ] = State::backslash  ;
 
-			tab [ State::backslash ][ Charset::dash      ] = State::any       ;
-			tab [ State::backslash ][ Charset::rangle    ] = State::any       ;
-			tab [ State::backslash ][ Charset::equal     ] = State::any       ;
-			tab [ State::backslash ][ Charset::colon     ] = State::any       ;
-			tab [ State::backslash ][ Charset::semicolon ] = State::any       ;
-			tab [ State::backslash ][ Charset::backslash ] = State::any       ;
+			tab [ State::dash       ][ Charset::rangle     ] = State::rangle     ;
 
-			tab [ State::dash      ][ Charset::rangle    ] = State::rangle    ;
+			tab [ State::any        ][ Charset::character  ] = State::any        ;
+			tab [ State::any        ][ Charset::dash       ] = State::any        ;
+			tab [ State::any        ][ Charset::rangle     ] = State::any        ;
+			tab [ State::any        ][ Charset::colon      ] = State::any        ;
+			tab [ State::any        ][ Charset::quote      ] = State::literal    ;
+			tab [ State::any        ][ Charset::semicolon  ] = State::any        ;
+			tab [ State::any        ][ Charset::backslash  ] = State::any        ;
+			tab [ State::any        ][ Charset::whitespace ] = State::any        ;
+
+			tab [ State::backslash  ][ Charset::dash       ] = State::identifier ;
+			tab [ State::backslash  ][ Charset::rangle     ] = State::identifier ;
+			tab [ State::backslash  ][ Charset::colon      ] = State::identifier ;
+			tab [ State::backslash  ][ Charset::quote      ] = State::identifier ;
+			tab [ State::backslash  ][ Charset::semicolon  ] = State::identifier ;
+			tab [ State::backslash  ][ Charset::backslash  ] = State::identifier ;
 
 			return tab;
 		}
