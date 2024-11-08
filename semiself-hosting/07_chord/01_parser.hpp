@@ -619,7 +619,7 @@ namespace chord {
 				"          -> ~                     : cyc_tonic_none    ;"
 		);}
 
-		nik_ces auto map = cctmp::table
+		nik_ces auto map = table
 		(
 			U_strlit_type, U_token_type,
 
@@ -678,7 +678,7 @@ namespace chord {
 			sxt_pair( "empty"  , Token::empty  )
 		);
 
-		nik_ces auto action = cctmp::table
+		nik_ces auto action = table
 		(
 			U_strlit_type, U_action_type,
 

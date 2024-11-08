@@ -31,7 +31,7 @@ namespace parser {
 	template<typename CharType, auto M, auto N>
 	nik_ce auto context_free_grammar(const CharType (&srt)[M], const CharType (&str)[N])
 	{
-		return cctmp::pair(cctmp::string_literal(srt), cctmp::string_literal(str));
+		return pair(string_literal(srt), string_literal(str));
 	}
 
 /***********************************************************************************************************************/
@@ -54,8 +54,8 @@ namespace parser {
 		using Token		= typename T_lexer::Token;
 		nik_ces auto size	= Token::dimension;
 
-		using sxt_pair		= cctmp::pair<strlit_type, token_type>;
-		using sxa_pair		= cctmp::pair<strlit_type, action_type>;
+		using sxt_pair		= pair<strlit_type, token_type>;
+		using sxa_pair		= pair<strlit_type, action_type>;
 
 		nik_ces auto source()
 		{
@@ -87,7 +87,7 @@ namespace parser {
 			);
 		}
 
-		nik_ces auto map = cctmp::table
+		nik_ces auto map = table
 		(
 			U_strlit_type, U_token_type,
 
@@ -102,7 +102,7 @@ namespace parser {
 			sxt_pair(   "s" , Token::semicolon  )
 		);
 
-		nik_ces auto action = cctmp::table
+		nik_ces auto action = table
 		(
 			U_strlit_type, U_action_type,
 
@@ -118,17 +118,17 @@ namespace parser {
 
 		struct Terminal
 		{
-			nik_ces auto symbol = cctmp::table
+			nik_ces auto symbol = table
 			(
 				U_gchar_type, U_token_type,
 
-				cctmp::pair( 'i' , Token::identifier ),
-				cctmp::pair( 'a' , Token::arrow      ),
-				cctmp::pair( ';' , Token::semicolon  ),
-				cctmp::pair( ':' , Token::colon      ),
-				cctmp::pair( 'm' , Token::empty      ), // empty, not none.
-				cctmp::pair( '=' , Token::equal      ),
-				cctmp::pair( '$' , Token::prompt     )
+				pair( 'i' , Token::identifier ),
+				pair( 'a' , Token::arrow      ),
+				pair( ';' , Token::semicolon  ),
+				pair( ':' , Token::colon      ),
+				pair( 'm' , Token::empty      ), // empty, not none.
+				pair( '=' , Token::equal      ),
+				pair( '$' , Token::prompt     )
 			);
 
 			nik_ces auto invalid   = Token::invalid;
@@ -158,23 +158,23 @@ namespace parser {
 				dimension
 			};
 
-			nik_ces auto symbol = cctmp::table
+			nik_ces auto symbol = table
 			(
 				U_gchar_type, U_token_type,
 
-				cctmp::pair( 'S' , start         ),
-				cctmp::pair( 'D' , rec_declare   ),
-				cctmp::pair( 'F' , front_declare ),
-				cctmp::pair( 'H' , head_declare  ),
-				cctmp::pair( 'B' , body_declare  ),
-				cctmp::pair( 'M' , disp_name     ),
-				cctmp::pair( 'N' , rec_name      ),
-				cctmp::pair( 'T' , tok_name      ),
-				cctmp::pair( 'A' , action        ),
-				cctmp::pair( 'C' , call          ),
-				cctmp::pair( 'J' , rec_alias     ),
-				cctmp::pair( 'I' , tok_alias     ),
-				cctmp::pair( 'K' , end_alias     )
+				pair( 'S' , start         ),
+				pair( 'D' , rec_declare   ),
+				pair( 'F' , front_declare ),
+				pair( 'H' , head_declare  ),
+				pair( 'B' , body_declare  ),
+				pair( 'M' , disp_name     ),
+				pair( 'N' , rec_name      ),
+				pair( 'T' , tok_name      ),
+				pair( 'A' , action        ),
+				pair( 'C' , call          ),
+				pair( 'J' , rec_alias     ),
+				pair( 'I' , tok_alias     ),
+				pair( 'K' , end_alias     )
 			);
 
 			nik_ces auto stack_start = symbol_type{Sign::nonterminal, start};

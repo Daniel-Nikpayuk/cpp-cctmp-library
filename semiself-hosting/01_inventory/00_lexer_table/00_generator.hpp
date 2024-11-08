@@ -19,6 +19,7 @@
 
 // generator:
 
+namespace cctmp     {
 namespace inventory {
 
 /***********************************************************************************************************************/
@@ -82,7 +83,7 @@ namespace inventory {
 		constexpr static auto make()
 		{
 			constexpr size_type size = State::dimension * Charset::dimension;
-			using seq_type           = cctmp::array<size_type, size_type, size>;
+			using seq_type           = array<size_type, size_type, size>;
 
 			seq_type seq;
 			for (size_type k = seq.length(); k != 0; --k) seq.push(State::empty);
@@ -117,5 +118,5 @@ namespace inventory {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-} // namespace inventory
+}} // namespace cctmp::inventory
 

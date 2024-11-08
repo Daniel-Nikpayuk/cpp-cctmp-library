@@ -154,8 +154,8 @@ namespace parser {
 
 		nik_ces gkey_type map(char_ctype c)
 		{
-			if (engine::matches_whitespace(c)) return Charset::whitespace;
-			else                               return charmap.lfind(c, Charset::character);
+			if (c.matches_whitespace()) return Charset::whitespace;
+			else                        return charmap.lfind(c, Charset::character);
 		}
 	};
 
@@ -194,7 +194,7 @@ namespace parser {
 		using size_type		= typename Trait::size_type;
 		using size_ctype	= typename Trait::size_ctype;
 
-		using table_type	= cctmp::table<size_type, size_type, State::dimension, Charset::dimension>;
+		using table_type	= table<size_type, size_type, State::dimension, Charset::dimension>;
 
 		constexpr static auto make()
 		{

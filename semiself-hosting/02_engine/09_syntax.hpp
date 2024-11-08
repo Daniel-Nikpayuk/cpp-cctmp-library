@@ -37,11 +37,11 @@ namespace engine {
 		typename SizeType, auto model_size, auto stack_size,
 		auto static_env_lookup, typename CharType = gchar_type
 	>
-	class T_syntax_model : public cctmp::T_env_model<CharType, SizeType, model_size>
+	class T_syntax_model : public T_env_model<CharType, SizeType, model_size>
 	{
 		public:
 
-			using base			= cctmp::T_env_model<CharType, SizeType, model_size>;
+			using base			= T_env_model<CharType, SizeType, model_size>;
 			using size_type			= typename base::size_type;
 			using csize_type		= typename base::csize_type;
 			using list_type			= typename base::list_type;
@@ -718,7 +718,7 @@ namespace engine {
 
 					nik_ce void delay_n_number_return(src_ptr b, src_ptr e)
 					{
-						auto pos = cctmp::apply<_string_to_builtin_<U_gindex_type>>(b, e);
+						auto pos = apply<_string_to_builtin_<U_gindex_type>>(b, e);
 						
 						literal.set(AN::literal, AT::n_number, pos);
 					}
@@ -727,9 +727,9 @@ namespace engine {
 
 					nik_ce void delay_r_number_return(src_ptr b, src_ptr e)
 					{
-						src_ptr k = cctmp::apply<_subarray_match_<>>(b, e, '.');
-						auto pos  = cctmp::apply<_string_to_builtin_<U_gindex_type>>(b, k);
-						auto num  = cctmp::apply<_string_to_builtin_<U_gindex_type>>(k+1, e);
+						src_ptr k = apply<_subarray_match_<>>(b, e, '.');
+						auto pos  = apply<_string_to_builtin_<U_gindex_type>>(b, k);
+						auto num  = apply<_string_to_builtin_<U_gindex_type>>(k+1, e);
 						auto div  = divisor(e-k);
 
 						literal.set(AN::floating, AT::r_number, pos, num, div);

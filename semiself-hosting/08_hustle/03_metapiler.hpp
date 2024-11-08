@@ -35,7 +35,7 @@ namespace hustle {
 
 		struct T_hustle_subtract
 		{
-			using F = T_store_U<cctmp::_subtract_>;
+			using F = T_store_U<_subtract_>;
 
 			template<typename T>
 			nik_ces auto result(T v) { return -v; }
@@ -51,30 +51,30 @@ namespace hustle {
 
 	nik_ce auto hustle_default_frame_callable()
 	{
-		return cctmp::frame
+		return frame
 		(
 		 	U_gchar_type,
 
-			cctmp::binding( "false"      , false                          ),
-			cctmp::binding( "true"       , true                           ),
+			binding( "false"      , false                          ),
+			binding( "true"       , true                           ),
 
-			cctmp::binding( "not"        , cctmp::_not_                   ),
-			cctmp::binding( "and"        , cctmp::_and_                   ),
-			cctmp::binding( "or"         , cctmp::_or_                    ),
-			cctmp::binding( "implies"    , cctmp::_implies_               ),
-			cctmp::binding( "equivalent" , cctmp::_equivalent_            ),
+			binding( "not"        , _not_                   ),
+			binding( "and"        , _and_                   ),
+			binding( "or"         , _or_                    ),
+			binding( "implies"    , _implies_               ),
+			binding( "equivalent" , _equivalent_            ),
 
-			cctmp::binding( "="          , cctmp::_equal_                 ),
-			cctmp::binding( "<"          , cctmp::_less_than_             ),
-			cctmp::binding( "<="         , cctmp::_less_than_or_equal_    ),
-			cctmp::binding( ">"          , cctmp::_greater_than_          ),
-			cctmp::binding( ">="         , cctmp::_greater_than_or_equal_ ),
+			binding( "="          , _equal_                 ),
+			binding( "<"          , _less_than_             ),
+			binding( "<="         , _less_than_or_equal_    ),
+			binding( ">"          , _greater_than_          ),
+			binding( ">="         , _greater_than_or_equal_ ),
 
-			cctmp::binding( "+"          , cctmp::_add_                   ),
-			cctmp::binding( "-"          , _hustle_subtract_              ),
-			cctmp::binding( "*"          , cctmp::_multiply_              ),
-			cctmp::binding( "/"          , cctmp::_divide_                ),
-			cctmp::binding( "%"          , cctmp::_modulo_                )
+			binding( "+"          , _add_                   ),
+			binding( "-"          , _hustle_subtract_       ),
+			binding( "*"          , _multiply_              ),
+			binding( "/"          , _divide_                ),
+			binding( "%"          , _modulo_                )
 		);
 	};
 

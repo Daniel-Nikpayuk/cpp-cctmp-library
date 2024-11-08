@@ -297,7 +297,7 @@ namespace hustle {
 		using size_type		= typename Trait::size_type;
 		using size_ctype	= typename Trait::size_ctype;
 
-		using table_type	= cctmp::table<size_type, size_type, State::dimension, Charset::dimension>;
+		using table_type	= table<size_type, size_type, State::dimension, Charset::dimension>;
 
 		constexpr static auto make()
 		{

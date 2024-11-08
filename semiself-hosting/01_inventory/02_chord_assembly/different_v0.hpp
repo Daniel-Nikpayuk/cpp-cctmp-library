@@ -17,6 +17,9 @@
 **
 ************************************************************************************************************************/
 
+namespace cctmp     {
+namespace inventory {
+
 // object:
 
 	template<typename SizeType>
@@ -24,8 +27,8 @@
 	{
 		using size_type = SizeType;
 
-		using AN = cctmp::MN;
-		using AT = cctmp::MT;
+		using AN = MN;
+		using AT = MT;
 
 		constexpr static size_type rowsize = 121;
 
@@ -155,7 +158,7 @@
 		};
 
 	}; template<typename SizeType>
-		constexpr auto contr_object_chord_different_v0 = cctmp::U_store_T
+		constexpr auto contr_object_chord_different_v0 = U_store_T
 		<
 			T_contr_object_chord_different_v0<SizeType>
 		>;
@@ -167,16 +170,16 @@
 	template<typename SizeType>
 	struct T_static_env_chord_different_v0
 	{
-		constexpr static auto value = cctmp::template env_tuple<SizeType>
+		constexpr static auto value = env_tuple<SizeType>
 		(
-			cctmp::_not_equal_   ,
-			cctmp::_dereference_ ,
-			cctmp::_first_       ,
-			cctmp::_id_
+			_not_equal_   ,
+			_dereference_ ,
+			_first_       ,
+			_id_
 		);
 
 	}; template<typename SizeType>
-		constexpr auto env_chord_different_v0 = cctmp::U_store_T<T_static_env_chord_different_v0<SizeType>>;
+		constexpr auto env_chord_different_v0 = U_store_T<T_static_env_chord_different_v0<SizeType>>;
 
 /***********************************************************************************************************************/
 
@@ -187,10 +190,10 @@
 	{
 		using rtn_type = unsigned char;
 
-		using T_apply = cctmp::T_metapile_apply
+		using T_apply = T_metapile_apply
 		<
 			SizeType, contr_object_chord_different_v0<SizeType>,
-			env_chord_different_v0<SizeType>, cctmp::U_pack_Ts<rtn_type>
+			env_chord_different_v0<SizeType>, U_pack_Ts<rtn_type>
 		>;
 
 		return T_apply::result(rtn_type{0}, in, end, in1);
@@ -203,4 +206,6 @@
 	template<typename SizeType, typename In, typename End, typename In1>
 	constexpr bool inventory_same_v0(In in, End end, In1 in1)
 		{ return not inventory_different_v0<SizeType, In, End, In1>(in, end, in1); }
+
+}} // namespace cctmp::inventory
 

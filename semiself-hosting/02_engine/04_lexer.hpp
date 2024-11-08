@@ -26,131 +26,6 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// character sets:
-
-	using global_string_type	= gchar_ctype*;
-	using gstring_type		= global_string_type;
-	using gstring_ctype		= global_string_type const;
-	nik_ce auto U_gstring_type	= U_store_T<gstring_type>;
-	nik_ce auto U_gstring_ctype	= U_store_T<gstring_ctype>;
-
-/***********************************************************************************************************************/
-
-// generic:
-
-	nik_ce gchar_type whitespace  [] = { ' ', '\t', '\n' };
-	nik_ce gchar_type latin_digit [] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-
-	nik_ce gchar_type latin_lowercase[] =
-	{
-		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-		'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-		'u', 'v', 'w', 'x', 'y', 'z'
-	};
-
-	nik_ce gchar_type latin_uppercase[] =
-	{
-		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-		'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-		'U', 'V', 'W', 'X', 'Y', 'Z'
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// numeric:
-
-/***********************************************************************************************************************/
-
-// find:
-
-	template<typename T, typename In, typename End>
-	nik_ce auto numeric_find(T n, In k, End e)
-	{
-		while (k != e) if (*k == n) break; else ++k;
-
-		return k;
-	}
-
-/***********************************************************************************************************************/
-
-// find pos:
-
-	template<typename T, typename In, typename End>
-	nik_ce auto numeric_find_pos(T n, In b, End e)
-	{
-		auto k = numeric_find(n, b, e);
-
-		return k - b;
-	}
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// recognizers:
-
-/***********************************************************************************************************************/
-
-// matches:
-
-	template<auto Size>
-	nik_ce auto matches_charset(gchar_ctype c, gchar_ctype (&charset)[Size])
-	{
-		gstring_ctype e = charset + Size;
-		gstring_ctype k = numeric_find(c, charset, e);
-
-		return (k != e);
-	}
-
-/***********************************************************************************************************************/
-
-// matches charset:
-
-	// whitespace:
-
-		nik_ce bool matches_whitespace(gchar_ctype c) { return matches_charset(c, whitespace); }
-
-	// digit (optimization):
-
-		nik_ce bool matches_digit(gchar_ctype c) { return ('0' <= c) && (c <= '9'); }
-
-	// underscore:
-
-		nik_ce bool matches_underscore(gchar_ctype c) { return (c == '_'); }
-
-	// latin lowercase:
-
-		nik_ce bool matches_latin_lowercase(gchar_ctype c) { return matches_charset(c, latin_lowercase); }
-
-	// latin uppercase:
-
-		nik_ce bool matches_latin_uppercase(gchar_ctype c) { return matches_charset(c, latin_uppercase); }
-
-/***********************************************************************************************************************/
-
-// matches identifier:
-
-	// latin alphabet:
-
-		nik_ce bool matches_la(gchar_ctype c)
-			{ return matches_latin_lowercase(c) || matches_latin_uppercase(c); }
-
-	// latin alphanumeric:
-
-		nik_ce bool matches_lan(gchar_ctype c) { return matches_digit(c) || matches_la(c); }
-
-	// underscore latin alphabet:
-
-		nik_ce bool matches_ula(gchar_ctype c) { return matches_underscore(c) || matches_la(c); }
-
-	// underscore latin alphanumeric:
-
-		nik_ce bool matches_ulan(gchar_ctype c) { return matches_digit(c) || matches_ula(c); }
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // deterministic finite automata:
 
 /***********************************************************************************************************************/
@@ -207,7 +82,7 @@ namespace engine {
 			using size_type		= SizeType;
 			using size_ctype	= size_type const;
 
-			using lit_type		= cctmp::array_literal<size_type, size_type>;
+			using lit_type		= array_literal<size_type, size_type>;
 			using lit_ctype		= lit_type const;
 			using lit_ctype_ref	= lit_ctype &;
 

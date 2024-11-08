@@ -225,7 +225,7 @@ namespace lexer {
 
 		protected:
 
-			nik_ces auto _to_builtin_	= cctmp::_string_to_builtin_<U_store_T<size_type>>;
+			nik_ces auto _to_builtin_	= _string_to_builtin_<U_store_T<size_type>>;
 
 		public:
 
@@ -235,25 +235,25 @@ namespace lexer {
 			nik_ce T_lexeme(const cselector<Type> & s) : base{s.cbegin(), s.cend()}, token{} { }
 
 			nik_ce const T_lexeme & find(ctype_ref v)
-				{ base::current = cctmp::apply<base::_find_>(base::start, base::finish, v); return *this; }
+				{ base::current = apply<base::_find_>(base::start, base::finish, v); return *this; }
 
 			template<typename T>
 			nik_ce const T_lexeme & find(const T & v)
-				{ base::current = cctmp::apply<base::_find_same_>(base::start, base::finish, v); return *this; }
+				{ base::current = apply<base::_find_same_>(base::start, base::finish, v); return *this; }
 
 			nik_ce const T_lexeme & left_find(ctype_ref v)
-				{ base::current = cctmp::apply<base::_find_>(base::start, base::current, v); return *this; }
+				{ base::current = apply<base::_find_>(base::start, base::current, v); return *this; }
 
 			template<typename T>
 			nik_ce const T_lexeme & left_find(const T & v)
-				{ base::current = cctmp::apply<base::_find_same_>(base::start, base::current, v); return *this; }
+				{ base::current = apply<base::_find_same_>(base::start, base::current, v); return *this; }
 
 			nik_ce const T_lexeme & right_find(ctype_ref v)
-				{ base::current = cctmp::apply<base::_find_>(base::current, base::finish, v); return *this; }
+				{ base::current = apply<base::_find_>(base::current, base::finish, v); return *this; }
 
 			template<typename T>
 			nik_ce const T_lexeme & right_find(const T & v)
-				{ base::current = cctmp::apply<base::_find_same_>(base::current, base::finish, v); return *this; }
+				{ base::current = apply<base::_find_same_>(base::current, base::finish, v); return *this; }
 
 			nik_ce auto contains(ctype_ref v) const { T_lexeme l{*this}; return l.find(v); }
 
@@ -294,7 +294,7 @@ namespace lexer {
 			}
 
 			nik_ce csize_type to_number() const
-				{ return cctmp::apply<_to_builtin_>(base::start, base::current); }
+				{ return apply<_to_builtin_>(base::start, base::current); }
 	};
 
 	using lexeme  = T_lexeme<gchar_type>;
@@ -534,15 +534,15 @@ namespace lexer {
 				dimension
 			};
 
-			nik_ces auto accept = cctmp::table
+			nik_ces auto accept = table
 			(
 				U_state_type, U_token_type,
 
-				cctmp::pair( any       , Token::identifier ),
-				cctmp::pair( rangle    , Token::arrow      ),
-				cctmp::pair( equal     , Token::equal      ),
-				cctmp::pair( colon     , Token::colon      ),
-				cctmp::pair( semicolon , Token::semicolon  )
+				pair( any       , Token::identifier ),
+				pair( rangle    , Token::arrow      ),
+				pair( equal     , Token::equal      ),
+				pair( colon     , Token::colon      ),
+				pair( semicolon , Token::semicolon  )
 			);
 		};
 
@@ -561,16 +561,16 @@ namespace lexer {
 				dimension
 			};
 
-			nik_ces auto charmap = cctmp::table
+			nik_ces auto charmap = table
 			(
 				U_gchar_type, U_gkey_type,
 
-				cctmp::pair( '-'  , Charset::dash      ),
-				cctmp::pair( '>'  , Charset::rangle    ),
-				cctmp::pair( '='  , Charset::equal     ),
-				cctmp::pair( ':'  , Charset::colon     ),
-				cctmp::pair( ';'  , Charset::semicolon ),
-				cctmp::pair( '\\' , Charset::backslash )
+				pair( '-'  , Charset::dash      ),
+				pair( '>'  , Charset::rangle    ),
+				pair( '='  , Charset::equal     ),
+				pair( ':'  , Charset::colon     ),
+				pair( ';'  , Charset::semicolon ),
+				pair( '\\' , Charset::backslash )
 			);
 
 			nik_ces gkey_type map(gcchar_type c)

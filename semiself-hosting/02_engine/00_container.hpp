@@ -91,8 +91,8 @@ namespace engine {
 			template<typename... Ts>
 			nik_ces auto result(Ts... vs)
 			{
-				using frame_type = cctmp::ctuple<size_type, segment_<sizeof...(Ts)>, Ts...      >;
-				using env_type   = cctmp::ctuple<size_type, segment_<1            >, frame_type >;
+				using frame_type = ctuple<size_type, segment_<sizeof...(Ts)>, Ts...      >;
+				using env_type   = ctuple<size_type, segment_<1            >, frame_type >;
 
 				return env_type{frame_type{vs...}};
 			}
@@ -131,7 +131,7 @@ namespace engine {
 	template<typename SizeType, typename CharType, SizeType N, typename T>
 	nik_ce auto binding(nik_avp(SizeType*), CharType (&variable)[N], T value)
 	{
-		using strlit_type = cctmp::string_literal<CharType, SizeType>;
+		using strlit_type = string_literal<CharType, SizeType>;
 
 		return LambdaTuple::make(strlit_type{variable}, value);
 	}
@@ -151,8 +151,8 @@ namespace engine {
 	template<typename CharType, typename SizeType, typename... Bindings>
 	nik_ce auto frame(nik_avp(CharType*), nik_avp(SizeType*), Bindings... bs)
 	{
-		using strlit_type   = cctmp::string_literal<CharType, SizeType>;
-		using variable_type = cctmp::array<strlit_type, SizeType, sizeof...(Bindings)>;
+		using strlit_type   = string_literal<CharType, SizeType>;
+		using variable_type = array<strlit_type, SizeType, sizeof...(Bindings)>;
 
 		auto variables      = variable_type{   {LambdaTuple::first  (bs)...}};
 		auto values         = LambdaTuple::make(LambdaTuple::second (bs)...);
@@ -165,10 +165,10 @@ namespace engine {
 // instr:
 
 	template<typename Type, typename SizeType>
-	struct machine_instr : public cctmp::array<Type, SizeType, MachineIndex::dimension>
+	struct machine_instr : public array<Type, SizeType, MachineIndex::dimension>
 	{
 		using Index 		= MachineIndex;
-		using base 		= cctmp::array<Type, SizeType, Index::dimension>;
+		using base 		= array<Type, SizeType, Index::dimension>;
 
 		using size_type		= typename base::size_type;
 		using size_ctype	= typename base::size_ctype;
@@ -189,10 +189,10 @@ namespace engine {
 // contr:
 
 	template<typename Type, typename SizeType, SizeType Size>
-	struct machine_contr : public cctmp::array<machine_instr<Type, SizeType>, SizeType, Size>
+	struct machine_contr : public array<machine_instr<Type, SizeType>, SizeType, Size>
 	{
 		using instr_type	= machine_instr<Type, SizeType>;
-		using base		= cctmp::array<instr_type, SizeType, Size>;
+		using base		= array<instr_type, SizeType, Size>;
 		using size_type		= typename base::size_type;
 		using size_ctype	= typename base::size_ctype;
 
@@ -212,7 +212,7 @@ namespace engine {
 	template<typename SizeType, typename CharType, SizeType N, typename... Bindings>
 	nik_ce auto source(const CharType (&s)[N], const Bindings &... bs)
 	{
-		using strlit_type       = cctmp::string_literal<CharType, SizeType>;
+		using strlit_type       = string_literal<CharType, SizeType>;
 		nik_ce auto U_char_type = U_store_T<CharType>;
 		nik_ce auto U_size_type = U_store_T<SizeType>;
 
@@ -236,8 +236,8 @@ namespace engine {
 			using size_type		= SizeType;
 			using size_ctype	= size_type const;
 
-			using left_type		= cctmp::array<Type0, size_type, Size>;
-			using right_type	= cctmp::array<Type1, size_type, Size>;
+			using left_type		= array<Type0, size_type, Size>;
+			using right_type	= array<Type1, size_type, Size>;
 
 		protected:
 
@@ -253,18 +253,16 @@ namespace engine {
 
 			nik_ce const Type1 & lfind(const Type0 & v0, const Type1 & v1) const
 			{
-				for (size_type k = 0; k != Size; ++k) 
-					if (left[k] == v0) return right[k];
+				size_ctype pos = left.find(v0);
 
-				return v1;
+				return (pos == left.size()) ? v1 : right[pos];
 			}
 
 			nik_ce const Type0 & rfind(const Type1 & v1, const Type0 & v0) const
 			{
-				for (size_type k = 0; k != Size; ++k) 
-					if (right[k] == v1) return left[k];
+				size_ctype pos = right.find(v1);
 
-				return v0;
+				return (pos == right.size()) ? v0 : left[pos];
 			}
 	};
 

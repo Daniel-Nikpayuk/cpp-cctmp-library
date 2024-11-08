@@ -112,7 +112,7 @@ namespace lexer {
 				nik_ces void result(AST *tree, Level *level)
 				{
 					-tree->current;
-					cctmp::apply<_level_append_0_action_>(tree, level);
+					apply<_level_append_0_action_>(tree, level);
 					++tree->current;
 					+tree->current;
 				}
@@ -128,7 +128,7 @@ namespace lexer {
 				nik_ces void result(AST *tree, Levels*... levels)
 				{
 					-tree->current;
-					(cctmp::apply<actions>(tree, levels), ...);
+					(apply<actions>(tree, levels), ...);
 					+tree->current;
 				}
 
@@ -156,7 +156,7 @@ namespace lexer {
 		{
 			template<typename AST>
 			nik_ces void result(AST *tree)
-				{ cctmp::apply<_level_append_1_action_>(tree, tree->level_1); }
+				{ apply<_level_append_1_action_>(tree, tree->level_1); }
 
 		}; nik_ce auto _level_1_append_action_ = U_level_1_action<GAN::append>;
 
@@ -179,7 +179,7 @@ namespace lexer {
 
 			template<typename AST>
 			nik_ces void result(AST *tree)
-				{ cctmp::apply<action>(tree, tree->level_2, tree->level_1); }
+				{ apply<action>(tree, tree->level_2, tree->level_1); }
 
 		}; nik_ce auto _level_2_append_action_ = U_level_2_action<GAN::append>;
 
@@ -249,10 +249,10 @@ namespace lexer {
 
 			nik_ces gindex_type max_size	= _two; // symbol, body.
 
-			using scope_type		= cctmp::sequence<bool, static_cast<gindex_type>(Scope::dimension)>;
-			using current_type		= cctmp::sequence<gindex_type, max_size>;
-			using max_type			= cctmp::sequence<gindex_type, max_size>;
-			using total_type		= cctmp::sequence<gindex_type, static_cast<gindex_type>(Level::dimension)>;
+			using scope_type		= sequence<bool, static_cast<gindex_type>(Scope::dimension)>;
+			using current_type		= sequence<gindex_type, max_size>;
+			using max_type			= sequence<gindex_type, max_size>;
+			using total_type		= sequence<gindex_type, static_cast<gindex_type>(Level::dimension)>;
 
 			scope_type scope;
 			current_type current;
@@ -445,10 +445,10 @@ namespace lexer {
 			nik_ce T_icon(ctype_cptr s, ctype_cptr f) : base{s, f} { }
 
 			nik_ce bool operator == (const T_icon<Type, SizeType> & i) const
-				{ return cctmp::apply<cctmp::_subarray_same_<>>(*this, i); }
+				{ return apply<_subarray_same_<>>(*this, i); }
 
 			nik_ce bool operator != (const T_icon<Type, SizeType> & i) const
-				{ return !cctmp::apply<cctmp::_subarray_same_<>>(*this, i); }
+				{ return !apply<_subarray_same_<>>(*this, i); }
 
 				// deprecate in the long run.
 			nik_ce void copy(const T_lexeme<Type> *l)
@@ -464,11 +464,11 @@ namespace lexer {
 			}
 
 			nik_ce T_icon & find(ctype_ref v)
-				{ base::start = cctmp::apply<base::_find_>(base::start, base::finish, v); return *this; }
+				{ base::start = apply<base::_find_>(base::start, base::finish, v); return *this; }
 
 			template<typename T>
 			nik_ce T_icon & find(const T & v)
-				{ base::start = cctmp::apply<base::_find_same_>(base::start, base::finish, v); return *this; }
+				{ base::start = apply<base::_find_same_>(base::start, base::finish, v); return *this; }
 
 			nik_ce auto contains(ctype_ref v) const { T_icon i{*this}; return i.find(v); }
 
@@ -478,13 +478,13 @@ namespace lexer {
 
 				// deprecate in the long run.
 			nik_ce bool same(const T_lexeme<Type> *l) const
-				{ return cctmp::apply<cctmp::_subarray_same_<>>(*this, l->left_cselect()); }
+				{ return apply<_subarray_same_<>>(*this, l->left_cselect()); }
 
 			nik_ce bool same(const cselector<Type, SizeType> & s) const
-				{ return cctmp::apply<cctmp::_subarray_same_<>>(*this, s); }
+				{ return apply<_subarray_same_<>>(*this, s); }
 
 			nik_ce bool same(const T_icon<Type, SizeType> & i) const
-				{ return cctmp::apply<cctmp::_subarray_same_<>>(*this, i); }
+				{ return apply<_subarray_same_<>>(*this, i); }
 	};
 
 	using icon  = T_icon<gchar_type>;
@@ -585,10 +585,10 @@ namespace lexer {
 		using cnavigator_type			= typename hierarchy_type::cnavigator_type;
 		using navigator_type			= typename hierarchy_type::navigator_type;
 
-		using level_head_type			= cctmp::sequence < level_head   , head_total    >;
-		using level_body_type			= cctmp::sequence < level_body   , body_total    >;
-		using level_symbol_type			= cctmp::sequence < level_symbol , symbol_total  >;
-		using level_action_type			= cctmp::sequence < level_symbol , action_length >;
+		using level_head_type			= sequence < level_head   , head_total    >;
+		using level_body_type			= sequence < level_body   , body_total    >;
+		using level_symbol_type			= sequence < level_symbol , symbol_total  >;
+		using level_action_type			= sequence < level_symbol , action_length >;
 
 		using level_head_ptr			= level_head_type*;
 		using level_body_ptr			= level_body_type*;
@@ -641,8 +641,8 @@ namespace lexer {
 		nik_ce void set_body_is_empty  () { body_level.last()->is_empty = true; }
 		nik_ce void set_head_has_empty () { head_level.last()->has_empty = true; }
 
-		nik_ce void new_head() { cctmp::apply<_level_append_0_action_>(this, level_2); }
-		nik_ce void new_body() { cctmp::apply<_level_append_0_action_>(this, level_1); }
+		nik_ce void new_head() { apply<_level_append_0_action_>(this, level_2); }
+		nik_ce void new_body() { apply<_level_append_0_action_>(this, level_1); }
 
 		nik_ce void push_nonterminal()
 		{
@@ -664,10 +664,10 @@ namespace lexer {
 			push_nonterminal();
 		}
 
-		nik_ce void append_body() { cctmp::apply<_level_1_append_action_>(this); }
+		nik_ce void append_body() { apply<_level_1_append_action_>(this); }
 		nik_ce void append_head()
 		{
-			cctmp::apply<_level_2_append_action_>(this);
+			apply<_level_2_append_action_>(this);
 			push_nonterminal();
 		}
 

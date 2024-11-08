@@ -69,8 +69,8 @@ namespace engine {
 			using size_type		= typename using_size<SizeType>::type;
 			using size_ctype	= typename using_size<SizeType>::ctype;
 
-			using word_type		= cctmp::array< size_type , size_type , WordSize >;
-			using symbol_type	= cctmp::array<      type , size_type ,     Size >;
+			using word_type		= array< size_type , size_type , WordSize >;
+			using symbol_type	= array<      type , size_type ,     Size >;
 
 			using inhabit_type	= inhabit<size_type>;
 			using inhabit_ctype	= inhabit_type const;
@@ -157,7 +157,7 @@ namespace engine {
 			using size_type		= SizeType;
 			using size_ctype	= size_type const;
 
-			using seq_type		= cctmp::array<type, size_type, Size>;
+			using seq_type		= array<type, size_type, Size>;
 
 			using inhabit_type	= inhabit<size_type>;
 			using inhabit_ctype	= inhabit_type const;

@@ -31,7 +31,7 @@ namespace engine {
 //	template<typename CharType, auto M, auto N>
 //	nik_ce auto context_free_grammar(const CharType (&srt)[M], const CharType (&str)[N])
 //	{
-//		return cctmp::pair(cctmp::string_literal(srt), cctmp::string_literal(str));
+//		return pair(string_literal(srt), string_literal(str));
 //	}
 
 /***********************************************************************************************************************/
@@ -203,7 +203,7 @@ namespace engine {
 			using action_ctype_cptr		= typename alias<Action>::ctype_cptr;
 			using action_ctype_ref		= typename alias<Action>::ctype_ref;
 
-			using action_array_type		= cctmp::array<action_ctype, SizeType, Size>;
+			using action_array_type		= array<action_ctype, SizeType, Size>;
 			using action_array_type_ptr	= typename alias<action_array_type>::type_ptr;
 			using action_array_type_cptr	= typename alias<action_array_type>::type_cptr;
 			using action_array_type_ref	= typename alias<action_array_type>::type_ref;

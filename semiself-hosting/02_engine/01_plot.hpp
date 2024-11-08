@@ -168,14 +168,14 @@ namespace engine {
 	template<typename Page, typename Text, typename SizeType>
 	class plot_literal	: public protoplot
 				<
-					cctmp::array_literal < Page , SizeType >,
-					cctmp::array_literal < Text , SizeType >
+					array_literal < Page , SizeType >,
+					array_literal < Text , SizeType >
 				>
 	{
 		public:
 
-			using page_array_type		= cctmp::array_literal < Page , SizeType >;
-			using text_array_type		= cctmp::array_literal < Text , SizeType >;
+			using page_array_type		= array_literal < Page , SizeType >;
+			using text_array_type		= array_literal < Text , SizeType >;
 			using base			= protoplot<page_array_type, text_array_type>;
 
 			using page_array_type_ptr	= typename base::page_array_type_ptr;
@@ -234,14 +234,14 @@ namespace engine {
 	template<typename Page, typename Text, typename SizeType, SizeType PageSize, SizeType TextSize = PageSize>
 	class plot	: public protoplot // PageSize <= TextSize
 			<
-				cctmp::array < Page , SizeType , PageSize >,
-				cctmp::array < Text , SizeType , TextSize >
+				array < Page , SizeType , PageSize >,
+				array < Text , SizeType , TextSize >
 			>
 	{
 		public:
 
-			using page_array_type		= cctmp::array < Page , SizeType , PageSize >;
-			using text_array_type		= cctmp::array < Text , SizeType , TextSize >;
+			using page_array_type		= array < Page , SizeType , PageSize >;
+			using text_array_type		= array < Text , SizeType , TextSize >;
 			using base			= protoplot<page_array_type, text_array_type>;
 
 			using page_array_type_ptr	= typename base::page_array_type_ptr;

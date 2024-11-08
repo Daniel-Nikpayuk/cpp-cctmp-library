@@ -422,6 +422,18 @@ namespace cctmp {
 				nik_ce ctype_ptr citer (size_ctype n) const { return initial + n; }
 				nik_ce ctype_ref cat   (size_ctype n) const { return initial[n]; }
 
+				nik_ce ctype_ptr find(ctype_ref v) const
+				{
+					ctype_ptr in = cbegin();
+
+					while (in != cend()) if (*in == v) break; else ++in;
+
+					return in;
+				}
+
+				nik_ce size_type left_find(ctype_ref v) const { return left_size(find(v)); }
+				nik_ce bool contains(ctype_ref v) const { return (find(v) != cend()); }
+
 				template<typename In, typename End>
 				nik_ce bool equal(size_ctype n, In in, End end) const
 					{ return not not_equal(n, in, end); }
@@ -446,6 +458,8 @@ namespace cctmp {
 				nik_ce ctype_ptr clast () const { return cend() - 1; }
 
 				nik_ce size_type right_size(ctype_cptr i) const { return cend() - i; }
+
+				nik_ce size_type right_find(ctype_ref v) const { return right_size(find(v)); }
 
 				nik_ce bool is_empty  () const { return (terminal == 0); }
 				nik_ce bool not_empty () const { return (terminal != 0); }

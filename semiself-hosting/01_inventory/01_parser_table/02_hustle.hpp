@@ -19,6 +19,9 @@
 
 // parser:
 
+namespace cctmp     {
+namespace inventory {
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -45,19 +48,19 @@
 		nik_ces auto row_size		= 40;
 		nik_ces auto col_size		= 38;
 
-		nik_ces auto prod_size		= cctmp::string_literal("d(S)TB").size(); // needs refining.
+		nik_ces auto prod_size		= string_literal("d(S)TB").size(); // needs refining.
 
 		nik_ces auto stack_finish	= symbol_type{generator::Sign::terminal, Token::prompt};
 		nik_ces auto stack_start	= symbol_type{generator::Sign::nonterminal, start_index};
 
-		nik_ces auto stack_size		= cctmp::literal("F{C|A|M|P}YPZ<>YPZYP,PZV;HGO").size(); // needs refining.
+		nik_ces auto stack_size		= literal("F{C|A|M|P}YPZ<>YPZYP,PZV;HGO").size(); // needs refining.
 							// literal is intentional.
 							// this is the longest possible sentential.
 							// might need updating.
 
 		using prod_type			= generator::Production<prod_size>;
 		using cprod_type		= prod_type const;
-		using list_type			= cctmp::array<prod_type, row_size * col_size>;
+		using list_type			= array<prod_type, row_size * col_size>;
 
 		list_type list; // list instead of table due to clang bug.
 		bool ambiguous;
@@ -464,4 +467,6 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+}} // namespace cctmp::inventory
 

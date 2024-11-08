@@ -173,14 +173,14 @@ namespace engine {
 	template<typename Page, typename Text, typename SizeType>
 	class sparse_plot_literal	: public protosparse_plot
 					<
-						cctmp::array_literal < SizeType        , SizeType >,
-						        plot_literal < Page     , Text , SizeType >
+						array_literal < SizeType        , SizeType >,
+						 plot_literal < Page     , Text , SizeType >
 					>
 	{
 		public:
 
-			using icon_array_type		= cctmp::array_literal < SizeType        , SizeType >;
-			using plot_type			=         plot_literal < Page     , Text , SizeType >;
+			using icon_array_type		= array_literal < SizeType        , SizeType >;
+			using plot_type			=  plot_literal < Page     , Text , SizeType >;
 			using base			= protosparse_plot<icon_array_type, plot_type>;
 
 			using icon_array_type_ptr	= typename base::icon_array_type_ptr;
@@ -275,14 +275,14 @@ namespace engine {
 	>
 	class sparse_plot	: public protosparse_plot // PageSize <= TextSize
 				<
-					cctmp::array < SizeType        , SizeType            , IconSize >,
-					        plot < Page     , Text , SizeType , PageSize , TextSize >
+					array < SizeType        , SizeType            , IconSize >,
+					 plot < Page     , Text , SizeType , PageSize , TextSize >
 				>
 	{
 		public:
 
-			using icon_array_type		= cctmp::array < SizeType        , SizeType            , IconSize >;
-			using plot_type			=         plot < Page     , Text , SizeType , PageSize , TextSize >;
+			using icon_array_type		= array < SizeType        , SizeType            , IconSize >;
+			using plot_type			=  plot < Page     , Text , SizeType , PageSize , TextSize >;
 			using base			= protosparse_plot<icon_array_type, plot_type>;
 
 			using icon_array_type_ptr	= typename base::icon_array_type_ptr;

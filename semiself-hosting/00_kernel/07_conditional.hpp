@@ -230,7 +230,7 @@ namespace cctmp {
 		nik_ces auto result(T_store_U<LUs>... lvs, T_store_U<MUs>... mvs, RT rv, T_store_U<RUs>... rvs)
 		{
 			nik_ce auto ni  = MD<c>::pos(i);
-			nik_ce auto np1 = cctmp::U_pack_Ts<T>;
+			nik_ce auto np1 = U_pack_Ts<T>;
 
 			NIK_MACHINE_TEMPLATE_WS(c, ni, p0, np1)
 				::NIK_MACHINE_RESULT_TS(c, ni, l, t, r, T_store_U<LUs>..., T)

@@ -73,13 +73,13 @@ namespace chord {
 
 		// cselect:
 
-			nik_ce auto cselect_id        () const { return cctmp::string_literal("@").cselect(); }
-			nik_ce auto cselect_first     () const { return cctmp::string_literal("first").cselect(); }
-			nik_ce auto cselect_deref     () const { return cctmp::string_literal("*").cselect(); }
-			nik_ce auto cselect_appoint   () const { return cctmp::string_literal("appoint").cselect(); }
-			nik_ce auto cselect_not_equal () const { return cctmp::string_literal("not_equal").cselect(); }
-			nik_ce auto cselect_inc       () const { return cctmp::string_literal("+").cselect(); }
-			nik_ce auto cselect_dec       () const { return cctmp::string_literal("-").cselect(); }
+			nik_ce auto cselect_id        () const { return string_literal("@").cselect(); }
+			nik_ce auto cselect_first     () const { return string_literal("first").cselect(); }
+			nik_ce auto cselect_deref     () const { return string_literal("*").cselect(); }
+			nik_ce auto cselect_appoint   () const { return string_literal("appoint").cselect(); }
+			nik_ce auto cselect_not_equal () const { return string_literal("not_equal").cselect(); }
+			nik_ce auto cselect_inc       () const { return string_literal("+").cselect(); }
+			nik_ce auto cselect_dec       () const { return string_literal("-").cselect(); }
 
 		// label:
 
@@ -124,7 +124,7 @@ namespace chord {
 					auto pos   = static_cast<model_subbase>(jump).get_value(entry, JumpEntry::pos);
 					auto value = base::model.get_value(JumpEntry::pos);
 
-					base::contr.set_instr_value(pos, cctmp::Instr::pos, value);
+					base::contr.set_instr_value(pos, Instr::pos, value);
 				}
 				else { } // error.
 			}
@@ -156,7 +156,7 @@ namespace chord {
 
 			nik_ce void subpose_value(const cselect & s, const bool mute = false)
 			{
-				auto is_id = cctmp::apply<_subarray_same_<>>(s, cselect_id());
+				auto is_id = apply<_subarray_same_<>>(s, cselect_id());
 
 				if (is_id) subpose_value_id(mute);
 				else       subpose_value_apply(s, mute);
@@ -423,12 +423,12 @@ namespace chord {
 		using T_lexer			= typename T_grammar::T_lexer;
 		using Token			= typename T_grammar::Token;
 
-		nik_ces auto prod_size		= cctmp::string_literal("{C|A|M|P}").size(); // needs refining.
+		nik_ces auto prod_size		= string_literal("{C|A|M|P}").size(); // needs refining.
 
 		nik_ces auto stack_start	= symbol_type{generator::Sign::nonterminal, base::start_index};
 		nik_ces auto stack_finish	= symbol_type{generator::Sign::terminal, Token::prompt};
 
-		nik_ces auto stack_size		= cctmp::literal("F{C|A|M|P}YPZ<>YPZYP,PZV;HGO").size(); // needs refining.
+		nik_ces auto stack_size		= literal("F{C|A|M|P}YPZ<>YPZYP,PZV;HGO").size(); // needs refining.
 							// literal is intentional.
 							// this is the longest possible sentential.
 							// might need updating.

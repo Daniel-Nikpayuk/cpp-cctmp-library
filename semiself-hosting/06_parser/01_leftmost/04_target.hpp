@@ -630,7 +630,7 @@ namespace parser {
 			auto & head   = parsed.head_at(head_iter);
 			auto & symbol = parsed.symbol_level[head.index];
 
-			lh_follow->has_prompt = cctmp::apply<_subarray_same_<>>(symbol, start_str.cselect());
+			lh_follow->has_prompt = apply<_subarray_same_<>>(symbol, start_str.cselect());
 
 			if (lh_follow->has_prompt) start_index = follow.head_follow.left_size(lh_follow); 
 		}

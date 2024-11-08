@@ -212,16 +212,16 @@ namespace engine {
 	template<typename Body, typename Page, typename Text, typename SizeType>
 	class corpus_literal	: public protocorpus
 				<
-					cctmp::array_literal < Body , SizeType >,
-					cctmp::array_literal < Page , SizeType >,
-					cctmp::array_literal < Text , SizeType >
+					array_literal < Body , SizeType >,
+					array_literal < Page , SizeType >,
+					array_literal < Text , SizeType >
 				>
 	{
 		public:
 
-			using body_array_type		= cctmp::array_literal < Body , SizeType >;
-			using page_array_type		= cctmp::array_literal < Page , SizeType >;
-			using text_array_type		= cctmp::array_literal < Text , SizeType >;
+			using body_array_type		= array_literal < Body , SizeType >;
+			using page_array_type		= array_literal < Page , SizeType >;
+			using text_array_type		= array_literal < Text , SizeType >;
 			using base			= protocorpus<body_array_type, page_array_type, text_array_type>;
 
 			using body_array_type_ptr	= typename base::body_array_type_ptr;
@@ -303,16 +303,16 @@ namespace engine {
 	>
 	class corpus	: public protocorpus // PageSize <= TextSize
 			<
-				cctmp::array < Body , SizeType , BodySize >,
-				cctmp::array < Page , SizeType , PageSize >,
-				cctmp::array < Text , SizeType , TextSize >
+				array < Body , SizeType , BodySize >,
+				array < Page , SizeType , PageSize >,
+				array < Text , SizeType , TextSize >
 			>
 	{
 		public:
 
-			using body_array_type		= cctmp::array < Body , SizeType , BodySize >;
-			using page_array_type		= cctmp::array < Page , SizeType , PageSize >;
-			using text_array_type		= cctmp::array < Text , SizeType , TextSize >;
+			using body_array_type		= array < Body , SizeType , BodySize >;
+			using page_array_type		= array < Page , SizeType , PageSize >;
+			using text_array_type		= array < Text , SizeType , TextSize >;
 			using base			= protocorpus<body_array_type, page_array_type, text_array_type>;
 
 			using body_array_type_ptr	= typename base::body_array_type_ptr;

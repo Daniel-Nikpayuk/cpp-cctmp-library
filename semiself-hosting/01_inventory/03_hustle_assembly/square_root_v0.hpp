@@ -17,6 +17,9 @@
 **
 ************************************************************************************************************************/
 
+namespace cctmp     {
+namespace inventory {
+
 // object:
 
 	template<typename SizeType>
@@ -24,8 +27,8 @@
 	{
 		using size_type = SizeType;
 
-		using AN = cctmp::MN;
-		using AT = cctmp::MT;
+		using AN = MN;
+		using AT = MT;
 
 		constexpr static size_type rowsize = 186;
 
@@ -220,7 +223,7 @@
 		};
 
 	}; template<typename SizeType>
-		constexpr auto contr_object_hustle_square_root_v0 = cctmp::U_store_T
+		constexpr auto contr_object_hustle_square_root_v0 = U_store_T
 		<
 			T_contr_object_hustle_square_root_v0<SizeType>
 		>;
@@ -231,7 +234,7 @@
 
 	struct T_hustle_subtract
 	{
-		using F = cctmp::T_store_U<cctmp::_subtract_>;
+		using F = T_store_U<_subtract_>;
 
 		template<typename T>
 		constexpr static auto result(T v) { return -v; }
@@ -239,7 +242,7 @@
 		template<typename... Ts>
 		constexpr static auto result(Ts... vs) { return F::template result<Ts...>(vs...); }
 
-	}; constexpr auto _hustle_subtract_ = cctmp::U_store_T<T_hustle_subtract>;
+	}; constexpr auto _hustle_subtract_ = U_store_T<T_hustle_subtract>;
 
 /***********************************************************************************************************************/
 
@@ -248,20 +251,20 @@
 	template<typename SizeType>
 	struct T_static_env_hustle_square_root_v0
 	{
-		constexpr static auto value = cctmp::template env_tuple<SizeType>
+		constexpr static auto value = env_tuple<SizeType>
 		(
-			cctmp::_less_than_       ,
+			_less_than_       ,
 
-			cctmp::_add_             ,
-			       _hustle_subtract_ ,
-			cctmp::_multiply_        ,
-			cctmp::_divide_          ,
+			_add_             ,
+			_hustle_subtract_ ,
+			_multiply_        ,
+			_divide_          ,
 
 			0.0001
 		);
 
 	}; template<typename SizeType>
-		constexpr auto env_hustle_square_root_v0 = cctmp::U_store_T<T_static_env_hustle_square_root_v0<SizeType>>;
+		constexpr auto env_hustle_square_root_v0 = U_store_T<T_static_env_hustle_square_root_v0<SizeType>>;
 
 /***********************************************************************************************************************/
 
@@ -270,12 +273,14 @@
 	template<typename SizeType, typename T>
 	constexpr T inventory_square_root_v0(T x)
 	{
-		using T_apply = cctmp::T_metapile_apply
+		using T_apply = T_metapile_apply
 		<
 			SizeType, contr_object_hustle_square_root_v0<SizeType>,
-			env_hustle_square_root_v0<SizeType>, cctmp::U_pack_Ts<T>
+			env_hustle_square_root_v0<SizeType>, U_pack_Ts<T>
 		>;
 
 		return T_apply::result(x);
 	}
+
+}} // namespace cctmp::inventory
 

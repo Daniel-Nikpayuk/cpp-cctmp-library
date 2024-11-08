@@ -33,46 +33,46 @@ namespace chord {
 
 	nik_ce auto chord_default_frame_callable()
 	{
-		return cctmp::frame
+		return frame
 		(
 		 	U_gchar_type,
 
-			cctmp::binding( "id"                    , cctmp::_id_                    ),
-			cctmp::binding( "first"                 , cctmp::_first_                 ),
-			cctmp::binding( "upshift"               , cctmp::_upshift_               ),
-			cctmp::binding( "downshift"             , cctmp::_downshift_             ),
+			binding( "id"                    , _id_                    ),
+			binding( "first"                 , _first_                 ),
+			binding( "upshift"               , _upshift_               ),
+			binding( "downshift"             , _downshift_             ),
 
-			cctmp::binding( "dereference"           , cctmp::_dereference_           ),
-			cctmp::binding( "appoint"               , cctmp::_appoint_               ),
+			binding( "dereference"           , _dereference_           ),
+			binding( "appoint"               , _appoint_               ),
 
-			cctmp::binding( "not"                   , cctmp::_not_                   ),
-			cctmp::binding( "and"                   , cctmp::_and_                   ),
-			cctmp::binding( "or"                    , cctmp::_or_                    ),
-			cctmp::binding( "implies"               , cctmp::_implies_               ),
-			cctmp::binding( "equivalent"            , cctmp::_equivalent_            ),
+			binding( "not"                   , _not_                   ),
+			binding( "and"                   , _and_                   ),
+			binding( "or"                    , _or_                    ),
+			binding( "implies"               , _implies_               ),
+			binding( "equivalent"            , _equivalent_            ),
 
-			cctmp::binding( "equal"                 , cctmp::_equal_                 ),
-			cctmp::binding( "is_zero"               , cctmp::_is_zero_               ),
-			cctmp::binding( "not_equal"             , cctmp::_not_equal_             ),
-			cctmp::binding( "not_zero"              , cctmp::_not_zero_              ),
-			cctmp::binding( "less_than"             , cctmp::_less_than_             ),
-			cctmp::binding( "less_than_or_equal"    , cctmp::_less_than_or_equal_    ),
-			cctmp::binding( "greater_than"          , cctmp::_greater_than_          ),
-			cctmp::binding( "greater_than_or_equal" , cctmp::_greater_than_or_equal_ ),
+			binding( "equal"                 , _equal_                 ),
+			binding( "is_zero"               , _is_zero_               ),
+			binding( "not_equal"             , _not_equal_             ),
+			binding( "not_zero"              , _not_zero_              ),
+			binding( "less_than"             , _less_than_             ),
+			binding( "less_than_or_equal"    , _less_than_or_equal_    ),
+			binding( "greater_than"          , _greater_than_          ),
+			binding( "greater_than_or_equal" , _greater_than_or_equal_ ),
 
-			cctmp::binding( "add"                   , cctmp::_add_                   ),
-			cctmp::binding( "subtract"              , cctmp::_subtract_              ),
-			cctmp::binding( "multiply"              , cctmp::_multiply_              ),
-			cctmp::binding( "divide"                , cctmp::_divide_                ),
-			cctmp::binding( "modulo"                , cctmp::_modulo_                ),
+			binding( "add"                   , _add_                   ),
+			binding( "subtract"              , _subtract_              ),
+			binding( "multiply"              , _multiply_              ),
+			binding( "divide"                , _divide_                ),
+			binding( "modulo"                , _modulo_                ),
 
-			cctmp::binding( "increment"             , cctmp::_increment_<1>          ),
-			cctmp::binding( "decrement"             , cctmp::_increment_<-1>         ),
+			binding( "increment"             , _increment_<1>          ),
+			binding( "decrement"             , _increment_<-1>         ),
 
-			cctmp::binding( "@"                     , cctmp::_id_                    ),
-			cctmp::binding( "*"                     , cctmp::_dereference_           ),
-			cctmp::binding( "+"                     , cctmp::_increment_<1>          ),
-			cctmp::binding( "-"                     , cctmp::_increment_<-1>         )
+			binding( "@"                     , _id_                    ),
+			binding( "*"                     , _dereference_           ),
+			binding( "+"                     , _increment_<1>          ),
+			binding( "-"                     , _increment_<-1>         )
 		);
 	};
 

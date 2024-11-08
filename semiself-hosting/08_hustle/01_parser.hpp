@@ -226,7 +226,7 @@ namespace hustle {
 					"LBody -> Expr0 ;"
 		);}
 
-		nik_ces auto map = cctmp::table
+		nik_ces auto map = table
 		(
 			U_strlit_type, U_token_type,
 
@@ -272,7 +272,7 @@ namespace hustle {
 			sxt_pair( "empty" , Token::empty )
 		);
 
-		nik_ces auto action = cctmp::table
+		nik_ces auto action = table
 		(
 			U_strlit_type, U_action_type,
 
@@ -349,12 +349,12 @@ namespace hustle {
 		using T_lexer			= typename T_grammar::T_lexer;
 		using Token			= typename T_grammar::Token;
 
-		nik_ces auto prod_size		= cctmp::string_literal("d(S)TB").size(); // needs refining.
+		nik_ces auto prod_size		= string_literal("d(S)TB").size(); // needs refining.
 
 		nik_ces auto stack_start	= symbol_type{generator::Sign::nonterminal, base::start_index};
 		nik_ces auto stack_finish	= symbol_type{generator::Sign::terminal, Token::prompt};
 
-		nik_ces auto stack_size		= cctmp::literal("F{C|A|M|P}YPZ<>YPZYP,PZV;HGO").size(); // needs refining.
+		nik_ces auto stack_size		= literal("F{C|A|M|P}YPZ<>YPZYP,PZV;HGO").size(); // needs refining.
 							// literal is intentional.
 							// this is the longest possible sentential.
 							// might need updating.

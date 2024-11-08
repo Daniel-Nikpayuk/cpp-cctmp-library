@@ -26,7 +26,7 @@ namespace parser {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// parser generator grammar:
+// あparser generator grammar:
 
 /***********************************************************************************************************************/
 
@@ -51,16 +51,32 @@ namespace parser {
   /*---------------------------------*/  /*---------------------------------*/  /*---------------------------------*/
   /* terminals (tokens):             */  /* nonterminals:                   */  /* context-free grammar (CFG):     */
   /*                                 */  /*                                 */  /*                                 */
-  /*  e - empty (generator)          */  /* S - Start                       */  /* S -> LM                         */
-  /*  a - arrow (right)              */  /* L - Line                        */  /* M -> LM    | e                  */
-  /*  s - semicolon                  */  /* M - Line (recursive)            */  /* L -> HaBAs                      */
-  /*  i - identifier                 */  /* H - Head                        */  /* H -> i     | e                  */
-  /*  m - empty_body (generated)     */  /* B - Body                        */  /* B -> YC    | m                  */
-  /*  c - colon                      */  /* C - Body (recursive)            */  /* C -> YC    | e                  */
-  /*  l - literal                    */  /* A - Action                      */  /* Y -> i                          */
+  /* e - empty (generator)           */  /* S - Start                       */  /* S -> LM                         */
+  /* a - arrow (right)               */  /* L - Line                        */  /* M -> LM    | e                  */
+  /* s - semicolon                   */  /* M - Line (recursive)            */  /* L -> HaBAs                      */
+  /* i - identifier                  */  /* H - Head                        */  /* H -> i     | e                  */
+  /* m - empty_body (generated)      */  /* B - Body                        */  /* B -> YC    | m                  */
+  /* c - colon                       */  /* C - Body (recursive)            */  /* C -> YC    | e                  */
+  /* l - literal                     */  /* A - Action                      */  /* Y -> i                          */
   /*---------------------------------*/  /* Y - Symbol                      */  /* A -> cE    | e                  */
                                          /* E - Expression                  */  /* E -> i     | l                  */
                                          /*---------------------------------*/  /* --------------------------------*/
+
+  /*--------------------------------------------------*/  /*----------------*/
+  /* first:                                           */  /* follow:        */
+  /*                                                  */  /*                */
+  /* nonterminals   | suffixes       | bodies         */  /* nonterminals   */
+  /*--------------------------------------------------*/  /*----------------*/
+  /* S |   | ia     | M    | e | ia  | LM    |   | ia */  /* S | $ |        */
+  /* M | e | ia     | aBAs |   | a   | e     | e |    */  /* M | $ |        */
+  /* L |   | ia     | As   |   | cs  | HaBAs |   | ia */  /* L | $ | ia     */
+  /* H | e | i      | s    |   | s   | i     |   | i  */  /* H |   | a      */
+  /* B |   | mi     | C    | e | i   | YC    |   | i  */  /* B |   | cs     */
+  /* C | e | i      |      |   |     | m     |   | m  */  /* C |   | cs     */
+  /* Y |   | i      |      |   |     | cE    |   | c  */  /* Y |   | ics    */
+  /* A | e | c      |      |   |     | l     |   | l  */  /* A |   | s      */
+  /* E |   | il     |      |   |     |       |   |    */  /* E |   | s      */
+  /*--------------------------------------------------*/  /*----------------*/
 
   /*------------------------------------------------------------------------------------------------*/
   /* parse table:                                                                                   */
@@ -124,12 +140,12 @@ namespace parser {
 			using size_type			= typename alias<SizeType>::type;
 			using size_ctype		= typename alias<SizeType>::ctype;
 
-			using strlit_type		= cctmp::string_literal<char_ctype, size_type>;
+			using strlit_type		= string_literal<char_ctype, size_type>;
 
-			using    row_array_type		= cctmp::array < size_type   , size_type , Size >;
-			using column_array_type		= cctmp::array < size_type   , size_type , Size >;
-			using strlit_array_type		= cctmp::array < strlit_type , size_type , Size >;
-			using action_array_type		= cctmp::array < size_type   , size_type , Size >;
+			using    row_array_type		= array < size_type   , size_type , Size >;
+			using column_array_type		= array < size_type   , size_type , Size >;
+			using strlit_array_type		= array < strlit_type , size_type , Size >;
+			using action_array_type		= array < size_type   , size_type , Size >;
 
 		protected:
 
@@ -257,7 +273,7 @@ namespace parser {
 
 		// table:
 
-			using strlit_type		= cctmp::string_literal<char_ctype, size_type>;
+			using strlit_type		= string_literal<char_ctype, size_type>;
 			using strlit_ctype_ref		= typename alias<strlit_type>::ctype_ref;
 
 			nik_ces size_type row_size	= Nonterminal::dimension;
