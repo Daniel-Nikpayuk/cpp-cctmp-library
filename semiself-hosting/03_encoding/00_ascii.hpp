@@ -94,7 +94,8 @@ namespace encoding {
 
 			nik_ce ascii_char() : character{} { }
 
-			nik_ce ascii_char(const char c) : character{c} { }
+			template<typename T>
+			nik_ce ascii_char(const T c) : character{c} { }
 
 			nik_ce bool operator == (const ascii_char & c) const
 				{ return (character == c.character); }

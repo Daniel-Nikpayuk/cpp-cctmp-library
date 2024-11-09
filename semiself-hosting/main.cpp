@@ -45,16 +45,6 @@
 
 	int main(int argc, char *argv[])
 	{
-	//	auto c = encoding::utf8_char<char, gindex_type>{'_'};
-
-	//	printf("%s whitespace\n", c.to_ascii().is_whitespace() ? "is" : "not");
-
-	//	using utf8_apply = engine::utf8_apply<engine::Utf8Spec::x000000_x00007f>;
-
-	//	const unsigned char utf8_str0[] = { 0x4d, 0xd0, 0xb0, 0xe4, 0xba, 0x8c, 0xf0, 0x90, 0x8c, 0x82 };
-
-	//	printf("%d\n", utf8_apply::to_scalar(utf8_str0));
-
 	//	printf("%f\n", inventory_square_root_v0<gindex_type>(2.0));
 
 	//	auto arr0 = array<int, gindex_type, 5>{{1, 2, 3, 4, 5}};

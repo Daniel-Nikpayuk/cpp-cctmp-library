@@ -468,6 +468,32 @@
 
 /***********************************************************************************************************************/
 
+// unicode:
+
+	// utf8 char:
+
+	//	using utf8_apply = engine::utf8_apply<engine::Utf8Spec::x000000_x00007f>;
+
+	//	const unsigned char utf8_str0[] = { 0x4d, 0xd0, 0xb0, 0xe4, 0xba, 0x8c, 0xf0, 0x90, 0x8c, 0x82 };
+
+	//	printf("%d\n", utf8_apply::to_scalar(utf8_str0));
+
+		auto c = encoding::utf8_char<char, gindex_type>{'_'};
+
+		printf("%s whitespace\n", c.to_ascii().is_whitespace() ? "is" : "not");
+
+	// utf8 string:
+
+		using utf8_string_type = encoding::utf8_string<unsigned char, gindex_type, 20>;
+
+		auto str = utf8_string_type{"abcあde"};
+
+		for (auto k = 0; k != str.size(); ++k) printf("%s", str[k].cstr_array().origin());
+
+		printf("\n");
+
+/***********************************************************************************************************************/
+
 // parser generator:
 
 	// transition table:
