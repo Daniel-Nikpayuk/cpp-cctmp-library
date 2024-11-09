@@ -39,36 +39,17 @@ namespace parser {
 
 // trait:
 
-	template<typename CharType, typename SizeType>
+	template<typename String>
 	struct lexer_trait
 	{
-		using char_type		= CharType;
-		using char_ctype	= char_type const;
+		using string_type	= typename alias<String>::type;
+		using string_ctype	= typename alias<String>::ctype;
 
-		using iter_type		= char_ctype *;
-		using iter_ctype	= iter_type const;
+		using char_type		= typename string_type::char_type;
+		using char_ctype	= typename string_type::char_ctype;
 
-		using size_type		= SizeType;
-		using size_ctype	= size_type const;
-
-		struct Token
-		{
-			enum : size_type
-			{
-				invalid,
-
-				empty      ,
-				arrow      ,
-				semicolon  ,
-				identifier ,
-				empty_body ,
-				colon      ,
-				literal    ,
-				prompt     ,
-
-				dimension
-			};
-		};
+		using size_type		= typename string_type::size_type;
+		using size_ctype	= typename string_type::size_ctype;
 
 		struct State
 		{
@@ -107,6 +88,28 @@ namespace parser {
 				dimension
 			};
 		};
+
+		struct Token
+		{
+			enum : size_type
+			{
+				invalid,
+
+				empty      ,
+				arrow      ,
+				semicolon  ,
+				identifier ,
+				empty_body ,
+				colon      ,
+				literal    ,
+				prompt     ,
+
+				dimension
+			};
+		};
+
+		using table_type	= table_literal<size_type, size_type, State::dimension, Charset::dimension>;
+		using table_ctype	= typename alias<table_type>::ctype;
 	};
 
 /***********************************************************************************************************************/
@@ -116,9 +119,9 @@ namespace parser {
 	template<typename Trait>
 	struct lexer_policy
 	{
-		using Token			= typename Trait::Token;
 		using State			= typename Trait::State;
 		using Charset			= typename Trait::Charset;
+		using Token			= typename Trait::Token;
 
 		using char_type			= typename Trait::char_type;
 		using char_ctype		= typename Trait::char_ctype;
@@ -128,17 +131,6 @@ namespace parser {
 
 		nik_ces auto U_char_type	= U_store_T<char_type>;
 		nik_ces auto U_size_type	= U_store_T<size_type>;
-
-		nik_ces auto accept = engine::lookup
-		(
-			U_size_type, U_size_type, U_size_type,
-
-			engine::pair( State::identifier , Token::identifier ),
-			engine::pair( State::rangle     , Token::arrow      ),
-			engine::pair( State::colon      , Token::colon      ),
-			engine::pair( State::literal    , Token::literal    ),
-			engine::pair( State::semicolon  , Token::semicolon  )
-		);
 
 		nik_ces auto charmap = engine::lookup
 		(
@@ -154,9 +146,20 @@ namespace parser {
 
 		nik_ces gkey_type map(char_ctype c)
 		{
-			if (c.matches_whitespace()) return Charset::whitespace;
-			else                        return charmap.lfind(c, Charset::character);
+			if (c.to_ascii().matches_whitespace()) return Charset::whitespace;
+			else                                   return charmap.lfind(c, Charset::character);
 		}
+
+		nik_ces auto accept = engine::lookup
+		(
+			U_size_type, U_size_type, U_size_type,
+
+			engine::pair( State::identifier , Token::identifier ),
+			engine::pair( State::rangle     , Token::arrow      ),
+			engine::pair( State::colon      , Token::colon      ),
+			engine::pair( State::literal    , Token::literal    ),
+			engine::pair( State::semicolon  , Token::semicolon  )
+		);
 	};
 
 /***********************************************************************************************************************/
@@ -168,14 +171,11 @@ namespace parser {
 	{
 		using Token			= typename Trait::Token;
 
-		using char_type			= typename Trait::char_type;
-		using char_ctype		= typename Trait::char_ctype;
+		using string_type		= typename Trait::string_type;
+		using string_ctype		= typename Trait::string_ctype;
 
-		using size_type			= typename Trait::size_type;
-		using size_ctype		= typename Trait::size_ctype;
-
-		using lexer_empty_short		= engine::lexer_keyword< char_type , size_type >;
-		using lexer_empty_long		= engine::lexer_keyword< char_type , size_type >;
+		using lexer_empty_short		= engine::lexer_keyword<string_type>;
+		using lexer_empty_long		= engine::lexer_keyword<string_type>;
 
 		nik_ces auto empty_short	= lexer_empty_short { "e"     , Token::empty };
 		nik_ces auto empty_long		= lexer_empty_long  { "empty" , Token::empty };
@@ -191,10 +191,11 @@ namespace parser {
 		using State		= typename Trait::State;
 		using Charset		= typename Trait::Charset;
 
+		using table_type	= typename Trait::table_type;
+		using table_ctype	= typename Trait::table_ctype;
+
 		using size_type		= typename Trait::size_type;
 		using size_ctype	= typename Trait::size_ctype;
-
-		using table_type	= table<size_type, size_type, State::dimension, Charset::dimension>;
 
 		constexpr static auto make()
 		{
@@ -242,34 +243,34 @@ namespace parser {
 	template<typename Trait>
 	class lexer : public engine::lexer_automaton
 	<
-		typename Trait::State,
-		typename Trait::Charset,
-		typename Trait::iter_type,
-		typename Trait::size_type
+		typename Trait::table_type,
+		typename Trait::string_type,
+		typename Trait::State
 	>
 	{
 		public:
 
-			using Token		= typename Trait::Token;
-			using State		= typename Trait::State;
-			using Charset		= typename Trait::Charset;
+			using State			= typename Trait::State;
+			using Charset			= typename Trait::Charset;
+			using Token			= typename Trait::Token;
 
-			using char_type		= typename Trait::char_type;
-			using char_ctype	= typename Trait::char_ctype;
+			using table_type		= typename Trait::table_type;
+			using table_ctype		= typename Trait::table_ctype;
+			using table_ctype_ref		= typename alias<table_type>::ctype_ref;
 
-			using iter_type		= typename Trait::iter_type;
-			using iter_ctype	= typename Trait::iter_ctype;
+			using string_type		= typename Trait::string_type;
+			using string_ctype		= typename Trait::string_ctype;
+			using string_ctype_ref		= typename alias<string_type>::ctype_ref;
 
-			using size_type		= typename Trait::size_type;
-			using size_ctype	= typename Trait::size_ctype;
+			using char_type_iter		= typename string_type::type_ptr;
+			using char_ctype_iter		= typename string_type::ctype_ptr;
 
-			using base		= engine::lexer_automaton<State, Charset, iter_type, size_type>;
-			using policy		= lexer_policy<Trait>;
-			using keyword		= lexer_keyword<Trait>;
+			using size_type			= typename Trait::size_type;
+			using size_ctype		= typename Trait::size_ctype;
 
-			using lit_type		= typename base::lit_type;
-			using lit_ctype		= typename base::lit_ctype;
-			using lit_ctype_ref	= typename base::lit_ctype_ref;
+			using base			= engine::lexer_automaton<table_type, string_type, State>;
+			using policy			= lexer_policy<Trait>;
+			using keyword			= lexer_keyword<Trait>;
 
 		protected:
 
@@ -277,8 +278,8 @@ namespace parser {
 
 		public:
 
-			nik_ce lexer(lit_ctype_ref t, iter_ctype s, iter_ctype f) :
-				base{t, s, f}, symbol{Token::invalid}
+			nik_ce lexer(table_ctype_ref t, string_ctype_ref s) :
+				base{t, s}, symbol{Token::invalid}
 					{ }
 
 			nik_ce size_type token  () const { return symbol; }
@@ -307,7 +308,7 @@ namespace parser {
 
 			// check:
 
-				nik_ce size_type check_keyword(iter_ctype in, iter_ctype end) const
+				nik_ce size_type check_keyword(char_ctype_iter in, char_ctype_iter end) const
 				{
 					size_type val = Token::invalid;
 
@@ -320,13 +321,13 @@ namespace parser {
 					return val;
 				}
 
-				nik_ce size_type check_keyword_1(iter_ctype in, iter_ctype end) const
+				nik_ce size_type check_keyword_1(char_ctype_iter in, char_ctype_iter end) const
 				{
 					if (keyword::empty_short.match(in, end)) return keyword::empty_short.token;
 					else                                     return Token::invalid;
 				}
 
-				nik_ce size_type check_keyword_5(iter_ctype in, iter_ctype end) const
+				nik_ce size_type check_keyword_5(char_ctype_iter in, char_ctype_iter end) const
 				{
 					if (keyword::empty_long.match(in, end)) return keyword::empty_long.token;
 					else                                    return Token::invalid;
@@ -337,10 +338,10 @@ namespace parser {
 
 // syntactic sugar:
 
-	template<typename CharType, typename SizeType, typename In, typename End>
+	template<typename String, typename In, typename End>
 	nik_ce auto make_lexer(In in, End end)
 	{
-		using trait_type		= lexer_trait<CharType, SizeType>;
+		using trait_type		= lexer_trait<String>;
 		using table_type		= lexer_table<trait_type>;
 		using lexer_type		= lexer<trait_type>;
 

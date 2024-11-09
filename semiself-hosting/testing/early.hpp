@@ -468,19 +468,52 @@
 
 /***********************************************************************************************************************/
 
+// ascii:
+
+	// char:
+
+		auto c0 = encoding::ascii_char<unsigned char, gindex_type>{'_'};
+		auto c1 = encoding::ascii_char<unsigned char, gindex_type>{255};
+
+		c0.validate();
+		c1.validate();
+
+		printf("c0 is %svalid\n", c0.is_valid() ? "" : "in");
+		printf("c1 is %svalid\n", c1.is_valid() ? "" : "in");
+
+	// string:
+
+		using ascii_string_type = encoding::ascii_string<unsigned char, gindex_type, 20>;
+
+		auto str0 = ascii_string_type{"abc" "d"    "ef"};
+		auto str1 = ascii_string_type{"abc" "\xff" "ef"};
+
+		str0.validate();
+		str1.validate();
+
+		printf("str0 is %svalid\n", str0.is_valid() ? "" : "in");
+		printf("str1 is %svalid\n", str1.is_valid() ? "" : "in");
+
+		for (auto k = 0; k != str0.size(); ++k) printf("%c", str0[k].value());
+		printf("\n");
+
+/***********************************************************************************************************************/
+
 // unicode:
 
 	// utf8 char:
 
-	//	using utf8_apply = engine::utf8_apply<engine::Utf8Spec::x000000_x00007f>;
+		auto c0 = encoding::utf8_char<unsigned char, gindex_type>{' '};
+		auto c1 = encoding::utf8_char<unsigned char, gindex_type>{255};
 
-	//	const unsigned char utf8_str0[] = { 0x4d, 0xd0, 0xb0, 0xe4, 0xba, 0x8c, 0xf0, 0x90, 0x8c, 0x82 };
+		c0.validate();
+		c1.validate();
 
-	//	printf("%d\n", utf8_apply::to_scalar(utf8_str0));
+		printf("c0 is %svalid\n", c0.is_valid() ? "" : "in");
+		printf("c1 is %svalid\n", c1.is_valid() ? "" : "in");
 
-		auto c = encoding::utf8_char<char, gindex_type>{'_'};
-
-		printf("%s whitespace\n", c.to_ascii().is_whitespace() ? "is" : "not");
+		printf("c0 is %swhitespace\n", c0.to_ascii().is_whitespace() ? "" : "not ");
+		printf("c1 is %swhitespace\n", c1.to_ascii().is_whitespace() ? "" : "not ");
 
 	// utf8 string:
 
@@ -489,7 +522,6 @@
 		auto str = utf8_string_type{"abcあde"};
 
 		for (auto k = 0; k != str.size(); ++k) printf("%s", str[k].cstr_array().origin());
-
 		printf("\n");
 
 /***********************************************************************************************************************/

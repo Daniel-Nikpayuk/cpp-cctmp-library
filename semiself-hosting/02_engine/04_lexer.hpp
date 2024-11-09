@@ -32,63 +32,61 @@ namespace engine {
 
 // keyword:
 
-	template<typename CharType, typename SizeType>
+	template<typename String>
 	class lexer_keyword
 	{
 		public:
 
-			using char_type			= CharType;
-			using char_ctype		= char_type const;
+			using string_type		= typename alias<String>::type;
+			using string_ctype		= typename alias<String>::ctype;
+			using string_ctype_ref		= typename alias<String>::ctype_ref;
 
-			using size_type			= SizeType;
-			using size_ctype		= size_type const;
+			using char_type			= typename string_type::char_type;
+			using char_ctype		= typename string_type::char_ctype;
 
-			using strlit_type		= string_literal<char_type, size_type>;
-			using strlit_ctype		= strlit_type const;
-			using strlit_ctype_ref		= strlit_ctype &;
+			using size_type			= typename string_type::size_type;
+			using size_ctype		= typename string_type::size_ctype;
 
 		protected:
 
-			strlit_ctype keyword;
+			string_ctype keyword;
 
 		public:
 
 			size_ctype token;
 
-			nik_ce lexer_keyword(strlit_ctype_ref k, size_ctype t) : keyword{k}, token{t} { }
+			nik_ce lexer_keyword(string_ctype_ref k, size_ctype t) : keyword{k}, token{t} { }
 
 			template<typename In, typename End>
-			nik_ce bool match(In in, End end) const
-			{
-				for (auto k = keyword.cbegin(); k != keyword.cend(); ++k, ++in)
-					if (*k != *in) break;
-
-				return (in == end);
-			}
+			nik_ce bool match(In in, End end) const { return keyword.equal(in, end); }
 	};
 
 /***********************************************************************************************************************/
 
 // automaton:
 
-	template<typename State, typename Charset, typename IterType, typename SizeType>
+	template<typename Table, typename String, typename State>
 	class lexer_automaton
 	{
 		public:
 
-			using iter_type		= IterType;
-			using iter_ctype	= iter_type const;
+			using table_type		= typename alias<Table>::type;
+			using table_ctype		= typename alias<Table>::ctype;
+			using table_ctype_ref		= typename alias<Table>::ctype_ref;
 
-			using size_type		= SizeType;
-			using size_ctype	= size_type const;
+			using string_type		= typename alias<String>::type;
+			using string_ctype		= typename alias<String>::ctype;
+			using string_ctype_ref		= typename alias<String>::ctype_ref;
 
-			using lit_type		= array_literal<size_type, size_type>;
-			using lit_ctype		= lit_type const;
-			using lit_ctype_ref	= lit_ctype &;
+			using iter_type			= typename string_type::char_ctype_ptr;
+			using iter_ctype		= typename string_type::char_ctype_cptr;
+
+			using size_type			= typename string_type::size_type;
+			using size_ctype		= typename string_type::size_ctype;
 
 		protected:
 
-			lit_ctype table;
+			table_ctype table;
 
 			iter_type start;
 			iter_type current;
@@ -98,8 +96,8 @@ namespace engine {
 
 		public:
 
-			nik_ce lexer_automaton(lit_ctype_ref t, iter_ctype s, iter_ctype f) :
-				table{t}, start{s}, current{s}, finish{f}, mode{}
+			nik_ce lexer_automaton(table_ctype_ref t, string_ctype_ref s) :
+				table{t}, start{s.cbegin()}, current{s.cbegin()}, finish{s.cend()}, mode{}
 					{ }
 
 			nik_ce size_type left_size() const { return current - start; }
@@ -118,17 +116,16 @@ namespace engine {
 
 			nik_ce auto skip_whitespace()
 			{
-				while (not_end() && matches_whitespace(*current)) ++current;
+				while (not_end() && current->matches_whitespace()) ++current;
 
 				return current;
 			}
 
-			nik_ce size_type table_at(size_ctype row, size_ctype col) const
-				{ return table[row * Charset::dimension + col]; }
+			nik_ce size_type cat(size_ctype row, size_ctype col) const { return table[row][col]; }
 
 			nik_ce bool find_empty(size_type & peek, size_ctype col)
 			{
-				peek = table_at(mode, col);
+				peek = cat(mode, col);
 
 				return (peek == State::empty);
 			}

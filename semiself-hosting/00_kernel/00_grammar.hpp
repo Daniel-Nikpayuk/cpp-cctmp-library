@@ -436,16 +436,16 @@ namespace cctmp {
 
 				template<typename In, typename End>
 				nik_ce bool equal(size_ctype n, In in, End end) const
-					{ return not not_equal(n, in, end); }
+				{
+					for (ctype_ptr out = citer(n); in != end; ++out, ++in)
+						if (*out != *in) return false;
+
+					return true;
+				}
 
 				template<typename In, typename End>
 				nik_ce bool not_equal(size_ctype n, In in, End end) const
-				{
-					for (ctype_ptr out = citer(n); in != end; ++out, ++in)
-						if (*out != *in) return true;
-
-					return false;
-				}
+					{ return not equal(n, in, end); }
 
 				nik_ce ctype_ref operator [] (size_ctype n) const { return cat(n); }
 

@@ -63,6 +63,7 @@ namespace encoding {
 
 		nik_ces char_type range[][Byte::dimension] =
 		{
+			//  b1   e1     b2   e2     b3   e3     b4   e4
 			{ 0x00,0x7f , 0x00,0x7f , 0x00,0x7f , 0x00,0x7f },
 			{ 0xc2,0xdf , 0x80,0xbf , 0x00,0x7f , 0x00,0x7f },
 			{ 0xe0,0xe0 , 0xa0,0xbf , 0x80,0xbf , 0x00,0x7f },
@@ -350,69 +351,72 @@ namespace encoding {
 
 /***********************************************************************************************************************/
 
-// valid:
+// validate:
 
-	template<typename Unicode>
-	struct utf8_valid
+	template<typename CharType, typename SizeType>
+	struct utf8_validate
 	{
-		using unicode_type		= typename alias<Unicode>::type;
-		using unicode_ctype		= typename alias<Unicode>::ctype;
+		using char_type			= typename alias<CharType>::type;
+		using char_ctype		= typename alias<CharType>::ctype;
 
-		using char_type			= typename unicode_type::char_type;
-		using char_ctype		= typename unicode_type::char_ctype;
-
-		using size_type			= typename unicode_type::size_type;
-		using size_ctype		= typename unicode_type::size_ctype;
+		using size_type			= typename alias<SizeType>::type;
+		using size_type_ref		= typename alias<SizeType>::type_ref;
+		using size_ctype		= typename alias<SizeType>::ctype;
 
 		using byte_type			= utf8_byte<char_type, size_type>;
 		using byte_range		= typename byte_type::Range;
 
 		template<typename In, typename End>
-		nik_ces void push(unicode_type & ch, In in, End end)
-			{ if (in != end) { push_byte1(ch, byte_type::byte1_range(*in), in, end); } }
+		nik_ces size_type apply(In in, End end)
+		{
+			size_type record = 0;
+
+			if (in != end) { apply_byte1(record, byte_type::byte1_range(*in), in, end); }
+
+			return record;
+		}
 
 		template<typename In, typename End>
-		nik_ces void push_byte1(unicode_type & ch, size_ctype row, In in, End end)
+		nik_ces void apply_byte1(size_type_ref record, size_ctype row, In in, End end)
 		{
-			if (byte_type::valid_range(row))
-			{
-				ch += static_cast<char_type>(*in);
+			record += byte_type::valid_range(row);
 
-				if (row != byte_range::x00_x7f) push_byte2(ch, row, in + 1, end);
+			if (record && row != byte_range::x00_x7f) { apply_byte2(record, row, in + 1, end); }
+		}
+
+		template<typename In, typename End>
+		nik_ces void apply_byte2(size_type_ref record, size_ctype row, In in, End end)
+		{
+			if (in == end) { record = 0; }
+			else
+			{
+				record += byte_type::in_byte2_range(*in, row);
+
+				if (record && row != byte_range::xc2_xdf) apply_byte3(record, row, in + 1, end);
 			}
 		}
 
 		template<typename In, typename End>
-		nik_ces void push_byte2(unicode_type & ch, size_ctype row, In in, End end)
+		nik_ces void apply_byte3(size_type_ref record, size_ctype row, In in, End end)
 		{
-			if (in != end && byte_type::in_byte2_range(*in, row))
+			if (in == end) { record = 0; }
+			else
 			{
-				ch += static_cast<char_type>(*in);
-
-				if (row != byte_range::xc2_xdf) push_byte3(ch, row, in + 1, end);
-			}
-		}
-
-		template<typename In, typename End>
-		nik_ces void push_byte3(unicode_type & ch, size_ctype row, In in, End end)
-		{
-			if (in != end && byte_type::in_byte3_range(*in, row))
-			{
-				ch += static_cast<char_type>(*in);
+				record += byte_type::in_byte3_range(*in, row);
 
 				const bool is_byte4 =	(row == byte_range::xf0_xf0) ||
 							(row == byte_range::xf1_xf3) ||
 							(row == byte_range::xf4_xf4) ;
 
-				if (is_byte4) push_byte4(ch, row, in + 1, end);
+				if (record && is_byte4) apply_byte4(record, row, in + 1, end);
 			}
 		}
 
 		template<typename In, typename End>
-		nik_ces void push_byte4(unicode_type & ch, size_ctype row, In in, End end)
+		nik_ces void apply_byte4(size_type_ref record, size_ctype row, In in, End end)
 		{
-			if (in != end && byte_type::in_byte4_range(*in, row))
-				{ ch += static_cast<char_type>(*in); }
+			if (in == end) { record = 0; }
+			else { record += byte_type::in_byte4_range(*in, row); }
 		}
 	};
 
@@ -421,20 +425,21 @@ namespace encoding {
 // interface:
 
 	template<typename CharType, typename SizeType>
-	class utf8_char
+	class utf8_char : public array<CharType, SizeType, utf8_byte<CharType, SizeType>::max_length>
 	{
+		protected:
+
+			nik_ces auto max_length		= utf8_byte<CharType, SizeType>::max_length;
+
 		public:
 
-			using char_type			= typename alias<CharType>::type;
-			using char_ctype		= typename alias<CharType>::ctype;
+			using base			= array<CharType, SizeType, max_length>;
 
-			using size_type			= typename alias<SizeType>::type;
-			using size_ctype		= typename alias<SizeType>::ctype;
+			using char_type			= typename base::type;
+			using char_ctype		= typename base::ctype;
 
-			nik_ces size_type length	= 4;
-
-			using array_type		= array<char_type, size_type, length>;
-			using valid_type		= utf8_valid<utf8_char>;
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
 
 		protected:
 
@@ -448,32 +453,39 @@ namespace encoding {
 			using ascii_char_ctype_cptr	= typename alias<ascii_char_type>::ctype_cptr;
 			using ascii_char_ctype_ref	= typename alias<ascii_char_type>::ctype_ref;
 
-			array_type character;
+			using validate_type		= utf8_validate<char_type, size_type>;
+
+		protected:
+
+			bool valid;
 
 		public:
 
-			nik_ce utf8_char() { }
+			nik_ce utf8_char() : valid{} { }
 
-			nik_ce utf8_char(ascii_char_ctype_ref c) { character.push(c.value()); }
+			nik_ce utf8_char(char_ctype c) : valid{} { base::push(c); }
 
-			nik_ce size_type size() const { return character.size(); }
+		public:
 
-			nik_ce bool is_empty  () const { return character.is_empty(); }
-			nik_ce bool not_empty () const { return character.not_empty(); }
+			// valid:
 
-			nik_ce utf8_char & operator += (ascii_char_ctype_ref c)
-				{ character.push(c.value()); return *this; }
+				nik_ce bool is_valid  () const { return valid; }
+				nik_ce bool not_valid () const { return not valid; }
 
-			template<typename In, typename End>
-			nik_ce void push_valid(In in, End end) { valid_type::push(*this, in, end); }
+				nik_ce void validate()
+					{ valid = validate_type::apply(base::cbegin(), base::cend()); }
+
+				template<typename In, typename End>
+				nik_ce void push_valid(In in, End end)
+					{ base::push(in, in + validate_type::apply(in, end)); }
 
 			// c str(ing) array:
 
 				nik_ce auto cstr_array() const
 				{
-					array<char, size_type, length + 1> cstr_arr;
+					array<char, size_type, max_length + 1> cstr_arr;
 
-					cstr_arr.push(character.cbegin(), character.cend());
+					cstr_arr.push(base::cbegin(), base::cend());
 					cstr_arr.push('\0');
 
 					return cstr_arr;
@@ -481,7 +493,8 @@ namespace encoding {
 
 			// ascii:
 
-				nik_ce ascii_char_type to_ascii() const { return ascii_char_type{character[0]}; }
+				nik_ce ascii_char_type to_ascii() const
+					{ return ascii_char_type{base::operator [] (0)}; }
 	};
 
 /***********************************************************************************************************************/
@@ -509,7 +522,8 @@ namespace encoding {
 
 		protected:
 
-			nik_ce void set_invalid() { valid = false; }
+			nik_ce void set_valid   () { valid = true; }
+			nik_ce void set_invalid () { valid = false; }
 
 			bool valid;
 
@@ -518,32 +532,53 @@ namespace encoding {
 			nik_ce utf8_string() : valid{} { }
 
 			nik_ce utf8_string(const string_literal<const char, size_type> & s) :
-				utf8_string(s.cbegin(), s.cend()) { }
+				valid{} { push_valid(s.cbegin(), s.cend()); }
 
-			template<typename In, typename End>
-			nik_ce utf8_string(In in, End end) : valid{true}
-			{
-				while (in != end)
+			// valid:
+
+				nik_ce bool is_valid  () const { return valid; }
+				nik_ce bool not_valid () const { return not valid; }
+
+				nik_ce void validate()
 				{
-					unicode_type ch;
+					set_valid();
 
-					ch.push_valid(in, end);
-
-					if (ch.not_empty())
+					for (auto k = base::begin(); k != base::end(); ++k)
 					{
-						base::push(ch);
+						k->validate();
 
-						in += ch.size();
-					}
-					else
-					{
-						set_invalid();
-						break;
+						if (k->not_valid())
+						{
+							set_invalid();
+							break;
+						}
 					}
 				}
-			}
 
-			nik_ce bool is_valid() const { return valid; }
+				template<typename In, typename End>
+				nik_ce void push_valid(In in, End end)
+				{
+					set_valid();
+
+					while (in != end)
+					{
+						unicode_type ch;
+
+						ch.push_valid(in, end);
+
+						if (ch.not_empty())
+						{
+							base::push(ch);
+
+							in += ch.size();
+						}
+						else
+						{
+							set_invalid();
+							break;
+						}
+					}
+				}
 	};
 
 /***********************************************************************************************************************/

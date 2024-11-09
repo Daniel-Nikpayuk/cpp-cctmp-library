@@ -89,19 +89,42 @@ namespace encoding {
 			nik_ces auto latin_uppercase	= lit_type{ ascii_set_type::latin_uppercase };
 
 			char_type character;
+			bool valid;
 
 		public:
 
-			nik_ce ascii_char() : character{} { }
+			nik_ce ascii_char() : character{}, valid{true} { }
 
-			template<typename T>
-			nik_ce ascii_char(const T c) : character{c} { }
+			template<typename Int>
+			nik_ce ascii_char(const Int c) : character{static_cast<char_type>(c)}, valid{} { }
 
 			nik_ce bool operator == (const ascii_char & c) const
 				{ return (character == c.character); }
 
 			nik_ce bool operator != (const ascii_char & c) const
 				{ return (character != c.character); }
+
+		protected:
+
+			nik_ce void set_valid   () { valid = true; }
+			nik_ce void set_invalid () { valid = false; }
+
+		public:
+
+			// character:
+
+				nik_ce char_type value() const { return character; }
+
+			// valid:
+
+				nik_ce bool is_valid  () const { return valid; }
+				nik_ce bool not_valid () const { return not valid; }
+
+				nik_ce void validate()
+				{
+					if (0 <= character && character < 128) set_valid();
+					else set_invalid();
+				}
 
 			// matches (atomic):
 
@@ -150,10 +173,69 @@ namespace encoding {
 
 					nik_ce bool is_underscore_latin_alphanumeric() const
 						{ return is_digit() || is_underscore_latin_alphabet(); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// string:
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename CharType, typename SizeType, SizeType Size>
+	class ascii_string : public array<ascii_char<CharType, SizeType>, SizeType, Size>
+	{
+		public:
+
+			using ascii_type		= ascii_char<CharType, SizeType>;
+			using base			= array<ascii_type, SizeType, Size>;
+
+			using char_type			= typename ascii_type::char_type;
+			using char_ctype		= typename ascii_type::char_ctype;
+
+			using size_type			= typename ascii_type::size_type;
+			using size_ctype		= typename ascii_type::size_ctype;
+
+		protected:
+
+			bool valid;
 
 		public:
 
-			nik_ce char_type value() const { return character; }
+			nik_ce ascii_string() : valid{} { }
+
+			nik_ce ascii_string(const string_literal<const char, size_type> & s) :
+				valid{} { base::push(s.cbegin(), s.cend()); }
+
+		protected:
+
+			nik_ce void set_valid   () { valid = true; }
+			nik_ce void set_invalid () { valid = false; }
+
+		public:
+
+			// valid:
+
+				nik_ce bool is_valid  () const { return valid; }
+				nik_ce bool not_valid () const { return not valid; }
+
+				nik_ce void validate()
+				{
+					set_valid();
+
+					for (auto k = base::begin(); k != base::end(); ++k)
+					{
+						k->validate();
+
+						if (k->not_valid())
+						{
+							set_invalid();
+							break;
+						}
+					}
+				}
 	};
 
 /***********************************************************************************************************************/
