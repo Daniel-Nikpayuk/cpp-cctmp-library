@@ -179,172 +179,6 @@ namespace encoding {
 	};
 
 /***********************************************************************************************************************/
-
-// apply:
-
-/*
-	template<gkey_type, auto...> struct utf8_apply;
-
-	// x000000 - x00007f:
-
-		template<auto... filler>
-		struct utf8_apply<Utf8Spec::x000000_x00007f, filler...>
-		{
-			using uint8_type		= typename Utf8Spec::uint8_type;
-			using uint8_ctype		= typename Utf8Spec::uint8_ctype;
-
-			using uint32_type		= typename Utf8Spec::uint32_type;
-			using uint32_ctype		= typename Utf8Spec::uint32_ctype;
-
-			using size_type			= typename Utf8Spec::size_type;
-			using size_ctype		= typename Utf8Spec::size_ctype;
-
-			nik_ces size_type byte_size	= 1;
-
-			nik_ces uint32_type to_scalar(uint8_ctype (&u)[Utf8Spec::max_byte_size])
-			{
-				return 0;
-			}
-		};
-
-	// x000080 - x0007ff:
-
-		template<auto... filler>
-		struct utf8_apply<Utf8Spec::x000080_x0007ff, filler...>
-		{
-			using uint8_type		= typename Utf8Spec::uint8_type;
-			using uint8_ctype		= typename Utf8Spec::uint8_ctype;
-
-			using uint32_type		= typename Utf8Spec::uint32_type;
-			using uint32_ctype		= typename Utf8Spec::uint32_ctype;
-
-			using size_type			= typename Utf8Spec::size_type;
-			using size_ctype		= typename Utf8Spec::size_ctype;
-
-			nik_ces size_type byte_size	= 2;
-		};
-
-	// x000800 - x000fff:
-
-		template<auto... filler>
-		struct utf8_apply<Utf8Spec::x000800_x000fff, filler...>
-		{
-			using uint8_type		= typename Utf8Spec::uint8_type;
-			using uint8_ctype		= typename Utf8Spec::uint8_ctype;
-
-			using uint32_type		= typename Utf8Spec::uint32_type;
-			using uint32_ctype		= typename Utf8Spec::uint32_ctype;
-
-			using size_type			= typename Utf8Spec::size_type;
-			using size_ctype		= typename Utf8Spec::size_ctype;
-
-			nik_ces size_type byte_size	= 3;
-		};
-
-	// x001000 - x00cfff:
-
-		template<auto... filler>
-		struct utf8_apply<Utf8Spec::x001000_x00cfff, filler...>
-		{
-			using uint8_type		= typename Utf8Spec::uint8_type;
-			using uint8_ctype		= typename Utf8Spec::uint8_ctype;
-
-			using uint32_type		= typename Utf8Spec::uint32_type;
-			using uint32_ctype		= typename Utf8Spec::uint32_ctype;
-
-			using size_type			= typename Utf8Spec::size_type;
-			using size_ctype		= typename Utf8Spec::size_ctype;
-
-			nik_ces size_type byte_size	= 3;
-		};
-
-	// x00d000 - x00d7ff:
-
-		template<auto... filler>
-		struct utf8_apply<Utf8Spec::x00d000_x00d7ff, filler...>
-		{
-			using uint8_type		= typename Utf8Spec::uint8_type;
-			using uint8_ctype		= typename Utf8Spec::uint8_ctype;
-
-			using uint32_type		= typename Utf8Spec::uint32_type;
-			using uint32_ctype		= typename Utf8Spec::uint32_ctype;
-
-			using size_type			= typename Utf8Spec::size_type;
-			using size_ctype		= typename Utf8Spec::size_ctype;
-
-			nik_ces size_type byte_size	= 3;
-		};
-
-	// x00e000 - x00ffff:
-
-		template<auto... filler>
-		struct utf8_apply<Utf8Spec::x00e000_x00ffff, filler...>
-		{
-			using uint8_type		= typename Utf8Spec::uint8_type;
-			using uint8_ctype		= typename Utf8Spec::uint8_ctype;
-
-			using uint32_type		= typename Utf8Spec::uint32_type;
-			using uint32_ctype		= typename Utf8Spec::uint32_ctype;
-
-			using size_type			= typename Utf8Spec::size_type;
-			using size_ctype		= typename Utf8Spec::size_ctype;
-
-			nik_ces size_type byte_size	= 3;
-		};
-
-	// x010000 - x03ffff:
-
-		template<auto... filler>
-		struct utf8_apply<Utf8Spec::x010000_x03ffff, filler...>
-		{
-			using uint8_type		= typename Utf8Spec::uint8_type;
-			using uint8_ctype		= typename Utf8Spec::uint8_ctype;
-
-			using uint32_type		= typename Utf8Spec::uint32_type;
-			using uint32_ctype		= typename Utf8Spec::uint32_ctype;
-
-			using size_type			= typename Utf8Spec::size_type;
-			using size_ctype		= typename Utf8Spec::size_ctype;
-
-			nik_ces size_type byte_size	= 4;
-		};
-
-	// x040000 - x0fffff:
-
-		template<auto... filler>
-		struct utf8_apply<Utf8Spec::x040000_x0fffff, filler...>
-		{
-			using uint8_type		= typename Utf8Spec::uint8_type;
-			using uint8_ctype		= typename Utf8Spec::uint8_ctype;
-
-			using uint32_type		= typename Utf8Spec::uint32_type;
-			using uint32_ctype		= typename Utf8Spec::uint32_ctype;
-
-			using size_type			= typename Utf8Spec::size_type;
-			using size_ctype		= typename Utf8Spec::size_ctype;
-
-			nik_ces size_type byte_size	= 4;
-		};
-
-	// x100000 - x10ffff:
-
-		template<auto... filler>
-		struct utf8_apply<Utf8Spec::x100000_x10ffff, filler...>
-		{
-			using uint8_type		= typename Utf8Spec::uint8_type;
-			using uint8_ctype		= typename Utf8Spec::uint8_ctype;
-
-			using uint32_type		= typename Utf8Spec::uint32_type;
-			using uint32_ctype		= typename Utf8Spec::uint32_ctype;
-
-			using size_type			= typename Utf8Spec::size_type;
-			using size_ctype		= typename Utf8Spec::size_ctype;
-
-			nik_ces size_type byte_size	= 4;
-		};
-*/
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // char(acter):
@@ -498,16 +332,11 @@ namespace encoding {
 	};
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
-// string:
-
-/***********************************************************************************************************************/
-
-// interface:
+// array:
 
 	template<typename CharType, typename SizeType, SizeType Size>
-	class utf8_string : public array<utf8_char<CharType, SizeType>, SizeType, Size>
+	class utf8_char_array : public array<utf8_char<CharType, SizeType>, SizeType, Size>
 	{
 		public:
 
@@ -529,9 +358,9 @@ namespace encoding {
 
 		public:
 
-			nik_ce utf8_string() : valid{} { }
+			nik_ce utf8_char_array() : valid{} { }
 
-			nik_ce utf8_string(const string_literal<const char, size_type> & s) :
+			nik_ce utf8_char_array(const string_literal<const char, size_type> & s) :
 				valid{} { push_valid(s.cbegin(), s.cend()); }
 
 			// valid:
@@ -578,6 +407,82 @@ namespace encoding {
 							break;
 						}
 					}
+				}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// string:
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename CharType, typename SizeType, SizeType Size>
+	class utf8_string : public array<CharType, SizeType, Size>
+	{
+		public:
+
+			using base			= array<CharType, SizeType, Size>;
+
+			using char_type			= typename base::type;
+			using char_ctype		= typename base::ctype;
+
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+		protected:
+
+			using validate_type		= utf8_validate<char_type, size_type>;
+
+		protected:
+
+			nik_ce void set_valid   () { valid = true; }
+			nik_ce void set_invalid () { valid = false; }
+
+			bool valid;
+
+		public:
+
+			nik_ce utf8_string() : valid{} { }
+
+			nik_ce utf8_string(const string_literal<const char, size_type> & s) :
+				valid{} { base::push(s.cbegin(), s.cend()); }
+
+			// valid:
+
+				nik_ce bool is_valid  () const { return valid; }
+				nik_ce bool not_valid () const { return not valid; }
+
+				nik_ce void validate()
+				{
+					set_valid();
+
+					auto b = base::cbegin();
+
+					while (b != base::cend())
+					{
+						size_ctype record = validate_type::apply(b, base::cend());
+
+						if (record) { b += record; }
+						else
+						{
+							set_invalid();
+							break;
+						}
+					}
+				}
+
+			// char array:
+
+				nik_ce auto char_array() const
+				{
+					utf8_char_array<char_type, size_type, Size> char_arr;
+
+					char_arr.push_valid(base::cbegin(), base::cend());
+
+					return char_arr;
 				}
 	};
 

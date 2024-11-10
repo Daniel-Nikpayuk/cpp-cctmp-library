@@ -515,13 +515,28 @@
 		printf("c0 is %swhitespace\n", c0.to_ascii().is_whitespace() ? "" : "not ");
 		printf("c1 is %swhitespace\n", c1.to_ascii().is_whitespace() ? "" : "not ");
 
+	// utf8 char array:
+
+		using utf8_char_array_type = encoding::utf8_char_array<unsigned char, gindex_type, 20>;
+
+		auto char_arr = utf8_char_array_type{"abcあde"};
+
+		for (auto k = 0; k != char_arr.size(); ++k) printf("%s", char_arr[k].cstr_array().origin());
+		printf("\n");
+
 	// utf8 string:
 
 		using utf8_string_type = encoding::utf8_string<unsigned char, gindex_type, 20>;
 
 		auto str = utf8_string_type{"abcあde"};
 
-		for (auto k = 0; k != str.size(); ++k) printf("%s", str[k].cstr_array().origin());
+		str.validate();
+
+		printf("str is %svalid\n", str.is_valid() ? "" : "in");
+
+		auto char_arr = str.char_array();
+
+		for (auto k = 0; k != char_arr.size(); ++k) printf("%s", char_arr[k].cstr_array().origin());
 		printf("\n");
 
 /***********************************************************************************************************************/
