@@ -253,14 +253,14 @@ namespace engine {
 
 			nik_ce const Type1 & lfind(const Type0 & v0, const Type1 & v1) const
 			{
-				size_ctype pos = left.find(v0);
+				size_ctype pos = left.left_find(v0);
 
 				return (pos == left.size()) ? v1 : right[pos];
 			}
 
 			nik_ce const Type0 & rfind(const Type1 & v1, const Type0 & v0) const
 			{
-				size_ctype pos = right.find(v1);
+				size_ctype pos = right.left_find(v1);
 
 				return (pos == right.size()) ? v0 : left[pos];
 			}

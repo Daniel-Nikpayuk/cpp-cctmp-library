@@ -45,8 +45,8 @@ namespace parser {
 		using string_type	= typename alias<String>::type;
 		using string_ctype	= typename alias<String>::ctype;
 
-		using char_type		= typename string_type::char_type;
-		using char_ctype	= typename string_type::char_ctype;
+		using char_type		= typename string_type::type;
+		using char_ctype	= typename string_type::ctype;
 
 		using size_type		= typename string_type::size_type;
 		using size_ctype	= typename string_type::size_ctype;
@@ -108,7 +108,7 @@ namespace parser {
 			};
 		};
 
-		using table_type	= table_literal<size_type, size_type, State::dimension, Charset::dimension>;
+		using table_type	= table<size_type, size_type, State::dimension, Charset::dimension>;
 		using table_ctype	= typename alias<table_type>::ctype;
 	};
 
@@ -144,10 +144,12 @@ namespace parser {
 			engine::pair( '\\' , Charset::backslash )
 		);
 
+		nik_ces bool is_whitespace(char_ctype c) { return c.to_ascii().is_whitespace(); }
+
 		nik_ces gkey_type map(char_ctype c)
 		{
-			if (c.to_ascii().matches_whitespace()) return Charset::whitespace;
-			else                                   return charmap.lfind(c, Charset::character);
+			if (is_whitespace(c)) return Charset::whitespace;
+			else                  return charmap.lfind(c, Charset::character);
 		}
 
 		nik_ces auto accept = engine::lookup
@@ -262,8 +264,8 @@ namespace parser {
 			using string_ctype		= typename Trait::string_ctype;
 			using string_ctype_ref		= typename alias<string_type>::ctype_ref;
 
-			using char_type_iter		= typename string_type::type_ptr;
-			using char_ctype_iter		= typename string_type::ctype_ptr;
+			using string_citer_type		= typename string_type::citer_type;
+			using string_citer_ctype	= typename string_type::citer_ctype;
 
 			using size_type			= typename Trait::size_type;
 			using size_ctype		= typename Trait::size_ctype;
@@ -282,12 +284,16 @@ namespace parser {
 				base{t, s}, symbol{Token::invalid}
 					{ }
 
+			nik_ce lexer(table_ctype_ref t, const string_literal<const char, size_type> & s) :
+				base{t, s}, symbol{Token::invalid}
+					{ }
+
 			nik_ce size_type token  () const { return symbol; }
 			nik_ce size_type column () const { return token(); }
 
 			nik_ce bool find()
 			{
-				base::initialize();
+				base::template initialize<policy>();
 
 				if (base::template find<policy>())
 					refine_symbol(policy::accept.lfind(base::state(), Token::invalid));
@@ -308,7 +314,7 @@ namespace parser {
 
 			// check:
 
-				nik_ce size_type check_keyword(char_ctype_iter in, char_ctype_iter end) const
+				nik_ce size_type check_keyword(string_citer_type in, string_citer_ctype end) const
 				{
 					size_type val = Token::invalid;
 
@@ -321,13 +327,13 @@ namespace parser {
 					return val;
 				}
 
-				nik_ce size_type check_keyword_1(char_ctype_iter in, char_ctype_iter end) const
+				nik_ce size_type check_keyword_1(string_citer_type in, string_citer_ctype end) const
 				{
 					if (keyword::empty_short.match(in, end)) return keyword::empty_short.token;
 					else                                     return Token::invalid;
 				}
 
-				nik_ce size_type check_keyword_5(char_ctype_iter in, char_ctype_iter end) const
+				nik_ce size_type check_keyword_5(string_citer_type in, string_citer_ctype end) const
 				{
 					if (keyword::empty_long.match(in, end)) return keyword::empty_long.token;
 					else                                    return Token::invalid;
@@ -338,14 +344,14 @@ namespace parser {
 
 // syntactic sugar:
 
-	template<typename String, typename In, typename End>
-	nik_ce auto make_lexer(In in, End end)
+	template<typename String>
+	nik_ce auto make_lexer(const string_literal<const char, typename String::size_type> & s)
 	{
 		using trait_type		= lexer_trait<String>;
 		using table_type		= lexer_table<trait_type>;
 		using lexer_type		= lexer<trait_type>;
 
-		return lexer_type{table_type::value.origin(), in, end};
+		return lexer_type{table_type::value, s};
 	};
 
 /***********************************************************************************************************************/

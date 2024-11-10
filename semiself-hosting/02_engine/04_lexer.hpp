@@ -49,11 +49,14 @@ namespace engine {
 
 		protected:
 
-			string_ctype keyword;
+			string_type keyword;
 
 		public:
 
 			size_ctype token;
+
+			nik_ce lexer_keyword(const string_literal<const char, size_type> & s, size_ctype t) :
+				token{} { keyword.push_valid(s.cbegin(), s.cend()); }
 
 			nik_ce lexer_keyword(string_ctype_ref k, size_ctype t) : keyword{k}, token{t} { }
 
@@ -78,27 +81,37 @@ namespace engine {
 			using string_ctype		= typename alias<String>::ctype;
 			using string_ctype_ref		= typename alias<String>::ctype_ref;
 
-			using iter_type			= typename string_type::char_ctype_ptr;
-			using iter_ctype		= typename string_type::char_ctype_cptr;
+			using string_citer_type		= typename string_type::citer_type;
+			using string_citer_ctype	= typename string_type::citer_ctype;
 
 			using size_type			= typename string_type::size_type;
 			using size_ctype		= typename string_type::size_ctype;
 
 		protected:
 
+			string_citer_type start;
+			string_citer_type current;
+			string_citer_type finish;
+
+		protected:
+
 			table_ctype table;
-
-			iter_type start;
-			iter_type current;
-			iter_type finish;
-
+			string_type unistr;
 			size_type mode;
 
 		public:
 
-			nik_ce lexer_automaton(table_ctype_ref t, string_ctype_ref s) :
-				table{t}, start{s.cbegin()}, current{s.cbegin()}, finish{s.cend()}, mode{}
+			nik_ce lexer_automaton(table_ctype_ref t) :
+				table{t}, start{}, current{}, finish{}, mode{}
 					{ }
+
+			nik_ce lexer_automaton(table_ctype_ref t, const string_literal<const char, size_type> & s) :
+				table{t}, unistr{s}, start{}, current{}, finish{}, mode{}
+				{
+					start   = unistr.cbegin ();
+					current = unistr.cbegin ();
+					finish  = unistr.cend   ();
+				}
 
 			nik_ce size_type left_size() const { return current - start; }
 
@@ -114,9 +127,10 @@ namespace engine {
 
 		protected:
 
+			template<typename Policy>
 			nik_ce auto skip_whitespace()
 			{
-				while (not_end() && current->matches_whitespace()) ++current;
+				while (not_end() && Policy::is_whitespace(*current)) ++current;
 
 				return current;
 			}
@@ -134,9 +148,10 @@ namespace engine {
 
 		public:
 
+			template<typename Policy>
 			nik_ce void initialize()
 			{
-				start = skip_whitespace();
+				start = skip_whitespace<Policy>();
 				mode  = State::initial;
 			}
 

@@ -540,114 +540,66 @@
 		printf("\n");
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // parser generator:
 
-	// transition table:
+/***********************************************************************************************************************/
 
-		for (auto row = 0; row != parser::lltr_table::value.row_length(); ++row)
+// lexer:
+
+	// keyword:
+
+		using utf8_char_array_type = encoding::utf8_char_array<unsigned char, gindex_type, 20>;
+		using lexer_trait_type     = parser::lexer_trait<utf8_char_array_type>;
+		using lexer_keyword_type   = parser::lexer_keyword<lexer_trait_type>;
+
+		constexpr auto char_arr    = utf8_char_array_type{"empty"};
+		constexpr bool match0      = lexer_keyword_type::empty_short .match(char_arr.cbegin(), char_arr.cend());
+		constexpr bool match1      = lexer_keyword_type::empty_long  .match(char_arr.cbegin(), char_arr.cend());
+
+		printf("empty short is a %smatch\n" , match0 ? "" : "non");
+		printf("empty long is a %smatch\n"  , match1 ? "" : "non");
+
+/***********************************************************************************************************************/
+
+// transition table:
+
+	for (auto row = 0; row != parser::lltr_table::value.row_length(); ++row)
+	{
+		for (auto col = 0; col != parser::lltr_table::value.col_length(); ++col)
 		{
-			for (auto col = 0; col != parser::lltr_table::value.col_length(); ++col)
+			const bool is_valid = parser::lltr_table::value.not_none(row, col);
+
+			printf(" ");
+			printf("%d, ", is_valid);
+
+			if (is_valid)
 			{
-				const bool is_valid = parser::lltr_table::value.not_none(row, col);
-
-				printf(" ");
-				printf("%d, ", is_valid);
-
-				if (is_valid)
-				{
-					printf("%d, ", parser::lltr_table::value.cat(row, col).start    ());
-					printf("%d, ", parser::lltr_table::value.cat(row, col).finish   ());
-					printf("%d, ", parser::lltr_table::value.cat(row, col).action   ());
-				}
-
-				printf("\n");
+				printf("%d, ", parser::lltr_table::value.cat(row, col).start    ());
+				printf("%d, ", parser::lltr_table::value.cat(row, col).finish   ());
+				printf("%d, ", parser::lltr_table::value.cat(row, col).action   ());
 			}
 
 			printf("\n");
 		}
 
-/***********************************************************************************************************************/
-
-// lexer hustle:
-
-		using size_type		= gindex_type;
-		using lit_type		= engine::literal<size_type, size_type>;
-		using strlit_type	= engine::string_literal<const char, size_type>;
-
-		using lexer_table_type	= inventory::lexer_transition_table_hustle<size_type>;
-		using lexer_state_type	= engine::lexer_state
-					<
-						typename lexer_table_type::State,
-						typename lexer_table_type::Charset,
-						const char*, size_type
-					>;
-		using lexer_token_type  = hustle::lexer_token<size_type>;
-		using lexer_policy_type	= hustle::lexer_policy
-					<
-						typename lexer_table_type::State,
-						typename lexer_table_type::Charset,
-						typename lexer_token_type::Token,
-						char, size_type
-					>;
-
-		constexpr auto table	= lit_type
-					{
-						lexer_table_type::value,
-						lexer_table_type::value + lexer_table_type::seq.size()
-					};
-		constexpr auto strlit0	= strlit_type{"hi there everybody!"};
-
-		auto lexer = lexer_state_type{table, strlit0.cbegin(), strlit0.cend()};
-
-		while (lexer.not_end())
-		{
-			lexer.initialize();
-			if (lexer.template find<lexer_policy_type>())
-				for (auto k = lexer.cbegin(); k != lexer.ccurrent(); ++k)
-					printf("%c", *k);
-
-			printf("\n");
-		}
+		printf("\n");
+	}
 
 /***********************************************************************************************************************/
 
-// hustle keyword:
+// lexer:
 
-		using size_type          = gindex_type;
-		using strlit_type        = engine::string_literal<char, size_type>;
-		using lexer_token_type   = hustle::lexer_token<size_type>;
-		using lexer_keyword_type = hustle::lexer_keyword<typename lexer_token_type::Token, char, size_type>;
+		using utf8_char_array_type = encoding::utf8_char_array<unsigned char, gindex_type, 50>;
 
-		constexpr auto if_str    = strlit_type{"if"};
-
-		printf("%d\n", lexer_keyword_type::eq_.match(if_str.cbegin(), if_str.cend()));
-
-/***********************************************************************************************************************/
-
-// hustle lexer:
-
-		using lexer_trait	= hustle::lexer_trait<char, gindex_type>;
-		using lexer_table_type	= inventory::lexer_transition_table_hustle<lexer_trait>;
-		using lexer_type	= hustle::lexer<lexer_trait>;
-
-		using lit_type		= typename lexer_type::lit_type;
-		using strlit_type	= engine::string_literal<typename lexer_type::char_ctype, typename lexer_type::size_type>;
-
-		constexpr auto table	= lit_type
-					{
-						lexer_table_type::value,
-						lexer_table_type::value + lexer_table_type::seq.size()
-					};
-		constexpr auto strlit0	= strlit_type{"hi there everybody!"};
-
-		auto lexer = lexer_type{table, strlit0.cbegin(), strlit0.cend()};
+		auto lexer = parser::make_lexer<utf8_char_array_type>("More of this please!");
 
 		while (lexer.not_end())
 		{
 			if (lexer.find())
 				for (auto k = lexer.cbegin(); k != lexer.ccurrent(); ++k)
-					printf("%c", *k);
+					printf("%s", k->cstr_array().origin());
 
 			printf("\n");
 		}

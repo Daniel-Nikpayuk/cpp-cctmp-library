@@ -61,7 +61,7 @@ namespace encoding {
 
 		struct Byte { enum : size_type { b1, e1, b2, e2, b3, e3, b4, e4, dimension }; };
 
-		nik_ces char_type range[][Byte::dimension] =
+		nik_ces char_type range[Range::dimension][Byte::dimension] =
 		{
 			//  b1   e1     b2   e2     b3   e3     b4   e4
 			{ 0x00,0x7f , 0x00,0x7f , 0x00,0x7f , 0x00,0x7f },
@@ -343,6 +343,9 @@ namespace encoding {
 			using unicode_type		= utf8_char<CharType, SizeType>;
 			using base			= array<unicode_type, SizeType, Size>;
 
+			using citer_type		= typename base::ctype_ptr;
+			using citer_ctype		= typename base::ctype_cptr;
+
 			using char_type			= typename unicode_type::char_type;
 			using char_ctype		= typename unicode_type::char_ctype;
 
@@ -362,6 +365,12 @@ namespace encoding {
 
 			nik_ce utf8_char_array(const string_literal<const char, size_type> & s) :
 				valid{} { push_valid(s.cbegin(), s.cend()); }
+
+			template<typename In, typename End>
+			nik_ce bool equal(In in, End end) const { return base::equal(0, in, end); }
+
+			template<typename In, typename End>
+			nik_ce bool not_equal(In in, End end) const { return base::not_equal(0, in, end); }
 
 			// valid:
 
