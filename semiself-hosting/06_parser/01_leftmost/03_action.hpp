@@ -32,55 +32,54 @@ namespace parser {
 	{
 		// nop:
 
-			template<typename Tree, typename Lexer>
-			nik_ces void nop(Tree & t, const Lexer & l) { }
+			template<typename Script, typename Lexer>
+			nik_ces void nop(Script & s, const Lexer & l) { }
 
 		// push unique head:
 
-			template<typename Tree, typename Lexer>
-			nik_ces void push_unique_head(Tree & t, const Lexer & l)
-			{
-			}
+			template<typename Script, typename Lexer>
+			nik_ces void push_unique_head(Script & s, const Lexer & l)
+				{ s.nonterminal().push(l.cbegin(), l.ccurrent()); }
 
 		// push empty next body:
 
-			template<typename Tree, typename Lexer>
-			nik_ces void push_empty_next_body(Tree & t, const Lexer & l)
+			template<typename Script, typename Lexer>
+			nik_ces void push_empty_next_body(Script & s, const Lexer & l)
 			{
 			}
 
 		// push next body:
 
-			template<typename Tree, typename Lexer>
-			nik_ces void push_next_body(Tree & t, const Lexer & l)
+			template<typename Script, typename Lexer>
+			nik_ces void push_next_body(Script & s, const Lexer & l)
 			{
 			}
 
 		// push identifier current body:
 
-			template<typename Tree, typename Lexer>
-			nik_ces void push_identifier_current_body(Tree & t, const Lexer & l)
+			template<typename Script, typename Lexer>
+			nik_ces void push_identifier_current_body(Script & s, const Lexer & l)
 			{
 			}
 
 		// push next action:
 
-			template<typename Tree, typename Lexer>
-			nik_ces void push_next_action(Tree & t, const Lexer & l)
+			template<typename Script, typename Lexer>
+			nik_ces void push_next_action(Script & s, const Lexer & l)
 			{
 			}
 
 		// push identifier next action:
 
-			template<typename Tree, typename Lexer>
-			nik_ces void push_identifier_next_action(Tree & t, const Lexer & l)
+			template<typename Script, typename Lexer>
+			nik_ces void push_identifier_next_action(Script & s, const Lexer & l)
 			{
 			}
 
 		// push literal next action:
 
-			template<typename Tree, typename Lexer>
-			nik_ces void push_literal_next_action(Tree & t, const Lexer & l)
+			template<typename Script, typename Lexer>
+			nik_ces void push_literal_next_action(Script & s, const Lexer & l)
 			{
 			}
 	};

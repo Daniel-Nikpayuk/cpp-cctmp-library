@@ -426,19 +426,20 @@ namespace cctmp {
 				{
 					ctype_ptr in = cbegin();
 
-					while (in != cend()) if (*in == v) break; else ++in;
+					while (in != cend()) { if (*in == v) { break; } else { ++in; } }
 
 					return in;
 				}
 
 				nik_ce size_type left_find(ctype_ref v) const { return left_size(find(v)); }
 				nik_ce bool contains(ctype_ref v) const { return (find(v) != cend()); }
+				nik_ce bool omits(ctype_ref v) const { return not contains(v); }
 
 				template<typename In, typename End>
 				nik_ce bool equal(size_ctype n, In in, End end) const
 				{
 					for (ctype_ptr out = citer(n); in != end; ++out, ++in)
-						if (*out != *in) return false;
+						{ if (*out != *in) { return false; } }
 
 					return true;
 				}
@@ -606,11 +607,52 @@ namespace cctmp {
 				nik_ce type pop() { return *iter(--base::terminal); }
 
 				template<typename In, typename End>
-				nik_ce void push(In in, End end) { while (in != end) push(*in++); }
+				nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }
 
 				template<typename F, typename In, typename End>
 				nik_ce void pushmap(F, In in, End end)
-					{ while (in != end) push(T_restore_T<F>::result(*in++)); }
+					{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
+	};
+
+/***********************************************************************************************************************/
+
+// unique:
+
+	template<typename Type, typename SizeType, SizeType Size>
+	class unique_array : public array<Type, SizeType, Size>
+	{
+		public:
+
+			using base		= array<Type, SizeType, Size>;
+
+			using type		= typename base::type;
+			using type_ptr		= typename base::type_ptr;
+			using type_cptr		= typename base::type_cptr;
+			using type_ref		= typename base::type_ref;
+
+			using ctype		= typename base::ctype;
+			using ctype_ptr		= typename base::ctype_ptr;
+			using ctype_cptr	= typename base::ctype_cptr;
+			using ctype_ref		= typename base::ctype_ref;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce unique_array() { }
+
+			template<typename T, auto N>
+			nik_ce unique_array(const T (&a)[N]) { push(a, a + N); }
+
+			nik_ce void push(ctype_ref v) { if (base::omits(v)) { base::push(v); } }
+
+			template<typename In, typename End>
+			nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }
+
+			template<typename F, typename In, typename End>
+			nik_ce void pushmap(F, In in, End end)
+				{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
 	};
 
 /***********************************************************************************************************************/

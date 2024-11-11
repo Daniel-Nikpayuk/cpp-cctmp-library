@@ -367,10 +367,16 @@ namespace encoding {
 				valid{} { push_valid(s.cbegin(), s.cend()); }
 
 			template<typename In, typename End>
-			nik_ce bool equal(In in, End end) const { return base::equal(0, in, end); }
+			nik_ce bool equal(In in, End end) const
+			{
+				size_ctype s = end - in;
+
+				if (s != base::size()) return false;
+				else return base::equal(0, in, end);
+			}
 
 			template<typename In, typename End>
-			nik_ce bool not_equal(In in, End end) const { return base::not_equal(0, in, end); }
+			nik_ce bool not_equal(In in, End end) const { return not equal(0, in, end); }
 
 			// valid:
 

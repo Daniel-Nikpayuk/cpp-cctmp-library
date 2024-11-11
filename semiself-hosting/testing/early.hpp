@@ -113,6 +113,20 @@
 
 /***********************************************************************************************************************/
 
+// unique array:
+
+		using seq_type = unique_array<int, gindex_type, 5>;
+
+		constexpr auto s0 = seq_type{{1, 2, 1, 3, 1}};
+
+		printf("unique array size: %d\n", s0.size());
+
+		printf("unique array: ");
+		for (auto k = s0.cbegin(); k != s0.cend(); ++k) printf("%d, ", *k);
+		printf("\n");
+
+/***********************************************************************************************************************/
+
 // table literal:
 
 	struct contr

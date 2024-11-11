@@ -128,6 +128,32 @@ namespace engine {
 			nik_ce size_type start  (size_ctype n) const { return page[n].start(); }
 			nik_ce size_type finish (size_ctype n) const { return page[n].finish(); }
 
+			template<typename In, typename End>
+			nik_ce page_ctype_ptr find(In in, End end) const
+			{
+				page_ctype_ptr k = page.cbegin();
+
+				while (k != page.cend())
+				{
+					if (text.equal(k->start(), in, end))
+						{ break; } else { ++k; }
+				}
+
+				return k;
+			}
+
+			template<typename In, typename End>
+			nik_ce size_type left_find(In in, End end) const { return page.left_size(find(in, end)); }
+
+			template<typename In, typename End>
+			nik_ce size_type right_find(In in, End end) const { return page.right_size(find(in, end)); }
+
+			template<typename In, typename End>
+			nik_ce bool contains(In in, End end) const { return (find(in, end) != page.cend()); }
+
+			template<typename In, typename End>
+			nik_ce bool omits(In in, End end) const { return not contains(in, end); }
+
 			// initial:
 
 				nik_ce text_ctype_ptr cbegin(size_ctype n) const { return text.citer(start(n)); }
@@ -350,6 +376,80 @@ namespace engine {
 					text().pushmap(f, in, end);
 					set_finish(n, start);
 				}
+	};
+
+/***********************************************************************************************************************/
+
+// unique:
+
+	template<typename Page, typename Text, typename SizeType, SizeType PageSize, SizeType TextSize = PageSize>
+	class unique_plot : public plot<Page, Text, SizeType, PageSize, TextSize> // PageSize <= TextSize
+	{
+		public:
+
+			using base			= plot<Page, Text, SizeType, PageSize, TextSize>;
+
+			using page_array_type		= typename base::page_array_type;
+			using page_array_type_ptr	= typename base::page_array_type_ptr;
+			using page_array_type_cptr	= typename base::page_array_type_cptr;
+			using page_array_type_ref	= typename base::page_array_type_ref;
+
+			using page_array_ctype		= typename base::page_array_ctype;
+			using page_array_ctype_ptr	= typename base::page_array_ctype_ptr;
+			using page_array_ctype_cptr	= typename base::page_array_ctype_cptr;
+			using page_array_ctype_ref	= typename base::page_array_ctype_ref;
+
+			using page_type			= typename base::page_type;
+			using page_type_ptr		= typename base::page_type_ptr;
+			using page_type_cptr		= typename base::page_type_cptr;
+			using page_type_ref		= typename base::page_type_ref;
+
+			using page_ctype		= typename base::page_ctype;
+			using page_ctype_ptr		= typename base::page_ctype_ptr;
+			using page_ctype_cptr		= typename base::page_ctype_cptr;
+			using page_ctype_ref		= typename base::page_ctype_ref;
+
+			using text_array_type		= typename base::text_array_type;
+			using text_array_type_ptr	= typename base::text_array_type_ptr;
+			using text_array_type_cptr	= typename base::text_array_type_cptr;
+			using text_array_type_ref	= typename base::text_array_type_ref;
+
+			using text_array_ctype		= typename base::text_array_ctype;
+			using text_array_ctype_ptr	= typename base::text_array_ctype_ptr;
+			using text_array_ctype_cptr	= typename base::text_array_ctype_cptr;
+			using text_array_ctype_ref	= typename base::text_array_ctype_ref;
+
+			using text_type			= typename base::text_type;
+			using text_type_ptr		= typename base::text_type_ptr;
+			using text_type_cptr		= typename base::text_type_cptr;
+			using text_type_ref		= typename base::text_type_ref;
+
+			using text_ctype		= typename base::text_ctype;
+			using text_ctype_ptr		= typename base::text_ctype_ptr;
+			using text_ctype_cptr		= typename base::text_ctype_cptr;
+			using text_ctype_ref		= typename base::text_ctype_ref;
+
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+		public:
+
+			nik_ce unique_plot() : base{} { }
+
+			template<typename P, auto N, typename T, auto M>
+			nik_ce unique_plot(const P (&p)[N], const T (&t)[M]) : base{p, t} { }
+
+			template<typename In, typename End>
+			nik_ce void push(In in, End end)
+				{ if (base::omits(in, end)) { base::push(in, end); } }
+
+			template<typename F, typename In, typename End> // semantically meaningful?
+			nik_ce void pushmap(F f, In in, End end)
+				{ if (base::omits(in, end)) { base::pushmap(f, in, end); } }
+
+			template<typename F, typename In, typename End> // semantically meaningful?
+			nik_ce void setmap(size_ctype n, F f, In in, End end)
+				{ if (base::omits(in, end)) { base::setmap(n, f, in, end); } }
 	};
 
 /***********************************************************************************************************************/

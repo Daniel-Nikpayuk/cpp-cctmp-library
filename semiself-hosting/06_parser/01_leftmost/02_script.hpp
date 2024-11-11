@@ -26,21 +26,72 @@ namespace parser {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// :
+// parser script:
 
 /***********************************************************************************************************************/
 
-	//	for (auto k = lexer.cbegin(); k != lexer.ccurrent(); ++k)
+// leftmost:
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
+	template<typename Nonterminal, typename Terminal, typename Action, typename Grammar>
+	class leftmost_parser_script
+	{
+		public:
 
-		using ll_parser_table = leftmost_parser_table
-		<
-			typename lexer_trait<gchar_type, gindex_type>::Token,
-			leftmost_action<gindex_type>,
-			gchar_type, gindex_type
-		>;
+			using nonterminal_type		= typename alias<Nonterminal>::type;
+			using nonterminal_type_ref	= typename alias<Nonterminal>::type_ref;
+
+			using nonterminal_ctype		= typename alias<Nonterminal>::ctype;
+			using nonterminal_ctype_ref	= typename alias<Nonterminal>::ctype_ref;
+
+			using terminal_type		= typename alias<Terminal>::type;
+			using terminal_type_ref		= typename alias<Terminal>::type_ref;
+
+			using terminal_ctype		= typename alias<Terminal>::ctype;
+			using terminal_ctype_ref	= typename alias<Terminal>::ctype_ref;
+
+			using action_type		= typename alias<Action>::type;
+			using action_type_ref		= typename alias<Action>::type_ref;
+
+			using action_ctype		= typename alias<Action>::ctype;
+			using action_ctype_ref		= typename alias<Action>::ctype_ref;
+
+			using grammar_type		= typename alias<Grammar>::type;
+			using grammar_type_ref		= typename alias<Grammar>::type_ref;
+
+			using grammar_ctype		= typename alias<Grammar>::ctype;
+			using grammar_ctype_ref		= typename alias<Grammar>::ctype_ref;
+
+		protected:
+
+			nonterminal_type nonterm;
+			   terminal_type    term;
+			     action_type     act;
+			    grammar_type    gram;
+
+		public:
+
+			nik_ce leftmost_parser_script() { }
+
+			// nonterminal:
+
+				nik_ce nonterminal_ctype_ref cnonterminal () const { return nonterm; }
+				nik_ce nonterminal_type_ref   nonterminal ()       { return nonterm; }
+
+			// terminal:
+
+				nik_ce terminal_ctype_ref cterminal () const { return term; }
+				nik_ce terminal_type_ref   terminal ()       { return term; }
+
+			// action:
+
+				nik_ce action_ctype_ref caction () const { return act; }
+				nik_ce action_type_ref   action ()       { return act; }
+
+			// script:
+
+				nik_ce grammar_ctype_ref cgrammar () const { return gram; }
+				nik_ce grammar_type_ref   grammar ()       { return gram; }
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
