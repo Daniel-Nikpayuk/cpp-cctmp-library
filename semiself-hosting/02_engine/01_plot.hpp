@@ -30,7 +30,7 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
-// entry:
+// entry (page):
 
 	template<typename SizeType>
 	class plot_entry
@@ -511,6 +511,11 @@ namespace engine {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
+		public:
+
+			nik_ces size_type row_length () { return RowSize; }
+			nik_ces size_type col_length () { return ColSize; }
+
 		protected:
 
 			nik_ce size_type row_start(size_ctype n) const { return n * ColSize; }
@@ -525,9 +530,6 @@ namespace engine {
 
 			using base::cpage;
 			using base::ctext;
-
-			nik_ce size_type row_length () const { return RowSize; }
-			nik_ce size_type col_length () const { return ColSize; }
 
 			nik_ce page_ctype_ptr row_cbegin (size_ctype n) const { return cpage().citer(row_start(n)); }
 			nik_ce page_ctype_ptr row_cend   (size_ctype n) const { return row_cbegin(n + 1); }

@@ -485,6 +485,11 @@ namespace engine {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
+		public:
+
+			nik_ces size_type row_length () { return RowSize; }
+			nik_ces size_type col_length () { return ColSize; }
+
 		protected:
 
 			nik_ce size_type row_start(size_ctype n) const { return n * ColSize; }
@@ -506,9 +511,6 @@ namespace engine {
 
 			using base::cpage;
 			using base::ctext;
-
-			nik_ce size_type row_length () const { return RowSize; }
-			nik_ce size_type col_length () const { return ColSize; }
 
 			nik_ce bool is_none(size_ctype n, size_ctype m) const
 				{ return base::is_none(col_start(n, m)); }

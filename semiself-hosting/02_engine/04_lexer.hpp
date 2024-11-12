@@ -47,6 +47,10 @@ namespace engine {
 			using size_type			= typename string_type::size_type;
 			using size_ctype		= typename string_type::size_ctype;
 
+			using strlit_type		= string_literal<const char, size_type>;
+			using strlit_ctype		= typename alias<strlit_type>::ctype;
+			using strlit_ctype_ref		= typename alias<strlit_type>::ctype_ref;
+
 		protected:
 
 			string_type keyword;
@@ -55,7 +59,7 @@ namespace engine {
 
 			size_ctype token;
 
-			nik_ce lexer_keyword(const string_literal<const char, size_type> & s, size_ctype t) :
+			nik_ce lexer_keyword(strlit_ctype_ref s, size_ctype t) :
 				token{} { keyword.push_valid(s.cbegin(), s.cend()); }
 
 			nik_ce lexer_keyword(string_ctype_ref k, size_ctype t) : keyword{k}, token{t} { }
@@ -69,7 +73,7 @@ namespace engine {
 // automaton:
 
 	template<typename Table, typename String, typename State>
-	class lexer_automaton
+	class lexer_automaton // table_size_type <= string_size_type
 	{
 		public:
 
@@ -86,6 +90,10 @@ namespace engine {
 
 			using size_type			= typename string_type::size_type;
 			using size_ctype		= typename string_type::size_ctype;
+
+			using strlit_type		= string_literal<const char, size_type>;
+			using strlit_ctype		= typename alias<strlit_type>::ctype;
+			using strlit_ctype_ref		= typename alias<strlit_type>::ctype_ref;
 
 		protected:
 
@@ -105,7 +113,7 @@ namespace engine {
 				table{t}, start{}, current{}, finish{}, mode{}
 					{ }
 
-			nik_ce lexer_automaton(table_ctype_ref t, const string_literal<const char, size_type> & s) :
+			nik_ce lexer_automaton(table_ctype_ref t, strlit_ctype_ref s) :
 				table{t}, unistr{s}, start{}, current{}, finish{}, mode{}
 				{
 					start   = unistr.cbegin ();

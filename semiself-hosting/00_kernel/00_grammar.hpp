@@ -569,6 +569,10 @@ namespace cctmp {
 
 		public:
 
+			nik_ces size_type length() { return Size; }
+
+		public:
+
 			nik_ce array() { }
 
 			template<typename T, auto N>
@@ -577,8 +581,6 @@ namespace cctmp {
 			// immutable:
 
 				using base::operator [];
-
-				nik_ce size_type length() const { return Size; }
 
 				nik_ce bool operator == (const array & s) const
 					{ return base::equal(0, s.cbegin(), s.cend()); }
@@ -686,13 +688,15 @@ namespace cctmp {
 
 		public:
 
+			nik_ces size_type row_length () { return RowSize; }
+			nik_ces size_type col_length () { return ColSize; }
+
+		public:
+
 			nik_ce prototable() { }
 
 			template<typename T, auto N>
 			nik_ce prototable(const T (&a)[N]) : base{a} { }
-
-			nik_ce size_type row_length () const { return RowSize; }
-			nik_ce size_type col_length () const { return ColSize; }
 
 			nik_ce ctype_ptr row_cbegin (size_ctype n) const { return base::citer(n * ColSize); }
 			nik_ce ctype_ptr row_cend   (size_ctype n) const { return row_cbegin(n + 1); }

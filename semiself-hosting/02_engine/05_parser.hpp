@@ -42,14 +42,34 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// parse table:
+// parser entry:
+
+/***********************************************************************************************************************/
+
+// body:
+
+	template<typename SizeType>
+	class parser_entry_body : public corpus_entry<SizeType>
+	{
+		public:
+
+			using base		= corpus_entry<SizeType>;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce parser_entry_body() : base{} { }
+			nik_ce parser_entry_body(size_ctype l) : base{l} { }
+	};
 
 /***********************************************************************************************************************/
 
 // page:
 
 	template<typename SizeType>
-	class parse_table_page : public plot_entry<SizeType>
+	class parser_entry_page : public plot_entry<SizeType>
 	{
 		public:
 
@@ -64,7 +84,7 @@ namespace engine {
 
 		public:
 
-			nik_ce parse_table_page() : base{}, act_pos{} { }
+			nik_ce parser_entry_page() : base{}, act_pos{} { }
 
 			nik_ce size_type action() const { return act_pos; }
 
@@ -76,7 +96,7 @@ namespace engine {
 // text:
 
 	template<typename SizeType>
-	class parse_table_text
+	class parser_entry_text
 	{
 		public:
 
@@ -90,8 +110,8 @@ namespace engine {
 
 		public:
 
-			nik_ce parse_table_text() : nonterm{}, index{} { }
-			nik_ce parse_table_text(bool const n, size_ctype i) : nonterm{n}, index{i} { }
+			nik_ce parser_entry_text() : nonterm{}, index{} { }
+			nik_ce parser_entry_text(bool const n, size_ctype i) : nonterm{n}, index{i} { }
 
 			nik_ce bool is_nonterminal () const { return nonterm; }
 			nik_ce size_type symbol    () const { return index; }
@@ -99,11 +119,55 @@ namespace engine {
 			nik_ce void set_terminality (bool const n) { nonterm = n; }
 			nik_ce void set_symbol      (size_ctype i) { index = i; }
 
-			nik_ce bool operator == (const parse_table_text & t) const
+			nik_ce bool operator == (const parser_entry_text & t) const
 				{ return (t.nonterm == nonterm) && (t.index == index); }
 
-			nik_ce bool operator != (const parse_table_text & t) const
+			nik_ce bool operator != (const parser_entry_text & t) const
 				{ return (t.nonterm != nonterm) || (t.index != index); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// parser table:
+
+/***********************************************************************************************************************/
+
+// page:
+
+	template<typename SizeType>
+	class parser_table_page : public parser_entry_page<SizeType>
+	{
+		public:
+
+			using base		= parser_entry_page<SizeType>;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce parser_table_page() : base{} { }
+	};
+
+/***********************************************************************************************************************/
+
+// text:
+
+	template<typename SizeType>
+	class parser_table_text : public parser_entry_text<SizeType>
+	{
+		public:
+
+			using base		= parser_entry_text<SizeType>;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce parser_table_text() : base{} { }
+			nik_ce parser_table_text(bool const n, size_ctype i) : base{n, i} { }
 	};
 
 /***********************************************************************************************************************/
@@ -111,17 +175,17 @@ namespace engine {
 // interface:
 
 	template<typename SizeType, SizeType RowSize, SizeType ColSize>
-	class parse_table	: public sparse_plottable
+	class parser_table	: public sparse_plottable
 				<
-					parse_table_page<SizeType>,
-					parse_table_text<SizeType>,
+					parser_table_page<SizeType>,
+					parser_table_text<SizeType>,
 					SizeType, RowSize, ColSize
 				>
 	{
 		public:
 
-			using page_type		= parse_table_page < SizeType >;
-			using text_type		= parse_table_text < SizeType >;
+			using page_type		= parser_table_page < SizeType >;
+			using text_type		= parser_table_text < SizeType >;
 			using base		= sparse_plottable<page_type, text_type, SizeType, RowSize, ColSize>;
 
 			using size_type		= typename base::size_type;
@@ -134,10 +198,10 @@ namespace engine {
 
 		public:
 
-			nik_ce parse_table() : base{}, row_pos{}, col_pos{} { }
+			nik_ce parser_table() : base{}, row_pos{}, col_pos{} { }
 
 			template<typename I, auto N, typename P, auto M, typename T, auto L>
-			nik_ce parse_table(const I (&i)[N], const P (&p)[M], const T (&t)[L]) : base{i, p, t} { }
+			nik_ce parser_table(const I (&i)[N], const P (&p)[M], const T (&t)[L]) : base{i, p, t} { }
 
 			nik_ce bool  is_valid () const { return base:: not_none (row_pos, col_pos); }
 			nik_ce bool not_valid () const { return base::  is_none (row_pos, col_pos); }
@@ -160,14 +224,14 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// parser:
+// parser tree:
 
 /***********************************************************************************************************************/
 
-// tree:
+// interface:
 
-	template<typename Tree, typename Lexer, typename SizeType, SizeType Size>
-	class parser_tree
+	template<typename Tree, typename Lexer, typename Lexer::size_type Size>
+	class parser_tree // tree_size_type <= lexer_size_type
 	{
 		public:
 
@@ -191,6 +255,9 @@ namespace engine {
 			using lexer_ctype_cptr		= typename alias<Lexer>::ctype_cptr;
 			using lexer_ctype_ref		= typename alias<Lexer>::ctype_ref;
 
+			using size_type			= typename Lexer::size_type;
+			using size_ctype		= typename Lexer::size_ctype;
+
 			using Action			= void(*)(tree_type_ref, lexer_ctype_ref);
 
 			using action_type		= typename alias<Action>::type;
@@ -203,13 +270,10 @@ namespace engine {
 			using action_ctype_cptr		= typename alias<Action>::ctype_cptr;
 			using action_ctype_ref		= typename alias<Action>::ctype_ref;
 
-			using action_array_type		= array<action_ctype, SizeType, Size>;
+			using action_array_type		= array<action_ctype, size_type, Size>;
 			using action_array_type_ptr	= typename alias<action_array_type>::type_ptr;
 			using action_array_type_cptr	= typename alias<action_array_type>::type_cptr;
 			using action_array_type_ref	= typename alias<action_array_type>::type_ref;
-
-			using size_type			= typename alias<SizeType>::type;
-			using size_ctype		= typename alias<SizeType>::ctype;
 
 		protected:
 
@@ -230,15 +294,20 @@ namespace engine {
 	};
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// parser:
+
+/***********************************************************************************************************************/
 
 // stack:
 
 	template<typename SizeType, SizeType Size>
-	class parser_stack : public stack<parse_table_text<SizeType>, SizeType, Size>
+	class parser_stack : public stack<parser_table_text<SizeType>, SizeType, Size>
 	{
 		public:
 
-			using text_type			= parse_table_text<SizeType>;
+			using text_type			= parser_table_text<SizeType>;
 			using base			= stack<text_type, SizeType, Size>;
 
 			using size_type			= typename base::size_type;
@@ -264,10 +333,10 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
-// state:
+// interface:
 
-	template<typename Table, typename Lexer, typename Tree, typename SizeType, SizeType Size>
-	class parser_state
+	template<typename Table, typename Tree, typename Lexer, typename Lexer::size_type Size>
+	class parser // table_size_type, tree_size_type <= lexer_size_type
 	{
 		public:
 
@@ -281,16 +350,6 @@ namespace engine {
 			using table_ctype_cptr		= typename alias<Table>::ctype_cptr;
 			using table_ctype_ref		= typename alias<Table>::ctype_ref;
 
-			using lexer_type		= typename alias<Lexer>::type;
-			using lexer_type_ptr		= typename alias<Lexer>::type_ptr;
-			using lexer_type_cptr		= typename alias<Lexer>::type_cptr;
-			using lexer_type_ref		= typename alias<Lexer>::type_ref;
-
-			using lexer_ctype		= typename alias<Lexer>::ctype;
-			using lexer_ctype_ptr		= typename alias<Lexer>::ctype_ptr;
-			using lexer_ctype_cptr		= typename alias<Lexer>::ctype_cptr;
-			using lexer_ctype_ref		= typename alias<Lexer>::ctype_ref;
-
 			using tree_type			= typename alias<Tree>::type;
 			using tree_type_ptr		= typename alias<Tree>::type_ptr;
 			using tree_type_cptr		= typename alias<Tree>::type_cptr;
@@ -301,7 +360,20 @@ namespace engine {
 			using tree_ctype_cptr		= typename alias<Tree>::ctype_cptr;
 			using tree_ctype_ref		= typename alias<Tree>::ctype_ref;
 
-			using stack_type		= parser_stack<SizeType, Size>;
+			using lexer_type		= typename alias<Lexer>::type;
+			using lexer_type_ptr		= typename alias<Lexer>::type_ptr;
+			using lexer_type_cptr		= typename alias<Lexer>::type_cptr;
+			using lexer_type_ref		= typename alias<Lexer>::type_ref;
+
+			using lexer_ctype		= typename alias<Lexer>::ctype;
+			using lexer_ctype_ptr		= typename alias<Lexer>::ctype_ptr;
+			using lexer_ctype_cptr		= typename alias<Lexer>::ctype_cptr;
+			using lexer_ctype_ref		= typename alias<Lexer>::ctype_ref;
+
+			using size_type			= typename Lexer::size_type;
+			using size_ctype		= typename Lexer::size_ctype;
+
+			using stack_type		= parser_stack<size_type, Size>;
 			using stack_type_ptr		= typename alias<stack_type>::type_ptr;
 			using stack_type_cptr		= typename alias<stack_type>::type_cptr;
 			using stack_type_ref		= typename alias<stack_type>::type_ref;
@@ -311,24 +383,21 @@ namespace engine {
 			using stack_ctype_cptr		= typename alias<stack_type>::ctype_cptr;
 			using stack_ctype_ref		= typename alias<stack_type>::ctype_ref;
 
-			using size_type			= typename alias<SizeType>::type;
-			using size_ctype		= typename alias<SizeType>::ctype;
-
 		protected:
 
 			enum Exit : size_type		{ none, lexer_only, stack_only, both, dimension };
 
 			table_type table;
-			lexer_type lexer;
 			 tree_type tree;
+			lexer_type lexer;
 			stack_type stack;
 
 		public:
 
-			nik_ce parser_state() { }
+			nik_ce parser() { }
 
-			nik_ce parser_state(table_ctype_ref t, lexer_ctype_ref l, tree_ctype_ref r, size_ctype s) :
-				table{t}, lexer{l}, tree{r}, stack{s} { }
+			nik_ce parser(table_ctype_ref t, tree_ctype_ref r, lexer_ctype_ref l, size_ctype s) :
+				table{t}, tree{r}, lexer{l}, stack{s} { }
 
 		public:
 

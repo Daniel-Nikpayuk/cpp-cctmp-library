@@ -30,7 +30,7 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
-// entry:
+// entry (body):
 
 	template<typename SizeType>
 	class corpus_entry
@@ -49,6 +49,7 @@ namespace engine {
 		public:
 
 			nik_ce corpus_entry() : initial{}, terminal{}, length{} { }
+			nik_ce corpus_entry(size_ctype l) : initial{}, terminal{}, length{l} { }
 
 			nik_ce size_type start    () const { return initial; }
 			nik_ce size_type finish   () const { return terminal; }
@@ -141,9 +142,9 @@ namespace engine {
 			page_array_type page;
 			text_array_type text;
 
-			nik_ce size_type start    (size_ctype n) const { return cbody().cat(n).start(); }
-			nik_ce size_type finish   (size_ctype n) const { return cbody().cat(n).finish(); }
-			nik_ce size_type capacity (size_ctype n) const { return cbody().cat(n).capacity(); }
+			nik_ce size_type start    (size_ctype n) const { return body.cat(n).start(); }
+			nik_ce size_type finish   (size_ctype n) const { return body.cat(n).finish(); }
+			nik_ce size_type capacity (size_ctype n) const { return body.cat(n).capacity(); }
 
 		public:
 
@@ -423,6 +424,8 @@ namespace engine {
 					{ return text().iter(base::finish(n, m)); }
 
 				nik_ce text_type_ptr last(size_ctype n, size_ctype m) { return end(n, m) - 1; }
+
+				nik_ce void upsize(size_ctype n = 1) { body().push(body_ctype_ref{n}); }
 
 				template<typename In, typename End>
 				nik_ce void push(size_ctype n, In in, End end)

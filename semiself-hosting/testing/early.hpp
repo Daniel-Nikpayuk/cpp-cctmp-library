@@ -99,6 +99,7 @@
 
 	// print:
 
+		printf("%d\n", seq_type::length());
 		printf("%d\n", s0.size());
 
 		printf("%s\n", (s0 == s1) ? "equal" : "not equal");

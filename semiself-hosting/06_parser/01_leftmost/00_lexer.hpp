@@ -270,6 +270,10 @@ namespace parser {
 			using size_type			= typename Trait::size_type;
 			using size_ctype		= typename Trait::size_ctype;
 
+			using strlit_type		= string_literal<const char, size_type>;
+			using strlit_ctype		= typename alias<strlit_type>::ctype;
+			using strlit_ctype_ref		= typename alias<strlit_type>::ctype_ref;
+
 			using base			= engine::lexer_automaton<table_type, string_type, State>;
 			using policy			= lexer_policy<Trait>;
 			using keyword			= lexer_keyword<Trait>;
@@ -284,7 +288,7 @@ namespace parser {
 				base{t, s}, symbol{Token::invalid}
 					{ }
 
-			nik_ce lexer(table_ctype_ref t, const string_literal<const char, size_type> & s) :
+			nik_ce lexer(table_ctype_ref t, strlit_ctype_ref s) :
 				base{t, s}, symbol{Token::invalid}
 					{ }
 
@@ -352,7 +356,7 @@ namespace parser {
 		using lexer_type		= lexer<trait_type>;
 
 		return lexer_type{table_type::value, s};
-	};
+	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

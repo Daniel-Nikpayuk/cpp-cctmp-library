@@ -333,23 +333,26 @@ namespace engine {
 			using list_type			= size_type;
 			using list_ctype		= size_ctype;
 
+		public:
+
+			nik_ces size_type length() { return Size; }
+
 		protected:
 
-			nik_ces size_type length	= Size;
-			nik_ces list_type null		= length;
+			nik_ces list_type null		= Size;
 
-			entry_type array[length];
+			entry_type array[length()];
 			size_type free;
 
 		public:
 
-			nik_ce model_list() : array{}, free{length} { }
+			nik_ce model_list() : array{}, free{length()} { }
 
 		protected:
 
 			// free:
 
-				nik_ce void clear() { free = length; }
+				nik_ce void clear() { free = length(); }
 
 				nik_ce size_type allocate() { return --free; }
 
@@ -358,7 +361,7 @@ namespace engine {
 			// array:
 
 				nik_ce entry_ctype_ptr cbegin () const { return array; }
-				nik_ce entry_ctype_ptr cend   () const { return array + length; }
+				nik_ce entry_ctype_ptr cend   () const { return array + length(); }
 
 				nik_ce ctype_ref get_car(size_ctype n) const { return array[n].car; }
 				nik_ce void set_car(size_ctype n, ctype_ref v) { array[n].car = v; }
