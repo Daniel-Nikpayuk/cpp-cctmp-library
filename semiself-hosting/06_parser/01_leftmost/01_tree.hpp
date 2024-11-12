@@ -138,6 +138,9 @@ namespace parser {
 						body_type , page_type , text_type , size_type ,
 						BodySize  , PageSize  , TextSize
 					>;
+		using type_ref		= typename alias<type>::type_ref;
+		using ctype		= typename alias<type>::ctype;
+		using ctype_ref		= typename alias<type>::ctype_ref;
 	};
 
 /***********************************************************************************************************************/
@@ -153,8 +156,8 @@ namespace parser {
 	template<typename String, typename TreeSizeTrait>
 	struct leftmost_tree_trait
 	{
-		using char_type			= typename String::char_type;
-		using char_ctype		= typename String::char_ctype;
+		using char_type			= typename String::type;
+		using char_ctype		= typename String::ctype;
 
 		using size_type			= typename String::size_type;
 		using size_ctype		= typename String::size_ctype;
@@ -258,7 +261,10 @@ namespace parser {
 
 			template<typename Script, typename Lexer>
 			nik_ces void push_unique_head(Script & s, const Lexer & l)
-				{ s.nonterminal().push(l.cbegin(), l.ccurrent()); }
+			{
+				s.nonterminal().push(l.cbegin(), l.ccurrent());
+			}
+			//	{ s.nonterminal().push(l.cbegin(), l.ccurrent()); }
 
 		// push empty next body:
 

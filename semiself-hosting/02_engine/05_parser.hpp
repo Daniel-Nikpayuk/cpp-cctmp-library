@@ -219,6 +219,13 @@ namespace engine {
 				row_pos = n;
 				col_pos = m;
 			}
+
+			template<typename F, typename In, typename End>
+			nik_ce void push_entry(size_ctype n, size_ctype m, F f, In in, End end, size_ctype a)
+			{
+				base::setmap(n, m, f, in, end);
+				base::at(n, m).set_action(a);
+			}
 	};
 
 /***********************************************************************************************************************/
@@ -230,20 +237,20 @@ namespace engine {
 
 // interface:
 
-	template<typename Tree, typename Lexer, typename Lexer::size_type Size>
-	class parser_tree // tree_size_type <= lexer_size_type
+	template<typename Script, typename Lexer, typename Lexer::size_type Size>
+	class parser_tree // script_size_type <= lexer_size_type
 	{
 		public:
 
-			using tree_type			= typename alias<Tree>::type;
-			using tree_type_ptr		= typename alias<Tree>::type_ptr;
-			using tree_type_cptr		= typename alias<Tree>::type_cptr;
-			using tree_type_ref		= typename alias<Tree>::type_ref;
+			using script_type		= typename alias<Script>::type;
+			using script_type_ptr		= typename alias<Script>::type_ptr;
+			using script_type_cptr		= typename alias<Script>::type_cptr;
+			using script_type_ref		= typename alias<Script>::type_ref;
 
-			using tree_ctype		= typename alias<Tree>::ctype;
-			using tree_ctype_ptr		= typename alias<Tree>::ctype_ptr;
-			using tree_ctype_cptr		= typename alias<Tree>::ctype_cptr;
-			using tree_ctype_ref		= typename alias<Tree>::ctype_ref;
+			using script_ctype		= typename alias<Script>::ctype;
+			using script_ctype_ptr		= typename alias<Script>::ctype_ptr;
+			using script_ctype_cptr		= typename alias<Script>::ctype_cptr;
+			using script_ctype_ref		= typename alias<Script>::ctype_ref;
 
 			using lexer_type		= typename alias<Lexer>::type;
 			using lexer_type_ptr		= typename alias<Lexer>::type_ptr;
@@ -258,7 +265,7 @@ namespace engine {
 			using size_type			= typename Lexer::size_type;
 			using size_ctype		= typename Lexer::size_ctype;
 
-			using Action			= void(*)(tree_type_ref, lexer_ctype_ref);
+			using Action			= void(*)(script_type_ref, lexer_ctype_ref);
 
 			using action_type		= typename alias<Action>::type;
 			using action_type_ptr		= typename alias<Action>::type_ptr;
@@ -270,27 +277,29 @@ namespace engine {
 			using action_ctype_cptr		= typename alias<Action>::ctype_cptr;
 			using action_ctype_ref		= typename alias<Action>::ctype_ref;
 
-			using action_array_type		= array<action_ctype, size_type, Size>;
+			using action_array_type		= array<action_type, size_type, Size>;
 			using action_array_type_ptr	= typename alias<action_array_type>::type_ptr;
 			using action_array_type_cptr	= typename alias<action_array_type>::type_cptr;
 			using action_array_type_ref	= typename alias<action_array_type>::type_ref;
 
 		protected:
 
-			tree_type tree;
+			script_type script;
 			action_array_type action;
 
 		public:
 
 			nik_ce parser_tree(action_ctype (&a)[Size]) : action{a} { }
 
+			nik_ce script_ctype_ref cscript() const { return script; }
+
 			nik_ce bool  is_nop (size_ctype n) const { return (n == 0); }
 			nik_ce bool not_nop (size_ctype n) const { return (n != 0); }
 
-			nik_ce void fast_apply(size_ctype n, lexer_ctype_ref l) { action[n](tree, l); }
+			nik_ce void fast_apply(size_ctype n, lexer_ctype_ref l) { action[n](script, l); }
 
 			nik_ce void apply(size_ctype n, lexer_ctype_ref l)
-				{ if (not_nop(n)) fast_apply(n, l); }
+				{ if (not_nop(n)) { fast_apply(n, l); } }
 	};
 
 /***********************************************************************************************************************/
@@ -327,7 +336,7 @@ namespace engine {
 			{
 				base::pull();
 
-				while (in != end) base::push(*--in);
+				while (end != in) { base::push(*--end); }
 			}
 	};
 
@@ -399,6 +408,11 @@ namespace engine {
 			nik_ce parser(table_ctype_ref t, tree_ctype_ref r, lexer_ctype_ref l, size_ctype s) :
 				table{t}, tree{r}, lexer{l}, stack{s} { }
 
+			table_ctype_ref ctable () const { return table; }
+			 tree_ctype_ref ctree  () const { return tree; }
+			lexer_ctype_ref clexer () const { return lexer; }
+			stack_ctype_ref cstack () const { return stack; }
+
 		public:
 
 			nik_ce void translate()
@@ -410,10 +424,43 @@ namespace engine {
 				exit();
 			}
 
+			nik_ce void print_stack() // debugging.
+			{
+				auto s = stack;
+
+				printf("stack: ");
+				while (s.not_empty())
+				{
+					auto sym = s.pop();
+
+					printf("%c%d ", sym.is_nonterminal() ? 'n' : 't', sym.symbol());
+				}
+				printf("| ");
+			}
+
+			nik_ce void print_string() // debugging.
+			{
+				printf("string: ");
+				printf("t%d ", lexer.token());
+			}
+
+			nik_ce void print_action() // debugging.
+			{
+				auto action = table.cat(stack.row(), lexer.column()).action();
+
+				if (stack.is_nonterminal() && action) { printf("| action: %d", action); }
+
+				printf("\n");
+			}
+
 			nik_ce void dispatch()
 			{
-				if (stack.is_nonterminal()) nonterminal ();
-				else                           terminal ();
+			//	print_stack  (); // debugging.
+			//	print_string (); // debugging.
+			//	print_action (); // debugging.
+
+				if (stack.is_nonterminal()) { nonterminal (); }
+				else                        {    terminal (); }
 			}
 
 			// nonterminal:
@@ -425,7 +472,7 @@ namespace engine {
 				{
 					table.move(stack.row(), lexer.column());
 
-					if (is_nonterminal_err()) nonterminal_report();
+					if (is_nonterminal_err()) { nonterminal_report(); }
 					else
 					{
 						nonterminal_stack  ();
@@ -449,7 +496,7 @@ namespace engine {
 
 				nik_ce void terminal()
 				{
-					if (is_terminal_err()) terminal_report();
+					if (is_terminal_err()) { terminal_report(); }
 					else
 					{
 						terminal_stack ();
@@ -467,20 +514,20 @@ namespace engine {
 
 				nik_ce size_type exit_index() const
 				{
-					if (lexer.not_empty()) return exit_index_lexer ();
-					else                   return exit_index_stack ();
+					if (lexer.not_end()) { return exit_index_lexer (); }
+					else                 { return exit_index_stack (); }
 				}
 
 				nik_ce size_type exit_index_lexer() const
 				{
-					if (stack.not_empty()) return Exit::both;
-					else                   return Exit::lexer_only;
+					if (stack.not_empty()) { return Exit::both;       }
+					else                   { return Exit::lexer_only; }
 				}
 
 				nik_ce size_type exit_index_stack() const
 				{
-					if (stack.not_empty()) return Exit::stack_only;
-					else                   return Exit::none;
+					if (stack.not_empty()) { return Exit::stack_only; }
+					else                   { return Exit::none;       }
 				}
 
 				nik_ce void exit()

@@ -111,7 +111,7 @@ namespace parser {
 		using string_ctype	= typename LexerTrait::string_ctype;
 
 		using char_type		= typename LexerTrait::char_type;
-		using char_ctype	= typename LexerTrait::char_ctype;
+		using char_ctype_ref	= typename LexerTrait::char_ctype_ref;
 
 		using size_type		= typename LexerTrait::size_type;
 		using size_ctype	= typename LexerTrait::size_ctype;
@@ -169,7 +169,7 @@ namespace parser {
 		using Action			= typename Trait::Action;
 
 		using char_type			= typename Trait::char_type;
-		using char_ctype		= typename Trait::char_ctype;
+		using char_ctype_ref		= typename Trait::char_ctype_ref;
 
 		using size_type			= typename Trait::size_type;
 		using size_ctype		= typename Trait::size_ctype;
@@ -204,15 +204,15 @@ namespace parser {
 			U_char_type, U_size_type,
 
 			engine::pair( 'a' , Terminal::arrow      ),
-			engine::pair( ';' , Terminal::semicolon  ),
+			engine::pair( 's' , Terminal::semicolon  ),
 			engine::pair( 'i' , Terminal::identifier ),
 			engine::pair( 'm' , Terminal::empty_body ),
-			engine::pair( ':' , Terminal::colon      ),
+			engine::pair( 'c' , Terminal::colon      ),
 			engine::pair( 'l' , Terminal::literal    ),
 			engine::pair( '$' , Terminal::prompt     )
 		);
 
-		nik_ces auto entry(char_ctype rc, char_ctype cc, strlit_ctype_ref s, size_ctype a = Action::nop)
+		nik_ces auto entry(char_ctype_ref rc, char_ctype_ref cc, strlit_ctype_ref s, size_ctype a = Action::nop)
 		{
 			size_ctype row = nonterminal.lfind(rc, Nonterminal::invalid);
 			size_ctype col =    terminal.lfind(cc,    Terminal::invalid);
@@ -224,7 +224,7 @@ namespace parser {
 
 			struct T_char_to_symbol
 			{
-				nik_ces auto result(char_ctype c) -> text_type
+				nik_ces auto result(char_ctype_ref c) -> text_type
 				{
 					bool s = false;
 					auto t = terminal.lfind(c, Terminal::invalid);
@@ -256,9 +256,6 @@ namespace parser {
 	class leftmost_repack_table
 	{
 		public:
-
-			using char_type			= typename alias<CharType>::type;
-			using char_ctype		= typename alias<CharType>::ctype;
 
 			using size_type			= typename alias<SizeType>::type;
 			using size_ctype		= typename alias<SizeType>::ctype;
@@ -309,7 +306,7 @@ namespace parser {
 		using table_ctype		= typename Trait::table_ctype;
 
 		using char_type			= typename Trait::char_type;
-		using char_ctype		= typename Trait::char_ctype;
+		using char_ctype_ref		= typename Trait::char_ctype_ref;
 
 		using size_type			= typename Trait::size_type;
 		using size_ctype		= typename Trait::size_ctype;
@@ -335,8 +332,7 @@ namespace parser {
 				      auto cend   = rtab.cend   (k);
 				size_ctype action = rtab.action (k);
 
-				tab.at(row, col).set_action(action);
-				tab.setmap(row, col, char_to_symbol, cin, cend);
+				tab.push_entry(row, col, char_to_symbol, cin, cend, action);
 			}
 
 			return tab;
@@ -407,12 +403,12 @@ namespace parser {
 		using lexer_type		= lexer<lexer_trait_type>;
 
 		using parser_trait_type		= leftmost_parser_trait<lexer_trait_type>;
-		using table_type		= leftmost_parser_table<parser_trait_type>;
+		using table_type		= typename parser_trait_type::table_type;
+		using table_instance		= leftmost_parser_table<parser_trait_type>;
 
 		using tree_type			= engine::parser_tree<script_type, lexer_type, TreeSizeTrait::size>;
-		using parser_type		= engine::parser<table_type, lexer_type, tree_type, StackSize>;
+		using parser_type		= engine::parser<table_type, tree_type, lexer_type, StackSize>;
 
-		auto lexer	= make_lexer(s);
 		auto tree	= tree_type
 				{{
 					action::nop                          <script_type, lexer_type>,
@@ -424,9 +420,10 @@ namespace parser {
 					action::push_identifier_next_action  <script_type, lexer_type>,
 					action::push_literal_next_action     <script_type, lexer_type>
 				}};
+		auto lexer	= make_lexer<String>(s);
 		auto start	= parser_trait_type::Nonterminal::start;
 
-		return lexer_type{table_type::value, lexer, tree, start};
+		return parser_type{table_instance::value, tree, lexer, start};
 	}
 
 /***********************************************************************************************************************/

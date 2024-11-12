@@ -97,28 +97,26 @@ namespace engine {
 
 		protected:
 
-			string_citer_type start;
-			string_citer_type current;
-			string_citer_type finish;
-
-		protected:
-
 			table_ctype table;
 			string_type unistr;
 			size_type mode;
 
+			size_type start;
+			size_type current;
+			size_type finish;
+
 		public:
 
 			nik_ce lexer_automaton(table_ctype_ref t) :
-				table{t}, start{}, current{}, finish{}, mode{}
+				table{t}, mode{}, start{}, current{}, finish{}
 					{ }
 
 			nik_ce lexer_automaton(table_ctype_ref t, strlit_ctype_ref s) :
-				table{t}, unistr{s}, start{}, current{}, finish{}, mode{}
+				table{t}, unistr{s}, mode{}, start{}, current{}, finish{}
 				{
-					start   = unistr.cbegin ();
-					current = unistr.cbegin ();
-					finish  = unistr.cend   ();
+					start   = 0;
+					current = 0;
+					finish  = unistr.size();
 				}
 
 			nik_ce size_type left_size() const { return current - start; }
@@ -126,33 +124,32 @@ namespace engine {
 			nik_ce bool not_begin () const { return (current != start); }
 			nik_ce bool not_end   () const { return (current != finish); }
 
-			nik_ce auto cbegin    () const { return start; }
-			nik_ce auto cprevious () const { return current - 1; }
-			nik_ce auto ccurrent  () const { return current; }
-			nik_ce auto cend      () const { return finish; }
+			nik_ce auto cbegin   () const { return unistr.citer(start); }
+			nik_ce auto ccurrent () const { return unistr.citer(current); }
+			nik_ce auto cend     () const { return unistr.citer(finish); }
 
 			nik_ce size_type state() const { return mode; }
 
 		protected:
 
 			template<typename Policy>
-			nik_ce auto skip_whitespace()
+			nik_ce size_type skip_whitespace()
 			{
-				while (not_end() && Policy::is_whitespace(*current)) ++current;
+				while (not_end() && Policy::is_whitespace(*ccurrent())) { ++current; }
 
 				return current;
 			}
 
 			nik_ce size_type cat(size_ctype row, size_ctype col) const { return table[row][col]; }
 
-			nik_ce bool find_empty(size_type & peek, size_ctype col)
+			nik_ce bool peek_empty(size_type & peek, size_ctype col)
 			{
 				peek = cat(mode, col);
 
 				return (peek == State::empty);
 			}
 
-			nik_ce void increment(size_ctype next) { mode = next; }
+			nik_ce void increment_mode(size_ctype next) { mode = next; }
 
 		public:
 
@@ -166,13 +163,14 @@ namespace engine {
 			template<typename Policy>
 			nik_ce bool find()
 			{
-				size_type peek;
+				size_type peek = State::empty;
 
 				while (not_end())
 				{
-					if (find_empty(peek, Policy::map(*current++))) break;
+					if (peek_empty(peek, Policy::map(*ccurrent()))) { break; }
 
-					increment(peek);
+					++current;
+					increment_mode(peek);
 				}
 
 				return not_begin();

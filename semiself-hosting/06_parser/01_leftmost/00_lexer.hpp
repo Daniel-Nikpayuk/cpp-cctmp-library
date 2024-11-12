@@ -46,7 +46,7 @@ namespace parser {
 		using string_ctype	= typename alias<String>::ctype;
 
 		using char_type		= typename string_type::type;
-		using char_ctype	= typename string_type::ctype;
+		using char_ctype_ref	= typename string_type::ctype_ref;
 
 		using size_type		= typename string_type::size_type;
 		using size_ctype	= typename string_type::size_ctype;
@@ -124,7 +124,7 @@ namespace parser {
 		using Token			= typename Trait::Token;
 
 		using char_type			= typename Trait::char_type;
-		using char_ctype		= typename Trait::char_ctype;
+		using char_ctype_ref		= typename Trait::char_ctype_ref;
 
 		using size_type			= typename Trait::size_type;
 		using size_ctype		= typename Trait::size_ctype;
@@ -144,12 +144,12 @@ namespace parser {
 			engine::pair( '\\' , Charset::backslash )
 		);
 
-		nik_ces bool is_whitespace(char_ctype c) { return c.to_ascii().is_whitespace(); }
+		nik_ces bool is_whitespace(char_ctype_ref c) { return c.to_ascii().is_whitespace(); }
 
-		nik_ces gkey_type map(char_ctype c)
+		nik_ces gkey_type map(char_ctype_ref c)
 		{
-			if (is_whitespace(c)) return Charset::whitespace;
-			else                  return charmap.lfind(c, Charset::character);
+			if (is_whitespace(c)) { return Charset::whitespace; }
+			else                  { return charmap.lfind(c, Charset::character); }
 		}
 
 		nik_ces auto accept = engine::lookup
@@ -300,7 +300,7 @@ namespace parser {
 				base::template initialize<policy>();
 
 				if (base::template find<policy>())
-					refine_symbol(policy::accept.lfind(base::state(), Token::invalid));
+					{ refine_symbol(policy::accept.lfind(base::state(), Token::invalid)); }
 
 				return (symbol != Token::invalid);
 			}
@@ -308,7 +308,10 @@ namespace parser {
 			// refine:
 
 				nik_ce void refine_symbol(size_ctype s)
-					{ if (s == Token::identifier) refine_identifier(s); }
+				{
+					if (s == Token::identifier) { refine_identifier(s); }
+					else { symbol = s; }
+				}
 
 				nik_ce void refine_identifier(size_type s)
 				{
@@ -333,14 +336,14 @@ namespace parser {
 
 				nik_ce size_type check_keyword_1(string_citer_type in, string_citer_ctype end) const
 				{
-					if (keyword::empty_short.match(in, end)) return keyword::empty_short.token;
-					else                                     return Token::invalid;
+					if (keyword::empty_short.match(in, end)) { return keyword::empty_short.token; }
+					else                                     { return Token::invalid; }
 				}
 
 				nik_ce size_type check_keyword_5(string_citer_type in, string_citer_ctype end) const
 				{
-					if (keyword::empty_long.match(in, end)) return keyword::empty_long.token;
-					else                                    return Token::invalid;
+					if (keyword::empty_long.match(in, end)) { return keyword::empty_long.token; }
+					else                                    { return Token::invalid; }
 				}
 	};
 
@@ -351,11 +354,11 @@ namespace parser {
 	template<typename String>
 	nik_ce auto make_lexer(const string_literal<const char, typename String::size_type> & s)
 	{
-		using trait_type		= lexer_trait<String>;
-		using table_type		= lexer_table<trait_type>;
-		using lexer_type		= lexer<trait_type>;
+		using trait_type	= lexer_trait<String>;
+		using table_instance	= lexer_table<trait_type>;
+		using lexer_type	= lexer<trait_type>;
 
-		return lexer_type{table_type::value, s};
+		return lexer_type{table_instance::value, s};
 	}
 
 /***********************************************************************************************************************/

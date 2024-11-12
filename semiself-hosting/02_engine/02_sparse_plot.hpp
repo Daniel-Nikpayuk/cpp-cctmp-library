@@ -384,15 +384,15 @@ namespace engine {
 				template<typename In, typename End>
 				nik_ce void push(size_ctype n, In in, End end)
 				{
-					arc().push(in, end);
 					icon().at(n) = base::cpage().size();
+					arc().push(in, end);
 				}
 
 				template<typename F, typename In, typename End>
 				nik_ce void pushmap(size_ctype n, F f, In in, End end)
 				{
-					arc().pushmap(f, in, end);
 					icon().at(n) = base::cpage().size();
+					arc().pushmap(f, in, end);
 				}
 	};
 
@@ -521,10 +521,10 @@ namespace engine {
 			nik_ce page_ctype_ref cat(size_ctype n, size_ctype m) const
 				{ return cpage().cat(page_position(n, m)); }
 
-			nik_ce page_ctype_ref cbegin(size_ctype n, size_ctype m) const
+			nik_ce text_ctype_ptr cbegin(size_ctype n, size_ctype m) const
 				{ return carc().cbegin(page_position(n, m)); }
 
-			nik_ce page_ctype_ref cend(size_ctype n, size_ctype m) const
+			nik_ce text_ctype_ptr cend(size_ctype n, size_ctype m) const
 				{ return carc().cend(page_position(n, m)); }
 	};
 

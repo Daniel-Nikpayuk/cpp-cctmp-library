@@ -38,24 +38,24 @@ namespace encoding {
 		using char_type		= typename alias<CharType>::type;
 		using char_ctype	= typename alias<CharType>::ctype;
 
-		nik_ces char_type whitespace[] =
+		nik_ces char_type whitespace[3] =
 		{
 			' ', '\t', '\n'
 		};
 
-		nik_ces char_type latin_digit[] =
+		nik_ces char_type latin_digit[10] =
 		{
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
 		};
 
-		nik_ces char_type latin_lowercase[] =
+		nik_ces char_type latin_lowercase[26] =
 		{
 			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
 			'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
 			'u', 'v', 'w', 'x', 'y', 'z'
 		};
 
-		nik_ces char_type latin_uppercase[] =
+		nik_ces char_type latin_uppercase[26] =
 		{
 			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
 			'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
