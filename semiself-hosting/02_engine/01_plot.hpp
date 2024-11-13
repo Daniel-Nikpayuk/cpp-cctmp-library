@@ -443,13 +443,15 @@ namespace engine {
 			nik_ce void push(In in, End end)
 				{ if (base::omits(in, end)) { base::push(in, end); } }
 
-			template<typename F, typename In, typename End> // semantically meaningful?
-			nik_ce void pushmap(F f, In in, End end)
-				{ if (base::omits(in, end)) { base::pushmap(f, in, end); } }
+			template<typename In, typename End>
+			nik_ce size_type left_find_push(In in, End end)
+			{
+				size_ctype pos = base::left_find(in, end);
 
-			template<typename F, typename In, typename End> // semantically meaningful?
-			nik_ce void setmap(size_ctype n, F f, In in, End end)
-				{ if (base::omits(in, end)) { base::setmap(n, f, in, end); } }
+				if (pos == base::cpage().size()) { base::push(in, end); }
+
+				return pos;
+			}
 	};
 
 /***********************************************************************************************************************/

@@ -31,7 +31,7 @@
 // diagnostic:
 
 	template<typename Table, typename Tree, typename Lexer, typename Lexer::size_type Size>
-	class parser_diagnostic : public engine::parser<Table, Tree, Lexer, Size>
+	class diagnostic_parser : public engine::parser<Table, Tree, Lexer, Size>
 	{
 		public:
 
@@ -82,9 +82,9 @@
 
 		public:
 
-			constexpr parser_diagnostic() { }
+			constexpr diagnostic_parser() { }
 
-			constexpr parser_diagnostic(table_ctype_ref t, tree_ctype_ref r, lexer_ctype_ref l, size_ctype s) :
+			constexpr diagnostic_parser(table_ctype_ref t, tree_ctype_ref r, lexer_ctype_ref l, size_ctype s) :
 				base{t, r, l, s} { }
 
 			table_type_ref table () { return base::table; }
@@ -160,41 +160,28 @@
 			}
 	};
 
-	template<typename String, typename TreeSizeTrait, typename String::size_type StackSize>
-	constexpr auto make_leftmost_parser_diagnostic(const string_literal<const char, typename String::size_type> & s)
+// syntactic sugar:
+
+	template<typename String, typename ScriptShape, typename String::size_type StackSize>
+	constexpr auto make_leftmost_diagnostic_parser(const string_literal<const char, typename String::size_type> & s)
+		{ return parser::build_leftmost_parser<diagnostic_parser, String, ScriptShape, StackSize>(s); }
+
+// unit test:
+
+	constexpr void parser_diagnostic()
 	{
-		using script_trait_type		= parser::leftmost_tree_trait<String, TreeSizeTrait>;
-		using script_type		= parser::leftmost_parser_tree<script_trait_type>;
-		using action			= parser::leftmost_parser_action;
+		using char_type			= unsigned char;
+		using size_type			= gindex_type;
 
-		using lexer_trait_type		= parser::lexer_trait<String>;
-		using lexer_type		= parser::lexer<lexer_trait_type>;
+		constexpr auto cfg		= engine::LambdaTuple::second(parser::leftmost_cfg<size_type>);
 
-		using parser_trait_type		= parser::leftmost_parser_trait<lexer_trait_type>;
-		using table_type		= typename parser_trait_type::table_type;
-		using table_instance		= parser::leftmost_parser_table<parser_trait_type>;
+		using string_type		= encoding::utf8_char_array<char_type, size_type, cfg.size()>;
+		using script_shape		= parser::leftmost_script_shape<string_type>;
+		constexpr size_type stack_size	= 10;
 
-		using tree_type			= engine::parser_tree<script_type, lexer_type, TreeSizeTrait::size>;
-		using parser_type		= parser_diagnostic
-						<
-							table_type, tree_type, lexer_type, StackSize
-						>;
+		auto parser = make_leftmost_diagnostic_parser<string_type, script_shape, stack_size>(cfg);
 
-		auto tree	= tree_type
-				{{
-					action::nop                          <script_type, lexer_type>,
-					action::push_unique_head             <script_type, lexer_type>,
-					action::push_empty_next_body         <script_type, lexer_type>,
-					action::push_next_body               <script_type, lexer_type>,
-					action::push_identifier_current_body <script_type, lexer_type>,
-					action::push_next_action             <script_type, lexer_type>,
-					action::push_identifier_next_action  <script_type, lexer_type>,
-					action::push_literal_next_action     <script_type, lexer_type>
-				}};
-		auto lexer	= parser::make_lexer<String>(s);
-		auto start	= parser_trait_type::Nonterminal::start;
-
-		return parser_type{table_instance::value, tree, lexer, start};
+		parser.translate();
 	}
 
 /***********************************************************************************************************************/
@@ -209,11 +196,10 @@
 		constexpr auto cfg		= engine::LambdaTuple::second(parser::leftmost_cfg<size_type>);
 
 		using string_type		= encoding::utf8_char_array<char_type, size_type, cfg.size()>;
-		using tree_size_trait		= parser::leftmost_tree_size_trait<string_type>;
+		using script_shape		= parser::leftmost_script_shape<string_type>;
 		constexpr size_type stack_size	= 10;
 
-		auto parser = make_leftmost_parser_diagnostic
-				<string_type, tree_size_trait, stack_size>(cfg);
+		auto parser = parser::make_leftmost_parser<string_type, script_shape, stack_size>(cfg);
 
 		parser.translate();
 

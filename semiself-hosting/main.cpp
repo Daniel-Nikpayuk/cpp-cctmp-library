@@ -47,8 +47,6 @@
 
 	int main(int argc, char *argv[])
 	{
-		parser_main();
-
 	//	printf("%f\n", inventory_square_root_v0<gindex_type>(2.0));
 
 	//	auto arr0 = array<int, gindex_type, 5>{{1, 2, 3, 4, 5}};

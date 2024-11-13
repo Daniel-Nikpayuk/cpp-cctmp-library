@@ -642,7 +642,13 @@
 
 	// see diagnostic.hpp
 
+	// diagnostic:
+
+		parser_diagnostic();
+
+	// main:
+
 		constexpr auto parsed = parser_main();
 
-		printf("%d\n", parsed.ctree().cscript().cnonterminal().cpage().size());
+		printf("%d\n", parsed.ctree().cscript().csymbol().cpage().size());
 

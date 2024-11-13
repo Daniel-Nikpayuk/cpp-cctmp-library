@@ -37,19 +37,19 @@ namespace parser {
 
 		" Start      -> Line RecLine                                                    ;"
 		" RecLine    -> Line RecLine                                                    ;"
-		"            -> empty                                                           ;"
+		"            -> empty                            : resolve_symbol               ;"
 		" Line       -> Head arrow Body Action semicolon                                ;"
-		" Head       -> identifier                       : push_unique_head             ;"
-		"            -> empty                                                           ;"
+		" Head       -> identifier                       : push_symbol_head_upsize_body ;"
+		"            -> empty                            : upsize_body                  ;"
 		" Body       -> Symbol RecBody                                                  ;"
-		"            -> empty_body                       : push_empty_next_body         ;"
+		"            -> empty_body                       : set_body_empty               ;"
 		" RecBody    -> Symbol RecBody                                                  ;"
-		"            -> empty                            : push_next_body               ;"
-		" Symbol     -> identifier                       : push_identifier_current_body ;"
+		"            -> empty                                                           ;"
+		" Symbol     -> identifier                       : push_symbol_body             ;"
 		" Action     -> colon Expression                                                ;"
-		"            -> empty                            : push_next_action             ;"
-		" Expression -> identifier                       : push_identifier_next_action  ;"
-		"            -> literal                          : push_literal_next_action     ;"
+		"            -> empty                                                           ;"
+		" Expression -> identifier                       : push_symbol_action           ;"
+		"            -> literal                          : push_quoted_action           ;"
 	);
 
   /*---------------------------------*/  /*---------------------------------*/  /*---------------------------------*/
@@ -146,13 +146,13 @@ namespace parser {
 		{
 			nop,
 
-			push_unique_head             ,
-			push_empty_next_body         ,
-			push_next_body               ,
-			push_identifier_current_body ,
-			push_next_action             ,
-			push_identifier_next_action  ,
-			push_literal_next_action     ,
+			push_symbol_head_upsize_body ,
+			upsize_body                  ,
+			set_body_empty               ,
+			push_symbol_body             ,
+			push_symbol_action           ,
+			push_quoted_action           ,
+			resolve_symbol               ,
 
 			dimension
 		};
@@ -348,59 +348,64 @@ namespace parser {
 			policy::entry( 'S' , 'a' , "LM"                                           ),
 			policy::entry( 'M' , 'i' , "LM"                                           ),
 			policy::entry( 'M' , 'a' , "LM"                                           ),
-			policy::entry( 'M' , '$' , ""                                             ),
+			policy::entry( 'M' , '$' , ""      , Action::resolve_symbol               ),
 			policy::entry( 'L' , 'i' , "HaBAs"                                        ),
 			policy::entry( 'L' , 'a' , "HaBAs"                                        ),
-			policy::entry( 'H' , 'i' , "i"     , Action::push_unique_head             ),
-			policy::entry( 'H' , 'a' , ""                                             ),
+			policy::entry( 'H' , 'i' , "i"     , Action::push_symbol_head_upsize_body ),
+			policy::entry( 'H' , 'a' , ""      , Action::upsize_body                  ),
 			policy::entry( 'B' , 'i' , "YC"                                           ),
-			policy::entry( 'B' , 'm' , "m"     , Action::push_empty_next_body         ),
+			policy::entry( 'B' , 'm' , "m"     , Action::set_body_empty               ),
 			policy::entry( 'C' , 'i' , "YC"                                           ),
-			policy::entry( 'C' , 's' , ""      , Action::push_next_body               ),
-			policy::entry( 'C' , 'c' , ""      , Action::push_next_body               ),
-			policy::entry( 'Y' , 'i' , "i"     , Action::push_identifier_current_body ),
-			policy::entry( 'A' , 's' , ""      , Action::push_next_action             ),
+			policy::entry( 'C' , 's' , ""                                             ),
+			policy::entry( 'C' , 'c' , ""                                             ),
+			policy::entry( 'Y' , 'i' , "i"     , Action::push_symbol_body             ),
+			policy::entry( 'A' , 's' , ""                                             ),
 			policy::entry( 'A' , 'c' , "cE"                                           ),
-			policy::entry( 'E' , 'i' , "i"     , Action::push_identifier_next_action  ),
-			policy::entry( 'E' , 'l' , "l"     , Action::push_literal_next_action     )
+			policy::entry( 'E' , 'i' , "i"     , Action::push_symbol_action           ),
+			policy::entry( 'E' , 'l' , "l"     , Action::push_quoted_action           )
 		);
 	};
 
 /***********************************************************************************************************************/
 
-// tree size trait (default):
+// script shape (default):
 
 	template<typename String>
-	struct leftmost_tree_size_trait
+	struct leftmost_script_shape
 	{
 		using size_type					= typename String::size_type;
 		using size_ctype				= typename String::size_ctype;
 
 		nik_ces size_type size				= String::length();
 
-		nik_ces size_type nonterminal_page_size		= _2_4;
-		nik_ces size_type nonterminal_text_size		= _2_7;
+		nik_ces size_type nonterminal_size		= _2_4;
+		nik_ces size_type terminal_size			= _2_4;
+		nik_ces size_type action_size			= _2_4;
 
-		nik_ces size_type terminal_page_size		= _2_4;
-		nik_ces size_type terminal_text_size		= _2_7;
+		nik_ces size_type quoted_page_size		= _2_4;
+		nik_ces size_type quoted_text_size		= _2_7;
 
-		nik_ces size_type action_page_size		= _2_4;
-		nik_ces size_type action_text_size		= _2_7;
+		nik_ces size_type symbol_page_size		= _2_4;
+		nik_ces size_type symbol_text_size		= _2_9;
 
-		nik_ces size_type grammar_body_size		= _2_4;
-		nik_ces size_type grammar_page_size		= _2_7;
-		nik_ces size_type grammar_text_size		= String::length();
+		nik_ces size_type yield_body_size		= _2_4;
+		nik_ces size_type yield_page_size		= _2_7;
+		nik_ces size_type yield_text_size		= String::length();
 	};
 
 /***********************************************************************************************************************/
 
-// syntactic sugar:
+// build:
 
-	template<typename String, typename TreeSizeTrait, typename String::size_type StackSize>
-	nik_ce auto make_leftmost_parser(const string_literal<const char, typename String::size_type> & s)
+	template
+	<
+		template<typename, typename, typename, auto> typename Parser,
+		typename String, typename ScriptShape, typename String::size_type StackSize
+	>
+	nik_ce auto build_leftmost_parser(const string_literal<const char, typename String::size_type> & s)
 	{
-		using script_trait_type		= leftmost_tree_trait<String, TreeSizeTrait>;
-		using script_type		= leftmost_parser_tree<script_trait_type>;
+		using script_trait_type		= leftmost_script_trait<String, ScriptShape>;
+		using script_type		= leftmost_parser_script<script_trait_type>;
 		using action			= leftmost_parser_action;
 
 		using lexer_trait_type		= lexer_trait<String>;
@@ -410,25 +415,31 @@ namespace parser {
 		using table_type		= typename parser_trait_type::table_type;
 		using table_instance		= leftmost_parser_table<parser_trait_type>;
 
-		using tree_type			= engine::parser_tree<script_type, lexer_type, TreeSizeTrait::size>;
-		using parser_type		= engine::parser<table_type, tree_type, lexer_type, StackSize>;
+		using tree_type			= engine::parser_tree<script_type, lexer_type, ScriptShape::size>;
+		using parser_type		= Parser<table_type, tree_type, lexer_type, StackSize>;
 
 		auto tree	= tree_type
 				{{
-					action::nop                          <script_type, lexer_type>,
-					action::push_unique_head             <script_type, lexer_type>,
-					action::push_empty_next_body         <script_type, lexer_type>,
-					action::push_next_body               <script_type, lexer_type>,
-					action::push_identifier_current_body <script_type, lexer_type>,
-					action::push_next_action             <script_type, lexer_type>,
-					action::push_identifier_next_action  <script_type, lexer_type>,
-					action::push_literal_next_action     <script_type, lexer_type>
+					action::nop                          < script_type , lexer_type >,
+					action::push_symbol_head_upsize_body < script_type , lexer_type >,
+					action::upsize_body                  < script_type , lexer_type >,
+					action::set_body_empty               < script_type , lexer_type >,
+					action::push_symbol_body             < script_type , lexer_type >,
+					action::push_symbol_action           < script_type , lexer_type >,
+					action::push_quoted_action           < script_type , lexer_type >,
+					action::resolve_symbol               < script_type , lexer_type >
 				}};
 		auto lexer	= make_lexer<String>(s);
 		auto start	= parser_trait_type::Nonterminal::start;
 
 		return parser_type{table_instance::value, tree, lexer, start};
 	}
+
+	// syntactic sugar:
+
+		template<typename String, typename ScriptShape, typename String::size_type StackSize>
+		nik_ce auto make_leftmost_parser(const string_literal<const char, typename String::size_type> & s)
+			{ return build_leftmost_parser<engine::parser, String, ScriptShape, StackSize>(s); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -26,46 +26,114 @@ namespace parser {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// leftmost tree:
+// leftmost script:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// char plot:
+// array:
 
 /***********************************************************************************************************************/
 
 // interface:
 
-	template<typename CharType, typename SizeType, SizeType PageSize, SizeType TextSize = PageSize>
-	struct leftmost_tree_char_plot
+	template<typename Type, typename SizeType, SizeType Size>
+	class leftmost_script_array : public unique_array<Type, SizeType, Size>
 	{
-		using char_type		= typename alias<CharType>::type;
-		using char_ctype	= typename alias<CharType>::ctype;
+		public:
+			using base		= unique_array<Type, SizeType, Size>;
 
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce leftmost_script_array() : base{} { }
+	};
+
+/***********************************************************************************************************************/
+
+// trait:
+
+	template<typename Type, typename SizeType, SizeType Size>
+	struct leftmost_script_array_trait
+	{
 		using size_type		= typename alias<SizeType>::type;
 		using size_ctype	= typename alias<SizeType>::ctype;
 
-		using page_type		= engine::plot_entry<size_type>;
-		using text_type		= char_type;
-
-		using type		= engine::unique_plot<page_type, text_type, size_type, PageSize, TextSize>;
+		using type		= leftmost_script_array<Type, size_type, Size>;
 		using type_ref		= typename alias<type>::type_ref;
 		using ctype		= typename alias<type>::ctype;
 		using ctype_ref		= typename alias<type>::ctype_ref;
 	};
 
+	// syntactic sugar:
+
+		template<typename Type, typename SizeType, SizeType Size>
+		using lsa_trait = leftmost_script_array_trait<Type, SizeType, Size>;
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// grammar:
+// plot:
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template
+	<
+		typename PageType, typename TextType, typename SizeType,
+		SizeType PageSize, SizeType TextSize = PageSize
+	>
+	class leftmost_script_plot : public engine::unique_plot<PageType, TextType, SizeType, PageSize, TextSize>
+	{
+		public:
+			using base		= engine::unique_plot<PageType, TextType, SizeType, PageSize, TextSize>;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce leftmost_script_plot() : base{} { }
+	};
+
+/***********************************************************************************************************************/
+
+// trait:
+
+	template<typename Type, typename SizeType, SizeType PageSize, SizeType TextSize = PageSize>
+	struct leftmost_script_plot_trait
+	{
+		using size_type		= typename alias<SizeType>::type;
+		using size_ctype	= typename alias<SizeType>::ctype;
+
+		using page_type		= engine::plot_entry<size_type>;
+		using text_type		= Type;
+
+		using type		= leftmost_script_plot<page_type, text_type, size_type, PageSize, TextSize>;
+		using type_ref		= typename alias<type>::type_ref;
+		using ctype		= typename alias<type>::ctype;
+		using ctype_ref		= typename alias<type>::ctype_ref;
+	};
+
+	// syntactic sugar:
+
+		template<typename Type, typename SizeType, SizeType PageSize, SizeType TextSize>
+		using lsp_trait = leftmost_script_plot_trait<Type, SizeType, PageSize, TextSize>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// yield (production):
 
 /***********************************************************************************************************************/
 
 // body:
 
 	template<typename SizeType>
-	class leftmost_tree_grammar_body : public engine::parser_entry_body<SizeType>
+	class leftmost_script_yield_body : public engine::parser_entry_body<SizeType>
 	{
 		public:
 
@@ -76,8 +144,8 @@ namespace parser {
 
 		public:
 
-			nik_ce leftmost_tree_grammar_body() : base{} { }
-			nik_ce leftmost_tree_grammar_body(size_ctype l) : base{l} { }
+			nik_ce leftmost_script_yield_body() : base{} { }
+			nik_ce leftmost_script_yield_body(size_ctype l) : base{l} { }
 	};
 
 /***********************************************************************************************************************/
@@ -85,7 +153,7 @@ namespace parser {
 // page:
 
 	template<typename SizeType>
-	class leftmost_tree_grammar_page : public engine::parser_entry_page<SizeType>
+	class leftmost_script_yield_page : public engine::parser_entry_page<SizeType>
 	{
 		public:
 
@@ -94,9 +162,17 @@ namespace parser {
 			using size_type		= typename base::size_type;
 			using size_ctype	= typename base::size_ctype;
 
+		protected:
+
+			bool quoted;
+
 		public:
 
-			nik_ce leftmost_tree_grammar_page() : base{} { }
+			nik_ce leftmost_script_yield_page() : base{}, quoted{} { }
+
+			nik_ce bool is_quoted() const { return quoted; }
+
+			nik_ce void set_quoted(bool q) { quoted = q; }
 	};
 
 /***********************************************************************************************************************/
@@ -104,7 +180,7 @@ namespace parser {
 // text:
 
 	template<typename SizeType>
-	class leftmost_tree_grammar_text : public engine::parser_entry_text<SizeType>
+	class leftmost_script_yield_text : public engine::parser_entry_text<SizeType>
 	{
 		public:
 
@@ -115,25 +191,63 @@ namespace parser {
 
 		public:
 
-			nik_ce leftmost_tree_grammar_text() : base{} { }
-			nik_ce leftmost_tree_grammar_text(bool const n, size_ctype i) : base{n, i} { }
+			nik_ce leftmost_script_yield_text() : base{} { }
+			nik_ce leftmost_script_yield_text(bool const n, size_ctype i) : base{n, i} { }
 	};
 
 /***********************************************************************************************************************/
 
 // interface:
 
+	template
+	<
+		typename BodyType, typename PageType, typename TextType, typename SizeType,
+		SizeType BodySize, SizeType PageSize, SizeType TextSize = PageSize
+	>
+	class leftmost_script_yield	: public engine::corpus
+					<
+						BodyType, PageType, TextType, SizeType,
+						BodySize, PageSize, TextSize
+					>
+	{
+		public:
+			using base		= engine::corpus
+						<
+							BodyType, PageType, TextType, SizeType,
+							BodySize, PageSize, TextSize
+						>;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		protected:
+
+			size_type latest;
+
+		public:
+
+			nik_ce leftmost_script_yield() : base{}, latest{} { }
+
+			nik_ce size_type current() const { return latest; }
+
+			nik_ce void set_current(size_ctype l) { latest = l; }
+	};
+
+/***********************************************************************************************************************/
+
+// trait:
+
 	template<typename SizeType, SizeType BodySize, SizeType PageSize, SizeType TextSize = PageSize>
-	struct leftmost_tree_grammar
+	struct leftmost_script_yield_trait
 	{
 		using size_type		= typename alias<SizeType>::type;
 		using size_ctype	= typename alias<SizeType>::ctype;
 
-		using body_type		= leftmost_tree_grammar_body<size_type>;
-		using page_type		= leftmost_tree_grammar_page<size_type>;
-		using text_type		= leftmost_tree_grammar_text<size_type>;
+		using body_type		= leftmost_script_yield_body<size_type>;
+		using page_type		= leftmost_script_yield_page<size_type>;
+		using text_type		= leftmost_script_yield_text<size_type>;
 
-		using type		= engine::corpus
+		using type		= leftmost_script_yield
 					<
 						body_type , page_type , text_type , size_type ,
 						BodySize  , PageSize  , TextSize
@@ -142,6 +256,11 @@ namespace parser {
 		using ctype		= typename alias<type>::ctype;
 		using ctype_ref		= typename alias<type>::ctype_ref;
 	};
+
+	// syntactic sugar:
+
+		template<typename SizeType, SizeType BodySize, SizeType PageSize, SizeType TextSize = PageSize>
+		using lsy_trait = leftmost_script_yield_trait<SizeType, BodySize, PageSize, TextSize>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -153,8 +272,8 @@ namespace parser {
 
 // trait:
 
-	template<typename String, typename TreeSizeTrait>
-	struct leftmost_tree_trait
+	template<typename String, typename ScriptSizeTrait>
+	struct leftmost_script_trait
 	{
 		using char_type			= typename String::type;
 		using char_ctype		= typename String::ctype;
@@ -162,68 +281,87 @@ namespace parser {
 		using size_type			= typename String::size_type;
 		using size_ctype		= typename String::size_ctype;
 
-		nik_ces size_type np_size	= TreeSizeTrait::nonterminal_page_size;
-		nik_ces size_type nt_size	= TreeSizeTrait::nonterminal_text_size;
+		nik_ces size_type n_size	= ScriptSizeTrait::nonterminal_size;
+		nik_ces size_type t_size	= ScriptSizeTrait::terminal_size;
+		nik_ces size_type a_size	= ScriptSizeTrait::action_size;
 
-		nik_ces size_type tp_size	= TreeSizeTrait::terminal_page_size;
-		nik_ces size_type tt_size	= TreeSizeTrait::terminal_text_size;
+		nik_ces size_type qp_size	= ScriptSizeTrait::quoted_page_size;
+		nik_ces size_type qt_size	= ScriptSizeTrait::quoted_text_size;
 
-		nik_ces size_type ap_size	= TreeSizeTrait::action_page_size;
-		nik_ces size_type at_size	= TreeSizeTrait::action_text_size;
+		nik_ces size_type sp_size	= ScriptSizeTrait::symbol_page_size;
+		nik_ces size_type st_size	= ScriptSizeTrait::symbol_text_size;
 
-		nik_ces size_type gb_size	= TreeSizeTrait::grammar_body_size;
-		nik_ces size_type gp_size	= TreeSizeTrait::grammar_page_size;
-		nik_ces size_type gt_size	= TreeSizeTrait::grammar_text_size;
+		nik_ces size_type gb_size	= ScriptSizeTrait::yield_body_size;
+		nik_ces size_type gp_size	= ScriptSizeTrait::yield_page_size;
+		nik_ces size_type gt_size	= ScriptSizeTrait::yield_text_size;
 
-		using nonterminal		= leftmost_tree_char_plot<char_type, size_type, np_size, nt_size>;
-		using terminal			= leftmost_tree_char_plot<char_type, size_type, tp_size, tt_size>;
-		using action			= leftmost_tree_char_plot<char_type, size_type, ap_size, at_size>;
-		using grammar			= leftmost_tree_grammar<size_type, gb_size, gp_size, gt_size>;
+		using nonterminal_trait		= lsa_trait < size_type , size_type , n_size >;
+		using terminal_trait		= lsa_trait < size_type , size_type , t_size >;
+		using action_trait		= lsa_trait < size_type , size_type , a_size >;
+
+		using quoted_trait		= lsp_trait < char_type , size_type , qp_size , qt_size >;
+		using symbol_trait		= lsp_trait < char_type , size_type , sp_size , st_size >;
+
+		using yield_trait		= lsy_trait < size_type , gb_size , gp_size , gt_size >;
 	};
 
 /***********************************************************************************************************************/
 
-// tree:
+// script:
 
 	template<typename Trait>
-	class leftmost_parser_tree
+	class leftmost_parser_script
 	{
 		public:
 
-			using nonterminal_trait		= typename Trait::nonterminal;
+			using nonterminal_trait		= typename Trait::nonterminal_trait;
 			using nonterminal_type		= typename nonterminal_trait::type;
 			using nonterminal_type_ref	= typename nonterminal_trait::type_ref;
 			using nonterminal_ctype		= typename nonterminal_trait::ctype;
 			using nonterminal_ctype_ref	= typename nonterminal_trait::ctype_ref;
 
-			using terminal_trait		= typename Trait::terminal;
+			using terminal_trait		= typename Trait::terminal_trait;
 			using terminal_type		= typename terminal_trait::type;
 			using terminal_type_ref		= typename terminal_trait::type_ref;
 			using terminal_ctype		= typename terminal_trait::ctype;
 			using terminal_ctype_ref	= typename terminal_trait::ctype_ref;
 
-			using action_trait		= typename Trait::action;
+			using action_trait		= typename Trait::action_trait;
 			using action_type		= typename action_trait::type;
 			using action_type_ref		= typename action_trait::type_ref;
 			using action_ctype		= typename action_trait::ctype;
 			using action_ctype_ref		= typename action_trait::ctype_ref;
 
-			using grammar_trait		= typename Trait::grammar;
-			using grammar_type		= typename grammar_trait::type;
-			using grammar_type_ref		= typename grammar_trait::type_ref;
-			using grammar_ctype		= typename grammar_trait::ctype;
-			using grammar_ctype_ref		= typename grammar_trait::ctype_ref;
+			using quoted_trait		= typename Trait::quoted_trait;
+			using quoted_type		= typename quoted_trait::type;
+			using quoted_type_ref		= typename quoted_trait::type_ref;
+			using quoted_ctype		= typename quoted_trait::ctype;
+			using quoted_ctype_ref		= typename quoted_trait::ctype_ref;
+
+			using symbol_trait		= typename Trait::symbol_trait;
+			using symbol_type		= typename symbol_trait::type;
+			using symbol_type_ref		= typename symbol_trait::type_ref;
+			using symbol_ctype		= typename symbol_trait::ctype;
+			using symbol_ctype_ref		= typename symbol_trait::ctype_ref;
+
+			using yield_trait		= typename Trait::yield_trait;
+			using yield_type		= typename yield_trait::type;
+			using yield_type_ref		= typename yield_trait::type_ref;
+			using yield_ctype		= typename yield_trait::ctype;
+			using yield_ctype_ref		= typename yield_trait::ctype_ref;
 
 		protected:
 
 			nonterminal_type nonterm;
 			   terminal_type    term;
 			     action_type     act;
-			    grammar_type    gram;
+			     quoted_type   quote;
+			     symbol_type     sym;
+			      yield_type    prod;
 
 		public:
 
-			nik_ce leftmost_parser_tree() { }
+			nik_ce leftmost_parser_script() { }
 
 			// nonterminal:
 
@@ -240,10 +378,20 @@ namespace parser {
 				nik_ce action_ctype_ref caction () const { return act; }
 				nik_ce action_type_ref   action ()       { return act; }
 
-			// grammar:
+			// quoted:
 
-				nik_ce grammar_ctype_ref cgrammar () const { return gram; }
-				nik_ce grammar_type_ref   grammar ()       { return gram; }
+				nik_ce quoted_ctype_ref cquoted () const { return quote; }
+				nik_ce quoted_type_ref   quoted ()       { return quote; }
+
+			// symbol:
+
+				nik_ce symbol_ctype_ref csymbol () const { return sym; }
+				nik_ce symbol_type_ref   symbol ()       { return sym; }
+
+			// yield:
+
+				nik_ce yield_ctype_ref cyield () const { return prod; }
+				nik_ce yield_type_ref   yield ()       { return prod; }
 	};
 
 /***********************************************************************************************************************/
@@ -257,51 +405,64 @@ namespace parser {
 			template<typename Script, typename Lexer>
 			nik_ces void nop(Script & s, const Lexer & l) { }
 
-		// push unique head:
+		// push symbol head upsize body:
 
 			template<typename Script, typename Lexer>
-			nik_ces void push_unique_head(Script & s, const Lexer & l)
-				{ s.nonterminal().push(l.cbegin(), l.ccurrent()); }
+			nik_ces void push_symbol_head_upsize_body(Script & s, const Lexer & l)
+			{
+				auto pos = s.symbol().left_find_push(l.cbegin(), l.ccurrent());
 
-		// push empty next body:
+				s.yield().set_current(pos);
+			}
+
+		// upsize body:
 
 			template<typename Script, typename Lexer>
-			nik_ces void push_empty_next_body(Script & s, const Lexer & l)
+			nik_ces void upsize_body(Script & s, const Lexer & l)
+			{
+				// 1. get yield current.
+				// 2. set current page as empty.
+				// 3. upsize current yield body.
+			}
+
+		// set body empty:
+
+			template<typename Script, typename Lexer>
+			nik_ces void set_body_empty(Script & s, const Lexer & l)
+			{
+				// 1. get yield current.
+				// 2. upsize current yield body.
+			}
+
+		// push symbol body:
+
+			template<typename Script, typename Lexer>
+			nik_ces void push_symbol_body(Script & s, const Lexer & l)
+			{
+				// 1. get yield current.
+				// 2. push to current page.
+				// 3. defer non/term identification.
+				// 4. update current yield body.
+			}
+
+		// push symbol action:
+
+			template<typename Script, typename Lexer>
+			nik_ces void push_symbol_action(Script & s, const Lexer & l)
 			{
 			}
 
-		// push next body:
+		// push quoted action:
 
 			template<typename Script, typename Lexer>
-			nik_ces void push_next_body(Script & s, const Lexer & l)
+			nik_ces void push_quoted_action(Script & s, const Lexer & l)
 			{
 			}
 
-		// push identifier current body:
+		// resolve symbol:
 
 			template<typename Script, typename Lexer>
-			nik_ces void push_identifier_current_body(Script & s, const Lexer & l)
-			{
-			}
-
-		// push next action:
-
-			template<typename Script, typename Lexer>
-			nik_ces void push_next_action(Script & s, const Lexer & l)
-			{
-			}
-
-		// push identifier next action:
-
-			template<typename Script, typename Lexer>
-			nik_ces void push_identifier_next_action(Script & s, const Lexer & l)
-			{
-			}
-
-		// push literal next action:
-
-			template<typename Script, typename Lexer>
-			nik_ces void push_literal_next_action(Script & s, const Lexer & l)
+			nik_ces void resolve_symbol(Script & s, const Lexer & l)
 			{
 			}
 	};
