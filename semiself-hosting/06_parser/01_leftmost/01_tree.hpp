@@ -261,10 +261,7 @@ namespace parser {
 
 			template<typename Script, typename Lexer>
 			nik_ces void push_unique_head(Script & s, const Lexer & l)
-			{
-				s.nonterminal().push(l.cbegin(), l.ccurrent());
-			}
-			//	{ s.nonterminal().push(l.cbegin(), l.ccurrent()); }
+				{ s.nonterminal().push(l.cbegin(), l.ccurrent()); }
 
 		// push empty next body:
 

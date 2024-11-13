@@ -102,30 +102,44 @@ namespace engine {
 			size_type mode;
 
 			size_type start;
-			size_type current;
+			size_type latest;
 			size_type finish;
 
 		public:
 
 			nik_ce lexer_automaton(table_ctype_ref t) :
-				table{t}, mode{}, start{}, current{}, finish{}
+				table{t}, mode{}, start{}, latest{}, finish{}
 					{ }
 
 			nik_ce lexer_automaton(table_ctype_ref t, strlit_ctype_ref s) :
-				table{t}, unistr{s}, mode{}, start{}, current{}, finish{}
+				table{t}, unistr{s}, mode{}, start{}, latest{}, finish{}
 				{
-					start   = 0;
-					current = 0;
-					finish  = unistr.size();
+					start  = 0;
+					latest = 0;
+					finish = unistr.size();
 				}
 
-			nik_ce size_type left_size() const { return current - start; }
+			nik_ce  table_ctype_ref ctable  () const { return table; }
+			nik_ce string_ctype_ref cunistr () const { return unistr; }
+			nik_ce   size_type      cmode   () const { return mode; }
 
-			nik_ce bool not_begin () const { return (current != start); }
-			nik_ce bool not_end   () const { return (current != finish); }
+			nik_ce size_type cstart  () const { return start; }
+			nik_ce size_type clatest () const { return latest; }
+			nik_ce size_type cfinish () const { return finish; }
+
+			nik_ce size_type left_size() const { return latest - start; }
+
+			nik_ce bool  is_left () const { return (start == latest); }
+			nik_ce bool not_left () const { return (start != latest); }
+
+			nik_ce bool  is_right () const { return (latest == finish); }
+			nik_ce bool not_right () const { return (latest != finish); }
+
+			nik_ce bool  is_end () const { return (start == finish); }
+			nik_ce bool not_end () const { return (start != finish); }
 
 			nik_ce auto cbegin   () const { return unistr.citer(start); }
-			nik_ce auto ccurrent () const { return unistr.citer(current); }
+			nik_ce auto ccurrent () const { return unistr.citer(latest); }
 			nik_ce auto cend     () const { return unistr.citer(finish); }
 
 			nik_ce size_type state() const { return mode; }
@@ -135,9 +149,9 @@ namespace engine {
 			template<typename Policy>
 			nik_ce size_type skip_whitespace()
 			{
-				while (not_end() && Policy::is_whitespace(*ccurrent())) { ++current; }
+				while (not_right() && Policy::is_whitespace(*ccurrent())) { ++latest; }
 
-				return current;
+				return latest;
 			}
 
 			nik_ce size_type cat(size_ctype row, size_ctype col) const { return table[row][col]; }
@@ -165,15 +179,15 @@ namespace engine {
 			{
 				size_type peek = State::empty;
 
-				while (not_end())
+				while (not_right())
 				{
 					if (peek_empty(peek, Policy::map(*ccurrent()))) { break; }
 
-					++current;
+					++latest;
 					increment_mode(peek);
 				}
 
-				return not_begin();
+				return not_left();
 			}
 	};
 

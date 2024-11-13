@@ -414,7 +414,7 @@ namespace encoding {
 						{
 							base::push(ch);
 
-							in += ch.size();
+							in += ch.size(); // in <= end
 						}
 						else
 						{

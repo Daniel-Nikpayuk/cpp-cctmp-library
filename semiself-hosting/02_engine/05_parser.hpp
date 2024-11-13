@@ -28,11 +28,13 @@ namespace engine {
 
 // context-free grammar:
 
-//	template<typename CharType, auto M, auto N>
-//	nik_ce auto context_free_grammar(const CharType (&srt)[M], const CharType (&str)[N])
-//	{
-//		return pair(string_literal(srt), string_literal(str));
-//	}
+	template<typename SizeType>
+	nik_ce auto context_free_grammar
+	(
+		const string_literal<const char, SizeType> & start,
+		const string_literal<const char, SizeType> & grammar
+
+	) { return pair(start, grammar); }
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -394,6 +396,8 @@ namespace engine {
 
 		protected:
 
+			using Token			= typename Lexer::Token;
+
 			enum Exit : size_type		{ none, lexer_only, stack_only, both, dimension };
 
 			table_type table;
@@ -415,52 +419,21 @@ namespace engine {
 
 		public:
 
+			nik_ce bool unfinished() const { return (lexer.not_end() && stack.not_empty()); }
+
 			nik_ce void translate()
 			{
 				lexer.find();
 
-				while (lexer.not_end() && stack.not_empty()) dispatch();
+				while (unfinished()) { dispatch(lexer.column(), lexer.token()); }
 
 				exit();
 			}
 
-			nik_ce void print_stack() // debugging.
+			nik_ce void dispatch(size_ctype col, size_ctype tok)
 			{
-				auto s = stack;
-
-				printf("stack: ");
-				while (s.not_empty())
-				{
-					auto sym = s.pop();
-
-					printf("%c%d ", sym.is_nonterminal() ? 'n' : 't', sym.symbol());
-				}
-				printf("| ");
-			}
-
-			nik_ce void print_string() // debugging.
-			{
-				printf("string: ");
-				printf("t%d ", lexer.token());
-			}
-
-			nik_ce void print_action() // debugging.
-			{
-				auto action = table.cat(stack.row(), lexer.column()).action();
-
-				if (stack.is_nonterminal() && action) { printf("| action: %d", action); }
-
-				printf("\n");
-			}
-
-			nik_ce void dispatch()
-			{
-			//	print_stack  (); // debugging.
-			//	print_string (); // debugging.
-			//	print_action (); // debugging.
-
-				if (stack.is_nonterminal()) { nonterminal (); }
-				else                        {    terminal (); }
+				if (stack.is_nonterminal()) { nonterminal (col); }
+				else                        {    terminal (tok); }
 			}
 
 			// nonterminal:
@@ -468,9 +441,9 @@ namespace engine {
 				nik_ce bool is_nonterminal_err() const
 					{ return table.not_valid(); }
 
-				nik_ce void nonterminal()
+				nik_ce void nonterminal(size_ctype col)
 				{
-					table.move(stack.row(), lexer.column());
+					table.move(stack.row(), col);
 
 					if (is_nonterminal_err()) { nonterminal_report(); }
 					else
@@ -491,12 +464,12 @@ namespace engine {
 
 			// terminal:
 
-				nik_ce bool is_terminal_err() const
-					{ return (lexer.token() != stack.token()); }
+				nik_ce bool is_terminal_err(size_ctype tok) const
+					{ return (tok != stack.token()); }
 
-				nik_ce void terminal()
+				nik_ce void terminal(size_ctype tok)
 				{
-					if (is_terminal_err()) { terminal_report(); }
+					if (is_terminal_err(tok)) { terminal_report(); }
 					else
 					{
 						terminal_stack ();
@@ -545,13 +518,7 @@ namespace engine {
 				{
 				}
 
-				nik_ce void exit_stack_only()
-				{
-				//	lexer.set_token(Token::prompt);
-				//	while (stack.not_empty()) dispatch();
-
-					// (stack.front() == ::stack_finish);
-				}
+				nik_ce void exit_stack_only() { dispatch(Token::prompt, Token::prompt); }
 
 				nik_ce void exit_both()
 					{ } // nothing yet.

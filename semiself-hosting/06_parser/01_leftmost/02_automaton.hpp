@@ -30,23 +30,27 @@ namespace parser {
 
 /***********************************************************************************************************************/
 
-	// tree := (head plot, body corpus, action corpus)
+	template<typename SizeType>
+	nik_ce auto leftmost_cfg = engine::context_free_grammar<SizeType>
+	(
+		"Start",
 
-	// " Start      -> Line RecLine                                                    ;"
-	// " RecLine    -> Line RecLine                                                    ;"
-	// "            -> empty                                                           ;"
-	// " Line       -> Head arrow Body Action semicolon                                ;"
-	// " Head       -> identifier                       : push_unique_head             ;"
-	// "            -> empty                                                           ;"
-	// " Body       -> Symbol RecBody                                                  ;"
-	// "            -> empty_body                       : push_empty_next_body         ;"
-	// " RecBody    -> Symbol RecBody                                                  ;"
-	// "            -> empty                            : push_next_body               ;"
-	// " Symbol     -> identifier                       : push_identifier_current_body ;"
-	// " Action     -> colon Expression                                                ;"
-	// "            -> empty                            : push_next_action             ;"
-	// " Expression -> identifier                       : push_identifier_next_action  ;"
-	// "            -> literal                          : push_literal_next_action     ;"
+		" Start      -> Line RecLine                                                    ;"
+		" RecLine    -> Line RecLine                                                    ;"
+		"            -> empty                                                           ;"
+		" Line       -> Head arrow Body Action semicolon                                ;"
+		" Head       -> identifier                       : push_unique_head             ;"
+		"            -> empty                                                           ;"
+		" Body       -> Symbol RecBody                                                  ;"
+		"            -> empty_body                       : push_empty_next_body         ;"
+		" RecBody    -> Symbol RecBody                                                  ;"
+		"            -> empty                            : push_next_body               ;"
+		" Symbol     -> identifier                       : push_identifier_current_body ;"
+		" Action     -> colon Expression                                                ;"
+		"            -> empty                            : push_next_action             ;"
+		" Expression -> identifier                       : push_identifier_next_action  ;"
+		"            -> literal                          : push_literal_next_action     ;"
+	);
 
   /*---------------------------------*/  /*---------------------------------*/  /*---------------------------------*/
   /* terminals (tokens):             */  /* nonterminals:                   */  /* context-free grammar (CFG):     */
@@ -374,17 +378,17 @@ namespace parser {
 
 		nik_ces size_type size				= String::length();
 
-		nik_ces size_type nonterminal_page_size		= String::length();
-		nik_ces size_type nonterminal_text_size		= String::length();
+		nik_ces size_type nonterminal_page_size		= _2_4;
+		nik_ces size_type nonterminal_text_size		= _2_7;
 
-		nik_ces size_type terminal_page_size		= String::length();
-		nik_ces size_type terminal_text_size		= String::length();
+		nik_ces size_type terminal_page_size		= _2_4;
+		nik_ces size_type terminal_text_size		= _2_7;
 
-		nik_ces size_type action_page_size		= String::length();
-		nik_ces size_type action_text_size		= String::length();
+		nik_ces size_type action_page_size		= _2_4;
+		nik_ces size_type action_text_size		= _2_7;
 
-		nik_ces size_type grammar_body_size		= String::length();
-		nik_ces size_type grammar_page_size		= String::length();
+		nik_ces size_type grammar_body_size		= _2_4;
+		nik_ces size_type grammar_page_size		= _2_7;
 		nik_ces size_type grammar_text_size		= String::length();
 	};
 

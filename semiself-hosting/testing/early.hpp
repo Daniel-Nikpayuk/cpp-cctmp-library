@@ -640,40 +640,7 @@
 
 // parser:
 
-	constexpr auto parser_main()
-	{
-		using char_type		= unsigned char;
-		using size_type		= gindex_type;
-
-		constexpr auto str0 = string_literal<const char, size_type>
-		{
-			" Start      -> Line RecLine                                                    ;"
-			" RecLine    -> Line RecLine                                                    ;"
-			"            -> empty                                                           ;"
-			" Line       -> Head arrow Body Action semicolon                                ;"
-			" Head       -> identifier                       : push_unique_head             ;"
-			"            -> empty                                                           ;"
-			" Body       -> Symbol RecBody                                                  ;"
-			"            -> empty_body                       : push_empty_next_body         ;"
-			" RecBody    -> Symbol RecBody                                                  ;"
-			"            -> empty                            : push_next_body               ;"
-			" Symbol     -> identifier                       : push_identifier_current_body ;"
-			" Action     -> colon Expression                                                ;"
-			"            -> empty                            : push_next_action             ;"
-			" Expression -> identifier                       : push_identifier_next_action  ;"
-			"            -> literal                          : push_literal_next_action     ;"
-		};
-
-		using string_type		= encoding::utf8_char_array<char_type, size_type, str0.size()>;
-		using tree_size_trait		= parser::leftmost_tree_size_trait<string_type>;
-		constexpr size_type stack_size	= 100;
-
-		auto parser = parser::make_leftmost_parser<string_type, tree_size_trait, stack_size>(str0);
-
-		parser.translate();
-
-		return parser;
-	}
+	// see diagnostic.hpp
 
 		constexpr auto parsed = parser_main();
 
