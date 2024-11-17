@@ -190,9 +190,9 @@ namespace cctmp {
 
 		using size_type		= typename T_store_U<static_contr>::size_type;
 		using size_ctype	= size_type const;
-		using tablit_type	= table_literal<size_type, size_type, rowsize, colsize>;
+		using ctab_type		= ctable<size_type, size_type, rowsize, colsize>;
 
-		nik_ces auto contr	= tablit_type{member_value_U<static_contr>};
+		nik_ces auto contr	= ctab_type{member_value_U<static_contr>};
 
 		// accessors:
 

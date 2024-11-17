@@ -410,9 +410,11 @@ namespace parser {
 			template<typename Script, typename Lexer>
 			nik_ces void push_symbol_head_upsize_body(Script & s, const Lexer & l)
 			{
-				auto pos = s.symbol().left_find_push(l.cbegin(), l.ccurrent());
+				const auto pos = s.symbol().left_find_push(l.cbegin(), l.ccurrent());
 
+				s.nonterminal().push(pos);
 				s.yield().set_current(pos);
+			//	s.yield().body().at(pos).upsize();
 			}
 
 		// upsize body:
@@ -420,9 +422,6 @@ namespace parser {
 			template<typename Script, typename Lexer>
 			nik_ces void upsize_body(Script & s, const Lexer & l)
 			{
-				// 1. get yield current.
-				// 2. set current page as empty.
-				// 3. upsize current yield body.
 			}
 
 		// set body empty:
@@ -430,8 +429,6 @@ namespace parser {
 			template<typename Script, typename Lexer>
 			nik_ces void set_body_empty(Script & s, const Lexer & l)
 			{
-				// 1. get yield current.
-				// 2. upsize current yield body.
 			}
 
 		// push symbol body:
@@ -439,10 +436,7 @@ namespace parser {
 			template<typename Script, typename Lexer>
 			nik_ces void push_symbol_body(Script & s, const Lexer & l)
 			{
-				// 1. get yield current.
-				// 2. push to current page.
-				// 3. defer non/term identification.
-				// 4. update current yield body.
+				s.symbol().push(l.cbegin(), l.ccurrent());
 			}
 
 		// push symbol action:

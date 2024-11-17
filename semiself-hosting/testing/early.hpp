@@ -55,75 +55,59 @@
 
 /***********************************************************************************************************************/
 
-// array literal:
-
-	struct contr
-	{
-		using lit_type = array_literal<int, gindex_type>;
-
-		constexpr static int arr[] =
-		{
-			2, 7, 3, 4, 9, 5,
-			1, 9, 3, 8, 7, 0,
-			2, 2, 3, 3, 4, 5
-		};
-
-		constexpr static auto x = lit_type{arr};
-	};
-
-		printf("%d\n", contr::x[ 1]);
-		printf("%d\n", contr::x[ 7]);
-		printf("%d\n", contr::x[13]);
-
-/***********************************************************************************************************************/
-
 // array:
 
-		using seq_type = array<int, gindex_type, 5>;
+		using  arr_type =  array<int, gindex_type, 5>;
+		using carr_type = carray<int, gindex_type>;
+
+		constexpr int a[] = {1, 2, 3, 4, 5};
 
 	// rvalue:
 
-		constexpr auto s0 = seq_type{{1, 2, 3, 4, 5}};
+		constexpr auto a0 = carr_type{a};
+		constexpr auto a1 =  arr_type{a};
+		constexpr auto a2 =  arr_type{{1, 2, 3, 4, 5}};
 
 	// lvalue:
 
 		constexpr int l0[] = {1, 2, 3, 4, 5};
 
-		seq_type s1{l0};
+		arr_type a1{l0};
 
 	// mutable:
 
-		s1[4] = 6;
-		s1.downsize();
-		s1.push(5);
+		a1[4] = 6;
+		a1.downsize();
+		a1.push(5);
 
 	// print:
 
-		printf("%d\n", seq_type::length());
-		printf("%d\n", s0.size());
+		printf("%d\n", arr_type::length());
+		printf("%d\n", a0.size());
 
-		printf("%s\n", (s0 == s1) ? "equal" : "not equal");
+		printf("%d\n", a1.size());
+		printf("%sequal\n", (a0 == a2) ? "" : "not ");
 
-		printf("%d\n", s0.origin()[3]);
-		printf("%d\n", s0.size());
-		printf("%d\n", s0[0]);
-		printf("%d\n", s0[1]);
-		printf("%d\n", s0[2]);
-		printf("%d\n", s0[3]);
-		printf("%d\n", s0[4]);
+		printf("%d\n", a0.origin()[3]);
+		printf("%d\n", a0.size());
+		printf("%d\n", a0[0]);
+		printf("%d\n", a0[1]);
+		printf("%d\n", a0[2]);
+		printf("%d\n", a0[3]);
+		printf("%d\n", a0[4]);
 
 /***********************************************************************************************************************/
 
 // unique array:
 
-		using seq_type = unique_array<int, gindex_type, 5>;
+		using arr_type = unique_array<int, gindex_type, 5>;
 
-		constexpr auto s0 = seq_type{{1, 2, 1, 3, 1}};
+		constexpr auto a0 = arr_type{{1, 2, 1, 3, 1}};
 
-		printf("unique array size: %d\n", s0.size());
+		printf("unique array size: %d\n", a0.size());
 
 		printf("unique array: ");
-		for (auto k = s0.cbegin(); k != s0.cend(); ++k) printf("%d, ", *k);
+		for (auto k = a0.cbegin(); k != a0.cend(); ++k) printf("%d, ", *k);
 		printf("\n");
 
 /***********************************************************************************************************************/
@@ -257,7 +241,30 @@
 
 /***********************************************************************************************************************/
 
-// protoplot:
+// plot:
+
+	using size_type = gindex_type;
+	using text_type = int;
+	using page_type = engine::plot_page_type<size_type>;
+	using plot_type = engine::plot<text_type, page_type, size_type, 2, 2>;
+
+	constexpr auto make_plot()
+	{
+		auto p = plot_type{};
+
+		p.upsize();
+
+		p.begin()->upsize();
+
+		return p;
+	}
+
+	constexpr auto plot0 = make_plot();
+
+		for (auto k = plot0.cbegin(); k != plot0.cend(); ++k)
+			printf("%d ", k->size());
+
+		printf("\n");
 
 /***********************************************************************************************************************/
 
@@ -650,5 +657,6 @@
 
 		constexpr auto parsed = parser_main();
 
-		printf("%d\n", parsed.ctree().cscript().csymbol().cpage().size());
+		printf("nonterminal size: %d\n", parsed.ctree().cscript().cnonterminal().size());
+		printf("symbol size: %d\n", parsed.ctree().cscript().csymbol().cpage().size());
 

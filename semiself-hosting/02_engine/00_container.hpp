@@ -131,9 +131,9 @@ namespace engine {
 	template<typename SizeType, typename CharType, SizeType N, typename T>
 	nik_ce auto binding(nik_avp(SizeType*), CharType (&variable)[N], T value)
 	{
-		using strlit_type = string_literal<CharType, SizeType>;
+		using cstr_type = cstring<CharType, SizeType>;
 
-		return LambdaTuple::make(strlit_type{variable}, value);
+		return LambdaTuple::make(cstr_type{variable}, value);
 	}
 
 	// syntactic sugar:
@@ -151,8 +151,8 @@ namespace engine {
 	template<typename CharType, typename SizeType, typename... Bindings>
 	nik_ce auto frame(nik_avp(CharType*), nik_avp(SizeType*), Bindings... bs)
 	{
-		using strlit_type   = string_literal<CharType, SizeType>;
-		using variable_type = array<strlit_type, SizeType, sizeof...(Bindings)>;
+		using cstr_type     = cstring<CharType, SizeType>;
+		using variable_type = array<cstr_type, SizeType, sizeof...(Bindings)>;
 
 		auto variables      = variable_type{   {LambdaTuple::first  (bs)...}};
 		auto values         = LambdaTuple::make(LambdaTuple::second (bs)...);
@@ -212,11 +212,11 @@ namespace engine {
 	template<typename SizeType, typename CharType, SizeType N, typename... Bindings>
 	nik_ce auto source(const CharType (&s)[N], const Bindings &... bs)
 	{
-		using strlit_type       = string_literal<CharType, SizeType>;
+		using cstr_type         = cstring<CharType, SizeType>;
 		nik_ce auto U_char_type = U_store_T<CharType>;
 		nik_ce auto U_size_type = U_store_T<SizeType>;
 
-		return LambdaTuple::make(strlit_type{s}, frame(U_char_type, U_size_type, bs...));
+		return LambdaTuple::make(cstr_type{s}, frame(U_char_type, U_size_type, bs...));
 	}
 
 /***********************************************************************************************************************/

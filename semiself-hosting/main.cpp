@@ -27,10 +27,10 @@
 #include"include/00_kernel.hpp"
 //#include"include/01_inventory.hpp"
 #include"include/02_engine.hpp"
-#include"include/03_encoding.hpp"
+//#include"include/03_encoding.hpp"
 //#include"include/04_fileput.hpp"
 //#include"include/05_lexer.hpp"
-#include"include/06_parser.hpp"
+//#include"include/06_parser.hpp"
 //#include"include/07_chord.hpp"
 //#include"include/08_hustle.hpp"
 
@@ -47,6 +47,11 @@
 
 	int main(int argc, char *argv[])
 	{
+	//	constexpr auto parsed = parser_main();
+
+	//	printf("nonterminal size: %d\n", parsed.ctree().cscript().cnonterminal().size());
+	//	printf("symbol size: %d\n", parsed.ctree().cscript().csymbol().cpage().size());
+
 	//	printf("%f\n", inventory_square_root_v0<gindex_type>(2.0));
 
 	//	auto arr0 = array<int, gindex_type, 5>{{1, 2, 3, 4, 5}};
