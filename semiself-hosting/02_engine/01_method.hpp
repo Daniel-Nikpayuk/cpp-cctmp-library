@@ -163,8 +163,8 @@ namespace engine {
 
 		protected:
 
-			template<typename Method, typename Pointer>
-			nik_ce auto pivot(Pointer p) const -> Method { return Method{model, p}; }
+			template<typename Method, typename Facade, typename Pointer>
+			nik_ce Method pivot(Pointer p) const { return Facade{model, p}; }
 
 		public:
 
@@ -230,8 +230,8 @@ namespace engine {
 
 		protected:
 
-			template<typename Method, typename Pointer>
-			nik_ce auto pivot(Pointer p) const -> Method { return Method{model, p}; }
+			template<typename Method, typename Facade, typename Pointer>
+			nik_ce Method pivot(Pointer p) const { return Facade{model, p}; }
 
 		public:
 
@@ -269,7 +269,8 @@ namespace engine {
 	{
 		protected:
 
-			using level_cmethod		= array_cmethod<plot_cfacade>;
+			using level_cfacade		= plot_cfacade;
+			using level_cmethod		= array_cmethod<level_cfacade>;
 
 			using below_cfacade		= plot_cfacade<Model, Order - 1>;
 			using below_cmethod		= array_cmethod<below_cfacade>;
@@ -327,12 +328,15 @@ namespace engine {
 			nik_ce plot_cfacade(model_ctype_ptr m, typename base::page_ctype_cptr p) : base{m, p} { }
 
 			nik_ce auto pivot(typename base::page_ctype_cptr p) const -> level_cmethod
-				{ return base::template pivot<level_cmethod>(p); }
+				{ return base::template pivot<level_cmethod, level_cfacade>(p); }
 
 			// initial:
 
 				nik_ce citer_type cbegin() const
-					{ return citer_type{base::template pivot<below_cmethod>(base::ctext())}; }
+				{
+					return citer_type
+						{ base::template pivot<below_cmethod, below_cfacade>(base::ctext()) };
+				}
 	};
 
 /***********************************************************************************************************************/
@@ -391,7 +395,8 @@ namespace engine {
 
 		protected:
 
-			using level_cmethod		= array_cmethod<plot_cfacade>;
+			using level_cfacade		= plot_cfacade;
+			using level_cmethod		= array_cmethod<level_cfacade>;
 
 		public:
 
@@ -399,7 +404,7 @@ namespace engine {
 			nik_ce plot_cfacade(model_ctype_ptr m, typename base::page_ctype_cptr p) : base{m, p} { }
 
 			nik_ce level_cmethod pivot(typename base::page_ctype_cptr p) const
-				{ return base::template pivot<level_cmethod>(p); }
+				{ return base::template pivot<level_cmethod, level_cfacade>(p); }
 
 			// initial:
 
@@ -420,9 +425,11 @@ namespace engine {
 	{
 		protected:
 
-			using level_cmethod		= array_cmethod<plot_cfacade<Model, Order>>;
+			using level_cfacade		= plot_cfacade<Model, Order>;
+			using level_cmethod		= array_cmethod<level_cfacade>;
 
-			using level_method		= array_method<plot_facade>;
+			using level_facade		= plot_facade;
+			using level_method		= array_method<level_facade>;
 
 			using below_cfacade		= plot_cfacade<Model, Order - 1>;
 			using below_cmethod		= array_cmethod<below_cfacade>;
@@ -503,18 +510,24 @@ namespace engine {
 			nik_ce plot_facade(model_type_ptr m, typename base::page_type_cptr p) : base{m, p} { }
 
 			nik_ce level_cmethod pivot(typename base::page_ctype_cptr p) const
-				{ return base::template pivot<level_cmethod>(p); }
+				{ return base::template pivot<level_cmethod, level_cfacade>(p); }
 
 			nik_ce level_method pivot(typename base::page_type_cptr p) const
-				{ return base::template pivot<level_method>(p); }
+				{ return base::template pivot<level_method, level_facade>(p); }
 
 			// initial:
 
 				nik_ce citer_type cbegin() const
-					{ return citer_type{base::template pivot<below_cmethod>(base::ctext())}; }
+				{
+					return citer_type
+						{ base::template pivot<below_cmethod, below_cfacade>(base::ctext()) };
+				}
 
 				nik_ce iter_type begin()
-					{ return iter_type{base::template pivot<below_method>(base::text())}; }
+				{
+					return iter_type
+						{ base::template pivot<below_method, below_facade>(base::text()) };
+				}
 	};
 
 /***********************************************************************************************************************/
@@ -593,9 +606,11 @@ namespace engine {
 
 		protected:
 
-			using level_cmethod		= array_cmethod<plot_cfacade<Model, 0>>;
+			using level_cfacade		= plot_cfacade<Model, 0>;
+			using level_cmethod		= array_cmethod<level_cfacade>;
 
-			using level_method		= array_method<plot_facade>;
+			using level_facade		= plot_facade;
+			using level_method		= array_method<level_facade>;
 
 		public:
 
@@ -603,10 +618,10 @@ namespace engine {
 			nik_ce plot_facade(model_type_ptr m, typename base::page_type_cptr p) : base{m, p} { }
 
 			nik_ce level_cmethod pivot(typename base::page_ctype_cptr p) const
-				{ return base::template pivot<level_cmethod>(p); }
+				{ return base::template pivot<level_cmethod, level_cfacade>(p); }
 
 			nik_ce level_method pivot(typename base::page_type_cptr p) const
-				{ return base::template pivot<level_method>(p); }
+				{ return base::template pivot<level_method, level_facade>(p); }
 
 			// initial:
 
@@ -647,8 +662,11 @@ namespace engine {
 
 		protected:
 
-			nik_ce void cincrement(size_ctype n = 1) { sub = sub.pivot(sub.cpage() + n); }
-			nik_ce void cdecrement(size_ctype n = 1) { sub = sub.pivot(sub.cpage() - n); }
+			nik_ce auto sub_increment(size_ctype n = 1) const { return sub.pivot(sub.cpage() + n); }
+			nik_ce auto sub_decrement(size_ctype n = 1) const { return sub.pivot(sub.cpage() - n); }
+
+			nik_ce void cincrement(size_ctype n = 1) { sub = sub_increment(n); }
+			nik_ce void cdecrement(size_ctype n = 1) { sub = sub_decrement(n); }
 
 			nik_ce auto post_cincrement(size_ctype n = 1) -> citerator_method
 				{ citerator_method post{*this}; cincrement(n); return post; }
@@ -674,6 +692,12 @@ namespace engine {
 
 				nik_ce cderef_ctype_ref operator  * () const { return sub; }
 				nik_ce cderef_ctype_ptr operator -> () const { return &sub; }
+
+				nik_ce citerator_method operator + (size_ctype n) const
+					{ return citerator_method{sub_increment(n)}; }
+
+				nik_ce citerator_method operator - (size_ctype n) const
+					{ return citerator_method{sub_decrement(n)}; }
 
 			// mutable:
 
@@ -715,8 +739,11 @@ namespace engine {
 
 		protected:
 
-			nik_ce void increment(size_ctype n = 1) { sub = sub.pivot(sub.page() + n); }
-			nik_ce void decrement(size_ctype n = 1) { sub = sub.pivot(sub.page() - n); }
+			nik_ce auto sub_increment(size_ctype n = 1) { return sub.pivot(sub.page() + n); }
+			nik_ce auto sub_decrement(size_ctype n = 1) { return sub.pivot(sub.page() - n); }
+
+			nik_ce void increment(size_ctype n = 1) { sub = sub_increment(n); }
+			nik_ce void decrement(size_ctype n = 1) { sub = sub_decrement(n); }
 
 			nik_ce auto post_increment(size_ctype n = 1) -> iterator_method
 				{ iterator_method post{*this}; increment(n); return post; }
@@ -739,6 +766,12 @@ namespace engine {
 
 				nik_ce bool operator != (const iterator_method & i) const
 					{ return not operator == (i); }
+
+				nik_ce iterator_method operator + (size_ctype n) const
+					{ return iterator_method{sub_increment(n)}; }
+
+				nik_ce iterator_method operator - (size_ctype n) const
+					{ return iterator_method{sub_decrement(n)}; }
 
 			// mutable:
 

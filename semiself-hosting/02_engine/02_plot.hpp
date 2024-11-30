@@ -136,6 +136,7 @@ namespace engine {
 
 // unique:
 
+/*
 	template<typename Text, typename Page, typename SizeType, SizeType TextSize, SizeType PageSize>
 	class unique_plot : public plot<Text, Page, SizeType, TextSize, PageSize>
 	{
@@ -207,6 +208,7 @@ namespace engine {
 				return pos;
 			}
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -217,6 +219,7 @@ namespace engine {
 
 // immutable:
 
+/*
 	template<typename Plot, typename SizeType, SizeType RowSize, SizeType ColSize>
 	class plottable_cmethod : public Plot
 	{
@@ -292,11 +295,13 @@ namespace engine {
 
 			nik_ce page_ctype_ptr operator [] (size_ctype n) const { return row_cbegin(n); }
 	};
+*/
 
 /***********************************************************************************************************************/
 
 // mutable:
 
+/*
 	template<typename Plot, typename SizeType, SizeType RowSize, SizeType ColSize>
 	class plottable_method	: public plottable_cmethod<Plot, SizeType, RowSize, ColSize>
 	{
@@ -369,6 +374,7 @@ namespace engine {
 		//	nik_ce void setmap(size_ctype n, size_ctype m, F f, In in, End end)
 		//		{ base::base::setmap(base::col_start(n, m), f, in, end); }
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -379,6 +385,7 @@ namespace engine {
 
 // immutable:
 
+/*
 	template<typename Page, typename Text, typename SizeType, SizeType RowSize, SizeType ColSize>
 	class cplottable : public plottable_cmethod<cplot<Page, Text, SizeType>, SizeType, RowSize, ColSize>
 	{
@@ -437,11 +444,13 @@ namespace engine {
 			template<typename T, auto N, typename P, auto M>
 			nik_ce cplottable(const T (&t)[N], const P (&p)[M]) : base{t, p} { }
 	};
+*/
 
 /***********************************************************************************************************************/
 
 // mutable:
 
+/*
 	template
 	<
 		typename Text, typename Page, typename SizeType,
@@ -508,6 +517,7 @@ namespace engine {
 			template<typename T, auto N, typename P, auto M>
 			nik_ce plottable(const T (&t)[N], const P (&p)[M]) : base{t, p} { }
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -41,12 +41,12 @@ namespace cctmp {
 		// base::cbegin()
 		// base::size()
 
-	template<typename Base>
-	class array_cmethod : public Base
+	template<typename Manner>
+	class array_cmethod : public Manner
 	{
 		public:
 
-			using base			= Base;
+			using base			= Manner;
 
 			using type			= typename base::type;
 			using type_ptr			= typename base::type_ptr;
@@ -84,7 +84,7 @@ namespace cctmp {
 		public:
 
 			nik_ce array_cmethod() : base{} { }
-			nik_ce array_cmethod(const Base & b) : base{b} { }
+			nik_ce array_cmethod(const Manner & b) : base{b} { }
 
 			// initial:
 
@@ -160,12 +160,12 @@ namespace cctmp {
 		// base::begin()
 		// base::set_size(size_ctype)
 
-	template<typename Base>
-	class array_method : public array_cmethod<Base>
+	template<typename Manner>
+	class array_method : public array_cmethod<Manner>
 	{
 		public:
 
-			using base			= array_cmethod<Base>;
+			using base			= array_cmethod<Manner>;
 
 			using type			= typename base::type;
 			using type_ptr			= typename base::type_ptr;
@@ -203,7 +203,7 @@ namespace cctmp {
 		public:
 
 			nik_ce array_method() : base{} { }
-			nik_ce array_method(const Base & b) : base{b} { }
+			nik_ce array_method(const Manner & b) : base{b} { }
 
 			template<typename T, auto N>
 			nik_ce array_method(const T (&a)[N]) { push(a, a + N); }

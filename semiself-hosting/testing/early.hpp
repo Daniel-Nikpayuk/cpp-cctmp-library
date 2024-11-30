@@ -289,6 +289,45 @@
 
 /***********************************************************************************************************************/
 
+// plot matrix:
+
+	constexpr auto make_plot_array()
+	{
+		using size_type = gindex_type;
+		using page_type = engine::plot_page_type<size_type>;
+
+		using arr0_type = array<int, size_type, 9>;
+		using arr1_type = array<page_type, size_type, 3>;
+		using arr2_type = array<page_type, size_type, 1>;
+
+		using type_pack = T_pack_Ts<int, page_type, page_type>;
+		using size_pack = T_pack_Vs<9, 3, 1>;
+		using plot_type = engine::plot<type_pack, size_pack, size_type>;
+
+		auto a0 = arr0_type{{1, 2, 3, 4, 5, 6, 7, 8, 9}};
+		auto a1 = arr1_type{{page_type{0, 3, 3}, page_type{3, 3, 3}, page_type{6, 3, 3}}};
+		auto a2 = arr2_type{{page_type{0, 3, 3}}};
+		auto p  = plot_type{a0, a1, a2};
+
+	//	p.method().at(3) = 6; // {1, 2, 3, 6, 5}
+
+		return p;
+	}
+
+	constexpr auto plot_array_0 = make_plot_array();
+
+		auto method0 = plot_array_0.cmethod();
+
+		for (auto j = method0.cbegin(); j != method0.cend(); ++j)
+		{
+			for (auto k = j->cbegin(); k != j->cend(); ++k)
+				printf("%d ", *k);
+
+			printf("\n");
+		}
+
+/***********************************************************************************************************************/
+
 // plot:
 
 	using size_type = gindex_type;
