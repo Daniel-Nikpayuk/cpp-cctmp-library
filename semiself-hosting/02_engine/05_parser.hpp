@@ -48,6 +48,59 @@ namespace engine {
 
 /***********************************************************************************************************************/
 
+// corpus:
+
+	//	protected:
+
+	//		nik_ce void push_finish(size_ctype n, size_ctype text_start)
+	//		{
+	//			size_ctype text_finish  = base::ctext().size();
+	//			size_ctype page_current = base::finish(n);
+
+	//			body().at(n).upsize();
+
+	//			page().at(page_current).set_start  (text_start);
+	//			page().at(page_current).set_finish (text_finish);
+	//		}
+
+	//		nik_ce void set_finish(size_ctype n, size_ctype m, size_ctype text_start)
+	//		{
+	//			size_ctype text_finish  = base::ctext().size();
+	//			size_ctype page_current = base::start(n) + m;
+
+	//			page().at(page_current).set_start  (text_start);
+	//			page().at(page_current).set_finish (text_finish);
+	//		}
+
+			//	template<typename In, typename End>
+			//	nik_ce void push(size_ctype n, In in, End end)
+			//	{
+			//		size_ctype text_start = base::ctext().size();
+
+			//		text().push(in, end);
+			//		push_finish(n, text_start);
+			//	}
+
+			//	template<typename F, typename In, typename End>
+			//	nik_ce void pushmap(size_ctype n, F f, In in, End end)
+			//	{
+			//		size_ctype text_start = base::ctext().size();
+
+			//		text().pushmap(f, in, end);
+			//		push_finish(n, text_start);
+			//	}
+
+			//	template<typename F, typename In, typename End>
+			//	nik_ce void setmap(size_ctype n, size_ctype m, F f, In in, End end)
+			//	{
+			//		size_ctype text_start = base::ctext().size();
+
+			//		text().pushmap(f, in, end);
+			//		set_finish(n, m, text_start);
+			//	}
+
+/***********************************************************************************************************************/
+
 // body:
 
 	template<typename SizeType>

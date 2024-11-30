@@ -89,10 +89,10 @@ namespace engine {
 			using size_type = T_store_U<U>;
 
 			template<typename... Ts>
-			nik_ces auto result(Ts... vs)
+			nik_ces auto result(const Ts &... vs)
 			{
-				using frame_type = ctuple<size_type, segment_<sizeof...(Ts)>, Ts...      >;
-				using env_type   = ctuple<size_type, segment_<1            >, frame_type >;
+				using frame_type = ctuple<size_type, Ts...      >;
+				using env_type   = ctuple<size_type, frame_type >;
 
 				return env_type{frame_type{vs...}};
 			}

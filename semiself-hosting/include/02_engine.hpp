@@ -18,9 +18,8 @@
 ************************************************************************************************************************/
 
 #include"../02_engine/00_container.hpp"
-#include"../02_engine/01_plot.hpp"
-//#include"../02_engine/01_plottable.hpp"
-//#include"../02_engine/02_sparse_plot.hpp"
+#include"../02_engine/01_method.hpp"
+#include"../02_engine/02_plot.hpp"
 //#include"../02_engine/03_corpus.hpp"
 //#include"../02_engine/04_lexer.hpp"
 //#include"../02_engine/05_parser.hpp"

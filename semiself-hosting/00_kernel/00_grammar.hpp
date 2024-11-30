@@ -114,6 +114,9 @@ namespace cctmp {
 	nik_ce auto U_pack_Ts = U_pack_Vs<U_store_T<Ts>...>;
 	nik_ce auto U_null_Ts = U_null_Vs;
 
+	template<typename... Ts>
+	using T_pack_Ts = T_store_U<U_pack_Ts<Ts...>>;
+
 // auto template:
 
 	template<template<auto...> typename> struct T_store_B { };
@@ -373,6 +376,7 @@ namespace cctmp {
 
 // image trait:
 
+/*
 	template<typename Cotype, typename Mode, typename Type>
 	struct image_trait
 	{
@@ -393,6 +397,7 @@ namespace cctmp {
 		using ctype_cptr	= typename alias<Type>::ctype_cptr;
 		using ctype_ref		= typename alias<Type>::ctype_ref;
 	};
+*/
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -45,8 +45,33 @@
 
 /***********************************************************************************************************************/
 
+//	using size_type = gindex_type;
+//	using text_type = int;
+//	using page_type = engine::plot_page_type<size_type>;
+//	using plot_type = engine::plot<page_type, text_type, size_type, 2, 2>;
+
+//	constexpr auto make_plot()
+//	{
+//		auto p = plot_type{};
+
+	//	p.upsize();
+
+	//	p.begin()->upsize();
+
+//		return p;
+//	}
+
+//	constexpr auto plot0 = make_plot();
+
+/***********************************************************************************************************************/
+
 	int main(int argc, char *argv[])
 	{
+	//	for (auto k = plot0.cbegin(); k != plot0.cend(); ++k);
+	//		printf("%d ", k->size());
+
+	//	printf("\n");
+
 	//	constexpr auto parsed = parser_main();
 
 	//	printf("nonterminal size: %d\n", parsed.ctree().cscript().cnonterminal().size());

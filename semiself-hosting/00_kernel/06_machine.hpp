@@ -61,42 +61,178 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// ctuple:
+// tuple method:
 
-	template<typename, auto, typename...> struct ctuple;
+	template<template<typename, typename, auto> typename, typename...> struct tuple_cmethod;
 
 /***********************************************************************************************************************/
 
-// indexed value:
+// immutable index:
 
-	template<typename T, typename SizeType, SizeType>
-	struct indexed_value
+	template<typename Type, typename SizeType, SizeType>
+	class tuple_cindex
 	{
-		T value;
+		public:
 
-		nik_ce indexed_value(const T & v) : value{v} { }
+			using type		= typename alias<Type>::type;
+			using type_ptr		= typename alias<Type>::type_ptr;
+			using type_cptr		= typename alias<Type>::type_cptr;
+			using type_ref		= typename alias<Type>::type_ref;
+
+			using ctype		= typename alias<Type>::ctype;
+			using ctype_ptr		= typename alias<Type>::ctype_ptr;
+			using ctype_cptr	= typename alias<Type>::ctype_cptr;
+			using ctype_ref		= typename alias<Type>::ctype_ref;
+
+			using size_type		= typename alias<SizeType>::type;
+			using size_ctype	= typename alias<SizeType>::ctype;
+
+		protected:
+
+			type value;
+
+		public:
+
+			nik_ce tuple_cindex() : value{} { }
+			nik_ce tuple_cindex(ctype_ref v) : value{v} { }
+
+			nik_ce ctype_ref cvalue() const { return value; }
 	};
 
 /***********************************************************************************************************************/
 
-// interface:
+// mutable index:
 
-	template<typename SizeType, auto... Is, nik_vp(p)(T_pack_Vs<Is...>*), typename... Ts>
-	struct ctuple<SizeType, p, Ts...> : public indexed_value<Ts, SizeType, Is>...
+	template<typename Type, typename SizeType, SizeType Index>
+	class tuple_index : public tuple_cindex<Type, SizeType, Index>
 	{
-		using size_type		= SizeType;
-		using size_ctype	= size_type const;
+		public:
 
-		nik_ce ctuple(Ts... vs) : indexed_value<Ts, size_type, Is>{vs}... { }
+			using base		= tuple_cindex<Type, SizeType, Index>;
 
-		template<size_type n>
-		nik_ce const auto & cvalue() const
-		{
-			using T		= type_at<n, Ts...>;
-			using BasePtr	= indexed_value<T, size_type, n> const*;
+			using type		= typename base::type;
+			using type_ptr		= typename base::type_ptr;
+			using type_cptr		= typename base::type_cptr;
+			using type_ref		= typename base::type_ref;
 
-			return static_cast<BasePtr>(this)->value;
-		}
+			using ctype		= typename base::ctype;
+			using ctype_ptr		= typename base::ctype_ptr;
+			using ctype_cptr	= typename base::ctype_cptr;
+			using ctype_ref		= typename base::ctype_ref;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce tuple_index() : base{} { }
+			nik_ce tuple_index(ctype_ref v) : base{v} { }
+
+			nik_ce type_ref value() { return base::value; }
+
+			nik_ce void set_value(ctype_ref v) { base::value = v; }
+	};
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<template<typename, typename, auto> typename Index, typename SizeType, auto... Is, typename... Types>
+	class tuple_cmethod<Index, SizeType, T_pack_Vs<Is...>, Types...> : public Index<Types, SizeType, Is>...
+	{
+		public:
+
+			using size_type		= typename alias<SizeType>::type;
+			using size_ctype	= typename alias<SizeType>::ctype;
+
+		public:
+
+			template<size_type n>
+			using sub_type = type_at<n, Types...>;
+
+			nik_ces size_type length() { return sizeof...(Types); }
+
+		public:
+
+			nik_ce tuple_cmethod() : Index<Types, size_type, Is>{}... { }
+			nik_ce tuple_cmethod(const Types &... vs) : Index<Types, size_type, Is>{vs}... { }
+
+			template<size_type n>
+			nik_ce const auto & cvalue() const
+			{
+				using Type      = sub_type<n>;
+				using IndVal    = Index<Type, size_type, n>;
+				using IndValPtr = typename alias<IndVal>::ctype_ptr;
+
+				return static_cast<IndValPtr>(this)->cvalue();
+			}
+	};
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<template<typename, typename, auto> typename Index, typename SizeType, typename Sizes, typename... Types>
+	class tuple_method : public tuple_cmethod<Index, SizeType, Sizes, Types...>
+	{
+		public:
+
+			using base		= tuple_cmethod<Index, SizeType, Sizes, Types...>;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce tuple_method() : base{} { }
+			nik_ce tuple_method(const Types &... vs) : base{vs...} { }
+
+			template<size_type n>
+			nik_ce auto & value()
+			{
+				using Type      = typename base::template sub_type<n>;
+				using IndVal    = Index<Type, size_type, n>;
+				using IndValPtr = typename alias<IndVal>::type_ptr;
+
+				return static_cast<IndValPtr>(this)->value();
+			}
+
+			template<size_type n, typename T>
+			nik_ce void set_value(const T & v)
+			{
+				using Type      = typename base::template sub_type<n>;
+				using IndVal    = Index<Type, size_type, n>;
+				using IndValPtr = typename alias<IndVal>::type_ptr;
+
+				return static_cast<IndValPtr>(this)->set_value(v);
+			}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// tuple:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename SizeType, typename... Types>
+	class ctuple : public tuple_cmethod<tuple_cindex, SizeType, T_store_U<segment_<sizeof...(Types)>>, Types...>
+	{
+		public:
+
+			using seg_pack		= T_store_U<segment_<sizeof...(Types)>>;
+
+			using base		= tuple_cmethod<tuple_cindex, SizeType, seg_pack, Types...>;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce ctuple() : base{} { }
+			nik_ce ctuple(const Types &... vs) : base{vs...} { }
 	};
 
 	// syntactic sugar:
@@ -104,11 +240,33 @@ namespace cctmp {
 		template<typename SizeType, typename... Ts>
 		nik_ces auto env_tuple(Ts... vs)
 		{
-			using frame_type = ctuple<SizeType, segment_<sizeof...(Ts)>, Ts...      >;
-			using env_type   = ctuple<SizeType, segment_<1            >, frame_type >;
+			using frame_type = ctuple<SizeType, Ts...      >;
+			using env_type   = ctuple<SizeType, frame_type >;
 
 			return env_type{frame_type{vs...}};
 		}
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename SizeType, typename... Types>
+	class tuple : public tuple_method<tuple_index, SizeType, T_store_U<segment_<sizeof...(Types)>>, Types...>
+	{
+		public:
+
+			using seg_pack		= T_store_U<segment_<sizeof...(Types)>>;
+
+			using base		= tuple_method<tuple_index, SizeType, seg_pack, Types...>;
+
+			using size_type		= typename base::size_type;
+			using size_ctype	= typename base::size_ctype;
+
+		public:
+
+			nik_ce tuple() : base{} { }
+			nik_ce tuple(const Types &... vs) : base{vs...} { }
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

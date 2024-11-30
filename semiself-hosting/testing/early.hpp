@@ -188,6 +188,20 @@
 		printf("%d\n", l0);
 
 /***********************************************************************************************************************/
+
+// tuple:
+
+		using tuple_type = tuple<gindex_type, int, float, char>;
+
+		auto tup = tuple_type{1, 2.0, 'c'};
+
+		tup.template set_value<1>(3.0);
+
+		printf("%d\n", tup.cvalue<0>());
+		printf("%f\n", tup.cvalue<1>());
+		printf("%c\n", tup.cvalue<2>());
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // inventory:
@@ -238,6 +252,40 @@
 		plot p0{arrlit0};
 
 		printf("%d\n", p0.arr[1].y);
+
+/***********************************************************************************************************************/
+
+// plot array:
+
+	constexpr auto make_plot_array()
+	{
+		using size_type = gindex_type;
+		using page_type = engine::plot_page_type<size_type>;
+
+		using arr0_type = array<int, size_type, 5>;
+		using arr1_type = array<page_type, size_type, 1>;
+
+		using type_pack = T_pack_Ts<int, page_type>;
+		using size_pack = T_pack_Vs<5, 1>;
+		using plot_type = engine::plot<type_pack, size_pack, size_type>;
+
+		auto a0 = arr0_type{{1, 2, 3, 4, 5}};
+		auto a1 = arr1_type{{page_type{0, 5, 5}}};
+		auto p  = plot_type{a0, a1};
+
+		p.method().at(3) = 6; // {1, 2, 3, 6, 5}
+
+		return p;
+	}
+
+	constexpr auto plot_array_0 = make_plot_array();
+
+		auto method0 = plot_array_0.cmethod();
+
+		for (auto k = method0.cbegin(); k != method0.cend(); ++k)
+			printf("%d ", *k);
+
+		printf("\n");
 
 /***********************************************************************************************************************/
 
@@ -318,7 +366,7 @@
 
 /***********************************************************************************************************************/
 
-// tuple:
+// lambda tuple:
 
 	// make, value, size, empty:
 
