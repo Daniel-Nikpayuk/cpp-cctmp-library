@@ -289,6 +289,46 @@
 
 /***********************************************************************************************************************/
 
+// plot unique (array):
+
+	constexpr auto make_plot_array()
+	{
+		using size_type = gindex_type;
+		using page_type = engine::plot_page_type<size_type>;
+
+		using type_pack = T_pack_Ts<int, page_type>;
+		using size_pack = T_pack_Vs<5, 1>;
+		using plot_type = engine::plot<type_pack, size_pack, size_type>;
+
+		using method_0  = engine::plot_method<plot_type,  array_method>;
+		using method_1  = engine::plot_method<plot_type, unique_method>;
+
+		auto p = plot_type{};
+
+		auto pm0 = p.template equip<method_0>();
+		auto pm1 = p.template equip<method_1>();
+		auto pm  = pm1;
+
+		pm.push(1);
+		pm.push(2);
+		pm.push(5);
+		pm.push(4); // (pm == pm0) would print as: 1 2 5 4 5
+		pm.push(5); // (pm == pm1) would print as: 1 2 5 4
+
+		return p;
+	}
+
+	constexpr auto plot_array_0 = make_plot_array();
+
+		auto method0 = plot_array_0.cmethod();
+
+		for (auto k = method0.cbegin(); k != method0.cend(); ++k)
+			printf("%d ", *k);
+
+		printf("\n");
+
+/***********************************************************************************************************************/
+
 // plot matrix:
 
 	constexpr auto make_plot_array()
@@ -309,7 +349,11 @@
 		auto a2 = arr2_type{{page_type{0, 3, 3}}};
 		auto p  = plot_type{a0, a1, a2};
 
-	//	p.method().at(3) = 6; // {1, 2, 3, 6, 5}
+	//	p.method().at(1).at(1) = 0; // member call on temporary whose lifetime has ended
+
+		*p.method().iter(1)->iter(1) = 0;	// 1 2 3
+							// 4 0 6
+							// 7 8 9
 
 		return p;
 	}

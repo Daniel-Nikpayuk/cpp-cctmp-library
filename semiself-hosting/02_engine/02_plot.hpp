@@ -93,11 +93,29 @@ namespace engine {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
+			using cfacade_type		= plot_cfacade<cplot, base::order()>;
+			using cmethod_type		= array_cmethod<cfacade_type>;
+
 		public:
 
 			nik_ce cplot() : base{} { }
 			nik_ce cplot(const carray<T_store_U<Us>, SizeType> &... as) : base{as...} { }
+
+			// equip:
+
+				template<typename CMethod>
+				nik_ce auto cequip() const -> CMethod
+					{ return cfacade_type{this, base::template cbegin<base::apex()>()}; }
+
+			// method:
+
+				nik_ce cmethod_type cmethod() const { return cequip<cmethod_type>(); }
 	};
+
+	// syntactic sugar:
+
+		template<typename Plot, template<typename> typename CMethod>
+		using plot_cmethod = CMethod<typename Plot::cfacade_type>;
 
 /***********************************************************************************************************************/
 
@@ -125,90 +143,26 @@ namespace engine {
 			nik_ce plot() : base{} { }
 			nik_ce plot(const array<T_store_U<Us>, SizeType, Sizes> &... as) : base{as...} { }
 
-			nik_ce cmethod_type cmethod() const
-				{ return cfacade_type{this, base::template cbegin<base::apex()>()}; }
+			// equip:
 
-			nik_ce method_type method()
-				{ return facade_type{this, base::template begin<base::apex()>()}; }
+				template<typename CMethod>
+				nik_ce auto cequip() const -> CMethod
+					{ return cfacade_type{this, base::template cbegin<base::apex()>()}; }
+
+				template<typename Method>
+				nik_ce auto equip() -> Method
+					{ return facade_type{this, base::template begin<base::apex()>()}; }
+
+			// method:
+
+				nik_ce auto cmethod () const { return cequip < cmethod_type >(); }
+				nik_ce auto  method ()       { return  equip <  method_type >(); }
 	};
 
-/***********************************************************************************************************************/
+	// syntactic sugar:
 
-// unique:
-
-/*
-	template<typename Text, typename Page, typename SizeType, SizeType TextSize, SizeType PageSize>
-	class unique_plot : public plot<Text, Page, SizeType, TextSize, PageSize>
-	{
-		public:
-
-			using base			= plot<Text, Page, SizeType, TextSize, PageSize>;
-
-			using text_array_type		= typename base::text_array_type;
-			using text_array_type_ptr	= typename base::text_array_type_ptr;
-			using text_array_type_cptr	= typename base::text_array_type_cptr;
-			using text_array_type_ref	= typename base::text_array_type_ref;
-
-			using text_array_ctype		= typename base::text_array_ctype;
-			using text_array_ctype_ptr	= typename base::text_array_ctype_ptr;
-			using text_array_ctype_cptr	= typename base::text_array_ctype_cptr;
-			using text_array_ctype_ref	= typename base::text_array_ctype_ref;
-
-			using text_type			= typename base::text_type;
-			using text_type_ptr		= typename base::text_type_ptr;
-			using text_type_cptr		= typename base::text_type_cptr;
-			using text_type_ref		= typename base::text_type_ref;
-
-			using text_ctype		= typename base::text_ctype;
-			using text_ctype_ptr		= typename base::text_ctype_ptr;
-			using text_ctype_cptr		= typename base::text_ctype_cptr;
-			using text_ctype_ref		= typename base::text_ctype_ref;
-
-			using page_array_type		= typename base::page_array_type;
-			using page_array_type_ptr	= typename base::page_array_type_ptr;
-			using page_array_type_cptr	= typename base::page_array_type_cptr;
-			using page_array_type_ref	= typename base::page_array_type_ref;
-
-			using page_array_ctype		= typename base::page_array_ctype;
-			using page_array_ctype_ptr	= typename base::page_array_ctype_ptr;
-			using page_array_ctype_cptr	= typename base::page_array_ctype_cptr;
-			using page_array_ctype_ref	= typename base::page_array_ctype_ref;
-
-			using page_type			= typename base::page_type;
-			using page_type_ptr		= typename base::page_type_ptr;
-			using page_type_cptr		= typename base::page_type_cptr;
-			using page_type_ref		= typename base::page_type_ref;
-
-			using page_ctype		= typename base::page_ctype;
-			using page_ctype_ptr		= typename base::page_ctype_ptr;
-			using page_ctype_cptr		= typename base::page_ctype_cptr;
-			using page_ctype_ref		= typename base::page_ctype_ref;
-
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
-
-		public:
-
-			nik_ce unique_plot() : base{} { }
-
-			template<typename T, auto N, typename P, auto M>
-			nik_ce unique_plot(const T (&t)[N], const P (&p)[M]) : base{t, p} { }
-
-			template<typename In, typename End>
-			nik_ce void push(In in, End end)
-				{ if (base::omits(in, end)) { base::push(in, end); } }
-
-			template<typename In, typename End>
-			nik_ce size_type left_find_push(In in, End end)
-			{
-				size_ctype pos = base::left_find(in, end);
-
-				if (pos == base::cpage().size()) { base::push(in, end); }
-
-				return pos;
-			}
-	};
-*/
+		template<typename Plot, template<typename> typename Method>
+		using plot_method = Method<typename Plot::facade_type>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

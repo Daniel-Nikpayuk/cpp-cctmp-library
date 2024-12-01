@@ -59,13 +59,6 @@ namespace cctmp {
 			using ctype_ref			= typename base::ctype_ref;
 
 			using citer_type		= typename base::citer_type;
-			using citer_type_ptr		= typename base::citer_type_ptr;
-			using citer_type_cptr		= typename base::citer_type_cptr;
-			using citer_type_ref		= typename base::citer_type_ref;
-
-			using citer_ctype		= typename base::citer_ctype;
-			using citer_ctype_ptr		= typename base::citer_ctype_ptr;
-			using citer_ctype_cptr		= typename base::citer_ctype_cptr;
 			using citer_ctype_ref		= typename base::citer_ctype_ref;
 
 			using cderef_type		= typename base::cderef_type;
@@ -92,9 +85,9 @@ namespace cctmp {
 
 				nik_ce size_type left_size(citer_ctype_ref i) const { return i - base::cbegin(); }
 
-				nik_ce cderef_ctype_ref cat(size_ctype n) const { return base::cbegin()[n]; }
-
 				nik_ce citer_type citer(size_ctype n) const { return base::cbegin() + n; }
+
+				nik_ce cderef_ctype_ref cat(size_ctype n) const { return *citer(n); }
 
 				nik_ce citer_type find(ctype_ref v) const
 				{
@@ -178,13 +171,6 @@ namespace cctmp {
 			using ctype_ref			= typename base::ctype_ref;
 
 			using iter_type			= typename base::iter_type;
-			using iter_type_ptr		= typename base::iter_type_ptr;
-			using iter_type_cptr		= typename base::iter_type_cptr;
-			using iter_type_ref		= typename base::iter_type_ref;
-
-			using iter_ctype		= typename base::iter_ctype;
-			using iter_ctype_ptr		= typename base::iter_ctype_ptr;
-			using iter_ctype_cptr		= typename base::iter_ctype_cptr;
 			using iter_ctype_ref		= typename base::iter_ctype_ref;
 
 			using deref_type		= typename base::deref_type;
@@ -218,9 +204,9 @@ namespace cctmp {
 
 				nik_ce size_type left_size(iter_ctype_ref i) const { return i - base::begin(); }
 
-				nik_ce deref_type_ref at(size_ctype n) { return base::begin()[n]; }
-
 				nik_ce iter_type iter(size_ctype n) { return base::begin() + n; }
+
+				nik_ce deref_type_ref at(size_ctype n) { return *iter(n); }
 
 				nik_ce iter_type end  () { return iter(base::size()); }
 				nik_ce iter_type last () { return end() - 1; }
@@ -238,6 +224,120 @@ namespace cctmp {
 					{ size_ctype s = base::size(); upsize(); *iter(s) = v; }
 
 				nik_ce deref_type pop() { downsize(); return *iter(base::size()); }
+
+				template<typename In, typename End>
+				nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }
+
+				template<typename F, typename In, typename End>
+				nik_ce void pushmap(F, In in, End end)
+					{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// unique:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Manner>
+	class unique_cmethod : public array_cmethod<Manner>
+	{
+		public:
+
+			using base			= array_cmethod<Manner>;
+
+			using type			= typename base::type;
+			using type_ptr			= typename base::type_ptr;
+			using type_cptr			= typename base::type_cptr;
+			using type_ref			= typename base::type_ref;
+
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
+
+			using citer_type		= typename base::citer_type;
+			using citer_ctype_ref		= typename base::citer_ctype_ref;
+
+			using cderef_type		= typename base::cderef_type;
+			using cderef_type_ptr		= typename base::cderef_type_ptr;
+			using cderef_type_cptr		= typename base::cderef_type_cptr;
+			using cderef_type_ref		= typename base::cderef_type_ref;
+
+			using cderef_ctype		= typename base::cderef_ctype;
+			using cderef_ctype_ptr		= typename base::cderef_ctype_ptr;
+			using cderef_ctype_cptr		= typename base::cderef_ctype_cptr;
+			using cderef_ctype_ref		= typename base::cderef_ctype_ref;
+
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+		public:
+
+			nik_ce unique_cmethod() : base{} { }
+			nik_ce unique_cmethod(const Manner & b) : base{b} { }
+	};
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Manner>
+	class unique_method : public array_method<Manner>
+	{
+		public:
+
+			using base			= array_method<Manner>;
+
+			using type			= typename base::type;
+			using type_ptr			= typename base::type_ptr;
+			using type_cptr			= typename base::type_cptr;
+			using type_ref			= typename base::type_ref;
+
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
+
+			using iter_type			= typename base::iter_type;
+			using iter_ctype_ref		= typename base::iter_ctype_ref;
+
+			using deref_type		= typename base::deref_type;
+			using deref_type_ptr		= typename base::deref_type_ptr;
+			using deref_type_cptr		= typename base::deref_type_cptr;
+			using deref_type_ref		= typename base::deref_type_ref;
+
+			using deref_ctype		= typename base::deref_ctype;
+			using deref_ctype_ptr		= typename base::deref_ctype_ptr;
+			using deref_ctype_cptr		= typename base::deref_ctype_cptr;
+			using deref_ctype_ref		= typename base::deref_ctype_ref;
+
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+		public:
+
+			nik_ce unique_method() : base{} { }
+			nik_ce unique_method(const Manner & b) : base{b} { }
+
+			template<typename T, auto N>
+			nik_ce unique_method(const T (&a)[N]) { push(a, a + N); }
+
+			// mutable:
+
+				nik_ce size_type left_find_push(ctype_ref v)
+				{
+					size_ctype pos = base::left_find(v);
+
+					if (pos == base::size()) { base::push(v); }
+
+					return pos;
+				}
+
+				nik_ce void push(ctype_ref v) { if (base::omits(v)) { base::push(v); } }
 
 				template<typename In, typename End>
 				nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }

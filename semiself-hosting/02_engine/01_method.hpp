@@ -163,8 +163,8 @@ namespace engine {
 
 		protected:
 
-			template<typename Method, typename Facade, typename Pointer>
-			nik_ce Method pivot(Pointer p) const { return Facade{model, p}; }
+			template<typename CMethod, typename CFacade, typename CPointer>
+			nik_ce auto cpivot(CPointer p) const -> CMethod { return CFacade{model, p}; }
 
 		public:
 
@@ -230,8 +230,11 @@ namespace engine {
 
 		protected:
 
+			template<typename CMethod, typename CFacade, typename CPointer>
+			nik_ce auto cpivot(CPointer p) const -> CMethod { return CFacade{model, p}; }
+
 			template<typename Method, typename Facade, typename Pointer>
-			nik_ce Method pivot(Pointer p) const { return Facade{model, p}; }
+			nik_ce auto pivot(Pointer p) -> Method { return Facade{model, p}; }
 
 		public:
 
@@ -299,14 +302,10 @@ namespace engine {
 			using ctype_cptr		= typename base::text_ctype_cptr;
 			using ctype_ref			= typename base::text_ctype_ref;
 
-			using citer_type		= citerator_method<level_cmethod>;
-			using citer_type_ptr		= typename alias<citer_type>::type_ptr;
-			using citer_type_cptr		= typename alias<citer_type>::type_cptr;
-			using citer_type_ref		= typename alias<citer_type>::type_ref;
+			template<typename CMethod>
+			using citerator			= citerator_method<CMethod>;
 
-			using citer_ctype		= typename alias<citer_type>::ctype;
-			using citer_ctype_ptr		= typename alias<citer_type>::ctype_ptr;
-			using citer_ctype_cptr		= typename alias<citer_type>::ctype_cptr;
+			using citer_type		= citerator<level_cmethod>;
 			using citer_ctype_ref		= typename alias<citer_type>::ctype_ref;
 
 			using cderef_type		= below_cmethod;
@@ -327,16 +326,17 @@ namespace engine {
 			nik_ce plot_cfacade() : base{} { }
 			nik_ce plot_cfacade(model_ctype_ptr m, typename base::page_ctype_cptr p) : base{m, p} { }
 
-			nik_ce auto pivot(typename base::page_ctype_cptr p) const -> level_cmethod
-				{ return base::template pivot<level_cmethod, level_cfacade>(p); }
+			template<typename CMethod>
+			nik_ce auto cpivot(typename base::page_ctype_cptr p) const
+				{ return base::template cpivot<CMethod, level_cfacade>(p); }
 
-			// initial:
+			nik_ce auto cpivot(typename base::page_ctype_cptr p) const { return cpivot<level_cmethod>(p); }
 
-				nik_ce citer_type cbegin() const
-				{
-					return citer_type
-						{ base::template pivot<below_cmethod, below_cfacade>(base::ctext()) };
-				}
+			template<typename CMethod>
+			nik_ce citer_type cbegin() const
+				{ return citer_type{base::template cpivot<CMethod, below_cfacade>(base::ctext())}; }
+
+			nik_ce citer_type cbegin() const { return cbegin<below_cmethod>(); }
 	};
 
 /***********************************************************************************************************************/
@@ -371,14 +371,7 @@ namespace engine {
 			using ctype_ref			= typename base::text_ctype_ref;
 
 			using citer_type		= typename alias<ctype_ptr>::type;
-			using citer_type_ptr		= typename alias<ctype_ptr>::type_ptr;
-			using citer_type_cptr		= typename alias<ctype_ptr>::type_cptr;
-			using citer_type_ref		= typename alias<ctype_ptr>::type_ref;
-
-			using citer_ctype		= typename alias<ctype_ptr>::ctype;
-			using citer_ctype_ptr		= typename alias<ctype_ptr>::ctype_ptr;
-			using citer_ctype_cptr		= typename alias<ctype_ptr>::ctype_cptr;
-			using citer_ctype_ref		= typename alias<ctype_ptr>::ctype_ref;
+			using citer_ctype_ref		= typename alias<citer_type>::ctype_ref;
 
 			using cderef_type		= typename alias<ctype>::type;
 			using cderef_type_ptr		= typename alias<ctype>::type_ptr;
@@ -403,8 +396,11 @@ namespace engine {
 			nik_ce plot_cfacade() : base{} { }
 			nik_ce plot_cfacade(model_ctype_ptr m, typename base::page_ctype_cptr p) : base{m, p} { }
 
-			nik_ce level_cmethod pivot(typename base::page_ctype_cptr p) const
-				{ return base::template pivot<level_cmethod, level_cfacade>(p); }
+			template<typename CMethod>
+			nik_ce auto cpivot(typename base::page_ctype_cptr p) const
+				{ return base::template cpivot<CMethod, level_cfacade>(p); }
+
+			nik_ce auto cpivot(typename base::page_ctype_cptr p) const { return cpivot<level_cmethod>(p); }
 
 			// initial:
 
@@ -461,24 +457,16 @@ namespace engine {
 			using ctype_cptr		= typename base::text_ctype_cptr;
 			using ctype_ref			= typename base::text_ctype_ref;
 
-			using citer_type		= citerator_method<level_cmethod>;
-			using citer_type_ptr		= typename alias<citer_type>::type_ptr;
-			using citer_type_cptr		= typename alias<citer_type>::type_cptr;
-			using citer_type_ref		= typename alias<citer_type>::type_ref;
+			template<typename CMethod>
+			using citerator			= citerator_method<CMethod>;
 
-			using citer_ctype		= typename alias<citer_type>::ctype;
-			using citer_ctype_ptr		= typename alias<citer_type>::ctype_ptr;
-			using citer_ctype_cptr		= typename alias<citer_type>::ctype_cptr;
+			using citer_type		= citerator<level_cmethod>;
 			using citer_ctype_ref		= typename alias<citer_type>::ctype_ref;
 
-			using iter_type			= iterator_method<level_method>;
-			using iter_type_ptr		= typename alias<iter_type>::type_ptr;
-			using iter_type_cptr		= typename alias<iter_type>::type_cptr;
-			using iter_type_ref		= typename alias<iter_type>::type_ref;
+			template<typename Method>
+			using iterator			= iterator_method<Method>;
 
-			using iter_ctype		= typename alias<iter_type>::ctype;
-			using iter_ctype_ptr		= typename alias<iter_type>::ctype_ptr;
-			using iter_ctype_cptr		= typename alias<iter_type>::ctype_cptr;
+			using iter_type			= iterator<level_method>;
 			using iter_ctype_ref		= typename alias<iter_type>::ctype_ref;
 
 			using cderef_type		= below_cmethod;
@@ -509,25 +497,31 @@ namespace engine {
 			nik_ce plot_facade() : base{} { }
 			nik_ce plot_facade(model_type_ptr m, typename base::page_type_cptr p) : base{m, p} { }
 
-			nik_ce level_cmethod pivot(typename base::page_ctype_cptr p) const
-				{ return base::template pivot<level_cmethod, level_cfacade>(p); }
+			template<typename CMethod>
+			nik_ce auto cpivot(typename base::page_ctype_cptr p) const
+				{ return base::template cpivot<CMethod, level_cfacade>(p); }
 
-			nik_ce level_method pivot(typename base::page_type_cptr p) const
-				{ return base::template pivot<level_method, level_facade>(p); }
+			nik_ce auto cpivot(typename base::page_ctype_cptr p) const { return cpivot<level_cmethod>(p); }
+
+			template<typename Method>
+			nik_ce auto pivot(typename base::page_type_cptr p)
+				{ return base::template pivot<Method, level_facade>(p); }
+
+			nik_ce auto pivot(typename base::page_type_cptr p) { return pivot<level_method>(p); }
 
 			// initial:
 
-				nik_ce citer_type cbegin() const
-				{
-					return citer_type
-						{ base::template pivot<below_cmethod, below_cfacade>(base::ctext()) };
-				}
+			template<typename CMethod>
+			nik_ce citer_type cbegin() const
+				{ return citer_type{base::template cpivot<CMethod, below_cfacade>(base::ctext())}; }
 
-				nik_ce iter_type begin()
-				{
-					return iter_type
-						{ base::template pivot<below_method, below_facade>(base::text()) };
-				}
+			nik_ce citer_type cbegin() const { return cbegin<below_cmethod>(); }
+
+			template<typename Method>
+			nik_ce iter_type begin()
+				{ return iter_type{base::template pivot<Method, below_facade>(base::text()) }; }
+
+			nik_ce iter_type begin() { return begin<below_method>(); }
 	};
 
 /***********************************************************************************************************************/
@@ -562,24 +556,10 @@ namespace engine {
 			using ctype_ref			= typename base::text_ctype_ref;
 
 			using citer_type		= typename alias<ctype_ptr>::type;
-			using citer_type_ptr		= typename alias<ctype_ptr>::type_ptr;
-			using citer_type_cptr		= typename alias<ctype_ptr>::type_cptr;
-			using citer_type_ref		= typename alias<ctype_ptr>::type_ref;
-
-			using citer_ctype		= typename alias<ctype_ptr>::ctype;
-			using citer_ctype_ptr		= typename alias<ctype_ptr>::ctype_ptr;
-			using citer_ctype_cptr		= typename alias<ctype_ptr>::ctype_cptr;
-			using citer_ctype_ref		= typename alias<ctype_ptr>::ctype_ref;
+			using citer_ctype_ref		= typename alias<citer_type>::ctype_ref;
 
 			using iter_type			= typename alias<type_ptr>::type;
-			using iter_type_ptr		= typename alias<type_ptr>::type_ptr;
-			using iter_type_cptr		= typename alias<type_ptr>::type_cptr;
-			using iter_type_ref		= typename alias<type_ptr>::type_ref;
-
-			using iter_ctype		= typename alias<type_ptr>::ctype;
-			using iter_ctype_ptr		= typename alias<type_ptr>::ctype_ptr;
-			using iter_ctype_cptr		= typename alias<type_ptr>::ctype_cptr;
-			using iter_ctype_ref		= typename alias<type_ptr>::ctype_ref;
+			using iter_ctype_ref		= typename alias<iter_type>::ctype_ref;
 
 			using cderef_type		= typename alias<ctype>::type;
 			using cderef_type_ptr		= typename alias<ctype>::type_ptr;
@@ -617,16 +597,22 @@ namespace engine {
 			nik_ce plot_facade() : base{} { }
 			nik_ce plot_facade(model_type_ptr m, typename base::page_type_cptr p) : base{m, p} { }
 
-			nik_ce level_cmethod pivot(typename base::page_ctype_cptr p) const
-				{ return base::template pivot<level_cmethod, level_cfacade>(p); }
+			template<typename CMethod>
+			nik_ce auto cpivot(typename base::page_ctype_cptr p) const
+				{ return base::template cpivot<CMethod, level_cfacade>(p); }
 
-			nik_ce level_method pivot(typename base::page_type_cptr p) const
-				{ return base::template pivot<level_method, level_facade>(p); }
+			nik_ce auto cpivot(typename base::page_ctype_cptr p) const { return cpivot<level_cmethod>(p); }
+
+			template<typename Method>
+			nik_ce auto pivot(typename base::page_type_cptr p)
+				{ return base::template pivot<Method, level_facade>(p); }
+
+			nik_ce auto pivot(typename base::page_type_cptr p) { return pivot<level_method>(p); }
 
 			// initial:
 
 				nik_ce citer_type cbegin() const { return base::ctext(); }
-				nik_ce iter_type   begin()       { return base:: text(); }
+				nik_ce  iter_type  begin()       { return base:: text(); }
 	};
 
 /***********************************************************************************************************************/
@@ -662,8 +648,8 @@ namespace engine {
 
 		protected:
 
-			nik_ce auto sub_increment(size_ctype n = 1) const { return sub.pivot(sub.cpage() + n); }
-			nik_ce auto sub_decrement(size_ctype n = 1) const { return sub.pivot(sub.cpage() - n); }
+			nik_ce auto sub_increment(size_ctype n = 1) const { return sub.cpivot(sub.cpage() + n); }
+			nik_ce auto sub_decrement(size_ctype n = 1) const { return sub.cpivot(sub.cpage() - n); }
 
 			nik_ce void cincrement(size_ctype n = 1) { sub = sub_increment(n); }
 			nik_ce void cdecrement(size_ctype n = 1) { sub = sub_decrement(n); }
@@ -767,10 +753,10 @@ namespace engine {
 				nik_ce bool operator != (const iterator_method & i) const
 					{ return not operator == (i); }
 
-				nik_ce iterator_method operator + (size_ctype n) const
+				nik_ce iterator_method operator + (size_ctype n)
 					{ return iterator_method{sub_increment(n)}; }
 
-				nik_ce iterator_method operator - (size_ctype n) const
+				nik_ce iterator_method operator - (size_ctype n)
 					{ return iterator_method{sub_decrement(n)}; }
 
 			// mutable:
