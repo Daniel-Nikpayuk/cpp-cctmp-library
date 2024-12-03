@@ -109,13 +109,8 @@ namespace engine {
 
 			// method:
 
-				nik_ce cmethod_type cmethod() const { return cequip<cmethod_type>(); }
+				nik_ce auto cmethod() const { return cequip<cmethod_type>(); }
 	};
-
-	// syntactic sugar:
-
-		template<typename Plot, template<typename> typename CMethod>
-		using plot_cmethod = CMethod<typename Plot::cfacade_type>;
 
 /***********************************************************************************************************************/
 
@@ -155,14 +150,9 @@ namespace engine {
 
 			// method:
 
-				nik_ce auto cmethod () const { return cequip < cmethod_type >(); }
-				nik_ce auto  method ()       { return  equip <  method_type >(); }
+				nik_ce auto cmethod () const { return cequip< cmethod_type >(); }
+				nik_ce auto  method ()       { return  equip<  method_type >(); }
 	};
-
-	// syntactic sugar:
-
-		template<typename Plot, template<typename> typename Method>
-		using plot_method = Method<typename Plot::facade_type>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

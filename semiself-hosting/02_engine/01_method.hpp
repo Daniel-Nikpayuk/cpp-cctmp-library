@@ -112,26 +112,19 @@ namespace engine {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// form:
+// nexus (facade factor):
 
 /***********************************************************************************************************************/
 
 // immutable:
 
 	template<typename Model, gkey_type Order>
-	class plot_cform
+	class plot_cnexus
 	{
 		public:
 
-			using model_type		= typename alias<Model>::type;
-			using model_type_ptr		= typename alias<Model>::type_ptr;
-			using model_type_cptr		= typename alias<Model>::type_cptr;
-			using model_type_ref		= typename alias<Model>::type_ref;
-
-			using model_ctype		= typename alias<Model>::ctype;
 			using model_ctype_ptr		= typename alias<Model>::ctype_ptr;
 			using model_ctype_cptr		= typename alias<Model>::ctype_cptr;
-			using model_ctype_ref		= typename alias<Model>::ctype_ref;
 
 			using page_type			= typename Model::template level_type<Order + 1>;
 			using page_type_ptr		= typename alias<page_type>::type_ptr;
@@ -168,10 +161,10 @@ namespace engine {
 
 		public:
 
-			nik_ce plot_cform() : model{}, leaf{} { }
-			nik_ce plot_cform(model_ctype_ptr m, page_ctype_cptr p) : model{m}, leaf{p} { }
+			nik_ce plot_cnexus() : model{}, leaf{} { }
+			nik_ce plot_cnexus(model_ctype_cptr m, page_ctype_cptr p) : model{m}, leaf{p} { }
 
-			nik_ce bool comparable(const plot_cform & f) const { return (*model == *f.model); }
+			nik_ce bool comparable(const plot_cnexus & f) const { return (*model == *f.model); }
 
 			nik_ce page_ctype_ptr cpage() const { return leaf; }
 			nik_ce text_ctype_ptr ctext() const { return model->template cbegin<Order>() + leaf->start(); }
@@ -186,19 +179,12 @@ namespace engine {
 // mutable:
 
 	template<typename Model, gkey_type Order>
-	class plot_form
+	class plot_nexus
 	{
 		public:
 
-			using model_type		= typename alias<Model>::type;
 			using model_type_ptr		= typename alias<Model>::type_ptr;
 			using model_type_cptr		= typename alias<Model>::type_cptr;
-			using model_type_ref		= typename alias<Model>::type_ref;
-
-			using model_ctype		= typename alias<Model>::ctype;
-			using model_ctype_ptr		= typename alias<Model>::ctype_ptr;
-			using model_ctype_cptr		= typename alias<Model>::ctype_cptr;
-			using model_ctype_ref		= typename alias<Model>::ctype_ref;
 
 			using page_type			= typename Model::template level_type<Order + 1>;
 			using page_type_ptr		= typename alias<page_type>::type_ptr;
@@ -238,10 +224,10 @@ namespace engine {
 
 		public:
 
-			nik_ce plot_form() : model{}, leaf{} { }
-			nik_ce plot_form(model_type_ptr m, page_type_cptr p) : model{m}, leaf{p} { }
+			nik_ce plot_nexus() : model{}, leaf{} { }
+			nik_ce plot_nexus(model_type_cptr m, page_type_cptr p) : model{m}, leaf{p} { }
 
-			nik_ce bool comparable(const plot_form & f) const { return (*model == *f.model); }
+			nik_ce bool comparable(const plot_nexus & f) const { return (*model == *f.model); }
 
 			nik_ce page_ctype_ptr cpage() const { return leaf; }
 			nik_ce text_ctype_ptr ctext() const { return model->template cbegin<Order>() + leaf->start(); }
@@ -268,7 +254,7 @@ namespace engine {
 // N >= 1:
 
 	template<typename Model, gkey_type Order>
-	class plot_cfacade : public plot_cform<Model, Order>
+	class plot_cfacade : public plot_cnexus<Model, Order>
 	{
 		protected:
 
@@ -280,17 +266,10 @@ namespace engine {
 
 		public:
 
-			using base			= plot_cform<Model, Order>;
+			using base			= plot_cnexus<Model, Order>;
 
-			using model_type		= typename base::model_type;
-			using model_type_ptr		= typename base::model_type_ptr;
-			using model_type_cptr		= typename base::model_type_cptr;
-			using model_type_ref		= typename base::model_type_ref;
-
-			using model_ctype		= typename base::model_ctype;
 			using model_ctype_ptr		= typename base::model_ctype_ptr;
 			using model_ctype_cptr		= typename base::model_ctype_cptr;
-			using model_ctype_ref		= typename base::model_ctype_ref;
 
 			using type			= typename base::text_type;
 			using type_ptr			= typename base::text_type_ptr;
@@ -324,7 +303,7 @@ namespace engine {
 		public:
 
 			nik_ce plot_cfacade() : base{} { }
-			nik_ce plot_cfacade(model_ctype_ptr m, typename base::page_ctype_cptr p) : base{m, p} { }
+			nik_ce plot_cfacade(model_ctype_cptr m, typename base::page_ctype_cptr p) : base{m, p} { }
 
 			template<typename CMethod>
 			nik_ce auto cpivot(typename base::page_ctype_cptr p) const
@@ -344,21 +323,14 @@ namespace engine {
 // 0:
 
 	template<typename Model>
-	class plot_cfacade<Model, 0> : public plot_cform<Model, 0>
+	class plot_cfacade<Model, 0> : public plot_cnexus<Model, 0>
 	{
 		public:
 
-			using base			= plot_cform<Model, 0>;
+			using base			= plot_cnexus<Model, 0>;
 
-			using model_type		= typename base::model_type;
-			using model_type_ptr		= typename base::model_type_ptr;
-			using model_type_cptr		= typename base::model_type_cptr;
-			using model_type_ref		= typename base::model_type_ref;
-
-			using model_ctype		= typename base::model_ctype;
 			using model_ctype_ptr		= typename base::model_ctype_ptr;
 			using model_ctype_cptr		= typename base::model_ctype_cptr;
-			using model_ctype_ref		= typename base::model_ctype_ref;
 
 			using type			= typename base::text_type;
 			using type_ptr			= typename base::text_type_ptr;
@@ -394,7 +366,7 @@ namespace engine {
 		public:
 
 			nik_ce plot_cfacade() : base{} { }
-			nik_ce plot_cfacade(model_ctype_ptr m, typename base::page_ctype_cptr p) : base{m, p} { }
+			nik_ce plot_cfacade(model_ctype_cptr m, typename base::page_ctype_cptr p) : base{m, p} { }
 
 			template<typename CMethod>
 			nik_ce auto cpivot(typename base::page_ctype_cptr p) const
@@ -417,7 +389,7 @@ namespace engine {
 // N >= 1:
 
 	template<typename Model, gkey_type Order>
-	class plot_facade : public plot_form<Model, Order>
+	class plot_facade : public plot_nexus<Model, Order>
 	{
 		protected:
 
@@ -435,17 +407,10 @@ namespace engine {
 
 		public:
 
-			using base			= plot_form<Model, Order>;
+			using base			= plot_nexus<Model, Order>;
 
-			using model_type		= typename base::model_type;
 			using model_type_ptr		= typename base::model_type_ptr;
 			using model_type_cptr		= typename base::model_type_cptr;
-			using model_type_ref		= typename base::model_type_ref;
-
-			using model_ctype		= typename base::model_ctype;
-			using model_ctype_ptr		= typename base::model_ctype_ptr;
-			using model_ctype_cptr		= typename base::model_ctype_cptr;
-			using model_ctype_ref		= typename base::model_ctype_ref;
 
 			using type			= typename base::text_type;
 			using type_ptr			= typename base::text_type_ptr;
@@ -495,7 +460,7 @@ namespace engine {
 		public:
 
 			nik_ce plot_facade() : base{} { }
-			nik_ce plot_facade(model_type_ptr m, typename base::page_type_cptr p) : base{m, p} { }
+			nik_ce plot_facade(model_type_cptr m, typename base::page_type_cptr p) : base{m, p} { }
 
 			template<typename CMethod>
 			nik_ce auto cpivot(typename base::page_ctype_cptr p) const
@@ -529,21 +494,14 @@ namespace engine {
 // 0:
 
 	template<typename Model>
-	class plot_facade<Model, 0> : public plot_form<Model, 0>
+	class plot_facade<Model, 0> : public plot_nexus<Model, 0>
 	{
 		public:
 
-			using base			= plot_form<Model, 0>;
+			using base			= plot_nexus<Model, 0>;
 
-			using model_type		= typename base::model_type;
 			using model_type_ptr		= typename base::model_type_ptr;
 			using model_type_cptr		= typename base::model_type_cptr;
-			using model_type_ref		= typename base::model_type_ref;
-
-			using model_ctype		= typename base::model_ctype;
-			using model_ctype_ptr		= typename base::model_ctype_ptr;
-			using model_ctype_cptr		= typename base::model_ctype_cptr;
-			using model_ctype_ref		= typename base::model_ctype_ref;
 
 			using type			= typename base::text_type;
 			using type_ptr			= typename base::text_type_ptr;
@@ -595,7 +553,7 @@ namespace engine {
 		public:
 
 			nik_ce plot_facade() : base{} { }
-			nik_ce plot_facade(model_type_ptr m, typename base::page_type_cptr p) : base{m, p} { }
+			nik_ce plot_facade(model_type_cptr m, typename base::page_type_cptr p) : base{m, p} { }
 
 			template<typename CMethod>
 			nik_ce auto cpivot(typename base::page_ctype_cptr p) const

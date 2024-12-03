@@ -46,26 +46,6 @@ namespace cctmp {
 			using ctype_cptr		= typename alias<Type>::ctype_cptr;
 			using ctype_ref			= typename alias<Type>::ctype_ref;
 
-			using citer_type		= typename alias<ctype_ptr>::type;
-			using citer_type_ptr		= typename alias<ctype_ptr>::type_ptr;
-			using citer_type_cptr		= typename alias<ctype_ptr>::type_cptr;
-			using citer_type_ref		= typename alias<ctype_ptr>::type_ref;
-
-			using citer_ctype		= typename alias<ctype_ptr>::ctype;
-			using citer_ctype_ptr		= typename alias<ctype_ptr>::ctype_ptr;
-			using citer_ctype_cptr		= typename alias<ctype_ptr>::ctype_cptr;
-			using citer_ctype_ref		= typename alias<ctype_ptr>::ctype_ref;
-
-			using cderef_type		= typename alias<ctype>::type;
-			using cderef_type_ptr		= typename alias<ctype>::type_ptr;
-			using cderef_type_cptr		= typename alias<ctype>::type_cptr;
-			using cderef_type_ref		= typename alias<ctype>::type_ref;
-
-			using cderef_ctype		= typename alias<ctype>::ctype;
-			using cderef_ctype_ptr		= typename alias<ctype>::ctype_ptr;
-			using cderef_ctype_cptr		= typename alias<ctype>::ctype_cptr;
-			using cderef_ctype_ref		= typename alias<ctype>::ctype_ref;
-
 			using size_type			= typename alias<SizeType>::type;
 			using size_ctype		= typename alias<SizeType>::ctype;
 
@@ -74,21 +54,14 @@ namespace cctmp {
 			ctype_ptr  initial; // compile time compatible.
 			size_type terminal; // compile time compatible.
 
-		protected:
-
-			nik_ce void assign(ctype_cptr i, size_ctype t) // inheritance convenience.
-			{
-				 initial = i;
-				terminal = t;
-			}
-
 		public:
 
 			nik_ce array_cmodel() : initial{}, terminal{} { }
+			nik_ce array_cmodel(ctype_cptr i, size_ctype t) : initial{i}, terminal{t} { }
 
 			// initial:
 
-				nik_ce citer_type cbegin() const { return initial; }
+				nik_ce ctype_ptr cbegin() const { return initial; }
 
 			// terminal:
 
@@ -113,6 +86,126 @@ namespace cctmp {
 			using ctype_ptr			= typename alias<Type>::ctype_ptr;
 			using ctype_cptr		= typename alias<Type>::ctype_cptr;
 			using ctype_ref			= typename alias<Type>::ctype_ref;
+
+			using size_type			= typename alias<SizeType>::type;
+			using size_ctype		= typename alias<SizeType>::ctype;
+
+		public:
+
+			nik_ces size_type length() { return Size; }
+
+		protected:
+
+			type initial[Size]; // compile time compatible.
+			size_type terminal; // compile time compatible.
+
+		public:
+
+			nik_ce array_model() : initial{}, terminal{} { }
+
+			// initial:
+
+				nik_ce ctype_ptr cbegin() const { return initial; }
+				nik_ce  type_ptr  begin()       { return initial; }
+
+			// terminal:
+
+				nik_ce size_type size() const { return terminal; }
+				nik_ce void set_size(size_ctype n) { terminal = n; }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// facade:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Model>
+	class array_cfacade
+	{
+		public:
+
+			using model_ctype_ptr		= typename alias<Model>::ctype_ptr;
+			using model_ctype_cptr		= typename alias<Model>::ctype_cptr;
+
+			using type			= typename Model::type;
+			using type_ptr			= typename Model::type_ptr;
+			using type_cptr			= typename Model::type_cptr;
+			using type_ref			= typename Model::type_ref;
+
+			using ctype			= typename Model::ctype;
+			using ctype_ptr			= typename Model::ctype_ptr;
+			using ctype_cptr		= typename Model::ctype_cptr;
+			using ctype_ref			= typename Model::ctype_ref;
+
+			using citer_type		= typename alias<ctype_ptr>::type;
+			using citer_type_ptr		= typename alias<ctype_ptr>::type_ptr;
+			using citer_type_cptr		= typename alias<ctype_ptr>::type_cptr;
+			using citer_type_ref		= typename alias<ctype_ptr>::type_ref;
+
+			using citer_ctype		= typename alias<ctype_ptr>::ctype;
+			using citer_ctype_ptr		= typename alias<ctype_ptr>::ctype_ptr;
+			using citer_ctype_cptr		= typename alias<ctype_ptr>::ctype_cptr;
+			using citer_ctype_ref		= typename alias<ctype_ptr>::ctype_ref;
+
+			using cderef_type		= typename alias<ctype>::type;
+			using cderef_type_ptr		= typename alias<ctype>::type_ptr;
+			using cderef_type_cptr		= typename alias<ctype>::type_cptr;
+			using cderef_type_ref		= typename alias<ctype>::type_ref;
+
+			using cderef_ctype		= typename alias<ctype>::ctype;
+			using cderef_ctype_ptr		= typename alias<ctype>::ctype_ptr;
+			using cderef_ctype_cptr		= typename alias<ctype>::ctype_cptr;
+			using cderef_ctype_ref		= typename alias<ctype>::ctype_ref;
+
+			using size_type			= typename Model::size_type;
+			using size_ctype		= typename Model::size_ctype;
+
+		protected:
+
+			model_ctype_ptr model;
+
+		public:
+
+			nik_ce array_cfacade() : model{} { }
+			nik_ce array_cfacade(model_ctype_cptr m) : model{m} { }
+
+			template<typename CMethod>
+			nik_ce auto cpivot() const -> CMethod { return array_cfacade{model}; }
+
+			// initial:
+
+				nik_ce citer_type cbegin() const { return model->cbegin(); }
+
+			// terminal:
+
+				nik_ce size_type size() const { return model->size(); }
+	};
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Model>
+	class array_facade
+	{
+		public:
+
+			using model_type_ptr		= typename alias<Model>::type_ptr;
+			using model_type_cptr		= typename alias<Model>::type_cptr;
+
+			using type			= typename Model::type;
+			using type_ptr			= typename Model::type_ptr;
+			using type_cptr			= typename Model::type_cptr;
+			using type_ref			= typename Model::type_ref;
+
+			using ctype			= typename Model::ctype;
+			using ctype_ptr			= typename Model::ctype_ptr;
+			using ctype_cptr		= typename Model::ctype_cptr;
+			using ctype_ref			= typename Model::ctype_ref;
 
 			using citer_type		= typename alias<ctype_ptr>::type;
 			using citer_type_ptr		= typename alias<ctype_ptr>::type_ptr;
@@ -154,31 +247,33 @@ namespace cctmp {
 			using deref_ctype_cptr		= typename alias<type>::ctype_cptr;
 			using deref_ctype_ref		= typename alias<type>::ctype_ref;
 
-			using size_type			= typename alias<SizeType>::type;
-			using size_ctype		= typename alias<SizeType>::ctype;
-
-		public:
-
-			nik_ces size_type length() { return Size; }
+			using size_type			= typename Model::size_type;
+			using size_ctype		= typename Model::size_ctype;
 
 		protected:
 
-			type initial[Size]; // compile time compatible.
-			size_type terminal; // compile time compatible.
+			model_type_ptr model;
 
 		public:
 
-			nik_ce array_model() : initial{}, terminal{} { }
+			nik_ce array_facade() : model{} { }
+			nik_ce array_facade(model_type_cptr m) : model{m} { }
+
+			template<typename CMethod>
+			nik_ce auto cpivot() const -> CMethod { return array_cfacade<Model>{model}; }
+
+			template<typename Method>
+			nik_ce auto pivot() -> Method { return array_facade{model}; }
 
 			// initial:
 
-				nik_ce citer_type cbegin() const { return initial; }
-				nik_ce iter_type begin() { return initial; }
+				nik_ce citer_type cbegin() const { return model->cbegin(); }
+				nik_ce  iter_type  begin()       { return model-> begin(); }
 
 			// terminal:
 
-				nik_ce size_type size() const { return terminal; }
-				nik_ce void set_size(size_ctype n) { terminal = n; }
+				nik_ce size_type size() const { return model->size(); }
+				nik_ce void set_size(size_ctype n) { model->set_size(n); }
 	};
 
 /***********************************************************************************************************************/
@@ -190,34 +285,45 @@ namespace cctmp {
 
 // immutable:
 
-	template<typename Type, typename SizeType>
-	class carray : public array_cmethod<array_cmodel<Type, SizeType>>
+	template<typename Type, typename SizeType, template<typename> typename CMethodType = array_cmethod>
+	class carray : public array_cmodel<Type, SizeType>
 	{
 		public:
 
-			using sub_base		= array_cmodel<Type, SizeType>;
-			using base		= array_cmethod<sub_base>;
+			using base			= array_cmodel<Type, SizeType>;
 
-			using type		= typename base::type;
-			using type_ptr		= typename base::type_ptr;
-			using type_cptr		= typename base::type_cptr;
-			using type_ref		= typename base::type_ref;
+			using type			= typename base::type;
+			using type_ptr			= typename base::type_ptr;
+			using type_cptr			= typename base::type_cptr;
+			using type_ref			= typename base::type_ref;
 
-			using ctype		= typename base::ctype;
-			using ctype_ptr		= typename base::ctype_ptr;
-			using ctype_cptr	= typename base::ctype_cptr;
-			using ctype_ref		= typename base::ctype_ref;
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
 
-			using size_type		= typename base::size_type;
-			using size_ctype	= typename base::size_ctype;
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+			using cfacade_type		= array_cfacade<carray>;
+			using cmethod_type		= CMethodType<cfacade_type>;
 
 		public:
 
 			nik_ce carray() : base{} { }
-			nik_ce carray(ctype_cptr i, size_ctype t) : base{} { base::assign(i, t); }
+			nik_ce carray(ctype_cptr i, size_ctype t) : base{i, t} { }
 
 			template<auto N>
 			nik_ce carray(const Type (&a)[N]) : carray{a, N} { }
+
+			// equip:
+
+				template<typename CMethod>
+				nik_ce auto cequip() const -> CMethod { return cfacade_type{this}; }
+
+			// method:
+
+				nik_ce cmethod_type cmethod() const { return cequip<cmethod_type>(); }
 	};
 
 /***********************************************************************************************************************/
@@ -227,20 +333,23 @@ namespace cctmp {
 	template<typename Type, typename SizeType>
 	struct cstring : public carray<Type, SizeType>
 	{
-		using base		= carray<Type, SizeType>;
+		using base			= carray<Type, SizeType>;
 
-		using type		= typename base::type;
-		using type_ptr		= typename base::type_ptr;
-		using type_cptr		= typename base::type_cptr;
-		using type_ref		= typename base::type_ref;
+		using type			= typename base::type;
+		using type_ptr			= typename base::type_ptr;
+		using type_cptr			= typename base::type_cptr;
+		using type_ref			= typename base::type_ref;
 
-		using ctype		= typename base::ctype;
-		using ctype_ptr		= typename base::ctype_ptr;
-		using ctype_cptr	= typename base::ctype_cptr;
-		using ctype_ref		= typename base::ctype_ref;
+		using ctype			= typename base::ctype;
+		using ctype_ptr			= typename base::ctype_ptr;
+		using ctype_cptr		= typename base::ctype_cptr;
+		using ctype_ref			= typename base::ctype_ref;
 
-		using size_type		= typename base::size_type;
-		using size_ctype	= typename base::size_ctype;
+		using size_type			= typename base::size_type;
+		using size_ctype		= typename base::size_ctype;
+
+		using cfacade_type		= array_cfacade<cstring>;
+		using cmethod_type		= array_cmethod<cfacade_type>;
 
 		nik_ce cstring() : base{} { }
 
@@ -252,33 +361,56 @@ namespace cctmp {
 
 // mutable:
 
-	template<typename Type, typename SizeType, SizeType Size>
-	class array : public array_method<array_model<Type, SizeType, Size>>
+	template
+	<
+		typename Type, typename SizeType, SizeType Size,
+		template<typename> typename CMethodType = array_cmethod,
+		template<typename> typename  MethodType = array_method
+	>
+	class array : public array_model<Type, SizeType, Size>
 	{
 		public:
 
-			using sub_base		= array_model<Type, SizeType, Size>;
-			using base		= array_method<sub_base>;
+			using base			= array_model<Type, SizeType, Size>;
 
-			using type		= typename base::type;
-			using type_ptr		= typename base::type_ptr;
-			using type_cptr		= typename base::type_cptr;
-			using type_ref		= typename base::type_ref;
+			using type			= typename base::type;
+			using type_ptr			= typename base::type_ptr;
+			using type_cptr			= typename base::type_cptr;
+			using type_ref			= typename base::type_ref;
 
-			using ctype		= typename base::ctype;
-			using ctype_ptr		= typename base::ctype_ptr;
-			using ctype_cptr	= typename base::ctype_cptr;
-			using ctype_ref		= typename base::ctype_ref;
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
 
-			using size_type		= typename base::size_type;
-			using size_ctype	= typename base::size_ctype;
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+			using cfacade_type		= array_cfacade<array>;
+			using cmethod_type		= CMethodType<cfacade_type>;
+
+			using facade_type		= array_facade<array>;
+			using method_type		= MethodType<facade_type>;
 
 		public:
 
 			nik_ce array() : base{} { }
 
 			template<typename T, auto N>
-			nik_ce array(const T (&a)[N]) : base{a} { }
+			nik_ce array(const T (&a)[N]) : base{} { method().push(a, a + N); }
+
+			// equip:
+
+				template<typename CMethod>
+				nik_ce auto cequip() const -> CMethod { return cfacade_type{this}; }
+
+				template<typename Method>
+				nik_ce auto equip() -> Method { return facade_type{this}; }
+
+			// method:
+
+				nik_ce auto cmethod() const { return cequip< cmethod_type >(); }
+				nik_ce auto  method()       { return  equip<  method_type >(); }
 	};
 
 /***********************************************************************************************************************/
@@ -286,40 +418,37 @@ namespace cctmp {
 // unique:
 
 	template<typename Type, typename SizeType, SizeType Size>
-	class unique_array : public array<Type, SizeType, Size>
+	class unique_array : public array<Type, SizeType, Size, unique_cmethod, unique_method>
 	{
 		public:
 
-			using base		= array<Type, SizeType, Size>;
+			using base			= array<Type, SizeType, Size, unique_cmethod, unique_method>;
 
-			using type		= typename base::type;
-			using type_ptr		= typename base::type_ptr;
-			using type_cptr		= typename base::type_cptr;
-			using type_ref		= typename base::type_ref;
+			using type			= typename base::type;
+			using type_ptr			= typename base::type_ptr;
+			using type_cptr			= typename base::type_cptr;
+			using type_ref			= typename base::type_ref;
 
-			using ctype		= typename base::ctype;
-			using ctype_ptr		= typename base::ctype_ptr;
-			using ctype_cptr	= typename base::ctype_cptr;
-			using ctype_ref		= typename base::ctype_ref;
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
 
-			using size_type		= typename base::size_type;
-			using size_ctype	= typename base::size_ctype;
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+			using cfacade_type		= typename base::cfacade_type;
+			using cmethod_type		= typename base::cmethod_type;
+
+			using facade_type		= typename base::facade_type;
+			using method_type		= typename base::method_type;
 
 		public:
 
 			nik_ce unique_array() : base{} { }
 
 			template<typename T, auto N>
-			nik_ce unique_array(const T (&a)[N]) : base{} { push(a, a + N); }
-
-			nik_ce void push(ctype_ref v) { if (base::omits(v)) { base::push(v); } }
-
-			template<typename In, typename End>
-			nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }
-
-			template<typename F, typename In, typename End>
-			nik_ce void pushmap(F, In in, End end)
-				{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
+			nik_ce unique_array(const T (&a)[N]) : base{} { base::method().push(a, a + N); }
 	};
 
 /***********************************************************************************************************************/
@@ -327,30 +456,39 @@ namespace cctmp {
 
 // table:
 
+	template<auto RowSize, auto ColSize>
+	struct curry_table_cmethod { template<typename Model> using type = table_cmethod<Model, RowSize, ColSize>; };
+
+	template<auto RowSize, auto ColSize>
+	struct curry_table_method { template<typename Model> using type = table_method<Model, RowSize, ColSize>; };
+
 /***********************************************************************************************************************/
 
 // immutable:
 
 	template<typename Type, typename SizeType, SizeType RowSize, SizeType ColSize>
-	class ctable : public table_cmethod<carray<Type, SizeType>, SizeType, RowSize, ColSize>
+	class ctable : public carray<Type, SizeType, curry_table_cmethod<RowSize, ColSize>::template type>
 	{
 		public:
 
-			using subbase		= carray<Type, SizeType>;
-			using base		= table_cmethod<subbase, SizeType, RowSize, ColSize>;
+			using curry			= curry_table_cmethod<RowSize, ColSize>;
+			using base			= carray<Type, SizeType, curry::template type>;
 
-			using type		= typename base::type;
-			using type_ptr		= typename base::type_ptr;
-			using type_cptr		= typename base::type_cptr;
-			using type_ref		= typename base::type_ref;
+			using type			= typename base::type;
+			using type_ptr			= typename base::type_ptr;
+			using type_cptr			= typename base::type_cptr;
+			using type_ref			= typename base::type_ref;
 
-			using ctype		= typename base::ctype;
-			using ctype_ptr		= typename base::ctype_ptr;
-			using ctype_cptr	= typename base::ctype_cptr;
-			using ctype_ref		= typename base::ctype_ref;
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
 
-			using size_type		= typename base::size_type;
-			using size_ctype	= typename base::size_ctype;
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+			using cfacade_type		= typename base::cfacade_type;
+			using cmethod_type		= typename base::cmethod_type;
 
 		public:
 
@@ -358,6 +496,8 @@ namespace cctmp {
 
 			template<typename T, auto N>
 			nik_ce ctable(const T (&a)[N]) : base{a} { }
+
+			nik_ce auto operator [] (size_ctype n) const { return base::cmethod().row_cbegin(n); }
 	};
 
 /***********************************************************************************************************************/
@@ -365,25 +505,42 @@ namespace cctmp {
 // mutable:
 
 	template<typename Type, typename SizeType, SizeType RowSize, SizeType ColSize>
-	class table : public table_method<array<Type, SizeType, RowSize * ColSize>, SizeType, RowSize, ColSize>
+	class table	: public array
+			<
+				Type, SizeType, RowSize * ColSize,
+				curry_table_cmethod<RowSize, ColSize>::template type,
+				curry_table_method<RowSize, ColSize>::template type
+			>
 	{
 		public:
 
-			using subbase		= array<Type, SizeType, RowSize * ColSize>;
-			using base		= table_method<subbase, SizeType, RowSize, ColSize>;
+			using ccurry			= curry_table_cmethod<RowSize, ColSize>;
+			using curry			= curry_table_method<RowSize, ColSize>;
+			using base			= array
+							<
+								Type, SizeType, RowSize * ColSize,
+								ccurry::template type,
+								curry::template type
+							>;
 
-			using type		= typename base::type;
-			using type_ptr		= typename base::type_ptr;
-			using type_cptr		= typename base::type_cptr;
-			using type_ref		= typename base::type_ref;
+			using type			= typename base::type;
+			using type_ptr			= typename base::type_ptr;
+			using type_cptr			= typename base::type_cptr;
+			using type_ref			= typename base::type_ref;
 
-			using ctype		= typename base::ctype;
-			using ctype_ptr		= typename base::ctype_ptr;
-			using ctype_cptr	= typename base::ctype_cptr;
-			using ctype_ref		= typename base::ctype_ref;
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
 
-			using size_type		= typename base::size_type;
-			using size_ctype	= typename base::size_ctype;
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+			using cfacade_type		= typename base::cfacade_type;
+			using cmethod_type		= typename base::cmethod_type;
+
+			using facade_type		= typename base::facade_type;
+			using method_type		= typename base::method_type;
 
 		public:
 
@@ -391,6 +548,9 @@ namespace cctmp {
 
 			template<typename T, auto N>
 			nik_ce table(const T (&a)[N]) : base{a} { }
+
+			nik_ce auto operator [] (size_ctype n) const { return base::cmethod().row_cbegin(n); }
+			nik_ce auto operator [] (size_ctype n)       { return base:: method().row_begin(n); }
 	};
 
 /***********************************************************************************************************************/

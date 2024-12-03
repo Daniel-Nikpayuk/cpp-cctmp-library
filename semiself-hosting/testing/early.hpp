@@ -57,6 +57,20 @@
 
 // array:
 
+	// print:
+
+		template<typename Array>
+		constexpr void print_array(const Array & a, const char *s = "%d ")
+		{
+			auto a_cm = a.cmethod();
+
+			for (auto k = a_cm.cbegin(); k != a_cm.cend(); ++k) printf(s, *k);
+
+			printf("\n");
+		}
+
+	// spec:
+
 		using  arr_type =  array<int, gindex_type, 5>;
 		using carr_type = carray<int, gindex_type>;
 
@@ -76,25 +90,30 @@
 
 	// mutable:
 
-		a1[4] = 6;
-		a1.downsize();
-		a1.push(5);
+		auto a10   = arr_type{a};
+		auto a10_m = a10.method();
+
+		a10_m[3] = 6;
+		a10_m.downsize();
+		a10_m.push(4);
+
+		print_array(a10);
 
 	// print:
 
+		auto a0_cm = a0.cmethod();
+		auto a1_cm = a1.cmethod();
+		auto a2_cm = a2.cmethod();
+
 		printf("%d\n", arr_type::length());
-		printf("%d\n", a0.size());
+		printf("%d\n", a0_cm.size());
 
-		printf("%d\n", a1.size());
-		printf("%sequal\n", (a0 == a2) ? "" : "not ");
+		printf("%d\n", a1_cm.size());
+		printf("%sequal\n", (a0_cm == a2_cm) ? "" : "not ");
 
-		printf("%d\n", a0.origin()[3]);
-		printf("%d\n", a0.size());
-		printf("%d\n", a0[0]);
-		printf("%d\n", a0[1]);
-		printf("%d\n", a0[2]);
-		printf("%d\n", a0[3]);
-		printf("%d\n", a0[4]);
+		printf("%d\n", a0_cm.origin()[3]);
+		printf("%d\n", a0_cm.size());
+		print_array(a0);
 
 /***********************************************************************************************************************/
 
@@ -104,10 +123,12 @@
 
 		constexpr auto a0 = arr_type{{1, 2, 1, 3, 1}};
 
-		printf("unique array size: %d\n", a0.size());
+		auto a0_cm = a0.cmethod();
+
+		printf("unique array size: %d\n", a0_cm.size());
 
 		printf("unique array: ");
-		for (auto k = a0.cbegin(); k != a0.cend(); ++k) printf("%d, ", *k);
+		for (auto k = a0_cm.cbegin(); k != a0_cm.cend(); ++k) printf("%d, ", *k);
 		printf("\n");
 
 /***********************************************************************************************************************/
@@ -116,7 +137,7 @@
 
 	struct contr
 	{
-		using lit_type = table_literal<int, gindex_type, 3, 6>;
+		using tab_type = ctable<int, gindex_type, 3, 6>;
 
 		constexpr static int arr[] =
 		{
@@ -125,12 +146,13 @@
 			2, 2, 3, 3, 4, 5
 		};
 
-		constexpr static auto x = lit_type{arr};
+		constexpr static auto x    = tab_type{arr};
+		constexpr static auto x_cm = contr::x.cmethod();
 	};
 
-		printf("%d\n", contr::x[0][1]);
-		printf("%d\n", contr::x[1][1]);
-		printf("%d\n", contr::x[2][1]);
+		printf("%d\n", contr::x_cm[0][1]);
+		printf("%d\n", contr::x_cm[1][1]);
+		printf("%d\n", contr::x_cm[2][1]);
 
 /***********************************************************************************************************************/
 
@@ -145,13 +167,14 @@
 			2, 2, 3, 3, 4, 5
 		};
 
-		auto x = table_type{arr};
+		auto x   = table_type{arr};
+		auto x_m = x.method();
 
-		x[1][1] = 5;
+		x_m[1][1] = 5;
 
-		printf("%d\n", x[0][1]);
-		printf("%d\n", x[1][1]);
-		printf("%d\n", x[2][1]);
+		printf("%d\n", x_m[0][1]);
+		printf("%d\n", x_m[1][1]);
+		printf("%d\n", x_m[2][1]);
 
 /***********************************************************************************************************************/
 
