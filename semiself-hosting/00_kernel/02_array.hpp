@@ -46,6 +46,26 @@ namespace cctmp {
 			using ctype_cptr		= typename alias<Type>::ctype_cptr;
 			using ctype_ref			= typename alias<Type>::ctype_ref;
 
+			using citer_type		= typename alias<ctype_ptr>::type;
+			using citer_type_ptr		= typename alias<ctype_ptr>::type_ptr;
+			using citer_type_cptr		= typename alias<ctype_ptr>::type_cptr;
+			using citer_type_ref		= typename alias<ctype_ptr>::type_ref;
+
+			using citer_ctype		= typename alias<ctype_ptr>::ctype;
+			using citer_ctype_ptr		= typename alias<ctype_ptr>::ctype_ptr;
+			using citer_ctype_cptr		= typename alias<ctype_ptr>::ctype_cptr;
+			using citer_ctype_ref		= typename alias<ctype_ptr>::ctype_ref;
+
+			using cderef_type		= typename alias<ctype>::type;
+			using cderef_type_ptr		= typename alias<ctype>::type_ptr;
+			using cderef_type_cptr		= typename alias<ctype>::type_cptr;
+			using cderef_type_ref		= typename alias<ctype>::type_ref;
+
+			using cderef_ctype		= typename alias<ctype>::ctype;
+			using cderef_ctype_ptr		= typename alias<ctype>::ctype_ptr;
+			using cderef_ctype_cptr		= typename alias<ctype>::ctype_cptr;
+			using cderef_ctype_ref		= typename alias<ctype>::ctype_ref;
+
 			using size_type			= typename alias<SizeType>::type;
 			using size_ctype		= typename alias<SizeType>::ctype;
 
@@ -54,10 +74,17 @@ namespace cctmp {
 			ctype_ptr  initial; // compile time compatible.
 			size_type terminal; // compile time compatible.
 
+		protected:
+
+			nik_ce void assign(ctype_cptr i, size_ctype t) // inheritance convenience
+			{
+				 initial = i;
+				terminal = t;
+			}
+
 		public:
 
 			nik_ce array_cmodel() : initial{}, terminal{} { }
-			nik_ce array_cmodel(ctype_cptr i, size_ctype t) : initial{i}, terminal{t} { }
 
 			// initial:
 
@@ -86,6 +113,46 @@ namespace cctmp {
 			using ctype_ptr			= typename alias<Type>::ctype_ptr;
 			using ctype_cptr		= typename alias<Type>::ctype_cptr;
 			using ctype_ref			= typename alias<Type>::ctype_ref;
+
+			using citer_type		= typename alias<ctype_ptr>::type;
+			using citer_type_ptr		= typename alias<ctype_ptr>::type_ptr;
+			using citer_type_cptr		= typename alias<ctype_ptr>::type_cptr;
+			using citer_type_ref		= typename alias<ctype_ptr>::type_ref;
+
+			using citer_ctype		= typename alias<ctype_ptr>::ctype;
+			using citer_ctype_ptr		= typename alias<ctype_ptr>::ctype_ptr;
+			using citer_ctype_cptr		= typename alias<ctype_ptr>::ctype_cptr;
+			using citer_ctype_ref		= typename alias<ctype_ptr>::ctype_ref;
+
+			using iter_type			= typename alias<type_ptr>::type;
+			using iter_type_ptr		= typename alias<type_ptr>::type_ptr;
+			using iter_type_cptr		= typename alias<type_ptr>::type_cptr;
+			using iter_type_ref		= typename alias<type_ptr>::type_ref;
+
+			using iter_ctype		= typename alias<type_ptr>::ctype;
+			using iter_ctype_ptr		= typename alias<type_ptr>::ctype_ptr;
+			using iter_ctype_cptr		= typename alias<type_ptr>::ctype_cptr;
+			using iter_ctype_ref		= typename alias<type_ptr>::ctype_ref;
+
+			using cderef_type		= typename alias<ctype>::type;
+			using cderef_type_ptr		= typename alias<ctype>::type_ptr;
+			using cderef_type_cptr		= typename alias<ctype>::type_cptr;
+			using cderef_type_ref		= typename alias<ctype>::type_ref;
+
+			using cderef_ctype		= typename alias<ctype>::ctype;
+			using cderef_ctype_ptr		= typename alias<ctype>::ctype_ptr;
+			using cderef_ctype_cptr		= typename alias<ctype>::ctype_cptr;
+			using cderef_ctype_ref		= typename alias<ctype>::ctype_ref;
+
+			using deref_type		= typename alias<type>::type;
+			using deref_type_ptr		= typename alias<type>::type_ptr;
+			using deref_type_cptr		= typename alias<type>::type_cptr;
+			using deref_type_ref		= typename alias<type>::type_ref;
+
+			using deref_ctype		= typename alias<type>::ctype;
+			using deref_ctype_ptr		= typename alias<type>::ctype_ptr;
+			using deref_ctype_cptr		= typename alias<type>::ctype_cptr;
+			using deref_ctype_ref		= typename alias<type>::ctype_ref;
 
 			using size_type			= typename alias<SizeType>::type;
 			using size_ctype		= typename alias<SizeType>::ctype;
@@ -141,25 +208,25 @@ namespace cctmp {
 			using ctype_cptr		= typename Model::ctype_cptr;
 			using ctype_ref			= typename Model::ctype_ref;
 
-			using citer_type		= typename alias<ctype_ptr>::type;
-			using citer_type_ptr		= typename alias<ctype_ptr>::type_ptr;
-			using citer_type_cptr		= typename alias<ctype_ptr>::type_cptr;
-			using citer_type_ref		= typename alias<ctype_ptr>::type_ref;
+			using citer_type		= typename Model::citer_type;
+			using citer_type_ptr		= typename Model::citer_type_ptr;
+			using citer_type_cptr		= typename Model::citer_type_cptr;
+			using citer_type_ref		= typename Model::citer_type_ref;
 
-			using citer_ctype		= typename alias<ctype_ptr>::ctype;
-			using citer_ctype_ptr		= typename alias<ctype_ptr>::ctype_ptr;
-			using citer_ctype_cptr		= typename alias<ctype_ptr>::ctype_cptr;
-			using citer_ctype_ref		= typename alias<ctype_ptr>::ctype_ref;
+			using citer_ctype		= typename Model::citer_ctype;
+			using citer_ctype_ptr		= typename Model::citer_ctype_ptr;
+			using citer_ctype_cptr		= typename Model::citer_ctype_cptr;
+			using citer_ctype_ref		= typename Model::citer_ctype_ref;
 
-			using cderef_type		= typename alias<ctype>::type;
-			using cderef_type_ptr		= typename alias<ctype>::type_ptr;
-			using cderef_type_cptr		= typename alias<ctype>::type_cptr;
-			using cderef_type_ref		= typename alias<ctype>::type_ref;
+			using cderef_type		= typename Model::cderef_type;
+			using cderef_type_ptr		= typename Model::cderef_type_ptr;
+			using cderef_type_cptr		= typename Model::cderef_type_cptr;
+			using cderef_type_ref		= typename Model::cderef_type_ref;
 
-			using cderef_ctype		= typename alias<ctype>::ctype;
-			using cderef_ctype_ptr		= typename alias<ctype>::ctype_ptr;
-			using cderef_ctype_cptr		= typename alias<ctype>::ctype_cptr;
-			using cderef_ctype_ref		= typename alias<ctype>::ctype_ref;
+			using cderef_ctype		= typename Model::cderef_ctype;
+			using cderef_ctype_ptr		= typename Model::cderef_ctype_ptr;
+			using cderef_ctype_cptr		= typename Model::cderef_ctype_cptr;
+			using cderef_ctype_ref		= typename Model::cderef_ctype_ref;
 
 			using size_type			= typename Model::size_type;
 			using size_ctype		= typename Model::size_ctype;
@@ -207,45 +274,45 @@ namespace cctmp {
 			using ctype_cptr		= typename Model::ctype_cptr;
 			using ctype_ref			= typename Model::ctype_ref;
 
-			using citer_type		= typename alias<ctype_ptr>::type;
-			using citer_type_ptr		= typename alias<ctype_ptr>::type_ptr;
-			using citer_type_cptr		= typename alias<ctype_ptr>::type_cptr;
-			using citer_type_ref		= typename alias<ctype_ptr>::type_ref;
+			using citer_type		= typename Model::citer_type;
+			using citer_type_ptr		= typename Model::citer_type_ptr;
+			using citer_type_cptr		= typename Model::citer_type_cptr;
+			using citer_type_ref		= typename Model::citer_type_ref;
 
-			using citer_ctype		= typename alias<ctype_ptr>::ctype;
-			using citer_ctype_ptr		= typename alias<ctype_ptr>::ctype_ptr;
-			using citer_ctype_cptr		= typename alias<ctype_ptr>::ctype_cptr;
-			using citer_ctype_ref		= typename alias<ctype_ptr>::ctype_ref;
+			using citer_ctype		= typename Model::citer_ctype;
+			using citer_ctype_ptr		= typename Model::citer_ctype_ptr;
+			using citer_ctype_cptr		= typename Model::citer_ctype_cptr;
+			using citer_ctype_ref		= typename Model::citer_ctype_ref;
 
-			using iter_type			= typename alias<type_ptr>::type;
-			using iter_type_ptr		= typename alias<type_ptr>::type_ptr;
-			using iter_type_cptr		= typename alias<type_ptr>::type_cptr;
-			using iter_type_ref		= typename alias<type_ptr>::type_ref;
+			using iter_type			= typename Model::iter_type;
+			using iter_type_ptr		= typename Model::iter_type_ptr;
+			using iter_type_cptr		= typename Model::iter_type_cptr;
+			using iter_type_ref		= typename Model::iter_type_ref;
 
-			using iter_ctype		= typename alias<type_ptr>::ctype;
-			using iter_ctype_ptr		= typename alias<type_ptr>::ctype_ptr;
-			using iter_ctype_cptr		= typename alias<type_ptr>::ctype_cptr;
-			using iter_ctype_ref		= typename alias<type_ptr>::ctype_ref;
+			using iter_ctype		= typename Model::iter_ctype;
+			using iter_ctype_ptr		= typename Model::iter_ctype_ptr;
+			using iter_ctype_cptr		= typename Model::iter_ctype_cptr;
+			using iter_ctype_ref		= typename Model::iter_ctype_ref;
 
-			using cderef_type		= typename alias<ctype>::type;
-			using cderef_type_ptr		= typename alias<ctype>::type_ptr;
-			using cderef_type_cptr		= typename alias<ctype>::type_cptr;
-			using cderef_type_ref		= typename alias<ctype>::type_ref;
+			using cderef_type		= typename Model::cderef_type;
+			using cderef_type_ptr		= typename Model::cderef_type_ptr;
+			using cderef_type_cptr		= typename Model::cderef_type_cptr;
+			using cderef_type_ref		= typename Model::cderef_type_ref;
 
-			using cderef_ctype		= typename alias<ctype>::ctype;
-			using cderef_ctype_ptr		= typename alias<ctype>::ctype_ptr;
-			using cderef_ctype_cptr		= typename alias<ctype>::ctype_cptr;
-			using cderef_ctype_ref		= typename alias<ctype>::ctype_ref;
+			using cderef_ctype		= typename Model::cderef_ctype;
+			using cderef_ctype_ptr		= typename Model::cderef_ctype_ptr;
+			using cderef_ctype_cptr		= typename Model::cderef_ctype_cptr;
+			using cderef_ctype_ref		= typename Model::cderef_ctype_ref;
 
-			using deref_type		= typename alias<type>::type;
-			using deref_type_ptr		= typename alias<type>::type_ptr;
-			using deref_type_cptr		= typename alias<type>::type_cptr;
-			using deref_type_ref		= typename alias<type>::type_ref;
+			using deref_type		= typename Model::deref_type;
+			using deref_type_ptr		= typename Model::deref_type_ptr;
+			using deref_type_cptr		= typename Model::deref_type_cptr;
+			using deref_type_ref		= typename Model::deref_type_ref;
 
-			using deref_ctype		= typename alias<type>::ctype;
-			using deref_ctype_ptr		= typename alias<type>::ctype_ptr;
-			using deref_ctype_cptr		= typename alias<type>::ctype_cptr;
-			using deref_ctype_ref		= typename alias<type>::ctype_ref;
+			using deref_ctype		= typename Model::deref_ctype;
+			using deref_ctype_ptr		= typename Model::deref_ctype_ptr;
+			using deref_ctype_cptr		= typename Model::deref_ctype_cptr;
+			using deref_ctype_ref		= typename Model::deref_ctype_ref;
 
 			using size_type			= typename Model::size_type;
 			using size_ctype		= typename Model::size_ctype;
@@ -286,16 +353,14 @@ namespace cctmp {
 // immutable:
 
 	template<typename Type, typename SizeType, template<typename> typename CMethodType = array_cmethod>
-	class carray	: public array_cmodel<Type, SizeType>,
-			  public CMethodType<array_cfacade<array_cmodel<Type, SizeType>>>
+	class carray : public CMethodType<array_cmodel<Type, SizeType>>
 	{
 		public:
 
-			using base			= array_cmodel<Type, SizeType>;
-			using cfacade_type		= array_cfacade<base>;
-
+			using model			= array_cmodel<Type, SizeType>;
+			using base			= CMethodType<model>;
+			using cfacade_type		= array_cfacade<model>;
 			using cmethod_type		= CMethodType<cfacade_type>;
-			using base_method		= cmethod_type;
 
 			using type			= typename base::type;
 			using type_ptr			= typename base::type_ptr;
@@ -312,21 +377,18 @@ namespace cctmp {
 
 		public:
 
-			nik_ce carray() : base{}, base_method{static_cast<base*>(this)} { }
+			nik_ce carray() : base{} { }
 
-			nik_ce carray(ctype_cptr i, size_ctype t) :
-				base{i, t}, base_method{static_cast<base*>(this)} { }
+			nik_ce carray(ctype_cptr i, size_ctype t) : base{} { base::assign(i, t); }
 
 			template<auto N>
 			nik_ce carray(const Type (&a)[N]) : carray{a, N} { }
 
-			using base_method::cbegin;
-			using base_method::size;
-
 			// equip:
 
 				template<typename CMethod>
-				nik_ce auto cequip() const -> CMethod { return cfacade_type{this}; }
+				nik_ce auto cequip() const -> CMethod
+					{ return cfacade_type{static_cast<base*>(this)}; }
 	};
 
 /***********************************************************************************************************************/
@@ -370,18 +432,16 @@ namespace cctmp {
 		template<typename> typename CMethodType = array_cmethod,
 		template<typename> typename  MethodType = array_method
 	>
-	class array	: public array_model<Type, SizeType, Size>,
-			  public MethodType<array_facade<array_model<Type, SizeType, Size>>>
+	class array : public MethodType<array_model<Type, SizeType, Size>>
 	{
 		public:
 
-			using base			= array_model<Type, SizeType, Size>;
-			using cfacade_type		= array_cfacade<base>;
-			using facade_type		= array_facade<base>;
-
+			using model			= array_model<Type, SizeType, Size>;
+			using base			= MethodType<model>;
+			using cfacade_type		= array_cfacade<model>;
+			using facade_type		= array_facade<model>;
 			using cmethod_type		= CMethodType<cfacade_type>;
 			using method_type		= MethodType<facade_type>;
-			using base_method		= method_type;
 
 			using type			= typename base::type;
 			using type_ptr			= typename base::type_ptr;
@@ -398,23 +458,20 @@ namespace cctmp {
 
 		public:
 
-			nik_ce array() : base{}, base_method{static_cast<base*>(this)} { }
+			nik_ce array() : base{} { }
 
 			template<typename T, auto N>
-			nik_ce array(const T (&a)[N]) : base{}, base_method{static_cast<base*>(this)}
-				{ base_method::push(a, a + N); }
-
-			using base_method::cbegin;
-			using base_method:: begin;
-			using base_method::size;
+			nik_ce array(const T (&a)[N]) : base{a} { }
 
 			// equip:
 
 				template<typename CMethod>
-				nik_ce auto cequip() const -> CMethod { return cfacade_type{this}; }
+				nik_ce auto cequip() const -> CMethod
+					{ return cfacade_type{static_cast<base*>(this)}; }
 
 				template<typename Method>
-				nik_ce auto equip() -> Method { return facade_type{this}; }
+				nik_ce auto equip() -> Method
+					{ return facade_type{static_cast<base*>(this)}; }
 	};
 
 /***********************************************************************************************************************/
