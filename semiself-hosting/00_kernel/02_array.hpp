@@ -286,11 +286,16 @@ namespace cctmp {
 // immutable:
 
 	template<typename Type, typename SizeType, template<typename> typename CMethodType = array_cmethod>
-	class carray : public array_cmodel<Type, SizeType>
+	class carray	: public array_cmodel<Type, SizeType>,
+			  public CMethodType<array_cfacade<array_cmodel<Type, SizeType>>>
 	{
 		public:
 
 			using base			= array_cmodel<Type, SizeType>;
+			using cfacade_type		= array_cfacade<base>;
+
+			using cmethod_type		= CMethodType<cfacade_type>;
+			using base_method		= cmethod_type;
 
 			using type			= typename base::type;
 			using type_ptr			= typename base::type_ptr;
@@ -305,25 +310,23 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using cfacade_type		= array_cfacade<carray>;
-			using cmethod_type		= CMethodType<cfacade_type>;
-
 		public:
 
-			nik_ce carray() : base{} { }
-			nik_ce carray(ctype_cptr i, size_ctype t) : base{i, t} { }
+			nik_ce carray() : base{}, base_method{static_cast<base*>(this)} { }
+
+			nik_ce carray(ctype_cptr i, size_ctype t) :
+				base{i, t}, base_method{static_cast<base*>(this)} { }
 
 			template<auto N>
 			nik_ce carray(const Type (&a)[N]) : carray{a, N} { }
+
+			using base_method::cbegin;
+			using base_method::size;
 
 			// equip:
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod { return cfacade_type{this}; }
-
-			// method:
-
-				nik_ce cmethod_type cmethod() const { return cequip<cmethod_type>(); }
 	};
 
 /***********************************************************************************************************************/
@@ -367,11 +370,18 @@ namespace cctmp {
 		template<typename> typename CMethodType = array_cmethod,
 		template<typename> typename  MethodType = array_method
 	>
-	class array : public array_model<Type, SizeType, Size>
+	class array	: public array_model<Type, SizeType, Size>,
+			  public MethodType<array_facade<array_model<Type, SizeType, Size>>>
 	{
 		public:
 
 			using base			= array_model<Type, SizeType, Size>;
+			using cfacade_type		= array_cfacade<base>;
+			using facade_type		= array_facade<base>;
+
+			using cmethod_type		= CMethodType<cfacade_type>;
+			using method_type		= MethodType<facade_type>;
+			using base_method		= method_type;
 
 			using type			= typename base::type;
 			using type_ptr			= typename base::type_ptr;
@@ -386,18 +396,17 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using cfacade_type		= array_cfacade<array>;
-			using cmethod_type		= CMethodType<cfacade_type>;
-
-			using facade_type		= array_facade<array>;
-			using method_type		= MethodType<facade_type>;
-
 		public:
 
-			nik_ce array() : base{} { }
+			nik_ce array() : base{}, base_method{static_cast<base*>(this)} { }
 
 			template<typename T, auto N>
-			nik_ce array(const T (&a)[N]) : base{} { method().push(a, a + N); }
+			nik_ce array(const T (&a)[N]) : base{}, base_method{static_cast<base*>(this)}
+				{ base_method::push(a, a + N); }
+
+			using base_method::cbegin;
+			using base_method:: begin;
+			using base_method::size;
 
 			// equip:
 
@@ -406,11 +415,6 @@ namespace cctmp {
 
 				template<typename Method>
 				nik_ce auto equip() -> Method { return facade_type{this}; }
-
-			// method:
-
-				nik_ce auto cmethod() const { return cequip< cmethod_type >(); }
-				nik_ce auto  method()       { return  equip<  method_type >(); }
 	};
 
 /***********************************************************************************************************************/
@@ -448,7 +452,7 @@ namespace cctmp {
 			nik_ce unique_array() : base{} { }
 
 			template<typename T, auto N>
-			nik_ce unique_array(const T (&a)[N]) : base{} { base::method().push(a, a + N); }
+			nik_ce unique_array(const T (&a)[N]) : base{a} { }
 	};
 
 /***********************************************************************************************************************/
@@ -496,8 +500,6 @@ namespace cctmp {
 
 			template<typename T, auto N>
 			nik_ce ctable(const T (&a)[N]) : base{a} { }
-
-			nik_ce auto operator [] (size_ctype n) const { return base::cmethod().row_cbegin(n); }
 	};
 
 /***********************************************************************************************************************/
@@ -548,9 +550,6 @@ namespace cctmp {
 
 			template<typename T, auto N>
 			nik_ce table(const T (&a)[N]) : base{a} { }
-
-			nik_ce auto operator [] (size_ctype n) const { return base::cmethod().row_cbegin(n); }
-			nik_ce auto operator [] (size_ctype n)       { return base:: method().row_begin(n); }
 	};
 
 /***********************************************************************************************************************/

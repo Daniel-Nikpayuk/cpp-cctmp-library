@@ -125,12 +125,10 @@ namespace cctmp {
 
 		nik_ce void push(size_ctype n, size_ctype t, size_ctype p = 0, size_ctype m = 0)
 		{
-			auto table_method = base::method();
-
-			table_method.push(n);
-			table_method.push(t);
-			table_method.push(p);
-			table_method.push(m);
+			base::push(n);
+			base::push(t);
+			base::push(p);
+			base::push(m);
 		}
 	};
 
