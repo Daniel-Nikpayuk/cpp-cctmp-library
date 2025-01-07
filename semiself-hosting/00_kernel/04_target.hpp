@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// array:
+// target:
 
 namespace cctmp {
 
@@ -25,14 +25,14 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// model:
+// model (base):
 
 /***********************************************************************************************************************/
 
 // immutable:
 
 	template<typename Type, typename SizeType>
-	class array_cmodel
+	class target_cmodel
 	{
 		public:
 
@@ -186,8 +186,6 @@ namespace cctmp {
 
 // facade:
 
-	// required for shallow copies of arrays when calling equip.
-
 /***********************************************************************************************************************/
 
 // immutable:
@@ -241,6 +239,9 @@ namespace cctmp {
 
 			nik_ce array_cfacade() : model{} { }
 			nik_ce array_cfacade(model_ctype_cptr m) : model{m} { }
+
+			template<typename CMethod>
+			nik_ce auto cpivot() const -> CMethod { return array_cfacade{model}; }
 
 			// initial:
 
@@ -316,10 +317,6 @@ namespace cctmp {
 			using size_type			= typename Model::size_type;
 			using size_ctype		= typename Model::size_ctype;
 
-		public:
-
-			nik_ces size_type length() { return Model::length(); }
-
 		protected:
 
 			model_type_ptr model;
@@ -328,6 +325,12 @@ namespace cctmp {
 
 			nik_ce array_facade() : model{} { }
 			nik_ce array_facade(model_type_cptr m) : model{m} { }
+
+			template<typename CMethod>
+			nik_ce auto cpivot() const -> CMethod { return array_cfacade<Model>{model}; }
+
+			template<typename Method>
+			nik_ce auto pivot() -> Method { return array_facade{model}; }
 
 			// initial:
 
@@ -385,7 +388,7 @@ namespace cctmp {
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model const*>(this)}; }
+					{ return cfacade_type{static_cast<base*>(this)}; }
 	};
 
 /***********************************************************************************************************************/
@@ -464,11 +467,11 @@ namespace cctmp {
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model const*>(this)}; }
+					{ return cfacade_type{static_cast<base*>(this)}; }
 
 				template<typename Method>
 				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<model*>(this)}; }
+					{ return facade_type{static_cast<base*>(this)}; }
 	};
 
 /***********************************************************************************************************************/

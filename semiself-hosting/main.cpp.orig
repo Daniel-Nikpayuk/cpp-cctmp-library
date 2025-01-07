@@ -25,8 +25,18 @@
 #include"define_macros.hpp"
 
 #include"include/00_kernel.hpp"
+//#include"include/01_inventory.hpp"
+#include"include/02_engine.hpp"
+//#include"include/03_encoding.hpp"
+//#include"include/04_fileput.hpp"
+//#include"include/05_lexer.hpp"
+//#include"include/06_parser.hpp"
+//#include"include/07_chord.hpp"
+//#include"include/08_hustle.hpp"
 
 #include"undef_macros.hpp"
+
+//#include"testing/diagnostic.hpp"
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -35,36 +45,44 @@
 
 /***********************************************************************************************************************/
 
-	constexpr auto make_plot()
-	{
-		using size_type = unsigned long;
-		using plot_type = plot<size_type, size_type, 5, 7, 3, 5>;
-		using method0   = resolve_method<plot_type, array_method>;
+//	using size_type = gindex_type;
+//	using text_type = int;
+//	using page_type = engine::plot_page_type<size_type>;
+//	using plot_type = engine::plot<page_type, text_type, size_type, 2, 2>;
 
-		auto rtn_plot   = plot_type{};
-		auto subarr0    = rtn_plot.template equip<method0>(0);
+//	constexpr auto make_plot()
+//	{
+//		auto p = plot_type{};
 
-		subarr0.fullsize();
-		subarr0[0] = 5;
-		subarr0[1] = 7;
-		subarr0[2] = 2;
-		subarr0[3] = 3;
-		subarr0[4] = 4;
+	//	p.upsize();
 
-		return rtn_plot;
-	}
+	//	p.begin()->upsize();
 
-	constexpr auto plot0 = make_plot();
+//		return p;
+//	}
+
+//	constexpr auto plot0 = make_plot();
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		using cmethod0 = resolve_cmethod<decltype(plot0), print_cmethod>;
+	//	for (auto k = plot0.cbegin(); k != plot0.cend(); ++k);
+	//		printf("%d ", k->size());
 
-			auto print0 = plot0.template cequip<cmethod0>(0);
+	//	printf("\n");
 
-			print0.as_set(); // prints: { 0, 5, 12, 15, 20 }
+	//	constexpr auto parsed = parser_main();
+
+	//	printf("nonterminal size: %d\n", parsed.ctree().cscript().cnonterminal().size());
+	//	printf("symbol size: %d\n", parsed.ctree().cscript().csymbol().cpage().size());
+
+	//	printf("%f\n", inventory_square_root_v0<gindex_type>(2.0));
+
+	//	auto arr0 = array<int, gindex_type, 5>{{1, 2, 3, 4, 5}};
+	//	auto arr1 = array<int, gindex_type, 5>{{1, 2, 3, 0, 5}};
+
+	//	printf("%d\n", inventory_different_v0<gindex_type>(arr0.cbegin(), arr0.cend(), arr1.cbegin()));
 
 		return 0;
 	}

@@ -93,8 +93,12 @@ namespace engine {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using cfacade_type		= plot_cfacade<cplot, base::order()>;
+			using cfacade_type		= plot_cfacade<base, base::order()>;
 			using cmethod_type		= array_cmethod<cfacade_type>;
+
+		protected:
+
+			nik_ce auto capex_ptr() const { return base::template cbegin<base::apex()>(); }
 
 		public:
 
@@ -105,7 +109,7 @@ namespace engine {
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{this, base::template cbegin<base::apex()>()}; }
+					{ return cfacade_type{static_cast<base*>(this), capex_ptr()}; }
 
 			// method:
 
@@ -127,11 +131,16 @@ namespace engine {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using cfacade_type		= plot_cfacade<plot, base::order()>;
+			using cfacade_type		= plot_cfacade<base, base::order()>;
 			using cmethod_type		= array_cmethod<cfacade_type>;
 
-			using facade_type		= plot_facade<plot, base::order()>;
+			using facade_type		= plot_facade<base, base::order()>;
 			using method_type		= array_method<facade_type>;
+
+		protected:
+
+			nik_ce auto capex_ptr() const { return base::template cbegin<base::apex()>(); }
+			nik_ce auto  apex_ptr()       { return base::template  begin<base::apex()>(); }
 
 		public:
 
@@ -142,11 +151,11 @@ namespace engine {
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{this, base::template cbegin<base::apex()>()}; }
+					{ return cfacade_type{static_cast<base*>(this), capex_ptr()}; }
 
 				template<typename Method>
 				nik_ce auto equip() -> Method
-					{ return facade_type{this, base::template begin<base::apex()>()}; }
+					{ return facade_type{static_cast<base*>(this), apex_ptr()}; }
 
 			// method:
 

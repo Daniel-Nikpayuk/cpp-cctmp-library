@@ -228,6 +228,9 @@ namespace cctmp {
 
 				nik_ce size_type right_size(iter_ctype_ref i) const { return end() - i; }
 
+				nik_ce bool is_full  () const { return (base::size() == base::length()); }
+				nik_ce bool not_full () const { return (base::size() != base::length()); }
+
 				nik_ce deref_type_ref operator [] (size_ctype n) { return at(n); }
 
 				nik_ce void clear() { base::set_size(0); }
@@ -473,6 +476,112 @@ namespace cctmp {
 
 			nik_ce citer_type operator [] (size_ctype n) const { return row_cbegin(n); }
 			nik_ce  iter_type operator [] (size_ctype n)       { return row_begin(n); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// ring:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+/*
+	template<typename Facade>
+	class ring_cmethod : public array_cmethod<Facade>
+	{
+		public:
+
+			using base			= array_cmethod<Facade>;
+
+			using type			= typename base::type;
+			using type_ptr			= typename base::type_ptr;
+			using type_cptr			= typename base::type_cptr;
+			using type_ref			= typename base::type_ref;
+
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
+
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+		public:
+
+			nik_ce ring_cmethod() : base{} { }
+			nik_ce ring_cmethod(const Facade & f) : base{f} { }
+
+			// size:
+
+				nik_ce size_type size() const
+				{
+					printf("{ ");
+
+					for (auto k = base::cbegin(); k != base::clast(); ++k)
+					{
+						printf(s, *k);
+						printf(", ");
+					}
+
+					printf(s, *base::clast());
+					printf(" }\n");
+				}
+	};
+*/
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// print:
+
+	// move this class code to fileput.
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	// assumptions:
+
+	template<typename Facade>
+	class print_cmethod : public array_cmethod<Facade>
+	{
+		public:
+
+			using base			= array_cmethod<Facade>;
+
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
+
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+		public:
+
+			nik_ce print_cmethod() : base{} { }
+			nik_ce print_cmethod(const Facade & f) : base{f} { }
+
+			// set:
+
+				nik_ce void as_set(const char* s = "%d") const
+				{
+					if (base::cbegin() != base::cend())
+					{
+						printf("{ ");
+
+						for (auto k = base::cbegin(); k != base::clast(); ++k)
+						{
+							printf(s, *k);
+							printf(", ");
+						}
+
+						printf(s, *base::clast());
+						printf(" }\n");
+					}
+				}
 	};
 
 /***********************************************************************************************************************/

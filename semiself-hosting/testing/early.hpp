@@ -25,6 +25,99 @@
 // experimental:
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// struct cast (failed):
+
+// base:
+
+	template<auto> struct A;
+
+	template<>
+	struct A<0>
+	{
+		unsigned char initial[2];
+
+		constexpr A() : initial{1, 0} { }
+
+		unsigned char operator [] (unsigned n) const { return initial[n]; }
+	};
+
+/***********************************************************************************************************************/
+
+// derived:
+
+	template<>
+	struct A<1>
+	{
+		unsigned short initial[1];
+
+		constexpr A() : initial{} { }
+
+		constexpr A(const A<0> & a) : initial{a.initial} { }
+
+		unsigned short operator [] (unsigned n) const { return initial[n]; }
+	};
+
+/***********************************************************************************************************************/
+
+// main:
+
+		A<0> a;
+
+		A<1> b = a;
+
+		printf("{ %d, %d }\n", a[0], a[1]);
+		printf("{ %d }\n", b[0]);
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// type tuple (failed):
+
+/***********************************************************************************************************************/
+
+// base:
+
+	struct type_tuple_base { virtual constexpr void value() const { } };
+
+/***********************************************************************************************************************/
+
+// derived:
+
+	template<typename Type>
+	struct type_tuple_derived : public type_tuple_base { constexpr Type value() const { return Type{}; } };
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename SizeType, typename... Types>
+	struct type_tuple
+	{
+		using size_type		= typename alias<SizeType>::type;
+		using size_ctype	= typename alias<SizeType>::ctype;
+
+		using array_type	= array<type_tuple_base*, SizeType, sizeof...(Types)>;
+		using tuple_type	= tuple<SizeType, type_tuple_derived<Types>...>;
+
+		array_type arr;
+		tuple_type tup;
+
+		constexpr type_tuple() : type_tuple(segment_<sizeof...(Types)>) { }
+
+		template<auto... Is>
+		constexpr type_tuple(void(*)(T_pack_Vs<Is...>*)) : tup{type_tuple_derived<Types>{}...}
+			{ (assign<Types, Is>(), ...); }
+
+		template<typename Type, auto N>
+		constexpr void assign() { arr[N] = &tup.template cvalue<N>(); }
+	};
+
+	constexpr auto tup0 = type_tuple<gindex_type, int, char, double>{};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // rvalue reference:
 
