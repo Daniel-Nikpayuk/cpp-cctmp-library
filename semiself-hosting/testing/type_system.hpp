@@ -27,6 +27,40 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// plot:
+
+	constexpr auto make_plot()
+	{
+		using size_type = unsigned long;
+		using plot_type = plot<size_type, size_type, 5, 7, 3, 5>;
+		using method0   = resolve_method<plot_type, array_method>;
+
+		auto rtn_plot   = plot_type{};
+		auto subarr0    = rtn_plot.template equip<method0>(0);
+
+		subarr0.fullsize();
+		subarr0[0] = 5;
+		subarr0[1] = 7;
+		subarr0[2] = 2;
+		subarr0[3] = 3;
+		subarr0[4] = 4;
+
+		return rtn_plot;
+	}
+
+	constexpr auto plot0 = make_plot();
+
+	// main:
+
+		using cmethod0 = resolve_cmethod<decltype(plot0), print_cmethod>;
+
+		auto print0 = plot0.template cequip<cmethod0>(0);
+
+		print0.as_set(); // prints: { 0, 5, 12, 15, 20 }
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // logo cstart:
 
 	// main:

@@ -17,10 +17,11 @@
 **
 ************************************************************************************************************************/
 
-#include"../00_kernel/00_grammar.hpp"
-#include"../00_kernel/01_method.hpp"
-#include"../00_kernel/02_array.hpp"
-#include"../00_kernel/03_discourse.hpp"
-#include"../00_kernel/04_system.hpp"
-//#include"../00_kernel/05_target.hpp"
+#include"../01_assembly/00_argument.hpp"
+#include"../01_assembly/01_parameter.hpp"
+#include"../01_assembly/02_variadic.hpp"
+#include"../01_assembly/03_machine.hpp"
+#include"../01_assembly/04_constant.hpp"
+#include"../01_assembly/05_application.hpp"
+#include"../01_assembly/06_conditional.hpp"
 
