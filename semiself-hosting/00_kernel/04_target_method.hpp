@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// discourse:
+// target method:
 
 namespace cctmp {
 
@@ -35,7 +35,7 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
-			ring, flex, tuple, cotuple, function, list, identity, exists, forall,
+			ring, flex, tuple, cotuple, function, null, list, identity, exists, forall, custom,
 			dimension
 		};
 	};
@@ -56,18 +56,23 @@ namespace cctmp {
 
 			using base			= Facade;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
+		//	using type			= typename base::type;
+		//	using type_ptr			= typename base::type_ptr;
+		//	using type_cptr			= typename base::type_cptr;
+		//	using type_ref			= typename base::type_ref;
 
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
+		//	using ctype			= typename base::ctype;
+		//	using ctype_ptr			= typename base::ctype_ptr;
+		//	using ctype_cptr		= typename base::ctype_cptr;
+		//	using ctype_ref			= typename base::ctype_ref;
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
+
+		protected:
+
+		//	using page_cmethod		= typename base::above_cmethod;
+		//	using text_cmethod		= typename base::below_cmethod;
 
 		public:
 
@@ -92,35 +97,26 @@ namespace cctmp {
 
 			using base			= logo_ring_cmethod<Facade>;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
+		//	using type			= typename base::type;
+		//	using type_ptr			= typename base::type_ptr;
+		//	using type_cptr			= typename base::type_cptr;
+		//	using type_ref			= typename base::type_ref;
 
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
+		//	using ctype			= typename base::ctype;
+		//	using ctype_ptr			= typename base::ctype_ptr;
+		//	using ctype_cptr		= typename base::ctype_cptr;
+		//	using ctype_ref			= typename base::ctype_ref;
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
 		protected:
 
-		//	using term_cmethod		= resolve_cmethod<terminal_type, array_cmethod>;
-		//	using term_method		= resolve_method <terminal_type, array_method>;
+		//	using page_cmethod		= typename base::page_cmethod;
+		//	using page_method		= typename base::base::above_method;
 
-		//	nik_ce void overlay(size_ctype name)
-		//	{
-		//		auto sub_cterm = terminal.template cequip<term_cmethod>(name);
-
-		//		if (sub_cterm.not_full())
-		//		{
-		//			auto sub_term = terminal.template equip<term_method>(name);
-
-		//			sub_term.push(initial.size());
-		//		}
-		//	}
+		//	using text_cmethod		= typename base::text_cmethod;
+		//	using text_method		= typename base::base::below_cmethod;
 
 		public:
 
@@ -129,16 +125,29 @@ namespace cctmp {
 
 			// :
 
-			// :
+			// overlay:
 
-			//	nik_ce iter_type iter(size_ctype n) { return base::begin() + n; }
+				// overlay is just the overlay.
+				// add in methods for setting the "field" values.
 
-			//	nik_ce size_type overlay_ring(size_ctype n)
-			//	{
-			//		overlay(LogoName::ring);
+				nik_ce size_type overlay(size_ctype bits)
+				{
+					base::overlay(LogoName::ring);
 
-			//		return 0;
-			//	}
+					// text is_full ?
+
+					// specifically make a subarray method (adjusts for size) ?
+
+					auto offset = base::text().size();
+					auto text_m = base::text().iter(offset);
+
+					base::text().upsize(3);
+
+					text_m[0] = LogoName::ring;
+					text_m[1] = bits;
+
+					return offset;
+				}
 	};
 
 /***********************************************************************************************************************/

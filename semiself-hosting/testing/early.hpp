@@ -187,10 +187,13 @@
 		a10.downsize();
 		a10.push(4);
 
+		print_array(a10);
+
 		using method0 = resolve_method<arr_type, unique_method>;
 
 		auto m10 = a10.template equip<method0>();
 
+		m10.clear();
 		m10.push(2);
 		m10.push(3);
 		m10.push(2);

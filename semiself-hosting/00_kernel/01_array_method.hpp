@@ -17,7 +17,9 @@
 **
 ************************************************************************************************************************/
 
-// method:
+// array method:
+
+	// these methods are intended for compile time, as such they avoid multiple inheritance.
 
 namespace cctmp {
 
@@ -31,16 +33,26 @@ namespace cctmp {
 
 // resolve:
 
-	template<typename Container, template<typename> typename CMethod>
-	using resolve_cmethod = CMethod<typename Container::cfacade_type>;
+	// immutable:
 
-	template<typename Container, template<typename> typename Method>
-	using resolve_method = Method<typename Container::facade_type>;
+		template<typename Container, template<typename> typename CMethod>
+		using resolve_csubmethod = CMethod<typename Container::csubfacade_type>;
+
+		template<typename Container, template<typename> typename CMethod>
+		using resolve_cmethod = CMethod<typename Container::cfacade_type>;
+
+	// mutable:
+
+		template<typename Container, template<typename> typename Method>
+		using resolve_submethod = Method<typename Container::subfacade_type>;
+
+		template<typename Container, template<typename> typename Method>
+		using resolve_method = Method<typename Container::facade_type>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// array:
+// subarray:
 
 /***********************************************************************************************************************/
 
@@ -49,14 +61,15 @@ namespace cctmp {
 	// assumptions:
 
 		// base:: { type, citer_type, cderef_type, size_type }
-		// base:: { cbegin(), size() }
+		// base:: { cbegin() }
 
-	template<typename Facade>
-	class array_cmethod : public Facade
+	template<typename Base>
+	class subarray_cmethod_disjoint : public Base
 	{
 		public:
 
-			using base			= Facade;
+			using base			= Base;
+			using facade			= typename base::facade;
 
 			using type			= typename base::type;
 			using type_ptr			= typename base::type_ptr;
@@ -86,31 +99,16 @@ namespace cctmp {
 
 		public:
 
-			nik_ce array_cmethod() : base{} { }
-			nik_ce array_cmethod(const Facade & f) : base{f} { }
+			nik_ce subarray_cmethod_disjoint() : base{} { }
+			nik_ce subarray_cmethod_disjoint(const facade & f) : base{f} { }
 
 			// initial:
 
-				nik_ce citer_type origin() const { return base::cbegin(); }
+				nik_ce citer_type citer(size_ctype n) const { return base::cbegin() + n; }
 
 				nik_ce size_type left_size(citer_ctype_ref i) const { return i - base::cbegin(); }
 
-				nik_ce citer_type citer(size_ctype n) const { return base::cbegin() + n; }
-
 				nik_ce cderef_ctype_ref cat(size_ctype n) const { return *citer(n); }
-
-				nik_ce citer_type find(ctype_ref v) const
-				{
-					citer_type in = base::cbegin();
-
-					while (in != cend()) { if (*in == v) { break; } else { ++in; } }
-
-					return in;
-				}
-
-				nik_ce size_type left_find(ctype_ref v) const { return left_size(find(v)); }
-				nik_ce bool contains(ctype_ref v) const { return (find(v) != cend()); }
-				nik_ce bool omits(ctype_ref v) const { return not contains(v); }
 
 				template<typename In, typename End>
 				nik_ce bool equal(size_ctype n, In in, End end) const
@@ -144,11 +142,170 @@ namespace cctmp {
 
 				nik_ce size_type right_size(citer_ctype_ref i) const { return cend() - i; }
 
-				nik_ce size_type right_find(ctype_ref v) const { return right_size(find(v)); }
-
 				nik_ce bool is_empty  () const { return (base::size() == 0); }
 				nik_ce bool not_empty () const { return (base::size() != 0); }
+
+				nik_ce citer_type find(ctype_ref v) const
+				{
+					citer_type in = base::cbegin();
+
+					while (in != cend()) { if (*in == v) { break; } else { ++in; } }
+
+					return in;
+				}
+
+				nik_ce size_type left_find(ctype_ref v) const { return left_size(find(v)); }
+				nik_ce size_type right_find(ctype_ref v) const { return right_size(find(v)); }
+				nik_ce bool contains(ctype_ref v) const { return (find(v) != cend()); }
+				nik_ce bool omits(ctype_ref v) const { return not contains(v); }
 	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using subarray_cmethod =
+			subarray_cmethod_disjoint < Facade >;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	// assumptions:
+
+		// base:: { iter_type, deref_type }
+		// base:: { begin() }
+
+	template<typename Base>
+	class subarray_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			using type			= typename base::type;
+			using type_ptr			= typename base::type_ptr;
+			using type_cptr			= typename base::type_cptr;
+			using type_ref			= typename base::type_ref;
+
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
+
+			using iter_type			= typename base::iter_type;
+			using iter_ctype_ref		= typename base::iter_ctype_ref;
+
+			using deref_type		= typename base::deref_type;
+			using deref_type_ptr		= typename base::deref_type_ptr;
+			using deref_type_cptr		= typename base::deref_type_cptr;
+			using deref_type_ref		= typename base::deref_type_ref;
+
+			using deref_ctype		= typename base::deref_ctype;
+			using deref_ctype_ptr		= typename base::deref_ctype_ptr;
+			using deref_ctype_cptr		= typename base::deref_ctype_cptr;
+			using deref_ctype_ref		= typename base::deref_ctype_ref;
+
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+		public:
+
+			nik_ce subarray_method_disjoint() : base{} { }
+			nik_ce subarray_method_disjoint(const facade & f) : base{f} { }
+
+			// immutable:
+
+				using base::left_size;
+				using base::right_size;
+				using base::operator [];
+
+			// mutable:
+
+				nik_ce iter_type iter(size_ctype n) { return base::begin() + n; }
+
+				nik_ce size_type left_size(iter_ctype_ref i) const { return i - base::begin(); }
+
+				nik_ce iter_type end  () { return iter(base::size()); }
+				nik_ce iter_type last () { return end() - 1; }
+
+				nik_ce size_type right_size(iter_ctype_ref i) const { return end() - i; }
+
+				nik_ce deref_type_ref at(size_ctype n) { return *iter(n); }
+
+				nik_ce deref_type_ref operator [] (size_ctype n) { return at(n); }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using subarray_method =
+			subarray_method_disjoint  <
+			subarray_cmethod_disjoint < Facade >>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// array:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	// assumptions:
+
+		// base:: { size() }
+
+	template<typename Base>
+	class array_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			using type			= typename base::type;
+			using type_ptr			= typename base::type_ptr;
+			using type_cptr			= typename base::type_cptr;
+			using type_ref			= typename base::type_ref;
+
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
+
+			using citer_type		= typename base::citer_type;
+			using citer_ctype_ref		= typename base::citer_ctype_ref;
+
+			using cderef_type		= typename base::cderef_type;
+			using cderef_type_ptr		= typename base::cderef_type_ptr;
+			using cderef_type_cptr		= typename base::cderef_type_cptr;
+			using cderef_type_ref		= typename base::cderef_type_ref;
+
+			using cderef_ctype		= typename base::cderef_ctype;
+			using cderef_ctype_ptr		= typename base::cderef_ctype_ptr;
+			using cderef_ctype_cptr		= typename base::cderef_ctype_cptr;
+			using cderef_ctype_ref		= typename base::cderef_ctype_ref;
+
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+		public:
+
+			nik_ce array_cmethod_disjoint() : base{} { }
+			nik_ce array_cmethod_disjoint(const facade & f) : base{f} { }
+
+			// initial:
+
+				nik_ce citer_type origin() const { return base::cbegin(); }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using array_cmethod =
+			   array_cmethod_disjoint <
+			subarray_cmethod_disjoint < Facade >>;
 
 /***********************************************************************************************************************/
 
@@ -159,12 +316,13 @@ namespace cctmp {
 		// base:: { iter_type, deref_type }
 		// base:: { length(), begin(), set_size(size_ctype) }
 
-	template<typename Facade>
-	class array_method : public array_cmethod<Facade>
+	template<typename Base>
+	class array_method_disjoint : public Base
 	{
 		public:
 
-			using base			= array_cmethod<Facade>;
+			using base			= Base;
+			using facade			= typename base::facade;
 
 			using type			= typename base::type;
 			using type_ptr			= typename base::type_ptr;
@@ -203,35 +361,16 @@ namespace cctmp {
 
 		public:
 
-			nik_ce array_method() : base{} { }
-			nik_ce array_method(const Facade & f) : base{f} { }
+			nik_ce array_method_disjoint() : base{} { }
+			nik_ce array_method_disjoint(const facade & f) : base{f} { }
 
 			template<typename T, auto N>
-			nik_ce array_method(const T (&a)[N]) : base{} { assign(a); }
-
-			// immutable:
-
-				using base::operator [];
-				using base::left_size;
-				using base::right_size;
+			nik_ce array_method_disjoint(const T (&a)[N]) : base{} { assign(a); }
 
 			// mutable:
 
-				nik_ce size_type left_size(iter_ctype_ref i) const { return i - base::begin(); }
-
-				nik_ce iter_type iter(size_ctype n) { return base::begin() + n; }
-
-				nik_ce deref_type_ref at(size_ctype n) { return *iter(n); }
-
-				nik_ce iter_type end  () { return iter(base::size()); }
-				nik_ce iter_type last () { return end() - 1; }
-
-				nik_ce size_type right_size(iter_ctype_ref i) const { return end() - i; }
-
 				nik_ce bool is_full  () const { return (base::size() == base::length()); }
 				nik_ce bool not_full () const { return (base::size() != base::length()); }
-
-				nik_ce deref_type_ref operator [] (size_ctype n) { return at(n); }
 
 				nik_ce void clear() { base::set_size(0); }
 				nik_ce void fullsize() { base::set_size(base::length()); }
@@ -239,9 +378,9 @@ namespace cctmp {
 				nik_ce void downsize(size_ctype n = 1) { base::set_size(base::size() - n); }
 
 				nik_ce void push(ctype_ref v)
-					{ size_ctype s = base::size(); upsize(); *iter(s) = v; }
+					{ size_ctype s = base::size(); upsize(); *base::iter(s) = v; }
 
-				nik_ce deref_type pop() { downsize(); return *iter(base::size()); }
+				nik_ce deref_type pop() { downsize(); return *base::end(); }
 
 				template<typename In, typename End>
 				nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }
@@ -250,6 +389,14 @@ namespace cctmp {
 				nik_ce void pushmap(F, In in, End end)
 					{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
 	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using array_method =
+			   array_method_disjoint <
+			subarray_method_disjoint <
+			   array_cmethod         < Facade >>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -261,43 +408,7 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class unique_cmethod : public array_cmethod<Facade>
-	{
-		public:
-
-			using base			= array_cmethod<Facade>;
-
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
-
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
-
-			using citer_type		= typename base::citer_type;
-			using citer_ctype_ref		= typename base::citer_ctype_ref;
-
-			using cderef_type		= typename base::cderef_type;
-			using cderef_type_ptr		= typename base::cderef_type_ptr;
-			using cderef_type_cptr		= typename base::cderef_type_cptr;
-			using cderef_type_ref		= typename base::cderef_type_ref;
-
-			using cderef_ctype		= typename base::cderef_ctype;
-			using cderef_ctype_ptr		= typename base::cderef_ctype_ptr;
-			using cderef_ctype_cptr		= typename base::cderef_ctype_cptr;
-			using cderef_ctype_ref		= typename base::cderef_ctype_ref;
-
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
-
-		public:
-
-			nik_ce unique_cmethod() : base{} { }
-			nik_ce unique_cmethod(const Facade & f) : base{f} { }
-	};
+	using unique_cmethod = array_cmethod<Facade>;
 
 /***********************************************************************************************************************/
 
@@ -476,112 +587,6 @@ namespace cctmp {
 
 			nik_ce citer_type operator [] (size_ctype n) const { return row_cbegin(n); }
 			nik_ce  iter_type operator [] (size_ctype n)       { return row_begin(n); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// ring:
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-/*
-	template<typename Facade>
-	class ring_cmethod : public array_cmethod<Facade>
-	{
-		public:
-
-			using base			= array_cmethod<Facade>;
-
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
-
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
-
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
-
-		public:
-
-			nik_ce ring_cmethod() : base{} { }
-			nik_ce ring_cmethod(const Facade & f) : base{f} { }
-
-			// size:
-
-				nik_ce size_type size() const
-				{
-					printf("{ ");
-
-					for (auto k = base::cbegin(); k != base::clast(); ++k)
-					{
-						printf(s, *k);
-						printf(", ");
-					}
-
-					printf(s, *base::clast());
-					printf(" }\n");
-				}
-	};
-*/
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// print:
-
-	// move this class code to fileput.
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	// assumptions:
-
-	template<typename Facade>
-	class print_cmethod : public array_cmethod<Facade>
-	{
-		public:
-
-			using base			= array_cmethod<Facade>;
-
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
-
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
-
-		public:
-
-			nik_ce print_cmethod() : base{} { }
-			nik_ce print_cmethod(const Facade & f) : base{f} { }
-
-			// set:
-
-				nik_ce void as_set(const char* s = "%d") const
-				{
-					if (base::cbegin() != base::cend())
-					{
-						printf("{ ");
-
-						for (auto k = base::cbegin(); k != base::clast(); ++k)
-						{
-							printf(s, *k);
-							printf(", ");
-						}
-
-						printf(s, *base::clast());
-						printf(" }\n");
-					}
-				}
 	};
 
 /***********************************************************************************************************************/

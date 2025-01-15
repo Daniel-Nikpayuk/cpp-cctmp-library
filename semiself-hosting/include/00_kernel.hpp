@@ -18,9 +18,10 @@
 ************************************************************************************************************************/
 
 #include"../00_kernel/00_grammar.hpp"
-#include"../00_kernel/01_method.hpp"
-#include"../00_kernel/02_array.hpp"
-#include"../00_kernel/03_discourse.hpp"
-#include"../00_kernel/04_system.hpp"
-//#include"../00_kernel/05_target.hpp"
+#include"../00_kernel/01_array_method.hpp"
+#include"../00_kernel/02_array_class.hpp"
+#include"../00_kernel/03_logo_method.hpp"
+//#include"../00_kernel/04_target_method.hpp"
+//#include"../00_kernel/05_corpus_method.hpp"
+#include"../00_kernel/06_corpus_class.hpp"
 

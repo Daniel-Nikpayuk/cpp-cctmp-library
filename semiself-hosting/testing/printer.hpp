@@ -17,52 +17,62 @@
 **
 ************************************************************************************************************************/
 
-#include<cstdio>
-//#include<cstdlib>
-
-/***********************************************************************************************************************/
-
-#include"define_macros.hpp"
-
-#include"include/00_kernel.hpp"
-
-#include"undef_macros.hpp"
-
-#include"testing/printer.hpp"
+// printer:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-	using namespace cctmp;
+// print:
+
+	// does not accept compile time objects.
+	// maybe move this class code to fileput?
+
+	// might be better to declare constexpr static
+	// and take the base type as input.
 
 /***********************************************************************************************************************/
 
-	constexpr auto make_ring()
+// immutable:
+
+	// assumptions:
+
+	template<typename Facade>
+	class print_cmethod : public cctmp::array_cmethod<Facade>
 	{
-		using size_type = unsigned long;
-		using logo_type = logo<size_type, size_type, 20, 5, 7, 3, 5>;
-		using method0   = resolve_method<logo_type, logo_ring_method>;
+		public:
 
-		auto logo_val   = logo_type{};
-		auto ring_m     = logo_val.template equip<method0>();
+			using base			= cctmp::array_cmethod<Facade>;
 
-		ring_m.overlay(8);
+			using ctype			= typename base::ctype;
+			using ctype_ptr			= typename base::ctype_ptr;
+			using ctype_cptr		= typename base::ctype_cptr;
+			using ctype_ref			= typename base::ctype_ref;
 
-		return logo_val;
-	}
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
 
-	constexpr auto logo0 = make_ring();
+		public:
 
-/***********************************************************************************************************************/
+			constexpr print_cmethod() : base{} { }
+			constexpr print_cmethod(const Facade & f) : base{f} { }
 
-	int main(int argc, char *argv[])
-	{
-		using cmethod0 = resolve_cmethod<typename decltype(logo0)::base::initial_type, print_cmethod>;
+			// set:
 
-		auto print0 = logo0.ctext()->template cequip<cmethod0>();
+				constexpr void as_set(const char* s = "%d") const
+				{
+					if (base::cbegin() != base::cend())
+					{
+						printf("{ ");
 
-		print0.as_set(); // prints: { 0, 8, 0 }
+						for (auto k = base::cbegin(); k != base::clast(); ++k)
+						{
+							printf(s, *k);
+							printf(", ");
+						}
 
-		return 0;
-	}
+						printf(s, *base::clast());
+						printf(" }\n");
+					}
+				}
+	};
 
