@@ -32,6 +32,18 @@
 
 /***********************************************************************************************************************/
 
+// array:
+
+	template<typename Array>
+	constexpr void print_array(const Array & a, const char *s = "%d ")
+	{
+		for (auto k = a.cbegin(); k != a.cend(); ++k) printf(s, *k);
+
+		printf("\n");
+	}
+
+/***********************************************************************************************************************/
+
 // immutable:
 
 	// assumptions:
@@ -75,4 +87,18 @@
 					}
 				}
 	};
+
+/***********************************************************************************************************************/
+
+// set:
+
+	template<typename Logo>
+	constexpr void print_as_set(const Logo & l)
+	{
+		using text_type = typename Logo::base::text_type;
+		using cmethod0  = cctmp::resolve_cmethod<text_type, print_cmethod>;
+		auto print_logo = l.ctext()->template cequip<cmethod0>();
+
+		print_logo.as_set(); // prints: { 0, 8, 0 }
+	}
 

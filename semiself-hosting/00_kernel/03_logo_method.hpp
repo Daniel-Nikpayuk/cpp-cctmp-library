@@ -27,6 +27,8 @@ namespace cctmp {
 
 // logo:
 
+	// should an enum type be added?
+
 /***********************************************************************************************************************/
 
 // names:
@@ -36,14 +38,61 @@ namespace cctmp {
 		enum : gkey_type
 		{
 			ring, flex, tuple, cotuple, function, null, list, identity, exists, forall, custom,
-			dimension
+
+			dimension, fail // fail is symbolic only.
 		};
+	};
+
+/***********************************************************************************************************************/
+
+// gram:
+
+	template<typename SizeType>
+	class logo_gram
+	{
+		public:
+
+			using size_type		= typename alias<SizeType>::type;
+			using size_ctype	= typename alias<SizeType>::ctype;
+
+		protected:
+
+			size_type name;
+			size_type index;
+
+		public:
+
+			nik_ce logo_gram() : name{}, index{} { }
+			nik_ce logo_gram(size_ctype n, size_ctype i) : name{n}, index{i} { }
+
+			// name:
+
+				nik_ce size_type get_name() const { return name; }
+				nik_ce void set_name(size_ctype n) { name = n; }
+
+			// index:
+
+				nik_ce size_type get_index() const { return index; }
+				nik_ce void set_index(size_ctype i) { index = i; }
 	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // ring:
+
+/***********************************************************************************************************************/
+
+// names:
+
+	struct LogoRing
+	{
+		enum : gkey_type
+		{
+			name, bits,
+			dimension
+		};
+	};
 
 /***********************************************************************************************************************/
 
@@ -68,12 +117,6 @@ namespace cctmp {
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
-
-		protected:
-
-		//	using page_cmethod		= typename base::above_cmethod;
-		//	using text_cmethod		= typename base::below_cmethod;
-			using subtext_cmethod		= typename base::subbelow_cmethod;
 
 		public:
 
@@ -111,45 +154,43 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
+			using gram_type			= logo_gram<size_type>;
+			using gram_ctype_ref		= typename alias<gram_type>::ctype_ref;
+
 		protected:
 
-		//	using page_cmethod		= typename base::page_cmethod;
-		//	using page_method		= typename base::base::above_method;
+			nik_ce bool overlay_base() { return base::overlay(LogoName::ring, LogoRing::dimension); }
 
-		//	using text_cmethod		= typename base::text_cmethod;
-		//	using text_method		= typename base::base::below_method;
+			nik_ce auto initialize_base()
+				{ return base::initialize_last(LogoName::ring, LogoRing::name); }
 
-			using subtext_cmethod		= typename base::subtext_cmethod;
-			using subtext_method		= typename base::base::subbelow_method;
+			nik_ce auto fail_gram() const { return gram_type{LogoName::fail, 0}; }
+			nik_ce auto ring_gram(size_ctype pos) const { return gram_type{LogoName::ring, pos}; }
 
 		public:
 
 			nik_ce logo_ring_method() : base{} { }
 			nik_ce logo_ring_method(const Facade & f) : base{f} { }
 
-			// :
+			// mutable:
 
-			// overlay:
-
-				// overlay is just the overlay.
-				// add in methods for setting the "field" values.
-
-				nik_ce size_type overlay(size_ctype bits)
+				nik_ce auto initialize()
 				{
-					base::overlay(LogoName::ring);
+					if (not overlay_base()) return fail_gram();
 
-					// text is_full ?
-
-					auto offset = base::text().size();
-					base::text().upsize(3);
-
-					auto text_m = base::text().template right_equip<subtext_method>(offset);
-
-					text_m[0] = LogoName::ring;
-					text_m[1] = bits;
-
-					return offset;
+					return ring_gram(initialize_base());
 				}
+
+				// text:
+
+					 // unsafe, does not test against name().
+
+					nik_ce auto text_right_equip(gram_ctype_ref g)
+					{
+						auto page_cmethod = base::cpage_equip(LogoName::ring);
+
+						return base::text_right_equip(page_cmethod[g.get_index()]);
+					}
 	};
 
 /***********************************************************************************************************************/

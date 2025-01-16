@@ -150,16 +150,6 @@
 
 // array:
 
-	// print:
-
-		template<typename Array>
-		constexpr void print_array(const Array & a, const char *s = "%d ")
-		{
-			for (auto k = a.cbegin(); k != a.cend(); ++k) printf(s, *k);
-
-			printf("\n");
-		}
-
 	// spec:
 
 		using  arr_type =  array<int, gindex_type, 5>;

@@ -399,45 +399,45 @@ namespace cctmp {
 
 			using facade			= logo_model; // method compatible.
 
-			using initial_type		= array<Type, SizeType, Size>;
-			using initial_type_ptr		= typename alias<initial_type>::type_ptr;
-			using initial_ctype_ptr		= typename alias<initial_type>::ctype_ptr;
+			using page_type			= plot<SizeType, SizeType, Sizes...>;
+			using page_type_ptr		= typename alias<page_type>::type_ptr;
+			using page_ctype_ptr		= typename alias<page_type>::ctype_ptr;
 
-			using type			= typename initial_type::type;
-			using type_ptr			= typename initial_type::type_ptr;
-			using type_cptr			= typename initial_type::type_cptr;
-			using type_ref			= typename initial_type::type_ref;
+			using text_type			= array<Type, SizeType, Size>;
+			using text_type_ptr		= typename alias<text_type>::type_ptr;
+			using text_ctype_ptr		= typename alias<text_type>::ctype_ptr;
 
-			using ctype			= typename initial_type::ctype;
-			using ctype_ptr			= typename initial_type::ctype_ptr;
-			using ctype_cptr		= typename initial_type::ctype_cptr;
-			using ctype_ref			= typename initial_type::ctype_ref;
+			using type			= typename text_type::type;
+			using type_ptr			= typename text_type::type_ptr;
+			using type_cptr			= typename text_type::type_cptr;
+			using type_ref			= typename text_type::type_ref;
 
-			using size_type			= typename initial_type::size_type;
-			using size_ctype		= typename initial_type::size_ctype;
+			using ctype			= typename text_type::ctype;
+			using ctype_ptr			= typename text_type::ctype_ptr;
+			using ctype_cptr		= typename text_type::ctype_cptr;
+			using ctype_ref			= typename text_type::ctype_ref;
 
-			using terminal_type		= plot<size_type, size_type, Sizes...>;
-			using terminal_type_ptr		= typename alias<terminal_type>::type_ptr;
-			using terminal_ctype_ptr	= typename alias<terminal_type>::ctype_ptr;
+			using size_type			= typename text_type::size_type;
+			using size_ctype		= typename text_type::size_ctype;
 
 		protected:
 
-			initial_type initial;
-			terminal_type terminal;
+			page_type above;
+			text_type below;
 
 		public:
 
 			nik_ce logo_model() { }
 
-			// initial:
+			// above:
 
-				nik_ce initial_ctype_ptr ctext() const { return &initial; }
-				nik_ce  initial_type_ptr  text()       { return &initial; }
+				nik_ce page_ctype_ptr cpage() const { return &above; }
+				nik_ce  page_type_ptr  page()       { return &above; }
 
-			// terminal:
+			// below:
 
-				nik_ce terminal_ctype_ptr cpage() const { return &terminal; }
-				nik_ce  terminal_type_ptr  page()       { return &terminal; }
+				nik_ce text_ctype_ptr ctext() const { return &below; }
+				nik_ce  text_type_ptr  text()       { return &below; }
 	};
 
 /***********************************************************************************************************************/
@@ -456,38 +456,38 @@ namespace cctmp {
 
 			using facade			= logo_cfacade; // method compatible.
 
-			using above_type		= typename Model::terminal_type;
-			using above_ctype		= typename alias<above_type>::ctype;
-			using above_ctype_ptr		= typename alias<above_type>::ctype_ptr;
-			using above_ctype_cptr		= typename alias<above_type>::ctype_cptr;
-			using above_ctype_ref		= typename alias<above_type>::ctype_ref;
+			using page_type			= typename Model::page_type;
+			using page_ctype		= typename alias<page_type>::ctype;
+			using page_ctype_ptr		= typename alias<page_type>::ctype_ptr;
+			using page_ctype_cptr		= typename alias<page_type>::ctype_cptr;
+			using page_ctype_ref		= typename alias<page_type>::ctype_ref;
 
-			using below_type		= typename Model::initial_type;
-			using below_ctype		= typename alias<below_type>::ctype;
-			using below_ctype_ptr		= typename alias<below_type>::ctype_ptr;
-			using below_ctype_cptr		= typename alias<below_type>::ctype_cptr;
-			using below_ctype_ref		= typename alias<below_type>::ctype_ref;
+			using text_type			= typename Model::text_type;
+			using text_ctype		= typename alias<text_type>::ctype;
+			using text_ctype_ptr		= typename alias<text_type>::ctype_ptr;
+			using text_ctype_cptr		= typename alias<text_type>::ctype_cptr;
+			using text_ctype_ref		= typename alias<text_type>::ctype_ref;
 
 			using size_type			= typename Model::size_type;
 			using size_ctype		= typename Model::size_ctype;
 
 		protected:
 
-			above_ctype_ptr above;
-			below_ctype_ptr below;
+			page_ctype_ptr above;
+			text_ctype_ptr below;
 
 		public:
 
 			nik_ce logo_cfacade() : above{}, below{} { }
-			nik_ce logo_cfacade(above_ctype_cptr a, below_ctype_cptr b) : above{a}, below{b} { }
+			nik_ce logo_cfacade(page_ctype_cptr a, text_ctype_cptr b) : above{a}, below{b} { }
 
 			// above:
 
-				nik_ce above_ctype_ref cpage() const { return *above; }
+				nik_ce page_ctype_ref cpage() const { return *above; }
 
 			// below:
 
-				nik_ce below_ctype_ref ctext() const { return *below; }
+				nik_ce text_ctype_ref ctext() const { return *below; }
 	};
 
 /***********************************************************************************************************************/
@@ -501,62 +501,95 @@ namespace cctmp {
 
 			using facade			= logo_facade; // method compatible.
 
-			using above_type		= typename Model::terminal_type;
-			using above_type_ptr		= typename alias<above_type>::type_ptr;
-			using above_type_cptr		= typename alias<above_type>::type_cptr;
-			using above_type_ref		= typename alias<above_type>::type_ref;
-			using above_ctype_ref		= typename alias<above_type>::ctype_ref;
+			using page_type			= typename Model::page_type;
+			using page_type_ptr		= typename alias<page_type>::type_ptr;
+			using page_type_cptr		= typename alias<page_type>::type_cptr;
+			using page_type_ref		= typename alias<page_type>::type_ref;
+			using page_ctype_ref		= typename alias<page_type>::ctype_ref;
 
-			using below_type		= typename Model::initial_type;
-			using below_type_ptr		= typename alias<below_type>::type_ptr;
-			using below_type_cptr		= typename alias<below_type>::type_cptr;
-			using below_type_ref		= typename alias<below_type>::type_ref;
-			using below_ctype_ref		= typename alias<below_type>::ctype_ref;
+			using text_type			= typename Model::text_type;
+			using text_type_ptr		= typename alias<text_type>::type_ptr;
+			using text_type_cptr		= typename alias<text_type>::type_cptr;
+			using text_type_ref		= typename alias<text_type>::type_ref;
+			using text_ctype_ref		= typename alias<text_type>::ctype_ref;
 
 			using size_type			= typename Model::size_type;
 			using size_ctype		= typename Model::size_ctype;
 
 		protected:
 
-			above_type_ptr above;
-			below_type_ptr below;
+			page_type_ptr above;
+			text_type_ptr below;
 
 		protected:
 
-			using above_cmethod		= resolve_cmethod<above_type, array_cmethod>;
-			using above_method		= resolve_method <above_type,  array_method>;
+			using page_cmethod		= resolve_cmethod<page_type, array_cmethod>;
+			using page_method		= resolve_method <page_type,  array_method>;
 
-			using below_cmethod		= resolve_cmethod<below_type, array_cmethod>;
-			using below_method		= resolve_method <below_type,  array_method>;
+			using text_cmethod		= resolve_cmethod<text_type, array_cmethod>;
+			using text_method		= resolve_method <text_type,  array_method>;
 
-			using subbelow_cmethod		= resolve_csubmethod<below_type, subarray_cmethod>;
-			using subbelow_method		= resolve_submethod <below_type,  subarray_method>;
+			using subtext_cmethod		= resolve_csubmethod<text_type, subarray_cmethod>;
+			using subtext_method		= resolve_submethod <text_type,  subarray_method>;
 
-			nik_ce void overlay(size_ctype kind)
+			// above:
+
+				nik_ce auto cpage_equip(size_ctype n) const
+					{ return above->template cequip<page_cmethod>(n); }
+
+				nik_ce auto page_equip(size_ctype n) const
+					{ return above->template equip<page_method>(n); }
+
+			// below:
+
+				nik_ce auto ctext_equip() const
+					{ return below->template cequip<text_cmethod>(); }
+
+				nik_ce auto text_equip() const
+					{ return below->template equip<text_method>(); }
+
+				nik_ce auto ctext_right_equip(size_ctype n) const
+					{ return below->template right_cequip<subtext_cmethod>(n); }
+
+				nik_ce auto text_right_equip(size_ctype n) const
+					{ return below->template right_equip<subtext_method>(n); }
+
+		protected:
+
+			nik_ce bool overlay(size_ctype kind, size_ctype n)
 			{
-				auto subterm = above->template equip<above_method>(kind);
+				auto above_method = page_equip(kind);
 
-				if (subterm.not_full())
-				{
-					subterm.push(below->size());
-				}
-				// else error ?
+				if (above_method.is_full() || below->lacks_capacity(n)) return false;
+
+				above_method.push(below->expand(n));
+
+				return true;
+			}
+
+			nik_ce size_type initialize_last(size_ctype kind, size_ctype tag)
+			{
+				auto above_cmethod = cpage_equip(kind);
+				auto below_method  = text_right_equip(*above_cmethod.clast());
+				below_method[tag]  = kind;
+
+				return above_cmethod.max();
 			}
 
 		public:
 
 			nik_ce logo_facade() : above{}, below{} { }
-			nik_ce logo_facade(above_type_cptr a, below_type_cptr b) : above{a}, below{b} { }
+			nik_ce logo_facade(page_type_cptr a, text_type_cptr b) : above{a}, below{b} { }
 
 			// above:
 
-				nik_ce above_ctype_ref cpage() const { return *above; }
-				nik_ce  above_type_ref  page()       { return *above; }
+				nik_ce page_ctype_ref cpage() const { return *above; }
+				nik_ce  page_type_ref  page()       { return *above; }
 
 			// below:
 
-				nik_ce below_ctype_ref ctext() const { return *below; }
-				nik_ce  below_type_ref  text()       { return *below; }
+				nik_ce text_ctype_ref ctext() const { return *below; }
+				nik_ce  text_type_ref  text()       { return *below; }
 	};
 
 /***********************************************************************************************************************/
@@ -604,6 +637,34 @@ namespace cctmp {
 				template<typename Method>
 				nik_ce auto equip() -> Method
 					{ return facade_type{base::page(), base::text()}; }
+	};
+
+/***********************************************************************************************************************/
+
+// ring:
+
+	template<typename SizeType>
+	struct Logo
+	{
+		using size_type		= typename alias<SizeType>::type;
+		using size_ctype	= typename alias<SizeType>::ctype;
+
+		using ring_type		= logo<size_type, size_type, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>;
+		using ring_method	= resolve_method<ring_type, logo_ring_method>;
+
+		nik_ces auto ring(size_ctype n)
+		{
+			auto ring_value  = ring_type{};
+			auto global_ring = ring_value.template equip<ring_method>();
+			auto ring_gram   = global_ring.initialize();
+
+			// test if ring_gram is fail.
+			auto local_ring  = global_ring.text_right_equip(ring_gram);
+
+			local_ring[LogoRing::bits] = n;
+
+			return ring_value;
+		}
 	};
 
 /***********************************************************************************************************************/

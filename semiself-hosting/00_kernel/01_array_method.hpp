@@ -369,16 +369,23 @@ namespace cctmp {
 
 			// mutable:
 
-				nik_ce bool is_full  () const { return (base::size() == base::length()); }
-				nik_ce bool not_full () const { return (base::size() != base::length()); }
+				nik_ce size_type capacity() const { return base::length() - base::size(); }
+
+				nik_ce bool has_capacity   (size_ctype n) const { return (n <= capacity()); }
+				nik_ce bool lacks_capacity (size_ctype n) const { return not has_capacity(n); }
+
+				nik_ce bool is_full  () const { return lacks_capacity(1); }
+				nik_ce bool not_full () const { return has_capacity(1); }
 
 				nik_ce void clear() { base::set_size(0); }
 				nik_ce void fullsize() { base::set_size(base::length()); }
 				nik_ce void upsize(size_ctype n = 1) { base::set_size(base::size() + n); }
 				nik_ce void downsize(size_ctype n = 1) { base::set_size(base::size() - n); }
 
-				nik_ce void push(ctype_ref v)
-					{ size_ctype s = base::size(); upsize(); *base::iter(s) = v; }
+				nik_ce size_type expand(size_ctype n)
+					{ size_ctype s = base::size(); base::set_size(s + n); return s; }
+
+				nik_ce void push(ctype_ref v) { *base::iter(expand(1)) = v; }
 
 				nik_ce deref_type pop() { downsize(); return *base::end(); }
 

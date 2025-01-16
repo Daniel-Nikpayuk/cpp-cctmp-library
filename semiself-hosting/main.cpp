@@ -37,31 +37,13 @@
 
 /***********************************************************************************************************************/
 
-	constexpr auto make_ring()
-	{
-		using size_type = unsigned long;
-		using logo_type = logo<size_type, size_type, 20, 5, 7, 3, 5>;
-		using method0   = resolve_method<logo_type, logo_ring_method>;
-
-		auto logo_val   = logo_type{};
-		auto ring_m     = logo_val.template equip<method0>();
-
-		ring_m.overlay(8);
-
-		return logo_val;
-	}
-
-	constexpr auto logo0 = make_ring();
+	constexpr auto logo0 = cctmp::Logo<unsigned long>::ring(8);
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		using cmethod0 = resolve_cmethod<typename decltype(logo0)::base::initial_type, print_cmethod>;
-
-		auto print0 = logo0.ctext()->template cequip<cmethod0>();
-
-		print0.as_set(); // prints: { 0, 8, 0 }
+		print_as_set(logo0);
 
 		return 0;
 	}
