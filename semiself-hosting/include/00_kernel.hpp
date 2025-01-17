@@ -18,10 +18,12 @@
 ************************************************************************************************************************/
 
 #include"../00_kernel/00_grammar.hpp"
-#include"../00_kernel/01_array_method.hpp"
-#include"../00_kernel/02_array_class.hpp"
-#include"../00_kernel/03_logo_method.hpp"
-//#include"../00_kernel/04_target_method.hpp"
-//#include"../00_kernel/05_corpus_method.hpp"
-#include"../00_kernel/06_corpus_class.hpp"
+#include"../00_kernel/01_array_class.hpp"
+#include"../00_kernel/02_array_method.hpp"
+#include"../00_kernel/03_logo_class.hpp"
+#include"../00_kernel/04_semiotic_class.hpp"
+#include"../00_kernel/05_signifier_method.hpp"
+#include"../00_kernel/06_signified_method.hpp"
+#include"../00_kernel/07_corpus_class.hpp"
+#include"../00_kernel/08_corpus_method.hpp"
 

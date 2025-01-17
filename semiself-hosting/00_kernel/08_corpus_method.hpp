@@ -17,29 +17,11 @@
 **
 ************************************************************************************************************************/
 
-// target method:
+// corpus method:
 
 namespace cctmp {
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// logo:
-
-/***********************************************************************************************************************/
-
-// names:
-
-	struct LogoName
-	{
-		enum : gkey_type
-		{
-			ring, flex, tuple, cotuple, function, null, list, identity, exists, forall, custom,
-			dimension
-		};
-	};
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -50,105 +32,53 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class logo_ring_cmethod : public Facade
+	class corpus_ring_cmethod : public Facade
 	{
 		public:
 
 			using base			= Facade;
 
-		//	using type			= typename base::type;
-		//	using type_ptr			= typename base::type_ptr;
-		//	using type_cptr			= typename base::type_cptr;
-		//	using type_ref			= typename base::type_ref;
-
-		//	using ctype			= typename base::ctype;
-		//	using ctype_ptr			= typename base::ctype_ptr;
-		//	using ctype_cptr		= typename base::ctype_cptr;
-		//	using ctype_ref			= typename base::ctype_ref;
-
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-		protected:
-
-		//	using page_cmethod		= typename base::above_cmethod;
-		//	using text_cmethod		= typename base::below_cmethod;
-
 		public:
 
-			nik_ce logo_ring_cmethod() : base{} { }
-			nik_ce logo_ring_cmethod(const Facade & f) : base{f} { }
-
-			// :
-
-			// :
-
-			//	nik_ce size_type max() const { return base::size() - 1; }
+			nik_ce corpus_ring_cmethod() : base{} { }
+			nik_ce corpus_ring_cmethod(const Facade & f) : base{f} { }
 	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using cring_cmethod = corpus_ring_cmethod<Facade>;
 
 /***********************************************************************************************************************/
 
 // mutable:
 
 	template<typename Facade>
-	class logo_ring_method : public logo_ring_cmethod<Facade>
+	class corpus_ring_method : public corpus_ring_cmethod<Facade>
 	{
 		public:
 
-			using base			= logo_ring_cmethod<Facade>;
-
-		//	using type			= typename base::type;
-		//	using type_ptr			= typename base::type_ptr;
-		//	using type_cptr			= typename base::type_cptr;
-		//	using type_ref			= typename base::type_ref;
-
-		//	using ctype			= typename base::ctype;
-		//	using ctype_ptr			= typename base::ctype_ptr;
-		//	using ctype_cptr		= typename base::ctype_cptr;
-		//	using ctype_ref			= typename base::ctype_ref;
+			using base			= corpus_ring_cmethod<Facade>;
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-		protected:
-
-		//	using page_cmethod		= typename base::page_cmethod;
-		//	using page_method		= typename base::base::above_method;
-
-		//	using text_cmethod		= typename base::text_cmethod;
-		//	using text_method		= typename base::base::below_cmethod;
+			using sign_type			= sign<size_type>;
+			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
 
 		public:
 
-			nik_ce logo_ring_method() : base{} { }
-			nik_ce logo_ring_method(const Facade & f) : base{f} { }
-
-			// :
-
-			// overlay:
-
-				// overlay is just the overlay.
-				// add in methods for setting the "field" values.
-
-				nik_ce size_type overlay(size_ctype bits)
-				{
-					base::overlay(LogoName::ring);
-
-					// text is_full ?
-
-					// specifically make a subarray method (adjusts for size) ?
-
-					auto offset = base::text().size();
-					auto text_m = base::text().iter(offset);
-
-					base::text().upsize(3);
-
-					text_m[0] = LogoName::ring;
-					text_m[1] = bits;
-
-					return offset;
-				}
+			nik_ce corpus_ring_method() : base{} { }
+			nik_ce corpus_ring_method(const Facade & f) : base{f} { }
 	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using cring_method = corpus_ring_method<Facade>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

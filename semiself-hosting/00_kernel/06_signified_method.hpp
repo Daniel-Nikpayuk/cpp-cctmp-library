@@ -17,65 +17,11 @@
 **
 ************************************************************************************************************************/
 
-// logo method:
+// signified method:
 
 namespace cctmp {
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// logo:
-
-	// should an enum type be added?
-
-/***********************************************************************************************************************/
-
-// names:
-
-	struct LogoName
-	{
-		enum : gkey_type
-		{
-			ring, flex, tuple, cotuple, function, null, list, identity, exists, forall, custom,
-
-			dimension, fail // fail is symbolic only.
-		};
-	};
-
-/***********************************************************************************************************************/
-
-// gram:
-
-	template<typename SizeType>
-	class logo_gram
-	{
-		public:
-
-			using size_type		= typename alias<SizeType>::type;
-			using size_ctype	= typename alias<SizeType>::ctype;
-
-		protected:
-
-			size_type name;
-			size_type index;
-
-		public:
-
-			nik_ce logo_gram() : name{}, index{} { }
-			nik_ce logo_gram(size_ctype n, size_ctype i) : name{n}, index{i} { }
-
-			// name:
-
-				nik_ce size_type get_name() const { return name; }
-				nik_ce void set_name(size_ctype n) { name = n; }
-
-			// index:
-
-				nik_ce size_type get_index() const { return index; }
-				nik_ce void set_index(size_ctype i) { index = i; }
-	};
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -85,113 +31,71 @@ namespace cctmp {
 
 // names:
 
-	struct LogoRing
+	struct SignifiedRing
 	{
 		enum : gkey_type
 		{
-			name, bits,
+			start,
 			dimension
 		};
 	};
+
+	using DRing = SignifiedRing;
 
 /***********************************************************************************************************************/
 
 // immutable:
 
 	template<typename Facade>
-	class logo_ring_cmethod : public Facade
+	class signified_ring_cmethod : public Facade
 	{
 		public:
 
 			using base			= Facade;
-
-		//	using type			= typename base::type;
-		//	using type_ptr			= typename base::type_ptr;
-		//	using type_cptr			= typename base::type_cptr;
-		//	using type_ref			= typename base::type_ref;
-
-		//	using ctype			= typename base::ctype;
-		//	using ctype_ptr			= typename base::ctype_ptr;
-		//	using ctype_cptr		= typename base::ctype_cptr;
-		//	using ctype_ref			= typename base::ctype_ref;
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
 		public:
 
-			nik_ce logo_ring_cmethod() : base{} { }
-			nik_ce logo_ring_cmethod(const Facade & f) : base{f} { }
-
-			// :
-
-			// :
-
-			//	nik_ce size_type max() const { return base::size() - 1; }
+			nik_ce signified_ring_cmethod() : base{} { }
+			nik_ce signified_ring_cmethod(const Facade & f) : base{f} { }
 	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using dring_cmethod = signified_ring_cmethod<Facade>;
 
 /***********************************************************************************************************************/
 
 // mutable:
 
 	template<typename Facade>
-	class logo_ring_method : public logo_ring_cmethod<Facade>
+	class signified_ring_method : public signified_ring_cmethod<Facade>
 	{
 		public:
 
-			using base			= logo_ring_cmethod<Facade>;
-
-		//	using type			= typename base::type;
-		//	using type_ptr			= typename base::type_ptr;
-		//	using type_cptr			= typename base::type_cptr;
-		//	using type_ref			= typename base::type_ref;
-
-		//	using ctype			= typename base::ctype;
-		//	using ctype_ptr			= typename base::ctype_ptr;
-		//	using ctype_cptr		= typename base::ctype_cptr;
-		//	using ctype_ref			= typename base::ctype_ref;
+			using base			= signified_ring_cmethod<Facade>;
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using gram_type			= logo_gram<size_type>;
-			using gram_ctype_ref		= typename alias<gram_type>::ctype_ref;
-
-		protected:
-
-			nik_ce bool overlay_base() { return base::overlay(LogoName::ring, LogoRing::dimension); }
-
-			nik_ce auto initialize_base()
-				{ return base::initialize_last(LogoName::ring, LogoRing::name); }
-
-			nik_ce auto fail_gram() const { return gram_type{LogoName::fail, 0}; }
-			nik_ce auto ring_gram(size_ctype pos) const { return gram_type{LogoName::ring, pos}; }
+			using icon_type			= icon<size_type>;
+			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
 
 		public:
 
-			nik_ce logo_ring_method() : base{} { }
-			nik_ce logo_ring_method(const Facade & f) : base{f} { }
+			nik_ce signified_ring_method() : base{} { }
+			nik_ce signified_ring_method(const Facade & f) : base{f} { }
 
 			// mutable:
-
-				nik_ce auto initialize()
-				{
-					if (not overlay_base()) return fail_gram();
-
-					return ring_gram(initialize_base());
-				}
-
-				// text:
-
-					 // unsafe, does not test against name().
-
-					nik_ce auto text_right_equip(gram_ctype_ref g)
-					{
-						auto page_cmethod = base::cpage_equip(LogoName::ring);
-
-						return base::text_right_equip(page_cmethod[g.get_index()]);
-					}
 	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using dring_method = signified_ring_method<Facade>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

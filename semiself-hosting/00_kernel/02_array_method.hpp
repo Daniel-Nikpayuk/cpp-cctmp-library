@@ -160,12 +160,6 @@ namespace cctmp {
 				nik_ce bool omits(ctype_ref v) const { return not contains(v); }
 	};
 
-	// syntactic sugar:
-
-		template<typename Facade>
-		using subarray_cmethod =
-			subarray_cmethod_disjoint < Facade >;
-
 /***********************************************************************************************************************/
 
 // mutable:
@@ -236,13 +230,6 @@ namespace cctmp {
 				nik_ce deref_type_ref operator [] (size_ctype n) { return at(n); }
 	};
 
-	// syntactic sugar:
-
-		template<typename Facade>
-		using subarray_method =
-			subarray_method_disjoint  <
-			subarray_cmethod_disjoint < Facade >>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -299,13 +286,6 @@ namespace cctmp {
 
 				nik_ce citer_type origin() const { return base::cbegin(); }
 	};
-
-	// syntactic sugar:
-
-		template<typename Facade>
-		using array_cmethod =
-			   array_cmethod_disjoint <
-			subarray_cmethod_disjoint < Facade >>;
 
 /***********************************************************************************************************************/
 
@@ -397,25 +377,10 @@ namespace cctmp {
 					{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
 	};
 
-	// syntactic sugar:
-
-		template<typename Facade>
-		using array_method =
-			   array_method_disjoint <
-			subarray_method_disjoint <
-			   array_cmethod         < Facade >>>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // unique:
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Facade>
-	using unique_cmethod = array_cmethod<Facade>;
 
 /***********************************************************************************************************************/
 

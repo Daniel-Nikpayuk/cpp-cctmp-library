@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// corpus method:
+// signifier method:
 
 namespace cctmp {
 
@@ -25,129 +25,134 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// logo:
+// ring:
 
 /***********************************************************************************************************************/
 
 // names:
 
-	struct LogoName
+	struct SignifierRing
 	{
 		enum : gkey_type
 		{
-			ring, flex, tuple, cotuple, function, null, list, identity, exists, forall, custom,
+			name, bits,
 			dimension
 		};
 	};
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// ring:
+	using RRing = SignifierRing;
 
 /***********************************************************************************************************************/
 
 // immutable:
 
 	template<typename Facade>
-	class logo_ring_cmethod : public Facade
+	class signifier_ring_cmethod : public Facade
 	{
 		public:
 
 			using base			= Facade;
 
-		//	using type			= typename base::type;
-		//	using type_ptr			= typename base::type_ptr;
-		//	using type_cptr			= typename base::type_cptr;
-		//	using type_ref			= typename base::type_ref;
-
-		//	using ctype			= typename base::ctype;
-		//	using ctype_ptr			= typename base::ctype_ptr;
-		//	using ctype_cptr		= typename base::ctype_cptr;
-		//	using ctype_ref			= typename base::ctype_ref;
-
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-		protected:
-
-		//	using page_cmethod		= typename base::above_cmethod;
-		//	using text_cmethod		= typename base::below_cmethod;
-
 		public:
 
-			nik_ce logo_ring_cmethod() : base{} { }
-			nik_ce logo_ring_cmethod(const Facade & f) : base{f} { }
-
-			// :
-
-			// :
-
-			//	nik_ce size_type max() const { return base::size() - 1; }
+			nik_ce signifier_ring_cmethod() : base{} { }
+			nik_ce signifier_ring_cmethod(const Facade & f) : base{f} { }
 	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using rring_cmethod = signifier_ring_cmethod<Facade>;
 
 /***********************************************************************************************************************/
 
 // mutable:
 
 	template<typename Facade>
-	class logo_ring_method : public logo_ring_cmethod<Facade>
+	class signifier_ring_method : public signifier_ring_cmethod<Facade>
 	{
 		public:
 
-			using base			= logo_ring_cmethod<Facade>;
-
-		//	using type			= typename base::type;
-		//	using type_ptr			= typename base::type_ptr;
-		//	using type_cptr			= typename base::type_cptr;
-		//	using type_ref			= typename base::type_ref;
-
-		//	using ctype			= typename base::ctype;
-		//	using ctype_ptr			= typename base::ctype_ptr;
-		//	using ctype_cptr		= typename base::ctype_cptr;
-		//	using ctype_ref			= typename base::ctype_ref;
+			using base			= signifier_ring_cmethod<Facade>;
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
+			using gram_type			= gram<size_type>;
+			using gram_ctype_ref		= typename alias<gram_type>::ctype_ref;
+
 		protected:
 
-		//	using page_cmethod		= typename base::page_cmethod;
-		//	using page_method		= typename base::base::above_method;
+			nik_ce bool overlay_base() { return base::overlay(Logo::ring, RRing::dimension); }
 
-		//	using text_cmethod		= typename base::text_cmethod;
-		//	using text_method		= typename base::base::below_cmethod;
+			nik_ce auto initialize_base()
+				{ return base::initialize_last(Logo::ring, RRing::name); }
+
+			nik_ce auto fail_gram() const { return gram_type{Logo::fail, 0}; }
+			nik_ce auto ring_gram(size_ctype pos) const { return gram_type{Logo::ring, pos}; }
 
 		public:
 
-			nik_ce logo_ring_method() : base{} { }
-			nik_ce logo_ring_method(const Facade & f) : base{f} { }
+			nik_ce signifier_ring_method() : base{} { }
+			nik_ce signifier_ring_method(const Facade & f) : base{f} { }
 
-			// :
+			// mutable:
 
-			// overlay:
-
-				// overlay is just the overlay.
-				// add in methods for setting the "field" values.
-
-				nik_ce size_type overlay(size_ctype bits)
+				nik_ce auto initialize()
 				{
-					base::overlay(LogoName::ring);
+					if (not overlay_base()) return fail_gram();
 
-					// text is_full ?
-
-					// specifically make a subarray method (adjusts for size) ?
-
-					auto offset = base::text().size();
-					auto text_m = base::text().iter(offset);
-
-					base::text().upsize(3);
-
-					text_m[0] = LogoName::ring;
-					text_m[1] = bits;
-
-					return offset;
+					return ring_gram(initialize_base());
 				}
+
+				// text:
+
+					 // unsafe, does not test against name().
+
+					nik_ce auto text_right_equip(gram_ctype_ref g)
+					{
+						auto page_cmethod = base::cpage_equip(Logo::ring);
+
+						return base::text_right_equip(page_cmethod[g.get_index()]);
+					}
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using rring_method = signifier_ring_method<Facade>;
+
+/***********************************************************************************************************************/
+
+// convenience constructors:
+
+	// keep here, or move to signifier methods ?
+
+	template<typename SizeType>
+	struct RMake
+	{
+		using size_type		= typename alias<SizeType>::type;
+		using size_ctype	= typename alias<SizeType>::ctype;
+
+		using ring_type		= logo<size_type, size_type, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>;
+		using ring_method	= resolve_method<ring_type, rring_method>;
+
+		nik_ces auto ring(size_ctype n)
+		{
+			auto ring_value  = ring_type{};
+			auto global_ring = ring_value.template equip<ring_method>();
+			auto ring_gram   = global_ring.initialize();
+
+			// test if ring_gram is fail.
+			auto local_ring  = global_ring.text_right_equip(ring_gram);
+
+			local_ring[RRing::bits] = n;
+
+			return ring_value;
+		}
 	};
 
 /***********************************************************************************************************************/

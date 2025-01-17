@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// corpus class:
+// logo class:
 
 namespace cctmp {
 
@@ -385,8 +385,97 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
-// logo model:
+// logo:
+
+/***********************************************************************************************************************/
+
+// names:
+
+		// should an enum type be added?
+
+	struct LogoName
+	{
+		enum : gkey_type
+		{
+			ring, flex, tuple, cotuple, function, null, list, identity, exists, forall, custom,
+
+			dimension, fail // fail is symbolic only.
+		};
+	};
+
+	using Logo = LogoName;
+
+/***********************************************************************************************************************/
+
+// note:
+
+	template<typename SizeType>
+	class note
+	{
+		public:
+
+			using size_type		= typename alias<SizeType>::type;
+			using size_ctype	= typename alias<SizeType>::ctype;
+
+		protected:
+
+			size_type kind;
+			size_type index;
+
+		public:
+
+			nik_ce note() : kind{}, index{} { }
+			nik_ce note(size_ctype k, size_ctype i) : kind{k}, index{i} { }
+
+			// kind:
+
+				nik_ce size_type get_kind() const { return kind; }
+				nik_ce void set_kind(size_ctype k) { kind = k; }
+
+			// index:
+
+				nik_ce size_type get_index() const { return index; }
+				nik_ce void set_index(size_ctype i) { index = i; }
+	};
+
+/***********************************************************************************************************************/
+
+// gram:
+
+	template<typename SizeType>
+	struct gram : public note<SizeType>
+	{
+		using base		= note<SizeType>;
+
+		using size_type		= typename base::size_type;
+		using size_ctype	= typename base::size_ctype;
+
+		nik_ce gram() : base{} { }
+		nik_ce gram(size_ctype k, size_ctype i) : base{k, i} { }
+	};
+
+/***********************************************************************************************************************/
+
+// icon:
+
+	template<typename SizeType>
+	struct icon : public note<SizeType>
+	{
+		using base		= note<SizeType>;
+
+		using size_type		= typename base::size_type;
+		using size_ctype	= typename base::size_ctype;
+
+		nik_ce icon() : base{} { }
+		nik_ce icon(size_ctype k, size_ctype i) : base{k, i} { }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// model:
 
 /***********************************************************************************************************************/
 
@@ -638,67 +727,6 @@ namespace cctmp {
 				nik_ce auto equip() -> Method
 					{ return facade_type{base::page(), base::text()}; }
 	};
-
-/***********************************************************************************************************************/
-
-// ring:
-
-	template<typename SizeType>
-	struct Logo
-	{
-		using size_type		= typename alias<SizeType>::type;
-		using size_ctype	= typename alias<SizeType>::ctype;
-
-		using ring_type		= logo<size_type, size_type, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>;
-		using ring_method	= resolve_method<ring_type, logo_ring_method>;
-
-		nik_ces auto ring(size_ctype n)
-		{
-			auto ring_value  = ring_type{};
-			auto global_ring = ring_value.template equip<ring_method>();
-			auto ring_gram   = global_ring.initialize();
-
-			// test if ring_gram is fail.
-			auto local_ring  = global_ring.text_right_equip(ring_gram);
-
-			local_ring[LogoRing::bits] = n;
-
-			return ring_value;
-		}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// target:
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// system:
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// corpus:
-
-	// in order to apply functions internal to a given type system,
-	// they have to be known before the use of the type system itself.
-	// this is a metacompile time that precedes metarun time.
-	// in order to achieve this, type systems should be designed
-	// to accept metacompile time type data as well as its metarun time data.
-
-	// instead, just get the apply method to accept metacompile time type system objects,
-	// as well as sagement objects. this way you can apply accordingly, while still maintaining
-	// the type system forms.
-
-/***********************************************************************************************************************/
-
-// judgment:
-
-/***********************************************************************************************************************/
-
-// interface:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

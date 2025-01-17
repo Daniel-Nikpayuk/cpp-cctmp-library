@@ -507,6 +507,60 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// methods:
+
+	// subarray:
+
+		template<typename> class subarray_cmethod_disjoint;
+		template<typename> class subarray_method_disjoint;
+
+		// syntactic sugar:
+
+			template<typename Facade>
+			using subarray_cmethod =
+				subarray_cmethod_disjoint < Facade >;
+
+			template<typename Facade>
+			using subarray_method =
+				subarray_method_disjoint  <
+				subarray_cmethod_disjoint < Facade >>;
+
+	// array:
+
+		template<typename> class array_cmethod_disjoint;
+		template<typename> class array_method_disjoint;
+
+		// syntactic sugar:
+
+			template<typename Facade>
+			using array_cmethod =
+				   array_cmethod_disjoint <
+				subarray_cmethod_disjoint < Facade >>;
+
+			template<typename Facade>
+			using array_method =
+				   array_method_disjoint <
+				subarray_method_disjoint <
+				   array_cmethod         < Facade >>>;
+
+	// unique:
+
+		template<typename> class unique_method;
+
+		// syntactic sugar:
+
+				// reimplement as an actual class ?
+
+			template<typename Facade>
+			using unique_cmethod = array_cmethod<Facade>;
+
+	// table:
+
+		template<typename Facade, typename Facade::size_type, typename Facade::size_type> class table_cmethod;
+		template<typename Facade, typename Facade::size_type, typename Facade::size_type> class table_method;
+
+/***********************************************************************************************************************/
+
 // immutable:
 
 	template<typename Type, typename SizeType, template<typename> typename CMethodType = array_cmethod>
