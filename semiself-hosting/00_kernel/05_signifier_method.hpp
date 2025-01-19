@@ -56,10 +56,24 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
+			using gram_type			= gram<size_type>;
+			using gram_ctype_ref		= typename alias<gram_type>::ctype_ref;
+
 		public:
 
 			nik_ce signifier_ring_cmethod() : base{} { }
 			nik_ce signifier_ring_cmethod(const Facade & f) : base{f} { }
+
+			// text:
+
+				 // unsafe, does not test against name().
+
+				nik_ce auto ctext_right_equip(gram_ctype_ref g)
+				{
+					auto page_cmethod = base::cpage_equip(Logo::ring);
+
+					return base::ctext_right_equip(page_cmethod[g.get_index()]);
+				}
 	};
 
 	// syntactic sugar:
@@ -81,15 +95,15 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using gram_type			= gram<size_type>;
-			using gram_ctype_ref		= typename alias<gram_type>::ctype_ref;
+			using gram_type			= typename base::gram_type;
+			using gram_ctype_ref		= typename base::gram_ctype_ref;
 
 		protected:
 
 			nik_ce bool overlay_base() { return base::overlay(Logo::ring, RRing::dimension); }
 
 			nik_ce auto initialize_base()
-				{ return base::initialize_last(Logo::ring, RRing::name); }
+				{ return base::initialize_last(Logo::ring, RRing::name, Logo::ring); }
 
 			nik_ce auto fail_gram() const { return gram_type{Logo::fail, 0}; }
 			nik_ce auto ring_gram(size_ctype pos) const { return gram_type{Logo::ring, pos}; }
@@ -124,36 +138,6 @@ namespace cctmp {
 
 		template<typename Facade>
 		using rring_method = signifier_ring_method<Facade>;
-
-/***********************************************************************************************************************/
-
-// convenience constructors:
-
-	// keep here, or move to signifier methods ?
-
-	template<typename SizeType>
-	struct RMake
-	{
-		using size_type		= typename alias<SizeType>::type;
-		using size_ctype	= typename alias<SizeType>::ctype;
-
-		using ring_type		= logo<size_type, size_type, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>;
-		using ring_method	= resolve_method<ring_type, rring_method>;
-
-		nik_ces auto ring(size_ctype n)
-		{
-			auto ring_value  = ring_type{};
-			auto global_ring = ring_value.template equip<ring_method>();
-			auto ring_gram   = global_ring.initialize();
-
-			// test if ring_gram is fail.
-			auto local_ring  = global_ring.text_right_equip(ring_gram);
-
-			local_ring[RRing::bits] = n;
-
-			return ring_value;
-		}
-	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

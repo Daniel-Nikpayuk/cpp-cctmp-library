@@ -37,13 +37,34 @@
 
 /***********************************************************************************************************************/
 
-	constexpr auto logo0 = cctmp::RMake<unsigned long>::ring(8);
+	constexpr auto corpus_add_test()
+	{
+		using size_type   = unsigned long;
+		using sym_pack    = cctmp::T_pack_Vs<6, 3>;
+		using img_pack    = cctmp::T_pack_Vs<6, 3>;
+		using corpus_type = corpus<unsigned, size_type, sym_pack, img_pack, 3>;
+		using ring_method = resolve_method<corpus_type, cring_method>;
+
+		auto corpus_value = corpus_type{};
+		auto corpus_ring  = corpus_value.template equip<ring_method>();
+		auto out_sign     = corpus_ring.declare (64);
+		auto in1_sign     = corpus_ring.define  (64, 2);
+		auto in2_sign     = corpus_ring.define  (64, 3);
+
+		corpus_ring.add_to(out_sign, in1_sign, in2_sign);
+
+		return corpus_value;
+	}
+
+	constexpr auto corpus0 = corpus_add_test();
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		print_as_set(logo0);
+		print_array(*corpus0.crecord()->csignifier()->ctext());
+		print_array(*corpus0.crecord()->csignified()->ctext());
+		print_array(*corpus0.cmemory());
 
 		return 0;
 	}

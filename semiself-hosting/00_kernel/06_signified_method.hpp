@@ -35,7 +35,7 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
-			start,
+			start, bytes,
 			dimension
 		};
 	};
@@ -84,12 +84,40 @@ namespace cctmp {
 			using icon_type			= icon<size_type>;
 			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
 
+		protected:
+
+			nik_ce bool overlay_base() { return base::overlay(Logo::ring, DRing::dimension); }
+
+			nik_ce auto initialize_base(size_ctype start)
+				{ return base::initialize_last(Logo::ring, DRing::start, start); }
+
+			nik_ce auto fail_icon() const { return icon_type{Logo::fail, 0}; }
+			nik_ce auto ring_icon(size_ctype pos) const { return icon_type{Logo::ring, pos}; }
+
 		public:
 
 			nik_ce signified_ring_method() : base{} { }
 			nik_ce signified_ring_method(const Facade & f) : base{f} { }
 
 			// mutable:
+
+				nik_ce auto initialize(size_ctype start)
+				{
+					if (not overlay_base()) return fail_icon();
+
+					return ring_icon(initialize_base(start));
+				}
+
+				// text:
+
+					 // unsafe, does not test against name().
+
+					nik_ce auto text_right_equip(icon_ctype_ref i)
+					{
+						auto page_cmethod = base::cpage_equip(Logo::ring);
+
+						return base::text_right_equip(page_cmethod[i.get_index()]);
+					}
 	};
 
 	// syntactic sugar:

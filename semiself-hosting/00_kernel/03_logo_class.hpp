@@ -656,11 +656,11 @@ namespace cctmp {
 				return true;
 			}
 
-			nik_ce size_type initialize_last(size_ctype kind, size_ctype tag)
+			nik_ce size_type initialize_last(size_ctype kind, size_ctype tag, size_ctype value)
 			{
 				auto above_cmethod = cpage_equip(kind);
 				auto below_method  = text_right_equip(*above_cmethod.clast());
-				below_method[tag]  = kind;
+				below_method[tag]  = value;
 
 				return above_cmethod.max();
 			}

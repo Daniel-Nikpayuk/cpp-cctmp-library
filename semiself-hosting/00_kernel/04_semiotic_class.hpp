@@ -35,32 +35,40 @@ namespace cctmp {
 			using size_type		= typename alias<SizeType>::type;
 			using size_ctype	= typename alias<SizeType>::ctype;
 
+			using gram_type		= gram<size_type>;
+			using icon_type		= icon<size_type>;
+
 		protected:
 
 			size_type kind;
-			size_type type_index;
+			size_type symbol_index;
 			size_type image_index;
 
 		public:
 
-			nik_ce sign() : kind{}, type_index{}, image_index{} { }
-			nik_ce sign(size_ctype k, size_ctype t, size_ctype i) :
-				kind{k}, type_index{t}, image_index{i} { }
+			nik_ce sign() : kind{}, symbol_index{}, image_index{} { }
+			nik_ce sign(size_ctype k, size_ctype s, size_ctype i) :
+				kind{k}, symbol_index{s}, image_index{i} { }
 
 			// kind:
 
 				nik_ce size_type get_kind() const { return kind; }
 				nik_ce void set_kind(size_ctype k) { kind = k; }
 
-			// type index:
+			// symbol index:
 
-				nik_ce size_type get_type_index() const { return type_index; }
-				nik_ce void set_type_index(size_ctype t) { type_index = t; }
+				nik_ce size_type get_symbol_index() const { return symbol_index; }
+				nik_ce void set_symbol_index(size_ctype s) { symbol_index = s; }
 
 			// image index:
 
 				nik_ce size_type get_image_index() const { return image_index; }
 				nik_ce void set_image_index(size_ctype i) { image_index = i; }
+
+			// to icon:
+
+				nik_ce auto to_gram() const { return gram_type{kind, symbol_index}; }
+				nik_ce auto to_icon() const { return icon_type{kind, image_index}; }
 	};
 
 /***********************************************************************************************************************/
