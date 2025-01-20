@@ -56,10 +56,49 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
+			using icon_type			= icon<size_type>;
+			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
+
+		protected:
+
+			nik_ces size_type bytes		= 1;
+
 		public:
 
 			nik_ce signified_ring_cmethod() : base{} { }
 			nik_ce signified_ring_cmethod(const Facade & f) : base{f} { }
+
+			nik_ce size_type byte_size() const { return bytes; }
+
+			// icon:
+
+				nik_ce auto fail_icon() const { return icon_type{Logo::fail, 0}; }
+				nik_ce auto ring_icon(size_ctype pos) const { return icon_type{Logo::ring, pos}; }
+
+			// find:
+
+				nik_ce bool found(size_ctype n) const
+					{ return (n != base::cpage_equip(Logo::ring).size()); }
+
+				nik_ce auto find(size_ctype start) const
+				{
+					auto page_cmethod = base::cpage_equip(Logo::ring);
+					auto in = page_cmethod.cbegin();
+
+					while (in != page_cmethod.cend())
+					{
+						auto text_cmethod = base::ctext_right_equip(*in);
+						bool same_start   = (text_cmethod[DRing::start] == start);
+						bool same_bytes   = (text_cmethod[DRing::bytes] == bytes);
+
+						if (same_start && same_bytes) { break; } else { ++in; }
+					}
+
+					return in;
+				}
+
+				nik_ce size_type left_find(size_ctype start) const
+					{ return find(start) - base::cpage_equip(Logo::ring).cbegin(); }
 	};
 
 	// syntactic sugar:
@@ -81,18 +120,12 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using icon_type			= icon<size_type>;
-			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
 		protected:
 
 			nik_ce bool overlay_base() { return base::overlay(Logo::ring, DRing::dimension); }
-
-			nik_ce auto initialize_base(size_ctype start)
-				{ return base::initialize_last(Logo::ring, DRing::start, start); }
-
-			nik_ce auto fail_icon() const { return icon_type{Logo::fail, 0}; }
-			nik_ce auto ring_icon(size_ctype pos) const { return icon_type{Logo::ring, pos}; }
 
 		public:
 
@@ -101,11 +134,11 @@ namespace cctmp {
 
 			// mutable:
 
-				nik_ce auto initialize(size_ctype start)
+				nik_ce auto overlay()
 				{
-					if (not overlay_base()) return fail_icon();
+					if (not overlay_base()) return base::fail_icon();
 
-					return ring_icon(initialize_base(start));
+					return base::ring_icon(base::cpage_equip(Logo::ring).max());
 				}
 
 				// text:

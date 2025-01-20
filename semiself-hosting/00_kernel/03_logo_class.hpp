@@ -399,7 +399,9 @@ namespace cctmp {
 	{
 		enum : gkey_type
 		{
-			ring, flex, tuple, cotuple, function, null, list, identity, exists, forall, custom,
+			ring, flex, utf8_char8, utf8_char16, utf8_char24, utf8_char32,	// builtin
+			tuple, cotuple, function, null, list, identity, exists, forall,	// inductive
+			custom,
 
 			dimension, fail // fail is symbolic only.
 		};
@@ -654,15 +656,6 @@ namespace cctmp {
 				above_method.push(below->expand(n));
 
 				return true;
-			}
-
-			nik_ce size_type initialize_last(size_ctype kind, size_ctype tag, size_ctype value)
-			{
-				auto above_cmethod = cpage_equip(kind);
-				auto below_method  = text_right_equip(*above_cmethod.clast());
-				below_method[tag]  = value;
-
-				return above_cmethod.max();
 			}
 
 		public:

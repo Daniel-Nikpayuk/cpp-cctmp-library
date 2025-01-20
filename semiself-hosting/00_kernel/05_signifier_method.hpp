@@ -64,6 +64,36 @@ namespace cctmp {
 			nik_ce signifier_ring_cmethod() : base{} { }
 			nik_ce signifier_ring_cmethod(const Facade & f) : base{f} { }
 
+			// gram:
+
+				nik_ce auto fail_gram() const { return gram_type{Logo::fail, 0}; }
+				nik_ce auto ring_gram(size_ctype pos) const { return gram_type{Logo::ring, pos}; }
+
+			// find:
+
+				nik_ce bool found(size_ctype n) const
+					{ return (n != base::cpage_equip(Logo::ring).size()); }
+
+				nik_ce auto find(size_ctype bits) const
+				{
+					auto page_cmethod = base::cpage_equip(Logo::ring);
+					auto in = page_cmethod.cbegin();
+
+					while (in != page_cmethod.cend())
+					{
+						auto text_cmethod = base::ctext_right_equip(*in);
+						bool same_name    = (text_cmethod[RRing::name] == Logo::ring);
+						bool same_bits    = (text_cmethod[RRing::bits] == bits);
+
+						if (same_name && same_bits) { break; } else { ++in; }
+					}
+
+					return in;
+				}
+
+				nik_ce size_type left_find(size_ctype bits) const
+					{ return find(bits) - base::cpage_equip(Logo::ring).cbegin(); }
+
 			// text:
 
 				 // unsafe, does not test against name().
@@ -100,13 +130,12 @@ namespace cctmp {
 
 		protected:
 
+			// redesign: initialize ring name after, so that left_find can be called before overlay.
+
 			nik_ce bool overlay_base() { return base::overlay(Logo::ring, RRing::dimension); }
 
-			nik_ce auto initialize_base()
-				{ return base::initialize_last(Logo::ring, RRing::name, Logo::ring); }
-
-			nik_ce auto fail_gram() const { return gram_type{Logo::fail, 0}; }
-			nik_ce auto ring_gram(size_ctype pos) const { return gram_type{Logo::ring, pos}; }
+		//	nik_ce auto initialize_base()
+		//		{ return base::initialize_last(Logo::ring, RRing::name, Logo::ring); }
 
 		public:
 
@@ -115,11 +144,11 @@ namespace cctmp {
 
 			// mutable:
 
-				nik_ce auto initialize()
+				nik_ce auto overlay()
 				{
-					if (not overlay_base()) return fail_gram();
+					if (not overlay_base()) return base::fail_gram();
 
-					return ring_gram(initialize_base());
+					return base::ring_gram(base::cpage_equip(Logo::ring).max());
 				}
 
 				// text:

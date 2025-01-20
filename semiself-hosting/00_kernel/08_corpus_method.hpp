@@ -71,8 +71,6 @@ namespace cctmp {
 
 		protected:
 
-			nik_ces size_type bytes		= 1;
-
 			using record_type		= typename Facade::record_type;
 			using signifier_type		= typename record_type::signifier_type;
 			using signified_type		= typename record_type::signified_type;
@@ -105,38 +103,73 @@ namespace cctmp {
 
 			// declare signifier:
 
+			//	nik_ce void initialize_signifier(gram_ctype_ref gram, size_ctype bits)
+			//	{
+			//		auto local_ring = global_rring.text_right_equip(gram);
+
+			//		local_ring[RRing::name] = Logo::ring;
+			//		local_ring[RRing::bits] = bits;
+			//	}
+
 				nik_ce void initialize_signifier(gram_ctype_ref gram, size_ctype bits)
 				{
 					auto local_ring = global_rring.text_right_equip(gram);
 
+					local_ring[RRing::name] = Logo::ring;
 					local_ring[RRing::bits] = bits;
 				}
 
-				nik_ce auto declare_signifier(size_ctype bits)
+				nik_ce auto instantiate_signifier(size_ctype bits)
 				{
-					auto gram = global_rring.initialize();
+					auto gram = global_rring.overlay();
 
 					if (not_fail(gram)) { initialize_signifier(gram, bits); }
 
 					return gram;
 				}
 
+				nik_ce auto declare_signifier(size_ctype bits)
+				{
+					size_ctype pos = global_rring.left_find(bits);
+
+					if (global_rring.found(pos)) { return global_rring.ring_gram(pos); }
+					else                         { return instantiate_signifier(bits); }
+				}
+
+			//	nik_ce auto declare_signifier(size_ctype bits)
+			//	{
+			//		auto gram = global_rring.initialize();
+
+			//		if (not_fail(gram)) { initialize_signifier(gram, bits); }
+
+			//		return gram;
+			//	}
+
 			// declare signified:
 
-				nik_ce void initialize_signified(icon_ctype_ref icon)
+				nik_ce void initialize_signified(icon_ctype_ref icon, size_ctype start)
 				{
 					auto local_ring = global_dring.text_right_equip(icon);
 
-					local_ring[DRing::bytes] = bytes;
+					local_ring[DRing::start] = start;
+					local_ring[DRing::bytes] = global_dring.byte_size();
 				}
 
-				nik_ce auto declare_signified()
+				nik_ce auto instantiate_signified(size_ctype start)
 				{
-					auto icon = global_dring.initialize(base::memory().expand(bytes));
+					auto icon = global_dring.overlay();
 
-					if (not_fail(icon)) { initialize_signified(icon); }
+					if (not_fail(icon)) { initialize_signified(icon, start); }
 
 					return icon;
+				}
+
+				nik_ce auto declare_signified(size_ctype start)
+				{
+					size_ctype pos = global_dring.left_find(start);
+
+					if (global_dring.found(pos)) { return global_dring.fail_icon(); }
+					else                         { return instantiate_signified(start); }
 				}
 
 		public:
@@ -151,23 +184,25 @@ namespace cctmp {
 
 				nik_ce auto declare(size_ctype bits)
 				{
-					auto gram = declare_signifier(bits);
-					auto icon = declare_signified();
-					auto kind = not_fail(gram, icon) ? Logo::ring : Logo::fail;
+					auto bytes = global_dring.byte_size();
+					auto gram  = declare_signifier(bits);
+					auto icon  = declare_signified(base::memory().expand(bytes));
+					auto kind  = not_fail(gram, icon) ? Logo::ring : Logo::fail;
 
 					return sign_type{kind, gram.get_index(), icon.get_index()};
 				}
 
 				nik_ce auto define(size_ctype bits, size_ctype value)
 				{
-					auto gram = declare_signifier(bits);
-					auto icon = declare_signified();
-					auto kind = not_fail(gram, icon) ? Logo::ring : Logo::fail;
+					auto & memory = base::memory();
+					auto bytes    = global_dring.byte_size();
+					auto gram     = declare_signifier(bits);
+					auto icon     = declare_signified(memory.expand(bytes));
+					auto kind     = not_fail(gram, icon) ? Logo::ring : Logo::fail;
 
 					if (kind == Logo::ring)
 					{
 						auto local_dring = global_dring.text_right_equip(icon);
-						auto & memory    = base::memory();
 
 						memory[local_dring[DRing::start]] = value;
 					}
