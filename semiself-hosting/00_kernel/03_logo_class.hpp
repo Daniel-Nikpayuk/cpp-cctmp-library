@@ -189,41 +189,42 @@ namespace cctmp {
 
 			using facade			= plot_cfacade; // method compatible.
 
-			using model_ctype_ptr		= typename alias<Model>::ctype_ptr;
-			using model_ctype_cptr		= typename alias<Model>::ctype_cptr;
+			using model_type		= Model;
+			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
+			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
 
-			using type			= typename Model::type;
-			using type_ptr			= typename Model::type_ptr;
-			using type_cptr			= typename Model::type_cptr;
-			using type_ref			= typename Model::type_ref;
+			using type			= typename model_type::type;
+			using type_ptr			= typename model_type::type_ptr;
+			using type_cptr			= typename model_type::type_cptr;
+			using type_ref			= typename model_type::type_ref;
 
-			using ctype			= typename Model::ctype;
-			using ctype_ptr			= typename Model::ctype_ptr;
-			using ctype_cptr		= typename Model::ctype_cptr;
-			using ctype_ref			= typename Model::ctype_ref;
+			using ctype			= typename model_type::ctype;
+			using ctype_ptr			= typename model_type::ctype_ptr;
+			using ctype_cptr		= typename model_type::ctype_cptr;
+			using ctype_ref			= typename model_type::ctype_ref;
 
-			using citer_type		= typename Model::citer_type;
-			using citer_type_ptr		= typename Model::citer_type_ptr;
-			using citer_type_cptr		= typename Model::citer_type_cptr;
-			using citer_type_ref		= typename Model::citer_type_ref;
+			using citer_type		= typename model_type::citer_type;
+			using citer_type_ptr		= typename model_type::citer_type_ptr;
+			using citer_type_cptr		= typename model_type::citer_type_cptr;
+			using citer_type_ref		= typename model_type::citer_type_ref;
 
-			using citer_ctype		= typename Model::citer_ctype;
-			using citer_ctype_ptr		= typename Model::citer_ctype_ptr;
-			using citer_ctype_cptr		= typename Model::citer_ctype_cptr;
-			using citer_ctype_ref		= typename Model::citer_ctype_ref;
+			using citer_ctype		= typename model_type::citer_ctype;
+			using citer_ctype_ptr		= typename model_type::citer_ctype_ptr;
+			using citer_ctype_cptr		= typename model_type::citer_ctype_cptr;
+			using citer_ctype_ref		= typename model_type::citer_ctype_ref;
 
-			using cderef_type		= typename Model::cderef_type;
-			using cderef_type_ptr		= typename Model::cderef_type_ptr;
-			using cderef_type_cptr		= typename Model::cderef_type_cptr;
-			using cderef_type_ref		= typename Model::cderef_type_ref;
+			using cderef_type		= typename model_type::cderef_type;
+			using cderef_type_ptr		= typename model_type::cderef_type_ptr;
+			using cderef_type_cptr		= typename model_type::cderef_type_cptr;
+			using cderef_type_ref		= typename model_type::cderef_type_ref;
 
-			using cderef_ctype		= typename Model::cderef_ctype;
-			using cderef_ctype_ptr		= typename Model::cderef_ctype_ptr;
-			using cderef_ctype_cptr		= typename Model::cderef_ctype_cptr;
-			using cderef_ctype_ref		= typename Model::cderef_ctype_ref;
+			using cderef_ctype		= typename model_type::cderef_ctype;
+			using cderef_ctype_ptr		= typename model_type::cderef_ctype_ptr;
+			using cderef_ctype_cptr		= typename model_type::cderef_ctype_cptr;
+			using cderef_ctype_ref		= typename model_type::cderef_ctype_ref;
 
-			using size_type			= typename Model::size_type;
-			using size_ctype		= typename Model::size_ctype;
+			using size_type			= typename model_type::size_type;
+			using size_ctype		= typename model_type::size_ctype;
 
 		protected:
 
@@ -255,61 +256,62 @@ namespace cctmp {
 
 			using facade			= plot_facade; // method compatible.
 
-			using model_type_ptr		= typename alias<Model>::type_ptr;
-			using model_type_cptr		= typename alias<Model>::type_cptr;
+			using model_type		= Model;
+			using model_type_ptr		= typename alias<model_type>::type_ptr;
+			using model_type_cptr		= typename alias<model_type>::type_cptr;
 
-			using type			= typename Model::type;
-			using type_ptr			= typename Model::type_ptr;
-			using type_cptr			= typename Model::type_cptr;
-			using type_ref			= typename Model::type_ref;
+			using type			= typename model_type::type;
+			using type_ptr			= typename model_type::type_ptr;
+			using type_cptr			= typename model_type::type_cptr;
+			using type_ref			= typename model_type::type_ref;
 
-			using ctype			= typename Model::ctype;
-			using ctype_ptr			= typename Model::ctype_ptr;
-			using ctype_cptr		= typename Model::ctype_cptr;
-			using ctype_ref			= typename Model::ctype_ref;
+			using ctype			= typename model_type::ctype;
+			using ctype_ptr			= typename model_type::ctype_ptr;
+			using ctype_cptr		= typename model_type::ctype_cptr;
+			using ctype_ref			= typename model_type::ctype_ref;
 
-			using citer_type		= typename Model::citer_type;
-			using citer_type_ptr		= typename Model::citer_type_ptr;
-			using citer_type_cptr		= typename Model::citer_type_cptr;
-			using citer_type_ref		= typename Model::citer_type_ref;
+			using citer_type		= typename model_type::citer_type;
+			using citer_type_ptr		= typename model_type::citer_type_ptr;
+			using citer_type_cptr		= typename model_type::citer_type_cptr;
+			using citer_type_ref		= typename model_type::citer_type_ref;
 
-			using citer_ctype		= typename Model::citer_ctype;
-			using citer_ctype_ptr		= typename Model::citer_ctype_ptr;
-			using citer_ctype_cptr		= typename Model::citer_ctype_cptr;
-			using citer_ctype_ref		= typename Model::citer_ctype_ref;
+			using citer_ctype		= typename model_type::citer_ctype;
+			using citer_ctype_ptr		= typename model_type::citer_ctype_ptr;
+			using citer_ctype_cptr		= typename model_type::citer_ctype_cptr;
+			using citer_ctype_ref		= typename model_type::citer_ctype_ref;
 
-			using iter_type			= typename Model::iter_type;
-			using iter_type_ptr		= typename Model::iter_type_ptr;
-			using iter_type_cptr		= typename Model::iter_type_cptr;
-			using iter_type_ref		= typename Model::iter_type_ref;
+			using iter_type			= typename model_type::iter_type;
+			using iter_type_ptr		= typename model_type::iter_type_ptr;
+			using iter_type_cptr		= typename model_type::iter_type_cptr;
+			using iter_type_ref		= typename model_type::iter_type_ref;
 
-			using iter_ctype		= typename Model::iter_ctype;
-			using iter_ctype_ptr		= typename Model::iter_ctype_ptr;
-			using iter_ctype_cptr		= typename Model::iter_ctype_cptr;
-			using iter_ctype_ref		= typename Model::iter_ctype_ref;
+			using iter_ctype		= typename model_type::iter_ctype;
+			using iter_ctype_ptr		= typename model_type::iter_ctype_ptr;
+			using iter_ctype_cptr		= typename model_type::iter_ctype_cptr;
+			using iter_ctype_ref		= typename model_type::iter_ctype_ref;
 
-			using cderef_type		= typename Model::cderef_type;
-			using cderef_type_ptr		= typename Model::cderef_type_ptr;
-			using cderef_type_cptr		= typename Model::cderef_type_cptr;
-			using cderef_type_ref		= typename Model::cderef_type_ref;
+			using cderef_type		= typename model_type::cderef_type;
+			using cderef_type_ptr		= typename model_type::cderef_type_ptr;
+			using cderef_type_cptr		= typename model_type::cderef_type_cptr;
+			using cderef_type_ref		= typename model_type::cderef_type_ref;
 
-			using cderef_ctype		= typename Model::cderef_ctype;
-			using cderef_ctype_ptr		= typename Model::cderef_ctype_ptr;
-			using cderef_ctype_cptr		= typename Model::cderef_ctype_cptr;
-			using cderef_ctype_ref		= typename Model::cderef_ctype_ref;
+			using cderef_ctype		= typename model_type::cderef_ctype;
+			using cderef_ctype_ptr		= typename model_type::cderef_ctype_ptr;
+			using cderef_ctype_cptr		= typename model_type::cderef_ctype_cptr;
+			using cderef_ctype_ref		= typename model_type::cderef_ctype_ref;
 
-			using deref_type		= typename Model::deref_type;
-			using deref_type_ptr		= typename Model::deref_type_ptr;
-			using deref_type_cptr		= typename Model::deref_type_cptr;
-			using deref_type_ref		= typename Model::deref_type_ref;
+			using deref_type		= typename model_type::deref_type;
+			using deref_type_ptr		= typename model_type::deref_type_ptr;
+			using deref_type_cptr		= typename model_type::deref_type_cptr;
+			using deref_type_ref		= typename model_type::deref_type_ref;
 
-			using deref_ctype		= typename Model::deref_ctype;
-			using deref_ctype_ptr		= typename Model::deref_ctype_ptr;
-			using deref_ctype_cptr		= typename Model::deref_ctype_cptr;
-			using deref_ctype_ref		= typename Model::deref_ctype_ref;
+			using deref_ctype		= typename model_type::deref_ctype;
+			using deref_ctype_ptr		= typename model_type::deref_ctype_ptr;
+			using deref_ctype_cptr		= typename model_type::deref_ctype_cptr;
+			using deref_ctype_ref		= typename model_type::deref_ctype_ref;
 
-			using size_type			= typename Model::size_type;
-			using size_ctype		= typename Model::size_ctype;
+			using size_type			= typename model_type::size_type;
+			using size_ctype		= typename model_type::size_ctype;
 
 		protected:
 
@@ -403,7 +405,7 @@ namespace cctmp {
 			tuple, cotuple, function, null, list, identity, exists, forall,	// inductive
 			custom,
 
-			dimension, fail // fail is symbolic only.
+			dimension, fail // fail is currently symbolic only, should this change?
 		};
 	};
 
@@ -423,23 +425,26 @@ namespace cctmp {
 
 		protected:
 
-			size_type kind;
-			size_type index;
+			size_type tag;
+			size_type position;
 
 		public:
 
-			nik_ce note() : kind{}, index{} { }
-			nik_ce note(size_ctype k, size_ctype i) : kind{k}, index{i} { }
+			nik_ce note() : tag{}, position{} { }
+			nik_ce note(size_ctype t, size_ctype p) : tag{t}, position{p} { }
 
-			// kind:
+			// tag:
 
-				nik_ce size_type get_kind() const { return kind; }
-				nik_ce void set_kind(size_ctype k) { kind = k; }
+				nik_ce bool is_fail() const { return (tag == Logo::fail); }
+				nik_ce bool not_fail() const { return (tag != Logo::fail); }
 
-			// index:
+				nik_ce size_type kind() const { return tag; }
+				nik_ce void set_kind(size_ctype t) { tag = t; }
 
-				nik_ce size_type get_index() const { return index; }
-				nik_ce void set_index(size_ctype i) { index = i; }
+			// position:
+
+				nik_ce size_type index() const { return position; }
+				nik_ce void set_index(size_ctype p) { position = p; }
 	};
 
 /***********************************************************************************************************************/
@@ -455,7 +460,7 @@ namespace cctmp {
 		using size_ctype	= typename base::size_ctype;
 
 		nik_ce gram() : base{} { }
-		nik_ce gram(size_ctype k, size_ctype i) : base{k, i} { }
+		nik_ce gram(size_ctype t, size_ctype p) : base{t, p} { }
 	};
 
 /***********************************************************************************************************************/
@@ -471,7 +476,7 @@ namespace cctmp {
 		using size_ctype	= typename base::size_ctype;
 
 		nik_ce icon() : base{} { }
-		nik_ce icon(size_ctype k, size_ctype i) : base{k, i} { }
+		nik_ce icon(size_ctype t, size_ctype p) : base{t, p} { }
 	};
 
 /***********************************************************************************************************************/
@@ -511,6 +516,17 @@ namespace cctmp {
 			using size_type			= typename text_type::size_type;
 			using size_ctype		= typename text_type::size_ctype;
 
+		public:
+
+			using pcmethod_type		= resolve_cmethod<page_type, array_cmethod>;
+			using pmethod_type		= resolve_method <page_type,  array_method>;
+
+			using tcmethod_type		= resolve_cmethod<text_type, array_cmethod>;
+			using tmethod_type		= resolve_method <text_type,  array_method>;
+
+			using sub_tcmethod_type		= resolve_csubmethod<text_type, subarray_cmethod>;
+			using sub_tmethod_type		= resolve_submethod <text_type,  subarray_method>;
+
 		protected:
 
 			page_type above;
@@ -525,10 +541,28 @@ namespace cctmp {
 				nik_ce page_ctype_ptr cpage() const { return &above; }
 				nik_ce  page_type_ptr  page()       { return &above; }
 
+				nik_ce auto cpage_equip(size_ctype n) const
+					{ return above.template cequip<pcmethod_type>(n); }
+
+				nik_ce auto page_equip(size_ctype n)
+					{ return above.template equip<pmethod_type>(n); }
+
 			// below:
 
 				nik_ce text_ctype_ptr ctext() const { return &below; }
 				nik_ce  text_type_ptr  text()       { return &below; }
+
+				nik_ce auto ctext_equip() const
+					{ return below.template cequip<tcmethod_type>(); }
+
+				nik_ce auto text_equip()
+					{ return below.template equip<tmethod_type>(); }
+
+				nik_ce auto ctext_right_equip(size_ctype n) const
+					{ return below.template right_cequip<sub_tcmethod_type>(n); }
+
+				nik_ce auto text_right_equip(size_ctype n)
+					{ return below.template right_equip<sub_tmethod_type>(n); }
 	};
 
 /***********************************************************************************************************************/
@@ -547,57 +581,35 @@ namespace cctmp {
 
 			using facade			= logo_cfacade; // method compatible.
 
-			using page_type			= typename Model::page_type;
-			using page_ctype		= typename alias<page_type>::ctype;
-			using page_ctype_ptr		= typename alias<page_type>::ctype_ptr;
-			using page_ctype_cptr		= typename alias<page_type>::ctype_cptr;
+			using model_type		= Model;
+			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
+			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
+
+			using page_type			= typename model_type::page_type;
 			using page_ctype_ref		= typename alias<page_type>::ctype_ref;
 
-			using text_type			= typename Model::text_type;
-			using text_ctype		= typename alias<text_type>::ctype;
-			using text_ctype_ptr		= typename alias<text_type>::ctype_ptr;
-			using text_ctype_cptr		= typename alias<text_type>::ctype_cptr;
+			using text_type			= typename model_type::text_type;
 			using text_ctype_ref		= typename alias<text_type>::ctype_ref;
 
-			using size_type			= typename Model::size_type;
-			using size_ctype		= typename Model::size_ctype;
+			using size_type			= typename model_type::size_type;
+			using size_ctype		= typename model_type::size_ctype;
 
 		protected:
 
-			page_ctype_ptr above;
-			text_ctype_ptr below;
-
-		protected:
-
-			using page_cmethod_type		= resolve_cmethod<page_type, array_cmethod>;
-			using text_cmethod_type		= resolve_cmethod<text_type, array_cmethod>;
-			using subtext_cmethod_type	= resolve_csubmethod<text_type, subarray_cmethod>;
-
-			// above:
-
-				nik_ce auto cpage_equip(size_ctype n) const
-					{ return above->template cequip<page_cmethod_type>(n); }
-
-			// below:
-
-				nik_ce auto ctext_equip() const
-					{ return below->template cequip<text_cmethod_type>(); }
-
-				nik_ce auto ctext_right_equip(size_ctype n) const
-					{ return below->template right_cequip<subtext_cmethod_type>(n); }
+			model_ctype_ptr model;
 
 		public:
 
-			nik_ce logo_cfacade() : above{}, below{} { }
-			nik_ce logo_cfacade(page_ctype_cptr a, text_ctype_cptr b) : above{a}, below{b} { }
+			nik_ce logo_cfacade() : model{} { }
+			nik_ce logo_cfacade(model_ctype_cptr m) : model{m} { }
 
-			// above:
+			// page:
 
-				nik_ce page_ctype_ref cpage() const { return *above; }
+				nik_ce page_ctype_ref cpage() const { return *model->cpage(); }
 
-			// below:
+			// text:
 
-				nik_ce text_ctype_ref ctext() const { return *below; }
+				nik_ce text_ctype_ref ctext() const { return *model->ctext(); }
 	};
 
 /***********************************************************************************************************************/
@@ -611,86 +623,52 @@ namespace cctmp {
 
 			using facade			= logo_facade; // method compatible.
 
-			using page_type			= typename Model::page_type;
-			using page_type_ptr		= typename alias<page_type>::type_ptr;
-			using page_type_cptr		= typename alias<page_type>::type_cptr;
+			using model_type		= Model;
+			using model_type_ptr		= typename alias<model_type>::type_ptr;
+			using model_type_cptr		= typename alias<model_type>::type_cptr;
+
+			using page_type			= typename model_type::page_type;
 			using page_type_ref		= typename alias<page_type>::type_ref;
 			using page_ctype_ref		= typename alias<page_type>::ctype_ref;
 
-			using text_type			= typename Model::text_type;
-			using text_type_ptr		= typename alias<text_type>::type_ptr;
-			using text_type_cptr		= typename alias<text_type>::type_cptr;
+			using text_type			= typename model_type::text_type;
 			using text_type_ref		= typename alias<text_type>::type_ref;
 			using text_ctype_ref		= typename alias<text_type>::ctype_ref;
 
-			using size_type			= typename Model::size_type;
-			using size_ctype		= typename Model::size_ctype;
+			using size_type			= typename model_type::size_type;
+			using size_ctype		= typename model_type::size_ctype;
 
 		protected:
 
-			page_type_ptr above;
-			text_type_ptr below;
-
-		protected:
-
-			using page_cmethod_type		= resolve_cmethod<page_type, array_cmethod>;
-			using page_method_type		= resolve_method <page_type,  array_method>;
-
-			using text_cmethod_type		= resolve_cmethod<text_type, array_cmethod>;
-			using text_method_type		= resolve_method <text_type,  array_method>;
-
-			using subtext_cmethod_type	= resolve_csubmethod<text_type, subarray_cmethod>;
-			using subtext_method_type	= resolve_submethod <text_type,  subarray_method>;
-
-			// above:
-
-				nik_ce auto cpage_equip(size_ctype n) const
-					{ return above->template cequip<page_cmethod_type>(n); }
-
-				nik_ce auto page_equip(size_ctype n) const
-					{ return above->template equip<page_method_type>(n); }
-
-			// below:
-
-				nik_ce auto ctext_equip() const
-					{ return below->template cequip<text_cmethod_type>(); }
-
-				nik_ce auto text_equip() const
-					{ return below->template equip<text_method_type>(); }
-
-				nik_ce auto ctext_right_equip(size_ctype n) const
-					{ return below->template right_cequip<subtext_cmethod_type>(n); }
-
-				nik_ce auto text_right_equip(size_ctype n) const
-					{ return below->template right_equip<subtext_method_type>(n); }
+			model_type_ptr model;
 
 		protected:
 
 			nik_ce bool overlay(size_ctype kind, size_ctype n)
 			{
-				auto above_method = page_equip(kind);
+				auto above_method = model->page_equip(kind);
 
-				if (above_method.is_full() || below->lacks_capacity(n)) return false;
+				if (above_method.is_full() || ctext().lacks_capacity(n)) return false;
 
-				above_method.push(below->expand(n));
+				above_method.push(text().expand(n));
 
 				return true;
 			}
 
 		public:
 
-			nik_ce logo_facade() : above{}, below{} { }
-			nik_ce logo_facade(page_type_cptr a, text_type_cptr b) : above{a}, below{b} { }
+			nik_ce logo_facade() : model{} { }
+			nik_ce logo_facade(model_type_cptr m) : model{m} { }
 
-			// above:
+			// page:
 
-				nik_ce page_ctype_ref cpage() const { return *above; }
-				nik_ce  page_type_ref  page()       { return *above; }
+				nik_ce page_ctype_ref cpage() const { return *model->cpage(); }
+				nik_ce  page_type_ref  page()       { return *model-> page(); }
 
-			// below:
+			// text:
 
-				nik_ce text_ctype_ref ctext() const { return *below; }
-				nik_ce  text_type_ref  text()       { return *below; }
+				nik_ce text_ctype_ref ctext() const { return *model->ctext(); }
+				nik_ce  text_type_ref  text()       { return *model-> text(); }
 	};
 
 /***********************************************************************************************************************/
@@ -712,16 +690,6 @@ namespace cctmp {
 			using cfacade_type		= logo_cfacade<model>;
 			using facade_type		= logo_facade<model>;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
-
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
-
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
@@ -733,11 +701,11 @@ namespace cctmp {
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{base::cpage(), base::ctext()}; }
+					{ return cfacade_type{static_cast<model const*>(this)}; }
 
 				template<typename Method>
 				nik_ce auto equip() -> Method
-					{ return facade_type{base::page(), base::text()}; }
+					{ return facade_type{static_cast<model*>(this)}; }
 	};
 
 /***********************************************************************************************************************/

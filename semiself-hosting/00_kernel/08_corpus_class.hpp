@@ -68,6 +68,17 @@ namespace cctmp {
 			using size_type			= typename memory_type::size_type;
 			using size_ctype		= typename memory_type::size_ctype;
 
+		public:
+
+			using rcmethod_type		= resolve_cmethod<record_type, sring_cmethod>;
+			using rmethod_type		= resolve_method <record_type,  sring_method>;
+
+			using mcmethod_type		= resolve_cmethod<memory_type, array_cmethod>;
+			using mmethod_type		= resolve_method <memory_type,  array_method>;
+
+			using sub_mcmethod_type		= resolve_csubmethod<memory_type, subarray_cmethod>;
+			using sub_mmethod_type		= resolve_submethod <memory_type,  subarray_method>;
+
 		protected:
 
 			record_type logic;
@@ -82,10 +93,28 @@ namespace cctmp {
 				nik_ce record_ctype_ptr crecord() const { return &logic; }
 				nik_ce  record_type_ptr  record()       { return &logic; }
 
+				nik_ce auto record_cequip() const
+					{ return logic.template cequip<rcmethod_type>(); }
+
+				nik_ce auto record_equip()
+					{ return logic.template equip<rmethod_type>(); }
+
 			// value:
 
 				nik_ce memory_ctype_ptr cmemory() const { return &value; }
 				nik_ce  memory_type_ptr  memory()       { return &value; }
+
+				nik_ce auto memory_cequip() const
+					{ return value.template cequip<mcmethod_type>(); }
+
+				nik_ce auto memory_equip()
+					{ return value.template equip<mmethod_type>(); }
+
+				nik_ce auto cmemory_right_equip(size_ctype n) const
+					{ return value.template right_cequip<sub_mcmethod_type>(n); }
+
+				nik_ce auto memory_right_equip(size_ctype n)
+					{ return value.template right_equip<sub_mmethod_type>(n); }
 	};
 
 /***********************************************************************************************************************/
@@ -104,38 +133,35 @@ namespace cctmp {
 
 			using facade			= corpus_cfacade; // method compatible.
 
-			using record_type		= typename Model::record_type;
-			using record_ctype		= typename alias<record_type>::ctype;
-			using record_ctype_ptr		= typename alias<record_type>::ctype_ptr;
-			using record_ctype_cptr		= typename alias<record_type>::ctype_cptr;
+			using model_type		= Model;
+			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
+			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
+
+			using record_type		= typename model_type::record_type;
 			using record_ctype_ref		= typename alias<record_type>::ctype_ref;
 
-			using memory_type		= typename Model::memory_type;
-			using memory_ctype		= typename alias<memory_type>::ctype;
-			using memory_ctype_ptr		= typename alias<memory_type>::ctype_ptr;
-			using memory_ctype_cptr		= typename alias<memory_type>::ctype_cptr;
+			using memory_type		= typename model_type::memory_type;
 			using memory_ctype_ref		= typename alias<memory_type>::ctype_ref;
 
-			using size_type			= typename Model::size_type;
-			using size_ctype		= typename Model::size_ctype;
+			using size_type			= typename model_type::size_type;
+			using size_ctype		= typename model_type::size_ctype;
 
 		protected:
 
-			record_ctype_ptr logic;
-			memory_ctype_ptr value;
+			model_ctype_ptr model;
 
 		public:
 
-			nik_ce corpus_cfacade() : logic{}, value{} { }
-			nik_ce corpus_cfacade(record_ctype_cptr l, memory_ctype_cptr v) : logic{l}, value{v} { }
+			nik_ce corpus_cfacade() : model{} { }
+			nik_ce corpus_cfacade(model_ctype_cptr m) : model{m} { }
 
-			// logic:
+			// record:
 
-				nik_ce record_ctype_ref crecord() const { return *logic; }
+				nik_ce record_ctype_ref crecord() const { return *model->crecord(); }
 
-			// value:
+			// memory:
 
-				nik_ce memory_ctype_ref cmemory() const { return *value; }
+				nik_ce memory_ctype_ref cmemory() const { return *model->cmemory(); }
 	};
 
 /***********************************************************************************************************************/
@@ -149,40 +175,39 @@ namespace cctmp {
 
 			using facade			= corpus_facade; // method compatible.
 
-			using record_type		= typename Model::record_type;
-			using record_type_ptr		= typename alias<record_type>::type_ptr;
-			using record_type_cptr		= typename alias<record_type>::type_cptr;
+			using model_type		= Model;
+			using model_type_ptr		= typename alias<model_type>::type_ptr;
+			using model_type_cptr		= typename alias<model_type>::type_cptr;
+
+			using record_type		= typename model_type::record_type;
 			using record_type_ref		= typename alias<record_type>::type_ref;
 			using record_ctype_ref		= typename alias<record_type>::ctype_ref;
 
-			using memory_type		= typename Model::memory_type;
-			using memory_type_ptr		= typename alias<memory_type>::type_ptr;
-			using memory_type_cptr		= typename alias<memory_type>::type_cptr;
+			using memory_type		= typename model_type::memory_type;
 			using memory_type_ref		= typename alias<memory_type>::type_ref;
 			using memory_ctype_ref		= typename alias<memory_type>::ctype_ref;
 
-			using size_type			= typename Model::size_type;
-			using size_ctype		= typename Model::size_ctype;
+			using size_type			= typename model_type::size_type;
+			using size_ctype		= typename model_type::size_ctype;
 
 		protected:
 
-			record_type_ptr logic;
-			memory_type_ptr value;
+			model_type_ptr model;
 
 		public:
 
-			nik_ce corpus_facade() : logic{}, value{} { }
-			nik_ce corpus_facade(record_type_cptr l, memory_type_cptr v) : logic{l}, value{v} { }
+			nik_ce corpus_facade() : model{} { }
+			nik_ce corpus_facade(model_type_cptr m) : model{m} { }
 
-			// logic:
+			// record:
 
-				nik_ce record_ctype_ref crecord() const { return *logic; }
-				nik_ce  record_type_ref  record()       { return *logic; }
+				nik_ce record_ctype_ref crecord() const { return *model->crecord(); }
+				nik_ce  record_type_ref  record()       { return *model-> record(); }
 
-			// value:
+			// memory:
 
-				nik_ce memory_ctype_ref cmemory() const { return *value; }
-				nik_ce  memory_type_ref  memory()       { return *value; }
+				nik_ce memory_ctype_ref cmemory() const { return *model->cmemory(); }
+				nik_ce  memory_type_ref  memory()       { return *model-> memory(); }
 	};
 
 /***********************************************************************************************************************/
@@ -204,16 +229,6 @@ namespace cctmp {
 			using cfacade_type		= corpus_cfacade<model>;
 			using facade_type		= corpus_facade<model>;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
-
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
-
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
@@ -225,11 +240,11 @@ namespace cctmp {
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{base::crecord(), base::cmemory()}; }
+					{ return cfacade_type{static_cast<model const*>(this)}; }
 
 				template<typename Method>
 				nik_ce auto equip() -> Method
-					{ return facade_type{base::record(), base::memory()}; }
+					{ return facade_type{static_cast<model*>(this)}; }
 	};
 
 /***********************************************************************************************************************/

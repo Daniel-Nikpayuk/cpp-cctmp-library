@@ -355,41 +355,42 @@ namespace cctmp {
 
 			using facade			= array_cfacade; // method compatible.
 
-			using model_ctype_ptr		= typename alias<Model>::ctype_ptr;
-			using model_ctype_cptr		= typename alias<Model>::ctype_cptr;
+			using model_type		= Model;
+			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
+			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
 
-			using type			= typename Model::type;
-			using type_ptr			= typename Model::type_ptr;
-			using type_cptr			= typename Model::type_cptr;
-			using type_ref			= typename Model::type_ref;
+			using type			= typename model_type::type;
+			using type_ptr			= typename model_type::type_ptr;
+			using type_cptr			= typename model_type::type_cptr;
+			using type_ref			= typename model_type::type_ref;
 
-			using ctype			= typename Model::ctype;
-			using ctype_ptr			= typename Model::ctype_ptr;
-			using ctype_cptr		= typename Model::ctype_cptr;
-			using ctype_ref			= typename Model::ctype_ref;
+			using ctype			= typename model_type::ctype;
+			using ctype_ptr			= typename model_type::ctype_ptr;
+			using ctype_cptr		= typename model_type::ctype_cptr;
+			using ctype_ref			= typename model_type::ctype_ref;
 
-			using citer_type		= typename Model::citer_type;
-			using citer_type_ptr		= typename Model::citer_type_ptr;
-			using citer_type_cptr		= typename Model::citer_type_cptr;
-			using citer_type_ref		= typename Model::citer_type_ref;
+			using citer_type		= typename model_type::citer_type;
+			using citer_type_ptr		= typename model_type::citer_type_ptr;
+			using citer_type_cptr		= typename model_type::citer_type_cptr;
+			using citer_type_ref		= typename model_type::citer_type_ref;
 
-			using citer_ctype		= typename Model::citer_ctype;
-			using citer_ctype_ptr		= typename Model::citer_ctype_ptr;
-			using citer_ctype_cptr		= typename Model::citer_ctype_cptr;
-			using citer_ctype_ref		= typename Model::citer_ctype_ref;
+			using citer_ctype		= typename model_type::citer_ctype;
+			using citer_ctype_ptr		= typename model_type::citer_ctype_ptr;
+			using citer_ctype_cptr		= typename model_type::citer_ctype_cptr;
+			using citer_ctype_ref		= typename model_type::citer_ctype_ref;
 
-			using cderef_type		= typename Model::cderef_type;
-			using cderef_type_ptr		= typename Model::cderef_type_ptr;
-			using cderef_type_cptr		= typename Model::cderef_type_cptr;
-			using cderef_type_ref		= typename Model::cderef_type_ref;
+			using cderef_type		= typename model_type::cderef_type;
+			using cderef_type_ptr		= typename model_type::cderef_type_ptr;
+			using cderef_type_cptr		= typename model_type::cderef_type_cptr;
+			using cderef_type_ref		= typename model_type::cderef_type_ref;
 
-			using cderef_ctype		= typename Model::cderef_ctype;
-			using cderef_ctype_ptr		= typename Model::cderef_ctype_ptr;
-			using cderef_ctype_cptr		= typename Model::cderef_ctype_cptr;
-			using cderef_ctype_ref		= typename Model::cderef_ctype_ref;
+			using cderef_ctype		= typename model_type::cderef_ctype;
+			using cderef_ctype_ptr		= typename model_type::cderef_ctype_ptr;
+			using cderef_ctype_cptr		= typename model_type::cderef_ctype_cptr;
+			using cderef_ctype_ref		= typename model_type::cderef_ctype_ref;
 
-			using size_type			= typename Model::size_type;
-			using size_ctype		= typename Model::size_ctype;
+			using size_type			= typename model_type::size_type;
+			using size_ctype		= typename model_type::size_ctype;
 
 		protected:
 
@@ -420,65 +421,66 @@ namespace cctmp {
 
 			using facade			= array_facade; // method compatible.
 
-			using model_type_ptr		= typename alias<Model>::type_ptr;
-			using model_type_cptr		= typename alias<Model>::type_cptr;
+			using model_type		= Model;
+			using model_type_ptr		= typename alias<model_type>::type_ptr;
+			using model_type_cptr		= typename alias<model_type>::type_cptr;
 
-			using type			= typename Model::type;
-			using type_ptr			= typename Model::type_ptr;
-			using type_cptr			= typename Model::type_cptr;
-			using type_ref			= typename Model::type_ref;
+			using type			= typename model_type::type;
+			using type_ptr			= typename model_type::type_ptr;
+			using type_cptr			= typename model_type::type_cptr;
+			using type_ref			= typename model_type::type_ref;
 
-			using ctype			= typename Model::ctype;
-			using ctype_ptr			= typename Model::ctype_ptr;
-			using ctype_cptr		= typename Model::ctype_cptr;
-			using ctype_ref			= typename Model::ctype_ref;
+			using ctype			= typename model_type::ctype;
+			using ctype_ptr			= typename model_type::ctype_ptr;
+			using ctype_cptr		= typename model_type::ctype_cptr;
+			using ctype_ref			= typename model_type::ctype_ref;
 
-			using citer_type		= typename Model::citer_type;
-			using citer_type_ptr		= typename Model::citer_type_ptr;
-			using citer_type_cptr		= typename Model::citer_type_cptr;
-			using citer_type_ref		= typename Model::citer_type_ref;
+			using citer_type		= typename model_type::citer_type;
+			using citer_type_ptr		= typename model_type::citer_type_ptr;
+			using citer_type_cptr		= typename model_type::citer_type_cptr;
+			using citer_type_ref		= typename model_type::citer_type_ref;
 
-			using citer_ctype		= typename Model::citer_ctype;
-			using citer_ctype_ptr		= typename Model::citer_ctype_ptr;
-			using citer_ctype_cptr		= typename Model::citer_ctype_cptr;
-			using citer_ctype_ref		= typename Model::citer_ctype_ref;
+			using citer_ctype		= typename model_type::citer_ctype;
+			using citer_ctype_ptr		= typename model_type::citer_ctype_ptr;
+			using citer_ctype_cptr		= typename model_type::citer_ctype_cptr;
+			using citer_ctype_ref		= typename model_type::citer_ctype_ref;
 
-			using iter_type			= typename Model::iter_type;
-			using iter_type_ptr		= typename Model::iter_type_ptr;
-			using iter_type_cptr		= typename Model::iter_type_cptr;
-			using iter_type_ref		= typename Model::iter_type_ref;
+			using iter_type			= typename model_type::iter_type;
+			using iter_type_ptr		= typename model_type::iter_type_ptr;
+			using iter_type_cptr		= typename model_type::iter_type_cptr;
+			using iter_type_ref		= typename model_type::iter_type_ref;
 
-			using iter_ctype		= typename Model::iter_ctype;
-			using iter_ctype_ptr		= typename Model::iter_ctype_ptr;
-			using iter_ctype_cptr		= typename Model::iter_ctype_cptr;
-			using iter_ctype_ref		= typename Model::iter_ctype_ref;
+			using iter_ctype		= typename model_type::iter_ctype;
+			using iter_ctype_ptr		= typename model_type::iter_ctype_ptr;
+			using iter_ctype_cptr		= typename model_type::iter_ctype_cptr;
+			using iter_ctype_ref		= typename model_type::iter_ctype_ref;
 
-			using cderef_type		= typename Model::cderef_type;
-			using cderef_type_ptr		= typename Model::cderef_type_ptr;
-			using cderef_type_cptr		= typename Model::cderef_type_cptr;
-			using cderef_type_ref		= typename Model::cderef_type_ref;
+			using cderef_type		= typename model_type::cderef_type;
+			using cderef_type_ptr		= typename model_type::cderef_type_ptr;
+			using cderef_type_cptr		= typename model_type::cderef_type_cptr;
+			using cderef_type_ref		= typename model_type::cderef_type_ref;
 
-			using cderef_ctype		= typename Model::cderef_ctype;
-			using cderef_ctype_ptr		= typename Model::cderef_ctype_ptr;
-			using cderef_ctype_cptr		= typename Model::cderef_ctype_cptr;
-			using cderef_ctype_ref		= typename Model::cderef_ctype_ref;
+			using cderef_ctype		= typename model_type::cderef_ctype;
+			using cderef_ctype_ptr		= typename model_type::cderef_ctype_ptr;
+			using cderef_ctype_cptr		= typename model_type::cderef_ctype_cptr;
+			using cderef_ctype_ref		= typename model_type::cderef_ctype_ref;
 
-			using deref_type		= typename Model::deref_type;
-			using deref_type_ptr		= typename Model::deref_type_ptr;
-			using deref_type_cptr		= typename Model::deref_type_cptr;
-			using deref_type_ref		= typename Model::deref_type_ref;
+			using deref_type		= typename model_type::deref_type;
+			using deref_type_ptr		= typename model_type::deref_type_ptr;
+			using deref_type_cptr		= typename model_type::deref_type_cptr;
+			using deref_type_ref		= typename model_type::deref_type_ref;
 
-			using deref_ctype		= typename Model::deref_ctype;
-			using deref_ctype_ptr		= typename Model::deref_ctype_ptr;
-			using deref_ctype_cptr		= typename Model::deref_ctype_cptr;
-			using deref_ctype_ref		= typename Model::deref_ctype_ref;
+			using deref_ctype		= typename model_type::deref_ctype;
+			using deref_ctype_ptr		= typename model_type::deref_ctype_ptr;
+			using deref_ctype_cptr		= typename model_type::deref_ctype_cptr;
+			using deref_ctype_ref		= typename model_type::deref_ctype_ref;
 
-			using size_type			= typename Model::size_type;
-			using size_ctype		= typename Model::size_ctype;
+			using size_type			= typename model_type::size_type;
+			using size_ctype		= typename model_type::size_ctype;
 
 		public:
 
-			nik_ces size_type length() { return Model::length(); }
+			nik_ces size_type length() { return model_type::length(); }
 
 		protected:
 

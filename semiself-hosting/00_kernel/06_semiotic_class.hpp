@@ -40,35 +40,35 @@ namespace cctmp {
 
 		protected:
 
-			size_type kind;
-			size_type symbol_index;
-			size_type image_index;
+			size_type tag;
+			size_type rposition;
+			size_type dposition;
 
 		public:
 
-			nik_ce sign() : kind{}, symbol_index{}, image_index{} { }
-			nik_ce sign(size_ctype k, size_ctype s, size_ctype i) :
-				kind{k}, symbol_index{s}, image_index{i} { }
+			nik_ce sign() : tag{}, rposition{}, dposition{} { }
+			nik_ce sign(size_ctype t, size_ctype r, size_ctype d) :
+				tag{t}, rposition{r}, dposition{d} { }
 
-			// kind:
+			// tag:
 
-				nik_ce size_type get_kind() const { return kind; }
-				nik_ce void set_kind(size_ctype k) { kind = k; }
+				nik_ce size_type kind() const { return tag; }
+				nik_ce void set_kind(size_ctype t) { tag = t; }
 
-			// symbol index:
+			// rposition:
 
-				nik_ce size_type get_symbol_index() const { return symbol_index; }
-				nik_ce void set_symbol_index(size_ctype s) { symbol_index = s; }
+				nik_ce size_type rindex() const { return rposition; }
+				nik_ce void set_rindex(size_ctype r) { rposition = r; }
 
-			// image index:
+			// dposition:
 
-				nik_ce size_type get_image_index() const { return image_index; }
-				nik_ce void set_image_index(size_ctype i) { image_index = i; }
+				nik_ce size_type dindex() const { return dposition; }
+				nik_ce void set_dindex(size_ctype d) { dposition = d; }
 
 			// to icon:
 
-				nik_ce auto to_gram() const { return gram_type{kind, symbol_index}; }
-				nik_ce auto to_icon() const { return icon_type{kind, image_index}; }
+				nik_ce auto to_gram() const { return gram_type{tag, rposition}; }
+				nik_ce auto to_icon() const { return icon_type{tag, dposition}; }
 	};
 
 /***********************************************************************************************************************/
@@ -110,6 +110,14 @@ namespace cctmp {
 			using size_type			= typename signified_type::size_type;
 			using size_ctype		= typename signified_type::size_ctype;
 
+		public:
+
+			using rcmethod_type		= resolve_cmethod<signifier_type, rring_cmethod>;
+			using rmethod_type		= resolve_method <signifier_type,  rring_method>;
+
+			using dcmethod_type		= resolve_cmethod<signified_type, dring_cmethod>;
+			using dmethod_type		= resolve_method <signified_type,  dring_method>;
+
 		protected:
 
 			signifier_type symbol;
@@ -124,10 +132,22 @@ namespace cctmp {
 				nik_ce signifier_ctype_ptr csignifier() const { return &symbol; }
 				nik_ce  signifier_type_ptr  signifier()       { return &symbol; }
 
+				nik_ce auto signifier_cequip() const
+					{ return symbol.template cequip<rcmethod_type>(); }
+
+				nik_ce auto signifier_equip()
+					{ return symbol.template equip<rmethod_type>(); }
+
 			// image:
 
 				nik_ce signified_ctype_ptr csignified() const { return &image; }
 				nik_ce  signified_type_ptr  signified()       { return &image; }
+
+				nik_ce auto signified_cequip() const
+					{ return image.template cequip<rcmethod_type>(); }
+
+				nik_ce auto signified_equip()
+					{ return image.template equip<rmethod_type>(); }
 	};
 
 /***********************************************************************************************************************/
@@ -146,39 +166,35 @@ namespace cctmp {
 
 			using facade			= semiotic_cfacade; // method compatible.
 
-			using signifier_type		= typename Model::signifier_type;
-			using signifier_ctype		= typename alias<signifier_type>::ctype;
-			using signifier_ctype_ptr	= typename alias<signifier_type>::ctype_ptr;
-			using signifier_ctype_cptr	= typename alias<signifier_type>::ctype_cptr;
+			using model_type		= Model;
+			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
+			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
+
+			using signifier_type		= typename model_type::signifier_type;
 			using signifier_ctype_ref	= typename alias<signifier_type>::ctype_ref;
 
-			using signified_type		= typename Model::signified_type;
-			using signified_ctype		= typename alias<signified_type>::ctype;
-			using signified_ctype_ptr	= typename alias<signified_type>::ctype_ptr;
-			using signified_ctype_cptr	= typename alias<signified_type>::ctype_cptr;
+			using signified_type		= typename model_type::signified_type;
 			using signified_ctype_ref	= typename alias<signified_type>::ctype_ref;
 
-			using size_type			= typename Model::size_type;
-			using size_ctype		= typename Model::size_ctype;
+			using size_type			= typename model_type::size_type;
+			using size_ctype		= typename model_type::size_ctype;
 
 		protected:
 
-			signifier_ctype_ptr symbol;
-			signified_ctype_ptr image;
+			model_ctype_ptr model;
 
 		public:
 
-			nik_ce semiotic_cfacade() : symbol{}, image{} { }
-			nik_ce semiotic_cfacade(signifier_ctype_cptr s, signified_ctype_cptr i) :
-				symbol{s}, image{i} { }
+			nik_ce semiotic_cfacade() : model{} { }
+			nik_ce semiotic_cfacade(model_ctype_cptr m) : model{m} { }
 
 			// symbol:
 
-				nik_ce signifier_ctype_ref csignifier() const { return *symbol; }
+				nik_ce signifier_ctype_ref csignifier() const { return *model->csignifier(); }
 
 			// image:
 
-				nik_ce signified_ctype_ref csignified() const { return *image; }
+				nik_ce signified_ctype_ref csignified() const { return *model->csignified(); }
 	};
 
 /***********************************************************************************************************************/
@@ -192,41 +208,39 @@ namespace cctmp {
 
 			using facade			= semiotic_facade; // method compatible.
 
-			using signifier_type		= typename Model::signifier_type;
-			using signifier_type_ptr	= typename alias<signifier_type>::type_ptr;
-			using signifier_type_cptr	= typename alias<signifier_type>::type_cptr;
+			using model_type		= Model;
+			using model_type_ptr		= typename alias<model_type>::type_ptr;
+			using model_type_cptr		= typename alias<model_type>::type_cptr;
+
+			using signifier_type		= typename model_type::signifier_type;
 			using signifier_type_ref	= typename alias<signifier_type>::type_ref;
 			using signifier_ctype_ref	= typename alias<signifier_type>::ctype_ref;
 
-			using signified_type		= typename Model::signified_type;
-			using signified_type_ptr	= typename alias<signified_type>::type_ptr;
-			using signified_type_cptr	= typename alias<signified_type>::type_cptr;
+			using signified_type		= typename model_type::signified_type;
 			using signified_type_ref	= typename alias<signified_type>::type_ref;
 			using signified_ctype_ref	= typename alias<signified_type>::ctype_ref;
 
-			using size_type			= typename Model::size_type;
-			using size_ctype		= typename Model::size_ctype;
+			using size_type			= typename model_type::size_type;
+			using size_ctype		= typename model_type::size_ctype;
 
 		protected:
 
-			signifier_type_ptr symbol;
-			signified_type_ptr image;
+			model_type_ptr model;
 
 		public:
 
-			nik_ce semiotic_facade() : symbol{}, image{} { }
-			nik_ce semiotic_facade(signifier_type_cptr s, signified_type_cptr i) :
-				symbol{s}, image{i} { }
+			nik_ce semiotic_facade() : model{} { }
+			nik_ce semiotic_facade(model_type_cptr m) : model{m} { }
 
-			// symbol:
+			// signifier:
 
-				nik_ce signifier_ctype_ref csignifier() const { return *symbol; }
-				nik_ce  signifier_type_ref  signifier()       { return *symbol; }
+				nik_ce signifier_ctype_ref csignifier() const { return *model->csignifier(); }
+				nik_ce  signifier_type_ref  signifier()       { return *model-> signifier(); }
 
-			// image:
+			// signified:
 
-				nik_ce signified_ctype_ref csignified() const { return *image; }
-				nik_ce  signified_type_ref  signified()       { return *image; }
+				nik_ce signified_ctype_ref csignified() const { return *model->csignified(); }
+				nik_ce  signified_type_ref  signified()       { return *model-> signified(); }
 	};
 
 /***********************************************************************************************************************/
@@ -253,16 +267,6 @@ namespace cctmp {
 			using cfacade_type		= semiotic_cfacade<model>;
 			using facade_type		= semiotic_facade<model>;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
-
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
-
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
@@ -274,31 +278,11 @@ namespace cctmp {
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{base::csignifier(), base::csignified()}; }
+					{ return cfacade_type{static_cast<model const*>(this)}; }
 
 				template<typename Method>
 				nik_ce auto equip() -> Method
-					{ return facade_type{base::signifier(), base::signified()}; }
-
-				// signifier:
-
-					template<typename CMethod>
-					nik_ce auto signifier_cequip() const -> CMethod
-						{ return base::csignifier()->template cequip<CMethod>(); }
-
-					template<typename Method>
-					nik_ce auto signifier_equip() -> Method
-						{ return base::signifier()->template equip<Method>(); }
-
-				// signified:
-
-					template<typename CMethod>
-					nik_ce auto signified_cequip() const -> CMethod
-						{ return base::csignified()->template cequip<CMethod>(); }
-
-					template<typename Method>
-					nik_ce auto signified_equip() -> Method
-						{ return base::signified()->template equip<Method>(); }
+					{ return facade_type{static_cast<model*>(this)}; }
 	};
 
 /***********************************************************************************************************************/
