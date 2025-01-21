@@ -52,7 +52,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// subarray:
+// array sub:
 
 /***********************************************************************************************************************/
 
@@ -64,7 +64,7 @@ namespace cctmp {
 		// base:: { cbegin() }
 
 	template<typename Base>
-	class subarray_cmethod_disjoint : public Base
+	class array_csubmethod_disjoint : public Base
 	{
 		public:
 
@@ -99,8 +99,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce subarray_cmethod_disjoint() : base{} { }
-			nik_ce subarray_cmethod_disjoint(const facade & f) : base{f} { }
+			nik_ce array_csubmethod_disjoint() : base{} { }
+			nik_ce array_csubmethod_disjoint(const facade & f) : base{f} { }
 
 			// initial:
 
@@ -170,7 +170,7 @@ namespace cctmp {
 		// base:: { begin() }
 
 	template<typename Base>
-	class subarray_method_disjoint : public Base
+	class array_submethod_disjoint : public Base
 	{
 		public:
 
@@ -205,8 +205,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce subarray_method_disjoint() : base{} { }
-			nik_ce subarray_method_disjoint(const facade & f) : base{f} { }
+			nik_ce array_submethod_disjoint() : base{} { }
+			nik_ce array_submethod_disjoint(const facade & f) : base{f} { }
 
 			// immutable:
 

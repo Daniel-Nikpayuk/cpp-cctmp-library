@@ -190,18 +190,18 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// subarray facade:
+// array subfacade:
 
 /***********************************************************************************************************************/
 
 // immutable:
 
 	template<typename Type, typename SizeType>
-	class subarray_cfacade
+	class array_csubfacade
 	{
 		public:
 
-			using facade			= subarray_cfacade; // method compatible.
+			using facade			= array_csubfacade; // method compatible.
 
 			using type			= typename alias<Type>::type;
 			using type_ptr			= typename alias<Type>::type_ptr;
@@ -243,8 +243,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce subarray_cfacade() : initial{}, terminal{} { }
-			nik_ce subarray_cfacade(ctype_cptr i, size_ctype t) : initial{i}, terminal{t} { }
+			nik_ce array_csubfacade() : initial{}, terminal{} { }
+			nik_ce array_csubfacade(ctype_cptr i, size_ctype t) : initial{i}, terminal{t} { }
 
 			// initial:
 
@@ -260,11 +260,11 @@ namespace cctmp {
 // mutable:
 
 	template<typename Type, typename SizeType>
-	class subarray_facade
+	class array_subfacade
 	{
 		public:
 
-			using facade			= subarray_facade; // method compatible.
+			using facade			= array_subfacade; // method compatible.
 
 			using type			= typename alias<Type>::type;
 			using type_ptr			= typename alias<Type>::type_ptr;
@@ -326,8 +326,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce subarray_facade() : initial{}, terminal{} { }
-			nik_ce subarray_facade(type_cptr i, size_ctype t) : initial{i}, terminal{t} { }
+			nik_ce array_subfacade() : initial{}, terminal{} { }
+			nik_ce array_subfacade(type_cptr i, size_ctype t) : initial{i}, terminal{t} { }
 
 			// initial:
 
@@ -511,21 +511,21 @@ namespace cctmp {
 
 // methods:
 
-	// subarray:
+	// array sub:
 
-		template<typename> class subarray_cmethod_disjoint;
-		template<typename> class subarray_method_disjoint;
+		template<typename> class array_csubmethod_disjoint;
+		template<typename> class array_submethod_disjoint;
 
 		// syntactic sugar:
 
 			template<typename Facade>
-			using subarray_cmethod =
-				subarray_cmethod_disjoint < Facade >;
+			using array_csubmethod =
+				array_csubmethod_disjoint < Facade >;
 
 			template<typename Facade>
-			using subarray_method =
-				subarray_method_disjoint  <
-				subarray_cmethod_disjoint < Facade >>;
+			using array_submethod =
+				array_submethod_disjoint  <
+				array_csubmethod_disjoint < Facade >>;
 
 	// array:
 
@@ -536,14 +536,14 @@ namespace cctmp {
 
 			template<typename Facade>
 			using array_cmethod =
-				   array_cmethod_disjoint <
-				subarray_cmethod_disjoint < Facade >>;
+				array_cmethod_disjoint    <
+				array_csubmethod_disjoint < Facade >>;
 
 			template<typename Facade>
 			using array_method =
-				   array_method_disjoint <
-				subarray_method_disjoint <
-				   array_cmethod         < Facade >>>;
+				array_method_disjoint    <
+				array_submethod_disjoint <
+				array_cmethod            < Facade >>>;
 
 	// unique:
 
@@ -588,7 +588,7 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using csubfacade_type		= subarray_cfacade<type, size_type>;
+			using csubfacade_type		= array_csubfacade<type, size_type>;
 
 		public:
 
@@ -658,8 +658,8 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using csubfacade_type		= subarray_cfacade<type, size_type>;
-			using subfacade_type		= subarray_facade<type, size_type>;
+			using csubfacade_type		= array_csubfacade<type, size_type>;
+			using subfacade_type		= array_subfacade<type, size_type>;
 
 		public:
 

@@ -62,62 +62,62 @@ namespace cctmp {
 
 		protected:
 
-			using pcmethod_type		= typename model_type::pcmethod_type;
-			using tcmethod_type		= typename model_type::tcmethod_type;
+			using page_cmethod_type		= typename model_type::page_cmethod_type;
+			using text_cmethod_type		= typename model_type::text_cmethod_type;
 
-			pcmethod_type pcmethod;
-			tcmethod_type tcmethod;
+			page_cmethod_type page_cmethod;
+			text_cmethod_type text_cmethod;
 
 		public:
 
-			nik_ce signifier_ring_cmethod() : base{}, pcmethod{}, tcmethod{} { }
+			nik_ce signifier_ring_cmethod() : base{}, page_cmethod{}, text_cmethod{} { }
 			nik_ce signifier_ring_cmethod(const Facade & f) :
 
 				base{f},
-				pcmethod{cpage_equip(Logo::ring)},
-				tcmethod{ctext_equip()}
+				page_cmethod{page_cequip(Logo::ringN)},
+				text_cmethod{text_cequip()}
 				{ }
 
 			// page:
 
-				nik_ce auto cpage_equip(size_ctype n) const
-					{ return base::model->cpage_equip(n); }
+				nik_ce auto page_cequip(size_ctype n) const
+					{ return base::model->page_cequip(n); }
 
 			// text:
 
-				nik_ce auto ctext_equip() const { return base::model->ctext_equip(); }
+				nik_ce auto text_cequip() const { return base::model->text_cequip(); }
 
 					// unsafe, does not test against name().
 
-				nik_ce auto ctext_right_equip(size_ctype n) const
-					{ return base::model->ctext_right_equip(n); }
+				nik_ce auto text_csubequip(size_ctype n) const
+					{ return base::model->text_csubequip(n); }
 
-				nik_ce auto page_to_ctext_equip(size_ctype n) const
-					{ return ctext_right_equip(pcmethod[n]); }
+				nik_ce auto page_to_text_cequip(size_ctype n) const
+					{ return text_csubequip(page_cmethod[n]); }
 
-				nik_ce auto gram_to_ctext_equip(gram_ctype_ref g) const
-					{ return page_to_ctext_equip(g.index()); }
+				nik_ce auto gram_to_text_cequip(gram_ctype_ref g) const
+					{ return page_to_text_cequip(g.index()); }
 
 			// gram:
 
 				nik_ce auto fail_gram() const { return gram_type{Logo::fail, 0}; }
-				nik_ce auto ring_gram(size_ctype pos) const { return gram_type{Logo::ring, pos}; }
+				nik_ce auto ring_gram(size_ctype pos) const { return gram_type{Logo::ringN, pos}; }
 
 			// find:
 
 				nik_ce bool found(size_ctype n) const
-					{ return (n != pcmethod.size()); }
+					{ return (n != page_cmethod.size()); }
 
 				nik_ce auto find(size_ctype bits) const
 				{
-					auto in = pcmethod.cbegin();
+					auto in = page_cmethod.cbegin();
 
-					while (in != pcmethod.cend())
+					while (in != page_cmethod.cend())
 					{
-						auto sub_tcmethod = base::model->ctext_right_equip(*in);
+						auto text_csubmethod = text_csubequip(*in);
 
-						bool same_name = (sub_tcmethod[RRing::name] == Logo::ring);
-						bool same_bits = (sub_tcmethod[RRing::bits] == bits);
+						bool same_name = (text_csubmethod[RRing::name] == Logo::ringN);
+						bool same_bits = (text_csubmethod[RRing::bits] == bits);
 
 							// refactor through variadic same ?
 						if (same_name && same_bits) { break; } else { ++in; }
@@ -127,13 +127,13 @@ namespace cctmp {
 				}
 
 				nik_ce size_type left_find(size_ctype bits) const
-					{ return find(bits) - pcmethod.cbegin(); }
+					{ return find(bits) - page_cmethod.cbegin(); }
 
 			// same:
 
 				template<typename T, typename... Ts>
 				nik_ce bool same_types(size_ctype n, const T l, const Ts... rs) const
-					{ return same_methods(n, page_to_ctext_equip(l), page_to_ctext_equip(rs)...); }
+					{ return same_methods(n, page_to_text_cequip(l), page_to_text_cequip(rs)...); }
 
 				template<typename T, typename... Ts>
 				nik_ce bool same_methods(size_ctype n, const T & l, const Ts &... rs) const
@@ -174,7 +174,7 @@ namespace cctmp {
 
 		protected:
 
-			nik_ce bool overlay_base() { return base::overlay(Logo::ring, RRing::dimension); }
+			nik_ce bool overlay_base() { return base::overlay(Logo::ringN, RRing::dimension); }
 
 		public:
 
@@ -185,11 +185,11 @@ namespace cctmp {
 
 				 // unsafe, does not test against name().
 
-				nik_ce auto text_right_equip(size_ctype n)
-					{ return base::model->text_right_equip(n); }
+				nik_ce auto text_subequip(size_ctype n)
+					{ return base::model->text_subequip(n); }
 
 				nik_ce auto page_to_text_equip(size_ctype n)
-					{ return text_right_equip(base::pcmethod[n]); }
+					{ return text_subequip(base::page_cmethod[n]); }
 
 				nik_ce auto gram_to_text_equip(gram_ctype_ref g)
 					{ return page_to_text_equip(g.index()); }
@@ -200,7 +200,7 @@ namespace cctmp {
 				{
 					if (not overlay_base()) return base::fail_gram();
 
-					return base::ring_gram(base::pcmethod.max());
+					return base::ring_gram(base::page_cmethod.max());
 				}
 	};
 

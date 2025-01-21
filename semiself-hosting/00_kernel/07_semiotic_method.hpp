@@ -44,20 +44,20 @@ namespace cctmp {
 
 		protected:
 
-			using rcmethod_type		= typename model_type::rcmethod_type;
-			using dcmethod_type		= typename model_type::dcmethod_type;
+			using signifier_cmethod_type	= typename model_type::signifier_cmethod_type;
+			using signified_cmethod_type	= typename model_type::signified_cmethod_type;
 
-			rcmethod_type rcmethod;
-			dcmethod_type dcmethod;
+			signifier_cmethod_type signifier_cmethod;
+			signified_cmethod_type signified_cmethod;
 
 		public:
 
-			nik_ce semiotic_ring_cmethod() : base{}, rcmethod{}, dcmethod{} { }
+			nik_ce semiotic_ring_cmethod() : base{}, signifier_cmethod{}, signified_cmethod{} { }
 			nik_ce semiotic_ring_cmethod(const Facade & f) :
 
 				base{f},
-				rcmethod{signifier_cequip()},
-				dcmethod{signified_cequip()}
+				signifier_cmethod{signifier_cequip()},
+				signified_cmethod{signified_cequip()}
 				{ }
 
 			// signifier:
@@ -100,11 +100,13 @@ namespace cctmp {
 
 		protected:
 
-			using rmethod_type		= typename model_type::rmethod_type;
-			using dmethod_type		= typename model_type::dmethod_type;
+			nik_ces size_type roffset	= RRing::dimension;
 
-			rmethod_type rmethod;
-			dmethod_type dmethod;
+			using signifier_method_type	= typename model_type::signifier_method_type;
+			using signified_method_type	= typename model_type::signified_method_type;
+
+			signifier_method_type signifier_method;
+			signified_method_type signified_method;
 
 		protected:
 
@@ -112,15 +114,15 @@ namespace cctmp {
 
 				nik_ce void initialize_signifier(gram_ctype_ref gram, size_ctype bits)
 				{
-					auto sub_rmethod = rmethod.gram_to_text_equip(gram);
+					auto signifier_submethod = signifier_method.gram_to_text_equip(gram);
 
-					sub_rmethod[RRing::name] = Logo::ring;
-					sub_rmethod[RRing::bits] = bits;
+					signifier_submethod[RRing::name] = Logo::ringN;
+					signifier_submethod[RRing::bits] = bits;
 				}
 
 				nik_ce auto instantiate_signifier(size_ctype bits)
 				{
-					auto gram = rmethod.overlay();
+					auto gram = signifier_method.overlay();
 
 					if (gram.not_fail()) { initialize_signifier(gram, bits); }
 
@@ -129,25 +131,25 @@ namespace cctmp {
 
 				nik_ce auto declare_signifier(size_ctype bits)
 				{
-					size_ctype pos = rmethod.left_find(bits);
+					size_ctype pos = signifier_method.left_find(bits);
 
-					if (rmethod.found(pos)) { return rmethod.ring_gram(pos); }
-					else                    { return instantiate_signifier(bits); }
+					if (signifier_method.found(pos)) { return signifier_method.ring_gram(pos); }
+					else                             { return instantiate_signifier(bits); }
 				}
 
 			// signified:
 
 				nik_ce void initialize_signified(icon_ctype_ref icon, size_ctype start)
 				{
-					auto sub_dmethod = dmethod.icon_to_text_equip(icon);
+					auto signified_submethod = signified_method.icon_to_text_equip(icon);
 
-					sub_dmethod[DRing::start] = start;
-					sub_dmethod[DRing::bytes] = dmethod.byte_size();
+					signified_submethod[DRing::start] = start;
+					signified_submethod[DRing::bytes] = signified_method.byte_size();
 				}
 
 				nik_ce auto instantiate_signified(size_ctype start)
 				{
-					auto icon = dmethod.overlay();
+					auto icon = signified_method.overlay();
 
 					if (icon.not_fail()) { initialize_signified(icon, start); }
 
@@ -156,20 +158,20 @@ namespace cctmp {
 
 				nik_ce auto declare_signified(size_ctype start)
 				{
-					size_ctype pos = dmethod.left_find(start);
+					size_ctype pos = signified_method.left_find(start);
 
-					if (dmethod.found(pos)) { return dmethod.fail_icon(); }
-					else                    { return instantiate_signified(start); }
+					if (signified_method.found(pos)) { return signified_method.fail_icon(); }
+					else                             { return instantiate_signified(start); }
 				}
 
 		public:
 
-			nik_ce semiotic_ring_method() : base{}, rmethod{}, dmethod{} { }
+			nik_ce semiotic_ring_method() : base{}, signifier_method{}, signified_method{} { }
 			nik_ce semiotic_ring_method(const Facade & f) :
 
 				base{f},
-				rmethod{signifier_equip()},
-				dmethod{signified_equip()}
+				signifier_method{signifier_equip()},
+				signified_method{signified_equip()}
 				{ }
 
 			// signifier:
@@ -186,7 +188,7 @@ namespace cctmp {
 				{
 					auto gram = declare_signifier(bits);
 					auto icon = declare_signified(offset);
-					auto kind = (gram.not_fail() && icon.not_fail()) ? Logo::ring : Logo::fail;
+					auto kind = (gram.not_fail() && icon.not_fail()) ? Logo::ringN : Logo::fail;
 
 					return sign_type{kind, gram.index(), icon.index()};
 				}
@@ -195,7 +197,7 @@ namespace cctmp {
 
 				template<typename T, typename... Ts>
 				nik_ce bool same_types(const T & l, const Ts &... rs)
-					{ return rmethod.same_types(RRing::dimension, l.rindex(), rs.rindex()...); }
+					{ return signifier_method.same_types(roffset, l.rindex(), rs.rindex()...); }
 	};
 
 	// syntactic sugar:

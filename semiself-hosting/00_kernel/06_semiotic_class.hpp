@@ -112,11 +112,11 @@ namespace cctmp {
 
 		public:
 
-			using rcmethod_type		= resolve_cmethod<signifier_type, rring_cmethod>;
-			using rmethod_type		= resolve_method <signifier_type,  rring_method>;
+			using signifier_cmethod_type	= resolve_cmethod<signifier_type, rring_cmethod>;
+			using signifier_method_type	= resolve_method <signifier_type,  rring_method>;
 
-			using dcmethod_type		= resolve_cmethod<signified_type, dring_cmethod>;
-			using dmethod_type		= resolve_method <signified_type,  dring_method>;
+			using signified_cmethod_type	= resolve_cmethod<signified_type, dring_cmethod>;
+			using signified_method_type	= resolve_method <signified_type,  dring_method>;
 
 		protected:
 
@@ -133,10 +133,10 @@ namespace cctmp {
 				nik_ce  signifier_type_ptr  signifier()       { return &symbol; }
 
 				nik_ce auto signifier_cequip() const
-					{ return symbol.template cequip<rcmethod_type>(); }
+					{ return symbol.template cequip<signifier_cmethod_type>(); }
 
 				nik_ce auto signifier_equip()
-					{ return symbol.template equip<rmethod_type>(); }
+					{ return symbol.template equip<signifier_method_type>(); }
 
 			// image:
 
@@ -144,10 +144,10 @@ namespace cctmp {
 				nik_ce  signified_type_ptr  signified()       { return &image; }
 
 				nik_ce auto signified_cequip() const
-					{ return image.template cequip<rcmethod_type>(); }
+					{ return image.template cequip<signifier_cmethod_type>(); }
 
 				nik_ce auto signified_equip()
-					{ return image.template equip<rmethod_type>(); }
+					{ return image.template equip<signifier_method_type>(); }
 	};
 
 /***********************************************************************************************************************/

@@ -70,14 +70,14 @@ namespace cctmp {
 
 		public:
 
-			using rcmethod_type		= resolve_cmethod<record_type, sring_cmethod>;
-			using rmethod_type		= resolve_method <record_type,  sring_method>;
+			using record_cmethod_type	= resolve_cmethod<record_type, sring_cmethod>;
+			using record_method_type	= resolve_method <record_type,  sring_method>;
 
-			using mcmethod_type		= resolve_cmethod<memory_type, array_cmethod>;
-			using mmethod_type		= resolve_method <memory_type,  array_method>;
+			using memory_cmethod_type	= resolve_cmethod<memory_type, array_cmethod>;
+			using memory_method_type	= resolve_method <memory_type,  array_method>;
 
-			using sub_mcmethod_type		= resolve_csubmethod<memory_type, subarray_cmethod>;
-			using sub_mmethod_type		= resolve_submethod <memory_type,  subarray_method>;
+			using memory_csubmethod_type	= resolve_csubmethod<memory_type, array_csubmethod>;
+			using memory_submethod_type	= resolve_submethod <memory_type,  array_submethod>;
 
 		protected:
 
@@ -94,10 +94,10 @@ namespace cctmp {
 				nik_ce  record_type_ptr  record()       { return &logic; }
 
 				nik_ce auto record_cequip() const
-					{ return logic.template cequip<rcmethod_type>(); }
+					{ return logic.template cequip<record_cmethod_type>(); }
 
 				nik_ce auto record_equip()
-					{ return logic.template equip<rmethod_type>(); }
+					{ return logic.template equip<record_method_type>(); }
 
 			// value:
 
@@ -105,16 +105,16 @@ namespace cctmp {
 				nik_ce  memory_type_ptr  memory()       { return &value; }
 
 				nik_ce auto memory_cequip() const
-					{ return value.template cequip<mcmethod_type>(); }
+					{ return value.template cequip<memory_cmethod_type>(); }
 
 				nik_ce auto memory_equip()
-					{ return value.template equip<mmethod_type>(); }
+					{ return value.template equip<memory_method_type>(); }
 
-				nik_ce auto cmemory_right_equip(size_ctype n) const
-					{ return value.template right_cequip<sub_mcmethod_type>(n); }
+				nik_ce auto memory_csubequip(size_ctype n) const
+					{ return value.template right_cequip<memory_csubmethod_type>(n); }
 
-				nik_ce auto memory_right_equip(size_ctype n)
-					{ return value.template right_equip<sub_mmethod_type>(n); }
+				nik_ce auto memory_subequip(size_ctype n)
+					{ return value.template right_equip<memory_submethod_type>(n); }
 	};
 
 /***********************************************************************************************************************/

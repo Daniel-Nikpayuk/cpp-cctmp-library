@@ -44,26 +44,28 @@ namespace cctmp {
 
 		protected:
 
-			using rcmethod_type		= typename model_type::rcmethod_type;
-			using mcmethod_type		= typename model_type::mcmethod_type;
+			using record_cmethod_type	= typename model_type::record_cmethod_type;
+			using memory_cmethod_type	= typename model_type::memory_cmethod_type;
 
 			using record_model_type		= typename model_type::record_type::base;
-			using dcmethod_type		= typename record_model_type::dcmethod_type;
+			using signified_cmethod_type	= typename record_model_type::signified_cmethod_type;
 
-			rcmethod_type rcmethod;
-			mcmethod_type mcmethod;
+			record_cmethod_type record_cmethod;
+			memory_cmethod_type memory_cmethod;
 
-			dcmethod_type dcmethod;
+			signified_cmethod_type signified_cmethod;
 
 		public:
 
-			nik_ce corpus_ring_cmethod() : base{}, rcmethod{}, mcmethod{}, dcmethod{} { }
+			nik_ce corpus_ring_cmethod() :
+				base{}, record_cmethod{}, memory_cmethod{}, signified_cmethod{} { }
+
 			nik_ce corpus_ring_cmethod(const Facade & f) :
 
 				base{f},
-				rcmethod{record_cequip()},
-				mcmethod{memory_cequip()},
-				dcmethod{signified_cequip()}
+				record_cmethod{record_cequip()},
+				memory_cmethod{memory_cequip()},
+				signified_cmethod{signified_cequip()}
 				{ }
 
 			// record:
@@ -110,26 +112,28 @@ namespace cctmp {
 
 		protected:
 
-			using rmethod_type		= typename model_type::rmethod_type;
-			using mmethod_type		= typename model_type::mmethod_type;
+			using record_method_type	= typename model_type::record_method_type;
+			using memory_method_type	= typename model_type::memory_method_type;
 
 			using record_model_type		= typename model_type::record_type::base;
-			using dmethod_type		= typename record_model_type::dmethod_type;
+			using signified_method_type	= typename record_model_type::signified_method_type;
 
-			rmethod_type rmethod;
-			mmethod_type mmethod;
+			record_method_type record_method;
+			memory_method_type memory_method;
 
-			dmethod_type dmethod;
+			signified_method_type signified_method;
 
 		public:
 
-			nik_ce corpus_ring_method() : base{}, rmethod{}, mmethod{}, dmethod{} { }
+			nik_ce corpus_ring_method() :
+				base{}, record_method{}, memory_method{}, signified_method{} { }
+
 			nik_ce corpus_ring_method(const Facade & f) :
 
 				base{f},
-				rmethod{record_equip()},
-				mmethod{memory_equip()},
-				dmethod{signified_equip()}
+				record_method{record_equip()},
+				memory_method{memory_equip()},
+				signified_method{signified_equip()}
 				{ }
 
 			// record:
@@ -148,21 +152,22 @@ namespace cctmp {
 
 				nik_ce auto declare(size_ctype bits)
 				{
-					size_ctype offset = base::dcmethod.byte_size();
+					size_ctype offset = base::signified_cmethod.byte_size();
 
-					return rmethod.declare(bits, mmethod.expand(offset));
+					return record_method.declare(bits, memory_method.expand(offset));
 				}
 
 				nik_ce auto define(size_ctype bits, size_ctype value)
 				{
 					auto sign = declare(bits);
 
-					if (sign.kind() == Logo::ring)
+					if (sign.kind() == Logo::ringN)
 					{
 									// signified_start ? index instead of icon ?
-						auto sub_dmethod = dmethod.icon_to_text_equip(sign.to_icon());
+						auto signified_submethod = base::signified_cmethod.
+										icon_to_text_cequip(sign.to_icon());
 
-						mmethod[sub_dmethod[DRing::start]] = value;
+						memory_method[signified_submethod[DRing::start]] = value;
 					}
 
 					return sign;
@@ -173,9 +178,11 @@ namespace cctmp {
 				template<typename T, typename... Ts>
 				nik_ce void add_to_memory(const T & l, const Ts &... rs)
 				{
-					const auto & l_dcmethod = dmethod.icon_to_ctext_equip(l.to_icon());
+					const auto & l_signified_cmethod = base::signified_cmethod.
+										icon_to_text_cequip(l.to_icon());
 
-					add_to_methods(l_dcmethod, dmethod.icon_to_ctext_equip(rs.to_icon())...);
+					add_to_methods(l_signified_cmethod,
+						base::signified_cmethod.icon_to_text_cequip(rs.to_icon())...);
 				}
 
 				template<typename T, typename... Ts>
@@ -184,12 +191,15 @@ namespace cctmp {
 
 				template<typename T, typename... Ts>
 				nik_ce void add_to_positions(T l, Ts... rs)
-					{ mmethod[l] = (... + base::mcmethod[rs]); }
+					{ memory_method[l] = (... + base::memory_cmethod[rs]); }
 
 			// add to:
 
 				nik_ce void add_to(sign_ctype_ref out, sign_ctype_ref in1, sign_ctype_ref in2)
-					{ if (rmethod.same_types(out, in1, in2)) { add_to_memory(out, in1, in2); } }
+				{
+					if (record_method.same_types(out, in1, in2))
+						{ add_to_memory(out, in1, in2); }
+				}
 	};
 
 	// syntactic sugar:

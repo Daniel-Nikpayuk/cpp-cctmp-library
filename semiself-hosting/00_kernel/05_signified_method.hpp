@@ -64,58 +64,65 @@ namespace cctmp {
 
 			nik_ces size_type bytes		= 1;
 
-			using pcmethod_type		= typename model_type::pcmethod_type;
-			using tcmethod_type		= typename model_type::tcmethod_type;
+			using page_cmethod_type		= typename model_type::page_cmethod_type;
+			using text_cmethod_type		= typename model_type::text_cmethod_type;
 
-			pcmethod_type pcmethod;
-			tcmethod_type tcmethod;
+			page_cmethod_type page_cmethod;
+			text_cmethod_type text_cmethod;
 
 		public:
 
-			nik_ce signified_ring_cmethod() : base{}, pcmethod{}, tcmethod{} { }
+			nik_ce signified_ring_cmethod() : base{}, page_cmethod{}, text_cmethod{} { }
 
 			nik_ce signified_ring_cmethod(const Facade & f) :
 
 				base{f},
-				pcmethod{base::model->cpage_equip(Logo::ring)},
-				tcmethod{base::model->ctext_equip()}
+				page_cmethod{page_cequip(Logo::ringN)},
+				text_cmethod{text_cequip()}
 				{ }
 
 			nik_ce size_type byte_size() const { return bytes; }
 
+			// page:
+
+				nik_ce auto page_cequip(size_ctype n) const
+					{ return base::model->page_cequip(n); }
+
 			// text:
+
+				nik_ce auto text_cequip() const { return base::model->text_cequip(); }
 
 				 // unsafe, does not test against name().
 
-				nik_ce auto ctext_right_equip(size_ctype n) const
-					{ return base::model->ctext_right_equip(n); }
+				nik_ce auto text_csubequip(size_ctype n) const
+					{ return base::model->text_csubequip(n); }
 
-				nik_ce auto page_to_ctext_equip(size_ctype n) const
-					{ return ctext_right_equip(pcmethod[n]); }
+				nik_ce auto page_to_text_cequip(size_ctype n) const
+					{ return text_csubequip(page_cmethod[n]); }
 
-				nik_ce auto icon_to_ctext_equip(icon_ctype_ref i) const
-					{ return page_to_ctext_equip(i.index()); }
+				nik_ce auto icon_to_text_cequip(icon_ctype_ref i) const
+					{ return page_to_text_cequip(i.index()); }
 
 			// icon:
 
 				nik_ce auto fail_icon() const { return icon_type{Logo::fail, 0}; }
-				nik_ce auto ring_icon(size_ctype pos) const { return icon_type{Logo::ring, pos}; }
+				nik_ce auto ring_icon(size_ctype pos) const { return icon_type{Logo::ringN, pos}; }
 
 			// find:
 
 				nik_ce bool found(size_ctype n) const
-					{ return (n != pcmethod.size()); }
+					{ return (n != page_cmethod.size()); }
 
 				nik_ce auto find(size_ctype start) const
 				{
-					auto in = pcmethod.cbegin();
+					auto in = page_cmethod.cbegin();
 
-					while (in != pcmethod.cend())
+					while (in != page_cmethod.cend())
 					{
-						auto sub_tcmethod = base::model->ctext_right_equip(*in);
+						auto text_csubmethod = text_csubequip(*in);
 
-						bool same_start = (sub_tcmethod[DRing::start] == start);
-						bool same_bytes = (sub_tcmethod[DRing::bytes] == bytes);
+						bool same_start = (text_csubmethod[DRing::start] == start);
+						bool same_bytes = (text_csubmethod[DRing::bytes] == bytes);
 
 							// refactor through variadic same ?
 						if (same_start && same_bytes) { break; } else { ++in; }
@@ -125,7 +132,7 @@ namespace cctmp {
 				}
 
 				nik_ce size_type left_find(size_ctype start) const
-					{ return find(start) - pcmethod.cbegin(); }
+					{ return find(start) - page_cmethod.cbegin(); }
 	};
 
 	// syntactic sugar:
@@ -152,7 +159,7 @@ namespace cctmp {
 
 		protected:
 
-			nik_ce bool overlay_base() { return base::overlay(Logo::ring, DRing::dimension); }
+			nik_ce bool overlay_base() { return base::overlay(Logo::ringN, DRing::dimension); }
 
 		public:
 
@@ -163,11 +170,11 @@ namespace cctmp {
 
 				 // unsafe, does not test against name().
 
-				nik_ce auto text_right_equip(size_ctype n)
-					{ return base::model->text_right_equip(n); }
+				nik_ce auto text_subequip(size_ctype n)
+					{ return base::model->text_subequip(n); }
 
 				nik_ce auto page_to_text_equip(size_ctype n)
-					{ return text_right_equip(base::pcmethod[n]); }
+					{ return text_subequip(base::page_cmethod[n]); }
 
 				nik_ce auto icon_to_text_equip(icon_ctype_ref i)
 					{ return page_to_text_equip(i.index()); }
@@ -178,7 +185,7 @@ namespace cctmp {
 				{
 					if (not overlay_base()) return base::fail_icon();
 
-					return base::ring_icon(base::pcmethod.max());
+					return base::ring_icon(base::page_cmethod.max());
 				}
 	};
 
