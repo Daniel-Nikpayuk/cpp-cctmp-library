@@ -567,6 +567,25 @@ namespace cctmp {
 			page_ctype_ptr above;
 			text_ctype_ptr below;
 
+		protected:
+
+			using page_cmethod_type		= resolve_cmethod<page_type, array_cmethod>;
+			using text_cmethod_type		= resolve_cmethod<text_type, array_cmethod>;
+			using subtext_cmethod_type	= resolve_csubmethod<text_type, subarray_cmethod>;
+
+			// above:
+
+				nik_ce auto cpage_equip(size_ctype n) const
+					{ return above->template cequip<page_cmethod_type>(n); }
+
+			// below:
+
+				nik_ce auto ctext_equip() const
+					{ return below->template cequip<text_cmethod_type>(); }
+
+				nik_ce auto ctext_right_equip(size_ctype n) const
+					{ return below->template right_cequip<subtext_cmethod_type>(n); }
+
 		public:
 
 			nik_ce logo_cfacade() : above{}, below{} { }
@@ -614,36 +633,36 @@ namespace cctmp {
 
 		protected:
 
-			using page_cmethod		= resolve_cmethod<page_type, array_cmethod>;
-			using page_method		= resolve_method <page_type,  array_method>;
+			using page_cmethod_type		= resolve_cmethod<page_type, array_cmethod>;
+			using page_method_type		= resolve_method <page_type,  array_method>;
 
-			using text_cmethod		= resolve_cmethod<text_type, array_cmethod>;
-			using text_method		= resolve_method <text_type,  array_method>;
+			using text_cmethod_type		= resolve_cmethod<text_type, array_cmethod>;
+			using text_method_type		= resolve_method <text_type,  array_method>;
 
-			using subtext_cmethod		= resolve_csubmethod<text_type, subarray_cmethod>;
-			using subtext_method		= resolve_submethod <text_type,  subarray_method>;
+			using subtext_cmethod_type	= resolve_csubmethod<text_type, subarray_cmethod>;
+			using subtext_method_type	= resolve_submethod <text_type,  subarray_method>;
 
 			// above:
 
 				nik_ce auto cpage_equip(size_ctype n) const
-					{ return above->template cequip<page_cmethod>(n); }
+					{ return above->template cequip<page_cmethod_type>(n); }
 
 				nik_ce auto page_equip(size_ctype n) const
-					{ return above->template equip<page_method>(n); }
+					{ return above->template equip<page_method_type>(n); }
 
 			// below:
 
 				nik_ce auto ctext_equip() const
-					{ return below->template cequip<text_cmethod>(); }
+					{ return below->template cequip<text_cmethod_type>(); }
 
 				nik_ce auto text_equip() const
-					{ return below->template equip<text_method>(); }
+					{ return below->template equip<text_method_type>(); }
 
 				nik_ce auto ctext_right_equip(size_ctype n) const
-					{ return below->template right_cequip<subtext_cmethod>(n); }
+					{ return below->template right_cequip<subtext_cmethod_type>(n); }
 
 				nik_ce auto text_right_equip(size_ctype n) const
-					{ return below->template right_equip<subtext_method>(n); }
+					{ return below->template right_equip<subtext_method_type>(n); }
 
 		protected:
 

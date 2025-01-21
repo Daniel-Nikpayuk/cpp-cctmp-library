@@ -39,19 +39,19 @@
 
 	constexpr auto corpus_add_test()
 	{
-		using size_type   = unsigned long;
-		using sym_pack    = cctmp::T_pack_Vs<6, 3>;
-		using img_pack    = cctmp::T_pack_Vs<6, 3>;
-		using corpus_type = corpus<unsigned, size_type, sym_pack, img_pack, 3>;
-		using ring_method = resolve_method<corpus_type, cring_method>;
+		using size_type    = unsigned long;
+		using sym_pack     = cctmp::T_pack_Vs<6, 3>;
+		using img_pack     = cctmp::T_pack_Vs<6, 3>;
+		using corpus_type  = corpus<unsigned, size_type, sym_pack, img_pack, 3>;
+		using method_type  = resolve_method<corpus_type, cring_method>;
 
-		auto corpus_value = corpus_type{};
-		auto corpus_ring  = corpus_value.template equip<ring_method>();
-		auto out_sign     = corpus_ring.declare (64);
-		auto in1_sign     = corpus_ring.define  (64, 2);
-		auto in2_sign     = corpus_ring.define  (64, 3);
+		auto corpus_value  = corpus_type{};
+		auto corpus_method = corpus_value.template equip<method_type>();
+		auto out_sign      = corpus_method.declare (64);
+		auto in1_sign      = corpus_method.define  (64, 2);
+		auto in2_sign      = corpus_method.define  (64, 3);
 
-		corpus_ring.add_to(out_sign, in1_sign, in2_sign);
+		corpus_method.add_to(out_sign, in1_sign, in2_sign);
 
 		return corpus_value;
 	}

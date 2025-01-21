@@ -169,39 +169,6 @@ namespace cctmp {
 			record_type_ptr logic;
 			memory_type_ptr value;
 
-		protected:
-
-		//	using page_cmethod		= resolve_cmethod<page_type, array_cmethod>;
-		//	using page_method		= resolve_method <page_type,  array_method>;
-
-		//	using text_cmethod		= resolve_cmethod<text_type, array_cmethod>;
-		//	using text_method		= resolve_method <text_type,  array_method>;
-
-		//	using subtext_cmethod		= resolve_csubmethod<text_type, subarray_cmethod>;
-		//	using subtext_method		= resolve_submethod <text_type,  subarray_method>;
-
-			// above:
-
-			//	nik_ce auto cpage_equip(size_ctype n) const
-			//		{ return above->template cequip<page_cmethod>(n); }
-
-			//	nik_ce auto page_equip(size_ctype n) const
-			//		{ return above->template equip<page_method>(n); }
-
-			// below:
-
-			//	nik_ce auto ctext_equip() const
-			//		{ return below->template cequip<text_cmethod>(); }
-
-			//	nik_ce auto text_equip() const
-			//		{ return below->template equip<text_method>(); }
-
-			//	nik_ce auto ctext_right_equip(size_ctype n) const
-			//		{ return below->template right_cequip<subtext_cmethod>(n); }
-
-			//	nik_ce auto text_right_equip(size_ctype n) const
-			//		{ return below->template right_equip<subtext_method>(n); }
-
 		public:
 
 			nik_ce corpus_facade() : logic{}, value{} { }

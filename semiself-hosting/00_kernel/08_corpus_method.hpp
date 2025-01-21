@@ -75,19 +75,25 @@ namespace cctmp {
 			using signifier_type		= typename record_type::signifier_type;
 			using signified_type		= typename record_type::signified_type;
 
-			using rring_method		= resolve_method<signifier_type, rring_method>;
-			using dring_method		= resolve_method<signified_type, dring_method>;
+			using rmethod_type		= resolve_method<signifier_type, rring_method>;
+			using dmethod_type		= resolve_method<signified_type, dring_method>;
 
-			using gram_type			= typename rring_method::gram_type;
-			using gram_ctype_ref		= typename rring_method::gram_ctype_ref;
+			using gram_type			= typename rmethod_type::gram_type;
+			using gram_ctype_ref		= typename rmethod_type::gram_ctype_ref;
 
-			using icon_type			= typename dring_method::icon_type;
-			using icon_ctype_ref		= typename dring_method::icon_ctype_ref;
+			using icon_type			= typename dmethod_type::icon_type;
+			using icon_ctype_ref		= typename dmethod_type::icon_ctype_ref;
 
 		protected:
 
-			rring_method global_rring;
-			dring_method global_dring;
+			rmethod_type rmethod;
+			dmethod_type dmethod;
+
+			nik_ce auto make_rmethod()
+				{ return base::record().template signifier_equip<rmethod_type>(); }
+
+			nik_ce auto make_dmethod()
+				{ return base::record().template signified_equip<dmethod_type>(); }
 
 			nik_ce bool not_fail(gram_ctype_ref g) const { return (g.get_kind() != Logo::fail); }
 			nik_ce bool not_fail(icon_ctype_ref i) const { return (i.get_kind() != Logo::fail); }
@@ -95,33 +101,19 @@ namespace cctmp {
 			nik_ce bool not_fail(gram_ctype_ref g, icon_ctype_ref i) const
 				{ return (not_fail(g) && not_fail(i)); }
 
-			nik_ce auto make_rring()
-				{ return base::record().signifier()->template equip<rring_method>(); }
-
-			nik_ce auto make_dring()
-				{ return base::record().signified()->template equip<dring_method>(); }
-
 			// declare signifier:
-
-			//	nik_ce void initialize_signifier(gram_ctype_ref gram, size_ctype bits)
-			//	{
-			//		auto local_ring = global_rring.text_right_equip(gram);
-
-			//		local_ring[RRing::name] = Logo::ring;
-			//		local_ring[RRing::bits] = bits;
-			//	}
 
 				nik_ce void initialize_signifier(gram_ctype_ref gram, size_ctype bits)
 				{
-					auto local_ring = global_rring.text_right_equip(gram);
+					auto sub_rmethod = rmethod.text_right_equip(gram);
 
-					local_ring[RRing::name] = Logo::ring;
-					local_ring[RRing::bits] = bits;
+					sub_rmethod[RRing::name] = Logo::ring;
+					sub_rmethod[RRing::bits] = bits;
 				}
 
 				nik_ce auto instantiate_signifier(size_ctype bits)
 				{
-					auto gram = global_rring.overlay();
+					auto gram = rmethod.overlay();
 
 					if (not_fail(gram)) { initialize_signifier(gram, bits); }
 
@@ -130,34 +122,25 @@ namespace cctmp {
 
 				nik_ce auto declare_signifier(size_ctype bits)
 				{
-					size_ctype pos = global_rring.left_find(bits);
+					size_ctype pos = rmethod.left_find(bits);
 
-					if (global_rring.found(pos)) { return global_rring.ring_gram(pos); }
-					else                         { return instantiate_signifier(bits); }
+					if (rmethod.found(pos)) { return rmethod.ring_gram(pos); }
+					else                    { return instantiate_signifier(bits); }
 				}
-
-			//	nik_ce auto declare_signifier(size_ctype bits)
-			//	{
-			//		auto gram = global_rring.initialize();
-
-			//		if (not_fail(gram)) { initialize_signifier(gram, bits); }
-
-			//		return gram;
-			//	}
 
 			// declare signified:
 
 				nik_ce void initialize_signified(icon_ctype_ref icon, size_ctype start)
 				{
-					auto local_ring = global_dring.text_right_equip(icon);
+					auto sub_dmethod = dmethod.text_right_equip(icon);
 
-					local_ring[DRing::start] = start;
-					local_ring[DRing::bytes] = global_dring.byte_size();
+					sub_dmethod[DRing::start] = start;
+					sub_dmethod[DRing::bytes] = dmethod.byte_size();
 				}
 
 				nik_ce auto instantiate_signified(size_ctype start)
 				{
-					auto icon = global_dring.overlay();
+					auto icon = dmethod.overlay();
 
 					if (not_fail(icon)) { initialize_signified(icon, start); }
 
@@ -166,28 +149,27 @@ namespace cctmp {
 
 				nik_ce auto declare_signified(size_ctype start)
 				{
-					size_ctype pos = global_dring.left_find(start);
+					size_ctype pos = dmethod.left_find(start);
 
-					if (global_dring.found(pos)) { return global_dring.fail_icon(); }
-					else                         { return instantiate_signified(start); }
+					if (dmethod.found(pos)) { return dmethod.fail_icon(); }
+					else                    { return instantiate_signified(start); }
 				}
 
 		public:
 
 			nik_ce corpus_ring_method() :
-				base{}, global_rring{make_rring()}, global_dring{make_dring()} { }
+				base{}, rmethod{make_rmethod()}, dmethod{make_dmethod()} { }
 
 			nik_ce corpus_ring_method(const Facade & f) :
-				base{f}, global_rring{make_rring()}, global_dring{make_dring()} { }
+				base{f}, rmethod{make_rmethod()}, dmethod{make_dmethod()} { }
 
 			// initialization:
 
 				nik_ce auto declare(size_ctype bits)
 				{
-					auto bytes = global_dring.byte_size();
-					auto gram  = declare_signifier(bits);
-					auto icon  = declare_signified(base::memory().expand(bytes));
-					auto kind  = not_fail(gram, icon) ? Logo::ring : Logo::fail;
+					auto gram = declare_signifier(bits);
+					auto icon = declare_signified(base::memory().expand(dmethod.byte_size()));
+					auto kind = not_fail(gram, icon) ? Logo::ring : Logo::fail;
 
 					return sign_type{kind, gram.get_index(), icon.get_index()};
 				}
@@ -195,58 +177,53 @@ namespace cctmp {
 				nik_ce auto define(size_ctype bits, size_ctype value)
 				{
 					auto & memory = base::memory();
-					auto bytes    = global_dring.byte_size();
 					auto gram     = declare_signifier(bits);
-					auto icon     = declare_signified(memory.expand(bytes));
+					auto icon     = declare_signified(memory.expand(dmethod.byte_size()));
 					auto kind     = not_fail(gram, icon) ? Logo::ring : Logo::fail;
 
 					if (kind == Logo::ring)
 					{
-						auto local_dring = global_dring.text_right_equip(icon);
+						auto sub_dmethod = dmethod.text_right_equip(icon);
 
-						memory[local_dring[DRing::start]] = value;
+						memory[sub_dmethod[DRing::start]] = value;
 					}
 
 					return sign_type{kind, gram.get_index(), icon.get_index()};
 				}
 
-			// arithetic:
+			// same types:
 
-				nik_ce bool binary_type_check(sign_ctype_ref out, sign_ctype_ref in1, sign_ctype_ref in2)
+				template<typename T, typename... Ts>
+				nik_ce bool same_types(const T & l, const Ts &... rs)
 				{
-					auto out_rring       = global_rring.ctext_right_equip(out.to_gram());
-					auto in1_rring       = global_rring.ctext_right_equip(in1.to_gram());
-					auto in2_rring       = global_rring.ctext_right_equip(in2.to_gram());
-
-					size_ctype out_name  = out_rring[RRing::name];
-					size_ctype in1_name  = in1_rring[RRing::name];
-					size_ctype in2_name  = in2_rring[RRing::name];
-
-					size_ctype out_bits  = out_rring[RRing::bits];
-					size_ctype in1_bits  = in1_rring[RRing::bits];
-					size_ctype in2_bits  = in2_rring[RRing::bits];
-
-					const bool same_name = (out_name == in1_name) && (out_name == in2_name);
-					const bool same_bits = (out_bits == in1_bits) && (out_bits == in2_bits);
-
-					return (same_name && same_bits);
+					return rmethod.same_types
+					(
+						RRing::dimension, l.get_symbol_index(), rs.get_symbol_index()...
+					);
 				}
 
-				nik_ce void add_to_memory(sign_ctype_ref out, sign_ctype_ref in1, sign_ctype_ref in2)
+			// add to memory:
+
+				template<typename T, typename... Ts>
+				nik_ce void add_to_memory(const T & l, const Ts &... rs)
 				{
-					auto & memory     = base::memory();
-					auto out_dring    = global_dring.text_right_equip(out.to_icon());
-					auto in1_dring    = global_dring.text_right_equip(in1.to_icon());
-					auto in2_dring    = global_dring.text_right_equip(in2.to_icon());
+					const auto & l_dcmethod = dmethod.ctext_right_equip(l.to_icon());
 
-					const auto value1 = memory[in1_dring[DRing::start]];
-					const auto value2 = memory[in2_dring[DRing::start]];
-
-					memory[out_dring[DRing::start]] = value1 + value2;
+					add_to_methods(l_dcmethod, dmethod.ctext_right_equip(rs.to_icon())...);
 				}
+
+				template<typename T, typename... Ts>
+				nik_ce void add_to_methods(const T & l, const Ts &... rs)
+					{ add_to_positions(l[DRing::start], rs[DRing::start]...); }
+
+				template<typename T, typename... Ts>
+				nik_ce void add_to_positions(T l, Ts... rs)
+					{ base::memory()[l] = (... + base::cmemory()[rs]); }
+
+			// add to:
 
 				nik_ce void add_to(sign_ctype_ref out, sign_ctype_ref in1, sign_ctype_ref in2)
-					{ if (binary_type_check(out, in1, in2)) { add_to_memory(out, in1, in2); } }
+					{ if (same_types(out, in1, in2)) { add_to_memory(out, in1, in2); } }
 	};
 
 	// syntactic sugar:

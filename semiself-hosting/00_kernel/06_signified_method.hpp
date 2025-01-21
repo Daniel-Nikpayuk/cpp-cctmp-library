@@ -63,10 +63,27 @@ namespace cctmp {
 
 			nik_ces size_type bytes		= 1;
 
+			using page_cmethod_type		= typename Facade::page_cmethod_type;
+			using text_cmethod_type		= typename Facade::text_cmethod_type;
+
+			page_cmethod_type page_cmethod;
+			text_cmethod_type text_cmethod;
+
 		public:
 
-			nik_ce signified_ring_cmethod() : base{} { }
-			nik_ce signified_ring_cmethod(const Facade & f) : base{f} { }
+			nik_ce signified_ring_cmethod() :
+
+				base{},
+				page_cmethod{base::cpage_equip(Logo::ring)},
+				text_cmethod{base::ctext_equip()}
+				{ }
+
+			nik_ce signified_ring_cmethod(const Facade & f) :
+
+				base{f},
+				page_cmethod{base::cpage_equip(Logo::ring)},
+				text_cmethod{base::ctext_equip()}
+				{ }
 
 			nik_ce size_type byte_size() const { return bytes; }
 
@@ -78,18 +95,18 @@ namespace cctmp {
 			// find:
 
 				nik_ce bool found(size_ctype n) const
-					{ return (n != base::cpage_equip(Logo::ring).size()); }
+					{ return (n != page_cmethod.size()); }
 
 				nik_ce auto find(size_ctype start) const
 				{
-					auto page_cmethod = base::cpage_equip(Logo::ring);
 					auto in = page_cmethod.cbegin();
 
 					while (in != page_cmethod.cend())
 					{
-						auto text_cmethod = base::ctext_right_equip(*in);
-						bool same_start   = (text_cmethod[DRing::start] == start);
-						bool same_bytes   = (text_cmethod[DRing::bytes] == bytes);
+						auto subtext_cmethod = base::ctext_right_equip(*in);
+
+						bool same_start = (subtext_cmethod[DRing::start] == start);
+						bool same_bytes = (subtext_cmethod[DRing::bytes] == bytes);
 
 						if (same_start && same_bytes) { break; } else { ++in; }
 					}
@@ -98,7 +115,14 @@ namespace cctmp {
 				}
 
 				nik_ce size_type left_find(size_ctype start) const
-					{ return find(start) - base::cpage_equip(Logo::ring).cbegin(); }
+					{ return find(start) - page_cmethod.cbegin(); }
+
+			// text:
+
+				 // unsafe, does not test against name().
+
+				nik_ce auto ctext_right_equip(icon_ctype_ref g)
+					{ return base::ctext_right_equip(page_cmethod[g.get_index()]); }
 	};
 
 	// syntactic sugar:
@@ -138,7 +162,7 @@ namespace cctmp {
 				{
 					if (not overlay_base()) return base::fail_icon();
 
-					return base::ring_icon(base::cpage_equip(Logo::ring).max());
+					return base::ring_icon(base::page_cmethod.max());
 				}
 
 				// text:
@@ -146,11 +170,7 @@ namespace cctmp {
 					 // unsafe, does not test against name().
 
 					nik_ce auto text_right_equip(icon_ctype_ref i)
-					{
-						auto page_cmethod = base::cpage_equip(Logo::ring);
-
-						return base::text_right_equip(page_cmethod[i.get_index()]);
-					}
+						{ return base::text_right_equip(base::page_cmethod[i.get_index()]); }
 	};
 
 	// syntactic sugar:

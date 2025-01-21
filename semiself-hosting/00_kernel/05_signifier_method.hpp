@@ -59,10 +59,29 @@ namespace cctmp {
 			using gram_type			= gram<size_type>;
 			using gram_ctype_ref		= typename alias<gram_type>::ctype_ref;
 
+		protected:
+
+			using page_cmethod_type		= typename Facade::page_cmethod_type;
+			using text_cmethod_type		= typename Facade::text_cmethod_type;
+
+			page_cmethod_type page_cmethod;
+			text_cmethod_type text_cmethod;
+
 		public:
 
-			nik_ce signifier_ring_cmethod() : base{} { }
-			nik_ce signifier_ring_cmethod(const Facade & f) : base{f} { }
+			nik_ce signifier_ring_cmethod() :
+
+				base{},
+				page_cmethod{base::cpage_equip(Logo::ring)},
+				text_cmethod{base::ctext_equip()}
+				{ }
+
+			nik_ce signifier_ring_cmethod(const Facade & f) :
+
+				base{f},
+				page_cmethod{base::cpage_equip(Logo::ring)},
+				text_cmethod{base::ctext_equip()}
+				{ }
 
 			// gram:
 
@@ -72,18 +91,18 @@ namespace cctmp {
 			// find:
 
 				nik_ce bool found(size_ctype n) const
-					{ return (n != base::cpage_equip(Logo::ring).size()); }
+					{ return (n != page_cmethod.size()); }
 
 				nik_ce auto find(size_ctype bits) const
 				{
-					auto page_cmethod = base::cpage_equip(Logo::ring);
 					auto in = page_cmethod.cbegin();
 
 					while (in != page_cmethod.cend())
 					{
-						auto text_cmethod = base::ctext_right_equip(*in);
-						bool same_name    = (text_cmethod[RRing::name] == Logo::ring);
-						bool same_bits    = (text_cmethod[RRing::bits] == bits);
+						auto subtext_cmethod = base::ctext_right_equip(*in);
+
+						bool same_name = (subtext_cmethod[RRing::name] == Logo::ring);
+						bool same_bits = (subtext_cmethod[RRing::bits] == bits);
 
 						if (same_name && same_bits) { break; } else { ++in; }
 					}
@@ -92,18 +111,36 @@ namespace cctmp {
 				}
 
 				nik_ce size_type left_find(size_ctype bits) const
-					{ return find(bits) - base::cpage_equip(Logo::ring).cbegin(); }
+					{ return find(bits) - page_cmethod.cbegin(); }
+
+			// same:
+
+				template<typename T, typename... Ts>
+				nik_ce bool same_types(size_ctype n, const T l, const Ts... rs) const
+					{ return same_methods(n, ctext_right_equip(l), ctext_right_equip(rs)...); }
+
+				template<typename T, typename... Ts>
+				nik_ce bool same_methods(size_ctype n, const T & l, const Ts &... rs) const
+				{
+					for (size_type k = 0; k != n; ++k)
+						{ if (different_values(l[k], rs[k]...)) return false; }
+
+					return true;
+				}
+
+				template<typename T, typename... Ts>
+				nik_ce bool different_values(const T l, const Ts... rs) const
+					{ return (... || (l != rs)); }
 
 			// text:
 
 				 // unsafe, does not test against name().
 
-				nik_ce auto ctext_right_equip(gram_ctype_ref g)
-				{
-					auto page_cmethod = base::cpage_equip(Logo::ring);
+				nik_ce auto ctext_right_equip(size_ctype n) const
+					{ return base::ctext_right_equip(page_cmethod[n]); }
 
-					return base::ctext_right_equip(page_cmethod[g.get_index()]);
-				}
+				nik_ce auto ctext_right_equip(gram_ctype_ref g) const
+					{ return ctext_right_equip(g.get_index()); }
 	};
 
 	// syntactic sugar:
@@ -130,12 +167,7 @@ namespace cctmp {
 
 		protected:
 
-			// redesign: initialize ring name after, so that left_find can be called before overlay.
-
 			nik_ce bool overlay_base() { return base::overlay(Logo::ring, RRing::dimension); }
-
-		//	nik_ce auto initialize_base()
-		//		{ return base::initialize_last(Logo::ring, RRing::name, Logo::ring); }
 
 		public:
 
@@ -148,7 +180,7 @@ namespace cctmp {
 				{
 					if (not overlay_base()) return base::fail_gram();
 
-					return base::ring_gram(base::cpage_equip(Logo::ring).max());
+					return base::ring_gram(base::page_cmethod.max());
 				}
 
 				// text:
@@ -156,11 +188,7 @@ namespace cctmp {
 					 // unsafe, does not test against name().
 
 					nik_ce auto text_right_equip(gram_ctype_ref g)
-					{
-						auto page_cmethod = base::cpage_equip(Logo::ring);
-
-						return base::text_right_equip(page_cmethod[g.get_index()]);
-					}
+						{ return base::text_right_equip(base::page_cmethod[g.get_index()]); }
 	};
 
 	// syntactic sugar:
