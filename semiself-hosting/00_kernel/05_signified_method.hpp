@@ -25,43 +25,33 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// ring:
-
-/***********************************************************************************************************************/
-
-// names:
-
-	struct SignifiedRing
-	{
-		enum : gkey_type
-		{
-			start, bytes,
-			dimension
-		};
-	};
-
-	using DRing = SignifiedRing;
+// base:
 
 /***********************************************************************************************************************/
 
 // immutable:
 
-	template<typename Facade>
-	class signified_ring_cmethod : public Facade
+	template<typename Base, typename Base::size_type Name, typename Base::size_type Dimension>
+	class signified_cmethod_disjoint : public Base
 	{
 		public:
 
-			using base			= Facade;
-			using model_type		= typename Facade::model_type;
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename facade::model_type;
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
+			using size_ctype_ptr		= typename alias<size_type>::ctype_ptr;
+			using size_ctype_cptr		= typename alias<size_type>::ctype_cptr;
 
 			using icon_type			= icon<size_type>;
 			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
 
 		protected:
 
+			nik_ces size_type name		= Name;
+			nik_ces size_type dimension	= Dimension;
 			nik_ces size_type bytes		= 1;
 
 			using page_cmethod_type		= typename model_type::page_cmethod_type;
@@ -72,12 +62,11 @@ namespace cctmp {
 
 		public:
 
-			nik_ce signified_ring_cmethod() : base{}, page_cmethod{}, text_cmethod{} { }
-
-			nik_ce signified_ring_cmethod(const Facade & f) :
+			nik_ce signified_cmethod_disjoint() : base{}, page_cmethod{}, text_cmethod{} { }
+			nik_ce signified_cmethod_disjoint(const facade & f) :
 
 				base{f},
-				page_cmethod{page_cequip(Logo::ringN)},
+				page_cmethod{page_cequip(name)},
 				text_cmethod{text_cequip()}
 				{ }
 
@@ -106,14 +95,15 @@ namespace cctmp {
 			// icon:
 
 				nik_ce auto fail_icon() const { return icon_type{Logo::fail, 0}; }
-				nik_ce auto ring_icon(size_ctype pos) const { return icon_type{Logo::ringN, pos}; }
+				nik_ce auto make_icon(size_ctype pos) const { return icon_type{name, pos}; }
 
 			// find:
 
 				nik_ce bool found(size_ctype n) const
 					{ return (n != page_cmethod.size()); }
 
-				nik_ce auto find(size_ctype start) const
+				template<typename T, auto N>
+				nik_ce auto find(const T (&field)[N]) const
 				{
 					auto in = page_cmethod.cbegin();
 
@@ -121,35 +111,33 @@ namespace cctmp {
 					{
 						auto text_csubmethod = text_csubequip(*in);
 
-						bool same_start = (text_csubmethod[DRing::start] == start);
-						bool same_bytes = (text_csubmethod[DRing::bytes] == bytes);
+						bool same{true};
+						for (size_type k = 0; same && (k != N); ++k)
+							{ same = (text_csubmethod[k] == field[k]); }
 
-							// refactor through variadic same ?
-						if (same_start && same_bytes) { break; } else { ++in; }
+						if (same) { break; } else { ++in; }
 					}
 
 					return in;
 				}
 
-				nik_ce size_type left_find(size_ctype start) const
-					{ return find(start) - page_cmethod.cbegin(); }
+				template<typename T, auto N>
+				nik_ce size_type left_find(const T (&field)[N]) const
+					{ return find(field) - page_cmethod.cbegin(); }
 	};
-
-	// syntactic sugar:
-
-		template<typename Facade>
-		using dring_cmethod = signified_ring_cmethod<Facade>;
 
 /***********************************************************************************************************************/
 
 // mutable:
 
-	template<typename Facade>
-	class signified_ring_method : public signified_ring_cmethod<Facade>
+	template<typename Base>
+	class signified_method_disjoint : public Base
 	{
 		public:
 
-			using base			= signified_ring_cmethod<Facade>;
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
@@ -159,12 +147,12 @@ namespace cctmp {
 
 		protected:
 
-			nik_ce bool overlay_base() { return base::overlay(Logo::ringN, DRing::dimension); }
+			nik_ce bool facade_overlay() { return facade::overlay(base::name, base::dimension); }
 
 		public:
 
-			nik_ce signified_ring_method() : base{} { }
-			nik_ce signified_ring_method(const Facade & f) : base{f} { }
+			nik_ce signified_method_disjoint() : base{} { }
+			nik_ce signified_method_disjoint(const facade & f) : base{f} { }
 
 			// text:
 
@@ -183,16 +171,131 @@ namespace cctmp {
 
 				nik_ce auto overlay()
 				{
-					if (not overlay_base()) return base::fail_icon();
+					if (not facade_overlay()) return base::fail_icon();
 
-					return base::ring_icon(base::page_cmethod.max());
+					return base::make_icon(base::page_cmethod.max());
 				}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// builtin:
+
+/***********************************************************************************************************************/
+
+// names:
+
+	struct SignifiedBuiltin
+	{
+		enum : gkey_type
+		{
+			start, bytes,
+			dimension
+		};
+	};
+
+	using DBuiltin = SignifiedBuiltin;
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Base>
+	class signified_builtin_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
+
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+			using icon_type			= icon<size_type>;
+			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
+
+		public:
+
+			nik_ce signified_builtin_cmethod_disjoint() : base{} { }
+			nik_ce signified_builtin_cmethod_disjoint(const facade & f) : base{f} { }
+
+			// find:
+
+				nik_ce size_type left_find(size_ctype start) const
+					{ return base::left_find({start, base::bytes}); }
 	};
 
 	// syntactic sugar:
 
+		template<typename Facade, auto Name>
+		using dbuiltin_cmethod =
+			signified_builtin_cmethod_disjoint <
+			signified_cmethod_disjoint         < Facade, Name, DBuiltin::dimension >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class signified_builtin_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
+
+			using size_type			= typename base::size_type;
+			using size_ctype		= typename base::size_ctype;
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+		public:
+
+			nik_ce signified_builtin_method_disjoint() : base{} { }
+			nik_ce signified_builtin_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade, auto Name>
+		using dbuiltin_method =
+			signified_builtin_method_disjoint  <
+			signified_builtin_cmethod_disjoint <
+			signified_method_disjoint          <
+			signified_cmethod_disjoint         < Facade, Name, DBuiltin::dimension >>>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// ring:
+
+/***********************************************************************************************************************/
+
+// names:
+
+	using DRing = DBuiltin;
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	// syntactic sugar:
+
 		template<typename Facade>
-		using dring_method = signified_ring_method<Facade>;
+		using dring_cmethod = dbuiltin_cmethod<Facade, Logo::ringN>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using dring_method = dbuiltin_method<Facade, Logo::ringN>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -202,6 +305,35 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // :
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// utf8 char:
+
+/***********************************************************************************************************************/
+
+// names:
+
+	using DUtf8Char = DBuiltin;
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using dutf8_char_cmethod = dbuiltin_cmethod<Facade, Logo::utf8_charN>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using dutf8_char_method = dbuiltin_method<Facade, Logo::utf8_charN>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

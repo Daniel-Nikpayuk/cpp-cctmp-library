@@ -403,7 +403,7 @@ namespace cctmp {
 		{
 			ringN, flexN, utf8_charN,					// builtin
 			tuple, cotuple, function, null, list, identity, exists, forall,	// inductive
-			custom,
+			custom, space,
 
 			dimension, fail // fail is currently symbolic only, should this change?
 		};

@@ -133,7 +133,7 @@ namespace cctmp {
 				{
 					size_ctype pos = signifier_method.left_find(bits);
 
-					if (signifier_method.found(pos)) { return signifier_method.ring_gram(pos); }
+					if (signifier_method.found(pos)) { return signifier_method.make_gram(pos); }
 					else                             { return instantiate_signifier(bits); }
 				}
 

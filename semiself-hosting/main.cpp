@@ -42,7 +42,7 @@
 		using size_type    = unsigned long;
 		using sym_pack     = cctmp::T_pack_Vs<6, 3>;
 		using img_pack     = cctmp::T_pack_Vs<6, 3>;
-		using corpus_type  = corpus<unsigned, size_type, sym_pack, img_pack, 3>;
+		using corpus_type  = corpus<size_type, size_type, sym_pack, img_pack, 3>;
 		using method_type  = resolve_method<corpus_type, cring_method>;
 
 		auto corpus_value  = corpus_type{};
