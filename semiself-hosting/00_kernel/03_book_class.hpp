@@ -17,9 +17,11 @@
 **
 ************************************************************************************************************************/
 
-// logo class:
+// book class:
 
 namespace cctmp {
+
+	// refactor typedefs with macros:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -339,7 +341,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// plot:
+// interface:
 
 /***********************************************************************************************************************/
 
@@ -389,7 +391,25 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// logo:
+// book:
+
+/***********************************************************************************************************************/
+
+// kinds:
+
+	struct BookKind
+	{
+		enum : gkey_type
+		{
+			builtin,
+			tuple, cotuple, function, list, compare, exists, forall,
+			space,
+
+			dimension
+		};
+	};
+
+	using Book = BookKind;
 
 /***********************************************************************************************************************/
 
@@ -397,19 +417,23 @@ namespace cctmp {
 
 		// should an enum type be added?
 
-	struct LogoName
+	struct BookName
 	{
 		enum : gkey_type
 		{
-			ringN, flexN, utf8_charN,					// builtin
-			tuple, cotuple, function, null, list, identity, exists, forall,	// inductive
+			ringN, flexN, utf8_charN,							// builtin
+			tuple, cotuple, function,
+			null, list,									// list
+			identity, less_than, less_than_or_equal, greater_than, greater_than_or_equal,	// compare
+			exists, forall,
 			custom, space,
 
 			dimension, fail // fail is currently symbolic only, should this change?
+					// probably better to define it as custom in a given space.
 		};
 	};
 
-	using Logo = LogoName;
+	using Gram = BookName;
 
 /***********************************************************************************************************************/
 
@@ -435,8 +459,8 @@ namespace cctmp {
 
 			// tag:
 
-				nik_ce bool is_fail() const { return (tag == Logo::fail); }
-				nik_ce bool not_fail() const { return (tag != Logo::fail); }
+				nik_ce bool is_fail  () const { return (tag == Gram::fail); }
+				nik_ce bool not_fail () const { return (tag != Gram::fail); }
 
 				nik_ce size_type kind() const { return tag; }
 				nik_ce void set_kind(size_ctype t) { tag = t; }
@@ -445,22 +469,6 @@ namespace cctmp {
 
 				nik_ce size_type index() const { return position; }
 				nik_ce void set_index(size_ctype p) { position = p; }
-	};
-
-/***********************************************************************************************************************/
-
-// gram:
-
-	template<typename SizeType>
-	struct gram : public note<SizeType>
-	{
-		using base		= note<SizeType>;
-
-		using size_type		= typename base::size_type;
-		using size_ctype	= typename base::size_ctype;
-
-		nik_ce gram() : base{} { }
-		nik_ce gram(size_ctype t, size_ctype p) : base{t, p} { }
 	};
 
 /***********************************************************************************************************************/
@@ -480,6 +488,22 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
+
+// sign:
+
+	template<typename SizeType>
+	struct sign : public note<SizeType>
+	{
+		using base		= note<SizeType>;
+
+		using size_type		= typename base::size_type;
+		using size_ctype	= typename base::size_ctype;
+
+		nik_ce sign() : base{} { }
+		nik_ce sign(size_ctype t, size_ctype p) : base{t, p} { }
+	};
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // model:
@@ -489,11 +513,11 @@ namespace cctmp {
 // mutable:
 
 	template<typename Type, typename SizeType, SizeType Size, SizeType... Sizes>
-	class logo_model
+	class book_model
 	{
 		public:
 
-			using facade			= logo_model; // method compatible.
+			using facade			= book_model; // method compatible.
 
 			using page_type			= plot<SizeType, SizeType, Sizes...>;
 			using page_type_ptr		= typename alias<page_type>::type_ptr;
@@ -529,40 +553,40 @@ namespace cctmp {
 
 		protected:
 
-			page_type above;
-			text_type below;
+			page_type _page;
+			text_type _text;
 
 		public:
 
-			nik_ce logo_model() { }
+			nik_ce book_model() { }
 
-			// above:
+			// page:
 
-				nik_ce page_ctype_ptr cpage() const { return &above; }
-				nik_ce  page_type_ptr  page()       { return &above; }
+				nik_ce page_ctype_ptr cpage() const { return &_page; }
+				nik_ce  page_type_ptr  page()       { return &_page; }
 
 				nik_ce auto page_cequip(size_ctype n) const
-					{ return above.template cequip<page_cmethod_type>(n); }
+					{ return _page.template cequip<page_cmethod_type>(n); }
 
 				nik_ce auto page_equip(size_ctype n)
-					{ return above.template equip<page_method_type>(n); }
+					{ return _page.template equip<page_method_type>(n); }
 
-			// below:
+			// text:
 
-				nik_ce text_ctype_ptr ctext() const { return &below; }
-				nik_ce  text_type_ptr  text()       { return &below; }
+				nik_ce text_ctype_ptr ctext() const { return &_text; }
+				nik_ce  text_type_ptr  text()       { return &_text; }
 
 				nik_ce auto text_cequip() const
-					{ return below.template cequip<text_cmethod_type>(); }
+					{ return _text.template cequip<text_cmethod_type>(); }
 
 				nik_ce auto text_equip()
-					{ return below.template equip<text_method_type>(); }
+					{ return _text.template equip<text_method_type>(); }
 
 				nik_ce auto text_csubequip(size_ctype n) const
-					{ return below.template right_cequip<text_csubmethod_type>(n); }
+					{ return _text.template right_cequip<text_csubmethod_type>(n); }
 
 				nik_ce auto text_subequip(size_ctype n)
-					{ return below.template right_equip<text_submethod_type>(n); }
+					{ return _text.template right_equip<text_submethod_type>(n); }
 	};
 
 /***********************************************************************************************************************/
@@ -575,11 +599,11 @@ namespace cctmp {
 // immutable:
 
 	template<typename Model>
-	class logo_cfacade
+	class book_cfacade
 	{
 		public:
 
-			using facade			= logo_cfacade; // method compatible.
+			using facade			= book_cfacade; // method compatible.
 
 			using model_type		= Model;
 			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
@@ -600,8 +624,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce logo_cfacade() : model{} { }
-			nik_ce logo_cfacade(model_ctype_cptr m) : model{m} { }
+			nik_ce book_cfacade() : model{} { }
+			nik_ce book_cfacade(model_ctype_cptr m) : model{m} { }
 
 			// page:
 
@@ -617,11 +641,11 @@ namespace cctmp {
 // mutable:
 
 	template<typename Model>
-	class logo_facade
+	class book_facade
 	{
 		public:
 
-			using facade			= logo_facade; // method compatible.
+			using facade			= book_facade; // method compatible.
 
 			using model_type		= Model;
 			using model_type_ptr		= typename alias<model_type>::type_ptr;
@@ -646,19 +670,19 @@ namespace cctmp {
 
 			nik_ce bool overlay(size_ctype kind, size_ctype n)
 			{
-				auto above_method = model->page_equip(kind);
+				auto page_method = model->page_equip(kind);
 
-				if (above_method.is_full() || ctext().lacks_capacity(n)) return false;
+				if (page_method.is_full() || ctext().lacks_capacity(n)) return false;
 
-				above_method.push(text().expand(n));
+				page_method.push(text().expand(n));
 
 				return true;
 			}
 
 		public:
 
-			nik_ce logo_facade() : model{} { }
-			nik_ce logo_facade(model_type_cptr m) : model{m} { }
+			nik_ce book_facade() : model{} { }
+			nik_ce book_facade(model_type_cptr m) : model{m} { }
 
 			// page:
 
@@ -674,28 +698,28 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// logo:
+// interface:
 
 /***********************************************************************************************************************/
 
 // mutable:
 
 	template<typename Type, typename SizeType, SizeType Size, SizeType... Sizes>
-	class logo : public logo_model<Type, SizeType, Size, Sizes...>
+	class book : public book_model<Type, SizeType, Size, Sizes...>
 	{
 		public:
 
-			using base			= logo_model<Type, SizeType, Size, Sizes...>;
+			using base			= book_model<Type, SizeType, Size, Sizes...>;
 			using model			= base;
-			using cfacade_type		= logo_cfacade<model>;
-			using facade_type		= logo_facade<model>;
+			using cfacade_type		= book_cfacade<model>;
+			using facade_type		= book_facade<model>;
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
 		public:
 
-			nik_ce logo() : base{} { }
+			nik_ce book() : base{} { }
 
 			// equip:
 

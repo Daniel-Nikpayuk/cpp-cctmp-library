@@ -17,20 +17,16 @@
 **
 ************************************************************************************************************************/
 
-// corpus class:
-
-	// in order to apply functions internal to a given type system,
-	// they have to be known before the use of the type system itself.
-	// this is a metacompile time that precedes metarun time.
-
-	// in order to achieve this, type systems should be designed
-	// to accept metacompile time type data as well as its metarun time data.
-	// defining "apply" to accept such metacompile time objects as template parameters
-	// is likely the most expressive approach while maintaining the type system forms.
+// concord class:
 
 namespace cctmp {
 
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// concord:
+
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -40,81 +36,81 @@ namespace cctmp {
 
 // mutable:
 
-	template<typename Type, typename SizeType, typename SymbolPack, typename ImagePack, SizeType Size>
-	class corpus_model
+	template<typename Type, typename SizeType, typename GlyphPack, typename ImagePack, SizeType Size>
+	class concord_model
 	{
 		public:
 
-			using facade			= corpus_model; // method compatible.
+			using facade			= concord_model; // method compatible.
 
-			using record_type		= semiotic<SizeType, SizeType, SymbolPack, ImagePack>;
+			using symbol_type		= corpus<SizeType, SizeType, GlyphPack, ImagePack>;
+			using symbol_type_ptr		= typename alias<symbol_type>::type_ptr;
+			using symbol_ctype_ptr		= typename alias<symbol_type>::ctype_ptr;
+
+			using record_type		= array<Type, SizeType, Size>;
 			using record_type_ptr		= typename alias<record_type>::type_ptr;
 			using record_ctype_ptr		= typename alias<record_type>::ctype_ptr;
 
-			using memory_type		= array<Type, SizeType, Size>;
-			using memory_type_ptr		= typename alias<memory_type>::type_ptr;
-			using memory_ctype_ptr		= typename alias<memory_type>::ctype_ptr;
+			using type			= typename record_type::type;
+			using type_ptr			= typename record_type::type_ptr;
+			using type_cptr			= typename record_type::type_cptr;
+			using type_ref			= typename record_type::type_ref;
 
-			using type			= typename memory_type::type;
-			using type_ptr			= typename memory_type::type_ptr;
-			using type_cptr			= typename memory_type::type_cptr;
-			using type_ref			= typename memory_type::type_ref;
+			using ctype			= typename record_type::ctype;
+			using ctype_ptr			= typename record_type::ctype_ptr;
+			using ctype_cptr		= typename record_type::ctype_cptr;
+			using ctype_ref			= typename record_type::ctype_ref;
 
-			using ctype			= typename memory_type::ctype;
-			using ctype_ptr			= typename memory_type::ctype_ptr;
-			using ctype_cptr		= typename memory_type::ctype_cptr;
-			using ctype_ref			= typename memory_type::ctype_ref;
-
-			using size_type			= typename memory_type::size_type;
-			using size_ctype		= typename memory_type::size_ctype;
+			using size_type			= typename record_type::size_type;
+			using size_ctype		= typename record_type::size_ctype;
 
 		public:
 
-			using record_cmethod_type	= resolve_cmethod<record_type, sring_cmethod>;
-			using record_method_type	= resolve_method <record_type,  sring_method>;
+			using symbol_cmethod_type	= resolve_cmethod<symbol_type, sring_cmethod>;
+			using symbol_method_type	= resolve_method <symbol_type,  sring_method>;
 
-			using memory_cmethod_type	= resolve_cmethod<memory_type, array_cmethod>;
-			using memory_method_type	= resolve_method <memory_type,  array_method>;
+			using record_cmethod_type	= resolve_cmethod<record_type, array_cmethod>;
+			using record_method_type	= resolve_method <record_type,  array_method>;
 
-			using memory_csubmethod_type	= resolve_csubmethod<memory_type, array_csubmethod>;
-			using memory_submethod_type	= resolve_submethod <memory_type,  array_submethod>;
+			using record_csubmethod_type	= resolve_csubmethod<record_type, array_csubmethod>;
+			using record_submethod_type	= resolve_submethod <record_type,  array_submethod>;
 
 		protected:
 
-			record_type logic;
-			memory_type value;
+			symbol_type _symbol;
+			record_type _record;
 
 		public:
 
-			nik_ce corpus_model() { }
+			nik_ce concord_model() { }
 
-			// logic:
+			// symbol:
 
-				nik_ce record_ctype_ptr crecord() const { return &logic; }
-				nik_ce  record_type_ptr  record()       { return &logic; }
+				nik_ce symbol_ctype_ptr csymbol() const { return &_symbol; }
+				nik_ce  symbol_type_ptr  symbol()       { return &_symbol; }
+
+				nik_ce auto symbol_cequip() const
+					{ return _symbol.template cequip<symbol_cmethod_type>(); }
+
+				nik_ce auto symbol_equip()
+					{ return _symbol.template equip<symbol_method_type>(); }
+
+			// record:
+
+				nik_ce record_ctype_ptr crecord() const { return &_record; }
+				nik_ce  record_type_ptr  record()       { return &_record; }
 
 				nik_ce auto record_cequip() const
-					{ return logic.template cequip<record_cmethod_type>(); }
+					{ return _record.template cequip<record_cmethod_type>(); }
 
 				nik_ce auto record_equip()
-					{ return logic.template equip<record_method_type>(); }
+					{ return _record.template equip<record_method_type>(); }
 
-			// value:
+				nik_ce auto record_csubequip(size_ctype n) const
+					{ return _record.template right_cequip<record_csubmethod_type>(n); }
 
-				nik_ce memory_ctype_ptr cmemory() const { return &value; }
-				nik_ce  memory_type_ptr  memory()       { return &value; }
-
-				nik_ce auto memory_cequip() const
-					{ return value.template cequip<memory_cmethod_type>(); }
-
-				nik_ce auto memory_equip()
-					{ return value.template equip<memory_method_type>(); }
-
-				nik_ce auto memory_csubequip(size_ctype n) const
-					{ return value.template right_cequip<memory_csubmethod_type>(n); }
-
-				nik_ce auto memory_subequip(size_ctype n)
-					{ return value.template right_equip<memory_submethod_type>(n); }
+				nik_ce auto record_subequip(size_ctype n)
+					{ return _record.template right_equip<record_submethod_type>(n); }
 	};
 
 /***********************************************************************************************************************/
@@ -127,21 +123,21 @@ namespace cctmp {
 // immutable:
 
 	template<typename Model>
-	class corpus_cfacade
+	class concord_cfacade
 	{
 		public:
 
-			using facade			= corpus_cfacade; // method compatible.
+			using facade			= concord_cfacade; // method compatible.
 
 			using model_type		= Model;
 			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
 			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
 
+			using symbol_type		= typename model_type::symbol_type;
+			using symbol_ctype_ref		= typename alias<symbol_type>::ctype_ref;
+
 			using record_type		= typename model_type::record_type;
 			using record_ctype_ref		= typename alias<record_type>::ctype_ref;
-
-			using memory_type		= typename model_type::memory_type;
-			using memory_ctype_ref		= typename alias<memory_type>::ctype_ref;
 
 			using size_type			= typename model_type::size_type;
 			using size_ctype		= typename model_type::size_ctype;
@@ -152,16 +148,16 @@ namespace cctmp {
 
 		public:
 
-			nik_ce corpus_cfacade() : model{} { }
-			nik_ce corpus_cfacade(model_ctype_cptr m) : model{m} { }
+			nik_ce concord_cfacade() : model{} { }
+			nik_ce concord_cfacade(model_ctype_cptr m) : model{m} { }
+
+			// symbol:
+
+				nik_ce symbol_ctype_ref csymbol() const { return *model->csymbol(); }
 
 			// record:
 
 				nik_ce record_ctype_ref crecord() const { return *model->crecord(); }
-
-			// memory:
-
-				nik_ce memory_ctype_ref cmemory() const { return *model->cmemory(); }
 	};
 
 /***********************************************************************************************************************/
@@ -169,23 +165,23 @@ namespace cctmp {
 // mutable:
 
 	template<typename Model>
-	class corpus_facade
+	class concord_facade
 	{
 		public:
 
-			using facade			= corpus_facade; // method compatible.
+			using facade			= concord_facade; // method compatible.
 
 			using model_type		= Model;
 			using model_type_ptr		= typename alias<model_type>::type_ptr;
 			using model_type_cptr		= typename alias<model_type>::type_cptr;
 
+			using symbol_type		= typename model_type::symbol_type;
+			using symbol_type_ref		= typename alias<symbol_type>::type_ref;
+			using symbol_ctype_ref		= typename alias<symbol_type>::ctype_ref;
+
 			using record_type		= typename model_type::record_type;
 			using record_type_ref		= typename alias<record_type>::type_ref;
 			using record_ctype_ref		= typename alias<record_type>::ctype_ref;
-
-			using memory_type		= typename model_type::memory_type;
-			using memory_type_ref		= typename alias<memory_type>::type_ref;
-			using memory_ctype_ref		= typename alias<memory_type>::ctype_ref;
 
 			using size_type			= typename model_type::size_type;
 			using size_ctype		= typename model_type::size_ctype;
@@ -196,45 +192,45 @@ namespace cctmp {
 
 		public:
 
-			nik_ce corpus_facade() : model{} { }
-			nik_ce corpus_facade(model_type_cptr m) : model{m} { }
+			nik_ce concord_facade() : model{} { }
+			nik_ce concord_facade(model_type_cptr m) : model{m} { }
+
+			// symbol:
+
+				nik_ce symbol_ctype_ref csymbol() const { return *model->csymbol(); }
+				nik_ce  symbol_type_ref  symbol()       { return *model-> symbol(); }
 
 			// record:
 
 				nik_ce record_ctype_ref crecord() const { return *model->crecord(); }
 				nik_ce  record_type_ref  record()       { return *model-> record(); }
-
-			// memory:
-
-				nik_ce memory_ctype_ref cmemory() const { return *model->cmemory(); }
-				nik_ce  memory_type_ref  memory()       { return *model-> memory(); }
 	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// corpus:
+// interface:
 
 /***********************************************************************************************************************/
 
 // mutable:
 
-	template<typename Type, typename SizeType, typename SymbolPack, typename ImagePack, SizeType Size>
-	class corpus : public corpus_model<Type, SizeType, SymbolPack, ImagePack, Size>
+	template<typename Type, typename SizeType, typename GlyphPack, typename ImagePack, SizeType Size>
+	class concord : public concord_model<Type, SizeType, GlyphPack, ImagePack, Size>
 	{
 		public:
 
-			using base			= corpus_model<Type, SizeType, SymbolPack, ImagePack, Size>;
+			using base			= concord_model<Type, SizeType, GlyphPack, ImagePack, Size>;
 			using model			= base;
-			using cfacade_type		= corpus_cfacade<model>;
-			using facade_type		= corpus_facade<model>;
+			using cfacade_type		= concord_cfacade<model>;
+			using facade_type		= concord_facade<model>;
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
 		public:
 
-			nik_ce corpus() : base{} { }
+			nik_ce concord() : base{} { }
 
 			// equip:
 

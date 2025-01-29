@@ -37,34 +37,34 @@
 
 /***********************************************************************************************************************/
 
-	constexpr auto corpus_add_test()
+	constexpr auto concord_add_test()
 	{
 		using size_type    = unsigned long;
-		using sym_pack     = cctmp::T_pack_Vs<6, 3>;
+		using glp_pack     = cctmp::T_pack_Vs<6, 3>;
 		using img_pack     = cctmp::T_pack_Vs<6, 3>;
-		using corpus_type  = corpus<size_type, size_type, sym_pack, img_pack, 3>;
-		using method_type  = resolve_method<corpus_type, cring_method>;
+		using concord_type = concord<size_type, size_type, glp_pack, img_pack, 3>;
+		using method_type  = resolve_method<concord_type, cring_method>;
 
-		auto corpus_value  = corpus_type{};
-		auto corpus_method = corpus_value.template equip<method_type>();
-		auto out_sign      = corpus_method.declare (64);
-		auto in1_sign      = corpus_method.define  (64, 2);
-		auto in2_sign      = corpus_method.define  (64, 3);
+		auto concord_value  = concord_type{};
+		auto concord_method = concord_value.template equip<method_type>();
+	//	auto out_sign       = concord_method.declare (64);
+	//	auto in1_sign       = concord_method.define  (64, 2);
+	//	auto in2_sign       = concord_method.define  (64, 3);
 
-		corpus_method.add_to(out_sign, in1_sign, in2_sign);
+	//	concord_method.add_to(out_sign, in1_sign, in2_sign);
 
-		return corpus_value;
+		return concord_value;
 	}
 
-	constexpr auto corpus0 = corpus_add_test();
+	constexpr auto concord0 = concord_add_test();
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		print_array(*corpus0.crecord()->csignifier()->ctext());
-		print_array(*corpus0.crecord()->csignified()->ctext());
-		print_array(*corpus0.cmemory());
+	//	print_array(*concord0.csymbol()->cglyph()->ctext());
+	//	print_array(*concord0.csymbol()->cimage()->ctext());
+	//	print_array(*concord0.crecord());
 
 		return 0;
 	}

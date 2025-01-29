@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// semiotic method:
+// concord method:
 
 namespace cctmp {
 
@@ -32,7 +32,7 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class semiotic_ring_cmethod : public Facade
+	class concord_ring_cmethod : public Facade
 	{
 		public:
 
@@ -44,46 +44,58 @@ namespace cctmp {
 
 		protected:
 
-			using signifier_cmethod_type	= typename model_type::signifier_cmethod_type;
-			using signified_cmethod_type	= typename model_type::signified_cmethod_type;
+			using symbol_cmethod_type	= typename model_type::symbol_cmethod_type;
+			using record_cmethod_type	= typename model_type::record_cmethod_type;
 
-			signifier_cmethod_type signifier_cmethod;
-			signified_cmethod_type signified_cmethod;
+			using symbol_model_type		= typename model_type::symbol_type::base;
+			using image_cmethod_type	= typename symbol_model_type::image_cmethod_type;
+
+			symbol_cmethod_type symbol_cmethod;
+			record_cmethod_type record_cmethod;
+
+			image_cmethod_type image_cmethod;
 
 		public:
 
-			nik_ce semiotic_ring_cmethod() : base{}, signifier_cmethod{}, signified_cmethod{} { }
-			nik_ce semiotic_ring_cmethod(const Facade & f) :
+			nik_ce concord_ring_cmethod() :
+				base{}, symbol_cmethod{}, record_cmethod{}, image_cmethod{} { }
+
+			nik_ce concord_ring_cmethod(const Facade & f) :
 
 				base{f},
-				signifier_cmethod{signifier_cequip()},
-				signified_cmethod{signified_cequip()}
+				symbol_cmethod{symbol_cequip()},
+				record_cmethod{record_cequip()},
+				image_cmethod{image_cequip()}
 				{ }
 
-			// signifier:
+			// symbol:
 
-				nik_ce auto signifier_cequip() { return base::model->signifier_cequip(); }
+				nik_ce auto symbol_cequip() { return base::model->symbol_cequip(); }
 
-			// signified:
+			// record:
 
-				nik_ce auto signified_cequip() { return base::model->signified_cequip(); }
+				nik_ce auto record_cequip() { return base::model->record_cequip(); }
+
+			// image:
+
+				nik_ce auto image_cequip() { return base::csymbol().image_cequip(); }
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
-		using sring_cmethod = semiotic_ring_cmethod<Facade>;
+		using cring_cmethod = concord_ring_cmethod<Facade>;
 
 /***********************************************************************************************************************/
 
 // mutable:
 
 	template<typename Facade>
-	class semiotic_ring_method : public semiotic_ring_cmethod<Facade>
+	class concord_ring_method : public concord_ring_cmethod<Facade>
 	{
 		public:
 
-			using base			= semiotic_ring_cmethod<Facade>;
+			using base			= concord_ring_cmethod<Facade>;
 			using model_type		= typename base::model_type;
 
 			using size_type			= typename base::size_type;
@@ -92,118 +104,102 @@ namespace cctmp {
 			using sign_type			= sign<size_type>;
 			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
 
-			using gram_type			= typename sign_type::gram_type;
-			using gram_ctype_ref		= typename alias<gram_type>::ctype_ref;
-
-			using icon_type			= typename sign_type::icon_type;
-			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
-
 		protected:
 
-			nik_ces size_type roffset	= RRing::dimension;
+			using symbol_method_type	= typename model_type::symbol_method_type;
+			using record_method_type	= typename model_type::record_method_type;
 
-			using signifier_method_type	= typename model_type::signifier_method_type;
-			using signified_method_type	= typename model_type::signified_method_type;
+			using symbol_model_type		= typename model_type::symbol_type::base;
+			using image_method_type		= typename symbol_model_type::image_method_type;
 
-			signifier_method_type signifier_method;
-			signified_method_type signified_method;
+			symbol_method_type symbol_method;
+			record_method_type record_method;
 
-		protected:
-
-			// signifier:
-
-				nik_ce void initialize_signifier(gram_ctype_ref gram, size_ctype bits)
-				{
-					auto signifier_submethod = signifier_method.gram_to_text_equip(gram);
-
-					signifier_submethod[RRing::name] = Logo::ringN;
-					signifier_submethod[RRing::bits] = bits;
-				}
-
-				nik_ce auto instantiate_signifier(size_ctype bits)
-				{
-					auto gram = signifier_method.overlay();
-
-					if (gram.not_fail()) { initialize_signifier(gram, bits); }
-
-					return gram;
-				}
-
-				nik_ce auto declare_signifier(size_ctype bits)
-				{
-					size_ctype pos = signifier_method.left_find(bits);
-
-					if (signifier_method.found(pos)) { return signifier_method.make_gram(pos); }
-					else                             { return instantiate_signifier(bits); }
-				}
-
-			// signified:
-
-				nik_ce void initialize_signified(icon_ctype_ref icon, size_ctype start)
-				{
-					auto signified_submethod = signified_method.icon_to_text_equip(icon);
-
-					signified_submethod[DRing::start] = start;
-					signified_submethod[DRing::bytes] = signified_method.byte_size();
-				}
-
-				nik_ce auto instantiate_signified(size_ctype start)
-				{
-					auto icon = signified_method.overlay();
-
-					if (icon.not_fail()) { initialize_signified(icon, start); }
-
-					return icon;
-				}
-
-				nik_ce auto declare_signified(size_ctype start)
-				{
-					size_ctype pos = signified_method.left_find(start);
-
-					if (signified_method.found(pos)) { return signified_method.fail_icon(); }
-					else                             { return instantiate_signified(start); }
-				}
+			image_method_type image_method;
 
 		public:
 
-			nik_ce semiotic_ring_method() : base{}, signifier_method{}, signified_method{} { }
-			nik_ce semiotic_ring_method(const Facade & f) :
+			nik_ce concord_ring_method() :
+				base{}, symbol_method{}, record_method{}, image_method{} { }
+
+			nik_ce concord_ring_method(const Facade & f) :
 
 				base{f},
-				signifier_method{signifier_equip()},
-				signified_method{signified_equip()}
+				symbol_method{symbol_equip()},
+				record_method{record_equip()},
+				image_method{image_equip()}
 				{ }
 
-			// signifier:
+			// symbol:
 
-				nik_ce auto signifier_equip() { return base::model->signifier_equip(); }
+				nik_ce auto symbol_equip() { return base::model->symbol_equip(); }
 
-			// signified:
+			// record:
 
-				nik_ce auto signified_equip() { return base::model->signified_equip(); }
+				nik_ce auto record_equip() { return base::model->record_equip(); }
+
+			// image:
+
+				nik_ce auto image_equip() { return base::symbol().image_equip(); }
 
 			// initialization:
 
-				nik_ce auto declare(size_ctype bits, size_ctype offset)
+				nik_ce auto declare(size_ctype bytes)
 				{
-					auto gram = declare_signifier(bits);
-					auto icon = declare_signified(offset);
-					auto kind = (gram.not_fail() && icon.not_fail()) ? Logo::ringN : Logo::fail;
+					size_ctype offset = base::image_cmethod.byte_size();
 
-					return sign_type{kind, gram.index(), icon.index()};
+					return symbol_method.declare(bytes, record_method.expand(offset));
 				}
 
-			// same types:
+				nik_ce auto define(size_ctype bytes, size_ctype value)
+				{
+					auto sign = declare(bytes);
+
+					if (sign.kind() == Gram::ringN)
+					{
+									// image_start ? index instead of sign ?
+						auto image_submethod = base::image_cmethod.
+										sign_to_text_cequip(sign.index());
+
+						record_method[image_submethod[IRing::start]] = value;
+					}
+
+					return sign;
+				}
+
+			// add to record:
 
 				template<typename T, typename... Ts>
-				nik_ce bool same_types(const T & l, const Ts &... rs)
-					{ return signifier_method.same_types(roffset, l.rindex(), rs.rindex()...); }
+				nik_ce void add_to_record(const T & l, const Ts &... rs)
+				{
+					const auto & l_image_cmethod = base::image_cmethod.
+										sign_to_text_cequip(l.index());
+
+					add_to_methods(l_image_cmethod,
+						base::image_cmethod.sign_to_text_cequip(rs.index())...);
+				}
+
+				template<typename T, typename... Ts>
+				nik_ce void add_to_methods(const T & l, const Ts &... rs)
+					{ add_to_positions(l[IRing::start], rs[IRing::start]...); }
+
+				template<typename T, typename... Ts>
+				nik_ce void add_to_positions(T l, Ts... rs)
+					{ record_method[l] = (... + base::record_cmethod[rs]); }
+
+			// add to:
+
+				nik_ce void add_to(sign_ctype_ref out, sign_ctype_ref in1, sign_ctype_ref in2)
+				{
+					if (symbol_method.same_types(out, in1, in2))
+						{ add_to_record(out, in1, in2); }
+				}
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
-		using sring_method = semiotic_ring_method<Facade>;
+		using cring_method = concord_ring_method<Facade>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

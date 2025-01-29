@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// corpus method:
+// symbol method:
 
 namespace cctmp {
 
@@ -32,7 +32,7 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class corpus_ring_cmethod : public Facade
+	class symbol_ring_cmethod : public Facade
 	{
 		public:
 
@@ -44,168 +44,173 @@ namespace cctmp {
 
 		protected:
 
-			using record_cmethod_type	= typename model_type::record_cmethod_type;
-			using memory_cmethod_type	= typename model_type::memory_cmethod_type;
+			using glyph_cmethod_type	= typename model_type::glyph_cmethod_type;
+			using image_cmethod_type	= typename model_type::image_cmethod_type;
 
-			using record_model_type		= typename model_type::record_type::base;
-			using signified_cmethod_type	= typename record_model_type::signified_cmethod_type;
-
-			record_cmethod_type record_cmethod;
-			memory_cmethod_type memory_cmethod;
-
-			signified_cmethod_type signified_cmethod;
+			glyph_cmethod_type glyph_cmethod;
+			image_cmethod_type image_cmethod;
 
 		public:
 
-			nik_ce corpus_ring_cmethod() :
-				base{}, record_cmethod{}, memory_cmethod{}, signified_cmethod{} { }
-
-			nik_ce corpus_ring_cmethod(const Facade & f) :
+			nik_ce symbol_ring_cmethod() : base{}, glyph_cmethod{}, image_cmethod{} { }
+			nik_ce symbol_ring_cmethod(const Facade & f) :
 
 				base{f},
-				record_cmethod{record_cequip()},
-				memory_cmethod{memory_cequip()},
-				signified_cmethod{signified_cequip()}
+				glyph_cmethod{glyph_cequip()},
+				image_cmethod{image_cequip()}
 				{ }
 
-			// record:
+			// glyph:
 
-				nik_ce auto record_cequip() { return base::model->record_cequip(); }
+				nik_ce auto glyph_cequip() { return base::model->glyph_cequip(); }
 
-			// memory:
+			// image:
 
-				nik_ce auto memory_cequip() { return base::model->memory_cequip(); }
-
-			// signified:
-
-				nik_ce auto signified_cequip() { return base::crecord().signified_cequip(); }
+				nik_ce auto image_cequip() { return base::model->image_cequip(); }
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
-		using cring_cmethod = corpus_ring_cmethod<Facade>;
+		using sring_cmethod = symbol_ring_cmethod<Facade>;
 
 /***********************************************************************************************************************/
 
 // mutable:
 
 	template<typename Facade>
-	class corpus_ring_method : public corpus_ring_cmethod<Facade>
+	class symbol_ring_method : public symbol_ring_cmethod<Facade>
 	{
 		public:
 
-			using base			= corpus_ring_cmethod<Facade>;
+			using base			= symbol_ring_cmethod<Facade>;
 			using model_type		= typename base::model_type;
 
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
+			using icon_type			= icon<size_type>;
+			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
+
 			using sign_type			= sign<size_type>;
 			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
 
-			using gram_type			= typename sign_type::gram_type;
-			using gram_ctype_ref		= typename alias<gram_type>::ctype_ref;
+		protected:
 
-			using icon_type			= typename sign_type::icon_type;
-			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
+			nik_ces size_type goffset	= GRing::dimension;
+
+			using glyph_method_type		= typename model_type::glyph_method_type;
+			using image_method_type		= typename model_type::image_method_type;
+
+			glyph_method_type glyph_method;
+			image_method_type image_method;
 
 		protected:
 
-			using record_method_type	= typename model_type::record_method_type;
-			using memory_method_type	= typename model_type::memory_method_type;
+			// glyph:
 
-			using record_model_type		= typename model_type::record_type::base;
-			using signified_method_type	= typename record_model_type::signified_method_type;
-
-			record_method_type record_method;
-			memory_method_type memory_method;
-
-			signified_method_type signified_method;
-
-		public:
-
-			nik_ce corpus_ring_method() :
-				base{}, record_method{}, memory_method{}, signified_method{} { }
-
-			nik_ce corpus_ring_method(const Facade & f) :
-
-				base{f},
-				record_method{record_equip()},
-				memory_method{memory_equip()},
-				signified_method{signified_equip()}
-				{ }
-
-			// record:
-
-				nik_ce auto record_equip() { return base::model->record_equip(); }
-
-			// memory:
-
-				nik_ce auto memory_equip() { return base::model->memory_equip(); }
-
-			// signified:
-
-				nik_ce auto signified_equip() { return base::record().signified_equip(); }
-
-			// initialization:
-
-				nik_ce auto declare(size_ctype bits)
+				nik_ce void initialize_glyph(icon_ctype_ref icon, size_ctype bytes)
 				{
-					size_ctype offset = base::signified_cmethod.byte_size();
+					auto glyph_submethod = glyph_method.icon_to_text_equip(icon);
 
-					return record_method.declare(bits, memory_method.expand(offset));
+						// name is redundant, bits is now bytes.
+						// each types specifies to which universe it belongs.
+						// has free (glyph).
+					glyph_submethod[GRing::name ] = Gram::ringN;
+					glyph_submethod[GRing::bytes] = bytes;
 				}
 
-				nik_ce auto define(size_ctype bits, size_ctype value)
+				nik_ce auto instantiate_glyph(size_ctype bytes)
 				{
-					auto sign = declare(bits);
+					auto icon = glyph_method.overlay();
 
-					if (sign.kind() == Logo::ringN)
-					{
-									// signified_start ? index instead of icon ?
-						auto signified_submethod = base::signified_cmethod.
-										icon_to_text_cequip(sign.to_icon());
+					if (icon.not_fail()) { initialize_glyph(icon, bytes); }
 
-						memory_method[signified_submethod[DRing::start]] = value;
-					}
+					return icon;
+				}
+
+				nik_ce auto declare_glyph(size_ctype bytes)
+				{
+					size_ctype pos = glyph_method.left_find(bytes);
+
+					if (glyph_method.found(pos)) { return glyph_method.make_icon(pos); }
+					else                         { return instantiate_glyph(bytes); }
+				}
+
+			// image:
+
+				nik_ce void initialize_image(sign_ctype_ref sign, size_ctype start)
+				{
+					auto image_submethod = image_method.sign_to_text_equip(sign);
+
+						// have "abstract" and "concrete" as fields.
+
+						// bytes is now moved to type info.
+						// type_pos (rindex?).
+						// bound: is_symbolic, start.
+						// has free (image) (index?).
+
+					image_submethod[IRing::start] = start;
+					image_submethod[IRing::bytes] = image_method.byte_size();
+				}
+
+				nik_ce auto instantiate_image(size_ctype start)
+				{
+					auto sign = image_method.overlay();
+
+					if (sign.not_fail()) { initialize_image(sign, start); }
 
 					return sign;
 				}
 
-			// add to memory:
-
-				template<typename T, typename... Ts>
-				nik_ce void add_to_memory(const T & l, const Ts &... rs)
+				nik_ce auto declare_image(size_ctype start)
 				{
-					const auto & l_signified_cmethod = base::signified_cmethod.
-										icon_to_text_cequip(l.to_icon());
+					size_ctype pos = image_method.left_find(start);
 
-					add_to_methods(l_signified_cmethod,
-						base::signified_cmethod.icon_to_text_cequip(rs.to_icon())...);
+					if (image_method.found(pos)) { return image_method.fail_sign(); }
+					else                         { return instantiate_image(start); }
 				}
 
-				template<typename T, typename... Ts>
-				nik_ce void add_to_methods(const T & l, const Ts &... rs)
-					{ add_to_positions(l[DRing::start], rs[DRing::start]...); }
+		public:
 
-				template<typename T, typename... Ts>
-				nik_ce void add_to_positions(T l, Ts... rs)
-					{ memory_method[l] = (... + base::memory_cmethod[rs]); }
+			nik_ce symbol_ring_method() : base{}, glyph_method{}, image_method{} { }
+			nik_ce symbol_ring_method(const Facade & f) :
 
-			// add to:
+				base{f},
+				glyph_method{glyph_equip()},
+				image_method{image_equip()}
+				{ }
 
-				nik_ce void add_to(sign_ctype_ref out, sign_ctype_ref in1, sign_ctype_ref in2)
+			// glyph:
+
+				nik_ce auto glyph_equip() { return base::model->glyph_equip(); }
+
+			// image:
+
+				nik_ce auto image_equip() { return base::model->image_equip(); }
+
+			// initialization:
+
+				nik_ce auto declare(size_ctype bits, size_ctype offset)
 				{
-					if (record_method.same_types(out, in1, in2))
-						{ add_to_memory(out, in1, in2); }
+					auto icon = declare_glyph(bits);
+					auto sign = declare_image(offset);
+					auto kind = (icon.not_fail() && sign.not_fail()) ? Gram::ringN : Gram::fail;
+
+					return sign;
 				}
+
+			// same types:
+
+				template<typename T, typename... Ts>
+				nik_ce bool same_types(const T & l, const Ts &... rs)
+					{ return glyph_method.same_types(goffset, l.index(), rs.index()...); }
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
-		using cring_method = corpus_ring_method<Facade>;
+		using sring_method = symbol_ring_method<Facade>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

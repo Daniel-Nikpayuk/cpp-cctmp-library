@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// signifier method:
+// image method:
 
 namespace cctmp {
 
@@ -32,7 +32,7 @@ namespace cctmp {
 // immutable:
 
 	template<typename Base, typename Base::size_type Name, typename Base::size_type Dimension>
-	class signifier_cmethod_disjoint : public Base
+	class image_cmethod_disjoint : public Base
 	{
 		public:
 
@@ -45,8 +45,8 @@ namespace cctmp {
 			using size_ctype_ptr		= typename alias<size_type>::ctype_ptr;
 			using size_ctype_cptr		= typename alias<size_type>::ctype_cptr;
 
-			using gram_type			= gram<size_type>;
-			using gram_ctype_ref		= typename alias<gram_type>::ctype_ref;
+			using sign_type			= sign<size_type>;
+			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
 
 		protected:
 
@@ -61,8 +61,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce signifier_cmethod_disjoint() : base{}, page_cmethod{}, text_cmethod{} { }
-			nik_ce signifier_cmethod_disjoint(const facade & f) :
+			nik_ce image_cmethod_disjoint() : base{}, page_cmethod{}, text_cmethod{} { }
+			nik_ce image_cmethod_disjoint(const facade & f) :
 
 				base{f},
 				page_cmethod{page_cequip(name)},
@@ -78,7 +78,7 @@ namespace cctmp {
 
 				nik_ce auto text_cequip() const { return base::model->text_cequip(); }
 
-					// unsafe, does not test against name().
+				 // unsafe, does not test against name().
 
 				nik_ce auto text_csubequip(size_ctype n) const
 					{ return base::model->text_csubequip(n); }
@@ -86,15 +86,17 @@ namespace cctmp {
 				nik_ce auto page_to_text_cequip(size_ctype n) const
 					{ return text_csubequip(page_cmethod[n]); }
 
-				nik_ce auto gram_to_text_cequip(gram_ctype_ref g) const
-					{ return page_to_text_cequip(g.index()); }
+				nik_ce auto sign_to_text_cequip(sign_ctype_ref i) const
+					{ return page_to_text_cequip(i.index()); }
 
-			// gram:
+			// sign:
 
-				nik_ce auto fail_gram() const { return gram_type{Logo::fail, 0}; }
-				nik_ce auto make_gram(size_ctype pos) const { return gram_type{name, pos}; }
+				nik_ce auto fail_sign() const { return sign_type{Gram::fail, 0}; }
+				nik_ce auto make_sign(size_ctype pos) const { return sign_type{name, pos}; }
 
 			// find:
+
+					// update for new internal type design:
 
 				nik_ce bool found(size_ctype n) const
 					{ return (n != page_cmethod.size()); }
@@ -121,25 +123,6 @@ namespace cctmp {
 				template<typename T, auto N>
 				nik_ce size_type left_find(const T (&field)[N]) const
 					{ return find(field) - page_cmethod.cbegin(); }
-
-			// same:
-
-				template<typename T, typename... Ts>
-				nik_ce bool same_types(size_ctype n, const T l, const Ts... rs) const
-					{ return same_methods(n, page_to_text_cequip(l), page_to_text_cequip(rs)...); }
-
-				template<typename T, typename... Ts>
-				nik_ce bool same_methods(size_ctype n, const T & l, const Ts &... rs) const
-				{
-					for (size_type k = 0; k != n; ++k)
-						{ if (different_values(l[k], rs[k]...)) return false; }
-
-					return true;
-				}
-
-				template<typename T, typename... Ts>
-				nik_ce bool different_values(const T l, const Ts... rs) const
-					{ return (... || (l != rs)); }
 	};
 
 /***********************************************************************************************************************/
@@ -147,7 +130,7 @@ namespace cctmp {
 // mutable:
 
 	template<typename Base>
-	class signifier_method_disjoint : public Base
+	class image_method_disjoint : public Base
 	{
 		public:
 
@@ -158,8 +141,8 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using gram_type			= typename base::gram_type;
-			using gram_ctype_ref		= typename base::gram_ctype_ref;
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
 		protected:
 
@@ -167,8 +150,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce signifier_method_disjoint() : base{} { }
-			nik_ce signifier_method_disjoint(const facade & f) : base{f} { }
+			nik_ce image_method_disjoint() : base{} { }
+			nik_ce image_method_disjoint(const facade & f) : base{f} { }
 
 			// text:
 
@@ -180,16 +163,16 @@ namespace cctmp {
 				nik_ce auto page_to_text_equip(size_ctype n)
 					{ return text_subequip(base::page_cmethod[n]); }
 
-				nik_ce auto gram_to_text_equip(gram_ctype_ref g)
-					{ return page_to_text_equip(g.index()); }
+				nik_ce auto sign_to_text_equip(sign_ctype_ref i)
+					{ return page_to_text_equip(i.index()); }
 
 			// overlay:
 
 				nik_ce auto overlay()
 				{
-					if (not facade_overlay()) return base::fail_gram();
+					if (not facade_overlay()) return base::fail_sign();
 
-					return base::make_gram(base::page_cmethod.max());
+					return base::make_sign(base::page_cmethod.max());
 				}
 	};
 
@@ -202,23 +185,23 @@ namespace cctmp {
 
 // names:
 
-	struct SignifierBuiltin
+	struct ImageBuiltin
 	{
 		enum : gkey_type
 		{
-			name, bits,
+			start, bytes,
 			dimension
 		};
 	};
 
-	using RBuiltin = SignifierBuiltin;
+	using IBuiltin = ImageBuiltin;
 
 /***********************************************************************************************************************/
 
 // immutable:
 
 	template<typename Base>
-	class signifier_builtin_cmethod_disjoint : public Base
+	class image_builtin_cmethod_disjoint : public Base
 	{
 		public:
 
@@ -229,33 +212,35 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using gram_type			= typename base::gram_type;
-			using gram_ctype_ref		= typename base::gram_ctype_ref;
+			using sign_type			= sign<size_type>;
+			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
 
 		public:
 
-			nik_ce signifier_builtin_cmethod_disjoint() : base{} { }
-			nik_ce signifier_builtin_cmethod_disjoint(const facade & f) : base{f} { }
+			nik_ce image_builtin_cmethod_disjoint() : base{} { }
+			nik_ce image_builtin_cmethod_disjoint(const facade & f) : base{f} { }
 
 			// find:
 
-				nik_ce size_type left_find(size_ctype bits) const
-					{ return base::left_find({base::name, bits}); }
+					// update for new internal type design:
+
+				nik_ce size_type left_find(size_ctype start) const
+					{ return base::left_find({start, base::bytes}); }
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade, auto Name>
-		using rbuiltin_cmethod =
-			signifier_builtin_cmethod_disjoint <
-			signifier_cmethod_disjoint         < Facade, Name, RBuiltin::dimension >>;
+		using ibuiltin_cmethod =
+			image_builtin_cmethod_disjoint <
+			image_cmethod_disjoint         < Facade, Name, IBuiltin::dimension >>;
 
 /***********************************************************************************************************************/
 
 // mutable:
 
 	template<typename Base>
-	class signifier_builtin_method_disjoint : public Base
+	class image_builtin_method_disjoint : public Base
 	{
 		public:
 
@@ -266,23 +251,23 @@ namespace cctmp {
 			using size_type			= typename base::size_type;
 			using size_ctype		= typename base::size_ctype;
 
-			using gram_type			= typename base::gram_type;
-			using gram_ctype_ref		= typename base::gram_ctype_ref;
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
 		public:
 
-			nik_ce signifier_builtin_method_disjoint() : base{} { }
-			nik_ce signifier_builtin_method_disjoint(const facade & f) : base{f} { }
+			nik_ce image_builtin_method_disjoint() : base{} { }
+			nik_ce image_builtin_method_disjoint(const facade & f) : base{f} { }
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade, auto Name>
-		using rbuiltin_method =
-			signifier_builtin_method_disjoint  <
-			signifier_builtin_cmethod_disjoint <
-			signifier_method_disjoint          <
-			signifier_cmethod_disjoint         < Facade, Name, RBuiltin::dimension >>>>;
+		using ibuiltin_method =
+			image_builtin_method_disjoint  <
+			image_builtin_cmethod_disjoint <
+			image_method_disjoint          <
+			image_cmethod_disjoint         < Facade, Name, IBuiltin::dimension >>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -293,7 +278,7 @@ namespace cctmp {
 
 // names:
 
-	using RRing = RBuiltin;
+	using IRing = IBuiltin;
 
 /***********************************************************************************************************************/
 
@@ -302,7 +287,7 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using rring_cmethod = rbuiltin_cmethod<Facade, Logo::ringN>;
+		using iring_cmethod = ibuiltin_cmethod<Facade, Gram::ringN>;
 
 /***********************************************************************************************************************/
 
@@ -311,7 +296,7 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using rring_method = rbuiltin_method<Facade, Logo::ringN>;
+		using iring_method = ibuiltin_method<Facade, Gram::ringN>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -331,7 +316,7 @@ namespace cctmp {
 
 // names:
 
-	using RUtf8Char = RBuiltin;
+	using IUtf8Char = IBuiltin;
 
 /***********************************************************************************************************************/
 
@@ -340,7 +325,7 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using rutf8_char_cmethod = rbuiltin_cmethod<Facade, Logo::utf8_charN>;
+		using iutf8_char_cmethod = ibuiltin_cmethod<Facade, Gram::utf8_charN>;
 
 /***********************************************************************************************************************/
 
@@ -349,7 +334,7 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using rutf8_char_method = rbuiltin_method<Facade, Logo::utf8_charN>;
+		using iutf8_char_method = ibuiltin_method<Facade, Gram::utf8_charN>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
