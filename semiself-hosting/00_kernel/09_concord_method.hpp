@@ -48,23 +48,26 @@ namespace cctmp {
 			using record_cmethod_type	= typename model_type::record_cmethod_type;
 
 			using symbol_model_type		= typename model_type::symbol_type::base;
+			using glyph_cmethod_type	= typename symbol_model_type::glyph_cmethod_type;
 			using image_cmethod_type	= typename symbol_model_type::image_cmethod_type;
 
 			symbol_cmethod_type symbol_cmethod;
 			record_cmethod_type record_cmethod;
 
+			glyph_cmethod_type glyph_cmethod;
 			image_cmethod_type image_cmethod;
 
 		public:
 
 			nik_ce concord_ring_cmethod() :
-				base{}, symbol_cmethod{}, record_cmethod{}, image_cmethod{} { }
+				base{}, symbol_cmethod{}, record_cmethod{}, glyph_cmethod{}, image_cmethod{} { }
 
 			nik_ce concord_ring_cmethod(const Facade & f) :
 
 				base{f},
 				symbol_cmethod{symbol_cequip()},
 				record_cmethod{record_cequip()},
+				glyph_cmethod{glyph_cequip()},
 				image_cmethod{image_cequip()}
 				{ }
 
@@ -75,6 +78,10 @@ namespace cctmp {
 			// record:
 
 				nik_ce auto record_cequip() { return base::model->record_cequip(); }
+
+			// glyph:
+
+				nik_ce auto glyph_cequip() { return base::csymbol().glyph_cequip(); }
 
 			// image:
 
@@ -146,7 +153,7 @@ namespace cctmp {
 
 				nik_ce auto declare(size_ctype bytes)
 				{
-					size_ctype offset = base::image_cmethod.byte_size();
+					size_ctype offset = base::glyph_cmethod.unit_size();
 
 					return symbol_method.declare(bytes, record_method.expand(offset));
 				}
@@ -166,6 +173,8 @@ namespace cctmp {
 
 					return sign;
 				}
+
+			// apply:
 
 			// add to record:
 

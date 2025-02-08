@@ -71,31 +71,22 @@ namespace cctmp {
 			using base			= Base;
 			using facade			= typename base::facade;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
+			nik_using_name_scope_type	( type, base)
+			nik_using_name_scope_ctype	(ctype, base)
 
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
+			nik_using_name_scope_member	( iter_type, base,  iter_type)
+			nik_using_name_scope_member	(iter_ctype, base, iter_ctype)
 
-			using citer_type		= typename base::citer_type;
-			using citer_ctype_ref		= typename base::citer_ctype_ref;
+			nik_using_name_scope_member	( citer_type, base,  citer_type)
+			nik_using_name_scope_member	(citer_ctype, base, citer_ctype)
 
-			using cderef_type		= typename base::cderef_type;
-			using cderef_type_ptr		= typename base::cderef_type_ptr;
-			using cderef_type_cptr		= typename base::cderef_type_cptr;
-			using cderef_type_ref		= typename base::cderef_type_ref;
+			nik_using_name_scope_member	( deref_type, base,  deref_type)
+			nik_using_name_scope_member	(deref_ctype, base, deref_ctype)
 
-			using cderef_ctype		= typename base::cderef_ctype;
-			using cderef_ctype_ptr		= typename base::cderef_ctype_ptr;
-			using cderef_ctype_cptr		= typename base::cderef_ctype_cptr;
-			using cderef_ctype_ref		= typename base::cderef_ctype_ref;
+			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
+			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
+			nik_using_size_type		(base)
 
 		public:
 
@@ -177,36 +168,30 @@ namespace cctmp {
 			using base			= Base;
 			using facade			= typename base::facade;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
+			nik_using_name_scope_type	( type, base)
+			nik_using_name_scope_ctype	(ctype, base)
 
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
+			nik_using_name_scope_member	( iter_type, base,  iter_type)
+			nik_using_name_scope_member	(iter_ctype, base, iter_ctype)
 
-			using iter_type			= typename base::iter_type;
-			using iter_ctype_ref		= typename base::iter_ctype_ref;
+			nik_using_name_scope_member	( citer_type, base,  citer_type)
+			nik_using_name_scope_member	(citer_ctype, base, citer_ctype)
 
-			using deref_type		= typename base::deref_type;
-			using deref_type_ptr		= typename base::deref_type_ptr;
-			using deref_type_cptr		= typename base::deref_type_cptr;
-			using deref_type_ref		= typename base::deref_type_ref;
+			nik_using_name_scope_member	( deref_type, base,  deref_type)
+			nik_using_name_scope_member	(deref_ctype, base, deref_ctype)
 
-			using deref_ctype		= typename base::deref_ctype;
-			using deref_ctype_ptr		= typename base::deref_ctype_ptr;
-			using deref_ctype_cptr		= typename base::deref_ctype_cptr;
-			using deref_ctype_ref		= typename base::deref_ctype_ref;
+			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
+			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
+			nik_using_size_type		(base)
 
 		public:
 
 			nik_ce array_submethod_disjoint() : base{} { }
 			nik_ce array_submethod_disjoint(const facade & f) : base{f} { }
+
+			template<typename T, auto N>
+			nik_ce array_submethod_disjoint(const T (&a)[N]) : base{} { copy(0, a, a + N); }
 
 			// immutable:
 
@@ -228,6 +213,10 @@ namespace cctmp {
 				nik_ce deref_type_ref at(size_ctype n) { return *iter(n); }
 
 				nik_ce deref_type_ref operator [] (size_ctype n) { return at(n); }
+
+				template<typename In, typename End>
+				nik_ce void copy(size_ctype n, In in, End end)
+					{ for (iter_type out = iter(n); in != end; ++out, ++in) { *out = *in; } }
 	};
 
 /***********************************************************************************************************************/
@@ -251,36 +240,36 @@ namespace cctmp {
 			using base			= Base;
 			using facade			= typename base::facade;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
+			nik_using_name_scope_type	( type, base)
+			nik_using_name_scope_ctype	(ctype, base)
 
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
+			nik_using_name_scope_member	( iter_type, base,  iter_type)
+			nik_using_name_scope_member	(iter_ctype, base, iter_ctype)
 
-			using citer_type		= typename base::citer_type;
-			using citer_ctype_ref		= typename base::citer_ctype_ref;
+			nik_using_name_scope_member	( citer_type, base,  citer_type)
+			nik_using_name_scope_member	(citer_ctype, base, citer_ctype)
 
-			using cderef_type		= typename base::cderef_type;
-			using cderef_type_ptr		= typename base::cderef_type_ptr;
-			using cderef_type_cptr		= typename base::cderef_type_cptr;
-			using cderef_type_ref		= typename base::cderef_type_ref;
+			nik_using_name_scope_member	( deref_type, base,  deref_type)
+			nik_using_name_scope_member	(deref_ctype, base, deref_ctype)
 
-			using cderef_ctype		= typename base::cderef_ctype;
-			using cderef_ctype_ptr		= typename base::cderef_ctype_ptr;
-			using cderef_ctype_cptr		= typename base::cderef_ctype_cptr;
-			using cderef_ctype_ref		= typename base::cderef_ctype_ref;
+			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
+			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
+			nik_using_size_type		(base)
+
+		protected:
+
+			nik_ce void assign(ctype_cptr i, size_ctype t) { base::initial = i; base::terminal = t; }
 
 		public:
 
 			nik_ce array_cmethod_disjoint() : base{} { }
 			nik_ce array_cmethod_disjoint(const facade & f) : base{f} { }
+
+			nik_ce array_cmethod_disjoint(ctype_cptr i, size_ctype t) : base{} { assign(i, t); }
+
+			template<typename T, auto N>
+			nik_ce array_cmethod_disjoint(const T (&a)[N]) : array_cmethod_disjoint{a, N} { }
 
 			// initial:
 
@@ -304,39 +293,30 @@ namespace cctmp {
 			using base			= Base;
 			using facade			= typename base::facade;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
+			nik_using_name_scope_type	( type, base)
+			nik_using_name_scope_ctype	(ctype, base)
 
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
+			nik_using_name_scope_member	( iter_type, base,  iter_type)
+			nik_using_name_scope_member	(iter_ctype, base, iter_ctype)
 
-			using iter_type			= typename base::iter_type;
-			using iter_ctype_ref		= typename base::iter_ctype_ref;
+			nik_using_name_scope_member	( citer_type, base,  citer_type)
+			nik_using_name_scope_member	(citer_ctype, base, citer_ctype)
 
-			using deref_type		= typename base::deref_type;
-			using deref_type_ptr		= typename base::deref_type_ptr;
-			using deref_type_cptr		= typename base::deref_type_cptr;
-			using deref_type_ref		= typename base::deref_type_ref;
+			nik_using_name_scope_member	( deref_type, base,  deref_type)
+			nik_using_name_scope_member	(deref_ctype, base, deref_ctype)
 
-			using deref_ctype		= typename base::deref_ctype;
-			using deref_ctype_ptr		= typename base::deref_ctype_ptr;
-			using deref_ctype_cptr		= typename base::deref_ctype_cptr;
-			using deref_ctype_ref		= typename base::deref_ctype_ref;
+			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
+			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
+			nik_using_size_type		(base)
 
 		protected:
 
 			template<typename T, auto N>
 			nik_ce void assign(const T (&a)[N])
 			{
-				clear();
-				push(a, a + N);
+				base::set_size(N);
+				base::copy(0, a, a + N);
 			}
 
 		public:
@@ -393,31 +373,22 @@ namespace cctmp {
 
 			using base			= array_method<Facade>;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
+			nik_using_name_scope_type	( type, base)
+			nik_using_name_scope_ctype	(ctype, base)
 
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
+			nik_using_name_scope_member	( iter_type, base,  iter_type)
+			nik_using_name_scope_member	(iter_ctype, base, iter_ctype)
 
-			using iter_type			= typename base::iter_type;
-			using iter_ctype_ref		= typename base::iter_ctype_ref;
+			nik_using_name_scope_member	( citer_type, base,  citer_type)
+			nik_using_name_scope_member	(citer_ctype, base, citer_ctype)
 
-			using deref_type		= typename base::deref_type;
-			using deref_type_ptr		= typename base::deref_type_ptr;
-			using deref_type_cptr		= typename base::deref_type_cptr;
-			using deref_type_ref		= typename base::deref_type_ref;
+			nik_using_name_scope_member	( deref_type, base,  deref_type)
+			nik_using_name_scope_member	(deref_ctype, base, deref_ctype)
 
-			using deref_ctype		= typename base::deref_ctype;
-			using deref_ctype_ptr		= typename base::deref_ctype_ptr;
-			using deref_ctype_cptr		= typename base::deref_ctype_cptr;
-			using deref_ctype_ref		= typename base::deref_ctype_ref;
+			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
+			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
+			nik_using_size_type		(base)
 
 		protected:
 
@@ -464,101 +435,153 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// immutable:
+// pre:
 
-	template<typename Facade, typename Facade::size_type RowSize, typename Facade::size_type ColSize>
-	class table_cmethod : public array_cmethod<Facade>
+	template<typename Facade, template<typename> typename SubMethod>
+	class table_presubmethod : public SubMethod<Facade>
 	{
 		public:
 
-			using base			= array_cmethod<Facade>;
+			using base			= SubMethod<Facade>;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
+			nik_using_name_scope_type	( type, base)
+			nik_using_name_scope_ctype	(ctype, base)
 
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
+			nik_using_name_scope_member	( iter_type, base,  iter_type)
+			nik_using_name_scope_member	(iter_ctype, base, iter_ctype)
 
-			using citer_type		= typename base::citer_type;
-			using citer_ctype_ref		= typename base::citer_ctype_ref;
+			nik_using_name_scope_member	( citer_type, base,  citer_type)
+			nik_using_name_scope_member	(citer_ctype, base, citer_ctype)
 
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
+			nik_using_name_scope_member	( deref_type, base,  deref_type)
+			nik_using_name_scope_member	(deref_ctype, base, deref_ctype)
+
+			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
+			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
+
+			nik_using_size_type		(base)
+
+		protected:
+
+			size_type rows;
+			size_type cols;
+
+		protected:
+
+			nik_ce void set_dimension(size_ctype r, size_ctype c) { rows = r; cols = c; }
+
+			nik_ce table_presubmethod(ctype_cptr i, size_ctype t) : base{i, t} { }
 
 		public:
 
-			nik_ces size_type row_length () { return RowSize; }
-			nik_ces size_type col_length () { return ColSize; }
+			nik_ce table_presubmethod() : base{}, rows{}, cols{} { }
+			nik_ce table_presubmethod(const Facade & f) : base{f}, rows{}, cols{} { }
+
+			template<typename T, auto N>
+			nik_ce table_presubmethod(const T (&a)[N]) : base{a} { }
+
+			nik_ce void set_sizes(size_ctype r, size_ctype c)
+				{ if (r * c <= base::size()) { set_dimension(r, c); } }
+
+			// row:
+
+				nik_ce size_type row_size() const { return rows; }
+
+				nik_ce citer_type row_cbegin (size_ctype n) const { return base::citer(n * cols); }
+				nik_ce citer_type row_cend   (size_ctype n) const { return row_cbegin(n + 1); }
+				nik_ce citer_type row_clast  (size_ctype n) const { return row_cend(n) - 1; }
+
+				nik_ce citer_type operator [] (size_ctype n) const { return row_cbegin(n); }
+
+			// col:
+
+				nik_ce size_type col_size() const { return cols; }
+	};
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Facade>
+	class table_csubmethod : public table_presubmethod<Facade, array_csubmethod>
+	{
+		public:
+
+			using base			= table_presubmethod<Facade, array_csubmethod>;
+
+			nik_using_name_scope_type	( type, base)
+			nik_using_name_scope_ctype	(ctype, base)
+
+			nik_using_name_scope_member	( iter_type, base,  iter_type)
+			nik_using_name_scope_member	(iter_ctype, base, iter_ctype)
+
+			nik_using_name_scope_member	( citer_type, base,  citer_type)
+			nik_using_name_scope_member	(citer_ctype, base, citer_ctype)
+
+			nik_using_name_scope_member	( deref_type, base,  deref_type)
+			nik_using_name_scope_member	(deref_ctype, base, deref_ctype)
+
+			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
+			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
+
+			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce table_cmethod() : base{} { }
-			nik_ce table_cmethod(const Facade & f) : base{f} { }
+			nik_ce table_csubmethod() : base{} { }
+			nik_ce table_csubmethod(const Facade & f) : base{f} { }
 
-			nik_ce citer_type row_cbegin (size_ctype n) const { return base::citer(n * ColSize); }
-			nik_ce citer_type row_cend   (size_ctype n) const { return row_cbegin(n + 1); }
-			nik_ce citer_type row_clast  (size_ctype n) const { return row_cend(n) - 1; }
+			nik_ce table_csubmethod(ctype_cptr i, size_ctype t) : base{i, t} { }
 
-			nik_ce citer_type operator [] (size_ctype n) const { return row_cbegin(n); }
+			template<typename T, auto N>
+			nik_ce table_csubmethod(const T (&a)[N]) : base{a} { }
 	};
 
 /***********************************************************************************************************************/
 
 // mutable:
 
-	template<typename Facade, typename Facade::size_type RowSize, typename Facade::size_type ColSize>
-	class table_method : public array_method<Facade>
+	template<typename Facade>
+	class table_submethod : public table_presubmethod<Facade, array_submethod>
 	{
 		public:
 
-			using base			= array_method<Facade>;
+			using base			= table_presubmethod<Facade, array_submethod>;
 
-			using type			= typename base::type;
-			using type_ptr			= typename base::type_ptr;
-			using type_cptr			= typename base::type_cptr;
-			using type_ref			= typename base::type_ref;
+			nik_using_name_scope_type	( type, base)
+			nik_using_name_scope_ctype	(ctype, base)
 
-			using ctype			= typename base::ctype;
-			using ctype_ptr			= typename base::ctype_ptr;
-			using ctype_cptr		= typename base::ctype_cptr;
-			using ctype_ref			= typename base::ctype_ref;
+			nik_using_name_scope_member	( iter_type, base,  iter_type)
+			nik_using_name_scope_member	(iter_ctype, base, iter_ctype)
 
-			using citer_type		= typename base::citer_type;
-			using citer_ctype_ref		= typename base::citer_ctype_ref;
+			nik_using_name_scope_member	( citer_type, base,  citer_type)
+			nik_using_name_scope_member	(citer_ctype, base, citer_ctype)
 
-			using iter_type			= typename base::iter_type;
-			using iter_ctype_ref		= typename base::iter_ctype_ref;
+			nik_using_name_scope_member	( deref_type, base,  deref_type)
+			nik_using_name_scope_member	(deref_ctype, base, deref_ctype)
 
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
+			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
+			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
+
+			nik_using_size_type		(base)
 
 		public:
 
-			nik_ces size_type row_length () { return RowSize; }
-			nik_ces size_type col_length () { return ColSize; }
-
-		public:
-
-			nik_ce table_method() : base{} { }
-			nik_ce table_method(const Facade & f) : base{f} { }
+			nik_ce table_submethod() : base{} { }
+			nik_ce table_submethod(const Facade & f) : base{f} { }
 
 			template<typename T, auto N>
-			nik_ce table_method(const T (&a)[N]) : base::assign(a) { }
+			nik_ce table_submethod(const T (&a)[N]) : base{a} { }
 
-			nik_ce citer_type row_cbegin (size_ctype n) const { return base::citer(n * ColSize); }
-			nik_ce citer_type row_cend   (size_ctype n) const { return row_cbegin(n + 1); }
-			nik_ce citer_type row_clast  (size_ctype n) const { return row_cend(n) - 1; }
+			using base::operator [];
 
-			nik_ce  iter_type row_begin  (size_ctype n)       { return base::iter(n * ColSize); }
-			nik_ce  iter_type row_end    (size_ctype n)       { return row_begin(n + 1); }
-			nik_ce  iter_type row_last   (size_ctype n)       { return row_end(n) - 1; }
+			// row:
 
-			nik_ce citer_type operator [] (size_ctype n) const { return row_cbegin(n); }
-			nik_ce  iter_type operator [] (size_ctype n)       { return row_begin(n); }
+				nik_ce iter_type row_begin (size_ctype n) { return base::iter(n * base::cols); }
+				nik_ce iter_type row_end   (size_ctype n) { return row_begin(n + 1); }
+				nik_ce iter_type row_last  (size_ctype n) { return row_end(n) - 1; }
+
+				nik_ce iter_type operator [] (size_ctype n) { return row_begin(n); }
 	};
 
 /***********************************************************************************************************************/

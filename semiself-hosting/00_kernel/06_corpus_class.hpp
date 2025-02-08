@@ -38,14 +38,26 @@ namespace cctmp {
 
 // mutable:
 
-	template<typename Type, typename SizeType, auto GSize, auto... GSizes, auto ISize, auto... ISizes>
-	class corpus_model<Type, SizeType, T_pack_Vs<GSize, GSizes...>, T_pack_Vs<ISize, ISizes...>>
+	template
+	<
+		typename Type, typename SizeType,
+		auto SSize, auto... SSizes,
+		auto GSize, auto... GSizes,
+		auto ISize, auto... ISizes
+	>
+	class corpus_model
+	<
+		Type, SizeType,
+		T_pack_Vs<SSize, SSizes...>,
+		T_pack_Vs<GSize, GSizes...>,
+		T_pack_Vs<ISize, ISizes...>
+	>
 	{
 		public:
 
 			using facade			= corpus_model; // method compatible.
 
-			using glyph_type		= book<Type, SizeType, GSize, GSizes...>;
+			using glyph_type		= book<Type, SizeType, GSize + SSize, (GSizes + SSizes)...>;
 			using glyph_type_ptr		= typename alias<glyph_type>::type_ptr;
 			using glyph_ctype_ptr		= typename alias<glyph_type>::ctype_ptr;
 
@@ -68,9 +80,11 @@ namespace cctmp {
 
 		public:
 
+								// ring ?
 			using glyph_cmethod_type	= resolve_cmethod<glyph_type, gring_cmethod>;
 			using glyph_method_type		= resolve_method <glyph_type,  gring_method>;
 
+								// ring ?
 			using image_cmethod_type	= resolve_cmethod<image_type, iring_cmethod>;
 			using image_method_type		= resolve_method <image_type,  iring_method>;
 
@@ -204,21 +218,22 @@ namespace cctmp {
 
 // interface:
 
-	template<typename...> class corpus;
-
 /***********************************************************************************************************************/
 
 // mutable:
 
-	template<typename Type, typename SizeType, auto GSize, auto... GSizes, auto ISize, auto... ISizes>
-	class corpus<Type, SizeType, T_pack_Vs<GSize, GSizes...>, T_pack_Vs<ISize, ISizes...>> :
-		public corpus_model<Type, SizeType, T_pack_Vs<GSize, GSizes...>, T_pack_Vs<ISize, ISizes...>>
+	template<typename Type, typename SizeType, typename SpacePack, typename GlyphPack, typename ImagePack>
+	class corpus : public corpus_model<Type, SizeType, SpacePack, GlyphPack, ImagePack>
 	{
 		public:
 
-			using glyph_pack		= T_pack_Vs<GSize, GSizes...>;
-			using image_pack		= T_pack_Vs<ISize, ISizes...>;
-			using base			= corpus_model<Type, SizeType, glyph_pack, image_pack>;
+			using space_pack		= SpacePack;
+			using glyph_pack		= GlyphPack;
+			using image_pack		= ImagePack;
+			using base			= corpus_model
+							<
+								Type, SizeType, space_pack, glyph_pack, image_pack
+							>;
 			using model			= base;
 			using cfacade_type		= corpus_cfacade<model>;
 			using facade_type		= corpus_facade<model>;

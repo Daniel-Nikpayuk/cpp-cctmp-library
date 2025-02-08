@@ -24,7 +24,7 @@
 #include"../00_kernel/04_glyph_method.hpp"
 #include"../00_kernel/05_image_method.hpp"
 #include"../00_kernel/06_corpus_class.hpp"
-#include"../00_kernel/07_symbol_method.hpp"
-#include"../00_kernel/08_concord_class.hpp"
-#include"../00_kernel/09_concord_method.hpp"
+//#include"../00_kernel/07_symbol_method.hpp"
+//#include"../00_kernel/08_concord_class.hpp"
+//#include"../00_kernel/09_concord_method.hpp"
 

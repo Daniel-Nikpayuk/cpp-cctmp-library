@@ -116,7 +116,8 @@ namespace cctmp {
 						// name is redundant, bits is now bytes.
 						// each types specifies to which universe it belongs.
 						// has free (glyph).
-					glyph_submethod[GRing::name ] = Gram::ringN;
+					glyph_submethod[GRing::arity] = Gram::ringN;
+					glyph_submethod[GRing::lines] = bytes;
 					glyph_submethod[GRing::bytes] = bytes;
 				}
 
@@ -191,13 +192,14 @@ namespace cctmp {
 
 			// initialization:
 
-				nik_ce auto declare(size_ctype bits, size_ctype offset)
+				nik_ce auto declare(size_ctype bytes, size_ctype start)
 				{
-					auto icon = declare_glyph(bits);
-					auto sign = declare_image(offset);
-					auto kind = (icon.not_fail() && sign.not_fail()) ? Gram::ringN : Gram::fail;
+					auto icon = declare_glyph(bytes);
+				//	auto sign = declare_image(start);
+				//	auto kind = (icon.not_fail() && sign.not_fail()) ? Gram::ringN : Gram::fail;
 
-					return sign;
+					return 0;
+				//	return sign;
 				}
 
 			// same types:

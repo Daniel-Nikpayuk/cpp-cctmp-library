@@ -54,7 +54,7 @@ namespace cctmp {
 			nik_ces size_type dimension	= Dimension;
 
 			using page_cmethod_type		= typename model_type::page_cmethod_type;
-			using text_cmethod_type		= typename model_type::text_cmethod_type;
+			using text_cmethod_type		= typename model_type::template text_cmethod<table_csubmethod>;
 
 			page_cmethod_type page_cmethod;
 			text_cmethod_type text_cmethod;
@@ -238,14 +238,14 @@ namespace cctmp {
 
 		protected:
 
-			nik_ces size_type byte_length	= 1;
+			nik_ces size_type unit_length	= 1;
 
 		public:
 
 			nik_ce glyph_builtin_cmethod_disjoint() : base{} { }
 			nik_ce glyph_builtin_cmethod_disjoint(const facade & f) : base{f} { }
 
-			nik_ce size_type byte_size() const { return byte_length; }
+			nik_ce size_type unit_size() const { return unit_length; }
 
 			// find:
 

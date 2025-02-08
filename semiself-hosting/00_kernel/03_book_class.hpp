@@ -162,7 +162,7 @@ namespace cctmp {
 
 		public:
 
-			nik_ce plot_model() { terminal.fullsize(); }
+			nik_ce plot_model() { terminal.fullsize(); } // too restrictive.
 
 			// initial:
 
@@ -348,16 +348,18 @@ namespace cctmp {
 // mutable:
 
 	template<typename Type, typename SizeType, SizeType... Sizes>
-	class plot : public array_method<plot_model<Type, SizeType, Sizes...>>
+	class plot : public plot_model<Type, SizeType, Sizes...>
+//	class plot : public array_method<plot_model<Type, SizeType, Sizes...>> // array_method plot_model ?
 	{
 		public:
 
 			using model			= plot_model<Type, SizeType, Sizes...>;
-			using base			= array_method<model>;
+			using base			= model;
+		//	using base			= array_method<model>;
 			using cfacade_type		= plot_cfacade<model>;
 			using facade_type		= plot_facade<model>;
-			using cmethod_type		= array_cmethod<cfacade_type>;
-			using method_type		= array_method<facade_type>;
+		//	using cmethod_type		= array_cmethod<cfacade_type>;
+		//	using method_type		= array_method<facade_type>;
 
 			using type			= typename base::type;
 			using type_ptr			= typename base::type_ptr;
@@ -392,6 +394,25 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // book:
+
+/***********************************************************************************************************************/
+
+// instructions:
+
+	struct BookInstruction
+	{
+		enum : gkey_type
+		{
+			program, push, apply,
+			empty, ring, flex, utf8_char, tuple, cotuple, function, null, list,
+			identity, l_than, l_than_or_eq, g_than, g_than_or_eq, dependent, custom,
+			exists, forall, type, value, arg,
+
+			dimension
+		};
+	};
+
+	using BInstr = BookInstruction;
 
 /***********************************************************************************************************************/
 
@@ -542,14 +563,20 @@ namespace cctmp {
 
 		public:
 
-			using page_cmethod_type		= resolve_cmethod<page_type, array_cmethod>;
-			using page_method_type		= resolve_method <page_type,  array_method>;
+		//	using page_cmethod_type		= resolve_cmethod<page_type, array_cmethod>;
+		//	using page_method_type		= resolve_method <page_type,  array_method>;
 
-			using text_cmethod_type		= resolve_cmethod<text_type, array_cmethod>;
-			using text_method_type		= resolve_method <text_type,  array_method>;
+		//	template<template<typename> typename CMethod = array_cmethod>
+		//	using text_cmethod = resolve_cmethod<text_type, CMethod>;
 
-			using text_csubmethod_type	= resolve_csubmethod<text_type, array_csubmethod>;
-			using text_submethod_type	= resolve_submethod <text_type,  array_submethod>;
+		//	template<template<typename> typename Method = array_method>
+		//	using text_method = resolve_method<text_type, Method>;
+
+		//	using text_cmethod_type		= text_cmethod<>;
+		//	using text_method_type		= text_method<>;
+
+		//	using text_csubmethod_type	= text_cmethod<array_csubmethod>;
+		//	using text_submethod_type	= text_method<array_submethod>;
 
 		protected:
 
@@ -565,28 +592,32 @@ namespace cctmp {
 				nik_ce page_ctype_ptr cpage() const { return &_page; }
 				nik_ce  page_type_ptr  page()       { return &_page; }
 
+				template<typename CMethod>
 				nik_ce auto page_cequip(size_ctype n) const
-					{ return _page.template cequip<page_cmethod_type>(n); }
+					{ return _page.template cequip<CMethod>(n); }
 
+				template<typename Method>
 				nik_ce auto page_equip(size_ctype n)
-					{ return _page.template equip<page_method_type>(n); }
+					{ return _page.template equip<Method>(n); }
 
 			// text:
 
 				nik_ce text_ctype_ptr ctext() const { return &_text; }
 				nik_ce  text_type_ptr  text()       { return &_text; }
 
+				template<typename CMethod>
 				nik_ce auto text_cequip() const
-					{ return _text.template cequip<text_cmethod_type>(); }
+					{ return _text.template cequip<CMethod>(); }
 
+				template<typename Method>
 				nik_ce auto text_equip()
-					{ return _text.template equip<text_method_type>(); }
+					{ return _text.template equip<Method>(); }
 
-				nik_ce auto text_csubequip(size_ctype n) const
-					{ return _text.template right_cequip<text_csubmethod_type>(n); }
+			//	nik_ce auto text_csubequip(size_ctype n) const
+			//		{ return _text.template right_cequip<text_csubmethod_type>(n); }
 
-				nik_ce auto text_subequip(size_ctype n)
-					{ return _text.template right_equip<text_submethod_type>(n); }
+			//	nik_ce auto text_subequip(size_ctype n)
+			//		{ return _text.template right_equip<text_submethod_type>(n); }
 	};
 
 /***********************************************************************************************************************/
