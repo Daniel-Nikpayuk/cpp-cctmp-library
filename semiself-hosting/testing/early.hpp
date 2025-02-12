@@ -244,22 +244,16 @@
 
 // table:
 
-		using table_type = table<int, gindex_type, 3, 6>;
+		using table_type = table<int, unsigned, 2, 2>;
 
-		int arr[] =
-		{
-			2, 7, 3, 4, 9, 5,
-			1, 9, 3, 8, 7, 0,
-			2, 2, 3, 3, 4, 5
-		};
+		auto t0 = table_type{{1, 2, 3, 4}};
 
-		auto x = table_type{arr};
+		t0[1][0] = 7;
 
-		x[1][1] = 5;
-
-		printf("%d\n", x[0][1]);
-		printf("%d\n", x[1][1]);
-		printf("%d\n", x[2][1]);
+		printf("%d " , t0[0][0]);
+		printf("%d " , t0[0][1]);
+		printf("%d " , t0[1][0]);
+		printf("%d " , t0[1][1]);
 
 /***********************************************************************************************************************/
 

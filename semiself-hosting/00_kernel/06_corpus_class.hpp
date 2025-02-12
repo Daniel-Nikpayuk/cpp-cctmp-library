@@ -41,15 +41,15 @@ namespace cctmp {
 	template
 	<
 		typename Type, typename SizeType,
-		auto SSize, auto... SSizes,
 		auto GSize, auto... GSizes,
+		auto SSize, auto... SSizes,
 		auto ISize, auto... ISizes
 	>
 	class corpus_model
 	<
 		Type, SizeType,
-		T_pack_Vs<SSize, SSizes...>,
 		T_pack_Vs<GSize, GSizes...>,
+		T_pack_Vs<SSize, SSizes...>,
 		T_pack_Vs<ISize, ISizes...>
 	>
 	{
@@ -57,7 +57,7 @@ namespace cctmp {
 
 			using facade			= corpus_model; // method compatible.
 
-			using glyph_type		= book<Type, SizeType, GSize + SSize, (GSizes + SSizes)...>;
+			using glyph_type		= book<Type, SizeType, GSize + SSize, GSizes..., SSizes...>;
 			using glyph_type_ptr		= typename alias<glyph_type>::type_ptr;
 			using glyph_ctype_ptr		= typename alias<glyph_type>::ctype_ptr;
 
@@ -65,28 +65,10 @@ namespace cctmp {
 			using image_type_ptr		= typename alias<image_type>::type_ptr;
 			using image_ctype_ptr		= typename alias<image_type>::ctype_ptr;
 
-			using type			= typename image_type::type;
-			using type_ptr			= typename image_type::type_ptr;
-			using type_cptr			= typename image_type::type_cptr;
-			using type_ref			= typename image_type::type_ref;
+			nik_using_name_scope_type	( type, image_type)
+			nik_using_name_scope_ctype	(ctype, image_type)
 
-			using ctype			= typename image_type::ctype;
-			using ctype_ptr			= typename image_type::ctype_ptr;
-			using ctype_cptr		= typename image_type::ctype_cptr;
-			using ctype_ref			= typename image_type::ctype_ref;
-
-			using size_type			= typename image_type::size_type;
-			using size_ctype		= typename image_type::size_ctype;
-
-		public:
-
-								// ring ?
-			using glyph_cmethod_type	= resolve_cmethod<glyph_type, gring_cmethod>;
-			using glyph_method_type		= resolve_method <glyph_type,  gring_method>;
-
-								// ring ?
-			using image_cmethod_type	= resolve_cmethod<image_type, iring_cmethod>;
-			using image_method_type		= resolve_method <image_type,  iring_method>;
+			nik_using_size_type		(image_type)
 
 		protected:
 
@@ -95,29 +77,33 @@ namespace cctmp {
 
 		public:
 
-			nik_ce corpus_model() { }
+			nik_ce corpus_model()
+			{
+				_glyph.page().upslot(sizeof...(GSizes));
+				_image.page().upslot(sizeof...(ISizes));
+			}
 
 			// glyph:
 
 				nik_ce glyph_ctype_ptr cglyph() const { return &_glyph; }
 				nik_ce  glyph_type_ptr  glyph()       { return &_glyph; }
 
-				nik_ce auto glyph_cequip() const
-					{ return _glyph.template cequip<glyph_cmethod_type>(); }
+				template<typename CMethod>
+				nik_ce auto glyph_cequip() const { return _glyph.template cequip<CMethod>(); }
 
-				nik_ce auto glyph_equip()
-					{ return _glyph.template equip<glyph_method_type>(); }
+				template<typename Method>
+				nik_ce auto glyph_equip() { return _glyph.template equip<Method>(); }
 
 			// image:
 
 				nik_ce image_ctype_ptr cimage() const { return &_image; }
 				nik_ce  image_type_ptr  image()       { return &_image; }
 
-				nik_ce auto image_cequip() const
-					{ return _image.template cequip<glyph_cmethod_type>(); }
+				template<typename CMethod>
+				nik_ce auto image_cequip() const { return _image.template cequip<CMethod>(); }
 
-				nik_ce auto image_equip()
-					{ return _image.template equip<glyph_method_type>(); }
+				template<typename Method>
+				nik_ce auto image_equip() { return _image.template equip<Method>(); }
 	};
 
 /***********************************************************************************************************************/
@@ -146,8 +132,7 @@ namespace cctmp {
 			using image_type		= typename model_type::image_type;
 			using image_ctype_ref		= typename alias<image_type>::ctype_ref;
 
-			using size_type			= typename model_type::size_type;
-			using size_ctype		= typename model_type::size_ctype;
+			nik_using_size_type		(model_type)
 
 		protected:
 
@@ -190,8 +175,7 @@ namespace cctmp {
 			using image_type_ref		= typename alias<image_type>::type_ref;
 			using image_ctype_ref		= typename alias<image_type>::ctype_ref;
 
-			using size_type			= typename model_type::size_type;
-			using size_ctype		= typename model_type::size_ctype;
+			nik_using_size_type		(model_type)
 
 		protected:
 
@@ -222,24 +206,23 @@ namespace cctmp {
 
 // mutable:
 
-	template<typename Type, typename SizeType, typename SpacePack, typename GlyphPack, typename ImagePack>
-	class corpus : public corpus_model<Type, SizeType, SpacePack, GlyphPack, ImagePack>
+	template<typename Type, typename SizeType, typename GlyphPack, typename SpacePack, typename ImagePack>
+	class corpus : public corpus_model<Type, SizeType, GlyphPack, SpacePack, ImagePack>
 	{
 		public:
 
-			using space_pack		= SpacePack;
 			using glyph_pack		= GlyphPack;
+			using space_pack		= SpacePack;
 			using image_pack		= ImagePack;
 			using base			= corpus_model
 							<
-								Type, SizeType, space_pack, glyph_pack, image_pack
+								Type, SizeType, glyph_pack, space_pack, image_pack
 							>;
 			using model			= base;
 			using cfacade_type		= corpus_cfacade<model>;
 			using facade_type		= corpus_facade<model>;
 
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
+			nik_using_size_type		(base)
 
 		public:
 

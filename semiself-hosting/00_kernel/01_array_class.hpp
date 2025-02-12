@@ -61,14 +61,6 @@ namespace cctmp {
 			ctype_ptr  initial; // compile time compatible.
 			size_type terminal; // compile time compatible.
 
-		protected:
-
-		//	nik_ce void assign(ctype_cptr i, size_ctype t) // inheritance convenience
-		//	{
-		//		 initial = i;
-		//		terminal = t;
-		//	}
-
 		public:
 
 			nik_ce array_cmodel() : initial{}, terminal{} { }
@@ -317,38 +309,59 @@ namespace cctmp {
 			nik_ce size_type right      () const { return initial + terminal; }
 			nik_ce size_type right_size () const { return model->size() - right(); }
 
-			nik_ce void dec_inc(size_ctype n) { initial -= n; terminal += n; }
-			nik_ce void inc_dec(size_ctype n) { initial += n; terminal -= n; }
-
 		public:
 
 			nik_ce array_presubfacade() : model{}, initial{}, terminal{} { }
 			nik_ce array_presubfacade(adj_model_type_cptr m) : model{m}, initial{}, terminal{} { }
 
-			nik_ce void mid_set(size_ctype i, size_ctype t) { initial = i; terminal = t; }
+			// set: aligns with the start, finish paradigm.
 
-			nik_ce void left_set  (size_ctype t) { mid_set(0, t); }
-			nik_ce void right_set (size_ctype i) { mid_set(i, model->size() - i); }
+				nik_ce void fast_mid_set(size_ctype s, size_ctype f) { initial = s; terminal = f - s; }
 
-			nik_ce void left_shift  (size_ctype n) { if (n <= initial) { initial -= n; } }
-			nik_ce void right_shift (size_ctype n) { if (n <= right_size()) { initial += n; } }
+				nik_ce void fast_left_set  (size_ctype f) { fast_mid_set(0, f); }
+				nik_ce void fast_right_set (size_ctype s) { fast_mid_set(s, model->size()); }
+
+				nik_ce void mid_set(size_ctype s, size_ctype f) { if (s <= f) { fast_mid_set(s, f); } }
+
+				nik_ce void left_set  (size_ctype f) { mid_set(0, f); }
+				nik_ce void right_set (size_ctype s) { mid_set(s, model->size()); }
+
+			// shift:
+
+				nik_ce void fast_left_shift  (size_ctype n = 1) { initial -= n; }
+				nik_ce void fast_right_shift (size_ctype n = 1) { initial += n; }
+
+				nik_ce void left_shift(size_ctype n = 1)
+					{ if (n <= initial) { fast_left_shift(n); } }
+
+				nik_ce void right_shift(size_ctype n = 1)
+					{ if (n <= right_size()) { fast_right_shift(n); } }
 
 			// initial:
 
 				nik_ce ctype_ptr cbegin() const { return model->cbegin() + initial; }
 
-				nik_ce void left_outward (size_ctype n = 1) { if (n <=  initial) { dec_inc(n); } }
-				nik_ce void left_inward  (size_ctype n = 1) { if (n <= terminal) { inc_dec(n); } }
+				nik_ce void fast_left_outward (size_ctype n) { initial -= n; terminal += n; }
+				nik_ce void fast_left_inward  (size_ctype n) { initial += n; terminal -= n; }
+
+				nik_ce void left_outward(size_ctype n = 1)
+					{ if (n <=  initial) { fast_left_outward(n); } }
+
+				nik_ce void left_inward(size_ctype n = 1)
+					{ if (n <= terminal) { fast_left_inward(n); } }
 
 			// terminal:
 
 				nik_ce size_type size() const { return terminal; }
 
+				nik_ce void fast_right_inward  (size_ctype n = 1) { terminal -= n; }
+				nik_ce void fast_right_outward (size_ctype n = 1) { terminal += n; }
+
 				nik_ce void right_inward(size_ctype n = 1)
-					{ if (n <= terminal) { terminal -= n; } }
+					{ if (n <= terminal) { fast_right_inward(n); } }
 
 				nik_ce void right_outward(size_ctype n = 1)
-					{ if (n <= right_size()) { terminal += n; } }
+					{ if (n <= right_size()) { fast_right_outward(n); } }
 	};
 
 /***********************************************************************************************************************/
