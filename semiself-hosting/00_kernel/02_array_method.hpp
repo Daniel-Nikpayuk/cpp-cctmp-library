@@ -588,5 +588,303 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// plot:
+
+	// We encode scope restrictions into the class itself as a means of partitioning a contiguous structure.
+	// It allows us to simulate a plot: An array of dynamic length arrays, all the same type.
+
+/***********************************************************************************************************************/
+
+// (scope) policy:
+
+	template<typename Array>
+	class plot_policy
+	{
+		public:
+
+			using array_type		= Array;
+
+			nik_using_name_scope_type	( type, array_type)
+			nik_using_name_scope_ctype	(ctype, array_type)
+
+			nik_using_size_type		(array_type)
+
+		protected:
+
+			array_type _start;
+			array_type _slot;
+
+		protected:
+
+			nik_ce void initialize_start(ctype_ptr in, ctype_cptr end)
+			{
+				_start.fullsize();
+				partial_sum_start(in, end);
+			}
+
+			nik_ce void partial_sum_start(ctype_ptr in, ctype_cptr end)
+			{
+				type sum = 0;
+
+				for (auto k = _start.begin(); in != end; ++k, ++in)
+				{
+					 *k  = sum;
+					sum +=  *in;
+				}
+			}
+
+			nik_ce void initialize_slot(ctype_ptr in, ctype_cptr end)
+			{
+				_slot.fullsize();
+				_slot.copy(0, in, end);
+			}
+
+		public:
+
+			nik_ce plot_policy() { }
+
+			nik_ce plot_policy(const array_type & i)
+			{
+				initialize_start (i.cbegin(), i.cend());
+				initialize_slot  (i.cbegin(), i.cend());
+			}
+
+			// start:
+
+				nik_ce size_type start(size_ctype n) const { return _start[n]; }
+
+			// slot:
+
+				nik_ce size_type length(size_ctype n) const { return _slot[n]; }
+	};
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Type, typename SizeType, SizeType... Sizes>
+	class plot_model
+	{
+		public:
+
+			using facade			= plot_model; // method compatible.
+
+			using initial_type		= array<Type, SizeType, (... + Sizes)>;
+			using terminal_type		= array<SizeType, SizeType, sizeof...(Sizes)>;
+			using policy_type		= plot_policy<terminal_type>;
+
+			nik_using_name_scope_type	( type, initial_type)
+			nik_using_name_scope_ctype	(ctype, initial_type)
+
+			nik_using_name_scope_member	( iter_type, initial_type,  iter_type)
+			nik_using_name_scope_member	(iter_ctype, initial_type, iter_ctype)
+
+			nik_using_name_scope_member	( citer_type, initial_type,  citer_type)
+			nik_using_name_scope_member	(citer_ctype, initial_type, citer_ctype)
+
+			nik_using_name_scope_member	( deref_type, initial_type,  deref_type)
+			nik_using_name_scope_member	(deref_ctype, initial_type, deref_ctype)
+
+			nik_using_name_scope_member	( cderef_type, initial_type,  cderef_type)
+			nik_using_name_scope_member	(cderef_ctype, initial_type, cderef_ctype)
+
+			nik_using_size_type		(initial_type)
+
+		protected:
+
+			nik_ces auto policy		= policy_type{{ Sizes... }};
+
+		public:
+
+			nik_ces size_type length(size_ctype n) { return policy.length(n); }
+
+		protected:
+
+			initial_type initial;
+			terminal_type terminal;
+
+		public:
+
+			nik_ce plot_model() { }
+
+			// initial:
+
+				nik_ce ctype_ptr cbegin(size_ctype n) const { return initial.citer(policy.start(n)); }
+				nik_ce  type_ptr  begin(size_ctype n)       { return initial. iter(policy.start(n)); }
+
+			// terminal:
+
+				nik_ce size_type size(size_ctype n) const { return terminal[n]; }
+
+				nik_ce void set_size(size_ctype n, size_ctype m)
+					{ if (m <= length(n)) terminal[n] = m; }
+
+				nik_ce void upslot(size_ctype n = 1)
+					{ if (terminal.has_capacity(n)) terminal.upsize(n); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// facade:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Model>
+	class plot_cfacade
+	{
+		public:
+
+			using facade			= plot_cfacade; // method compatible.
+
+			using model_type		= Model;
+			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
+			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
+
+			nik_using_name_scope_type	( type, model_type)
+			nik_using_name_scope_ctype	(ctype, model_type)
+
+			nik_using_name_scope_member	( iter_type, model_type,  iter_type)
+			nik_using_name_scope_member	(iter_ctype, model_type, iter_ctype)
+
+			nik_using_name_scope_member	( citer_type, model_type,  citer_type)
+			nik_using_name_scope_member	(citer_ctype, model_type, citer_ctype)
+
+			nik_using_name_scope_member	( deref_type, model_type,  deref_type)
+			nik_using_name_scope_member	(deref_ctype, model_type, deref_ctype)
+
+			nik_using_name_scope_member	( cderef_type, model_type,  cderef_type)
+			nik_using_name_scope_member	(cderef_ctype, model_type, cderef_ctype)
+
+			nik_using_size_type		(model_type)
+
+		protected:
+
+			model_ctype_ptr model;
+			size_type locus;
+
+		public:
+
+			nik_ce plot_cfacade() : model{}, locus{} { }
+			nik_ce plot_cfacade(model_ctype_cptr m, size_ctype l) : model{m}, locus{l} { }
+
+			nik_ce size_type slot() const { return locus; }
+			nik_ce void set_slot(size_ctype l) { locus = l; }
+
+			// initial:
+
+				nik_ce citer_type cbegin() const { return model->cbegin(locus); }
+
+			// terminal:
+
+				nik_ce size_type size() const { return model->size(locus); }
+	};
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Model>
+	class plot_facade
+	{
+		public:
+
+			using facade			= plot_facade; // method compatible.
+
+			using model_type		= Model;
+			using model_type_ptr		= typename alias<model_type>::type_ptr;
+			using model_type_cptr		= typename alias<model_type>::type_cptr;
+
+			nik_using_name_scope_type	( type, model_type)
+			nik_using_name_scope_ctype	(ctype, model_type)
+
+			nik_using_name_scope_member	( iter_type, model_type,  iter_type)
+			nik_using_name_scope_member	(iter_ctype, model_type, iter_ctype)
+
+			nik_using_name_scope_member	( citer_type, model_type,  citer_type)
+			nik_using_name_scope_member	(citer_ctype, model_type, citer_ctype)
+
+			nik_using_name_scope_member	( deref_type, model_type,  deref_type)
+			nik_using_name_scope_member	(deref_ctype, model_type, deref_ctype)
+
+			nik_using_name_scope_member	( cderef_type, model_type,  cderef_type)
+			nik_using_name_scope_member	(cderef_ctype, model_type, cderef_ctype)
+
+			nik_using_size_type		(model_type)
+
+		protected:
+
+			model_type_ptr model;
+			size_type locus;
+
+		public:
+
+			nik_ce plot_facade() : model{}, locus{} { }
+			nik_ce plot_facade(model_type_cptr m, size_ctype l) : model{m}, locus{l} { }
+
+			nik_ce size_type slot() const { return locus; }
+			nik_ce void set_slot(size_ctype l) { locus = l; }
+
+			nik_ce size_type length() const { return model->length(locus); }
+
+			// initial:
+
+				nik_ce citer_type cbegin() const { return model->cbegin(locus); }
+				nik_ce  iter_type  begin()       { return model-> begin(locus); }
+
+			// terminal:
+
+				nik_ce size_type size() const { return model->size(locus); }
+				nik_ce void set_size(size_ctype n) { model->set_size(locus, n); }
+				nik_ce void upslot(size_ctype n = 1) { model->upslot(n); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// interface:
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Type, typename SizeType, SizeType... Sizes>
+	class plot : public plot_model<Type, SizeType, Sizes...>
+	{
+		public:
+
+			using base			= plot_model<Type, SizeType, Sizes...>;
+			using model			= base;
+			using cfacade_type		= plot_cfacade<model>;
+			using facade_type		= plot_facade<model>;
+
+			nik_using_name_scope_type	( type, base)
+			nik_using_name_scope_ctype	(ctype, base)
+
+			nik_using_size_type		(base)
+
+		public:
+
+			nik_ce plot() : base{} { }
+
+			// equip:
+
+					// submethods lack access to push.
+
+				template<typename CMethod>
+				nik_ce auto cequip(size_ctype n) const -> CMethod
+					{ return cfacade_type{static_cast<model const*>(this), n}; }
+
+				template<typename Method>
+				nik_ce auto equip(size_ctype n) -> Method
+					{ return facade_type{static_cast<model*>(this), n}; }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 } // namespace cctmp
 

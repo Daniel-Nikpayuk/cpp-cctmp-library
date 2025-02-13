@@ -25,340 +25,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// plot:
-
-	// We encode scope restrictions into the class itself as a means of partitioning a contiguous structure.
-	// It allows us to simulate a plot: An array of dynamic length arrays, all the same type.
-
-/***********************************************************************************************************************/
-
-// (scope) policy:
-
-	template<typename Array>
-	class plot_policy
-	{
-		public:
-
-			using array_type		= Array;
-
-			nik_using_name_scope_type	( type, array_type)
-			nik_using_name_scope_ctype	(ctype, array_type)
-
-			nik_using_size_type		(array_type)
-
-		protected:
-
-			array_type _start;
-			array_type _slot;
-
-		protected:
-
-			nik_ce void initialize_start(ctype_ptr in, ctype_cptr end)
-			{
-				_start.fullsize();
-				partial_sum_start(in, end);
-			}
-
-			nik_ce void partial_sum_start(ctype_ptr in, ctype_cptr end)
-			{
-				type sum = 0;
-
-				for (auto k = _start.begin(); in != end; ++k, ++in)
-				{
-					 *k  = sum;
-					sum +=  *in;
-				}
-			}
-
-			nik_ce void initialize_slot(ctype_ptr in, ctype_cptr end)
-			{
-				_slot.fullsize();
-				_slot.copy(0, in, end);
-			}
-
-		public:
-
-			nik_ce plot_policy() { }
-
-			nik_ce plot_policy(const array_type & i)
-			{
-				initialize_start (i.cbegin(), i.cend());
-				initialize_slot  (i.cbegin(), i.cend());
-			}
-
-			// start:
-
-				nik_ce size_type start(size_ctype n) const { return _start[n]; }
-
-			// slot:
-
-				nik_ce size_type length(size_ctype n) const { return _slot[n]; }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Type, typename SizeType, SizeType... Sizes>
-	class plot_model
-	{
-		public:
-
-			using facade			= plot_model; // method compatible.
-
-			using initial_type		= array<Type, SizeType, (... + Sizes)>;
-			using terminal_type		= array<SizeType, SizeType, sizeof...(Sizes)>;
-			using policy_type		= plot_policy<terminal_type>;
-
-			nik_using_name_scope_type	( type, initial_type)
-			nik_using_name_scope_ctype	(ctype, initial_type)
-
-			nik_using_name_scope_member	( iter_type, initial_type,  iter_type)
-			nik_using_name_scope_member	(iter_ctype, initial_type, iter_ctype)
-
-			nik_using_name_scope_member	( citer_type, initial_type,  citer_type)
-			nik_using_name_scope_member	(citer_ctype, initial_type, citer_ctype)
-
-			nik_using_name_scope_member	( deref_type, initial_type,  deref_type)
-			nik_using_name_scope_member	(deref_ctype, initial_type, deref_ctype)
-
-			nik_using_name_scope_member	( cderef_type, initial_type,  cderef_type)
-			nik_using_name_scope_member	(cderef_ctype, initial_type, cderef_ctype)
-
-			nik_using_size_type		(initial_type)
-
-		protected:
-
-			nik_ces auto policy		= policy_type{{ Sizes... }};
-
-		public:
-
-			nik_ces size_type length(size_ctype n) { return policy.length(n); }
-
-		protected:
-
-			initial_type initial;
-			terminal_type terminal;
-
-		public:
-
-			nik_ce plot_model() { }
-
-			// initial:
-
-				nik_ce ctype_ptr cbegin(size_ctype n) const { return initial.citer(policy.start(n)); }
-				nik_ce  type_ptr  begin(size_ctype n)       { return initial. iter(policy.start(n)); }
-
-			// terminal:
-
-				nik_ce size_type size(size_ctype n) const { return terminal[n]; }
-
-				nik_ce void set_size(size_ctype n, size_ctype m)
-					{ if (m <= length(n)) terminal[n] = m; }
-
-				nik_ce void upslot(size_ctype n = 1)
-					{ if (terminal.has_capacity(n)) terminal.upsize(n); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// facade:
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Model>
-	class plot_cfacade
-	{
-		public:
-
-			using facade			= plot_cfacade; // method compatible.
-
-			using model_type		= Model;
-			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
-			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
-
-			nik_using_name_scope_type	( type, model_type)
-			nik_using_name_scope_ctype	(ctype, model_type)
-
-			nik_using_name_scope_member	( iter_type, model_type,  iter_type)
-			nik_using_name_scope_member	(iter_ctype, model_type, iter_ctype)
-
-			nik_using_name_scope_member	( citer_type, model_type,  citer_type)
-			nik_using_name_scope_member	(citer_ctype, model_type, citer_ctype)
-
-			nik_using_name_scope_member	( deref_type, model_type,  deref_type)
-			nik_using_name_scope_member	(deref_ctype, model_type, deref_ctype)
-
-			nik_using_name_scope_member	( cderef_type, model_type,  cderef_type)
-			nik_using_name_scope_member	(cderef_ctype, model_type, cderef_ctype)
-
-			nik_using_size_type		(model_type)
-
-		protected:
-
-			model_ctype_ptr model;
-			size_type locus;
-
-		public:
-
-			nik_ce plot_cfacade() : model{}, locus{} { }
-			nik_ce plot_cfacade(model_ctype_cptr m, size_ctype l) : model{m}, locus{l} { }
-
-			nik_ce size_type slot() const { return locus; }
-			nik_ce void set_slot(size_ctype l) { locus = l; }
-
-			// initial:
-
-				nik_ce citer_type cbegin() const { return model->cbegin(locus); }
-
-			// terminal:
-
-				nik_ce size_type size() const { return model->size(locus); }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Model>
-	class plot_facade
-	{
-		public:
-
-			using facade			= plot_facade; // method compatible.
-
-			using model_type		= Model;
-			using model_type_ptr		= typename alias<model_type>::type_ptr;
-			using model_type_cptr		= typename alias<model_type>::type_cptr;
-
-			nik_using_name_scope_type	( type, model_type)
-			nik_using_name_scope_ctype	(ctype, model_type)
-
-			nik_using_name_scope_member	( iter_type, model_type,  iter_type)
-			nik_using_name_scope_member	(iter_ctype, model_type, iter_ctype)
-
-			nik_using_name_scope_member	( citer_type, model_type,  citer_type)
-			nik_using_name_scope_member	(citer_ctype, model_type, citer_ctype)
-
-			nik_using_name_scope_member	( deref_type, model_type,  deref_type)
-			nik_using_name_scope_member	(deref_ctype, model_type, deref_ctype)
-
-			nik_using_name_scope_member	( cderef_type, model_type,  cderef_type)
-			nik_using_name_scope_member	(cderef_ctype, model_type, cderef_ctype)
-
-			nik_using_size_type		(model_type)
-
-		protected:
-
-			model_type_ptr model;
-			size_type locus;
-
-		public:
-
-			nik_ce plot_facade() : model{}, locus{} { }
-			nik_ce plot_facade(model_type_cptr m, size_ctype l) : model{m}, locus{l} { }
-
-			nik_ce size_type slot() const { return locus; }
-			nik_ce void set_slot(size_ctype l) { locus = l; }
-
-			nik_ce size_type length() const { return model->length(locus); }
-
-			// initial:
-
-				nik_ce citer_type cbegin() const { return model->cbegin(locus); }
-				nik_ce  iter_type  begin()       { return model-> begin(locus); }
-
-			// terminal:
-
-				nik_ce size_type size() const { return model->size(locus); }
-				nik_ce void set_size(size_ctype n) { model->set_size(locus, n); }
-				nik_ce void upslot(size_ctype n = 1) { model->upslot(n); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// interface:
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Type, typename SizeType, SizeType... Sizes>
-	class plot : public plot_model<Type, SizeType, Sizes...>
-	{
-		public:
-
-			using base			= plot_model<Type, SizeType, Sizes...>;
-			using model			= base;
-			using cfacade_type		= plot_cfacade<model>;
-			using facade_type		= plot_facade<model>;
-
-			nik_using_name_scope_type	( type, base)
-			nik_using_name_scope_ctype	(ctype, base)
-
-			nik_using_size_type		(base)
-
-		public:
-
-			nik_ce plot() : base{} { }
-
-			// equip:
-
-					// submethods lack access to push.
-
-				template<typename CMethod>
-				nik_ce auto cequip(size_ctype n) const -> CMethod
-					{ return cfacade_type{static_cast<model const*>(this), n}; }
-
-				template<typename Method>
-				nik_ce auto equip(size_ctype n) -> Method
-					{ return facade_type{static_cast<model*>(this), n}; }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // book:
-
-/***********************************************************************************************************************/
-
-// instructions:
-
-		// should an enum type be added?
-
-	struct BookInstruction
-	{
-		enum : gkey_type
-		{
-			program, push, apply,
-			empty, ring, flex, utf8_char, tuple, cotuple, function, null, list,
-			identity, l_than, l_than_or_eq, g_than, g_than_or_eq, dependent, custom,
-			exists, forall, type, value, arg,
-
-			dimension
-		};
-	};
-
-	using BInstr = BookInstruction;
-
-/***********************************************************************************************************************/
-
-// fields:
-
-	struct BookProgram { enum : gkey_type { instr,     none, lines, next, dimension }; };
-	struct BookKind    { enum : gkey_type { instr,    local, arity, next, dimension }; };
-	struct BookPush    { enum : gkey_type { instr, universe, bytes, next, dimension }; };
-
-/***********************************************************************************************************************/
-
-// spaces:
-
-	struct SpaceMaybe { enum : gkey_type { fail, dimension }; }; // fail as custom type.
 
 /***********************************************************************************************************************/
 
@@ -423,6 +90,71 @@ namespace cctmp {
 	};
 
 /***********************************************************************************************************************/
+
+// instructions:
+
+	struct BookInstruction
+	{
+		enum : gkey_type
+		{
+			program, push, apply,
+			empty, ring, flex, utf8_char, tuple, cotuple, function, null, list,
+			identity, l_than, l_than_or_eq, g_than, g_than_or_eq, dependent, custom,
+			exists, forall, type, value, arg,
+
+			dimension
+		};
+	};
+
+	using BookInstr = BookInstruction;
+
+/***********************************************************************************************************************/
+
+// codes:
+
+	struct BookCode
+	{
+		enum : gkey_type
+		{
+			valid, invalid, // will be refined and extended as needed.
+
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
+// slots:
+
+		// should an enum type be added?
+
+	struct BookSlot
+	{
+		enum : gkey_type
+		{
+			builtin, tuple, cotuple, function, list,
+			identity, l_than, l_than_or_eq, g_than, g_than_or_eq,
+			exists, forall, space,
+
+			dimension
+		};
+	};
+
+/***********************************************************************************************************************/
+
+// fields:
+
+	struct BookProg { enum : gkey_type { instr, lines,     code, next, dimension }; };
+	struct BookKind { enum : gkey_type { instr, arity,    local, next, dimension }; };
+	struct BookMeta { enum : gkey_type { instr, bytes, universe, next, dimension }; };
+
+/***********************************************************************************************************************/
+
+// spaces:
+
+	struct SpaceMsg { enum : gkey_type { fail, dimension }; }; // fail as custom type within the message space.
+
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // model:
@@ -447,6 +179,8 @@ namespace cctmp {
 
 			nik_ce book_interval() : _start{}, _finish{} { }
 			nik_ce book_interval(size_ctype s, size_ctype f) : _start{s}, _finish{f} { }
+
+			nik_ce size_type size() const { return _finish - _start; }
 
 			// start:
 
@@ -696,6 +430,7 @@ namespace cctmp {
 			nik_using_size_type		(base)
 
 			using note_type			= Note<size_type>;
+			using note_type_ref		= typename alias<note_type>::type_ref;
 			using note_ctype_ref		= typename alias<note_type>::ctype_ref;
 
 		protected:
@@ -741,30 +476,45 @@ namespace cctmp {
 
 				nik_ce auto make_note(size_type n, size_ctype m) const { return note_type{n, m}; }
 
-			// find:
+			// fail:
 
-				nik_ce bool found(size_ctype n) const
-					{ return (n != page_cmethod.size()); }
-
-				template<typename T, auto N>
-				nik_ce auto find(const T (&field)[N]) const
+				nik_ce bool is_fail(note_ctype_ref n) const
 				{
-					auto in = page_cmethod.cbegin();
-
-					while (in != page_cmethod.cend())
-					{
-						set_text_ival(in->start(), in->finish());
-
-						if (text_csubmethod.equal(0, field, field + N))
-							{ break; } else { ++in; }
-					}
-
-					return in;
+					return false;
 				}
 
-				template<typename T, auto N>
-				nik_ce size_type left_find(const T (&field)[N]) const
-					{ return page_cmethod.left_size(find(field)); }
+				nik_ce bool not_fail(note_ctype_ref n) const { return not is_fail(n); }
+
+				nik_ce auto fail_note()
+				{
+					// fail note should construct
+					// a fail message type/value.
+
+					return note_type{0, 0};
+				}
+
+			// find:
+
+				nik_ce bool found_from_previous(size_ctype n, note_ctype_ref note) const
+					{ return (n != note.index()); }
+
+				template<typename T, auto N> // assumes page and note_page match.
+				nik_ce auto find_from_previous(note_ctype_ref n) const
+				{
+					auto npage = page_cmethod.citer(n.index());
+					set_text_ival(npage->start(), npage->finish());
+
+					for (auto k = page_cmethod.cbegin(); k != npage; ++k)
+					{
+						auto b = base::ctext().citer(k->start ());
+						auto e = base::ctext().citer(k->finish());
+
+						if (text_csubmethod.equal(0, b, e))
+							{ return page_cmethod.left_size(k); }
+					}
+
+					return n.index();
+				}
 	};
 
 /***********************************************************************************************************************/
@@ -794,19 +544,6 @@ namespace cctmp {
 
 			page_method_type page_method;
 			text_submethod_type text_submethod;
-
-		protected:
-
-			nik_ce bool overlay(size_ctype n, size_ctype m)
-			{
-				base::set_chapter(n);
-
-				if (page_method.is_full() || base::ctext().lacks_capacity(m)) return false;
-
-				page_method.push(ival_type{base::text().expand(m), m});
-
-				return true;
-			}
 
 		public:
 
@@ -849,16 +586,42 @@ namespace cctmp {
 					set_text_from_page(n.index());
 				}
 
-			// upfield:
+		protected:
 
-				nik_ce auto upfield(size_ctype n, size_ctype m)
+				nik_ce bool overlay(size_ctype n, size_ctype m)
+				{
+					set_chapter(n);
+
+					if (page_method.is_full() || base::ctext().lacks_capacity(m)) return false;
+
+					page_method.push(ival_type{base::text().expand(m), m});
+
+					return true;
+				}
+
+				nik_ce auto fast_deallocate_last()
+				{
+					base::text().downsize(base::page_cmethod.clast()->size());
+					base::page().downsize();
+				}
+
+				nik_ce auto deallocate_last()
+				{
+					set_text_ival(0, 0);
+					fast_deallocate_last();
+				}
+
+		public:
+
+				nik_ce auto allocate(size_ctype n, size_ctype m)
 				{
 					if (not overlay(n, m)) return base::fail_note();
+
+					set_text_from_page(base::page_cmethod.max());
 
 					return base::make_note(n, base::page_cmethod.max());
 				}
 	};
-
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

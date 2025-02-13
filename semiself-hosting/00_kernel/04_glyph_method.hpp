@@ -41,6 +41,10 @@ namespace cctmp {
 
 			nik_using_size_type	(base)
 
+			using icon_type		= typename base::note_type;
+			using icon_type_ref	= typename base::note_type_ref;
+			using icon_ctype_ref	= typename base::note_ctype_ref;
+
 		public:
 
 			nik_ce glyph_cmethod_disjoint() : base{} { }
@@ -80,10 +84,44 @@ namespace cctmp {
 
 			nik_using_size_type	(base)
 
+			using icon_type		= typename base::icon_type;
+			using icon_type_ref	= typename base::icon_type_ref;
+			using icon_ctype_ref	= typename base::icon_ctype_ref;
+
 		public:
 
 			nik_ce glyph_method_disjoint() : base{} { }
 			nik_ce glyph_method_disjoint(const facade & f) : base{f} { }
+
+			nik_ce void make_line_program(size_ctype lines, size_ctype code = BookCode::valid)
+			{
+				nik_ce size_type line = 0;
+
+				base::text_submethod[line][BookProg::instr] = BookInstr::program;
+				base::text_submethod[line][BookProg::lines] = lines;
+				base::text_submethod[line][BookProg::code ] = code;
+				base::text_submethod[line][BookProg::next ] = 1;
+			}
+
+			nik_ce void make_line_kind(size_ctype instr, size_ctype arity = 0, size_ctype local = 0)
+			{
+				nik_ce size_type line = 1;
+
+				base::text_submethod[line][BookKind::instr] = instr;
+				base::text_submethod[line][BookKind::arity] = arity;
+				base::text_submethod[line][BookKind::local] = local;
+				base::text_submethod[line][BookKind::next ] = 1;
+			}
+
+			nik_ce void make_line_meta(size_ctype bytes, size_ctype universe = 0, size_ctype next = 1)
+			{
+				nik_ce size_type line = 2;
+
+				base::text_submethod[line][BookMeta::instr   ] = BookInstr::push;
+				base::text_submethod[line][BookMeta::bytes   ] = bytes;
+				base::text_submethod[line][BookMeta::universe] = universe;
+				base::text_submethod[line][BookMeta::next    ] = next;
+			}
 	};
 
 /***********************************************************************************************************************/
@@ -122,6 +160,7 @@ namespace cctmp {
 			nik_using_size_type		(base)
 
 			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
 		protected:
@@ -164,41 +203,51 @@ namespace cctmp {
 			nik_using_size_type		(base)
 
 			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+		protected:
+
+			nik_ces size_type length	= 12;
+			nik_ces size_type row_length	= length >> 2;
+			nik_ces size_type col_length	= 4;
 
 		public:
 
 			nik_ce glyph_builtin_method_disjoint() : base{} { }
 			nik_ce glyph_builtin_method_disjoint(const facade & f) : base{f} { }
 
-		//	nik_ce void initialize(icon_ctype_ref icon, size_ctype bytes)
-		//	{
-		//		auto glyph_submethod = glyph_method.icon_to_text_equip(icon);
+			nik_ce void copy_program(size_ctype instr, size_ctype bytes)
+			{
+				base::make_line_program (row_length);
+				base::make_line_kind    (instr);
+				base::make_line_meta    (bytes, 0, 0);
+			}
 
-		//			// name is redundant, bits is now bytes.
-		//			// each types specifies to which universe it belongs.
-		//			// has free (glyph).
-		//		glyph_submethod[GRing::arity] = Gram::ringN;
-		//		glyph_submethod[GRing::lines] = bytes;
-		//		glyph_submethod[GRing::bytes] = bytes;
-		//	}
+			nik_ce void instantiate(icon_type_ref icon, size_ctype instr, size_ctype bytes)
+			{
+				base::set_text_dim(row_length, col_length);
 
-		//	nik_ce auto instantiate(size_ctype bytes)
-		//	{
-		//		auto icon = glyph_method.overlay();
+				copy_program(instr, bytes);
 
-		//		if (icon.not_fail()) { initialize(icon, bytes); }
+				size_ctype pos = base::find_from_previous(icon);
 
-		//		return icon;
-		//	}
+				if (base::found_from_previous(pos))
+				{
+					icon.set_index(pos);
 
-		//	nik_ce auto declare(size_ctype bytes)
-		//	{
-		//		size_ctype pos = glyph_method.left_find(bytes);
+					base::fast_deallocate_last(); // reset text as well (non fast) ?
+				}
+			}
 
-		//		if (glyph_method.found(pos)) { return glyph_method.make_icon(pos); }
-		//		else                         { return instantiate(bytes); }
-		//	}
+			nik_ce auto declare(size_ctype instr, size_ctype bytes)
+			{
+				auto icon = base::allocate(BookSlot::builtin, length);
+
+				if (base::not_fail(icon)) { instantiate(icon, instr, bytes); }
+
+				return icon;
+			}
 	};
 
 	// syntactic sugar:
