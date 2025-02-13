@@ -40,23 +40,23 @@ namespace cctmp {
 
 		protected:
 
-			size_type tag;
-			size_type position;
+			size_type _mark;
+			size_type _index;
 
 		public:
 
-			nik_ce note() : tag{}, position{} { }
-			nik_ce note(size_ctype t, size_ctype p) : tag{t}, position{p} { }
+			nik_ce note() : _mark{}, _index{} { }
+			nik_ce note(size_ctype m, size_ctype i) : _mark{m}, _index{i} { }
 
-			// tag:
+			// mark:
 
-				nik_ce size_type kind() const { return tag; }
-				nik_ce void set_kind(size_ctype t) { tag = t; }
+				nik_ce size_type mark() const { return _mark; }
+				nik_ce void set_mark(size_ctype m) { _mark = m; }
 
-			// position:
+			// index:
 
-				nik_ce size_type index() const { return position; }
-				nik_ce void set_index(size_ctype p) { position = p; }
+				nik_ce size_type index() const { return _index; }
+				nik_ce void set_index(size_ctype i) { _index = i; }
 	};
 
 /***********************************************************************************************************************/
@@ -91,44 +91,11 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// instructions:
-
-	struct BookInstruction
-	{
-		enum : gkey_type
-		{
-			program, push, apply,
-			empty, ring, flex, utf8_char, tuple, cotuple, function, null, list,
-			identity, l_than, l_than_or_eq, g_than, g_than_or_eq, dependent, custom,
-			exists, forall, type, value, arg,
-
-			dimension
-		};
-	};
-
-	using BookInstr = BookInstruction;
-
-/***********************************************************************************************************************/
-
-// codes:
-
-	struct BookCode
-	{
-		enum : gkey_type
-		{
-			valid, invalid, // will be refined and extended as needed.
-
-			dimension
-		};
-	};
-
-/***********************************************************************************************************************/
-
-// slots:
+// marks:
 
 		// should an enum type be added?
 
-	struct BookSlot
+	struct BookMark
 	{
 		enum : gkey_type
 		{
@@ -139,14 +106,6 @@ namespace cctmp {
 			dimension
 		};
 	};
-
-/***********************************************************************************************************************/
-
-// fields:
-
-	struct BookProg { enum : gkey_type { instr, lines,     code, next, dimension }; };
-	struct BookKind { enum : gkey_type { instr, arity,    local, next, dimension }; };
-	struct BookMeta { enum : gkey_type { instr, bytes, universe, next, dimension }; };
 
 /***********************************************************************************************************************/
 
@@ -453,23 +412,28 @@ namespace cctmp {
 
 			// page:
 
-				nik_ce void set_chapter(size_ctype n) { page_cmethod.set_slot(n); }
+					// safe version should reset text.
+				nik_ce void fast_set_chapter(size_ctype n) { page_cmethod.set_slot(n); }
 
 			// text:
 
-				nik_ce void set_text_dim(size_ctype r, size_ctype c) // assumes text is preset.
+					// needs to test against subtext.
+				nik_ce void fast_set_text_dim(size_ctype r, size_ctype c)
 					{ text_csubmethod.set_dimension(r, c); }
 
-				nik_ce void set_text_ival(size_ctype s, size_ctype f)
+					// safe version should reset dimensions.
+				nik_ce void fast_set_text_ival(size_ctype s, size_ctype f)
 					{ text_csubmethod.mid_set(s, f); }
 
-				nik_ce void set_text_from_page(size_ctype n) // assumes page is preset.
-					{ set_text_ival(page_cmethod[n].start(), page_cmethod[n].finish()); }
+					// safe version assumes page is set; should reset dimensions.
+				nik_ce void fast_set_text_from_page(size_ctype n)
+					{ fast_set_text_ival(page_cmethod[n].start(), page_cmethod[n].finish()); }
 
-				nik_ce auto set_text_from_note(note_ctype_ref n)
+					// safe version should reset dimensions.
+				nik_ce auto fast_set_text_from_note(note_ctype_ref n)
 				{
-					set_chapter(n.kind());
-					set_text_from_page(n.index());
+					fast_set_chapter(n.mark());
+					fast_set_text_from_page(n.index());
 				}
 
 			// note:
@@ -477,13 +441,6 @@ namespace cctmp {
 				nik_ce auto make_note(size_type n, size_ctype m) const { return note_type{n, m}; }
 
 			// fail:
-
-				nik_ce bool is_fail(note_ctype_ref n) const
-				{
-					return false;
-				}
-
-				nik_ce bool not_fail(note_ctype_ref n) const { return not is_fail(n); }
 
 				nik_ce auto fail_note()
 				{
@@ -499,10 +456,10 @@ namespace cctmp {
 					{ return (n != note.index()); }
 
 				template<typename T, auto N> // assumes page and note_page match.
-				nik_ce auto find_from_previous(note_ctype_ref n) const
+				nik_ce auto fast_find_from_previous(note_ctype_ref n) const
 				{
 					auto npage = page_cmethod.citer(n.index());
-					set_text_ival(npage->start(), npage->finish());
+					fast_set_text_ival(npage->start(), npage->finish());
 
 					for (auto k = page_cmethod.cbegin(); k != npage; ++k)
 					{
@@ -557,40 +514,39 @@ namespace cctmp {
 
 			// page:
 
-				nik_ce void set_chapter(size_ctype n)
-				{
-					base::set_chapter(n);
-					page_method.set_slot(n);
-				}
+					// safe version should reset text.
+				nik_ce void fast_set_chapter(size_ctype n) { page_method.set_slot(n); }
 
 			// text:
 
-				nik_ce void set_text_dim(size_ctype r, size_ctype c) // assumes text is preset.
+					// needs to test against subtext.
+				nik_ce void fast_set_text_dim(size_ctype r, size_ctype c)
+					{ text_submethod.set_dimension(r, c); }
+
+					// safe version should reset dimensions.
+				nik_ce void fast_set_text_ival(size_ctype s, size_ctype f)
+					{ text_submethod.mid_set(s, f); }
+
+					// safe version assumes page is set; should reset dimensions.
+				nik_ce void fast_set_text_from_page(size_ctype n)
 				{
-					base::set_text_dim(r, c);
-					text_submethod.set_dimension(r, c);
+					auto npage = base::page_cmethod.citer(n);
+
+					fast_set_text_ival(npage->start(), npage->finish());
 				}
 
-				nik_ce void set_text_ival(size_ctype s, size_ctype f)
+					// safe version should reset dimensions.
+				nik_ce auto fast_set_text_from_note(note_ctype_ref n)
 				{
-					base::set_text_ival(s, f);
-					text_submethod.mid_set(s, f);
-				}
-
-				nik_ce void set_text_from_page(size_ctype n) // assumes page is preset.
-					{ set_text_ival(base::page_cmethod[n].start(), base::page_cmethod[n].finish()); }
-
-				nik_ce auto set_text_from_note(note_ctype_ref n)
-				{
-					set_chapter(n.kind());
-					set_text_from_page(n.index());
+					fast_set_chapter(n.mark());
+					fast_set_text_from_page(n.index());
 				}
 
 		protected:
 
 				nik_ce bool overlay(size_ctype n, size_ctype m)
 				{
-					set_chapter(n);
+					fast_set_chapter(n);
 
 					if (page_method.is_full() || base::ctext().lacks_capacity(m)) return false;
 
@@ -607,7 +563,7 @@ namespace cctmp {
 
 				nik_ce auto deallocate_last()
 				{
-					set_text_ival(0, 0);
+					fast_set_text_ival(0, 0);
 					fast_deallocate_last();
 				}
 
@@ -617,7 +573,7 @@ namespace cctmp {
 				{
 					if (not overlay(n, m)) return base::fail_note();
 
-					set_text_from_page(base::page_cmethod.max());
+					fast_set_text_from_page(base::page_cmethod.max());
 
 					return base::make_note(n, base::page_cmethod.max());
 				}
