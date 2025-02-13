@@ -70,6 +70,20 @@ namespace cctmp {
 
 			nik_using_size_type		(image_type)
 
+		public:
+
+			template<template<typename> typename CMethod>
+			using glyph_cmethod_type = resolve_cmethod<glyph_type, CMethod>;
+
+			template<template<typename> typename Method>
+			using glyph_method_type = resolve_method<glyph_type, Method>;
+
+			template<template<typename> typename CMethod>
+			using image_cmethod_type = resolve_cmethod<image_type, CMethod>;
+
+			template<template<typename> typename Method>
+			using image_method_type = resolve_method<image_type, Method>;
+
 		protected:
 
 			glyph_type _glyph;
@@ -238,6 +252,116 @@ namespace cctmp {
 				nik_ce auto equip() -> Method
 					{ return facade_type{static_cast<model*>(this)}; }
 	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// method:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Base, template<typename> typename GlyphCMethod, template<typename> typename ImageCMethod>
+	class corpus_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model			= typename base::model_type;
+
+			nik_using_size_type		(base)
+
+			using icon_type			= icon<size_type>;
+			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
+
+			using sign_type			= sign<size_type>;
+			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
+
+		protected:
+
+			using glyph_cmethod_type	= typename model::template glyph_cmethod_type<GlyphCMethod>;
+			using image_cmethod_type	= typename model::template image_cmethod_type<ImageCMethod>;
+
+			glyph_cmethod_type glyph_cmethod;
+			image_cmethod_type image_cmethod;
+
+		public:
+
+			nik_ce corpus_cmethod_disjoint() : base{}, glyph_cmethod{}, image_cmethod{} { }
+			nik_ce corpus_cmethod_disjoint(const facade & f) :
+
+				base{f},
+				glyph_cmethod{base::model->template glyph_cequip<glyph_cmethod_type>()},
+				image_cmethod{base::model->template image_cequip<image_cmethod_type>()}
+				{ }
+	};
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base, template<typename> typename GlyphMethod, template<typename> typename ImageMethod>
+	class corpus_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model			= typename base::model_type;
+
+			nik_using_size_type		(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		protected:
+
+			using glyph_method_type		= typename model::template glyph_method_type<GlyphMethod>;
+			using image_method_type		= typename model::template image_method_type<ImageMethod>;
+
+			glyph_method_type glyph_method;
+			image_method_type image_method;
+
+		public:
+
+			nik_ce corpus_method_disjoint() : base{}, glyph_method{}, image_method{} { }
+			nik_ce corpus_method_disjoint(const facade & f) :
+
+				base{f},
+				glyph_method{base::model->template glyph_equip<glyph_method_type>()},
+				image_method{base::model->template image_equip<image_method_type>()}
+				{ }
+	};
+
+	// syntactic sugar:
+
+		template
+		<
+			typename Facade,
+			template<typename> typename GlyphCMethod,
+			template<typename> typename ImageCMethod
+		>
+		using corpus_cmethod =
+			corpus_cmethod_disjoint < Facade, GlyphCMethod, ImageCMethod >;
+
+	// syntactic sugar:
+
+		template
+		<
+			typename Facade,
+			template<typename> typename GlyphCMethod,
+			template<typename> typename ImageCMethod,
+			template<typename> typename  GlyphMethod,
+			template<typename> typename  ImageMethod
+		>
+		using corpus_method =
+			corpus_method_disjoint  <
+			corpus_cmethod_disjoint < Facade, GlyphCMethod, ImageCMethod >, GlyphMethod, ImageMethod >;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

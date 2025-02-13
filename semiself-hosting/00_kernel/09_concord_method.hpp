@@ -31,184 +31,124 @@ namespace cctmp {
 
 // immutable:
 
-	template<typename Facade>
-	class concord_ring_cmethod : public Facade
+	template<typename Base>
+	class concord_ring_cmethod_disjoint : public Base
 	{
 		public:
 
-			using base			= Facade;
-			using model_type		= typename Facade::model_type;
+			using base			= Base;
+			using facade			= typename base::facade;
 
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
+			nik_using_size_type		(base)
 
-		protected:
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
-			using symbol_cmethod_type	= typename model_type::symbol_cmethod_type;
-			using record_cmethod_type	= typename model_type::record_cmethod_type;
-
-			using symbol_model_type		= typename model_type::symbol_type::base;
-			using glyph_cmethod_type	= typename symbol_model_type::glyph_cmethod_type;
-			using image_cmethod_type	= typename symbol_model_type::image_cmethod_type;
-
-			symbol_cmethod_type symbol_cmethod;
-			record_cmethod_type record_cmethod;
-
-			glyph_cmethod_type glyph_cmethod;
-			image_cmethod_type image_cmethod;
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
 		public:
 
-			nik_ce concord_ring_cmethod() :
-				base{}, symbol_cmethod{}, record_cmethod{}, glyph_cmethod{}, image_cmethod{} { }
-
-			nik_ce concord_ring_cmethod(const Facade & f) :
-
-				base{f},
-				symbol_cmethod{symbol_cequip()},
-				record_cmethod{record_cequip()},
-				glyph_cmethod{glyph_cequip()},
-				image_cmethod{image_cequip()}
-				{ }
-
-			// symbol:
-
-				nik_ce auto symbol_cequip() { return base::model->symbol_cequip(); }
-
-			// record:
-
-				nik_ce auto record_cequip() { return base::model->record_cequip(); }
-
-			// glyph:
-
-				nik_ce auto glyph_cequip() { return base::csymbol().glyph_cequip(); }
-
-			// image:
-
-				nik_ce auto image_cequip() { return base::csymbol().image_cequip(); }
+			nik_ce concord_ring_cmethod_disjoint() : base{} { }
+			nik_ce concord_ring_cmethod_disjoint(const facade & f) : base{f} { }
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
-		using cring_cmethod = concord_ring_cmethod<Facade>;
+		using concord_ring_cmethod =
+			concord_ring_cmethod_disjoint <
+			concord_cmethod < Facade, symbol_ring_cmethod, array_csubmethod >>;
 
 /***********************************************************************************************************************/
 
 // mutable:
 
-	template<typename Facade>
-	class concord_ring_method : public concord_ring_cmethod<Facade>
+	template<typename Base>
+	class concord_ring_method_disjoint : public Base
 	{
 		public:
 
-			using base			= concord_ring_cmethod<Facade>;
-			using model_type		= typename base::model_type;
+			using base			= Base;
+			using facade			= typename base::facade;
 
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
+			nik_using_size_type		(base)
 
-			using sign_type			= sign<size_type>;
-			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
-		protected:
-
-			using symbol_method_type	= typename model_type::symbol_method_type;
-			using record_method_type	= typename model_type::record_method_type;
-
-			using symbol_model_type		= typename model_type::symbol_type::base;
-			using image_method_type		= typename symbol_model_type::image_method_type;
-
-			symbol_method_type symbol_method;
-			record_method_type record_method;
-
-			image_method_type image_method;
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
 		public:
 
-			nik_ce concord_ring_method() :
-				base{}, symbol_method{}, record_method{}, image_method{} { }
-
-			nik_ce concord_ring_method(const Facade & f) :
-
-				base{f},
-				symbol_method{symbol_equip()},
-				record_method{record_equip()},
-				image_method{image_equip()}
-				{ }
-
-			// symbol:
-
-				nik_ce auto symbol_equip() { return base::model->symbol_equip(); }
-
-			// record:
-
-				nik_ce auto record_equip() { return base::model->record_equip(); }
-
-			// image:
-
-				nik_ce auto image_equip() { return base::symbol().image_equip(); }
+			nik_ce concord_ring_method_disjoint() : base{} { }
+			nik_ce concord_ring_method_disjoint(const facade & f) : base{f} { }
 
 			// initialization:
 
-				nik_ce auto declare(size_ctype bytes)
-				{
-					size_ctype offset = base::glyph_cmethod.unit_size();
+			//	nik_ce auto declare(size_ctype bytes)
+			//	{
+			//		size_ctype offset = base::glyph_cmethod.unit_size();
 
-					return symbol_method.declare(bytes, record_method.expand(offset));
-				}
+			//		return symbol_method.declare(bytes, record_method.expand(offset));
+			//	}
 
-				nik_ce auto define(size_ctype bytes, size_ctype value)
-				{
-					auto sign = declare(bytes);
+			//	nik_ce auto define(size_ctype bytes, size_ctype value)
+			//	{
+			//		auto sign = declare(bytes);
 
-					if (sign.kind() == Gram::ringN)
-					{
-									// image_start ? index instead of sign ?
-						auto image_submethod = base::image_cmethod.
-										sign_to_text_cequip(sign.index());
+			//		if (sign.kind() == Gram::ringN)
+			//		{
+			//						// image_start ? index instead of sign ?
+			//			auto image_submethod = base::image_cmethod.
+			//							sign_to_text_cequip(sign.index());
 
-						record_method[image_submethod[IRing::start]] = value;
-					}
+			//			record_method[image_submethod[IRing::start]] = value;
+			//		}
 
-					return sign;
-				}
-
-			// apply:
-
-			// add to record:
-
-				template<typename T, typename... Ts>
-				nik_ce void add_to_record(const T & l, const Ts &... rs)
-				{
-					const auto & l_image_cmethod = base::image_cmethod.
-										sign_to_text_cequip(l.index());
-
-					add_to_methods(l_image_cmethod,
-						base::image_cmethod.sign_to_text_cequip(rs.index())...);
-				}
-
-				template<typename T, typename... Ts>
-				nik_ce void add_to_methods(const T & l, const Ts &... rs)
-					{ add_to_positions(l[IRing::start], rs[IRing::start]...); }
-
-				template<typename T, typename... Ts>
-				nik_ce void add_to_positions(T l, Ts... rs)
-					{ record_method[l] = (... + base::record_cmethod[rs]); }
-
-			// add to:
-
-				nik_ce void add_to(sign_ctype_ref out, sign_ctype_ref in1, sign_ctype_ref in2)
-				{
-					if (symbol_method.same_types(out, in1, in2))
-						{ add_to_record(out, in1, in2); }
-				}
+			//		return sign;
+			//	}
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
-		using cring_method = concord_ring_method<Facade>;
+		using concord_ring_method =
+			concord_ring_method_disjoint  <
+			concord_ring_cmethod_disjoint <
+			concord_method < Facade, symbol_ring_cmethod, array_csubmethod,
+						  symbol_ring_method,  array_submethod >>>;
+
+			// apply:
+
+			// add to record:
+
+			//	template<typename T, typename... Ts>
+			//	nik_ce void add_to_record(const T & l, const Ts &... rs)
+			//	{
+			//		const auto & l_image_cmethod = base::image_cmethod.
+			//							sign_to_text_cequip(l.index());
+
+			//		add_to_methods(l_image_cmethod,
+			//			base::image_cmethod.sign_to_text_cequip(rs.index())...);
+			//	}
+
+			//	template<typename T, typename... Ts>
+			//	nik_ce void add_to_methods(const T & l, const Ts &... rs)
+			//		{ add_to_positions(l[IRing::start], rs[IRing::start]...); }
+
+			//	template<typename T, typename... Ts>
+			//	nik_ce void add_to_positions(T l, Ts... rs)
+			//		{ record_method[l] = (... + base::record_cmethod[rs]); }
+
+			// add to:
+
+			//	nik_ce void add_to(sign_ctype_ref out, sign_ctype_ref in1, sign_ctype_ref in2)
+			//	{
+			//		if (symbol_method.same_types(out, in1, in2))
+			//			{ add_to_record(out, in1, in2); }
+			//	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -36,14 +36,19 @@ namespace cctmp {
 
 // mutable:
 
-	template<typename Type, typename SizeType, typename GlyphPack, typename ImagePack, SizeType Size>
+	template
+	<
+		typename Type, typename SizeType,
+		typename GlyphPack, typename SpacePack, typename ImagePack,
+		SizeType Size
+	>
 	class concord_model
 	{
 		public:
 
 			using facade			= concord_model; // method compatible.
 
-			using symbol_type		= corpus<SizeType, SizeType, GlyphPack, ImagePack>;
+			using symbol_type		= corpus<SizeType, SizeType, GlyphPack, SpacePack, ImagePack>;
 			using symbol_type_ptr		= typename alias<symbol_type>::type_ptr;
 			using symbol_ctype_ptr		= typename alias<symbol_type>::ctype_ptr;
 
@@ -51,66 +56,56 @@ namespace cctmp {
 			using record_type_ptr		= typename alias<record_type>::type_ptr;
 			using record_ctype_ptr		= typename alias<record_type>::ctype_ptr;
 
-			using type			= typename record_type::type;
-			using type_ptr			= typename record_type::type_ptr;
-			using type_cptr			= typename record_type::type_cptr;
-			using type_ref			= typename record_type::type_ref;
+			nik_using_name_scope_type	( type, record_type)
+			nik_using_name_scope_ctype	(ctype, record_type)
 
-			using ctype			= typename record_type::ctype;
-			using ctype_ptr			= typename record_type::ctype_ptr;
-			using ctype_cptr		= typename record_type::ctype_cptr;
-			using ctype_ref			= typename record_type::ctype_ref;
-
-			using size_type			= typename record_type::size_type;
-			using size_ctype		= typename record_type::size_ctype;
+			nik_using_size_type		(record_type)
 
 		public:
 
-			using symbol_cmethod_type	= resolve_cmethod<symbol_type, sring_cmethod>;
-			using symbol_method_type	= resolve_method <symbol_type,  sring_method>;
+			template<template<typename> typename CMethod>
+			using symbol_cmethod_type = resolve_cmethod<symbol_type, CMethod>;
 
-			using record_cmethod_type	= resolve_cmethod<record_type, array_cmethod>;
-			using record_method_type	= resolve_method <record_type,  array_method>;
+			template<template<typename> typename Method>
+			using symbol_method_type = resolve_method<symbol_type, Method>;
 
-			using record_csubmethod_type	= resolve_csubmethod<record_type, array_csubmethod>;
-			using record_submethod_type	= resolve_submethod <record_type,  array_submethod>;
+			template<template<typename> typename CMethod>
+			using record_csubmethod_type = resolve_csubmethod<record_type, CMethod>;
+
+			template<template<typename> typename Method>
+			using record_submethod_type = resolve_submethod<record_type, Method>;
 
 		protected:
 
 			symbol_type _symbol;
 			record_type _record;
+			size_type   _memory; // optimization: by design is a member array of the logic class.
 
 		public:
 
-			nik_ce concord_model() { }
+			nik_ce concord_model() : _memory{} { }
 
 			// symbol:
 
 				nik_ce symbol_ctype_ptr csymbol() const { return &_symbol; }
 				nik_ce  symbol_type_ptr  symbol()       { return &_symbol; }
 
-				nik_ce auto symbol_cequip() const
-					{ return _symbol.template cequip<symbol_cmethod_type>(); }
+				template<typename CMethod>
+				nik_ce auto symbol_cequip() const { return _symbol.template cequip<CMethod>(); }
 
-				nik_ce auto symbol_equip()
-					{ return _symbol.template equip<symbol_method_type>(); }
+				template<typename Method>
+				nik_ce auto symbol_equip() { return _symbol.template equip<Method>(); }
 
 			// record:
 
 				nik_ce record_ctype_ptr crecord() const { return &_record; }
 				nik_ce  record_type_ptr  record()       { return &_record; }
 
-				nik_ce auto record_cequip() const
-					{ return _record.template cequip<record_cmethod_type>(); }
+				template<typename CMethod>
+				nik_ce auto record_csubequip() const { return _record.template csubequip<CMethod>(); }
 
-				nik_ce auto record_equip()
-					{ return _record.template equip<record_method_type>(); }
-
-				nik_ce auto record_csubequip(size_ctype n) const
-					{ return _record.template right_cequip<record_csubmethod_type>(n); }
-
-				nik_ce auto record_subequip(size_ctype n)
-					{ return _record.template right_equip<record_submethod_type>(n); }
+				template<typename Method>
+				nik_ce auto record_subequip() { return _record.template subequip<Method>(); }
 	};
 
 /***********************************************************************************************************************/
@@ -139,8 +134,7 @@ namespace cctmp {
 			using record_type		= typename model_type::record_type;
 			using record_ctype_ref		= typename alias<record_type>::ctype_ref;
 
-			using size_type			= typename model_type::size_type;
-			using size_ctype		= typename model_type::size_ctype;
+			nik_using_size_type		(model_type)
 
 		protected:
 
@@ -183,8 +177,7 @@ namespace cctmp {
 			using record_type_ref		= typename alias<record_type>::type_ref;
 			using record_ctype_ref		= typename alias<record_type>::ctype_ref;
 
-			using size_type			= typename model_type::size_type;
-			using size_ctype		= typename model_type::size_ctype;
+			nik_using_size_type		(model_type)
 
 		protected:
 
@@ -215,18 +208,25 @@ namespace cctmp {
 
 // mutable:
 
-	template<typename Type, typename SizeType, typename GlyphPack, typename ImagePack, SizeType Size>
-	class concord : public concord_model<Type, SizeType, GlyphPack, ImagePack, Size>
+	template
+	<
+		typename Type, typename SizeType,
+		typename GlyphPack, typename SpacePack, typename ImagePack,
+		SizeType Size
+	>
+	class concord : public concord_model<Type, SizeType, GlyphPack, SpacePack, ImagePack, Size>
 	{
 		public:
 
-			using base			= concord_model<Type, SizeType, GlyphPack, ImagePack, Size>;
+			using base			= concord_model
+							<
+								Type, SizeType, GlyphPack, SpacePack, ImagePack, Size
+							>;
 			using model			= base;
 			using cfacade_type		= concord_cfacade<model>;
 			using facade_type		= concord_facade<model>;
 
-			using size_type			= typename base::size_type;
-			using size_ctype		= typename base::size_ctype;
+			nik_using_size_type		(base)
 
 		public:
 
@@ -242,6 +242,116 @@ namespace cctmp {
 				nik_ce auto equip() -> Method
 					{ return facade_type{static_cast<model*>(this)}; }
 	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// method:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Base, template<typename> typename SymbolCMethod, template<typename> typename RecordCMethod>
+	class concord_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model			= typename base::model_type;
+
+			nik_using_size_type		(base)
+
+			using icon_type			= icon<size_type>;
+			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
+
+			using sign_type			= sign<size_type>;
+			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
+
+		protected:
+
+			using symbol_cmethod_type	= typename model::template symbol_cmethod_type<SymbolCMethod>;
+			using record_csubmethod_type	= typename model::template record_csubmethod_type<RecordCMethod>;
+
+			symbol_cmethod_type symbol_cmethod;
+			record_csubmethod_type record_csubmethod;
+
+		public:
+
+			nik_ce concord_cmethod_disjoint() : base{}, symbol_cmethod{}, record_csubmethod{} { }
+			nik_ce concord_cmethod_disjoint(const facade & f) :
+
+				base{f},
+				symbol_cmethod{base::model->template symbol_cequip<symbol_cmethod_type>()},
+				record_csubmethod{base::model->template record_csubequip<record_csubmethod_type>()}
+				{ }
+	};
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base, template<typename> typename SymbolMethod, template<typename> typename RecordMethod>
+	class concord_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model			= typename base::model_type;
+
+			nik_using_size_type		(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		protected:
+
+			using symbol_method_type	= typename model::template symbol_method_type<SymbolMethod>;
+			using record_submethod_type	= typename model::template record_submethod_type<RecordMethod>;
+
+			symbol_method_type symbol_method;
+			record_submethod_type record_submethod;
+
+		public:
+
+			nik_ce concord_method_disjoint() : base{}, symbol_method{}, record_submethod{} { }
+			nik_ce concord_method_disjoint(const facade & f) :
+
+				base{f},
+				symbol_method{base::model->template symbol_equip<symbol_method_type>()},
+				record_submethod{base::model->template record_subequip<record_submethod_type>()}
+				{ }
+	};
+
+	// syntactic sugar:
+
+		template
+		<
+			typename Facade,
+			template<typename> typename SymbolCMethod,
+			template<typename> typename RecordCMethod
+		>
+		using concord_cmethod =
+			concord_cmethod_disjoint < Facade, SymbolCMethod, RecordCMethod >;
+
+	// syntactic sugar:
+
+		template
+		<
+			typename Facade,
+			template<typename> typename SymbolCMethod,
+			template<typename> typename RecordCMethod,
+			template<typename> typename  SymbolMethod,
+			template<typename> typename  RecordMethod
+		>
+		using concord_method =
+			concord_method_disjoint  <
+			concord_cmethod_disjoint < Facade, SymbolCMethod, RecordCMethod >, SymbolMethod, RecordMethod >;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -85,6 +85,10 @@ namespace cctmp {
 			using icon_type_ref	= typename base::note_type_ref;
 			using icon_ctype_ref	= typename base::note_ctype_ref;
 
+		protected:
+
+			nik_ces auto col_length	= size_type{4};
+
 		public:
 
 			nik_ce glyph_cmethod_disjoint() : base{} { }
@@ -189,7 +193,6 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
-			using model_type		= typename base::model_type;
 
 			nik_using_size_type		(base)
 
@@ -211,7 +214,7 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using gbuiltin_cmethod =
+		using glyph_builtin_cmethod =
 			glyph_builtin_cmethod_disjoint <
 			glyph_cmethod_disjoint         < Facade >>;
 
@@ -226,7 +229,6 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
-			using model_type		= typename base::model_type;
 
 			nik_using_size_type		(base)
 
@@ -236,9 +238,8 @@ namespace cctmp {
 
 		protected:
 
-			nik_ces size_type length	= 12;
-			nik_ces size_type row_length	=  3;
-			nik_ces size_type col_length	=  4;
+			nik_ces size_type row_length	= 3;
+			nik_ces size_type length	= row_length * base::col_length;
 
 		public:
 
@@ -254,7 +255,7 @@ namespace cctmp {
 
 			nik_ce void instantiate(icon_type_ref icon, size_ctype instr, size_ctype bytes)
 			{
-				base::fast_set_text_dim(row_length, col_length);
+				base::fast_set_text_dim(row_length, base::col_length);
 
 				copy_program(instr, bytes);
 
@@ -281,7 +282,7 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using gbuiltin_method =
+		using glyph_builtin_method =
 			glyph_builtin_method_disjoint  <
 			glyph_builtin_cmethod_disjoint <
 			glyph_method_disjoint          <
@@ -297,19 +298,19 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class gempty_cmethod : public gbuiltin_cmethod<Facade>
+	class glyph_empty_cmethod : public glyph_builtin_cmethod<Facade>
 	{
 		public:
 
-			using base			= gbuiltin_cmethod<Facade>;
+			using base			= glyph_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce gempty_cmethod() : base{} { }
-			nik_ce gempty_cmethod(const facade & f) : base{f} { }
+			nik_ce glyph_empty_cmethod() : base{} { }
+			nik_ce glyph_empty_cmethod(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
@@ -317,21 +318,21 @@ namespace cctmp {
 // mutable:
 
 	template<typename Facade>
-	class gempty_method : public gbuiltin_method<Facade>
+	class glyph_empty_method : public glyph_builtin_method<Facade>
 	{
 		public:
 
-			using base			= gbuiltin_method<Facade>;
+			using base			= glyph_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce gempty_method() : base{} { }
-			nik_ce gempty_method(const facade & f) : base{f} { }
+			nik_ce glyph_empty_method() : base{} { }
+			nik_ce glyph_empty_method(const facade & f) : base{f} { }
 
-			nik_ce auto declare(size_ctype bytes) { base::declare(GlyphInstr::empty, bytes); }
+			nik_ce auto declare(size_ctype bytes) { return base::declare(GlyphInstr::empty, bytes); }
 	};
 
 /***********************************************************************************************************************/
@@ -344,19 +345,19 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class gring_cmethod : public gbuiltin_cmethod<Facade>
+	class glyph_ring_cmethod : public glyph_builtin_cmethod<Facade>
 	{
 		public:
 
-			using base			= gbuiltin_cmethod<Facade>;
+			using base			= glyph_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce gring_cmethod() : base{} { }
-			nik_ce gring_cmethod(const facade & f) : base{f} { }
+			nik_ce glyph_ring_cmethod() : base{} { }
+			nik_ce glyph_ring_cmethod(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
@@ -364,21 +365,21 @@ namespace cctmp {
 // mutable:
 
 	template<typename Facade>
-	class gring_method : public gbuiltin_method<Facade>
+	class glyph_ring_method : public glyph_builtin_method<Facade>
 	{
 		public:
 
-			using base			= gbuiltin_method<Facade>;
+			using base			= glyph_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce gring_method() : base{} { }
-			nik_ce gring_method(const facade & f) : base{f} { }
+			nik_ce glyph_ring_method() : base{} { }
+			nik_ce glyph_ring_method(const facade & f) : base{f} { }
 
-			nik_ce auto declare(size_ctype bytes) { base::declare(GlyphInstr::ring, bytes); }
+			nik_ce auto declare(size_ctype bytes) { return base::declare(GlyphInstr::ring, bytes); }
 	};
 
 /***********************************************************************************************************************/
@@ -391,19 +392,19 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class gflex_cmethod : public gbuiltin_cmethod<Facade>
+	class glyph_flex_cmethod : public glyph_builtin_cmethod<Facade>
 	{
 		public:
 
-			using base			= gbuiltin_cmethod<Facade>;
+			using base			= glyph_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce gflex_cmethod() : base{} { }
-			nik_ce gflex_cmethod(const facade & f) : base{f} { }
+			nik_ce glyph_flex_cmethod() : base{} { }
+			nik_ce glyph_flex_cmethod(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
@@ -411,21 +412,21 @@ namespace cctmp {
 // mutable:
 
 	template<typename Facade>
-	class gflex_method : public gbuiltin_method<Facade>
+	class glyph_flex_method : public glyph_builtin_method<Facade>
 	{
 		public:
 
-			using base			= gbuiltin_method<Facade>;
+			using base			= glyph_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce gflex_method() : base{} { }
-			nik_ce gflex_method(const facade & f) : base{f} { }
+			nik_ce glyph_flex_method() : base{} { }
+			nik_ce glyph_flex_method(const facade & f) : base{f} { }
 
-			nik_ce auto declare(size_ctype bytes) { base::declare(GlyphInstr::flex, bytes); }
+			nik_ce auto declare(size_ctype bytes) { return base::declare(GlyphInstr::flex, bytes); }
 	};
 
 /***********************************************************************************************************************/
@@ -438,19 +439,19 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class gutf8_char_cmethod : public gbuiltin_cmethod<Facade>
+	class glyph_utf8_char_cmethod : public glyph_builtin_cmethod<Facade>
 	{
 		public:
 
-			using base			= gbuiltin_cmethod<Facade>;
+			using base			= glyph_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce gutf8_char_cmethod() : base{} { }
-			nik_ce gutf8_char_cmethod(const facade & f) : base{f} { }
+			nik_ce glyph_utf8_char_cmethod() : base{} { }
+			nik_ce glyph_utf8_char_cmethod(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
@@ -458,21 +459,21 @@ namespace cctmp {
 // mutable:
 
 	template<typename Facade>
-	class gutf8_char_method : public gbuiltin_method<Facade>
+	class glyph_utf8_char_method : public glyph_builtin_method<Facade>
 	{
 		public:
 
-			using base			= gbuiltin_method<Facade>;
+			using base			= glyph_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce gutf8_char_method() : base{} { }
-			nik_ce gutf8_char_method(const facade & f) : base{f} { }
+			nik_ce glyph_utf8_char_method() : base{} { }
+			nik_ce glyph_utf8_char_method(const facade & f) : base{f} { }
 
-			nik_ce auto declare(size_ctype bytes) { base::declare(GlyphInstr::utf8_char, bytes); }
+			nik_ce auto declare(size_ctype bytes) { return base::declare(GlyphInstr::utf8_char, bytes); }
 	};
 
 /***********************************************************************************************************************/

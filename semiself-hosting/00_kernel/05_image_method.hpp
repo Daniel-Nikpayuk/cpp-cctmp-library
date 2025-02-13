@@ -25,7 +25,9 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// fields:
+// times:
+
+	struct ImageTime { enum : gkey_type { abstract, concrete, dimension }; };
 
 /***********************************************************************************************************************/
 
@@ -130,7 +132,6 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
-			using model_type		= typename base::model_type;
 
 			nik_using_size_type		(base)
 
@@ -151,7 +152,7 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using ibuiltin_cmethod =
+		using image_builtin_cmethod =
 			image_builtin_cmethod_disjoint <
 			image_cmethod_disjoint         < Facade >>;
 
@@ -166,7 +167,6 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
-			using model_type		= typename base::model_type;
 
 			nik_using_size_type		(base)
 
@@ -180,7 +180,7 @@ namespace cctmp {
 
 		protected:
 
-			nik_ces size_type length	= 3;
+			nik_ces size_type length	= ImageBuiltin::dimension;
 			nik_ces size_type unit_length	= 1;
 
 		public:
@@ -198,7 +198,7 @@ namespace cctmp {
 				base::text_submethod[ImageBuiltin::point] = point;
 			}
 
-			nik_ce auto define(icon_ctype_ref icon, size_ctype time, size_ctype point)
+			nik_ce auto declare(icon_ctype_ref icon, size_ctype time, size_ctype point)
 			{
 				auto sign = base::allocate(BookMark::builtin, length);
 
@@ -211,7 +211,7 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using ibuiltin_method =
+		using image_builtin_method =
 			image_builtin_method_disjoint  <
 			image_builtin_cmethod_disjoint <
 			image_method_disjoint          <
@@ -229,19 +229,19 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class iempty_cmethod : public ibuiltin_cmethod<Facade>
+	class image_empty_cmethod : public image_builtin_cmethod<Facade>
 	{
 		public:
 
-			using base			= ibuiltin_cmethod<Facade>;
+			using base			= image_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce iempty_cmethod() : base{} { }
-			nik_ce iempty_cmethod(const facade & f) : base{f} { }
+			nik_ce image_empty_cmethod() : base{} { }
+			nik_ce image_empty_cmethod(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
@@ -249,19 +249,19 @@ namespace cctmp {
 // mutable:
 
 	template<typename Facade>
-	class iempty_method : public ibuiltin_method<Facade>
+	class image_empty_method : public image_builtin_method<Facade>
 	{
 		public:
 
-			using base			= ibuiltin_method<Facade>;
+			using base			= image_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce iempty_method() : base{} { }
-			nik_ce iempty_method(const facade & f) : base{f} { }
+			nik_ce image_empty_method() : base{} { }
+			nik_ce image_empty_method(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
@@ -276,19 +276,19 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class iring_cmethod : public ibuiltin_cmethod<Facade>
+	class image_ring_cmethod : public image_builtin_cmethod<Facade>
 	{
 		public:
 
-			using base			= ibuiltin_cmethod<Facade>;
+			using base			= image_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce iring_cmethod() : base{} { }
-			nik_ce iring_cmethod(const facade & f) : base{f} { }
+			nik_ce image_ring_cmethod() : base{} { }
+			nik_ce image_ring_cmethod(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
@@ -296,19 +296,19 @@ namespace cctmp {
 // mutable:
 
 	template<typename Facade>
-	class iring_method : public ibuiltin_method<Facade>
+	class image_ring_method : public image_builtin_method<Facade>
 	{
 		public:
 
-			using base			= ibuiltin_method<Facade>;
+			using base			= image_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce iring_method() : base{} { }
-			nik_ce iring_method(const facade & f) : base{f} { }
+			nik_ce image_ring_method() : base{} { }
+			nik_ce image_ring_method(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
@@ -323,19 +323,19 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class iflex_cmethod : public ibuiltin_cmethod<Facade>
+	class image_flex_cmethod : public image_builtin_cmethod<Facade>
 	{
 		public:
 
-			using base			= ibuiltin_cmethod<Facade>;
+			using base			= image_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce iflex_cmethod() : base{} { }
-			nik_ce iflex_cmethod(const facade & f) : base{f} { }
+			nik_ce image_flex_cmethod() : base{} { }
+			nik_ce image_flex_cmethod(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
@@ -343,19 +343,19 @@ namespace cctmp {
 // mutable:
 
 	template<typename Facade>
-	class iflex_method : public ibuiltin_method<Facade>
+	class image_flex_method : public image_builtin_method<Facade>
 	{
 		public:
 
-			using base			= ibuiltin_method<Facade>;
+			using base			= image_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce iflex_method() : base{} { }
-			nik_ce iflex_method(const facade & f) : base{f} { }
+			nik_ce image_flex_method() : base{} { }
+			nik_ce image_flex_method(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
@@ -370,19 +370,19 @@ namespace cctmp {
 // immutable:
 
 	template<typename Facade>
-	class iutf8_char_cmethod : public ibuiltin_cmethod<Facade>
+	class image_utf8_char_cmethod : public image_builtin_cmethod<Facade>
 	{
 		public:
 
-			using base			= ibuiltin_cmethod<Facade>;
+			using base			= image_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce iutf8_char_cmethod() : base{} { }
-			nik_ce iutf8_char_cmethod(const facade & f) : base{f} { }
+			nik_ce image_utf8_char_cmethod() : base{} { }
+			nik_ce image_utf8_char_cmethod(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
@@ -390,19 +390,19 @@ namespace cctmp {
 // mutable:
 
 	template<typename Facade>
-	class iutf8_char_method : public ibuiltin_method<Facade>
+	class image_utf8_char_method : public image_builtin_method<Facade>
 	{
 		public:
 
-			using base			= ibuiltin_method<Facade>;
+			using base			= image_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type		(base)
 
 		public:
 
-			nik_ce iutf8_char_method() : base{} { }
-			nik_ce iutf8_char_method(const facade & f) : base{f} { }
+			nik_ce image_utf8_char_method() : base{} { }
+			nik_ce image_utf8_char_method(const facade & f) : base{f} { }
 	};
 
 /***********************************************************************************************************************/
