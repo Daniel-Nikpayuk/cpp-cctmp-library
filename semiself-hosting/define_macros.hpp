@@ -60,15 +60,17 @@
 															\
 		nik_using_name_scope_member(_n_, _t_, ctype)
 
-	#define nik_using_size_type(_t_)										\
+// using size_type:
+
+	#define nik_using_size_type_scope(_t_)										\
 															\
-		using size_type			= typename _t_::type;							\
-		using size_ctype		= typename _t_::ctype;
+		using size_type			= typename _t_::size_type;						\
+		using size_ctype		= typename _t_::size_ctype;						\
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// alias:
+// using alias:
 
 	#define nik_using_name_alias_scope_type(_n_, _t_)								\
 															\
@@ -78,9 +80,12 @@
 															\
 		nik_using_name_scope_ctype(_n_, alias<_t_>)
 
+// using size_type alias:
+
 	#define nik_using_size_type_alias(_t_)										\
 															\
-		nik_using_size_type(alias<_t_>)
+		using size_type			= typename alias<_t_>::type;						\
+		using size_ctype		= typename alias<_t_>::ctype;						\
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -59,7 +59,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, record_type)
 			nik_using_name_scope_ctype	(ctype, record_type)
 
-			nik_using_size_type		(record_type)
+			nik_using_size_type_scope	(record_type)
 
 		public:
 
@@ -134,7 +134,7 @@ namespace cctmp {
 			using record_type		= typename model_type::record_type;
 			using record_ctype_ref		= typename alias<record_type>::ctype_ref;
 
-			nik_using_size_type		(model_type)
+			nik_using_size_type_scope	(model_type)
 
 		protected:
 
@@ -177,7 +177,7 @@ namespace cctmp {
 			using record_type_ref		= typename alias<record_type>::type_ref;
 			using record_ctype_ref		= typename alias<record_type>::ctype_ref;
 
-			nik_using_size_type		(model_type)
+			nik_using_size_type_scope	(model_type)
 
 		protected:
 
@@ -226,7 +226,7 @@ namespace cctmp {
 			using cfacade_type		= concord_cfacade<model>;
 			using facade_type		= concord_facade<model>;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -259,9 +259,9 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
-			using model			= typename base::model_type;
+			using model_type		= typename base::model_type;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 			using icon_type			= icon<size_type>;
 			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
@@ -271,8 +271,10 @@ namespace cctmp {
 
 		protected:
 
-			using symbol_cmethod_type	= typename model::template symbol_cmethod_type<SymbolCMethod>;
-			using record_csubmethod_type	= typename model::template record_csubmethod_type<RecordCMethod>;
+			using symbol_cmethod_type	= typename model_type::template
+								symbol_cmethod_type<SymbolCMethod>;
+			using record_csubmethod_type	= typename model_type::template
+								record_csubmethod_type<RecordCMethod>;
 
 			symbol_cmethod_type symbol_cmethod;
 			record_csubmethod_type record_csubmethod;
@@ -299,9 +301,9 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
-			using model			= typename base::model_type;
+			using model_type		= typename base::model_type;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 			using icon_type			= typename base::icon_type;
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
@@ -311,8 +313,10 @@ namespace cctmp {
 
 		protected:
 
-			using symbol_method_type	= typename model::template symbol_method_type<SymbolMethod>;
-			using record_submethod_type	= typename model::template record_submethod_type<RecordMethod>;
+			using symbol_method_type	= typename model_type::template
+								symbol_method_type<SymbolMethod>;
+			using record_submethod_type	= typename model_type::template
+								record_submethod_type<RecordMethod>;
 
 			symbol_method_type symbol_method;
 			record_submethod_type record_submethod;

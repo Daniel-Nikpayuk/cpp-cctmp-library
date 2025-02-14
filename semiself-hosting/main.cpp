@@ -37,36 +37,33 @@
 
 /***********************************************************************************************************************/
 
-/*
 	constexpr auto concord_add_test()
 	{
 		using size_type     = unsigned long;
-		using glp_pack      = cctmp::T_pack_Vs<6, 3>;
-		using img_pack      = cctmp::T_pack_Vs<6, 3>;
-		using concord_type  = concord<size_type, size_type, glp_pack, img_pack, 3>;
-		using method_type   = resolve_method<concord_type, cring_method>;
+		using glyph_pack    = cctmp::T_pack_Vs<36, 3>;
+		using space_pack    = cctmp::T_pack_Vs<36, 3>;
+		using image_pack    = cctmp::T_pack_Vs<36, 3>;
+		using concord_type  = concord<size_type, size_type, glyph_pack, space_pack, image_pack, 3>;
+		using method_type   = resolve_method<concord_type, concord_ring_method>;
 
 		auto concord_value  = concord_type{};
 		auto concord_method = concord_value.template equip<method_type>();
-	//	auto out_sign       = concord_method.declare (8);
-	//	auto in1_sign       = concord_method.define  (8, 2);
-	//	auto in2_sign       = concord_method.define  (8, 3);
-
-	//	concord_method.add_to(out_sign, in1_sign, in2_sign);
+		auto out_sign       = concord_method.declare_abstract (8);
+		auto in1_sign       = concord_method.define_abstract  (8, 2);
+		auto in2_sign       = concord_method.define_abstract  (8, 3);
 
 		return concord_value;
 	}
 
 	constexpr auto concord0 = concord_add_test();
-*/
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-	//	print_array(*concord0.csymbol()->cglyph()->ctext());
-	//	print_array(*concord0.csymbol()->cimage()->ctext());
-	//	print_array(*concord0.crecord());
+		print_array(*concord0.csymbol()->cglyph()->ctext());
+		print_array(*concord0.csymbol()->cimage()->ctext());
+		print_array(*concord0.crecord());
 
 		return 0;
 	}

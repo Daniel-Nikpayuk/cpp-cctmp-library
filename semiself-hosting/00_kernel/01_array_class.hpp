@@ -159,7 +159,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, model_type,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, model_type, cderef_ctype)
 
-			nik_using_size_type		(model_type)
+			nik_using_size_type_scope	(model_type)
 
 		protected:
 
@@ -204,7 +204,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -243,7 +243,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -296,7 +296,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, model_type,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, model_type, cderef_ctype)
 
-			nik_using_size_type		(model_type)
+			nik_using_size_type_scope	(model_type)
 
 		protected:
 
@@ -389,7 +389,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -428,7 +428,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -520,7 +520,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -567,7 +567,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -615,7 +615,7 @@ namespace cctmp {
 		nik_using_name_scope_type	( type, base)
 		nik_using_name_scope_ctype	(ctype, base)
 
-		nik_using_size_type		(base)
+		nik_using_size_type_scope	(base)
 
 		nik_ce cstring() : base{} { }
 
@@ -644,7 +644,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -674,7 +674,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -700,7 +700,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		protected:
 

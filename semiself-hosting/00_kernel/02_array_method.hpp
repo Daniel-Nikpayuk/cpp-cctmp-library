@@ -86,7 +86,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -183,7 +183,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -255,7 +255,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		protected:
 
@@ -308,7 +308,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		protected:
 
@@ -388,7 +388,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		protected:
 
@@ -459,7 +459,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		protected:
 
@@ -467,8 +467,6 @@ namespace cctmp {
 			size_type cols;
 
 		protected:
-
-			nik_ce void set_dimension(size_ctype r, size_ctype c) { rows = r; cols = c; }
 
 			nik_ce table_presubmethod(ctype_cptr i, size_ctype t) : base{i, t} { }
 
@@ -480,8 +478,10 @@ namespace cctmp {
 			template<typename T, auto N>
 			nik_ce table_presubmethod(const T (&a)[N]) : base{a} { }
 
-			nik_ce void set_sizes(size_ctype r, size_ctype c)
-				{ if (r * c <= base::size()) { set_dimension(r, c); } }
+			nik_ce void fast_set_dimension(size_ctype r, size_ctype c) { rows = r; cols = c; }
+
+			nik_ce void set_dimension(size_ctype r, size_ctype c)
+				{ if (r * c <= base::size()) { fast_set_dimension(r, c); } }
 
 			// row:
 
@@ -524,7 +524,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -563,7 +563,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, base,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, base, cderef_ctype)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -607,7 +607,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, array_type)
 			nik_using_name_scope_ctype	(ctype, array_type)
 
-			nik_using_size_type		(array_type)
+			nik_using_size_type_scope	(array_type)
 
 		protected:
 
@@ -643,10 +643,11 @@ namespace cctmp {
 
 			nik_ce plot_policy() { }
 
-			nik_ce plot_policy(const array_type & i)
+			template<typename T, auto N>
+			nik_ce plot_policy(const T (&a)[N])
 			{
-				initialize_start (i.cbegin(), i.cend());
-				initialize_slot  (i.cbegin(), i.cend());
+				initialize_start (a, a + N);
+				initialize_slot  (a, a + N);
 			}
 
 			// start:
@@ -688,7 +689,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, initial_type,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, initial_type, cderef_ctype)
 
-			nik_using_size_type		(initial_type)
+			nik_using_size_type_scope	(initial_type)
 
 		protected:
 
@@ -758,7 +759,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, model_type,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, model_type, cderef_ctype)
 
-			nik_using_size_type		(model_type)
+			nik_using_size_type_scope	(model_type)
 
 		protected:
 
@@ -812,7 +813,7 @@ namespace cctmp {
 			nik_using_name_scope_member	( cderef_type, model_type,  cderef_type)
 			nik_using_name_scope_member	(cderef_ctype, model_type, cderef_ctype)
 
-			nik_using_size_type		(model_type)
+			nik_using_size_type_scope	(model_type)
 
 		protected:
 
@@ -863,7 +864,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 

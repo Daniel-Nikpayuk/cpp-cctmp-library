@@ -39,7 +39,7 @@ namespace cctmp {
 			using base			= Base;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 			using icon_type			= typename base::icon_type;
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
@@ -72,7 +72,7 @@ namespace cctmp {
 			using base			= Base;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 			using icon_type			= typename base::icon_type;
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
@@ -97,22 +97,30 @@ namespace cctmp {
 	//			nik_ce bool same_types(const T & l, const Ts &... rs)
 	//				{ return base::glyph_method.same_types(goffset, l.index(), rs.index()...); }
 
-			// declare:
+			protected:
 
-				nik_ce auto declare_sign(icon_ctype_ref icon, size_ctype time, size_ctype point)
+				nik_ce auto declare_image(icon_ctype_ref icon, size_ctype time, size_ctype point)
 				{
-				//	if (base::glyph_cmethod.is_fail(icon))
-				//		{ return base::image_cmethod.fail_sign(icon); }
+					if (base::glyph_cmethod.is_fail(icon))
+						{ return base::image_cmethod.fail_sign(); }
 
 					return base::image_method.declare(icon, time, point);
 				}
 
-				nik_ce auto declare(size_ctype bytes, size_ctype time, size_ctype point)
-				{
-					auto icon = base::glyph_method.declare(bytes);
+			public:
 
-					return declare_sign(icon, time, point);
-				}
+				// point:
+
+					nik_ce size_type get_abstract_point(sign_ctype_ref sign)
+						{ return base::image_cmethod.get(sign, ImageRing::point); }
+
+				// declare:
+
+					nik_ce auto declare(size_ctype bytes)
+						{ return base::glyph_method.declare(bytes); }
+
+					nik_ce auto declare(size_ctype bytes, size_ctype time, size_ctype point)
+						{ return declare_image(declare(bytes), time, point); }
 	};
 
 	// syntactic sugar:

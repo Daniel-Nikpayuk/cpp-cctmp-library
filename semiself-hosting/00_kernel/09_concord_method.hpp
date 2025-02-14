@@ -39,7 +39,7 @@ namespace cctmp {
 			using base			= Base;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 			using icon_type			= typename base::icon_type;
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
@@ -72,7 +72,7 @@ namespace cctmp {
 			using base			= Base;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 			using icon_type			= typename base::icon_type;
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
@@ -86,6 +86,41 @@ namespace cctmp {
 			nik_ce concord_ring_method_disjoint(const facade & f) : base{f} { }
 
 			// initialization:
+
+				// declare:
+
+				nik_ce auto declare(size_ctype bytes, size_ctype time)
+				{
+					size_ctype point = base::record().expand(1); // unit_size
+
+					return base::symbol_method.declare(bytes, time, point);
+				}
+
+				nik_ce auto declare_abstract(size_ctype bytes)
+					{ return declare(bytes, ImageTime::abstract); }
+
+				nik_ce auto declare_concrete(size_ctype bytes)
+					{ return declare(bytes, ImageTime::concrete); }
+
+				nik_ce auto define_abstract(size_ctype bytes, size_ctype value)
+				{
+					auto sign  = declare_abstract(bytes);
+					auto point = base::symbol_method.get_abstract_point(sign);
+
+					base::record_submethod[point] = value;
+
+					return sign;
+				}
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_ring_method =
+			concord_ring_method_disjoint  <
+			concord_ring_cmethod_disjoint <
+			concord_method < Facade, symbol_ring_cmethod, array_csubmethod,
+						  symbol_ring_method,  array_submethod >>>;
 
 			//	nik_ce auto declare(size_ctype bytes)
 			//	{
@@ -109,16 +144,6 @@ namespace cctmp {
 
 			//		return sign;
 			//	}
-	};
-
-	// syntactic sugar:
-
-		template<typename Facade>
-		using concord_ring_method =
-			concord_ring_method_disjoint  <
-			concord_ring_cmethod_disjoint <
-			concord_method < Facade, symbol_ring_cmethod, array_csubmethod,
-						  symbol_ring_method,  array_submethod >>>;
 
 			// apply:
 

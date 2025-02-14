@@ -66,9 +66,9 @@ namespace cctmp {
 	template<typename SizeType>
 	struct icon : public note<SizeType>
 	{
-		using base		= note<SizeType>;
+		using base			= note<SizeType>;
 
-		nik_using_size_type	(base)
+		nik_using_size_type_scope	(base)
 
 		nik_ce icon() : base{} { }
 		nik_ce icon(size_ctype t, size_ctype p) : base{t, p} { }
@@ -81,9 +81,9 @@ namespace cctmp {
 	template<typename SizeType>
 	struct sign : public note<SizeType>
 	{
-		using base		= note<SizeType>;
+		using base			= note<SizeType>;
 
-		nik_using_size_type	(base)
+		nik_using_size_type_scope	(base)
 
 		nik_ce sign() : base{} { }
 		nik_ce sign(size_ctype t, size_ctype p) : base{t, p} { }
@@ -175,7 +175,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, text_type)
 			nik_using_name_scope_ctype	(ctype, text_type)
 
-			nik_using_size_type		(text_type)
+			nik_using_size_type_scope	(text_type)
 
 		public:
 
@@ -256,7 +256,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, model_type)
 			nik_using_name_scope_ctype	(ctype, model_type)
 
-			nik_using_size_type		(model_type)
+			nik_using_size_type_scope	(model_type)
 
 		protected:
 
@@ -302,7 +302,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, model_type)
 			nik_using_name_scope_ctype	(ctype, model_type)
 
-			nik_using_size_type		(model_type)
+			nik_using_size_type_scope	(model_type)
 
 		protected:
 
@@ -345,7 +345,7 @@ namespace cctmp {
 			using cfacade_type		= book_cfacade<model>;
 			using facade_type		= book_facade<model>;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -371,31 +371,32 @@ namespace cctmp {
 
 // immutable:
 
-	template
-	<
-		typename Base,
-		template<typename> typename PageCMethod,
-		template<typename> typename TextCMethod,
-		template<typename> typename Note
-	>
+	template<typename Base, template<typename> typename PageCMethod, template<typename> typename TextCMethod>
 	class book_cmethod_disjoint : public Base
 	{
 		public:
 
 			using base			= Base;
 			using facade			= typename base::facade;
-			using model			= typename facade::model_type;
+			using model_type		= typename facade::model_type;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
-			using note_type			= Note<size_type>;
-			using note_type_ref		= typename alias<note_type>::type_ref;
-			using note_ctype_ref		= typename alias<note_type>::ctype_ref;
+			using icon_type			= icon<size_type>;
+			using icon_type_ref		= typename alias<icon_type>::type_ref;
+			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
+
+			using sign_type			= sign<size_type>;
+			using sign_type_ref		= typename alias<sign_type>::type_ref;
+			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
 
 		protected:
 
-			using page_cmethod_type		= typename model::template page_cmethod_type<PageCMethod>;
-			using text_csubmethod_type	= typename model::template text_csubmethod_type<TextCMethod>;
+			using page_cmethod_type		= typename model_type::template
+								page_cmethod_type<PageCMethod>;
+
+			using text_csubmethod_type	= typename model_type::template
+								text_csubmethod_type<TextCMethod>;
 
 			page_cmethod_type page_cmethod;
 			text_csubmethod_type text_csubmethod;
@@ -413,53 +414,31 @@ namespace cctmp {
 			// page:
 
 					// safe version should reset text.
-				nik_ce void fast_set_chapter(size_ctype n) { page_cmethod.set_slot(n); }
+				nik_ce void fast_set_cpage_chapter(size_ctype n) { page_cmethod.set_slot(n); }
 
 			// text:
 
-					// needs to test against subtext.
-				nik_ce void fast_set_text_dim(size_ctype r, size_ctype c)
-					{ text_csubmethod.set_dimension(r, c); }
-
 					// safe version should reset dimensions.
-				nik_ce void fast_set_text_ival(size_ctype s, size_ctype f)
+				nik_ce void fast_set_ctext_ival(size_ctype s, size_ctype f)
 					{ text_csubmethod.mid_set(s, f); }
 
 					// safe version assumes page is set; should reset dimensions.
-				nik_ce void fast_set_text_from_page(size_ctype n)
-					{ fast_set_text_ival(page_cmethod[n].start(), page_cmethod[n].finish()); }
-
-					// safe version should reset dimensions.
-				nik_ce auto fast_set_text_from_note(note_ctype_ref n)
-				{
-					fast_set_chapter(n.mark());
-					fast_set_text_from_page(n.index());
-				}
-
-			// note:
-
-				nik_ce auto make_note(size_type n, size_ctype m) const { return note_type{n, m}; }
-
-			// fail:
-
-				nik_ce auto fail_note()
-				{
-					// fail note should construct
-					// a fail message type/value.
-
-					return note_type{0, 0};
-				}
+				nik_ce void fast_set_ctext_from_page(size_ctype n)
+					{ fast_set_ctext_ival(page_cmethod[n].start(), page_cmethod[n].finish()); }
 
 			// find:
 
-				nik_ce bool found_from_previous(size_ctype n, note_ctype_ref note) const
-					{ return (n != note.index()); }
+				nik_ce bool found_from_previous(size_ctype n, size_ctype index) const
+					{ return (n < index); }
 
-				template<typename T, auto N> // assumes page and note_page match.
-				nik_ce auto fast_find_from_previous(note_ctype_ref n) const
+					// assumes page and note_page match.
+				nik_ce size_type find_from_previous(size_ctype mark, size_ctype index)
 				{
-					auto npage = page_cmethod.citer(n.index());
-					fast_set_text_ival(npage->start(), npage->finish());
+					fast_set_cpage_chapter(mark);
+
+					auto npage = page_cmethod.citer(index);
+
+					fast_set_ctext_ival(npage->start(), npage->finish());
 
 					for (auto k = page_cmethod.cbegin(); k != npage; ++k)
 					{
@@ -470,7 +449,7 @@ namespace cctmp {
 							{ return page_cmethod.left_size(k); }
 					}
 
-					return n.index();
+					return index;
 				}
 	};
 
@@ -485,19 +464,26 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
-			using model			= typename base::model_type;
+			using model_type		= typename base::model_type;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 			using ival_type			= typename base::ival_type;
 
-			using note_type			= typename base::note_type;
-			using note_ctype_ref		= typename base::note_ctype_ref;
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
 		protected:
 
-			using page_method_type		= typename model::template page_method_type<PageMethod>;
-			using text_submethod_type	= typename model::template text_submethod_type<TextMethod>;
+			using page_method_type		= typename model_type::template
+								page_method_type<PageMethod>;
+			using text_submethod_type	= typename model_type::template
+								text_submethod_type<TextMethod>;
 
 			page_method_type page_method;
 			text_submethod_type text_submethod;
@@ -515,13 +501,9 @@ namespace cctmp {
 			// page:
 
 					// safe version should reset text.
-				nik_ce void fast_set_chapter(size_ctype n) { page_method.set_slot(n); }
+				nik_ce void fast_set_page_chapter(size_ctype n) { page_method.set_slot(n); }
 
 			// text:
-
-					// needs to test against subtext.
-				nik_ce void fast_set_text_dim(size_ctype r, size_ctype c)
-					{ text_submethod.set_dimension(r, c); }
 
 					// safe version should reset dimensions.
 				nik_ce void fast_set_text_ival(size_ctype s, size_ctype f)
@@ -535,33 +517,29 @@ namespace cctmp {
 					fast_set_text_ival(npage->start(), npage->finish());
 				}
 
-					// safe version should reset dimensions.
-				nik_ce auto fast_set_text_from_note(note_ctype_ref n)
-				{
-					fast_set_chapter(n.mark());
-					fast_set_text_from_page(n.index());
-				}
-
 		protected:
 
 				nik_ce bool overlay(size_ctype n, size_ctype m)
 				{
-					fast_set_chapter(n);
+					fast_set_page_chapter(n);
 
 					if (page_method.is_full() || base::ctext().lacks_capacity(m)) return false;
 
-					page_method.push(ival_type{base::text().expand(m), m});
+					size_ctype start  = base::text().expand(m);
+					size_ctype finish = start + m;
+
+					page_method.push(ival_type{start, finish});
 
 					return true;
 				}
 
-				nik_ce auto fast_deallocate_last()
+				nik_ce void fast_deallocate_last()
 				{
 					base::text().downsize(base::page_cmethod.clast()->size());
-					base::page().downsize();
+					page_method.downsize();
 				}
 
-				nik_ce auto deallocate_last()
+				nik_ce void deallocate_last()
 				{
 					fast_set_text_ival(0, 0);
 					fast_deallocate_last();
@@ -569,13 +547,14 @@ namespace cctmp {
 
 		public:
 
-				nik_ce auto allocate(size_ctype n, size_ctype m)
+				nik_ce bool allocate(size_ctype n, size_ctype m)
 				{
-					if (not overlay(n, m)) return base::fail_note();
+					if (not overlay(n, m)) return false;
 
+					base::fast_set_cpage_chapter(n);
 					fast_set_text_from_page(base::page_cmethod.max());
 
-					return base::make_note(n, base::page_cmethod.max());
+					return true;
 				}
 	};
 

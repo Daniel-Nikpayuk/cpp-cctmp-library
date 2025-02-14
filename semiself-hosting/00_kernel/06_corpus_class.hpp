@@ -68,7 +68,7 @@ namespace cctmp {
 			nik_using_name_scope_type	( type, image_type)
 			nik_using_name_scope_ctype	(ctype, image_type)
 
-			nik_using_size_type		(image_type)
+			nik_using_size_type_scope	(image_type)
 
 		public:
 
@@ -93,8 +93,8 @@ namespace cctmp {
 
 			nik_ce corpus_model()
 			{
-				_glyph.page().upslot(sizeof...(GSizes));
-				_image.page().upslot(sizeof...(ISizes));
+				_glyph.page()->upslot(sizeof...(GSizes));
+				_image.page()->upslot(sizeof...(ISizes));
 			}
 
 			// glyph:
@@ -146,7 +146,7 @@ namespace cctmp {
 			using image_type		= typename model_type::image_type;
 			using image_ctype_ref		= typename alias<image_type>::ctype_ref;
 
-			nik_using_size_type		(model_type)
+			nik_using_size_type_scope	(model_type)
 
 		protected:
 
@@ -189,7 +189,7 @@ namespace cctmp {
 			using image_type_ref		= typename alias<image_type>::type_ref;
 			using image_ctype_ref		= typename alias<image_type>::ctype_ref;
 
-			nik_using_size_type		(model_type)
+			nik_using_size_type_scope	(model_type)
 
 		protected:
 
@@ -236,7 +236,7 @@ namespace cctmp {
 			using cfacade_type		= corpus_cfacade<model>;
 			using facade_type		= corpus_facade<model>;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -269,9 +269,9 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
-			using model			= typename base::model_type;
+			using model_type		= typename base::model_type;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 			using icon_type			= icon<size_type>;
 			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
@@ -281,8 +281,10 @@ namespace cctmp {
 
 		protected:
 
-			using glyph_cmethod_type	= typename model::template glyph_cmethod_type<GlyphCMethod>;
-			using image_cmethod_type	= typename model::template image_cmethod_type<ImageCMethod>;
+			using glyph_cmethod_type	= typename model_type::template
+								glyph_cmethod_type<GlyphCMethod>;
+			using image_cmethod_type	= typename model_type::template
+								image_cmethod_type<ImageCMethod>;
 
 			glyph_cmethod_type glyph_cmethod;
 			image_cmethod_type image_cmethod;
@@ -309,9 +311,9 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
-			using model			= typename base::model_type;
+			using model_type		= typename base::model_type;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 			using icon_type			= typename base::icon_type;
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
@@ -321,8 +323,10 @@ namespace cctmp {
 
 		protected:
 
-			using glyph_method_type		= typename model::template glyph_method_type<GlyphMethod>;
-			using image_method_type		= typename model::template image_method_type<ImageMethod>;
+			using glyph_method_type		= typename model_type::template
+								glyph_method_type<GlyphMethod>;
+			using image_method_type		= typename model_type::template
+								image_method_type<ImageMethod>;
 
 			glyph_method_type glyph_method;
 			image_method_type image_method;

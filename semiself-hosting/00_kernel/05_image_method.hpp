@@ -45,27 +45,31 @@ namespace cctmp {
 // immutable:
 
 	template<typename Base>
-	class image_cmethod_disjoint : public book_cmethod_disjoint<Base, array_cmethod, array_csubmethod, sign>
+	class image_cmethod_disjoint : public book_cmethod_disjoint<Base, array_cmethod, array_csubmethod>
 	{
 		public:
 
-			using base		= book_cmethod_disjoint<Base, array_cmethod, array_csubmethod, sign>;
-			using facade		= typename base::facade;
+			using base			= book_cmethod_disjoint<Base, array_cmethod, array_csubmethod>;
+			using facade			= typename base::facade;
 
-			nik_using_size_type	(base)
+			nik_using_size_type_scope	(base)
 
-			using icon_type		= icon<size_type>;
-			using icon_type_ref	= typename alias<icon_type>::type_ref;
-			using icon_ctype_ref	= typename alias<icon_type>::ctype_ref;
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
-			using sign_type		= typename base::note_type;
-			using sign_type_ref	= typename base::note_type_ref;
-			using sign_ctype_ref	= typename base::note_ctype_ref;
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
 		public:
 
 			nik_ce image_cmethod_disjoint() : base{} { }
 			nik_ce image_cmethod_disjoint(const facade & f) : base{f} { }
+
+			// sign:
+
+				nik_ce auto make_sign(size_type n, size_ctype m) const { return sign_type{n, m}; }
 
 			// fail:
 
@@ -75,6 +79,23 @@ namespace cctmp {
 				}
 
 				nik_ce bool not_fail(sign_ctype_ref n) const { return not is_fail(n); }
+
+				nik_ce auto fail_sign()
+				{
+					// fail sign should construct
+					// a fail message type/value.
+
+					return make_sign(0, 0);
+				}
+
+			// text:
+
+					// safe version should reset dimensions.
+				nik_ce auto fast_set_ctext_from_sign(sign_ctype_ref sign)
+				{
+					base::fast_set_cpage_chapter(sign.mark());
+					base::fast_set_ctext_from_page(sign.index());
+				}
 	};
 
 /***********************************************************************************************************************/
@@ -86,29 +107,47 @@ namespace cctmp {
 	{
 		public:
 
-			using base		= book_method_disjoint<Base, array_method, array_submethod>;
-			using facade		= typename base::facade;
+			using base			= book_method_disjoint<Base, array_method, array_submethod>;
+			using facade			= typename base::facade;
 
-			nik_using_size_type	(base)
+			nik_using_size_type_scope	(base)
 
-			using icon_type		= typename base::icon_type;
-			using icon_type_ref	= typename base::icon_type_ref;
-			using icon_ctype_ref	= typename base::icon_ctype_ref;
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
-			using sign_type		= typename base::sign_type;
-			using sign_type_ref	= typename base::sign_type_ref;
-			using sign_ctype_ref	= typename base::sign_ctype_ref;
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
 		public:
 
 			nik_ce image_method_disjoint() : base{} { }
 			nik_ce image_method_disjoint(const facade & f) : base{f} { }
 
-			nik_ce void set_iconography(icon_ctype_ref icon)
+			nik_ce void set_icon_fields(icon_ctype_ref icon)
 			{
 				base::text_submethod[ImageBase::mark ] = icon.mark ();
 				base::text_submethod[ImageBase::index] = icon.index();
 			}
+
+			// text:
+
+					// safe version should reset dimensions.
+				nik_ce auto fast_set_text_from_sign(sign_ctype_ref sign)
+				{
+					base::fast_set_page_chapter(sign.mark());
+					base::fast_set_text_from_page(sign.index());
+				}
+
+			// allocate:
+
+				nik_ce auto allocate(size_ctype n, size_ctype m)
+				{
+					if (base::allocate(n, m))
+						{ return base::make_sign(n, base::page_cmethod.max()); }
+					else    { return base::fail_sign(); }
+				}
 	};
 
 /***********************************************************************************************************************/
@@ -133,7 +172,7 @@ namespace cctmp {
 			using base			= Base;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 			using icon_type			= typename base::icon_type;
 			using icon_type_ref		= typename base::icon_type_ref;
@@ -147,6 +186,15 @@ namespace cctmp {
 
 			nik_ce image_builtin_cmethod_disjoint() : base{} { }
 			nik_ce image_builtin_cmethod_disjoint(const facade & f) : base{f} { }
+
+			nik_ce size_type fast_get(size_ctype n) const { return base::text_csubmethod[n]; }
+
+			nik_ce size_type get(sign_ctype_ref sign, size_ctype n)
+			{
+				base::fast_set_ctext_from_sign(sign);
+
+				return fast_get(n);
+			}
 	};
 
 	// syntactic sugar:
@@ -168,7 +216,7 @@ namespace cctmp {
 			using base			= Base;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 			using icon_type			= typename base::icon_type;
 			using icon_type_ref		= typename base::icon_type_ref;
@@ -192,7 +240,7 @@ namespace cctmp {
 
 			nik_ce void instantiate(icon_ctype_ref icon, size_ctype time, size_ctype point)
 			{
-				base::set_iconography(icon);
+				base::set_icon_fields(icon);
 
 				base::text_submethod[ImageBuiltin::time ] = time;
 				base::text_submethod[ImageBuiltin::point] = point;
@@ -200,7 +248,7 @@ namespace cctmp {
 
 			nik_ce auto declare(icon_ctype_ref icon, size_ctype time, size_ctype point)
 			{
-				auto sign = base::allocate(BookMark::builtin, length);
+				auto sign = base::allocate(icon.mark(), length);
 
 				if (base::not_fail(sign)) { instantiate(icon, time, point); }
 
@@ -236,7 +284,7 @@ namespace cctmp {
 			using base			= image_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -256,7 +304,7 @@ namespace cctmp {
 			using base			= image_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -283,7 +331,7 @@ namespace cctmp {
 			using base			= image_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -303,7 +351,7 @@ namespace cctmp {
 			using base			= image_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -330,7 +378,7 @@ namespace cctmp {
 			using base			= image_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -350,7 +398,7 @@ namespace cctmp {
 			using base			= image_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -377,7 +425,7 @@ namespace cctmp {
 			using base			= image_builtin_cmethod<Facade>;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
@@ -397,7 +445,7 @@ namespace cctmp {
 			using base			= image_builtin_method<Facade>;
 			using facade			= typename base::facade;
 
-			nik_using_size_type		(base)
+			nik_using_size_type_scope	(base)
 
 		public:
 
