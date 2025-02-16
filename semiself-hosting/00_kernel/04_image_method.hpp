@@ -27,13 +27,13 @@ namespace cctmp {
 
 // times:
 
-	struct ImageTime { enum : gkey_type { abstract, concrete, dimension }; };
+	struct ImageTime { enum : genum_type { abstract, concrete, dimension }; };
 
 /***********************************************************************************************************************/
 
 // base:
 
-	struct ImageBase { enum : gkey_type { mark, index, dimension }; };
+	struct ImageBase { enum : genum_type { mark, index, dimension }; };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -157,7 +157,7 @@ namespace cctmp {
 
 	struct ImageBuiltin
 	{
-		enum : gkey_type { mark = ImageBase::mark, index = ImageBase::index, time, point, dimension };
+		enum : genum_type { mark = ImageBase::mark, index = ImageBase::index, time, point, dimension };
 	};
 
 /***********************************************************************************************************************/
@@ -460,12 +460,89 @@ namespace cctmp {
 
 	struct ImageTuple
 	{
-		enum : gkey_type { mark = ImageBase::mark, index = ImageBase::index, length, start, dimension };
+		enum : genum_type { mark = ImageBase::mark, index = ImageBase::index, length, start, dimension };
 	};
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class image_tuple_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce image_tuple_cmethod_disjoint() : base{} { }
+			nik_ce image_tuple_cmethod_disjoint(const facade & f) : base{f} { }
+
+			nik_ce size_type fast_get(size_ctype n) const { return base::text_csubmethod[n]; }
+
+			nik_ce size_type get(sign_ctype_ref sign, size_ctype n)
+			{
+				base::fast_set_ctext_from_sign(sign);
+
+				return fast_get(n);
+			}
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using image_tuple_cmethod =
+			image_tuple_cmethod_disjoint <
+			image_cmethod_disjoint          < Facade >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class image_tuple_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce image_tuple_method_disjoint() : base{} { }
+			nik_ce image_tuple_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using image_tuple_method =
+			image_tuple_method_disjoint  <
+			image_tuple_cmethod_disjoint <
+			image_method_disjoint           <
+			image_cmethod_disjoint          < Facade >>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -474,7 +551,7 @@ namespace cctmp {
 
 	struct ImageCotuple
 	{
-		enum : gkey_type
+		enum : genum_type
 		{
 			mark = ImageBase::mark, index = ImageBase::index, length, injection, start, dimension
 		};
@@ -482,16 +559,178 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class image_cotuple_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce image_cotuple_cmethod_disjoint() : base{} { }
+			nik_ce image_cotuple_cmethod_disjoint(const facade & f) : base{f} { }
+
+			nik_ce size_type fast_get(size_ctype n) const { return base::text_csubmethod[n]; }
+
+			nik_ce size_type get(sign_ctype_ref sign, size_ctype n)
+			{
+				base::fast_set_ctext_from_sign(sign);
+
+				return fast_get(n);
+			}
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using image_cotuple_cmethod =
+			image_cotuple_cmethod_disjoint <
+			image_cmethod_disjoint         < Facade >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class image_cotuple_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce image_cotuple_method_disjoint() : base{} { }
+			nik_ce image_cotuple_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using image_cotuple_method =
+			image_cotuple_method_disjoint  <
+			image_cotuple_cmethod_disjoint <
+			image_method_disjoint          <
+			image_cmethod_disjoint         < Facade >>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // function:
 
+	struct ImageFunction
+	{
+		enum : genum_type
+		{
+			mark = ImageBase::mark, index = ImageBase::index, time, check, point, dimension
+		};
+	};
+
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class image_function_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce image_function_cmethod_disjoint() : base{} { }
+			nik_ce image_function_cmethod_disjoint(const facade & f) : base{f} { }
+
+			nik_ce size_type fast_get(size_ctype n) const { return base::text_csubmethod[n]; }
+
+			nik_ce size_type get(sign_ctype_ref sign, size_ctype n)
+			{
+				base::fast_set_ctext_from_sign(sign);
+
+				return fast_get(n);
+			}
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using image_function_cmethod =
+			image_function_cmethod_disjoint <
+			image_cmethod_disjoint          < Facade >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class image_function_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce image_function_method_disjoint() : base{} { }
+			nik_ce image_function_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using image_function_method =
+			image_function_method_disjoint  <
+			image_function_cmethod_disjoint <
+			image_method_disjoint           <
+			image_cmethod_disjoint          < Facade >>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

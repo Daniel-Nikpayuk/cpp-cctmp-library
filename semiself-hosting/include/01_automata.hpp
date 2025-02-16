@@ -17,13 +17,5 @@
 **
 ************************************************************************************************************************/
 
-#include"../00_kernel/00_array_class.hpp"
-#include"../00_kernel/01_array_method.hpp"
-#include"../00_kernel/02_book_class.hpp"
-#include"../00_kernel/03_glyph_method.hpp"
-#include"../00_kernel/04_image_method.hpp"
-#include"../00_kernel/05_corpus_class.hpp"
-#include"../00_kernel/06_symbol_method.hpp"
-#include"../00_kernel/07_concord_class.hpp"
-#include"../00_kernel/08_concord_method.hpp"
+#include"../01_automata/00_evaluator.hpp"
 

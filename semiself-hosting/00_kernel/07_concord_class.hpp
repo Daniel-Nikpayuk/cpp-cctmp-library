@@ -222,9 +222,9 @@ namespace cctmp {
 							<
 								Type, SizeType, GlyphPack, SpacePack, ImagePack, Size
 							>;
-			using model			= base;
-			using cfacade_type		= concord_cfacade<model>;
-			using facade_type		= concord_facade<model>;
+			using model_type		= base;
+			using cfacade_type		= concord_cfacade<model_type>;
+			using facade_type		= concord_facade<model_type>;
 
 			nik_using_size_type_scope	(base)
 
@@ -236,11 +236,11 @@ namespace cctmp {
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model const*>(this)}; }
+					{ return cfacade_type{static_cast<model_type const*>(this)}; }
 
 				template<typename Method>
 				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<model*>(this)}; }
+					{ return facade_type{static_cast<model_type*>(this)}; }
 	};
 
 /***********************************************************************************************************************/

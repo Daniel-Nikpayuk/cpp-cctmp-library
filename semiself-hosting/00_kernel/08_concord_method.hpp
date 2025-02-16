@@ -122,59 +122,6 @@ namespace cctmp {
 			concord_method < Facade, symbol_ring_cmethod, array_csubmethod,
 						  symbol_ring_method,  array_submethod >>>;
 
-			//	nik_ce auto declare(size_ctype bytes)
-			//	{
-			//		size_ctype offset = base::glyph_cmethod.unit_size();
-
-			//		return symbol_method.declare(bytes, record_method.expand(offset));
-			//	}
-
-			//	nik_ce auto define(size_ctype bytes, size_ctype value)
-			//	{
-			//		auto sign = declare(bytes);
-
-			//		if (sign.kind() == Gram::ringN)
-			//		{
-			//						// image_start ? index instead of sign ?
-			//			auto image_submethod = base::image_cmethod.
-			//							sign_to_text_cequip(sign.index());
-
-			//			record_method[image_submethod[IRing::start]] = value;
-			//		}
-
-			//		return sign;
-			//	}
-
-			// apply:
-
-			// add to record:
-
-			//	template<typename T, typename... Ts>
-			//	nik_ce void add_to_record(const T & l, const Ts &... rs)
-			//	{
-			//		const auto & l_image_cmethod = base::image_cmethod.
-			//							sign_to_text_cequip(l.index());
-
-			//		add_to_methods(l_image_cmethod,
-			//			base::image_cmethod.sign_to_text_cequip(rs.index())...);
-			//	}
-
-			//	template<typename T, typename... Ts>
-			//	nik_ce void add_to_methods(const T & l, const Ts &... rs)
-			//		{ add_to_positions(l[IRing::start], rs[IRing::start]...); }
-
-			//	template<typename T, typename... Ts>
-			//	nik_ce void add_to_positions(T l, Ts... rs)
-			//		{ record_method[l] = (... + base::record_cmethod[rs]); }
-
-			// add to:
-
-			//	nik_ce void add_to(sign_ctype_ref out, sign_ctype_ref in1, sign_ctype_ref in2)
-			//	{
-			//		if (symbol_method.same_types(out, in1, in2))
-			//			{ add_to_record(out, in1, in2); }
-			//	}
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -191,7 +138,71 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class concord_tuple_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_tuple_cmethod_disjoint() : base{} { }
+			nik_ce concord_tuple_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_tuple_cmethod =
+			concord_tuple_cmethod_disjoint <
+			concord_cmethod < Facade, symbol_tuple_cmethod, array_csubmethod >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class concord_tuple_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_tuple_method_disjoint() : base{} { }
+			nik_ce concord_tuple_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_tuple_method =
+			concord_tuple_method_disjoint  <
+			concord_tuple_cmethod_disjoint <
+			concord_method < Facade, symbol_tuple_cmethod, array_csubmethod,
+						  symbol_tuple_method,  array_submethod >>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -200,7 +211,71 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class concord_cotuple_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_cotuple_cmethod_disjoint() : base{} { }
+			nik_ce concord_cotuple_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_cotuple_cmethod =
+			concord_cotuple_cmethod_disjoint <
+			concord_cmethod < Facade, symbol_cotuple_cmethod, array_csubmethod >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class concord_cotuple_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_cotuple_method_disjoint() : base{} { }
+			nik_ce concord_cotuple_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_cotuple_method =
+			concord_cotuple_method_disjoint  <
+			concord_cotuple_cmethod_disjoint <
+			concord_method < Facade, symbol_cotuple_cmethod, array_csubmethod,
+						  symbol_cotuple_method,  array_submethod >>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -209,7 +284,71 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class concord_function_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_function_cmethod_disjoint() : base{} { }
+			nik_ce concord_function_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_function_cmethod =
+			concord_function_cmethod_disjoint <
+			concord_cmethod < Facade, symbol_function_cmethod, array_csubmethod >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class concord_function_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_function_method_disjoint() : base{} { }
+			nik_ce concord_function_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_function_method =
+			concord_function_method_disjoint  <
+			concord_function_cmethod_disjoint <
+			concord_method < Facade, symbol_function_cmethod, array_csubmethod,
+						  symbol_function_method,  array_submethod >>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

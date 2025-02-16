@@ -27,6 +27,42 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// packs:
+
+	template<auto...> struct T_pack_Vs; // intentionally undefined.
+
+/***********************************************************************************************************************/
+
+// types:
+
+	// enum:
+
+		using global_enum_type		= unsigned char;
+		using genum_type		= global_enum_type;
+		using genum_ctype		= global_enum_type const;
+
+/***********************************************************************************************************************/
+
+// alias:
+
+	template<typename Type>
+	struct alias
+	{
+		using type		= Type;
+		using type_ptr		= type*;
+		using type_cptr		= type_ptr const;
+		using type_ref		= type&;
+
+		using ctype		= type const;
+		using ctype_ptr		= ctype*;
+		using ctype_cptr	= ctype_ptr const;
+		using ctype_ref		= ctype&;
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // array:
 
 /***********************************************************************************************************************/
@@ -320,11 +356,13 @@ namespace cctmp {
 
 				nik_ce void fast_left_set  (size_ctype f) { fast_mid_set(0, f); }
 				nik_ce void fast_right_set (size_ctype s) { fast_mid_set(s, model->size()); }
+				nik_ce void fast_full_set  (            ) { fast_mid_set(0, model->size()); }
 
 				nik_ce void mid_set(size_ctype s, size_ctype f) { if (s <= f) { fast_mid_set(s, f); } }
 
 				nik_ce void left_set  (size_ctype f) { mid_set(0, f); }
 				nik_ce void right_set (size_ctype s) { mid_set(s, model->size()); }
+				nik_ce void full_set  (            ) { mid_set(0, model->size()); }
 
 			// shift:
 
@@ -512,10 +550,10 @@ namespace cctmp {
 	{
 		public:
 
-			using model			= array_cmodel<Type, SizeType>;
-			using base			= CMethodType<model>;
-			using csubfacade_type		= array_csubfacade<model>;
-			using cfacade_type		= array_cfacade<model>;
+			using model_type		= array_cmodel<Type, SizeType>;
+			using base			= CMethodType<model_type>;
+			using csubfacade_type		= array_csubfacade<model_type>;
+			using cfacade_type		= array_cfacade<model_type>;
 
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
@@ -535,13 +573,13 @@ namespace cctmp {
 
 				template<typename CMethod>
 				nik_ce auto csubequip() const -> CMethod
-					{ return csubfacade_type{static_cast<model const*>(this)}; }
+					{ return csubfacade_type{static_cast<model_type const*>(this)}; }
 
 			// equip:
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model const*>(this)}; }
+					{ return cfacade_type{static_cast<model_type const*>(this)}; }
 	};
 
 /***********************************************************************************************************************/
@@ -557,12 +595,12 @@ namespace cctmp {
 	{
 		public:
 
-			using model			= array_model<Type, SizeType, Size>;
-			using base			= MethodType<model>;
-			using csubfacade_type		= array_csubfacade<model>;
-			using subfacade_type		= array_subfacade<model>;
-			using cfacade_type		= array_cfacade<model>;
-			using facade_type		= array_facade<model>;
+			using model_type		= array_model<Type, SizeType, Size>;
+			using base			= MethodType<model_type>;
+			using csubfacade_type		= array_csubfacade<model_type>;
+			using subfacade_type		= array_subfacade<model_type>;
+			using cfacade_type		= array_cfacade<model_type>;
+			using facade_type		= array_facade<model_type>;
 
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
@@ -580,21 +618,21 @@ namespace cctmp {
 
 				template<typename CMethod>
 				nik_ce auto csubequip() const -> CMethod
-					{ return csubfacade_type{static_cast<model const*>(this)}; }
+					{ return csubfacade_type{static_cast<model_type const*>(this)}; }
 
 				template<typename Method>
 				nik_ce auto subequip() -> Method
-					{ return subfacade_type{static_cast<model*>(this)}; }
+					{ return subfacade_type{static_cast<model_type*>(this)}; }
 
 			// equip:
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model const*>(this)}; }
+					{ return cfacade_type{static_cast<model_type const*>(this)}; }
 
 				template<typename Method>
 				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<model*>(this)}; }
+					{ return facade_type{static_cast<model_type*>(this)}; }
 	};
 
 /***********************************************************************************************************************/

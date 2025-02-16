@@ -81,13 +81,33 @@
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// logo cstart:
+// concord:
+
+	constexpr auto concord_define_test()
+	{
+		using size_type     = unsigned long;
+		using glyph_pack    = cctmp::T_pack_Vs<12, 1>;
+		using space_pack    = cctmp::T_pack_Vs< 0, 0>;
+		using image_pack    = cctmp::T_pack_Vs<36, 3>;
+		using concord_type  = concord<size_type, size_type, glyph_pack, space_pack, image_pack, 3>;
+		using method_type   = resolve_method<concord_type, concord_ring_method>;
+
+		auto concord_value  = concord_type{};
+		auto concord_method = concord_value.template equip<method_type>();
+		auto out_sign       = concord_method.declare_abstract (8);
+		auto in1_sign       = concord_method.define_abstract  (8, 2);
+		auto in2_sign       = concord_method.define_abstract  (8, 3);
+
+		return concord_value;
+	}
+
+	constexpr auto concord0 = concord_define_test();
 
 	// main:
 
-		using cmethod0 = resolve_cmethod<decltype(start0), print_cmethod>;
+		print_array(*concord0.csymbol()->cglyph()->ctext());
+		print_array(*concord0.csymbol()->cimage()->ctext());
+		print_array(*concord0.crecord());
 
-		auto print0 = start0.template cequip<cmethod0>();
-
-		print0.as_set(); // prints: { 0, 5, 12, 15, 20 }
+/***********************************************************************************************************************/
 

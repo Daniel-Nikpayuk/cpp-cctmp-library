@@ -97,7 +97,7 @@ namespace cctmp {
 
 	struct BookMark
 	{
-		enum : gkey_type
+		enum : genum_type
 		{
 			builtin, tuple, cotuple, function, list,
 			identity, l_than, l_than_or_eq, g_than, g_than_or_eq,
@@ -111,7 +111,7 @@ namespace cctmp {
 
 // spaces:
 
-	struct SpaceMsg { enum : gkey_type { fail, dimension }; }; // fail as custom type within the message space.
+	struct SpaceMsg { enum : genum_type { fail, dimension }; }; // fail as custom type within the message space.
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -306,8 +306,6 @@ namespace cctmp {
 
 		protected:
 
-			using ival_type			= typename Model::ival_type;
-
 			model_type_ptr model;
 
 		public:
@@ -341,9 +339,9 @@ namespace cctmp {
 		public:
 
 			using base			= book_model<Type, SizeType, Size, Sizes...>;
-			using model			= base;
-			using cfacade_type		= book_cfacade<model>;
-			using facade_type		= book_facade<model>;
+			using model_type		= base;
+			using cfacade_type		= book_cfacade<model_type>;
+			using facade_type		= book_facade<model_type>;
 
 			nik_using_size_type_scope	(base)
 
@@ -355,11 +353,11 @@ namespace cctmp {
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model const*>(this)}; }
+					{ return cfacade_type{static_cast<model_type const*>(this)}; }
 
 				template<typename Method>
 				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<model*>(this)}; }
+					{ return facade_type{static_cast<model_type*>(this)}; }
 	};
 
 /***********************************************************************************************************************/
@@ -519,16 +517,21 @@ namespace cctmp {
 
 		protected:
 
+				nik_ce void push_page(size_ctype m)
+				{
+					size_ctype start  = base::text().expand(m);
+					size_ctype finish = start + m;
+
+					page_method.push(ival_type{start, finish});
+				}
+
 				nik_ce bool overlay(size_ctype n, size_ctype m)
 				{
 					fast_set_page_chapter(n);
 
 					if (page_method.is_full() || base::ctext().lacks_capacity(m)) return false;
 
-					size_ctype start  = base::text().expand(m);
-					size_ctype finish = start + m;
-
-					page_method.push(ival_type{start, finish});
+					push_page(m);
 
 					return true;
 				}

@@ -352,9 +352,9 @@ namespace cctmp {
 				template<typename In, typename End>
 				nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }
 
-				template<typename F, typename In, typename End>
-				nik_ce void pushmap(F, In in, End end)
-					{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
+			//	template<typename F, typename In, typename End>
+			//	nik_ce void pushmap(F, In in, End end)
+			//		{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
 	};
 
 /***********************************************************************************************************************/
@@ -423,9 +423,9 @@ namespace cctmp {
 				template<typename In, typename End>
 				nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }
 
-				template<typename F, typename In, typename End>
-				nik_ce void pushmap(F, In in, End end)
-					{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
+			//	template<typename F, typename In, typename End>
+			//	nik_ce void pushmap(F, In in, End end)
+			//		{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
 	};
 
 /***********************************************************************************************************************/
@@ -857,9 +857,9 @@ namespace cctmp {
 		public:
 
 			using base			= plot_model<Type, SizeType, Sizes...>;
-			using model			= base;
-			using cfacade_type		= plot_cfacade<model>;
-			using facade_type		= plot_facade<model>;
+			using model_type		= base;
+			using cfacade_type		= plot_cfacade<model_type>;
+			using facade_type		= plot_facade<model_type>;
 
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
@@ -876,11 +876,11 @@ namespace cctmp {
 
 				template<typename CMethod>
 				nik_ce auto cequip(size_ctype n) const -> CMethod
-					{ return cfacade_type{static_cast<model const*>(this), n}; }
+					{ return cfacade_type{static_cast<model_type const*>(this), n}; }
 
 				template<typename Method>
 				nik_ce auto equip(size_ctype n) -> Method
-					{ return facade_type{static_cast<model*>(this), n}; }
+					{ return facade_type{static_cast<model_type*>(this), n}; }
 	};
 
 /***********************************************************************************************************************/

@@ -91,36 +91,34 @@ namespace cctmp {
 
 		public:
 
-	//		// same types:
+			// same types:
 
-	//			template<typename T, typename... Ts>
-	//			nik_ce bool same_types(const T & l, const Ts &... rs)
-	//				{ return base::glyph_method.same_types(goffset, l.index(), rs.index()...); }
+			//	template<typename T, typename... Ts>
+			//	nik_ce bool same_types(const T & l, const Ts &... rs)
+			//		{ return base::glyph_method.same_types(goffset, l.index(), rs.index()...); }
 
-			protected:
+		protected:
 
-				nik_ce auto declare_image(icon_ctype_ref icon, size_ctype time, size_ctype point)
-				{
-					if (base::glyph_cmethod.is_fail(icon))
-						{ return base::image_cmethod.fail_sign(); }
+			nik_ce auto declare_image(icon_ctype_ref icon, size_ctype time, size_ctype point)
+			{
+				if (base::glyph_cmethod.is_fail(icon)) { return base::image_cmethod.fail_sign(); }
 
-					return base::image_method.declare(icon, time, point);
-				}
+				return base::image_method.declare(icon, time, point);
+			}
 
-			public:
+		public:
 
-				// point:
+			// point:
 
-					nik_ce size_type get_abstract_point(sign_ctype_ref sign)
-						{ return base::image_cmethod.get(sign, ImageRing::point); }
+				nik_ce size_type get_abstract_point(sign_ctype_ref sign)
+					{ return base::image_cmethod.get(sign, ImageRing::point); }
 
-				// declare:
+			// declare:
 
-					nik_ce auto declare(size_ctype bytes)
-						{ return base::glyph_method.declare(bytes); }
+				nik_ce auto declare(size_ctype bytes) { return base::glyph_method.declare(bytes); }
 
-					nik_ce auto declare(size_ctype bytes, size_ctype time, size_ctype point)
-						{ return declare_image(declare(bytes), time, point); }
+				nik_ce auto declare(size_ctype bytes, size_ctype time, size_ctype point)
+					{ return declare_image(declare(bytes), time, point); }
 	};
 
 	// syntactic sugar:
@@ -148,7 +146,71 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class symbol_tuple_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce symbol_tuple_cmethod_disjoint() : base{} { }
+			nik_ce symbol_tuple_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using symbol_tuple_cmethod =
+			symbol_tuple_cmethod_disjoint <
+			corpus_cmethod < Facade, glyph_tuple_cmethod, image_tuple_cmethod >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class symbol_tuple_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce symbol_tuple_method_disjoint() : base{} { }
+			nik_ce symbol_tuple_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using symbol_tuple_method =
+			symbol_tuple_method_disjoint  <
+			symbol_tuple_cmethod_disjoint <
+			corpus_method < Facade, glyph_tuple_cmethod, image_tuple_cmethod,
+						 glyph_tuple_method,  image_tuple_method >>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -157,7 +219,71 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class symbol_cotuple_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce symbol_cotuple_cmethod_disjoint() : base{} { }
+			nik_ce symbol_cotuple_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using symbol_cotuple_cmethod =
+			symbol_cotuple_cmethod_disjoint <
+			corpus_cmethod < Facade, glyph_cotuple_cmethod, image_cotuple_cmethod >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class symbol_cotuple_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce symbol_cotuple_method_disjoint() : base{} { }
+			nik_ce symbol_cotuple_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using symbol_cotuple_method =
+			symbol_cotuple_method_disjoint  <
+			symbol_cotuple_cmethod_disjoint <
+			corpus_method < Facade, glyph_cotuple_cmethod, image_cotuple_cmethod,
+						 glyph_cotuple_method,  image_cotuple_method >>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -166,7 +292,71 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class symbol_function_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce symbol_function_cmethod_disjoint() : base{} { }
+			nik_ce symbol_function_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using symbol_function_cmethod =
+			symbol_function_cmethod_disjoint <
+			corpus_cmethod < Facade, glyph_function_cmethod, image_function_cmethod >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class symbol_function_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce symbol_function_method_disjoint() : base{} { }
+			nik_ce symbol_function_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using symbol_function_method =
+			symbol_function_method_disjoint  <
+			symbol_function_cmethod_disjoint <
+			corpus_method < Facade, glyph_function_cmethod, image_function_cmethod,
+						 glyph_function_method,  image_function_method >>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

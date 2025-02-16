@@ -29,7 +29,7 @@ namespace cctmp {
 
 	struct GlyphInstr
 	{
-		enum : gkey_type
+		enum : genum_type
 		{
 			program, push, apply,
 			empty, ring, flex, utf8_char, tuple, cotuple, function, null, list,
@@ -44,9 +44,9 @@ namespace cctmp {
 
 // fields:
 
-	struct GlyphProg { enum : gkey_type { instr, lines,     code, next, dimension }; };
-	struct GlyphRout { enum : gkey_type { instr, arity,    local, next, dimension }; };
-	struct GlyphMeta { enum : gkey_type { instr, bytes, universe, next, dimension }; };
+	struct GlyphProg { enum : genum_type { instr, lines,     code, next, dimension }; };
+	struct GlyphRout { enum : genum_type { instr, arity,    local, next, dimension }; };
+	struct GlyphMeta { enum : genum_type { instr, bytes, universe, next, dimension }; };
 
 /***********************************************************************************************************************/
 
@@ -54,7 +54,7 @@ namespace cctmp {
 
 	struct GlyphCode
 	{
-		enum : gkey_type
+		enum : genum_type
 		{
 			valid, invalid, // will be refined and extended as needed.
 
@@ -530,7 +530,59 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class glyph_tuple_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+		public:
+
+			nik_ce glyph_tuple_cmethod_disjoint() : base{} { }
+			nik_ce glyph_tuple_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using glyph_tuple_cmethod =
+			glyph_tuple_cmethod_disjoint <
+			glyph_cmethod_disjoint       < Facade >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class glyph_tuple_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+		public:
+
+			nik_ce glyph_tuple_method_disjoint() : base{} { }
+			nik_ce glyph_tuple_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using glyph_tuple_method =
+			glyph_tuple_method_disjoint  <
+			glyph_tuple_cmethod_disjoint <
+			glyph_method_disjoint        <
+			glyph_cmethod_disjoint       < Facade >>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -539,7 +591,59 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class glyph_cotuple_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+		public:
+
+			nik_ce glyph_cotuple_cmethod_disjoint() : base{} { }
+			nik_ce glyph_cotuple_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using glyph_cotuple_cmethod =
+			glyph_cotuple_cmethod_disjoint <
+			glyph_cmethod_disjoint         < Facade >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class glyph_cotuple_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+		public:
+
+			nik_ce glyph_cotuple_method_disjoint() : base{} { }
+			nik_ce glyph_cotuple_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using glyph_cotuple_method =
+			glyph_cotuple_method_disjoint  <
+			glyph_cotuple_cmethod_disjoint <
+			glyph_method_disjoint          <
+			glyph_cmethod_disjoint         < Facade >>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -548,7 +652,59 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class glyph_function_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+		public:
+
+			nik_ce glyph_function_cmethod_disjoint() : base{} { }
+			nik_ce glyph_function_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using glyph_function_cmethod =
+			glyph_function_cmethod_disjoint <
+			glyph_cmethod_disjoint          < Facade >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class glyph_function_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+		public:
+
+			nik_ce glyph_function_method_disjoint() : base{} { }
+			nik_ce glyph_function_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using glyph_function_method =
+			glyph_function_method_disjoint  <
+			glyph_function_cmethod_disjoint <
+			glyph_method_disjoint           <
+			glyph_cmethod_disjoint          < Facade >>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

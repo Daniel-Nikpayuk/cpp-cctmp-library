@@ -34,13 +34,17 @@
 
 // array:
 
-	template<typename Array>
-	constexpr void print_array(const Array & a, const char *s = "%d ")
+	template<typename In, typename End>
+	constexpr void print_array(In in, End end, const char *s = "%d ")
 	{
-		for (auto k = a.cbegin(); k != a.cend(); ++k) printf(s, *k);
+		for (auto k = in; k != end; ++k) printf(s, *k);
 
 		printf("\n");
 	}
+
+	template<typename Array>
+	constexpr void print_array(const Array & a, const char *s = "%d ")
+		{ print_array(a.cbegin(), a.cend(), s); }
 
 /***********************************************************************************************************************/
 

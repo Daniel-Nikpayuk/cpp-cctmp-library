@@ -25,6 +25,7 @@
 #include"define_macros.hpp"
 
 #include"include/00_kernel.hpp"
+#include"include/01_automata.hpp"
 
 #include"undef_macros.hpp"
 
@@ -37,33 +38,50 @@
 
 /***********************************************************************************************************************/
 
-	constexpr auto concord_add_test()
+// square:
+
+	template<typename MI, typename MP, typename SizeType>
+	struct square_contr
 	{
-		using size_type     = unsigned long;
-		using glyph_pack    = cctmp::T_pack_Vs<36, 3>;
-		using space_pack    = cctmp::T_pack_Vs<36, 3>;
-		using image_pack    = cctmp::T_pack_Vs<36, 3>;
-		using concord_type  = concord<size_type, size_type, glyph_pack, space_pack, image_pack, 3>;
-		using method_type   = resolve_method<concord_type, concord_ring_method>;
+		using size_type = SizeType;
 
-		auto concord_value  = concord_type{};
-		auto concord_method = concord_value.template equip<method_type>();
-		auto out_sign       = concord_method.declare_abstract (8);
-		auto in1_sign       = concord_method.define_abstract  (8, 2);
-		auto in2_sign       = concord_method.define_abstract  (8, 3);
+		constexpr static size_type result[28] =
+		{
+			MI::program         ,  7 ,            0 , 1 ,	// line 0: instr,  lines, atomic, next
+			MI::function        ,  5 , MP::to_stack , 1 ,	// line 1: instr, inline, policy, next
+			MI::memory_to_stack ,  0 ,            1 , 1 ,	// line 2: instr,  begin,    end, next
+			MI::memory_to_stack ,  0 ,            1 , 1 ,	// line 3: instr,  begin,    end, next
+			MI::apply           ,  0 , MP::to_carry , 0 ,	// line 4: instr,  begin, policy, next
+			MI::program         ,  2 ,            1 , 1 ,	// line 5: instr,  lines, atomic, next
+			MI::multiply        ,  0 , MP::to_carry , 0  	// line 6: instr,  begin, policy, next
+		};
+	};
 
-		return concord_value;
+/***********************************************************************************************************************/
+
+	constexpr auto eval_sq_test()
+	{
+		using size_type   = unsigned long;
+		using eval_type   = eval<size_type, size_type, 100, 100, 100, 100>;
+		using sq_contr    = square_contr<MachineInstruction, MachinePolicy, size_type>;
+
+		auto eval_value   = eval_type{sq_contr::result};
+
+		eval_value.run({3});
+
+		return eval_value;
 	}
 
-	constexpr auto concord0 = concord_add_test();
+	constexpr auto sq_eval = eval_sq_test();
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-		print_array(*concord0.csymbol()->cglyph()->ctext());
-		print_array(*concord0.csymbol()->cimage()->ctext());
-		print_array(*concord0.crecord());
+		using method_type = resolve_cmethod<typename decltype(sq_eval)::machine_type, machine_cmethod>;
+		auto sq_cmethod   = sq_eval._machine.template cequip<method_type>();
+
+		print_array(sq_cmethod.rtn_cbegin(), sq_cmethod.rtn_cend());
 
 		return 0;
 	}
