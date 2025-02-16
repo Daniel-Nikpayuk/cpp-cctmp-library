@@ -556,25 +556,45 @@ namespace cctmp {
 
 			nik_ces void apply(eval_type_ptr eval, contr_ctype_ref contr)
 			{
-				auto subeval = eval_type{*machine(eval).ccontr()};
+				size_ctype offset = contr[machine(eval).counter()][1];
+				size_ctype policy = contr[machine(eval).counter()][2];
 
-				machine(&subeval).set_counter(machine(eval).cstage()->cat(0));
+				auto subeval      = eval_type{*machine(eval).ccontr()};
+				auto stage_start  = offset;
+				auto stage_finish = machine(eval).cstage()->size();
 
-				auto stage_begin = machine(eval).cstage()->citer(1);
-				auto stage_end   = machine(eval).cstage()->cend();
-
+				machine(&subeval).set_counter(machine(eval).cstage()->cat(stage_start));
+				auto stage_begin = machine(eval).cstage()->citer(stage_start + 1);
+				auto stage_end   = machine(eval).cstage()->citer(stage_finish);
 				subeval.run(stage_begin, stage_end);
 
 				auto subcarry_begin = machine(&subeval).ccarry()->cbegin();
 				auto subcarry_end   = machine(&subeval).ccarry()->cend();
 
-				machine(eval).carry()->push(subcarry_begin, subcarry_end);
+				if (policy == MP::to_stack)
+				{
+					machine(eval).stage()->downsize(stage_finish - stage_start);
+					machine(eval).stage()->push(subcarry_begin, subcarry_end);
+				}
+				else if (policy == MP::to_carry)
+				{
+					machine(eval).carry()->push(subcarry_begin, subcarry_end);
+				}
 			}
 
 		// ring:
 
 			nik_ces void add(eval_type_ptr eval, contr_ctype_ref contr)
 			{
+				machine(eval).carry()->clear();
+
+				auto b = machine(eval).cverse()->cbegin();
+				auto e = machine(eval).cverse()->cend();
+
+				size_type k = 0;
+				while (b != e) { k += *b++; }
+
+				machine(eval).carry()->push(k);
 			}
 
 			nik_ces void subtract(eval_type_ptr eval, contr_ctype_ref contr)
