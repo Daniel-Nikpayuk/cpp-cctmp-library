@@ -17,6 +17,6 @@
 **
 ************************************************************************************************************************/
 
-#include"../01_automata/00_abstract.hpp"
-#include"../01_automata/01_evaluate.hpp"
+#include"../01_automata/00_virtual.hpp"
+#include"../01_automata/01_action.hpp"
 
