@@ -47,11 +47,14 @@
 
 		constexpr static size_type result[28] =
 		{
-			MI::program         , 7 ,            0 , 1 ,	// line 0: instr,  lines, atomic, next
+			MI::program         , 5 ,            0 , 1 ,	// line 0: instr,  lines, atomic, next
 			MI::function        , 5 , MP::to_stack , 1 ,	// line 1: instr, inline, policy, next
 			MI::memory_to_stack , 0 ,            1 , 1 ,	// line 2: instr,  begin,    end, next
 			MI::memory_to_stack , 0 ,            1 , 1 ,	// line 3: instr,  begin,    end, next
 			MI::apply           , 0 , MP::to_carry , 0 ,	// line 4: instr,  begin, policy, next
+
+		// multiply:
+
 			MI::program         , 2 ,            1 , 1 ,	// line 5: instr,  lines, atomic, next
 			MI::multiply        , 0 , MP::to_carry , 0	// line 6: instr,  begin, policy, next
 		};
@@ -68,7 +71,7 @@
 
 		constexpr static size_type result[72] =
 		{
-			MI::program         , 18 ,            0 , 1 ,	// 00
+			MI::program         ,  9 ,            0 , 1 ,	// 00
 			MI::function        , 16 , MP::to_stack , 1 ,	// 01
 			MI::function        ,  9 , MP::to_stack , 1 ,	// 02
 			MI::memory_to_stack ,  0 ,            1 , 1 ,	// 03
@@ -80,7 +83,7 @@
 
 		// square:
 
-			MI::program         ,  7 ,            0 , 1 ,	// 09
+			MI::program         ,  5 ,            0 , 1 ,	// 09
 			MI::function        , 14 , MP::to_stack , 1 ,	// 10
 			MI::memory_to_stack ,  0 ,            1 , 1 ,	// 11
 			MI::memory_to_stack ,  0 ,            1 , 1 ,	// 12
@@ -100,20 +103,22 @@
 
 /***********************************************************************************************************************/
 
+/*
 	constexpr auto eval_sq_test()
 	{
 		using size_type   = unsigned long;
 		using eval_type   = eval<size_type, size_type, 100, 100, 100, 100>;
+		using method_type = resolve_method<eval_type, eval_method>;
 		using sq_contr    = square_contr<MachineInstruction, MachinePolicy, size_type>;
 
 		auto eval_value   = eval_type{sq_contr::result};
+		auto eval_method  = eval_value.template equip<method_type>();
 
-		eval_value.run({5});
-
-		return eval_value;
+		return eval_method.run({5});
 	}
 
-	constexpr auto sq_eval = eval_sq_test();
+	constexpr auto carry_sq = eval_sq_test();
+*/
 
 /***********************************************************************************************************************/
 
@@ -121,16 +126,16 @@
 	{
 		using size_type        = unsigned long;
 		using eval_type        = eval<size_type, size_type, 100, 100, 100, 100>;
+		using method_type      = resolve_method<eval_type, eval_method>;
 		using sum_of_sqs_contr = sum_of_squares_contr<MachineInstruction, MachinePolicy, size_type>;
 
-		auto eval_value   = eval_type{sum_of_sqs_contr::result};
+		auto eval_value        = eval_type{sum_of_sqs_contr::result};
+		auto eval_method       = eval_value.template equip<method_type>();
 
-		eval_value.run({3, 4});
-
-		return eval_value;
+		return eval_method.run({3, 7});
 	}
 
-	constexpr auto sum_of_sqs_eval = eval_sum_of_sqs_test();
+	constexpr auto carry_sum_of_sqs = eval_sum_of_sqs_test();
 
 /***********************************************************************************************************************/
 
@@ -138,24 +143,15 @@
 	{
 		// square:
 
-			using method_type = resolve_cmethod<typename decltype(sq_eval)::machine_type, machine_cmethod>;
-			auto sq_cmethod   = sq_eval._machine.template cequip<method_type>();
-
 		//	static_assert(sq_eval._machine.ccarry()->cat(0) == 9);
 
-			print_array(sq_cmethod.rtn_cbegin(), sq_cmethod.rtn_cend());
+		//	print_array(carry_sq.cbegin(), carry_sq.cend());
 
 		// sum of squares:
 
-			using method_type       = resolve_cmethod
-						<
-							typename decltype(sum_of_sqs_eval)::machine_type, machine_cmethod
-						>;
-			auto sum_of_sqs_cmethod = sum_of_sqs_eval._machine.template cequip<method_type>();
-
 		//	static_assert(sum_of_sqs_eval._machine.ccarry()->cat(0) == 25);
 
-			print_array(sum_of_sqs_cmethod.rtn_cbegin(), sum_of_sqs_cmethod.rtn_cend());
+			print_array(carry_sum_of_sqs.cbegin(), carry_sum_of_sqs.cend());
 
 		return 0;
 	}

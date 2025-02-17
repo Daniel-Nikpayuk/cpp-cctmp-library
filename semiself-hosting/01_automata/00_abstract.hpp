@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// evaluator:
+// abstract:
 
 namespace cctmp {
 
@@ -36,19 +36,12 @@ namespace cctmp {
 
 // mutable:
 
-	template
-	<
-		typename Type, typename SizeType,
-		SizeType ContrSize, SizeType CarrySize, SizeType VerseSize, SizeType StageSize
-	>
+	template<typename Type, typename SizeType, SizeType CarrySize, SizeType VerseSize, SizeType StageSize>
 	class machine_model
 	{
 		public:
 
 			using facade				= machine_model; // method compatible.
-
-			using contr_type			= array<Type, SizeType, ContrSize>;
-			using contr_ctype_ptr			= typename alias<contr_type>::ctype_ptr;
 
 			using carry_type			= array<Type, SizeType, CarrySize>;
 			using carry_type_ptr			= typename alias<carry_type>::type_ptr;
@@ -69,8 +62,6 @@ namespace cctmp {
 
 		public:
 
-			using contr_csubmethod_type		= resolve_csubmethod<contr_type, table_csubmethod>;
-
 			using carry_csubmethod_type		= resolve_csubmethod<carry_type, array_csubmethod>;
 			using  carry_submethod_type		=  resolve_submethod<carry_type,  array_submethod>;
 
@@ -82,24 +73,14 @@ namespace cctmp {
 
 		protected:
 
-			contr_type  _contr;
-			size_type   _counter;
-
-			carry_type  _carry;
-			verse_type  _verse;
-			stage_type  _stage;
+			carry_type _carry;
+			verse_type _verse;
+			stage_type _stage;
+			size_type  _counter;
 
 		public:
 
 			nik_ce machine_model() : _counter{} { }
-			nik_ce machine_model(const contr_type & c) : _contr{c}, _counter{} { }
-
-			// contr:
-
-				nik_ce contr_ctype_ptr ccontr() const { return &_contr; }
-
-				nik_ce auto contr_csubequip() const
-					{ return _contr.template csubequip<contr_csubmethod_type>(); }
 
 			// counter:
 
@@ -161,9 +142,6 @@ namespace cctmp {
 			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
 			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
 
-			using contr_type		= typename model_type::contr_type;
-			using contr_ctype_ref		= typename alias<contr_type>::ctype_ref;
-
 			using carry_type		= typename model_type::carry_type;
 			using carry_ctype_ref		= typename alias<carry_type>::ctype_ref;
 
@@ -186,10 +164,6 @@ namespace cctmp {
 
 			nik_ce machine_cfacade() : model{} { }
 			nik_ce machine_cfacade(model_ctype_cptr m) : model{m} { }
-
-			// contr:
-
-				nik_ce contr_ctype_ref ccontr() const { return *model->ccontr(); }
 
 			// counter:
 
@@ -223,9 +197,6 @@ namespace cctmp {
 			using model_type_ptr		= typename alias<model_type>::type_ptr;
 			using model_type_cptr		= typename alias<model_type>::type_cptr;
 
-			using contr_type		= typename model_type::contr_type;
-			using contr_ctype_ref		= typename alias<contr_type>::ctype_ref;
-
 			using carry_type		= typename model_type::carry_type;
 			using carry_type_ref		= typename alias<carry_type>::type_ref;
 			using carry_ctype_ref		= typename alias<carry_type>::ctype_ref;
@@ -251,10 +222,6 @@ namespace cctmp {
 
 			nik_ce machine_facade() : model{} { }
 			nik_ce machine_facade(model_type_cptr m) : model{m} { }
-
-			// contr:
-
-				nik_ce contr_ctype_ref ccontr() const { return *model->ccontr(); }
 
 			// counter:
 
@@ -287,25 +254,15 @@ namespace cctmp {
 
 // mutable:
 
-	template
-	<
-		typename Type, typename SizeType,
-		SizeType ContrSize, SizeType CarrySize, SizeType VerseSize, SizeType StageSize
-	>
-	class machine : public machine_model<Type, SizeType, ContrSize, CarrySize, VerseSize, StageSize>
+	template<typename Type, typename SizeType, SizeType CarrySize, SizeType VerseSize, SizeType StageSize>
+	class machine : public machine_model<Type, SizeType, CarrySize, VerseSize, StageSize>
 	{
 		public:
 
-			using base			= machine_model
-							<
-								Type, SizeType,
-								ContrSize, CarrySize, VerseSize, StageSize
-							>;
+			using base			= machine_model<Type, SizeType, CarrySize, VerseSize, StageSize>;
 			using model_type		= base;
 			using cfacade_type		= machine_cfacade<model_type>;
 			using facade_type		= machine_facade<model_type>;
-
-			using contr_type		= typename model_type::contr_type;
 
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
@@ -315,7 +272,6 @@ namespace cctmp {
 		public:
 
 			nik_ce machine() : base{} { }
-			nik_ce machine(const contr_type & c) : base{c} { }
 
 			// equip:
 
@@ -353,13 +309,9 @@ namespace cctmp {
 
 	//	protected: // debugging:
 
-			using contr_csubmethod_type  = typename model_type::contr_csubmethod_type;
-
 			using carry_csubmethod_type  = typename model_type::carry_csubmethod_type;
 			using verse_csubmethod_type  = typename model_type::verse_csubmethod_type;
 			using stage_csubmethod_type  = typename model_type::stage_csubmethod_type;
-
-			contr_csubmethod_type  contr_csubmethod;
 
 			carry_csubmethod_type  carry_csubmethod;
 			verse_csubmethod_type  verse_csubmethod;
@@ -369,11 +321,6 @@ namespace cctmp {
 
 			nik_ce void initialize() // call only once.
 			{
-				size_ctype row_size = (base::ccontr().size() >> 2);
-				size_ctype col_size = 4;
-				contr_csubmethod.fast_full_set();
-				contr_csubmethod.set_dimension(row_size, col_size);
-
 			//	carry_csubmethod.fast_full_set();
 			//	verse_csubmethod.fast_full_set();
 			//	stage_csubmethod.fast_full_set();
@@ -385,17 +332,10 @@ namespace cctmp {
 			nik_ce machine_cmethod_disjoint(const facade & f) :
 
 				base{f},
-				contr_csubmethod {base::model->contr_csubequip()},
 				carry_csubmethod {base::model->carry_csubequip()},
 				verse_csubmethod {base::model->verse_csubequip()},
 				stage_csubmethod {base::model->stage_csubequip()}
 				{ initialize(); }
-
-			nik_ce auto contr_value(size_ctype row, size_ctype col) const
-				{ return contr_csubmethod[row][col]; }
-
-			nik_ce auto contr_current_value(size_ctype col) const
-				{ return contr_value(base::counter(), col); }
 
 			// carry:
 
@@ -478,7 +418,6 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
 
 // action:
 
@@ -516,215 +455,137 @@ namespace cctmp {
 
 // interface:
 
-	template<typename Eval, typename Contr, typename SizeType>
-	struct MachineAction
+	template<typename EvalMethod, typename Contr, typename SizeType>
+	struct machine_action
 	{
-		using eval_type			= Eval;
-		using eval_type_ptr		= typename alias<eval_type>::type_ptr;
+		using eval_method_type		= EvalMethod;
+		using eval_method_type_ptr	= typename alias<eval_method_type>::type_ptr;
 
 		using contr_ctype_ref		= Contr const&;
 
-		using method_type		= void(*)(eval_type_ptr, contr_ctype_ref);
+		using method_type		= void(*)(eval_method_type_ptr, contr_ctype_ref);
+		using action_type		= array<method_type, SizeType, MI::dimension>;
 
 		nik_using_size_type_alias	(SizeType)
 
 		// utility:
 
-			nik_ces auto & machine(eval_type_ptr eval) { return eval->_machine; }
+			nik_ces auto & machine(eval_method_type_ptr eval_method) { return eval_method->_machine; }
 
 		// core:
 
-			nik_ces void program(eval_type_ptr eval, contr_ctype_ref contr)
+			nik_ces void program(eval_method_type_ptr eval_method, contr_ctype_ref contr)
 				{ } // nothing.
 
-			nik_ces void function(eval_type_ptr eval, contr_ctype_ref contr)
+			nik_ces void function(eval_method_type_ptr eval_method, contr_ctype_ref contr)
 			{
-				size_ctype value  = contr[machine(eval).counter()][1];
-				size_ctype policy = contr[machine(eval).counter()][2];
+				size_ctype value  = contr[machine(eval_method).counter()][1];
+				size_ctype policy = contr[machine(eval_method).counter()][2];
 
-				if      (policy == MP::to_stack) { machine(eval).stage()->push(value); }
-				else if (policy == MP::to_carry) { machine(eval).carry()->push(value); }
+				if      (policy == MP::to_stack) { machine(eval_method).stage()->push(value); }
+				else if (policy == MP::to_carry) { machine(eval_method).carry()->push(value); }
 			}
 
-			nik_ces void memory_to_stack(eval_type_ptr eval, contr_ctype_ref contr)
+			nik_ces void memory_to_stack(eval_method_type_ptr eval_method, contr_ctype_ref contr)
 			{
-				auto begin = machine(eval).cverse()->citer(contr[eval->_machine.counter()][1]);
-				auto end   = machine(eval).cverse()->citer(contr[eval->_machine.counter()][2]);
+				auto begin = machine(eval_method).cverse()->citer(contr[eval_method->_machine.counter()][1]);
+				auto end   = machine(eval_method).cverse()->citer(contr[eval_method->_machine.counter()][2]);
 
-				machine(eval).stage()->push(begin, end);
+				machine(eval_method).stage()->push(begin, end);
 			}
 
-			nik_ces void apply(eval_type_ptr eval, contr_ctype_ref contr)
+			nik_ces void apply(eval_method_type_ptr eval_method, contr_ctype_ref contr)
 			{
-				size_ctype offset = contr[machine(eval).counter()][1];
-				size_ctype policy = contr[machine(eval).counter()][2];
+				size_ctype offset = contr[machine(eval_method).counter()][1];
+				size_ctype policy = contr[machine(eval_method).counter()][2];
 
-				auto subeval      = eval_type{*machine(eval).ccontr()};
+				auto subeval      = eval_method->again();
 				auto stage_start  = offset;
-				auto stage_finish = machine(eval).cstage()->size();
+				auto stage_finish = machine(eval_method).cstage()->size();
 
-				machine(&subeval).set_counter(machine(eval).cstage()->cat(stage_start));
-				auto stage_begin = machine(eval).cstage()->citer(stage_start + 1);
-				auto stage_end   = machine(eval).cstage()->citer(stage_finish);
-				subeval.run(stage_begin, stage_end);
+				machine(&subeval).set_counter(machine(eval_method).cstage()->cat(stage_start));
+				auto stage_begin = machine(eval_method).cstage()->citer(stage_start + 1);
+				auto stage_end   = machine(eval_method).cstage()->citer(stage_finish);
+				auto carry       = subeval.run(stage_begin, stage_end);
 
 				auto subcarry_begin = machine(&subeval).ccarry()->cbegin();
 				auto subcarry_end   = machine(&subeval).ccarry()->cend();
 
 				if (policy == MP::to_stack)
 				{
-					machine(eval).stage()->downsize(stage_finish - stage_start);
-					machine(eval).stage()->push(subcarry_begin, subcarry_end);
+					machine(eval_method).stage()->downsize(stage_finish - stage_start);
+					machine(eval_method).stage()->push(subcarry_begin, subcarry_end);
 				}
 				else if (policy == MP::to_carry)
 				{
-					machine(eval).carry()->push(subcarry_begin, subcarry_end);
+					machine(eval_method).carry()->push(subcarry_begin, subcarry_end);
 				}
 			}
 
 		// ring:
 
-			nik_ces void add(eval_type_ptr eval, contr_ctype_ref contr)
+			nik_ces void add(eval_method_type_ptr eval_method, contr_ctype_ref contr)
 			{
-				machine(eval).carry()->clear();
+				machine(eval_method).carry()->clear();
 
-				auto b = machine(eval).cverse()->cbegin();
-				auto e = machine(eval).cverse()->cend();
+				auto b = machine(eval_method).cverse()->cbegin();
+				auto e = machine(eval_method).cverse()->cend();
 
 				size_type k = 0;
 				while (b != e) { k += *b++; }
 
-				machine(eval).carry()->push(k);
+				machine(eval_method).carry()->push(k);
 			}
 
-			nik_ces void subtract(eval_type_ptr eval, contr_ctype_ref contr)
+			nik_ces void subtract(eval_method_type_ptr eval_method, contr_ctype_ref contr)
 			{
 			}
 
-			nik_ces void multiply(eval_type_ptr eval, contr_ctype_ref contr)
+			nik_ces void multiply(eval_method_type_ptr eval_method, contr_ctype_ref contr)
 			{
-				machine(eval).carry()->clear();
+				machine(eval_method).carry()->clear();
 
-				auto b = machine(eval).cverse()->cbegin();
-				auto e = machine(eval).cverse()->cend();
+				auto b = machine(eval_method).cverse()->cbegin();
+				auto e = machine(eval_method).cverse()->cend();
 
 				size_type k = 1;
 				while (b != e) { k *= *b++; }
 
-				machine(eval).carry()->push(k);
+				machine(eval_method).carry()->push(k);
 			}
 
-			nik_ces void divide(eval_type_ptr eval, contr_ctype_ref contr)
+			nik_ces void divide(eval_method_type_ptr eval_method, contr_ctype_ref contr)
 			{
 			}
 
-			nik_ces void modulo(eval_type_ptr eval, contr_ctype_ref contr)
+			nik_ces void modulo(eval_method_type_ptr eval_method, contr_ctype_ref contr)
 			{
 			}
-	};
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
+		// action:
 
-// eval:
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template
-	<
-		typename Type, typename SizeType,
-		SizeType ContrSize, SizeType CarrySize, SizeType VerseSize, SizeType StageSize
-	>
-	class eval
-	{
-		public:
-
-			using machine_type		= machine
-							<
-								Type, SizeType,
-								ContrSize, CarrySize, VerseSize, StageSize
-							>;
-			using machine_method_type	= resolve_method<machine_type, machine_method>;
-
-			nik_using_name_scope_type	( type, machine_type)
-			nik_using_name_scope_ctype	(ctype, machine_type)
-
-			nik_using_size_type_scope	(machine_type)
-
-		protected:
-
-			using machine_model_type	= typename machine_type::model_type;
-			using contr_csubmethod_type	= typename machine_model_type::contr_csubmethod_type;
-			using contr_type		= typename machine_model_type::contr_type;
-			using ma_type			= MachineAction<eval, contr_csubmethod_type, size_type>;
-
-		public:
-
-			using action_method_type	= typename ma_type::method_type;
-			using action_type		= array<action_method_type, SizeType, MI::dimension>;
-
-			using action_csubmethod_type	= resolve_csubmethod<action_type, array_csubmethod>;
-
-	//	protected: // debugging.
-
-			machine_type _machine;
-			action_type _action;
-
-		protected:
-
-			nik_ce void initialize() { set_action(); } // call only once.
-
-			nik_ce void set_action() // call only once.
+			nik_ces auto set_action() // call only once.
 			{
-				_action.fullsize();
+				action_type action;
+				action.fullsize();
 
-				_action[ MI::program         ] = ma_type::program         ;
-				_action[ MI::function        ] = ma_type::function        ;
-				_action[ MI::memory_to_stack ] = ma_type::memory_to_stack ;
-				_action[ MI::apply           ] = ma_type::apply           ;
-				_action[ MI::add             ] = ma_type::add             ;
-				_action[ MI::subtract        ] = ma_type::subtract        ;
-				_action[ MI::multiply        ] = ma_type::multiply        ;
-				_action[ MI::divide          ] = ma_type::divide          ;
-				_action[ MI::modulo          ] = ma_type::modulo          ;
+				action[ MI::program         ] = program         ;
+				action[ MI::function        ] = function        ;
+				action[ MI::memory_to_stack ] = memory_to_stack ;
+				action[ MI::apply           ] = apply           ;
+				action[ MI::add             ] = add             ;
+				action[ MI::subtract        ] = subtract        ;
+				action[ MI::multiply        ] = multiply        ;
+				action[ MI::divide          ] = divide          ;
+				action[ MI::modulo          ] = modulo          ;
+
+				return action;
 			}
 
-		public:
+			nik_ces auto action = set_action();
 
-			nik_ce eval() : _machine{}, _action{} { initialize(); }
-			nik_ce eval(const contr_type & c) : _machine{c}, _action{} { initialize(); }
-
-		protected:
-
-			nik_ce auto make_machine_method() { return _machine.template equip<machine_method_type>(); }
-
-			nik_ce void execute()
-			{
-				auto mach_method = make_machine_method();
-				size_ctype instr = mach_method.contr_current_value(0);
-
-				_action[instr](this, mach_method.contr_csubmethod);
-			}
-
-		public:
-
-			nik_ce void run(ctype_ptr in, ctype_cptr end) // assumes counter is set before calling.
-			{
-				auto mach_method = make_machine_method();
-
-				_machine.verse()->push(in, end);
-
-				while (mach_method.contr_current_value(3))
-				{
-					_machine.inc_counter();
-					execute();
-				}
-			}
-
-			template<auto N> // const verse_type & ?
-			nik_ce void run(ctype (&v)[N]) { run(v, v + N); }
+			nik_ces void execute(size_ctype instr, eval_method_type_ptr eval_method, contr_ctype_ref contr)
+				{ action[instr](eval_method, contr); }
 	};
 
 /***********************************************************************************************************************/

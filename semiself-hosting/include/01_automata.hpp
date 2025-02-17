@@ -17,5 +17,6 @@
 **
 ************************************************************************************************************************/
 
-#include"../01_automata/00_evaluator.hpp"
+#include"../01_automata/00_abstract.hpp"
+#include"../01_automata/01_evaluate.hpp"
 
