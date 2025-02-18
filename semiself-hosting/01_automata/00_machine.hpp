@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// virtual:
+// machine:
 
 namespace cctmp {
 
@@ -25,7 +25,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// machine:
+// virtual machine:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -420,190 +420,167 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// eval:
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// model:
+// action:
 
 /***********************************************************************************************************************/
 
-// mutable:
+// instructions:
 
-	template
-	<
-		typename Type, typename SizeType,
-		SizeType ContrSize, SizeType CarrySize, SizeType VerseSize, SizeType StageSize
-	>
-	class eval_model
+	struct MachineInstr
 	{
-		public:
+		enum : genum_type
+		{
+			// core:
 
-			using facade				= eval_model; // method compatible.
+				program, define_argument, branch, invert, apply,
+				function, argument, memory_to_stack, memory_to_carry,
 
-			using contr_type			= array<Type, SizeType, ContrSize>;
-			using contr_ctype_ptr			= typename alias<contr_type>::ctype_ptr;
+			// compare:
 
-			using machine_type			= machine
-								<
-									Type, SizeType, CarrySize, VerseSize, StageSize
-								>;
+				equal, not_equal, l_than, l_than_or_eq, g_than, g_than_or_eq,
 
-			nik_using_name_alias_scope_type		( type, Type)
-			nik_using_name_alias_scope_ctype	(ctype, Type)
+			// arithmetic:
 
-			nik_using_size_type_alias		(SizeType)
+				constant, add, subtract, multiply, divide, modulo,
 
-		public:
+			// dimension
 
-			using contr_csubmethod_type		= resolve_csubmethod<contr_type, table_csubmethod>;
-			using machine_method_type		= resolve_method<machine_type, machine_method>;
-
-		protected:
-
-			contr_type  _contr;
-
-		public:
-
-			nik_ce eval_model() { }
-			nik_ce eval_model(const contr_type & c) : _contr{c} { }
-
-			// contr:
-
-				nik_ce contr_ctype_ptr ccontr() const { return &_contr; }
-
-				nik_ce auto contr_csubequip() const
-					{ return _contr.template csubequip<contr_csubmethod_type>(); }
+				dimension
+		};
 	};
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// facade:
+	using MI = MachineInstr;
 
 /***********************************************************************************************************************/
 
-// immutable:
+// policies:
 
-	template<typename Model>
-	class eval_cfacade
-	{
-		public:
+	struct MachinePolicy { enum : genum_type { to_stack, to_carry, dimension }; };
 
-			using facade			= eval_cfacade; // method compatible.
-
-			using model_type		= Model;
-			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
-			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
-
-			using contr_type		= typename model_type::contr_type;
-			using contr_ctype_ref		= typename alias<contr_type>::ctype_ref;
-
-			nik_using_name_scope_type	( type, model_type)
-			nik_using_name_scope_ctype	(ctype, model_type)
-
-			nik_using_size_type_scope	(model_type)
-
-		protected:
-
-			model_ctype_ptr model;
-
-		public:
-
-			nik_ce eval_cfacade() : model{} { }
-			nik_ce eval_cfacade(model_ctype_cptr m) : model{m} { }
-
-			// contr:
-
-				nik_ce contr_ctype_ref ccontr() const { return *model->ccontr(); }
-	};
+	using MP = MachinePolicy;
 
 /***********************************************************************************************************************/
 
-// mutable:
+// fields:
 
-	template<typename Model>
-	class eval_facade
-	{
-		public:
+	struct MachineProgram		{ enum : genum_type { action,  lines, atomic,   next, dimension }; };
+	struct MachineArgument		{ enum : genum_type { action,  index,  start, finish, dimension }; };
+	struct MachineBranch		{ enum : genum_type { action,   line,   none,   next, dimension }; };
+	struct MachineApply		{ enum : genum_type { action, offset, policy,   next, dimension }; };
+	struct MachineValue		{ enum : genum_type { action,   line, policy,   next, dimension }; };
+	struct MachineMove		{ enum : genum_type { action,  start, finish,   next, dimension }; };
 
-			using facade			= eval_facade; // method compatible.
+	using MProg			= MachineProgram;
+	using MArg			= MachineArgument;
+	using MBran			= MachineBranch;
+	using MAppl			= MachineApply;
+	using MVal			= MachineValue;
+	using MMove			= MachineMove;
 
-			using model_type		= Model;
-			using model_type_ptr		= typename alias<model_type>::type_ptr;
-			using model_type_cptr		= typename alias<model_type>::type_cptr;
-
-			using contr_type		= typename model_type::contr_type;
-			using contr_ctype_ref		= typename alias<contr_type>::ctype_ref;
-
-			nik_using_name_scope_type	( type, model_type)
-			nik_using_name_scope_ctype	(ctype, model_type)
-
-			nik_using_size_type_scope	(model_type)
-
-		protected:
-
-			model_type_ptr model;
-
-		public:
-
-			nik_ce eval_facade() : model{} { }
-			nik_ce eval_facade(model_type_cptr m) : model{m} { }
-
-			// contr:
-
-				nik_ce contr_ctype_ref ccontr() const { return *model->ccontr(); }
-	};
-
-/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // interface:
 
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template
-	<
-		typename Type, typename SizeType,
-		SizeType ContrSize, SizeType CarrySize, SizeType VerseSize, SizeType StageSize
-	>
-	class eval : public eval_model<Type, SizeType, ContrSize, CarrySize, VerseSize, StageSize>
+	template<typename EvalMethod, typename SizeType>
+	struct machine_action
 	{
-		public:
+		using eval_method_type		= EvalMethod;
+		using eval_method_type_ptr	= typename alias<eval_method_type>::type_ptr;
 
-			using base			= eval_model
-							<
-								Type, SizeType,
-								ContrSize, CarrySize, VerseSize, StageSize
-							>;
-			using model_type		= base;
-			using cfacade_type		= eval_cfacade<model_type>;
-			using facade_type		= eval_facade<model_type>;
+		using method_type		= void(*)(eval_method_type_ptr);
+		using action_type		= array<method_type, SizeType, MI::dimension>;
 
-			using contr_type		= typename model_type::contr_type;
+		nik_using_size_type_alias	(SizeType)
 
-			nik_using_name_scope_type	( type, base)
-			nik_using_name_scope_ctype	(ctype, base)
+		// core:
 
-			nik_using_size_type_scope	(base)
+			nik_ces void program         (eval_method_type_ptr) { } // symbolic.
+			nik_ces void define_argument (eval_method_type_ptr) { } // symbolic.
 
-		public:
+			nik_ces void branch(eval_method_type_ptr eval_method)
+				{ eval_method->run_branch(); }
 
-			nik_ce eval() : base{} { }
-			nik_ce eval(const contr_type & c) : base{c} { }
+			nik_ces void invert(eval_method_type_ptr eval_method)
+				{ eval_method->run_invert(); }
 
-			// equip:
+			nik_ces void apply(eval_method_type_ptr eval_method)
+				{ eval_method->run_apply(); }
 
-				template<typename CMethod>
-				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model_type const*>(this)}; }
+			nik_ces void function(eval_method_type_ptr eval_method)
+				{ eval_method->run_function(); }
 
-				template<typename Method>
-				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<model_type*>(this)}; }
+			nik_ces void argument(eval_method_type_ptr eval_method)
+				{ eval_method->run_argument(); }
+
+			nik_ces void memory_to_stack(eval_method_type_ptr eval_method)
+				{ eval_method->run_memory_to_stack(); }
+
+			nik_ces void memory_to_carry(eval_method_type_ptr eval_method)
+				{ eval_method->run_memory_to_carry(); }
+
+		// compare:
+
+			nik_ces void equal        (eval_method_type_ptr eval_method) { eval_method->equal        (); }
+			nik_ces void not_equal    (eval_method_type_ptr eval_method) { eval_method->not_equal    (); }
+			nik_ces void l_than       (eval_method_type_ptr eval_method) { eval_method->l_than       (); }
+			nik_ces void l_than_or_eq (eval_method_type_ptr eval_method) { eval_method->l_than_or_eq (); }
+			nik_ces void g_than       (eval_method_type_ptr eval_method) { eval_method->g_than       (); }
+			nik_ces void g_than_or_eq (eval_method_type_ptr eval_method) { eval_method->g_than_or_eq (); }
+
+		// arithmetic:
+
+
+			nik_ces void constant (eval_method_type_ptr eval_method) { eval_method->constant( ); }
+			nik_ces void add      (eval_method_type_ptr eval_method) { eval_method->add     ( ); }
+			nik_ces void subtract (eval_method_type_ptr eval_method) { eval_method->subtract( ); }
+			nik_ces void multiply (eval_method_type_ptr eval_method) { eval_method->multiply( ); }
+			nik_ces void divide   (eval_method_type_ptr eval_method) { eval_method->divide  ( ); }
+			nik_ces void modulo   (eval_method_type_ptr eval_method) { eval_method->modulo  ( ); }
+
+		// action:
+
+			nik_ces auto set_action() // call only once.
+			{
+				action_type action;
+				action.fullsize();
+
+				// core:
+
+					action[ MI::program         ] = program         ;
+					action[ MI::define_argument ] = define_argument ;
+					action[ MI::branch          ] = branch          ;
+					action[ MI::invert          ] = invert          ;
+					action[ MI::apply           ] = apply           ;
+					action[ MI::function        ] = function        ;
+					action[ MI::argument        ] = argument        ;
+					action[ MI::memory_to_stack ] = memory_to_stack ;
+					action[ MI::memory_to_carry ] = memory_to_carry ;
+
+				// compare:
+
+					action[ MI::equal           ] = equal           ;
+					action[ MI::not_equal       ] = not_equal       ;
+					action[ MI::l_than          ] = l_than          ;
+					action[ MI::l_than_or_eq    ] = l_than_or_eq    ;
+					action[ MI::g_than          ] = g_than          ;
+					action[ MI::g_than_or_eq    ] = g_than_or_eq    ;
+
+				// arithmetic:
+
+					action[ MI::constant        ] = constant        ;
+					action[ MI::add             ] = add             ;
+					action[ MI::subtract        ] = subtract        ;
+					action[ MI::multiply        ] = multiply        ;
+					action[ MI::divide          ] = divide          ;
+					action[ MI::modulo          ] = modulo          ;
+
+				return action;
+			}
+
+			nik_ces auto action = set_action();
+
+			nik_ces void execute(size_ctype instr, eval_method_type_ptr eval_method)
+				{ action[instr](eval_method); }
 	};
 
 /***********************************************************************************************************************/
