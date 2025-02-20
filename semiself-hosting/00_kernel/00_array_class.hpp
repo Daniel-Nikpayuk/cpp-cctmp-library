@@ -342,8 +342,7 @@ namespace cctmp {
 
 		protected:
 
-			nik_ce size_type right      () const { return initial + terminal; }
-			nik_ce size_type right_size () const { return model->size() - right(); }
+			nik_ce size_type right() const { return initial + terminal; }
 
 		public:
 
@@ -373,14 +372,14 @@ namespace cctmp {
 					{ if (n <= initial) { fast_left_shift(n); } }
 
 				nik_ce void right_shift(size_ctype n = 1)
-					{ if (n <= right_size()) { fast_right_shift(n); } }
+					{ if (n <= right_capacity()) { fast_right_shift(n); } }
 
 			// initial:
 
 				nik_ce ctype_ptr cbegin() const { return model->cbegin() + initial; }
 
-				nik_ce void fast_left_outward (size_ctype n) { initial -= n; terminal += n; }
-				nik_ce void fast_left_inward  (size_ctype n) { initial += n; terminal -= n; }
+				nik_ce void fast_left_outward (size_ctype n = 1) { initial -= n; terminal += n; }
+				nik_ce void fast_left_inward  (size_ctype n = 1) { initial += n; terminal -= n; }
 
 				nik_ce void left_outward(size_ctype n = 1)
 					{ if (n <=  initial) { fast_left_outward(n); } }
@@ -391,6 +390,7 @@ namespace cctmp {
 			// terminal:
 
 				nik_ce size_type size() const { return terminal; }
+				nik_ce size_type right_capacity() const { return model->size() - right(); }
 
 				nik_ce void fast_right_inward  (size_ctype n = 1) { terminal -= n; }
 				nik_ce void fast_right_outward (size_ctype n = 1) { terminal += n; }
@@ -399,7 +399,7 @@ namespace cctmp {
 					{ if (n <= terminal) { fast_right_inward(n); } }
 
 				nik_ce void right_outward(size_ctype n = 1)
-					{ if (n <= right_size()) { fast_right_outward(n); } }
+					{ if (n <= right_capacity()) { fast_right_outward(n); } }
 	};
 
 /***********************************************************************************************************************/

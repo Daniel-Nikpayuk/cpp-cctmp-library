@@ -246,7 +246,7 @@ namespace cctmp {
 			{
 				size_ctype row_size = (base::ccontr().size() >> 2);
 				size_ctype col_size = 4;
-				contr_csubmethod.fast_full_set();
+				contr_csubmethod.full_set();
 				contr_csubmethod.set_dimension(row_size, col_size);
 			}
 
@@ -275,7 +275,12 @@ namespace cctmp {
 
 // mutable:
 
-	template<template<typename, typename> typename Action, typename Base>
+	template
+	<
+		template<typename, typename> typename Atomic,
+		template<typename, typename> typename Action,
+		typename Base
+	>
 	class eval_method_disjoint : public Base
 	{
 		public:
@@ -286,6 +291,7 @@ namespace cctmp {
 
 			using machine_type		= typename model_type::machine_type;
 			using carry_type		= typename machine_type::carry_type;
+			using verse_type		= typename machine_type::verse_type;
 
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
@@ -294,7 +300,14 @@ namespace cctmp {
 
 		protected:
 
+			using atomic_action_type	= Atomic<type, size_type>;
 			using action_type		= Action<eval_method_disjoint, size_type>;
+
+			using machine_cmethod_type	= resolve_cmethod<machine_type, machine_cmethod>;
+			using  machine_method_type	=  resolve_method<machine_type,  machine_method>;
+
+			machine_cmethod_type mach_cmethod;
+			machine_method_type   mach_method;
 
 		protected:
 
@@ -302,187 +315,114 @@ namespace cctmp {
 
 		public:
 
-			nik_ce eval_method_disjoint() : base{} { }
-			nik_ce eval_method_disjoint(const facade & f) : base{f} { }
+			nik_ce eval_method_disjoint() : base{}, mach_cmethod{}, mach_method{} { }
+			nik_ce eval_method_disjoint(const facade & f) : base{f}
+			{
+				mach_cmethod = _machine.template cequip<machine_cmethod_type>();
+				mach_method  = _machine.template  equip< machine_method_type>();
+			}
 
 			// contr:
 
 				nik_ce size_type instr_value(size_ctype col) const
-					{ return base::contr_value(_machine.counter(), col); }
-
-			// counter:
-
-				nik_ce void set_counter(size_ctype n) { _machine.set_counter(n); }
+					{ return base::contr_value(mach_method.counter(), col); }
 
 			// carry:
 
-				nik_ce auto ccarry() const { return _machine.ccarry(); }
-				nik_ce auto  carry()       { return _machine. carry(); }
-
-			// verse:
-
-				nik_ce auto cverse() const { return _machine.cverse(); }
-				nik_ce auto  verse()       { return _machine. verse(); }
-
-			// stage:
-
-				nik_ce auto cstage() const { return _machine.cstage(); }
-				nik_ce auto  stage()       { return _machine. stage(); }
+				nik_ce auto rtn_cbegin () const { return mach_method.ccarry().cbegin (); }
+				nik_ce auto rtn_cend   () const { return mach_method.ccarry().cend   (); }
 
 		protected:
 
-			// value:
+				template<typename F>
+				nik_ce void atomic_binary(F f)
+					{ mach_method.atomic_binary(f, instr_value(MAppl::policy)); }
 
-				nik_ce void value_to_stack(size_ctype start, size_ctype finish)
-					{ stage()->push(cverse()->citer(start), cverse()->citer(finish)); }
-
-				nik_ce void value_to_carry(size_ctype start, size_ctype finish)
-					{ carry()->push(cverse()->citer(start), cverse()->citer(finish)); }
-
-				nik_ce void move(size_ctype policy, size_ctype value)
-				{
-					if      (policy == MP::to_stack) { stage()->push(value); }
-					else if (policy == MP::to_carry) { carry()->push(value); }
-				}
-
-				nik_ce void move(size_ctype policy, size_ctype start, size_ctype finish)
-				{
-					if      (policy == MP::to_stack) { value_to_stack(start, finish); }
-					else if (policy == MP::to_carry) { value_to_carry(start, finish); }
-				}
-
-			// atomic:
-
-				// compare:
-
-					nik_ces bool atomic_equal        (ctype v1, ctype v2) { return v1 == v2; }
-					nik_ces bool atomic_not_equal    (ctype v1, ctype v2) { return v1 != v2; }
-					nik_ces bool atomic_l_than       (ctype v1, ctype v2) { return v1 <  v2; }
-					nik_ces bool atomic_l_than_or_eq (ctype v1, ctype v2) { return v1 <= v2; }
-					nik_ces bool atomic_g_than       (ctype v1, ctype v2) { return v1 >  v2; }
-					nik_ces bool atomic_g_than_or_eq (ctype v1, ctype v2) { return v1 >= v2; }
-
-				// arithmetic:
-
-					nik_ces type atomic_add      (ctype v1, ctype v2) { return v1 + v2; }
-					nik_ces type atomic_subtract (ctype v1, ctype v2) { return v1 - v2; }
-					nik_ces type atomic_multiply (ctype v1, ctype v2) { return v1 * v2; }
-					nik_ces type atomic_divide   (ctype v1, ctype v2) { return v1 / v2; }
-					nik_ces type atomic_modulo   (ctype v1, ctype v2) { return v1 % v2; }
-
-				template<typename F> // generalize for policy
-				nik_ce void atomic_binary(F f) // test against size
-				{
-					auto v1 = _machine.cverse()->cat(0);
-					auto v2 = _machine.cverse()->cat(1);
-
-					_machine.carry()->push(f(v1, v2));
-				}
-
-				template<typename F> // generalize for policy
-				nik_ce void atomic_fold(F f, size_type k)
-				{
-					auto b = _machine.cverse()->cbegin();
-					auto e = _machine.cverse()->cend();
-
-					_machine.carry()->clear();
-					while (b != e) { k = f(k, *b++); }
-					_machine.carry()->push(k);
-				}
+				template<typename F>
+				nik_ce void atomic_fold(F f, size_type m)
+					{ mach_method.atomic_fold(f, instr_value(MAppl::policy), m); }
 
 			// execute:
 
+				nik_ce auto instantiate() const { return eval_method_disjoint{base::model}; }
 				nik_ce void execute() { action_type::execute(instr_value(MAppl::action), this); }
 
 		public:
 
-			// compare:
+			// atomic:
 
-				nik_ce void equal        () { atomic_binary (atomic_equal       ); }
-				nik_ce void not_equal    () { atomic_binary (atomic_not_equal   ); }
-				nik_ce void l_than       () { atomic_binary (atomic_l_than      ); }
-				nik_ce void l_than_or_eq () { atomic_binary (atomic_l_than_or_eq); }
-				nik_ce void g_than       () { atomic_binary (atomic_g_than      ); }
-				nik_ce void g_than_or_eq () { atomic_binary (atomic_g_than_or_eq); }
-
-			// arithmetic:
-
-
-				nik_ce void constant() { move(instr_value(MAppl::policy), instr_value(MAppl::offset)); }
-
-				nik_ce void add      () { atomic_fold   (atomic_add      , 0); }
-				nik_ce void subtract () { atomic_binary (atomic_subtract    ); }
-				nik_ce void multiply () { atomic_fold   (atomic_multiply , 1); }
-				nik_ce void divide   () { atomic_binary (atomic_divide      ); }
-				nik_ce void modulo   () { atomic_binary (atomic_modulo      ); }
+				nik_ce void atomic(size_ctype n)
+					{ atomic_binary(atomic_action_type::action[n]); }
 
 			// run:
 
-				nik_ce void run_branch()
-					{ if (carry()->pop()) { _machine.set_counter(instr_value(MBran::line)); } }
-
-				nik_ce void run_invert()
-					{ if (not carry()->pop()) { _machine.set_counter(instr_value(MBran::line)); } }
+				nik_ce void run_branch() { mach_method.branch(instr_value(MBran::line)); }
+				nik_ce void run_invert() { mach_method.invert(instr_value(MBran::line)); }
 
 				nik_ce void run_apply()
 				{
-					size_ctype offset   = instr_value(MAppl::offset);
-					size_ctype policy   = instr_value(MAppl::policy);
+					size_ctype offset  = instr_value(MAppl::offset);
+					size_ctype policy  = instr_value(MAppl::policy);
 
-					auto n_eval_method  = again();
-					auto stage_start    = offset;
-					auto stage_finish   = cstage()->size();
+					auto n_eval_method = instantiate();
+					auto func_index    = mach_method.stage_cfunc(offset);
+					auto value         = n_eval_method.run(mach_method.stage_cargs(), func_index);
 
-					n_eval_method       . set_counter(cstage()->cat(stage_start));
-					auto stage_begin    = cstage()->citer(stage_start + 1);
-					auto stage_end      = cstage()->citer(stage_finish);
-					auto value          = n_eval_method.run(stage_begin, stage_end);
+					mach_method.pop_stage();
+					mach_method.copy_interval(policy, value);
+				}
 
-					auto subcarry_begin = n_eval_method.ccarry()->cbegin();
-					auto subcarry_end   = n_eval_method.ccarry()->cend();
+				nik_ce void run_constant()
+				{
+					size_ctype policy = instr_value(MAppl::policy);
+					size_ctype value  = instr_value(MAppl::offset);
 
-					stage()->downsize(stage_finish - stage_start);
-
-					if (policy == MP::to_stack)
-					{
-						stage()->push(subcarry_begin, subcarry_end);
-					}
-					else if (policy == MP::to_carry)
-					{
-						carry()->push(subcarry_begin, subcarry_end);
-					}
+					mach_method.copy_value(policy, value);
 				}
 
 				nik_ce void run_function()
-					{ move(instr_value(MVal::policy), instr_value(MVal::line)); }
+				{
+					size_ctype policy = instr_value(MVal::policy);
+					size_ctype line   = instr_value(MVal::line);
+
+					mach_method.copy_value(policy, line);
+				}
 
 				nik_ce void run_argument()
 				{
 					auto start  = base::contr_value(instr_value(MVal::line), MArg::start);
 					auto finish = base::contr_value(instr_value(MVal::line), MArg::finish);
 
-					move(instr_value(MVal::policy), start, finish);
+					mach_method.copy_interval(instr_value(MVal::policy), start, finish);
 				}
 
-				nik_ce void run_memory_to_stack()
-					{ value_to_stack(instr_value(MMove::start), instr_value(MMove::finish)); }
+				nik_ce void run_memory_to_stage()
+				{
+					size_ctype start  = instr_value(MMove::start);
+					size_ctype finish = instr_value(MMove::finish);
+
+					mach_method.interval_to_stage(start, finish);
+				}
 
 				nik_ce void run_memory_to_carry()
-					{ value_to_carry(instr_value(MMove::start), instr_value(MMove::finish)); }
+				{
+					size_ctype start  = instr_value(MMove::start);
+					size_ctype finish = instr_value(MMove::finish);
 
-						// rename!
-				nik_ce auto again() const { return eval_method_disjoint{base::model}; }
+					mach_method.interval_to_carry(start, finish);
+				}
 
-					// assumes counter is set before calling.
-				nik_ce auto run(ctype_ptr in, ctype_cptr end) -> carry_type
+				nik_ce auto run(ctype_ptr in, ctype_cptr end, size_ctype n = 0) -> carry_type
 				{
 					carry_type carry;
 
-					_machine.verse()->push(in, end);
+					verse_type verse; // designed for standalone virtual machine.
+					verse.push(in, end);
 
+					mach_method.initialize(n, verse);
 					while (instr_value(MProg::next))
 					{
-						_machine.inc_counter(instr_value(MProg::next));
+						mach_method.inc_counter(instr_value(MProg::next));
 						execute();
 					}
 
@@ -491,16 +431,23 @@ namespace cctmp {
 					return carry;
 				}
 
-				template<auto N> // const verse_type & ?
-				nik_ce auto run(ctype (&v)[N]) { return run(v, v + N); }
+				// syntactic sugar:
+
+					template<typename T>
+					nik_ce auto run(const T & v, size_ctype n = 0)
+						{ return run(v.cbegin(), v.cend(), n); }
+
+					template<auto N>
+					nik_ce auto run(ctype (&v)[N], size_ctype n = 0)
+						{ return run(v, v + N, n); }
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
 		using eval_method =
-			eval_method_disjoint  < machine_action ,
-			eval_cmethod_disjoint < Facade         >>;
+			eval_method_disjoint  < atomic_action , machine_action ,
+			eval_cmethod_disjoint < Facade                         >>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
