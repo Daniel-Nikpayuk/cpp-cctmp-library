@@ -32,6 +32,9 @@ namespace cctmp {
 
 // model:
 
+	template<typename> class eval_cfacade;
+	template<typename> class eval_facade;
+
 /***********************************************************************************************************************/
 
 // mutable:
@@ -41,11 +44,13 @@ namespace cctmp {
 		typename Type, typename SizeType,
 		SizeType ContrSize, SizeType CarrySize, SizeType VerseSize, SizeType StageSize
 	>
-	class eval_model
+	class eval
 	{
 		public:
 
-			using facade				= eval_model; // method compatible.
+			using facade				= eval; // method compatible.
+			using cfacade_type			= eval_cfacade<eval>;
+			using facade_type			= eval_facade<eval>;
 
 			using contr_type			= array<Type, SizeType, ContrSize>;
 			using contr_ctype_ptr			= typename alias<contr_type>::ctype_ptr;
@@ -71,8 +76,18 @@ namespace cctmp {
 
 		public:
 
-			nik_ce eval_model() { }
-			nik_ce eval_model(const contr_type & c) : _contr{c} { }
+			nik_ce eval() { }
+			nik_ce eval(const contr_type & c) : _contr{c} { }
+
+			// equip:
+
+				template<typename CMethod>
+				nik_ce auto cequip() const -> CMethod
+					{ return cfacade_type{static_cast<eval const*>(this)}; }
+
+				template<typename Method>
+				nik_ce auto equip() -> Method
+					{ return facade_type{static_cast<eval*>(this)}; }
 
 			// contr:
 
@@ -159,56 +174,6 @@ namespace cctmp {
 			// contr:
 
 				nik_ce contr_ctype_ref ccontr() const { return *model->ccontr(); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// interface:
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template
-	<
-		typename Type, typename SizeType,
-		SizeType ContrSize, SizeType CarrySize, SizeType VerseSize, SizeType StageSize
-	>
-	class eval : public eval_model<Type, SizeType, ContrSize, CarrySize, VerseSize, StageSize>
-	{
-		public:
-
-			using base			= eval_model
-							<
-								Type, SizeType,
-								ContrSize, CarrySize, VerseSize, StageSize
-							>;
-			using model_type		= base;
-			using cfacade_type		= eval_cfacade<model_type>;
-			using facade_type		= eval_facade<model_type>;
-
-			using contr_type		= typename model_type::contr_type;
-
-			nik_using_name_scope_type	( type, base)
-			nik_using_name_scope_ctype	(ctype, base)
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce eval() : base{} { }
-			nik_ce eval(const contr_type & c) : base{c} { }
-
-			// equip:
-
-				template<typename CMethod>
-				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model_type const*>(this)}; }
-
-				template<typename Method>
-				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<model_type*>(this)}; }
 	};
 
 /***********************************************************************************************************************/

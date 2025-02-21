@@ -44,12 +44,12 @@ namespace cctmp {
 
 // immutable:
 
-	template<typename Base>
-	class image_cmethod_disjoint : public book_cmethod_disjoint<Base, array_cmethod, array_csubmethod>
+	template<typename Base> // inheritance as {glyph, image} optimization.
+	class image_cmethod_disjoint : public book_cmethod_disjoint<array_cmethod, array_csubmethod, Base>
 	{
 		public:
 
-			using base			= book_cmethod_disjoint<Base, array_cmethod, array_csubmethod>;
+			using base			= book_cmethod_disjoint<array_cmethod, array_csubmethod, Base>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type_scope	(base)
@@ -61,6 +61,11 @@ namespace cctmp {
 			using sign_type			= typename base::sign_type;
 			using sign_type_ref		= typename base::sign_type_ref;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		protected:
+
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
 
 		public:
 
@@ -91,10 +96,20 @@ namespace cctmp {
 			// text:
 
 					// safe version should reset dimensions.
-				nik_ce auto fast_set_ctext_from_sign(sign_ctype_ref sign)
+				nik_ce void fast_set_ctext_from_sign(sign_ctype_ref sign)
 				{
 					base::fast_set_cpage_chapter(sign.mark());
 					base::fast_set_ctext_from_page(sign.index());
+				}
+
+				nik_ce size_type fast_ctext_at(size_ctype n) const
+					{ return base::text_csubmethod[n]; }
+
+				nik_ce size_type ctext_at(sign_ctype_ref sign, size_ctype n)
+				{
+					fast_set_ctext_from_sign(sign);
+
+					return fast_ctext_at(n);
 				}
 	};
 
@@ -102,12 +117,12 @@ namespace cctmp {
 
 // mutable:
 
-	template<typename Base>
-	class image_method_disjoint : public book_method_disjoint<Base, array_method, array_submethod>
+	template<typename Base> // inheritance as {glyph, image} optimization.
+	class image_method_disjoint : public book_method_disjoint<array_method, array_submethod, Base>
 	{
 		public:
 
-			using base			= book_method_disjoint<Base, array_method, array_submethod>;
+			using base			= book_method_disjoint<array_method, array_submethod, Base>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type_scope	(base)
@@ -134,7 +149,7 @@ namespace cctmp {
 			// text:
 
 					// safe version should reset dimensions.
-				nik_ce auto fast_set_text_from_sign(sign_ctype_ref sign)
+				nik_ce void fast_set_text_from_sign(sign_ctype_ref sign)
 				{
 					base::fast_set_page_chapter(sign.mark());
 					base::fast_set_text_from_page(sign.index());
@@ -186,15 +201,6 @@ namespace cctmp {
 
 			nik_ce image_builtin_cmethod_disjoint() : base{} { }
 			nik_ce image_builtin_cmethod_disjoint(const facade & f) : base{f} { }
-
-			nik_ce size_type fast_get(size_ctype n) const { return base::text_csubmethod[n]; }
-
-			nik_ce size_type get(sign_ctype_ref sign, size_ctype n)
-			{
-				base::fast_set_ctext_from_sign(sign);
-
-				return fast_get(n);
-			}
 	};
 
 	// syntactic sugar:
@@ -268,194 +274,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// empty:
-
-	using ImageEmpty = ImageBuiltin;
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Facade>
-	class image_empty_cmethod : public image_builtin_cmethod<Facade>
-	{
-		public:
-
-			using base			= image_builtin_cmethod<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce image_empty_cmethod() : base{} { }
-			nik_ce image_empty_cmethod(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Facade>
-	class image_empty_method : public image_builtin_method<Facade>
-	{
-		public:
-
-			using base			= image_builtin_method<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce image_empty_method() : base{} { }
-			nik_ce image_empty_method(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// ring:
-
-	using ImageRing = ImageBuiltin;
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Facade>
-	class image_ring_cmethod : public image_builtin_cmethod<Facade>
-	{
-		public:
-
-			using base			= image_builtin_cmethod<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce image_ring_cmethod() : base{} { }
-			nik_ce image_ring_cmethod(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Facade>
-	class image_ring_method : public image_builtin_method<Facade>
-	{
-		public:
-
-			using base			= image_builtin_method<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce image_ring_method() : base{} { }
-			nik_ce image_ring_method(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// flex:
-
-	using ImageFlex = ImageBuiltin;
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Facade>
-	class image_flex_cmethod : public image_builtin_cmethod<Facade>
-	{
-		public:
-
-			using base			= image_builtin_cmethod<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce image_flex_cmethod() : base{} { }
-			nik_ce image_flex_cmethod(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Facade>
-	class image_flex_method : public image_builtin_method<Facade>
-	{
-		public:
-
-			using base			= image_builtin_method<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce image_flex_method() : base{} { }
-			nik_ce image_flex_method(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// utf8 char:
-
-	using ImageUtf8Char = ImageBuiltin;
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Facade>
-	class image_utf8_char_cmethod : public image_builtin_cmethod<Facade>
-	{
-		public:
-
-			using base			= image_builtin_cmethod<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce image_utf8_char_cmethod() : base{} { }
-			nik_ce image_utf8_char_cmethod(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Facade>
-	class image_utf8_char_method : public image_builtin_method<Facade>
-	{
-		public:
-
-			using base			= image_builtin_method<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce image_utf8_char_method() : base{} { }
-			nik_ce image_utf8_char_method(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // tuple:
 
 	struct ImageTuple
@@ -489,15 +307,6 @@ namespace cctmp {
 
 			nik_ce image_tuple_cmethod_disjoint() : base{} { }
 			nik_ce image_tuple_cmethod_disjoint(const facade & f) : base{f} { }
-
-			nik_ce size_type fast_get(size_ctype n) const { return base::text_csubmethod[n]; }
-
-			nik_ce size_type get(sign_ctype_ref sign, size_ctype n)
-			{
-				base::fast_set_ctext_from_sign(sign);
-
-				return fast_get(n);
-			}
 	};
 
 	// syntactic sugar:
@@ -583,15 +392,6 @@ namespace cctmp {
 
 			nik_ce image_cotuple_cmethod_disjoint() : base{} { }
 			nik_ce image_cotuple_cmethod_disjoint(const facade & f) : base{f} { }
-
-			nik_ce size_type fast_get(size_ctype n) const { return base::text_csubmethod[n]; }
-
-			nik_ce size_type get(sign_ctype_ref sign, size_ctype n)
-			{
-				base::fast_set_ctext_from_sign(sign);
-
-				return fast_get(n);
-			}
 	};
 
 	// syntactic sugar:
@@ -647,7 +447,7 @@ namespace cctmp {
 	{
 		enum : genum_type
 		{
-			mark = ImageBase::mark, index = ImageBase::index, time, check, point, dimension
+			mark = ImageBase::mark, index = ImageBase::index, time, length, point, dimension
 		};
 	};
 
@@ -677,15 +477,6 @@ namespace cctmp {
 
 			nik_ce image_function_cmethod_disjoint() : base{} { }
 			nik_ce image_function_cmethod_disjoint(const facade & f) : base{f} { }
-
-			nik_ce size_type fast_get(size_ctype n) const { return base::text_csubmethod[n]; }
-
-			nik_ce size_type get(sign_ctype_ref sign, size_ctype n)
-			{
-				base::fast_set_ctext_from_sign(sign);
-
-				return fast_get(n);
-			}
 	};
 
 	// syntactic sugar:
@@ -721,6 +512,24 @@ namespace cctmp {
 
 			nik_ce image_function_method_disjoint() : base{} { }
 			nik_ce image_function_method_disjoint(const facade & f) : base{f} { }
+
+			nik_ce void instantiate(icon_ctype_ref icon, size_ctype time, size_ctype length, size_ctype point)
+			{
+				base::set_icon_fields(icon);
+
+				base::text_submethod[ImageFunction::time  ] = time;
+				base::text_submethod[ImageFunction::length] = length;
+				base::text_submethod[ImageFunction::point ] = point;
+			}
+
+			nik_ce auto declare(icon_ctype_ref icon, size_ctype time, size_ctype length, size_ctype point)
+			{
+				auto sign = base::allocate(icon.mark(), 5);
+
+				if (base::not_fail(sign)) { instantiate(icon, time, length, point); }
+
+				return sign;
+			}
 	};
 
 	// syntactic sugar:

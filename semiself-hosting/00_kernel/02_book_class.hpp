@@ -118,6 +118,9 @@ namespace cctmp {
 
 // model:
 
+	template<typename> class book_cfacade;
+	template<typename> class book_facade;
+
 /***********************************************************************************************************************/
 
 // interval:
@@ -157,11 +160,13 @@ namespace cctmp {
 // mutable:
 
 	template<typename Type, typename SizeType, SizeType Size, SizeType... Sizes>
-	class book_model
+	class book
 	{
 		public:
 
-			using facade			= book_model; // method compatible.
+			using facade			= book; // method compatible.
+			using cfacade_type		= book_cfacade<book>;
+			using facade_type		= book_facade<book>;
 
 			using ival_type			= book_interval<SizeType>;
 			using page_type			= plot<ival_type, SizeType, Sizes...>;
@@ -198,7 +203,17 @@ namespace cctmp {
 
 		public:
 
-			nik_ce book_model() { }
+			nik_ce book() { }
+
+			// equip:
+
+				template<typename CMethod>
+				nik_ce auto cequip() const -> CMethod
+					{ return cfacade_type{static_cast<book const*>(this)}; }
+
+				template<typename Method>
+				nik_ce auto equip() -> Method
+					{ return facade_type{static_cast<book*>(this)}; }
 
 			// page:
 
@@ -327,49 +342,13 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// interface:
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Type, typename SizeType, SizeType Size, SizeType... Sizes>
-	class book : public book_model<Type, SizeType, Size, Sizes...>
-	{
-		public:
-
-			using base			= book_model<Type, SizeType, Size, Sizes...>;
-			using model_type		= base;
-			using cfacade_type		= book_cfacade<model_type>;
-			using facade_type		= book_facade<model_type>;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce book() : base{} { }
-
-			// equip:
-
-				template<typename CMethod>
-				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model_type const*>(this)}; }
-
-				template<typename Method>
-				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<model_type*>(this)}; }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // method:
 
 /***********************************************************************************************************************/
 
 // immutable:
 
-	template<typename Base, template<typename> typename PageCMethod, template<typename> typename TextCMethod>
+	template<template<typename> typename PageCMethod, template<typename> typename TextCMethod, typename Base>
 	class book_cmethod_disjoint : public Base
 	{
 		public:
@@ -455,7 +434,7 @@ namespace cctmp {
 
 // mutable:
 
-	template<typename Base, template<typename> typename PageMethod, template<typename> typename TextMethod>
+	template<template<typename> typename PageMethod, template<typename> typename TextMethod, typename Base>
 	class book_method_disjoint : public Base
 	{
 		public:
@@ -463,10 +442,9 @@ namespace cctmp {
 			using base			= Base;
 			using facade			= typename base::facade;
 			using model_type		= typename base::model_type;
+			using ival_type			= typename model_type::ival_type;
 
 			nik_using_size_type_scope	(base)
-
-			using ival_type			= typename base::ival_type;
 
 			using icon_type			= typename base::icon_type;
 			using icon_type_ref		= typename base::icon_type_ref;

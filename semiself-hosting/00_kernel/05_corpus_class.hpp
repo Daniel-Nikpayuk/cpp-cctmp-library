@@ -32,7 +32,9 @@ namespace cctmp {
 
 // model:
 
-	template<typename...> class corpus_model;
+	template<typename> class corpus_cfacade;
+	template<typename> class corpus_facade;
+	template<typename...> class corpus;
 
 /***********************************************************************************************************************/
 
@@ -45,7 +47,7 @@ namespace cctmp {
 		auto SSize, auto... SSizes,
 		auto ISize, auto... ISizes
 	>
-	class corpus_model
+	class corpus
 	<
 		Type, SizeType,
 		T_pack_Vs<GSize, GSizes...>,
@@ -55,7 +57,9 @@ namespace cctmp {
 	{
 		public:
 
-			using facade			= corpus_model; // method compatible.
+			using facade			= corpus; // method compatible.
+			using cfacade_type		= corpus_cfacade<corpus>;
+			using facade_type		= corpus_facade<corpus>;
 
 			using glyph_type		= book<Type, SizeType, GSize + SSize, GSizes..., SSizes...>;
 			using glyph_type_ptr		= typename alias<glyph_type>::type_ptr;
@@ -91,11 +95,21 @@ namespace cctmp {
 
 		public:
 
-			nik_ce corpus_model()
+			nik_ce corpus()
 			{
 				_glyph.page()->upslot(sizeof...(GSizes));
 				_image.page()->upslot(sizeof...(ISizes));
 			}
+
+			// equip:
+
+				template<typename CMethod>
+				nik_ce auto cequip() const -> CMethod
+					{ return cfacade_type{static_cast<corpus const*>(this)}; }
+
+				template<typename Method>
+				nik_ce auto equip() -> Method
+					{ return facade_type{static_cast<corpus*>(this)}; }
 
 			// glyph:
 
@@ -214,77 +228,35 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// interface:
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Type, typename SizeType, typename GlyphPack, typename SpacePack, typename ImagePack>
-	class corpus : public corpus_model<Type, SizeType, GlyphPack, SpacePack, ImagePack>
-	{
-		public:
-
-			using glyph_pack		= GlyphPack;
-			using space_pack		= SpacePack;
-			using image_pack		= ImagePack;
-			using base			= corpus_model
-							<
-								Type, SizeType, glyph_pack, space_pack, image_pack
-							>;
-			using model_type		= base;
-			using cfacade_type		= corpus_cfacade<model_type>;
-			using facade_type		= corpus_facade<model_type>;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce corpus() : base{} { }
-
-			// equip:
-
-				template<typename CMethod>
-				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model_type const*>(this)}; }
-
-				template<typename Method>
-				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<model_type*>(this)}; }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // method:
 
 /***********************************************************************************************************************/
 
 // immutable:
 
-	template<typename Base, template<typename> typename GlyphCMethod, template<typename> typename ImageCMethod>
+	template<template<typename> typename GlyphCMethod, template<typename> typename ImageCMethod, typename Base>
 	class corpus_cmethod_disjoint : public Base
 	{
 		public:
 
-			using base			= Base;
-			using facade			= typename base::facade;
-			using model_type		= typename base::model_type;
+			using base				= Base;
+			using facade				= typename base::facade;
+			using model_type			= typename base::model_type;
 
-			nik_using_size_type_scope	(base)
+			nik_using_size_type_scope		(base)
 
-			using icon_type			= icon<size_type>;
-			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
+			using icon_type				= icon<size_type>;
+			using icon_ctype_ref			= typename alias<icon_type>::ctype_ref;
 
-			using sign_type			= sign<size_type>;
-			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
+			using sign_type				= sign<size_type>;
+			using sign_ctype_ref			= typename alias<sign_type>::ctype_ref;
 
 		protected:
 
-			using glyph_cmethod_type	= typename model_type::template
-								glyph_cmethod_type<GlyphCMethod>;
-			using image_cmethod_type	= typename model_type::template
-								image_cmethod_type<ImageCMethod>;
+			using glyph_cmethod_type		= typename model_type::template
+									glyph_cmethod_type<GlyphCMethod>;
+			using image_cmethod_type		= typename model_type::template
+									image_cmethod_type<ImageCMethod>;
 
 			glyph_cmethod_type glyph_cmethod;
 			image_cmethod_type image_cmethod;
@@ -298,13 +270,44 @@ namespace cctmp {
 				glyph_cmethod{base::model->template glyph_cequip<glyph_cmethod_type>()},
 				image_cmethod{base::model->template image_cequip<image_cmethod_type>()}
 				{ }
+
+			// glyph:
+
+				nik_ce size_type fast_glyph_ctext_at(size_ctype n, size_ctype m)
+					{ return glyph_cmethod.fast_ctext_at(n, m); }
+
+				nik_ce size_type glyph_ctext_at(icon_ctype_ref icon, size_ctype n, size_ctype m)
+					{ return glyph_cmethod.ctext_at(icon, n, m); }
+
+				nik_ce auto fast_to_icon()
+				{
+					size_ctype mark  = fast_image_ctext_at(ImageBase::mark );
+					size_ctype index = fast_image_ctext_at(ImageBase::index);
+
+					return glyph_cmethod.make_icon(mark, index);
+				}
+
+				nik_ce auto to_icon(sign_ctype_ref sign)
+				{
+					image_cmethod.fast_set_ctext_from_sign(sign);
+
+					return fast_to_icon();
+				}
+
+			// image:
+
+				nik_ce size_type fast_image_ctext_at(size_ctype n)
+					{ return image_cmethod.fast_ctext_at(n); }
+
+				nik_ce size_type image_ctext_at(sign_ctype_ref sign, size_ctype n)
+					{ return image_cmethod.ctext_at(sign, n); }
 	};
 
 /***********************************************************************************************************************/
 
 // mutable:
 
-	template<typename Base, template<typename> typename GlyphMethod, template<typename> typename ImageMethod>
+	template<template<typename> typename GlyphMethod, template<typename> typename ImageMethod, typename Base>
 	class corpus_method_disjoint : public Base
 	{
 		public:
@@ -341,31 +344,6 @@ namespace cctmp {
 				image_method{base::model->template image_equip<image_method_type>()}
 				{ }
 	};
-
-	// syntactic sugar:
-
-		template
-		<
-			typename Facade,
-			template<typename> typename GlyphCMethod,
-			template<typename> typename ImageCMethod
-		>
-		using corpus_cmethod =
-			corpus_cmethod_disjoint < Facade, GlyphCMethod, ImageCMethod >;
-
-	// syntactic sugar:
-
-		template
-		<
-			typename Facade,
-			template<typename> typename GlyphCMethod,
-			template<typename> typename ImageCMethod,
-			template<typename> typename  GlyphMethod,
-			template<typename> typename  ImageMethod
-		>
-		using corpus_method =
-			corpus_method_disjoint  <
-			corpus_cmethod_disjoint < Facade, GlyphCMethod, ImageCMethod >, GlyphMethod, ImageMethod >;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -32,6 +32,9 @@ namespace cctmp {
 
 // model:
 
+	template<typename> class concord_cfacade;
+	template<typename> class concord_facade;
+
 /***********************************************************************************************************************/
 
 // mutable:
@@ -42,11 +45,13 @@ namespace cctmp {
 		typename GlyphPack, typename SpacePack, typename ImagePack,
 		SizeType Size
 	>
-	class concord_model
+	class concord
 	{
 		public:
 
-			using facade			= concord_model; // method compatible.
+			using facade			= concord; // method compatible.
+			using cfacade_type		= concord_cfacade<concord>;
+			using facade_type		= concord_facade<concord>;
 
 			using symbol_type		= corpus<SizeType, SizeType, GlyphPack, SpacePack, ImagePack>;
 			using symbol_type_ptr		= typename alias<symbol_type>::type_ptr;
@@ -83,7 +88,17 @@ namespace cctmp {
 
 		public:
 
-			nik_ce concord_model() : _memory{} { }
+			nik_ce concord() : _memory{} { }
+
+			// equip:
+
+				template<typename CMethod>
+				nik_ce auto cequip() const -> CMethod
+					{ return cfacade_type{static_cast<concord const*>(this)}; }
+
+				template<typename Method>
+				nik_ce auto equip() -> Method
+					{ return facade_type{static_cast<concord*>(this)}; }
 
 			// symbol:
 
@@ -202,57 +217,13 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// interface:
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template
-	<
-		typename Type, typename SizeType,
-		typename GlyphPack, typename SpacePack, typename ImagePack,
-		SizeType Size
-	>
-	class concord : public concord_model<Type, SizeType, GlyphPack, SpacePack, ImagePack, Size>
-	{
-		public:
-
-			using base			= concord_model
-							<
-								Type, SizeType, GlyphPack, SpacePack, ImagePack, Size
-							>;
-			using model_type		= base;
-			using cfacade_type		= concord_cfacade<model_type>;
-			using facade_type		= concord_facade<model_type>;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce concord() : base{} { }
-
-			// equip:
-
-				template<typename CMethod>
-				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model_type const*>(this)}; }
-
-				template<typename Method>
-				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<model_type*>(this)}; }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // method:
 
 /***********************************************************************************************************************/
 
 // immutable:
 
-	template<typename Base, template<typename> typename SymbolCMethod, template<typename> typename RecordCMethod>
+	template<template<typename> typename SymbolCMethod, template<typename> typename RecordCMethod, typename Base>
 	class concord_cmethod_disjoint : public Base
 	{
 		public:
@@ -288,13 +259,19 @@ namespace cctmp {
 				symbol_cmethod{base::model->template symbol_cequip<symbol_cmethod_type>()},
 				record_csubmethod{base::model->template record_csubequip<record_csubmethod_type>()}
 				{ }
+
+			// glyph:
+
+				nik_ce auto fast_type() { return symbol_cmethod.fast_to_icon(); }
+
+				nik_ce auto type(sign_ctype_ref sign) { return symbol_cmethod.to_icon(sign); }
 	};
 
 /***********************************************************************************************************************/
 
 // mutable:
 
-	template<typename Base, template<typename> typename SymbolMethod, template<typename> typename RecordMethod>
+	template<template<typename> typename SymbolMethod, template<typename> typename RecordMethod, typename Base>
 	class concord_method_disjoint : public Base
 	{
 		public:
@@ -331,31 +308,6 @@ namespace cctmp {
 				record_submethod{base::model->template record_subequip<record_submethod_type>()}
 				{ }
 	};
-
-	// syntactic sugar:
-
-		template
-		<
-			typename Facade,
-			template<typename> typename SymbolCMethod,
-			template<typename> typename RecordCMethod
-		>
-		using concord_cmethod =
-			concord_cmethod_disjoint < Facade, SymbolCMethod, RecordCMethod >;
-
-	// syntactic sugar:
-
-		template
-		<
-			typename Facade,
-			template<typename> typename SymbolCMethod,
-			template<typename> typename RecordCMethod,
-			template<typename> typename  SymbolMethod,
-			template<typename> typename  RecordMethod
-		>
-		using concord_method =
-			concord_method_disjoint  <
-			concord_cmethod_disjoint < Facade, SymbolCMethod, RecordCMethod >, SymbolMethod, RecordMethod >;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -70,6 +70,12 @@ namespace cctmp {
 
 // model:
 
+	template<typename> class array_csubfacade;
+	template<typename> class array_cfacade;
+
+	template<typename> class array_subfacade;
+	template<typename> class array_facade;
+
 /***********************************************************************************************************************/
 
 // immutable:
@@ -80,6 +86,8 @@ namespace cctmp {
 		public:
 
 			using facade				= array_cmodel; // method compatible.
+			using csubfacade_type			= array_csubfacade<array_cmodel>;
+			using cfacade_type			= array_cfacade<array_cmodel>;
 
 			nik_using_name_alias_scope_type		( type, Type)
 			nik_using_name_alias_scope_ctype	(ctype, Type)
@@ -101,6 +109,18 @@ namespace cctmp {
 
 			nik_ce array_cmodel() : initial{}, terminal{} { }
 
+			// subequip:
+
+				template<typename CMethod>
+				nik_ce auto csubequip() const -> CMethod
+					{ return csubfacade_type{static_cast<array_cmodel const*>(this)}; }
+
+			// equip:
+
+				template<typename CMethod>
+				nik_ce auto cequip() const -> CMethod
+					{ return cfacade_type{static_cast<array_cmodel const*>(this)}; }
+
 			// initial:
 
 				nik_ce ctype_ptr cbegin() const { return initial; }
@@ -120,6 +140,10 @@ namespace cctmp {
 		public:
 
 			using facade				= array_model; // method compatible.
+			using csubfacade_type			= array_csubfacade<array_model>;
+			using subfacade_type			= array_subfacade<array_model>;
+			using cfacade_type			= array_cfacade<array_model>;
+			using facade_type			= array_facade<array_model>;
 
 			nik_using_name_alias_scope_type		( type, Type)
 			nik_using_name_alias_scope_ctype	(ctype, Type)
@@ -150,6 +174,26 @@ namespace cctmp {
 		public:
 
 			nik_ce array_model() : initial{}, terminal{} { }
+
+			// subequip:
+
+				template<typename CMethod>
+				nik_ce auto csubequip() const -> CMethod
+					{ return csubfacade_type{static_cast<array_model const*>(this)}; }
+
+				template<typename Method>
+				nik_ce auto subequip() -> Method
+					{ return subfacade_type{static_cast<array_model*>(this)}; }
+
+			// equip:
+
+				template<typename CMethod>
+				nik_ce auto cequip() const -> CMethod
+					{ return cfacade_type{static_cast<array_model const*>(this)}; }
+
+				template<typename Method>
+				nik_ce auto equip() -> Method
+					{ return facade_type{static_cast<array_model*>(this)}; }
 
 			// initial:
 
@@ -552,8 +596,8 @@ namespace cctmp {
 
 			using model_type		= array_cmodel<Type, SizeType>;
 			using base			= CMethodType<model_type>;
-			using csubfacade_type		= array_csubfacade<model_type>;
-			using cfacade_type		= array_cfacade<model_type>;
+			using csubfacade_type		= typename model_type::csubfacade_type;
+			using cfacade_type		= typename model_type::cfacade_type;
 
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
@@ -568,18 +612,6 @@ namespace cctmp {
 
 			template<auto N>
 			nik_ce carray(const Type (&a)[N]) : base{a} { }
-
-			// subequip:
-
-				template<typename CMethod>
-				nik_ce auto csubequip() const -> CMethod
-					{ return csubfacade_type{static_cast<model_type const*>(this)}; }
-
-			// equip:
-
-				template<typename CMethod>
-				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model_type const*>(this)}; }
 	};
 
 /***********************************************************************************************************************/
@@ -597,10 +629,10 @@ namespace cctmp {
 
 			using model_type		= array_model<Type, SizeType, Size>;
 			using base			= MethodType<model_type>;
-			using csubfacade_type		= array_csubfacade<model_type>;
-			using subfacade_type		= array_subfacade<model_type>;
-			using cfacade_type		= array_cfacade<model_type>;
-			using facade_type		= array_facade<model_type>;
+			using csubfacade_type		= typename model_type::csubfacade_type;
+			using subfacade_type		= typename model_type::subfacade_type;
+			using cfacade_type		= typename model_type::cfacade_type;
+			using facade_type		= typename model_type::facade_type;
 
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
@@ -613,26 +645,6 @@ namespace cctmp {
 
 			template<typename T, auto N>
 			nik_ce array(const T (&a)[N]) : base{a} { }
-
-			// subequip:
-
-				template<typename CMethod>
-				nik_ce auto csubequip() const -> CMethod
-					{ return csubfacade_type{static_cast<model_type const*>(this)}; }
-
-				template<typename Method>
-				nik_ce auto subequip() -> Method
-					{ return subfacade_type{static_cast<model_type*>(this)}; }
-
-			// equip:
-
-				template<typename CMethod>
-				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model_type const*>(this)}; }
-
-				template<typename Method>
-				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<model_type*>(this)}; }
 	};
 
 /***********************************************************************************************************************/

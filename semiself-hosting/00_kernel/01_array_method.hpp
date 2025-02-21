@@ -593,6 +593,9 @@ namespace cctmp {
 	// We encode scope restrictions into the class itself as a means of partitioning a contiguous structure.
 	// It allows us to simulate a plot: An array of dynamic length arrays, all the same type.
 
+	template<typename> class plot_cfacade;
+	template<typename> class plot_facade;
+
 /***********************************************************************************************************************/
 
 // (scope) policy:
@@ -664,11 +667,13 @@ namespace cctmp {
 // mutable:
 
 	template<typename Type, typename SizeType, SizeType... Sizes>
-	class plot_model
+	class plot
 	{
 		public:
 
-			using facade			= plot_model; // method compatible.
+			using facade			= plot; // method compatible.
+			using cfacade_type		= plot_cfacade<plot>;
+			using facade_type		= plot_facade<plot>;
 
 			using initial_type		= array<Type, SizeType, (... + Sizes)>;
 			using terminal_type		= array<SizeType, SizeType, sizeof...(Sizes)>;
@@ -706,7 +711,19 @@ namespace cctmp {
 
 		public:
 
-			nik_ce plot_model() { }
+			nik_ce plot() { }
+
+			// equip:
+
+					// submethods lack access to push.
+
+				template<typename CMethod>
+				nik_ce auto cequip(size_ctype n) const -> CMethod
+					{ return cfacade_type{static_cast<plot const*>(this), n}; }
+
+				template<typename Method>
+				nik_ce auto equip(size_ctype n) -> Method
+					{ return facade_type{static_cast<plot*>(this), n}; }
 
 			// initial:
 
@@ -840,47 +857,6 @@ namespace cctmp {
 				nik_ce size_type size() const { return model->size(locus); }
 				nik_ce void set_size(size_ctype n) { model->set_size(locus, n); }
 				nik_ce void upslot(size_ctype n = 1) { model->upslot(n); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// interface:
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Type, typename SizeType, SizeType... Sizes>
-	class plot : public plot_model<Type, SizeType, Sizes...>
-	{
-		public:
-
-			using base			= plot_model<Type, SizeType, Sizes...>;
-			using model_type		= base;
-			using cfacade_type		= plot_cfacade<model_type>;
-			using facade_type		= plot_facade<model_type>;
-
-			nik_using_name_scope_type	( type, base)
-			nik_using_name_scope_ctype	(ctype, base)
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce plot() : base{} { }
-
-			// equip:
-
-					// submethods lack access to push.
-
-				template<typename CMethod>
-				nik_ce auto cequip(size_ctype n) const -> CMethod
-					{ return cfacade_type{static_cast<model_type const*>(this), n}; }
-
-				template<typename Method>
-				nik_ce auto equip(size_ctype n) -> Method
-					{ return facade_type{static_cast<model_type*>(this), n}; }
 	};
 
 /***********************************************************************************************************************/

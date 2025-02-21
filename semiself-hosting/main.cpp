@@ -40,6 +40,7 @@
 
 // square:
 
+/*
 	template<typename MI, typename MP, typename SizeType>
 	struct square_contr
 	{
@@ -66,21 +67,39 @@
 		template<typename size_type>
 		constexpr auto square(size_type const v)
 		{
-			using eval_type   = eval<size_type, size_type, 100, 10, 10, 10>;
-			using method_type = resolve_method<eval_type, eval_method>;
-			using sq_contr    = square_contr<MachineInstr, MachinePolicy, size_type>;
+			using glyph_pack       = cctmp::T_pack_Vs<32, 1, 0, 0, 1>;
+			using space_pack       = cctmp::T_pack_Vs< 0, 0, 0, 0, 0>;
+			using image_pack       = cctmp::T_pack_Vs< 9, 1, 0, 0, 1>;
+			using concord_type     = concord<size_type, size_type, glyph_pack, space_pack, image_pack, 35>;
 
-			auto eval_value   = eval_type{sq_contr::result};
-			auto eval_method  = eval_value.template equip<method_type>();
-			auto carry_value  = eval_method.run({v});
+			using ring_method_type = resolve_method<concord_type, concord_ring_method>;
+			using func_method_type = resolve_method<concord_type, concord_function_method>;
+			using eval_method_type = resolve_method<concord_type, eval_method>;
+			using eval_contr       = square_contr<MachineInstr, MachinePolicy, size_type>;
 
-			return carry_value[0];
+			auto concord_value     = concord_type{};
+			auto ring_method       = concord_value.template equip<ring_method_type>();
+			auto func_method       = concord_value.template equip<func_method_type>();
+			auto eval_method       = concord_value.template equip<eval_method_type>();
+
+			auto ring8_t           = ring_method.declare_type(8);
+			auto out_sign          = ring_method.declare_abstract(ring8_t);
+			auto in_sign           = ring_method.define_abstract(ring8_t, v);
+
+			auto ring8_to_ring8_f  = func_method.declare_type({ ring8_t, ring8_t });
+			auto func_sign         = func_method.define_abstract(ring8_to_ring8_f, eval_contr::result);
+		//	eval_method            . apply(out_sign, func_sign, in_sign);
+
+			return concord_value;
+		//	return ring_method.value(in_sign);
 		}
+*/
 
 /***********************************************************************************************************************/
 
 // sum of squares:
 
+/*
 	template<typename MI, typename MP, typename SizeType>
 	struct sum_of_squares_contr
 	{
@@ -128,19 +147,21 @@
 		{
 			using eval_type        = eval<size_type, size_type, 100, 10, 10, 10>;
 			using method_type      = resolve_method<eval_type, eval_method>;
-			using sum_of_sqs_contr = sum_of_squares_contr<MachineInstr, MachinePolicy, size_type>;
+			using eval_contr       = sum_of_squares_contr<MachineInstr, MachinePolicy, size_type>;
 
-			auto eval_value        = eval_type{sum_of_sqs_contr::result};
+			auto eval_value        = eval_type{eval_contr::result};
 			auto eval_method       = eval_value.template equip<method_type>();
 			auto carry_value       = eval_method.run({v1, v2});
 
 			return carry_value[0];
 		}
+*/
 
 /***********************************************************************************************************************/
 
 // factorial:
 
+/*
 	template<typename MI, typename MP, typename SizeType>
 	struct factorial_contr
 	{
@@ -194,19 +215,21 @@
 		{
 			using eval_type   = eval<size_type, size_type, 100, 10, 10, 10>;
 			using method_type = resolve_method<eval_type, eval_method>;
-			using fact_contr  = factorial_contr<MachineInstr, MachinePolicy, size_type>;
+			using eval_contr  = factorial_contr<MachineInstr, MachinePolicy, size_type>;
 
-			auto eval_value   = eval_type{fact_contr::result};
+			auto eval_value   = eval_type{eval_contr::result};
 			auto eval_method  = eval_value.template equip<method_type>();
 			auto carry_value  = eval_method.run({v});
 
 			return carry_value[0];
 		}
+*/
 
 /***********************************************************************************************************************/
 
 // fibonacci:
 
+/*
 	template<typename MI, typename MP, typename SizeType>
 	struct fibonacci_contr
 	{
@@ -269,40 +292,49 @@
 		{
 			using eval_type   = eval<size_type, size_type, 116, 10, 10, 10>;
 			using method_type = resolve_method<eval_type, eval_method>;
-			using fib_contr   = fibonacci_contr<MachineInstr, MachinePolicy, size_type>;
+			using eval_contr  = fibonacci_contr<MachineInstr, MachinePolicy, size_type>;
 
-			auto eval_value   = eval_type{fib_contr::result};
+			auto eval_value   = eval_type{eval_contr::result};
 			auto eval_method  = eval_value.template equip<method_type>();
 			auto carry_value  = eval_method.run({v});
 
 			return carry_value[0];
 		}
+*/
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
+	//	constexpr auto concord0 = square<unsigned long>(5);
+
+	// main:
+
+	//	print_array(*concord0.csymbol()->cglyph()->ctext());
+	//	print_array(*concord0.csymbol()->cimage()->ctext());
+	//	print_array(*concord0.crecord());
+
 		// square:
 
-			static_assert(square<unsigned long>(5) == 25);
+		//	static_assert(square<unsigned long>(5) == 25);
 
 		//	printf("%lu\n", square<unsigned long>(5));
 
 		// sum of squares:
 
-			static_assert(sum_of_squares<unsigned long>(3, 7) == 58);
+		//	static_assert(sum_of_squares<unsigned long>(3, 7) == 58);
 
 		//	printf("%lu\n", sum_of_squares<unsigned long>(3, 7));
 
 		// factorial:
 
-			static_assert(factorial<unsigned long>(5) == 120);
+		//	static_assert(factorial<unsigned long>(5) == 120);
 
 		//	printf("%lu\n", factorial<unsigned long>(5));
 
 		// fibonacci:
 
-			static_assert(fibonacci<unsigned long>(8) == 34);
+		//	static_assert(fibonacci<unsigned long>(8) == 34);
 
 		//	printf("%lu\n", fibonacci<unsigned long>(8));
 

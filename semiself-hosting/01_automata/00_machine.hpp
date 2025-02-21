@@ -32,16 +32,21 @@ namespace cctmp {
 
 // model:
 
+	template<typename> class machine_cfacade;
+	template<typename> class machine_facade;
+
 /***********************************************************************************************************************/
 
 // mutable:
 
 	template<typename Type, typename SizeType, SizeType CarrySize, SizeType VerseSize, SizeType StageSize>
-	class machine_model
+	class machine
 	{
 		public:
 
-			using facade				= machine_model; // method compatible.
+			using facade				= machine; // method compatible.
+			using cfacade_type			= machine_cfacade<machine>;
+			using facade_type			= machine_facade<machine>;
 
 			using carry_type			= array<Type, SizeType, CarrySize>;
 			using carry_type_ptr			= typename alias<carry_type>::type_ptr;
@@ -80,7 +85,17 @@ namespace cctmp {
 
 		public:
 
-			nik_ce machine_model() : _counter{} { }
+			nik_ce machine() : _counter{} { }
+
+			// equip:
+
+				template<typename CMethod>
+				nik_ce auto cequip() const -> CMethod
+					{ return cfacade_type{static_cast<machine const*>(this)}; }
+
+				template<typename Method>
+				nik_ce auto equip() -> Method
+					{ return facade_type{static_cast<machine*>(this)}; }
 
 			// carry:
 
@@ -243,45 +258,6 @@ namespace cctmp {
 				nik_ce size_type counter() const { return model->counter(); }
 				nik_ce void set_counter(size_ctype c) { model->set_counter(c); }
 				nik_ce void inc_counter(size_ctype n = 1) { model->inc_counter(n); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// interface:
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Type, typename SizeType, SizeType CarrySize, SizeType VerseSize, SizeType StageSize>
-	class machine : public machine_model<Type, SizeType, CarrySize, VerseSize, StageSize>
-	{
-		public:
-
-			using base			= machine_model<Type, SizeType, CarrySize, VerseSize, StageSize>;
-			using model_type		= base;
-			using cfacade_type		= machine_cfacade<model_type>;
-			using facade_type		= machine_facade<model_type>;
-
-			nik_using_name_scope_type	( type, base)
-			nik_using_name_scope_ctype	(ctype, base)
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce machine() : base{} { }
-
-			// equip:
-
-				template<typename CMethod>
-				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<model_type const*>(this)}; }
-
-				template<typename Method>
-				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<model_type*>(this)}; }
 	};
 
 /***********************************************************************************************************************/

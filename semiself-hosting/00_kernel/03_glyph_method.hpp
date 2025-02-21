@@ -47,6 +47,7 @@ namespace cctmp {
 	struct GlyphProg { enum : genum_type { instr, lines,     code, next, dimension }; };
 	struct GlyphRout { enum : genum_type { instr, arity,    local, next, dimension }; };
 	struct GlyphMeta { enum : genum_type { instr, bytes, universe, next, dimension }; };
+	struct GlyphDyna { enum : genum_type { instr,  mark,    index, next, dimension }; };
 
 /***********************************************************************************************************************/
 
@@ -71,12 +72,12 @@ namespace cctmp {
 
 // immutable:
 
-	template<typename Base>
-	class glyph_cmethod_disjoint : public book_cmethod_disjoint<Base, array_cmethod, table_csubmethod>
+	template<typename Base> // inheritance as {glyph, image} optimization.
+	class glyph_cmethod_disjoint : public book_cmethod_disjoint<array_cmethod, table_csubmethod, Base>
 	{
 		public:
 
-			using base			= book_cmethod_disjoint<Base, array_cmethod, table_csubmethod>;
+			using base			= book_cmethod_disjoint<array_cmethod, table_csubmethod, Base>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type_scope	(base)
@@ -115,6 +116,26 @@ namespace cctmp {
 					return make_icon(0, 0);
 				}
 
+			// program:
+
+				template<typename T>
+				nik_ce size_type fast_max_universe(const T & v)
+				{
+					size_type max = 0;
+
+					fast_set_ctext_dim(3, 4);
+					for (auto k = v.cbegin(); k != v.cend(); ++k)
+					{
+						fast_set_ctext_from_icon(*k);
+
+						size_ctype current = base::text_csubmethod[2][GlyphMeta::universe];
+
+						if (current > max) { max = current; }
+					}
+
+					return max;
+				}
+
 			// type check:
 
 			//	template<typename T, typename... Ts>
@@ -137,7 +158,7 @@ namespace cctmp {
 			// text:
 
 					// safe version should reset dimensions.
-				nik_ce auto fast_set_ctext_from_icon(icon_ctype_ref icon)
+				nik_ce void fast_set_ctext_from_icon(icon_ctype_ref icon)
 				{
 					base::fast_set_cpage_chapter(icon.mark());
 					base::fast_set_ctext_from_page(icon.index());
@@ -146,18 +167,28 @@ namespace cctmp {
 					// needs to test against subtext.
 				nik_ce void fast_set_ctext_dim(size_ctype r, size_ctype c)
 					{ base::text_csubmethod.fast_set_dimension(r, c); }
+
+				nik_ce size_type fast_ctext_at(size_ctype n, size_ctype m) const
+					{ return base::text_csubmethod[n][m]; }
+
+				nik_ce size_type ctext_at(icon_ctype_ref icon, size_ctype n, size_ctype m)
+				{
+					fast_set_ctext_from_icon(icon);
+
+					return fast_ctext_at(n, m);
+				}
 	};
 
 /***********************************************************************************************************************/
 
 // mutable:
 
-	template<typename Base>
-	class glyph_method_disjoint : public book_method_disjoint<Base, array_method, table_submethod>
+	template<typename Base> // inheritance as {glyph, image} optimization.
+	class glyph_method_disjoint : public book_method_disjoint<array_method, table_submethod, Base>
 	{
 		public:
 
-			using base			= book_method_disjoint<Base, array_method, table_submethod>;
+			using base			= book_method_disjoint<array_method, table_submethod, Base>;
 			using facade			= typename base::facade;
 
 			nik_using_size_type_scope	(base)
@@ -204,7 +235,7 @@ namespace cctmp {
 			// text:
 
 					// safe version should reset dimensions.
-				nik_ce auto fast_set_text_from_icon(icon_ctype_ref icon)
+				nik_ce void fast_set_text_from_icon(icon_ctype_ref icon)
 				{
 					base::fast_set_page_chapter(icon.mark());
 					base::fast_set_text_from_page(icon.index());
@@ -338,194 +369,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// empty:
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Facade>
-	class glyph_empty_cmethod : public glyph_builtin_cmethod<Facade>
-	{
-		public:
-
-			using base			= glyph_builtin_cmethod<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce glyph_empty_cmethod() : base{} { }
-			nik_ce glyph_empty_cmethod(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Facade>
-	class glyph_empty_method : public glyph_builtin_method<Facade>
-	{
-		public:
-
-			using base			= glyph_builtin_method<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce glyph_empty_method() : base{} { }
-			nik_ce glyph_empty_method(const facade & f) : base{f} { }
-
-			nik_ce auto declare(size_ctype bytes) { return base::declare(GlyphInstr::empty, bytes); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// ring:
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Facade>
-	class glyph_ring_cmethod : public glyph_builtin_cmethod<Facade>
-	{
-		public:
-
-			using base			= glyph_builtin_cmethod<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce glyph_ring_cmethod() : base{} { }
-			nik_ce glyph_ring_cmethod(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Facade>
-	class glyph_ring_method : public glyph_builtin_method<Facade>
-	{
-		public:
-
-			using base			= glyph_builtin_method<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce glyph_ring_method() : base{} { }
-			nik_ce glyph_ring_method(const facade & f) : base{f} { }
-
-			nik_ce auto declare(size_ctype bytes) { return base::declare(GlyphInstr::ring, bytes); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// flex:
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Facade>
-	class glyph_flex_cmethod : public glyph_builtin_cmethod<Facade>
-	{
-		public:
-
-			using base			= glyph_builtin_cmethod<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce glyph_flex_cmethod() : base{} { }
-			nik_ce glyph_flex_cmethod(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Facade>
-	class glyph_flex_method : public glyph_builtin_method<Facade>
-	{
-		public:
-
-			using base			= glyph_builtin_method<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce glyph_flex_method() : base{} { }
-			nik_ce glyph_flex_method(const facade & f) : base{f} { }
-
-			nik_ce auto declare(size_ctype bytes) { return base::declare(GlyphInstr::flex, bytes); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// utf8 char:
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Facade>
-	class glyph_utf8_char_cmethod : public glyph_builtin_cmethod<Facade>
-	{
-		public:
-
-			using base			= glyph_builtin_cmethod<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce glyph_utf8_char_cmethod() : base{} { }
-			nik_ce glyph_utf8_char_cmethod(const facade & f) : base{f} { }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Facade>
-	class glyph_utf8_char_method : public glyph_builtin_method<Facade>
-	{
-		public:
-
-			using base			= glyph_builtin_method<Facade>;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-		public:
-
-			nik_ce glyph_utf8_char_method() : base{} { }
-			nik_ce glyph_utf8_char_method(const facade & f) : base{f} { }
-
-			nik_ce auto declare(size_ctype bytes) { return base::declare(GlyphInstr::utf8_char, bytes); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // tuple:
 
 /***********************************************************************************************************************/
@@ -541,6 +384,10 @@ namespace cctmp {
 			using facade			= typename base::facade;
 
 			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
 		public:
 
@@ -568,6 +415,10 @@ namespace cctmp {
 			using facade			= typename base::facade;
 
 			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
 		public:
 
@@ -603,6 +454,10 @@ namespace cctmp {
 
 			nik_using_size_type_scope	(base)
 
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
 		public:
 
 			nik_ce glyph_cotuple_cmethod_disjoint() : base{} { }
@@ -629,6 +484,10 @@ namespace cctmp {
 			using facade			= typename base::facade;
 
 			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
 		public:
 
@@ -664,6 +523,10 @@ namespace cctmp {
 
 			nik_using_size_type_scope	(base)
 
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
 		public:
 
 			nik_ce glyph_function_cmethod_disjoint() : base{} { }
@@ -691,10 +554,55 @@ namespace cctmp {
 
 			nik_using_size_type_scope	(base)
 
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
 		public:
 
 			nik_ce glyph_function_method_disjoint() : base{} { }
 			nik_ce glyph_function_method_disjoint(const facade & f) : base{f} { }
+
+			template<typename T>
+			nik_ce void instantiate(icon_type_ref icon, size_ctype row_length, const T & v)
+			{
+				base::fast_set_text_dim(row_length, base::col_length);
+
+				size_ctype universe = base::fast_max_universe(v);
+
+				base::make_line_program (row_length);
+				base::make_line_routine (GlyphInstr::function);
+				base::make_line_meta    (0, universe);
+
+				size_type line = 3;
+				for (auto k = v.cbegin(); k != v.cend(); ++k, ++line)
+				{
+					base::text_submethod[line][GlyphDyna::instr] = GlyphInstr::type;
+					base::text_submethod[line][GlyphDyna::mark ] = k->mark ();
+					base::text_submethod[line][GlyphDyna::index] = k->index();
+					base::text_submethod[line][GlyphDyna::next ] = 1;
+				}
+
+				size_ctype pos = base::find_from_previous(icon.mark(), icon.index());
+
+				if (base::found_from_previous(pos, icon.index()))
+				{
+					icon.set_index(pos);
+
+					base::fast_deallocate_last(); // reset text as well (non fast) ?
+				}
+			}
+
+			template<typename T>
+			nik_ce auto declare(const T & v)
+			{
+				size_ctype rows = v.size() + 3;
+				auto icon       = base::allocate(BookMark::function, rows * base::col_length);
+
+				if (base::not_fail(icon)) { instantiate(icon, rows, v); }
+
+				return icon;
+			}
 	};
 
 	// syntactic sugar:
