@@ -258,49 +258,35 @@ namespace cctmp {
 			using image_cmethod_type		= typename model_type::template
 									image_cmethod_type<ImageCMethod>;
 
-			glyph_cmethod_type glyph_cmethod;
-			image_cmethod_type image_cmethod;
-
 		public:
 
-			nik_ce corpus_cmethod_disjoint() : base{}, glyph_cmethod{}, image_cmethod{} { }
-			nik_ce corpus_cmethod_disjoint(const facade & f) :
-
-				base{f},
-				glyph_cmethod{base::model->template glyph_cequip<glyph_cmethod_type>()},
-				image_cmethod{base::model->template image_cequip<image_cmethod_type>()}
-				{ }
+			nik_ce corpus_cmethod_disjoint() : base{} { }
+			nik_ce corpus_cmethod_disjoint(const facade & f) : base{f} { }
 
 			// glyph:
 
-				nik_ce size_type fast_glyph_ctext_at(size_ctype n, size_ctype m)
-					{ return glyph_cmethod.fast_ctext_at(n, m); }
+				nik_ce auto glyph_cmethod() const
+					{ return base::model->template glyph_cequip<glyph_cmethod_type>(); }
 
 				nik_ce size_type glyph_ctext_at(icon_ctype_ref icon, size_ctype n, size_ctype m)
-					{ return glyph_cmethod.ctext_at(icon, n, m); }
-
-				nik_ce auto fast_to_icon()
-				{
-					size_ctype mark  = fast_image_ctext_at(ImageBase::mark );
-					size_ctype index = fast_image_ctext_at(ImageBase::index);
-
-					return glyph_cmethod.make_icon(mark, index);
-				}
+					{ return glyph_cmethod().text_cmethod(icon).cat(n, m); }
 
 				nik_ce auto to_icon(sign_ctype_ref sign)
 				{
-					image_cmethod.fast_set_ctext_from_sign(sign);
+					auto text_cival  = image_cmethod().text_cmethod(sign);
+					size_ctype mark  = text_cival.cat(ImageBase::mark );
+					size_ctype index = text_cival.cat(ImageBase::index);
 
-					return fast_to_icon();
+					return icon_type{mark, index};
 				}
 
 			// image:
 
-				nik_ce size_type fast_image_ctext_at(size_ctype n)
-					{ return image_cmethod.fast_ctext_at(n); }
+				nik_ce auto image_cmethod() const
+					{ return base::model->template image_cequip<image_cmethod_type>(); }
 
 				nik_ce size_type image_ctext_at(sign_ctype_ref sign, size_ctype n)
-					{ return image_cmethod.ctext_at(sign, n); }
+					{ return image_cmethod().text_cmethod(sign).cat(n); }
 	};
 
 /***********************************************************************************************************************/
@@ -331,18 +317,20 @@ namespace cctmp {
 			using image_method_type		= typename model_type::template
 								image_method_type<ImageMethod>;
 
-			glyph_method_type glyph_method;
-			image_method_type image_method;
-
 		public:
 
-			nik_ce corpus_method_disjoint() : base{}, glyph_method{}, image_method{} { }
-			nik_ce corpus_method_disjoint(const facade & f) :
+			nik_ce corpus_method_disjoint() : base{} { }
+			nik_ce corpus_method_disjoint(const facade & f) : base{f} { }
 
-				base{f},
-				glyph_method{base::model->template glyph_equip<glyph_method_type>()},
-				image_method{base::model->template image_equip<image_method_type>()}
-				{ }
+			// glyph:
+
+				nik_ce auto glyph_method()
+					{ return base::model->template glyph_equip<glyph_method_type>(); }
+
+			// image:
+
+				nik_ce auto image_method()
+					{ return base::model->template image_equip<image_method_type>(); }
 	};
 
 /***********************************************************************************************************************/

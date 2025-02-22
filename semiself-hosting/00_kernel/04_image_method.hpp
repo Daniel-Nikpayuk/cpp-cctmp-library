@@ -92,25 +92,6 @@ namespace cctmp {
 
 					return make_sign(0, 0);
 				}
-
-			// text:
-
-					// safe version should reset dimensions.
-				nik_ce void fast_set_ctext_from_sign(sign_ctype_ref sign)
-				{
-					base::fast_set_cpage_chapter(sign.mark());
-					base::fast_set_ctext_from_page(sign.index());
-				}
-
-				nik_ce size_type fast_ctext_at(size_ctype n) const
-					{ return base::text_csubmethod[n]; }
-
-				nik_ce size_type ctext_at(sign_ctype_ref sign, size_ctype n)
-				{
-					fast_set_ctext_from_sign(sign);
-
-					return fast_ctext_at(n);
-				}
 	};
 
 /***********************************************************************************************************************/
@@ -135,32 +116,31 @@ namespace cctmp {
 			using sign_type_ref		= typename base::sign_type_ref;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
+		protected:
+
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using page_method_type		= typename base::page_method_type;
+
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
+			using text_submethod_type	= typename base::text_submethod_type;
+
 		public:
 
 			nik_ce image_method_disjoint() : base{} { }
 			nik_ce image_method_disjoint(const facade & f) : base{f} { }
 
-			nik_ce void set_icon_fields(icon_ctype_ref icon)
+			nik_ce void set_icon_fields(text_submethod_type & text_ival, icon_ctype_ref icon)
 			{
-				base::text_submethod[ImageBase::mark ] = icon.mark ();
-				base::text_submethod[ImageBase::index] = icon.index();
+				text_ival[ImageBase::mark ] = icon.mark ();
+				text_ival[ImageBase::index] = icon.index();
 			}
-
-			// text:
-
-					// safe version should reset dimensions.
-				nik_ce void fast_set_text_from_sign(sign_ctype_ref sign)
-				{
-					base::fast_set_page_chapter(sign.mark());
-					base::fast_set_text_from_page(sign.index());
-				}
 
 			// allocate:
 
-				nik_ce auto allocate(size_ctype n, size_ctype m)
+				nik_ce auto allocate(page_method_type & page_ival, size_ctype mark, size_ctype n)
 				{
-					if (base::allocate(n, m))
-						{ return base::make_sign(n, base::page_cmethod.max()); }
+					if (base::allocate(page_ival, n))
+						{ return base::make_sign(mark, page_ival.max()); }
 					else    { return base::fail_sign(); }
 				}
 	};
@@ -196,6 +176,11 @@ namespace cctmp {
 			using sign_type			= typename base::sign_type;
 			using sign_type_ref		= typename base::sign_type_ref;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		protected:
+
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
 
 		public:
 
@@ -234,6 +219,12 @@ namespace cctmp {
 
 		protected:
 
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using page_method_type		= typename base::page_method_type;
+
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
+			using text_submethod_type	= typename base::text_submethod_type;
+
 			nik_ces size_type length	= ImageBuiltin::dimension;
 			nik_ces size_type unit_length	= 1;
 
@@ -244,19 +235,23 @@ namespace cctmp {
 
 		//	nik_ce size_type unit_size() const { return unit_length; }
 
-			nik_ce void instantiate(icon_ctype_ref icon, size_ctype time, size_ctype point)
+			nik_ce void instantiate(const page_method_type & page_ival,
+				icon_ctype_ref icon, size_ctype time, size_ctype point)
 			{
-				base::set_icon_fields(icon);
+				auto text_ival = base::text_submethod(page_ival, icon.index());
 
-				base::text_submethod[ImageBuiltin::time ] = time;
-				base::text_submethod[ImageBuiltin::point] = point;
+				base::set_icon_fields(text_ival, icon);
+
+				text_ival[ImageBuiltin::time ] = time;
+				text_ival[ImageBuiltin::point] = point;
 			}
 
 			nik_ce auto declare(icon_ctype_ref icon, size_ctype time, size_ctype point)
 			{
-				auto sign = base::allocate(icon.mark(), length);
+				auto page_ival = base::page_method(BookMark::builtin);
+				auto sign      = base::allocate(page_ival, icon.mark(), length);
 
-				if (base::not_fail(sign)) { instantiate(icon, time, point); }
+				if (base::not_fail(sign)) { instantiate(page_ival, icon, time, point); }
 
 				return sign;
 			}
@@ -473,6 +468,11 @@ namespace cctmp {
 			using sign_type_ref		= typename base::sign_type_ref;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
+		protected:
+
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
+
 		public:
 
 			nik_ce image_function_cmethod_disjoint() : base{} { }
@@ -508,25 +508,37 @@ namespace cctmp {
 			using sign_type_ref		= typename base::sign_type_ref;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
+		protected:
+
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using page_method_type		= typename base::page_method_type;
+
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
+			using text_submethod_type	= typename base::text_submethod_type;
+
 		public:
 
 			nik_ce image_function_method_disjoint() : base{} { }
 			nik_ce image_function_method_disjoint(const facade & f) : base{f} { }
 
-			nik_ce void instantiate(icon_ctype_ref icon, size_ctype time, size_ctype length, size_ctype point)
+			nik_ce void instantiate(const page_method_type & page_ival,
+				icon_ctype_ref icon, size_ctype time, size_ctype length, size_ctype point)
 			{
-				base::set_icon_fields(icon);
+				auto text_ival = base::text_submethod(page_ival, icon.index());
 
-				base::text_submethod[ImageFunction::time  ] = time;
-				base::text_submethod[ImageFunction::length] = length;
-				base::text_submethod[ImageFunction::point ] = point;
+				base::set_icon_fields(text_ival, icon);
+
+				text_ival[ImageFunction::time  ] = time;
+				text_ival[ImageFunction::length] = length;
+				text_ival[ImageFunction::point ] = point;
 			}
 
 			nik_ce auto declare(icon_ctype_ref icon, size_ctype time, size_ctype length, size_ctype point)
 			{
-				auto sign = base::allocate(icon.mark(), 5);
+				auto page_ival = base::page_method(BookMark::function);
+				auto sign      = base::allocate(page_ival, icon.mark(), 5);
 
-				if (base::not_fail(sign)) { instantiate(icon, time, length, point); }
+				if (base::not_fail(sign)) { instantiate(page_ival, icon, time, length, point); }
 
 				return sign;
 			}

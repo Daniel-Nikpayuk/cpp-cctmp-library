@@ -375,33 +375,38 @@ namespace cctmp {
 			using text_csubmethod_type	= typename model_type::template
 								text_csubmethod_type<TextCMethod>;
 
-			page_cmethod_type page_cmethod;
-			text_csubmethod_type text_csubmethod;
-
 		public:
 
-			nik_ce book_cmethod_disjoint() : base{}, page_cmethod{}, text_csubmethod{} { }
-			nik_ce book_cmethod_disjoint(const facade & f) :
-
-				base{f},
-				page_cmethod    {base::model->template page_cequip   <page_cmethod_type   >(0)},
-				text_csubmethod {base::model->template text_csubequip<text_csubmethod_type>( )}
-				{ }
+			nik_ce book_cmethod_disjoint() : base{} { }
+			nik_ce book_cmethod_disjoint(const facade & f) : base{f} { }
 
 			// page:
 
-					// safe version should reset text.
-				nik_ce void fast_set_cpage_chapter(size_ctype n) { page_cmethod.set_slot(n); }
+				nik_ce auto page_cmethod(size_ctype n) const
+					{ return base::model->template page_cequip<page_cmethod_type>(n); }
 
 			// text:
 
-					// safe version should reset dimensions.
-				nik_ce void fast_set_ctext_ival(size_ctype s, size_ctype f)
-					{ text_csubmethod.mid_set(s, f); }
+				nik_ce auto text_csubmethod(size_ctype start, size_ctype finish) const
+				{
+					auto cival = base::model->template text_csubequip<text_csubmethod_type>();
+					cival.mid_set(start, finish);
 
-					// safe version assumes page is set; should reset dimensions.
-				nik_ce void fast_set_ctext_from_page(size_ctype n)
-					{ fast_set_ctext_ival(page_cmethod[n].start(), page_cmethod[n].finish()); }
+					return cival;
+				}
+
+				nik_ce auto text_csubmethod(const page_cmethod_type & page_cival, size_ctype index) const
+				{
+					auto npage = page_cival.citer(index);
+
+					return text_csubmethod(npage->start(), npage->finish());
+				}
+
+				nik_ce auto text_csubmethod(icon_ctype_ref icon) const
+					{ return text_csubmethod(page_cmethod(icon.mark()), icon.index()); }
+
+				nik_ce auto text_csubmethod(sign_ctype_ref sign) const
+					{ return text_csubmethod(page_cmethod(sign.mark()), sign.index()); }
 
 			// find:
 
@@ -409,24 +414,22 @@ namespace cctmp {
 					{ return (n < index); }
 
 					// assumes page and note_page match.
-				nik_ce size_type find_from_previous(size_ctype mark, size_ctype index)
+				nik_ce size_type find_from_previous(icon_ctype_ref icon) const
 				{
-					fast_set_cpage_chapter(mark);
+					auto page_cival = page_cmethod(icon.mark());
+					auto npage      = page_cival.citer(icon.index());
+					auto text_cival = text_csubmethod(npage->start(), npage->finish());
 
-					auto npage = page_cmethod.citer(index);
-
-					fast_set_ctext_ival(npage->start(), npage->finish());
-
-					for (auto k = page_cmethod.cbegin(); k != npage; ++k)
+					for (auto k = page_cival.cbegin(); k != npage; ++k)
 					{
 						auto b = base::ctext().citer(k->start ());
 						auto e = base::ctext().citer(k->finish());
 
-						if (text_csubmethod.equal(0, b, e))
-							{ return page_cmethod.left_size(k); }
+						if (text_cival.equal(0, b, e))
+							{ return page_cival.left_size(k); }
 					}
 
-					return index;
+					return icon.index();
 				}
 	};
 
@@ -456,84 +459,74 @@ namespace cctmp {
 
 		protected:
 
+			using page_cmethod_type		= typename base::page_cmethod_type;
 			using page_method_type		= typename model_type::template
 								page_method_type<PageMethod>;
+
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
 			using text_submethod_type	= typename model_type::template
 								text_submethod_type<TextMethod>;
 
-			page_method_type page_method;
-			text_submethod_type text_submethod;
-
 		public:
 
-			nik_ce book_method_disjoint() : base{}, page_method{}, text_submethod{} { }
-			nik_ce book_method_disjoint(const facade & f) :
-
-				base{f},
-				page_method    {base::model->template page_equip   <page_method_type   >(0)},
-				text_submethod {base::model->template text_subequip<text_submethod_type>( )}
-				{ }
+			nik_ce book_method_disjoint() : base{} { }
+			nik_ce book_method_disjoint(const facade & f) : base{f} { }
 
 			// page:
 
-					// safe version should reset text.
-				nik_ce void fast_set_page_chapter(size_ctype n) { page_method.set_slot(n); }
+				nik_ce auto page_method(size_ctype n)
+					{ return base::model->template page_equip<page_method_type>(n); }
 
 			// text:
 
-					// safe version should reset dimensions.
-				nik_ce void fast_set_text_ival(size_ctype s, size_ctype f)
-					{ text_submethod.mid_set(s, f); }
-
-					// safe version assumes page is set; should reset dimensions.
-				nik_ce void fast_set_text_from_page(size_ctype n)
+				nik_ce auto text_submethod(size_ctype start, size_ctype finish)
 				{
-					auto npage = base::page_cmethod.citer(n);
+					auto ival = base::model->template text_subequip<text_submethod_type>();
+					ival.mid_set(start, finish);
 
-					fast_set_text_ival(npage->start(), npage->finish());
+					return ival;
 				}
+
+				nik_ce auto text_submethod(const page_cmethod_type & page_cival, size_ctype index)
+				{
+					auto npage = page_cival.citer(index);
+
+					return text_submethod(npage->start(), npage->finish());
+				}
+
+				nik_ce auto text_submethod(const page_method_type & page_ival, size_ctype index)
+				{
+					auto npage = page_ival.citer(index);
+
+					return text_submethod(npage->start(), npage->finish());
+				}
+
+				nik_ce auto text_submethod(icon_ctype_ref icon)
+					{ return text_submethod(page_cmethod(icon.mark()), icon.index()); }
 
 		protected:
 
-				nik_ce void push_page(size_ctype m)
+				nik_ce void deallocate_last(const page_cmethod_type & page_cival)
+					{ base::text().downsize(page_cival.clast()->size()); }
+
+				nik_ce void deallocate_last(const page_method_type & page_ival)
+					{ base::text().downsize(page_ival.clast()->size()); }
+
+				nik_ce void push_page(page_method_type & page_ival, size_ctype n)
 				{
-					size_ctype start  = base::text().expand(m);
-					size_ctype finish = start + m;
+					size_ctype start  = base::text().expand(n);
+					size_ctype finish = start + n;
 
-					page_method.push(ival_type{start, finish});
-				}
-
-				nik_ce bool overlay(size_ctype n, size_ctype m)
-				{
-					fast_set_page_chapter(n);
-
-					if (page_method.is_full() || base::ctext().lacks_capacity(m)) return false;
-
-					push_page(m);
-
-					return true;
-				}
-
-				nik_ce void fast_deallocate_last()
-				{
-					base::text().downsize(base::page_cmethod.clast()->size());
-					page_method.downsize();
-				}
-
-				nik_ce void deallocate_last()
-				{
-					fast_set_text_ival(0, 0);
-					fast_deallocate_last();
+					page_ival.push(ival_type{start, finish});
 				}
 
 		public:
 
-				nik_ce bool allocate(size_ctype n, size_ctype m)
+				nik_ce bool allocate(page_method_type & page_ival, size_ctype n)
 				{
-					if (not overlay(n, m)) return false;
+					if (page_ival.is_full() || base::ctext().lacks_capacity(n)) return false;
 
-					base::fast_set_cpage_chapter(n);
-					fast_set_text_from_page(base::page_cmethod.max());
+					push_page(page_ival, n);
 
 					return true;
 				}

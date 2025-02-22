@@ -351,10 +351,6 @@ namespace cctmp {
 
 				template<typename In, typename End>
 				nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }
-
-			//	template<typename F, typename In, typename End>
-			//	nik_ce void pushmap(F, In in, End end)
-			//		{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
 	};
 
 /***********************************************************************************************************************/
@@ -422,10 +418,6 @@ namespace cctmp {
 
 				template<typename In, typename End>
 				nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }
-
-			//	template<typename F, typename In, typename End>
-			//	nik_ce void pushmap(F, In in, End end)
-			//		{ while (in != end) { push(T_restore_T<F>::result(*in++)); } }
 	};
 
 /***********************************************************************************************************************/
@@ -477,6 +469,8 @@ namespace cctmp {
 
 			template<typename T, auto N>
 			nik_ce table_presubmethod(const T (&a)[N]) : base{a} { }
+
+			nik_ce size_type cat(size_ctype n, size_ctype m) const { return base::cat(n * cols + m); }
 
 			nik_ce void fast_set_dimension(size_ctype r, size_ctype c) { rows = r; cols = c; }
 

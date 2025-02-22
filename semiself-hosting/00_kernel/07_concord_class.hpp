@@ -247,24 +247,22 @@ namespace cctmp {
 			using record_csubmethod_type	= typename model_type::template
 								record_csubmethod_type<RecordCMethod>;
 
-			symbol_cmethod_type symbol_cmethod;
-			record_csubmethod_type record_csubmethod;
-
 		public:
 
-			nik_ce concord_cmethod_disjoint() : base{}, symbol_cmethod{}, record_csubmethod{} { }
-			nik_ce concord_cmethod_disjoint(const facade & f) :
+			nik_ce concord_cmethod_disjoint() : base{} { }
+			nik_ce concord_cmethod_disjoint(const facade & f) : base{f} { }
 
-				base{f},
-				symbol_cmethod{base::model->template symbol_cequip<symbol_cmethod_type>()},
-				record_csubmethod{base::model->template record_csubequip<record_csubmethod_type>()}
-				{ }
+			// symbol:
 
-			// glyph:
+				nik_ce auto symbol_cmethod() const
+					{ return base::model->template symbol_cequip<symbol_cmethod_type>(); }
 
-				nik_ce auto fast_type() { return symbol_cmethod.fast_to_icon(); }
+				nik_ce auto type(sign_ctype_ref sign) { return symbol_cmethod().to_icon(sign); }
 
-				nik_ce auto type(sign_ctype_ref sign) { return symbol_cmethod.to_icon(sign); }
+			// record:
+
+				nik_ce auto record_csubmethod() const
+					{ return base::model->template record_csubequip<record_csubmethod_type>(); }
 	};
 
 /***********************************************************************************************************************/
@@ -295,18 +293,21 @@ namespace cctmp {
 			using record_submethod_type	= typename model_type::template
 								record_submethod_type<RecordMethod>;
 
-			symbol_method_type symbol_method;
-			record_submethod_type record_submethod;
-
 		public:
 
-			nik_ce concord_method_disjoint() : base{}, symbol_method{}, record_submethod{} { }
-			nik_ce concord_method_disjoint(const facade & f) :
+			nik_ce concord_method_disjoint() : base{} { }
+			nik_ce concord_method_disjoint(const facade & f) : base{f} { }
 
-				base{f},
-				symbol_method{base::model->template symbol_equip<symbol_method_type>()},
-				record_submethod{base::model->template record_subequip<record_submethod_type>()}
-				{ }
+			// symbol:
+
+				nik_ce auto symbol_method()
+					{ return base::model->template symbol_equip<symbol_method_type>(); }
+
+			// record:
+
+				nik_ce auto record_submethod()
+					{ return base::model->template record_subequip<record_submethod_type>(); }
+
 	};
 
 /***********************************************************************************************************************/

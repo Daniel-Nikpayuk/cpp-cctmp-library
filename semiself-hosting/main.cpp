@@ -74,13 +74,13 @@
 
 			using ring_method_type = resolve_method<concord_type, concord_ring_method>;
 			using func_method_type = resolve_method<concord_type, concord_function_method>;
-			using eval_method_type = resolve_method<concord_type, eval_method>;
+		//	using eval_method_type = resolve_method<concord_type, eval_method>;
 			using eval_contr       = square_contr<MachineInstr, MachinePolicy, size_type>;
 
 			auto concord_value     = concord_type{};
 			auto ring_method       = concord_value.template equip<ring_method_type>();
 			auto func_method       = concord_value.template equip<func_method_type>();
-			auto eval_method       = concord_value.template equip<eval_method_type>();
+		//	auto eval_method       = concord_value.template equip<eval_method_type>();
 
 			auto ring8_t           = ring_method.declare_type(8);
 			auto out_sign          = ring_method.declare_abstract(ring8_t);
@@ -307,8 +307,6 @@
 	int main(int argc, char *argv[])
 	{
 	//	constexpr auto concord0 = square<unsigned long>(5);
-
-	// main:
 
 	//	print_array(*concord0.csymbol()->cglyph()->ctext());
 	//	print_array(*concord0.csymbol()->cimage()->ctext());

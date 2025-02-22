@@ -54,16 +54,13 @@ namespace cctmp {
 
 			// point:
 
-				nik_ce auto fast_cpoint()
-					{ return base::symbol_cmethod.fast_image_ctext_point(); }
-
 				nik_ce auto cpoint(sign_ctype_ref sign)
-					{ return base::symbol_cmethod.image_ctext_point(sign); }
+					{ return base::symbol_cmethod().image_ctext_at(ImageBuiltin::point); }
 
 			// value:
 
-				nik_ce size_type value(sign_ctype_ref sign)
-					{ return base::record_csubmethod[cpoint(sign)]; }
+				nik_ce size_type cvalue(sign_ctype_ref sign)
+					{ return base::record_csubmethod().cat(cpoint(sign)); }
 	};
 
 /***********************************************************************************************************************/
@@ -89,7 +86,7 @@ namespace cctmp {
 		protected:
 
 			nik_ce auto declare_image(icon_ctype_ref icon, size_ctype time, size_ctype point)
-				{ return base::symbol_method.declare_image(icon, time, point); }
+				{ return base::symbol_method().declare_image(icon, time, point); }
 
 		public:
 
@@ -99,7 +96,7 @@ namespace cctmp {
 			// declare:
 
 				nik_ce auto declare_type(size_ctype instr, size_ctype bytes)
-					{ return base::symbol_method.declare_type(instr, bytes); }
+					{ return base::symbol_method().declare_type(instr, bytes); }
 
 				nik_ce auto declare_abstract(icon_ctype_ref icon)
 					{ return declare_image(icon, ImageTime::abstract, base::record().expand(1)); }
@@ -111,10 +108,11 @@ namespace cctmp {
 
 				nik_ce auto define_abstract(icon_ctype_ref icon, size_ctype value)
 				{
-					auto point = base::record().expand(1); // unit_size
-					auto sign  = declare_image(icon, ImageTime::abstract, point);
+					auto point       = base::record().expand(1); // unit_size
+					auto sign        = declare_image(icon, ImageTime::abstract, point);
+					auto record_ival = base::record_submethod();
 
-					base::record_submethod[point] = value;
+					record_ival[point] = value;
 
 					return sign;
 				}
@@ -418,7 +416,7 @@ namespace cctmp {
 
 			nik_ce auto declare_image(
 				icon_ctype_ref icon, size_ctype time, size_ctype length, size_ctype point)
-					{ return base::symbol_method.declare_image(icon, time, length, point); }
+					{ return base::symbol_method().declare_image(icon, time, length, point); }
 
 		public:
 
@@ -432,7 +430,7 @@ namespace cctmp {
 				{
 					using array_type = array<icon_type, size_type, N>;
 
-					return base::symbol_method.declare_type(array_type{t});
+					return base::symbol_method().declare_type(array_type{t});
 				}
 
 				nik_ce auto declare_abstract(icon_ctype_ref icon, size_ctype n)
@@ -456,15 +454,16 @@ namespace cctmp {
 				template<auto N>
 				nik_ce auto define_abstract(icon_ctype_ref icon, const size_type (&cc_asm)[N])
 				{
-					auto length = base::record().expand(1);
-					auto point  = base::record().expand(N);
-					auto sign   = declare_image(icon, ImageTime::abstract, length, point);
+					auto length      = base::record().expand(1);
+					auto point       = base::record().expand(N);
+					auto sign        = declare_image(icon, ImageTime::abstract, length, point);
+					auto record_ival = base::record_submethod();
 
-					base::record_submethod[length] = N;
+					record_ival[length] = N;
 
 						// requires type check.
 					for (size_type k = 0; k != N; ++k, ++point)
-						{ base::record_submethod[point] = cc_asm[k]; }
+						{ record_ival[point] = cc_asm[k]; }
 
 					return sign;
 				}

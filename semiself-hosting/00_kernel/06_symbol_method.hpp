@@ -55,9 +55,6 @@ namespace cctmp {
 
 			// point:
 
-				nik_ce size_type fast_image_ctext_point()
-					{ return base::fast_image_ctext_at(ImageBuiltin::point); }
-
 				nik_ce size_type image_ctext_point(sign_ctype_ref sign)
 					{ return base::image_ctext_at(sign, ImageBuiltin::point); }
 
@@ -102,14 +99,16 @@ namespace cctmp {
 			nik_ce symbol_builtin_method_disjoint(const facade & f) : base{f} { }
 
 			nik_ce auto declare_type(size_ctype instr, size_ctype bytes)
-				{ return base::glyph_method.declare(instr, bytes); }
+				{ return base::glyph_method().declare(instr, bytes); }
 
 			nik_ce auto declare_image(icon_ctype_ref icon, size_ctype time, size_ctype point)
 			{
-					// should this check be here now ?
-				if (base::glyph_cmethod.is_fail(icon)) { return base::image_cmethod.fail_sign(); }
+				auto image_ival = base::image_method();
 
-				return base::image_method.declare(icon, time, point);
+					// should this check be here now ?
+				if (base::glyph_cmethod().is_fail(icon)) { return image_ival.fail_sign(); }
+
+				return image_ival.declare(icon, time, point);
 			}
 	};
 
@@ -332,15 +331,17 @@ namespace cctmp {
 			nik_ce symbol_function_method_disjoint(const facade & f) : base{f} { }
 
 			template<typename T>
-			nik_ce auto declare_type(const T & v) { return base::glyph_method.declare(v); }
+			nik_ce auto declare_type(const T & v) { return base::glyph_method().declare(v); }
 
 			nik_ce auto declare_image(
 				icon_ctype_ref icon, size_ctype time, size_ctype length, size_ctype point)
 			{
-					// should this check be here now ?
-				if (base::glyph_cmethod.is_fail(icon)) { return base::image_cmethod.fail_sign(); }
+				auto image_ival = base::image_method();
 
-				return base::image_method.declare(icon, time, length, point);
+					// should this check be here now ?
+				if (base::glyph_cmethod().is_fail(icon)) { return image_ival.fail_sign(); }
+
+				return image_ival.declare(icon, time, length, point);
 			}
 	};
 
