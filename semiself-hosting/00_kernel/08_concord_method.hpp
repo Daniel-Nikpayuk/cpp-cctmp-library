@@ -38,6 +38,7 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
 
 			nik_using_size_type_scope	(base)
 
@@ -74,6 +75,7 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
 
 			nik_using_size_type_scope	(base)
 
@@ -134,6 +136,7 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
 
 			nik_using_size_type_scope	(base)
 
@@ -168,6 +171,7 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
 
 			nik_using_size_type_scope	(base)
 
@@ -224,6 +228,7 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
 
 			nik_using_size_type_scope	(base)
 
@@ -257,6 +262,7 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
 
 			nik_using_size_type_scope	(base)
 
@@ -297,6 +303,7 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
 
 			nik_using_size_type_scope	(base)
 
@@ -330,6 +337,7 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
 
 			nik_using_size_type_scope	(base)
 
@@ -370,6 +378,7 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
 
 			nik_using_size_type_scope	(base)
 
@@ -379,10 +388,39 @@ namespace cctmp {
 			using sign_type			= typename base::sign_type;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
+		protected:
+
+			using contr_type		= typename model_type::template
+								record_csubmethod_type<table_csubmethod>;
+
 		public:
 
 			nik_ce concord_function_cmethod_disjoint() : base{} { }
 			nik_ce concord_function_cmethod_disjoint(const facade & f) : base{f} { }
+
+		protected:
+
+			// contr:
+
+				nik_ce auto get_contr(sign_ctype_ref sign) const
+				{
+					auto sit_cival = base::symbol_cmethod().image_cmethod().text_csubmethod(sign);
+					auto rec_cival = base::model->template record_csubequip<contr_type>();
+
+					size_ctype length   = base::crecord().cat(sit_cival[ImageFunction::length]);
+					size_ctype start    = sit_cival[ImageFunction::point];
+					size_ctype finish   = start + length;
+					size_ctype row_size = (length >> 2);
+					size_ctype col_size = 4;
+
+					rec_cival.mid_set(start, finish);
+					rec_cival.set_dimension(row_size, col_size);
+
+					return rec_cival;
+				}
+
+			//	nik_ce auto contr_ctext(sign_ctype_ref sign) const
+			//		{ return base::symbol_cmethod().image_cmethod().text_csubmethod(sign); }
 	};
 
 	// syntactic sugar:
@@ -403,6 +441,7 @@ namespace cctmp {
 
 			using base			= Base;
 			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
 
 			nik_using_size_type_scope	(base)
 

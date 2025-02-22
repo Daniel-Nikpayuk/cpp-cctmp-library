@@ -30,155 +30,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// model:
-
-	template<typename> class eval_cfacade;
-	template<typename> class eval_facade;
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template
-	<
-		typename Type, typename SizeType,
-		SizeType ContrSize, SizeType CarrySize, SizeType VerseSize, SizeType StageSize
-	>
-	class eval
-	{
-		public:
-
-			using facade				= eval; // method compatible.
-			using cfacade_type			= eval_cfacade<eval>;
-			using facade_type			= eval_facade<eval>;
-
-			using contr_type			= array<Type, SizeType, ContrSize>;
-			using contr_ctype_ptr			= typename alias<contr_type>::ctype_ptr;
-
-			using machine_type			= machine
-								<
-									Type, SizeType, CarrySize, VerseSize, StageSize
-								>;
-
-			nik_using_name_alias_scope_type		( type, Type)
-			nik_using_name_alias_scope_ctype	(ctype, Type)
-
-			nik_using_size_type_alias		(SizeType)
-
-		public:
-
-			using contr_csubmethod_type		= resolve_csubmethod<contr_type, table_csubmethod>;
-			using machine_method_type		= resolve_method<machine_type, machine_method>;
-
-		protected:
-
-			contr_type  _contr;
-
-		public:
-
-			nik_ce eval() { }
-			nik_ce eval(const contr_type & c) : _contr{c} { }
-
-			// equip:
-
-				template<typename CMethod>
-				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<eval const*>(this)}; }
-
-				template<typename Method>
-				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<eval*>(this)}; }
-
-			// contr:
-
-				nik_ce contr_ctype_ptr ccontr() const { return &_contr; }
-
-				nik_ce auto contr_csubequip() const
-					{ return _contr.template csubequip<contr_csubmethod_type>(); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// facade:
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Model>
-	class eval_cfacade
-	{
-		public:
-
-			using facade			= eval_cfacade; // method compatible.
-
-			using model_type		= Model;
-			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
-			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
-
-			using contr_type		= typename model_type::contr_type;
-			using contr_ctype_ref		= typename alias<contr_type>::ctype_ref;
-
-			nik_using_name_scope_type	( type, model_type)
-			nik_using_name_scope_ctype	(ctype, model_type)
-
-			nik_using_size_type_scope	(model_type)
-
-		protected:
-
-			model_ctype_ptr model;
-
-		public:
-
-			nik_ce eval_cfacade() : model{} { }
-			nik_ce eval_cfacade(model_ctype_cptr m) : model{m} { }
-
-			// contr:
-
-				nik_ce contr_ctype_ref ccontr() const { return *model->ccontr(); }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Model>
-	class eval_facade
-	{
-		public:
-
-			using facade			= eval_facade; // method compatible.
-
-			using model_type		= Model;
-			using model_type_ptr		= typename alias<model_type>::type_ptr;
-			using model_type_cptr		= typename alias<model_type>::type_cptr;
-
-			using contr_type		= typename model_type::contr_type;
-			using contr_ctype_ref		= typename alias<contr_type>::ctype_ref;
-
-			nik_using_name_scope_type	( type, model_type)
-			nik_using_name_scope_ctype	(ctype, model_type)
-
-			nik_using_size_type_scope	(model_type)
-
-		protected:
-
-			model_type_ptr model;
-
-		public:
-
-			nik_ce eval_facade() : model{} { }
-			nik_ce eval_facade(model_type_cptr m) : model{m} { }
-
-			// contr:
-
-				nik_ce contr_ctype_ref ccontr() const { return *model->ccontr(); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // method:
 
 /***********************************************************************************************************************/
@@ -194,47 +45,39 @@ namespace cctmp {
 			using facade			= typename base::facade;
 			using model_type		= typename facade::model_type;
 
-			nik_using_name_scope_type	( type, base)
-			nik_using_name_scope_ctype	(ctype, base)
+			nik_using_name_scope_type	( type, model_type)
+			nik_using_name_scope_ctype	(ctype, model_type)
 
-			nik_using_size_type_scope	(base)
+			nik_using_size_type_scope	(model_type)
 
-		protected:
-
-			using contr_csubmethod_type	= typename model_type::contr_csubmethod_type;
-
-			contr_csubmethod_type contr_csubmethod;
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
 		protected:
 
-			nik_ce void initialize() // call only once.
-			{
-				size_ctype row_size = (base::ccontr().size() >> 2);
-				size_ctype col_size = 4;
-				contr_csubmethod.full_set();
-				contr_csubmethod.set_dimension(row_size, col_size);
-			}
+			using contr_type		= typename base::contr_type;
+
+			contr_type contr;
 
 		public:
 
-			nik_ce eval_cmethod_disjoint() : base{} { initialize(); }
-			nik_ce eval_cmethod_disjoint(const facade & f) :
-
-				base{f},
-				contr_csubmethod{base::model->contr_csubequip()}
-				{ initialize(); }
+			nik_ce eval_cmethod_disjoint() : base{}, contr{} { }
+			nik_ce eval_cmethod_disjoint(const facade & f) : base{f}, contr{} { }
 
 			// contr:
 
-			nik_ce size_type contr_value(size_ctype row, size_ctype col) const
-				{ return contr_csubmethod[row][col]; }
+				nik_ce size_type contr_value(size_ctype row, size_ctype col) const
+					{ return contr[row][col]; }
+
+				nik_ce void set_contr(sign_ctype_ref sign) { contr = base::get_contr(sign); }
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
 		using eval_cmethod =
-			eval_cmethod_disjoint < Facade >;
+			eval_cmethod_disjoint    <
+			concord_function_cmethod < Facade >>;
 
 /***********************************************************************************************************************/
 
@@ -242,6 +85,7 @@ namespace cctmp {
 
 	template
 	<
+		auto CarrySize, auto VerseSize, auto StageSize,
 		template<typename, typename> typename Atomic,
 		template<typename, typename> typename Action,
 		typename Base
@@ -254,14 +98,17 @@ namespace cctmp {
 			using facade			= typename base::facade;
 			using model_type		= typename facade::model_type;
 
-			using machine_type		= typename model_type::machine_type;
-			using carry_type		= typename machine_type::carry_type;
-			using verse_type		= typename machine_type::verse_type;
-
 			nik_using_name_scope_type	( type, base)
 			nik_using_name_scope_ctype	(ctype, base)
 
 			nik_using_size_type_scope	(base)
+
+			using machine_type		= machine<type, size_type, CarrySize, VerseSize, StageSize>;
+			using carry_type		= typename machine_type::carry_type;
+			using verse_type		= typename machine_type::verse_type;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
 		protected:
 
@@ -294,8 +141,8 @@ namespace cctmp {
 
 			// carry:
 
-				nik_ce auto rtn_cbegin () const { return mach_method.ccarry().cbegin (); }
-				nik_ce auto rtn_cend   () const { return mach_method.ccarry().cend   (); }
+				nik_ce auto & rtn_cvalue() const { return mach_method.ccarry(); }
+				nik_ce auto rtn_cat(size_ctype n) const { return mach_method.ccarry().cat(n); }
 
 		protected:
 
@@ -309,7 +156,6 @@ namespace cctmp {
 
 			// execute:
 
-				nik_ce auto instantiate() const { return eval_method_disjoint{base::model}; }
 				nik_ce void execute() { action_type::execute(instr_value(MAppl::action), this); }
 
 		public:
@@ -324,17 +170,25 @@ namespace cctmp {
 				nik_ce void run_branch() { mach_method.branch(instr_value(MBran::line)); }
 				nik_ce void run_invert() { mach_method.invert(instr_value(MBran::line)); }
 
+				nik_ce void reset()
+				{
+					mach_method.carry().clear();
+					mach_method.verse().clear();
+					mach_method.stage().clear();
+				}
+
 				nik_ce void run_apply()
 				{
-					size_ctype offset  = instr_value(MAppl::offset);
-					size_ctype policy  = instr_value(MAppl::policy);
+					size_ctype offset   = instr_value(MAppl::offset);
+					size_ctype policy   = instr_value(MAppl::policy);
 
-					auto n_eval_method = instantiate();
-					auto func_index    = mach_method.stage_cfunc(offset);
-					auto value         = n_eval_method.run(mach_method.stage_cargs(), func_index);
+					auto n_eval_method  = eval_method_disjoint{base::model};
+					n_eval_method.contr = base::contr;
+					auto func_index     = mach_method.stage_cfunc(offset);
+					n_eval_method       . run(mach_method.stage_cargs(), func_index);
 
 					mach_method.pop_stage();
-					mach_method.copy_interval(policy, value);
+					mach_method.copy_interval(policy, n_eval_method.rtn_cvalue());
 				}
 
 				nik_ce void run_constant()
@@ -377,42 +231,44 @@ namespace cctmp {
 					mach_method.interval_to_carry(start, finish);
 				}
 
-				nik_ce auto run(ctype_ptr in, ctype_cptr end, size_ctype n = 0) -> carry_type
+		protected:
+
+			template<typename T>
+			nik_ce void run(const T & v, size_ctype n = 0)
+			{
+				mach_method.initialize(n, v);
+
+				while (instr_value(MProg::next))
 				{
-					carry_type carry;
-
-					verse_type verse; // designed for standalone virtual machine.
-					verse.push(in, end);
-
-					mach_method.initialize(n, verse);
-					while (instr_value(MProg::next))
-					{
-						mach_method.inc_counter(instr_value(MProg::next));
-						execute();
-					}
-
-					carry.push(_machine.carry()->cbegin(), _machine.carry()->cend());
-
-					return carry;
+					mach_method.inc_counter(instr_value(MProg::next));
+					execute();
 				}
+			}
 
-				// syntactic sugar:
+		public:
 
-					template<typename T>
-					nik_ce auto run(const T & v, size_ctype n = 0)
-						{ return run(v.cbegin(), v.cend(), n); }
+			template<auto N>
+			nik_ce void apply(sign_ctype_ref sign, ctype (&v)[N])
+			{
+				base::set_contr(sign);
 
-					template<auto N>
-					nik_ce auto run(ctype (&v)[N], size_ctype n = 0)
-						{ return run(v, v + N, n); }
+				run(verse_type{v});
+			}
 	};
 
 	// syntactic sugar:
 
-		template<typename Facade>
+		template<typename Facade, auto CarrySize, auto VerseSize, auto StageSize>
 		using eval_method =
-			eval_method_disjoint  < atomic_action , machine_action ,
-			eval_cmethod_disjoint < Facade                         >>;
+			eval_method_disjoint     < CarrySize , VerseSize , StageSize , atomic_action , machine_action ,
+			eval_cmethod_disjoint    <
+			concord_function_method  < Facade    >>>;
+
+		template<typename Container, auto CarrySize, auto VerseSize, auto StageSize>
+		using resolve_eval_method = eval_method
+		<
+			typename Container::facade_type, CarrySize, VerseSize, StageSize
+		>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

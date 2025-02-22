@@ -470,6 +470,8 @@ namespace cctmp {
 			template<typename T, auto N>
 			nik_ce table_presubmethod(const T (&a)[N]) : base{a} { }
 
+			using base::cat;
+
 			nik_ce size_type cat(size_ctype n, size_ctype m) const { return base::cat(n * cols + m); }
 
 			nik_ce void fast_set_dimension(size_ctype r, size_ctype c) { rows = r; cols = c; }
