@@ -57,12 +57,6 @@ namespace cctmp {
 
 				nik_ce size_type image_ctext_point(sign_ctype_ref sign)
 					{ return base::image_ctext_at(sign, ImageBuiltin::point); }
-
-			// same types:
-
-			//	template<typename T, typename... Ts>
-			//	nik_ce bool same_types(const T & l, const Ts &... rs)
-			//		{ return base::glyph_method.same_types(goffset, l.index(), rs.index()...); }
 	};
 
 	// syntactic sugar:
@@ -98,18 +92,14 @@ namespace cctmp {
 			nik_ce symbol_builtin_method_disjoint() : base{} { }
 			nik_ce symbol_builtin_method_disjoint(const facade & f) : base{f} { }
 
-			nik_ce auto declare_type(size_ctype instr, size_ctype bytes)
-				{ return base::glyph_method().declare(instr, bytes); }
+			// declare:
 
-			nik_ce auto declare_image(icon_ctype_ref icon, size_ctype time, size_ctype point)
-			{
-				auto image_ival = base::image_method();
+				nik_ce auto declare_type(size_ctype instr, size_ctype bytes)
+					{ return base::glyph_method().declare(instr, bytes); }
 
-					// should this check be here now ?
-				if (base::glyph_cmethod().is_fail(icon)) { return image_ival.fail_sign(); }
-
-				return image_ival.declare(icon, time, point);
-			}
+				template<typename T>
+				nik_ce auto declare_image(icon_ctype_ref icon, T & field)
+					{ return base::template declare_image<ImageBuiltin::dimension>(icon, field); }
 	};
 
 	// syntactic sugar:
@@ -183,6 +173,22 @@ namespace cctmp {
 
 			nik_ce symbol_tuple_method_disjoint() : base{} { }
 			nik_ce symbol_tuple_method_disjoint(const facade & f) : base{f} { }
+
+			// declare:
+
+				template<typename T>
+				nik_ce auto declare_type(const T & v) { return base::glyph_method().declare(v); }
+
+				template<typename T>
+				nik_ce auto declare_image(icon_ctype_ref icon, T & field)
+					{ return base::template declare_image<ImageTuple::dimension>(icon, field); }
+
+			// set:
+
+			//	nik_ce void set_abstract(size_ctype n, sign_ctype_ref sign)
+			//	{
+			//		base::symbol_method().set_abstract(v);
+			//	}
 	};
 
 	// syntactic sugar:
@@ -256,6 +262,15 @@ namespace cctmp {
 
 			nik_ce symbol_cotuple_method_disjoint() : base{} { }
 			nik_ce symbol_cotuple_method_disjoint(const facade & f) : base{f} { }
+
+			// declare:
+
+				template<typename T>
+				nik_ce auto declare_type(const T & v) { return base::glyph_method().declare(v); }
+
+				template<typename T>
+				nik_ce auto declare_image(icon_ctype_ref icon, T & field)
+					{ return base::template declare_image<ImageCotuple::dimension>(icon, field); }
 	};
 
 	// syntactic sugar:
@@ -330,19 +345,14 @@ namespace cctmp {
 			nik_ce symbol_function_method_disjoint() : base{} { }
 			nik_ce symbol_function_method_disjoint(const facade & f) : base{f} { }
 
-			template<typename T>
-			nik_ce auto declare_type(const T & v) { return base::glyph_method().declare(v); }
+			// declare:
 
-			nik_ce auto declare_image(
-				icon_ctype_ref icon, size_ctype time, size_ctype length, size_ctype point)
-			{
-				auto image_ival = base::image_method();
+				template<typename T>
+				nik_ce auto declare_type(const T & v) { return base::glyph_method().declare(v); }
 
-					// should this check be here now ?
-				if (base::glyph_cmethod().is_fail(icon)) { return image_ival.fail_sign(); }
-
-				return image_ival.declare(icon, time, length, point);
-			}
+				template<typename T>
+				nik_ce auto declare_image(icon_ctype_ref icon, T & field)
+					{ return base::template declare_image<ImageFunction::dimension>(icon, field); }
 	};
 
 	// syntactic sugar:

@@ -331,6 +331,17 @@ namespace cctmp {
 
 				nik_ce auto image_method()
 					{ return base::model->template image_equip<image_method_type>(); }
+
+				template<size_type Size, typename T>
+				nik_ce auto declare_image(icon_ctype_ref icon, const T & field)
+				{
+					auto image_ival = image_method();
+
+						// should this check be here now ?
+					if (base::glyph_cmethod().is_fail(icon)) { return image_ival.fail_sign(); }
+
+					return image_ival.template declare<Size>(field);
+				}
 	};
 
 /***********************************************************************************************************************/

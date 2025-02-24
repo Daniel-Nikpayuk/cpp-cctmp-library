@@ -36,7 +36,13 @@ namespace cctmp {
 
 // immutable:
 
-	template<typename Base>
+	template
+	<
+		auto CarrySize, auto VerseSize, auto StageSize,
+		template<typename, typename> typename Atomic,
+		template<typename, typename> typename Action,
+		typename Base
+	>
 	class eval_cmethod_disjoint : public Base
 	{
 		public:
@@ -53,67 +59,20 @@ namespace cctmp {
 			using sign_type			= typename base::sign_type;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
+			using machine_type		= machine<type, size_type, CarrySize, VerseSize, StageSize>;
+			using carry_type		= typename machine_type::carry_type;
+			using verse_type		= typename machine_type::verse_type;
+
 		protected:
 
 			using contr_type		= typename base::contr_type;
 
 			contr_type contr;
 
-		public:
-
-			nik_ce eval_cmethod_disjoint() : base{}, contr{} { }
-			nik_ce eval_cmethod_disjoint(const facade & f) : base{f}, contr{} { }
-
-			// contr:
-
-				nik_ce size_type contr_value(size_ctype row, size_ctype col) const
-					{ return contr[row][col]; }
-
-				nik_ce void set_contr(sign_ctype_ref sign) { contr = base::get_contr(sign); }
-	};
-
-	// syntactic sugar:
-
-		template<typename Facade>
-		using eval_cmethod =
-			eval_cmethod_disjoint    <
-			concord_function_cmethod < Facade >>;
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template
-	<
-		auto CarrySize, auto VerseSize, auto StageSize,
-		template<typename, typename> typename Atomic,
-		template<typename, typename> typename Action,
-		typename Base
-	>
-	class eval_method_disjoint : public Base
-	{
-		public:
-
-			using base			= Base;
-			using facade			= typename base::facade;
-			using model_type		= typename facade::model_type;
-
-			nik_using_name_scope_type	( type, base)
-			nik_using_name_scope_ctype	(ctype, base)
-
-			nik_using_size_type_scope	(base)
-
-			using machine_type		= machine<type, size_type, CarrySize, VerseSize, StageSize>;
-			using carry_type		= typename machine_type::carry_type;
-			using verse_type		= typename machine_type::verse_type;
-
-			using sign_type			= typename base::sign_type;
-			using sign_ctype_ref		= typename base::sign_ctype_ref;
-
 		protected:
 
 			using atomic_action_type	= Atomic<type, size_type>;
-			using action_type		= Action<eval_method_disjoint, size_type>;
+			using action_type		= Action<eval_cmethod_disjoint, size_type>;
 
 			using machine_cmethod_type	= resolve_cmethod<machine_type, machine_cmethod>;
 			using  machine_method_type	=  resolve_method<machine_type,  machine_method>;
@@ -127,8 +86,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce eval_method_disjoint() : base{}, mach_cmethod{}, mach_method{} { }
-			nik_ce eval_method_disjoint(const facade & f) : base{f}
+			nik_ce eval_cmethod_disjoint() : base{}, mach_cmethod{}, mach_method{} { }
+			nik_ce eval_cmethod_disjoint(const facade & f) : base{f}
 			{
 				mach_cmethod = _machine.template cequip<machine_cmethod_type>();
 				mach_method  = _machine.template  equip< machine_method_type>();
@@ -136,8 +95,13 @@ namespace cctmp {
 
 			// contr:
 
+				nik_ce size_type contr_value(size_ctype row, size_ctype col) const
+					{ return contr[row][col]; }
+
 				nik_ce size_type instr_value(size_ctype col) const
-					{ return base::contr_value(mach_method.counter(), col); }
+					{ return contr_value(mach_method.counter(), col); }
+
+				nik_ce void set_contr(sign_ctype_ref sign) { contr = base::get_contr(sign); }
 
 			// carry:
 
@@ -179,16 +143,16 @@ namespace cctmp {
 
 				nik_ce void run_apply()
 				{
-					size_ctype offset   = instr_value(MAppl::offset);
-					size_ctype policy   = instr_value(MAppl::policy);
+					size_ctype offset    = instr_value(MAppl::offset);
+					size_ctype policy    = instr_value(MAppl::policy);
 
-					auto n_eval_method  = eval_method_disjoint{base::model};
-					n_eval_method.contr = base::contr;
-					auto func_index     = mach_method.stage_cfunc(offset);
-					n_eval_method       . run(mach_method.stage_cargs(), func_index);
+					auto n_eval_cmethod  = eval_cmethod_disjoint{base::model};
+					n_eval_cmethod.contr = contr;
+					auto func_index      = mach_method.stage_cfunc(offset);
+					n_eval_cmethod       . run(mach_method.stage_cargs(), func_index);
 
 					mach_method.pop_stage();
-					mach_method.copy_interval(policy, n_eval_method.rtn_cvalue());
+					mach_method.copy_interval(policy, n_eval_cmethod.rtn_cvalue());
 				}
 
 				nik_ce void run_constant()
@@ -209,8 +173,8 @@ namespace cctmp {
 
 				nik_ce void run_argument()
 				{
-					auto start  = base::contr_value(instr_value(MVal::line), MArg::start);
-					auto finish = base::contr_value(instr_value(MVal::line), MArg::finish);
+					auto start  = contr_value(instr_value(MVal::line), MArg::start);
+					auto finish = contr_value(instr_value(MVal::line), MArg::finish);
 
 					mach_method.copy_interval(instr_value(MVal::policy), start, finish);
 				}
@@ -250,7 +214,7 @@ namespace cctmp {
 			template<auto N>
 			nik_ce void apply(sign_ctype_ref sign, ctype (&v)[N])
 			{
-				base::set_contr(sign);
+				set_contr(sign);
 
 				run(verse_type{v});
 			}
@@ -259,15 +223,14 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade, auto CarrySize, auto VerseSize, auto StageSize>
-		using eval_method =
-			eval_method_disjoint     < CarrySize , VerseSize , StageSize , atomic_action , machine_action ,
-			eval_cmethod_disjoint    <
-			concord_function_method  < Facade    >>>;
+		using eval_cmethod =
+			eval_cmethod_disjoint   < CarrySize , VerseSize , StageSize , atomic_action , machine_action ,
+			concord_function_method < Facade    >>;
 
 		template<typename Container, auto CarrySize, auto VerseSize, auto StageSize>
-		using resolve_eval_method = eval_method
+		using resolve_eval_cmethod = eval_cmethod
 		<
-			typename Container::facade_type, CarrySize, VerseSize, StageSize
+			typename Container::cfacade_type, CarrySize, VerseSize, StageSize
 		>;
 
 /***********************************************************************************************************************/

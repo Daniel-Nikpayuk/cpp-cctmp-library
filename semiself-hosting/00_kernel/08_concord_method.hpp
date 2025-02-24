@@ -87,8 +87,18 @@ namespace cctmp {
 
 		protected:
 
-			nik_ce auto declare_image(icon_ctype_ref icon, size_ctype time, size_ctype point)
-				{ return base::symbol_method().declare_image(icon, time, point); }
+			nik_ce auto declare_image(icon_ctype_ref icon, size_type time, size_ctype point)
+			{
+				auto field = array<size_type, size_type, ImageBuiltin::dimension>{};
+				field.fullsize();
+
+				field[ImageTuple::mark  ] = icon.mark();
+				field[ImageTuple::index ] = icon.index();
+				field[ImageTuple::time  ] = time;
+				field[ImageTuple::point ] = point;
+
+				return base::symbol_method().declare_image(icon, field);
+			}
 
 		public:
 
@@ -119,6 +129,89 @@ namespace cctmp {
 					return sign;
 				}
 	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// empty:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Base>
+	class concord_empty_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_empty_cmethod_disjoint() : base{} { }
+			nik_ce concord_empty_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_empty_cmethod =
+			concord_empty_cmethod_disjoint    <
+			concord_builtin_cmethod_disjoint <
+			concord_cmethod_disjoint         < symbol_builtin_cmethod , array_csubmethod , Facade >>>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class concord_empty_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_empty_method_disjoint() : base{} { }
+			nik_ce concord_empty_method_disjoint(const facade & f) : base{f} { }
+
+			// declare:
+
+				nik_ce auto declare_type(size_ctype bytes)
+					{ return base::declare_type(GlyphInstr::empty, bytes); }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_empty_method =
+			concord_empty_method_disjoint     <
+			concord_empty_cmethod_disjoint    <
+			concord_builtin_method_disjoint  <
+			concord_builtin_cmethod_disjoint <
+			concord_method_disjoint          < symbol_builtin_method  , array_submethod  ,
+			concord_cmethod_disjoint         < symbol_builtin_cmethod , array_csubmethod , Facade >>>>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -210,7 +303,164 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class concord_flex_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_flex_cmethod_disjoint() : base{} { }
+			nik_ce concord_flex_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_flex_cmethod =
+			concord_flex_cmethod_disjoint    <
+			concord_builtin_cmethod_disjoint <
+			concord_cmethod_disjoint         < symbol_builtin_cmethod , array_csubmethod , Facade >>>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class concord_flex_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_flex_method_disjoint() : base{} { }
+			nik_ce concord_flex_method_disjoint(const facade & f) : base{f} { }
+
+			// declare:
+
+				nik_ce auto declare_type(size_ctype bytes)
+					{ return base::declare_type(GlyphInstr::flex, bytes); }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_flex_method =
+			concord_flex_method_disjoint     <
+			concord_flex_cmethod_disjoint    <
+			concord_builtin_method_disjoint  <
+			concord_builtin_cmethod_disjoint <
+			concord_method_disjoint          < symbol_builtin_method  , array_submethod  ,
+			concord_cmethod_disjoint         < symbol_builtin_cmethod , array_csubmethod , Facade >>>>>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// utf8_char:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Base>
+	class concord_utf8_char_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_utf8_char_cmethod_disjoint() : base{} { }
+			nik_ce concord_utf8_char_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_utf8_char_cmethod =
+			concord_utf8_char_cmethod_disjoint    <
+			concord_builtin_cmethod_disjoint <
+			concord_cmethod_disjoint         < symbol_builtin_cmethod , array_csubmethod , Facade >>>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class concord_utf8_char_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce concord_utf8_char_method_disjoint() : base{} { }
+			nik_ce concord_utf8_char_method_disjoint(const facade & f) : base{f} { }
+
+			// declare:
+
+				nik_ce auto declare_type(size_ctype bytes)
+					{ return base::declare_type(GlyphInstr::utf8_char, bytes); }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_utf8_char_method =
+			concord_utf8_char_method_disjoint     <
+			concord_utf8_char_cmethod_disjoint    <
+			concord_builtin_method_disjoint  <
+			concord_builtin_cmethod_disjoint <
+			concord_method_disjoint          < symbol_builtin_method  , array_submethod  ,
+			concord_cmethod_disjoint         < symbol_builtin_cmethod , array_csubmethod , Facade >>>>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -272,10 +522,68 @@ namespace cctmp {
 			using sign_type			= typename base::sign_type;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
+		protected:
+
+			nik_ce auto declare_image(icon_ctype_ref icon,
+				size_type time, size_ctype length, size_ctype point)
+			{
+				auto field = array<size_type, size_type, ImageTuple::dimension>{};
+				field.fullsize();
+
+				field[ImageTuple::mark  ] = icon.mark();
+				field[ImageTuple::index ] = icon.index();
+				field[ImageTuple::time  ] = time;
+				field[ImageTuple::length] = length;
+				field[ImageTuple::point ] = point;
+
+				return base::symbol_method().declare_image(icon, field);
+			}
+
 		public:
 
 			nik_ce concord_tuple_method_disjoint() : base{} { }
 			nik_ce concord_tuple_method_disjoint(const facade & f) : base{f} { }
+
+			// declare:
+
+				template<auto N>
+				nik_ce auto declare_type(const icon_type (&t)[N])
+				{
+					using array_type = array<icon_type, size_type, N>;
+
+					return base::symbol_method().declare_type(array_type{t});
+				}
+
+				nik_ce auto declare_abstract(icon_ctype_ref icon, size_ctype n)
+				{
+					auto length = base::record().expand(1);
+					auto point  = base::record().expand(n);
+
+					return declare_image(icon, ImageTime::abstract, length, point);
+				}
+
+				nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype n)
+				{
+					auto length = base::record().expand(1);
+					auto point  = base::record().expand(n);
+
+					return declare_image(icon, ImageTime::concrete, length, point);
+				}
+
+			// set:
+
+				nik_ce void set_abstract(size_ctype n, sign_ctype_ref sign)
+				{
+					auto text_ival = base::symbol_cmethod().image_cmethod().text_csubmethod(sign);
+
+				//	base::symbol_method().set_abstract(v);
+
+				//	auto record_ival = base::record_submethod();
+
+				//	record_ival      . mid_set(length, point + N);
+				//	record_ival[0]   = N;
+				//	record_ival      . copy(1, cc_asm, cc_asm + N);
+				}
 	};
 
 	// syntactic sugar:
@@ -347,10 +655,56 @@ namespace cctmp {
 			using sign_type			= typename base::sign_type;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
+		protected:
+
+			nik_ce auto declare_image(icon_ctype_ref icon,
+				size_type time, size_ctype length, size_ctype injection, size_ctype point)
+			{
+				auto field = array<size_type, size_type, ImageCotuple::dimension>{};
+				field.fullsize();
+
+				field[ImageCotuple::mark     ] = icon.mark();
+				field[ImageCotuple::index    ] = icon.index();
+				field[ImageCotuple::time     ] = time;
+				field[ImageCotuple::length   ] = length;
+				field[ImageCotuple::injection] = injection;
+				field[ImageCotuple::point    ] = point;
+
+				return base::symbol_method().declare_image(icon, field);
+			}
+
 		public:
 
 			nik_ce concord_cotuple_method_disjoint() : base{} { }
 			nik_ce concord_cotuple_method_disjoint(const facade & f) : base{f} { }
+
+			// declare:
+
+				template<auto N>
+				nik_ce auto declare_type(const icon_type (&t)[N])
+				{
+					using array_type = array<icon_type, size_type, N>;
+
+					return base::symbol_method().declare_type(array_type{t});
+				}
+
+				nik_ce auto declare_abstract(icon_ctype_ref icon, size_ctype n)
+				{
+					auto length    = base::record().expand(1);
+					auto injection = base::record().expand(1);
+					auto point     = base::record().expand(n);
+
+					return declare_image(icon, ImageTime::abstract, length, injection, point);
+				}
+
+				nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype n)
+				{
+					auto length    = base::record().expand(1);
+					auto injection = base::record().expand(1);
+					auto point     = base::record().expand(n);
+
+					return declare_image(icon, ImageTime::concrete, length, injection, point);
+				}
 	};
 
 	// syntactic sugar:
@@ -418,9 +772,6 @@ namespace cctmp {
 
 					return rec_cival;
 				}
-
-			//	nik_ce auto contr_ctext(sign_ctype_ref sign) const
-			//		{ return base::symbol_cmethod().image_cmethod().text_csubmethod(sign); }
 	};
 
 	// syntactic sugar:
@@ -453,9 +804,20 @@ namespace cctmp {
 
 		protected:
 
-			nik_ce auto declare_image(
-				icon_ctype_ref icon, size_ctype time, size_ctype length, size_ctype point)
-					{ return base::symbol_method().declare_image(icon, time, length, point); }
+			nik_ce auto declare_image(icon_ctype_ref icon,
+				size_type time, size_ctype length, size_ctype point)
+			{
+				auto field = array<size_type, size_type, ImageFunction::dimension>{};
+				field.fullsize();
+
+				field[ImageFunction::mark  ] = icon.mark();
+				field[ImageFunction::index ] = icon.index();
+				field[ImageFunction::time  ] = time;
+				field[ImageFunction::length] = length;
+				field[ImageFunction::point ] = point;
+
+				return base::symbol_method().declare_image(icon, field);
+			}
 
 		public:
 
@@ -498,11 +860,9 @@ namespace cctmp {
 					auto sign        = declare_image(icon, ImageTime::abstract, length, point);
 					auto record_ival = base::record_submethod();
 
-					record_ival[length] = N;
-
-						// requires type check.
-					for (size_type k = 0; k != N; ++k, ++point)
-						{ record_ival[point] = cc_asm[k]; }
+					record_ival      . mid_set(length, point + N);
+					record_ival[0]   = N;
+					record_ival      . copy(1, cc_asm, cc_asm + N);
 
 					return sign;
 				}

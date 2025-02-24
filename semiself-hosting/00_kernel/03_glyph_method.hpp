@@ -122,7 +122,23 @@ namespace cctmp {
 			// program:
 
 				template<typename T>
-				nik_ce size_type max_universe(const T & v)
+				nik_ce size_type total_bytes(const T & v)
+				{
+					size_type total = 0;
+
+					for (auto k = v.cbegin(); k != v.cend(); ++k)
+					{
+						auto text_cival = base::text_csubmethod(*k);
+						text_cival.set_dimension(3, 4);
+
+						total += text_cival[2][GlyphMeta::bytes];
+					}
+
+					return total;
+				}
+
+				template<typename T>
+				nik_ce size_type max_push(const T & v, size_ctype n)
 				{
 					size_type max = 0;
 
@@ -131,7 +147,7 @@ namespace cctmp {
 						auto text_cival = base::text_csubmethod(*k);
 						text_cival.set_dimension(3, 4);
 
-						size_ctype current = text_cival[2][GlyphMeta::universe];
+						size_ctype current = text_cival[2][n];
 
 						if (current > max) { max = current; }
 					}
@@ -139,24 +155,11 @@ namespace cctmp {
 					return max;
 				}
 
-			// type check:
+				template<typename T>
+				nik_ce size_type max_bytes(const T & v) { return max_push(v, GlyphMeta::bytes); }
 
-			//	template<typename T, typename... Ts>
-			//	nik_ce bool same_types(size_ctype n, const T l, const Ts... rs) const
-			//		{ return same_methods(n, page_to_text_cequip(l), page_to_text_cequip(rs)...); }
-
-			//	template<typename T, typename... Ts>
-			//	nik_ce bool same_methods(size_ctype n, const T & l, const Ts &... rs) const
-			//	{
-			//		for (size_type k = 0; k != n; ++k)
-			//			{ if (different_values(l[k], rs[k]...)) return false; }
-
-			//		return true;
-			//	}
-
-			//	template<typename T, typename... Ts>
-			//	nik_ce bool different_values(const T l, const Ts... rs) const
-			//		{ return (... || (l != rs)); }
+				template<typename T>
+				nik_ce size_type max_universe(const T & v) { return max_push(v, GlyphMeta::universe); }
 	};
 
 /***********************************************************************************************************************/
@@ -356,6 +359,127 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
+// composite:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Base>
+	class glyph_composite_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+		protected:
+
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
+
+		public:
+
+			nik_ce glyph_composite_cmethod_disjoint() : base{} { }
+			nik_ce glyph_composite_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class glyph_composite_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+		protected:
+
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using page_method_type		= typename base::page_method_type;
+
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
+			using text_submethod_type	= typename base::text_submethod_type;
+
+		public:
+
+			nik_ce glyph_composite_method_disjoint() : base{} { }
+			nik_ce glyph_composite_method_disjoint(const facade & f) : base{f} { }
+
+			template<size_type Mark, typename T>
+			nik_ce void copy_program(text_submethod_type & text_ival,
+				size_ctype row_length, const T & v, size_ctype bytes, size_ctype universe)
+			{
+				base::make_line_program (text_ival, row_length);
+				base::make_line_routine (text_ival, Mark);
+				base::make_line_meta    (text_ival, bytes, universe);
+			}
+
+			nik_ce void set_program_type(
+				text_submethod_type & text_ival, size_ctype line, size_ctype mark, size_ctype index)
+			{
+				text_ival[line][GlyphDyna::instr] = GlyphInstr::type;
+				text_ival[line][GlyphDyna::mark ] = mark;
+				text_ival[line][GlyphDyna::index] = index;
+				text_ival[line][GlyphDyna::next ] = 1;
+			}
+
+			template<size_type Mark, typename T>
+			nik_ce void instantiate(const page_method_type & page_ival, icon_type_ref icon,
+				size_ctype row_length, const T & v, size_ctype bytes, size_ctype universe)
+			{
+				auto text_ival = base::text_submethod(page_ival, icon.index());
+				text_ival.set_dimension(row_length, base::col_length);
+
+				copy_program<Mark>(text_ival, row_length, v, bytes, universe);
+
+				size_type line = 3;
+				for (auto k = v.cbegin(); k != v.cend(); ++k, ++line)
+					{ set_program_type(text_ival, line, k->mark(), k->index()); }
+
+				size_ctype pos = base::find_from_previous(icon);
+
+				if (base::found_from_previous(pos, icon.index()))
+				{
+					icon.set_index(pos);
+
+					base::deallocate_last(page_ival);
+				}
+			}
+
+			template<size_type Mark, typename T>
+			nik_ce auto declare(const T & v, size_ctype bytes, size_ctype universe)
+			{
+				auto page_ival    = base::page_method(Mark);
+				size_ctype rows   = v.size() + 3;
+				size_ctype length = rows * base::col_length;
+				auto icon         = base::allocate(page_ival, Mark, length);
+
+				if (base::not_fail(icon))
+					{ instantiate<Mark>(page_ival, icon, rows, v, bytes, universe); }
+
+				return icon;
+			}
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
 // tuple:
 
 /***********************************************************************************************************************/
@@ -386,8 +510,9 @@ namespace cctmp {
 
 		template<typename Facade>
 		using glyph_tuple_cmethod =
-			glyph_tuple_cmethod_disjoint <
-			glyph_cmethod_disjoint       < Facade >>;
+			glyph_tuple_cmethod_disjoint     <
+			glyph_composite_cmethod_disjoint <
+			glyph_cmethod_disjoint           < Facade >>>;
 
 /***********************************************************************************************************************/
 
@@ -411,16 +536,27 @@ namespace cctmp {
 
 			nik_ce glyph_tuple_method_disjoint() : base{} { }
 			nik_ce glyph_tuple_method_disjoint(const facade & f) : base{f} { }
+
+			template<typename T>
+			nik_ce auto declare(const T & v)
+			{
+				size_ctype bytes    = base::total_bytes(v);
+				size_ctype universe = base::max_universe(v);
+
+				return base::template declare<BookMark::tuple>(v, bytes, universe);
+			}
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
 		using glyph_tuple_method =
-			glyph_tuple_method_disjoint  <
-			glyph_tuple_cmethod_disjoint <
-			glyph_method_disjoint        <
-			glyph_cmethod_disjoint       < Facade >>>>;
+			glyph_tuple_method_disjoint      <
+			glyph_tuple_cmethod_disjoint     <
+			glyph_composite_method_disjoint  <
+			glyph_composite_cmethod_disjoint <
+			glyph_method_disjoint            <
+			glyph_cmethod_disjoint           < Facade >>>>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -455,8 +591,9 @@ namespace cctmp {
 
 		template<typename Facade>
 		using glyph_cotuple_cmethod =
-			glyph_cotuple_cmethod_disjoint <
-			glyph_cmethod_disjoint         < Facade >>;
+			glyph_cotuple_cmethod_disjoint   <
+			glyph_composite_cmethod_disjoint <
+			glyph_cmethod_disjoint           < Facade >>>;
 
 /***********************************************************************************************************************/
 
@@ -480,16 +617,27 @@ namespace cctmp {
 
 			nik_ce glyph_cotuple_method_disjoint() : base{} { }
 			nik_ce glyph_cotuple_method_disjoint(const facade & f) : base{f} { }
+
+			template<typename T>
+			nik_ce auto declare(const T & v)
+			{
+				size_ctype bytes    = base::max_bytes(v);
+				size_ctype universe = base::max_universe(v);
+
+				return base::template declare<BookMark::cotuple>(v, bytes, universe);
+			}
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
 		using glyph_cotuple_method =
-			glyph_cotuple_method_disjoint  <
-			glyph_cotuple_cmethod_disjoint <
-			glyph_method_disjoint          <
-			glyph_cmethod_disjoint         < Facade >>>>;
+			glyph_cotuple_method_disjoint    <
+			glyph_cotuple_cmethod_disjoint   <
+			glyph_composite_method_disjoint  <
+			glyph_composite_cmethod_disjoint <
+			glyph_method_disjoint            <
+			glyph_cmethod_disjoint           < Facade >>>>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -514,11 +662,6 @@ namespace cctmp {
 			using icon_type_ref		= typename base::icon_type_ref;
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
-		protected:
-
-			using page_cmethod_type		= typename base::page_cmethod_type;
-			using text_csubmethod_type	= typename base::text_csubmethod_type;
-
 		public:
 
 			nik_ce glyph_function_cmethod_disjoint() : base{} { }
@@ -529,8 +672,9 @@ namespace cctmp {
 
 		template<typename Facade>
 		using glyph_function_cmethod =
-			glyph_function_cmethod_disjoint <
-			glyph_cmethod_disjoint          < Facade >>;
+			glyph_function_cmethod_disjoint  <
+			glyph_composite_cmethod_disjoint <
+			glyph_cmethod_disjoint           < Facade >>>;
 
 /***********************************************************************************************************************/
 
@@ -550,72 +694,18 @@ namespace cctmp {
 			using icon_type_ref		= typename base::icon_type_ref;
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
-		protected:
-
-			using page_cmethod_type		= typename base::page_cmethod_type;
-			using page_method_type		= typename base::page_method_type;
-
-			using text_csubmethod_type	= typename base::text_csubmethod_type;
-			using text_submethod_type	= typename base::text_submethod_type;
-
 		public:
 
 			nik_ce glyph_function_method_disjoint() : base{} { }
 			nik_ce glyph_function_method_disjoint(const facade & f) : base{f} { }
 
 			template<typename T>
-			nik_ce void copy_program(text_submethod_type & text_ival, size_ctype row_length, const T & v)
-			{
-				size_ctype universe = base::max_universe(v);
-
-				base::make_line_program (text_ival, row_length);
-				base::make_line_routine (text_ival, GlyphInstr::function);
-				base::make_line_meta    (text_ival, 0, universe);
-			}
-
-			nik_ce void set_program_type(text_submethod_type & text_ival,
-				size_ctype line, size_ctype mark, size_ctype index)
-			{
-				text_ival[line][GlyphDyna::instr] = GlyphInstr::type;
-				text_ival[line][GlyphDyna::mark ] = mark;
-				text_ival[line][GlyphDyna::index] = index;
-				text_ival[line][GlyphDyna::next ] = 1;
-			}
-
-			template<typename T>
-			nik_ce void instantiate(const page_method_type & page_ival,
-				icon_type_ref icon, size_ctype row_length, const T & v)
-			{
-				auto text_ival = base::text_submethod(page_ival, icon.index());
-				text_ival.set_dimension(row_length, base::col_length);
-
-				copy_program(text_ival, row_length, v);
-
-				size_type line = 3;
-				for (auto k = v.cbegin(); k != v.cend(); ++k, ++line)
-					{ set_program_type(text_ival, line, k->mark(), k->index()); }
-
-				size_ctype pos = base::find_from_previous(icon);
-
-				if (base::found_from_previous(pos, icon.index()))
-				{
-					icon.set_index(pos);
-
-					base::deallocate_last(page_ival);
-				}
-			}
-
-			template<typename T>
 			nik_ce auto declare(const T & v)
 			{
-				auto page_ival    = base::page_method(BookMark::function);
-				size_ctype rows   = v.size() + 3;
-				size_ctype length = rows * base::col_length;
-				auto icon         = base::allocate(page_ival, BookMark::function, length);
+				size_ctype bytes    = 0;
+				size_ctype universe = base::max_universe(v);
 
-				if (base::not_fail(icon)) { instantiate(page_ival, icon, rows, v); }
-
-				return icon;
+				return base::template declare<BookMark::function>(v, bytes, universe);
 			}
 	};
 
@@ -623,10 +713,12 @@ namespace cctmp {
 
 		template<typename Facade>
 		using glyph_function_method =
-			glyph_function_method_disjoint  <
-			glyph_function_cmethod_disjoint <
-			glyph_method_disjoint           <
-			glyph_cmethod_disjoint          < Facade >>>>;
+			glyph_function_method_disjoint   <
+			glyph_function_cmethod_disjoint  <
+			glyph_composite_method_disjoint  <
+			glyph_composite_cmethod_disjoint <
+			glyph_method_disjoint            <
+			glyph_cmethod_disjoint           < Facade >>>>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

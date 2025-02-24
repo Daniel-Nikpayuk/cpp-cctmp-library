@@ -99,7 +99,7 @@ namespace cctmp {
 	{
 		enum : genum_type
 		{
-			builtin, tuple, cotuple, function, list,
+			builtin, tuple, cotuple, function, recurse,
 			identity, l_than, l_than_or_eq, g_than, g_than_or_eq,
 			exists, forall, space,
 
