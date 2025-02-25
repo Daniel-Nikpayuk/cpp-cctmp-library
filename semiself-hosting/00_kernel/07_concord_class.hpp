@@ -238,6 +238,7 @@ namespace cctmp {
 			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
 
 			using sign_type			= sign<size_type>;
+			using sign_ctype		= typename alias<sign_type>::ctype;
 			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
 
 		protected:
@@ -259,10 +260,55 @@ namespace cctmp {
 
 				nik_ce auto type(sign_ctype_ref sign) { return symbol_cmethod().to_icon(sign); }
 
+			// (glyph):
+
+				nik_ce auto glyph_ctext(icon_ctype_ref icon) const
+					{ return symbol_cmethod().glyph_ctext(icon); }
+
+				nik_ce auto glyph_ctext(sign_ctype_ref sign) const
+					{ return symbol_cmethod().glyph_ctext(sign); }
+
+				nik_ce size_type glyph_ctext(icon_ctype_ref icon, size_ctype n) const
+					{ return symbol_cmethod().glyph_ctext(icon, n); }
+
+				nik_ce size_type glyph_ctext(sign_ctype_ref sign, size_ctype n) const
+					{ return symbol_cmethod().glyph_ctext(sign, n); }
+
+				template<typename T>
+				nik_ce size_type total_bytes(const T & v) const
+					{ return symbol_cmethod().total_bytes(v); }
+
+				template<typename T>
+				nik_ce size_type max_bytes(const T & v) const
+					{ return symbol_cmethod().max_bytes(v); }
+
+				template<typename T>
+				nik_ce size_type max_universe(const T & v) const
+					{ return symbol_cmethod().max_universe(v); }
+
+			// (image):
+
+				nik_ce auto image_ctext(sign_ctype_ref sign) const
+					{ return symbol_cmethod().image_ctext(sign); }
+
+				nik_ce size_type image_ctext(sign_ctype_ref sign, size_ctype n) const
+					{ return symbol_cmethod().image_ctext(sign, n); }
+
 			// record:
 
 				nik_ce auto record_csubmethod() const
 					{ return base::model->template record_csubequip<record_csubmethod_type>(); }
+
+				nik_ce auto record_ctext(sign_ctype_ref sign, size_ctype point, size_ctype n = 1) const
+				{
+					size_ctype start  = image_ctext(sign, point);
+					size_ctype finish = start + n;
+					auto record_cival = record_csubmethod();
+
+					record_cival.mid_set(start, finish);
+
+					return record_cival;
+				}
 	};
 
 /***********************************************************************************************************************/
@@ -284,6 +330,7 @@ namespace cctmp {
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
 			using sign_type			= typename base::sign_type;
+			using sign_ctype		= typename base::sign_ctype;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
 		protected:
@@ -303,11 +350,46 @@ namespace cctmp {
 				nik_ce auto symbol_method()
 					{ return base::model->template symbol_equip<symbol_method_type>(); }
 
+			// (glyph):
+
+				nik_ce auto glyph_text(icon_ctype_ref icon)
+					{ return symbol_method().glyph_text(icon); }
+
+				nik_ce auto glyph_text(sign_ctype_ref sign)
+					{ return symbol_method().glyph_text(sign); }
+
+				nik_ce size_type glyph_text(icon_ctype_ref icon, size_ctype n)
+					{ return symbol_method().glyph_text(icon, n); }
+
+				nik_ce size_type glyph_text(sign_ctype_ref sign, size_ctype n)
+					{ return symbol_method().glyph_text(sign, n); }
+
+			// (image):
+
+				nik_ce auto image_text(sign_ctype_ref sign)
+					{ return symbol_method().image_text(sign); }
+
+				nik_ce size_type image_text(sign_ctype_ref sign, size_ctype n)
+					{ return symbol_method().image_text(sign, n); }
+
 			// record:
 
 				nik_ce auto record_submethod()
 					{ return base::model->template record_subequip<record_submethod_type>(); }
 
+				nik_ce auto record_text(sign_ctype_ref sign, size_ctype point, size_ctype n = 1)
+				{
+					size_ctype start  = base::image_ctext(sign, point);
+					size_ctype finish = start + n;
+					auto record_ival  = record_submethod();
+
+					record_ival.mid_set(start, finish);
+
+					return record_ival;
+				}
+
+				nik_ce void record_copy(sign_ctype_ref sign, size_ctype point, size_ctype value)
+					{ base::record().copy(base::image_ctext(sign, point), value); }
 	};
 
 /***********************************************************************************************************************/

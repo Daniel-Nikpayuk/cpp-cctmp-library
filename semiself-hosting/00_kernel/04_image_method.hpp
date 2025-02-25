@@ -33,7 +33,7 @@ namespace cctmp {
 
 // base:
 
-	struct ImageBase { enum : genum_type { mark, index, dimension }; };
+	struct ImageBase { enum : genum_type { index, dimension }; };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -92,6 +92,32 @@ namespace cctmp {
 
 					return make_sign(0, 0);
 				}
+
+			// text:
+
+				nik_ce auto text_csubmethod(sign_ctype_ref sign) const
+					{ return base::text_csubmethod(base::page_cmethod(sign.mark()), sign.index()); }
+
+			// find:
+
+					// assumes page and note_page match.
+			//	nik_ce size_type find_from_previous(sign_ctype_ref icon) const
+			//	{
+			//		auto page_cival = base::page_cmethod(icon.mark());
+			//		auto npage      = page_cival.citer(icon.index());
+			//		auto text_cival = base::text_csubmethod(npage->start(), npage->finish());
+
+			//		for (auto k = page_cival.cbegin(); k != npage; ++k)
+			//		{
+			//			auto b = base::ctext().citer(k->start ());
+			//			auto e = base::ctext().citer(k->finish());
+
+			//			if (text_cival.equal(0, b, e))
+			//				{ return page_cival.left_size(k); }
+			//		}
+
+			//		return icon.index();
+			//	}
 	};
 
 /***********************************************************************************************************************/
@@ -139,6 +165,11 @@ namespace cctmp {
 			nik_ce image_method_disjoint() : base{} { }
 			nik_ce image_method_disjoint(const facade & f) : base{f} { }
 
+			// text:
+
+				nik_ce auto text_submethod(sign_ctype_ref sign)
+					{ return base::text_submethod(base::page_cmethod(sign.mark()), sign.index()); }
+
 			// allocate:
 
 				nik_ce auto allocate(page_method_type & page_ival, size_ctype mark, size_ctype n)
@@ -150,11 +181,11 @@ namespace cctmp {
 
 			// declare:
 
-				template<size_type Size, typename T>
+				template<size_type Mark, size_type Size, typename T>
 				nik_ce auto declare(const T & field)
 				{
-					auto page_ival = base::page_method(field[ImageBase::mark]);
-					auto sign      = allocate(page_ival, field[ImageBase::mark], Size);
+					auto page_ival = base::page_method(Mark);
+					auto sign      = allocate(page_ival, Mark, Size);
 
 					if (base::not_fail(sign)) { instantiate(page_ival, field); }
 
@@ -167,10 +198,7 @@ namespace cctmp {
 
 // builtin:
 
-	struct ImageBuiltin
-	{
-		enum : genum_type { mark = ImageBase::mark, index = ImageBase::index, time, point, dimension };
-	};
+	struct ImageBuiltin { enum : genum_type { index = ImageBase::index, time, point, dimension }; };
 
 /***********************************************************************************************************************/
 
@@ -249,10 +277,7 @@ namespace cctmp {
 
 // tuple:
 
-	struct ImageTuple
-	{
-		enum : genum_type { mark = ImageBase::mark, index = ImageBase::index, time, length, point, dimension };
-	};
+	struct ImageTuple { enum : genum_type { index = ImageBase::index, time, length, point, dimension }; };
 
 /***********************************************************************************************************************/
 
@@ -346,10 +371,7 @@ namespace cctmp {
 
 	struct ImageCotuple
 	{
-		enum : genum_type
-		{
-			mark = ImageBase::mark, index = ImageBase::index, time, length, injection, point, dimension
-		};
+		enum : genum_type { index = ImageBase::index, time, inject, point, dimension };
 	};
 
 /***********************************************************************************************************************/
@@ -429,13 +451,7 @@ namespace cctmp {
 
 // function:
 
-	struct ImageFunction
-	{
-		enum : genum_type
-		{
-			mark = ImageBase::mark, index = ImageBase::index, time, length, point, dimension
-		};
-	};
+	struct ImageFunction { enum : genum_type { index = ImageBase::index, time, length, point, dimension }; };
 
 /***********************************************************************************************************************/
 

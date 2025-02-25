@@ -265,28 +265,46 @@ namespace cctmp {
 
 			// glyph:
 
+				nik_ce auto to_icon(sign_ctype_ref sign) const
+					{ return icon_type{sign.mark(), image_ctext(sign).cat(ImageBase::index)}; }
+
 				nik_ce auto glyph_cmethod() const
 					{ return base::model->template glyph_cequip<glyph_cmethod_type>(); }
 
-				nik_ce size_type glyph_ctext_at(icon_ctype_ref icon, size_ctype n, size_ctype m)
-					{ return glyph_cmethod().text_cmethod(icon).cat(n, m); }
+				nik_ce auto glyph_ctext(icon_ctype_ref icon) const
+					{ return glyph_cmethod().text_csubmethod(icon); }
 
-				nik_ce auto to_icon(sign_ctype_ref sign)
-				{
-					auto text_cival  = image_cmethod().text_cmethod(sign);
-					size_ctype mark  = text_cival.cat(ImageBase::mark );
-					size_ctype index = text_cival.cat(ImageBase::index);
+				nik_ce auto glyph_ctext(sign_ctype_ref sign) const
+					{ return glyph_ctext(to_icon(sign)); }
 
-					return icon_type{mark, index};
-				}
+				nik_ce size_type glyph_ctext(icon_ctype_ref icon, size_ctype n) const
+					{ return glyph_ctext(icon).cat(n); }
+
+				nik_ce size_type glyph_ctext(sign_ctype_ref sign, size_ctype n) const
+					{ return glyph_ctext(sign).cat(n); }
+
+				template<typename T>
+				nik_ce size_type total_bytes(const T & v) const
+					{ return glyph_cmethod().total_bytes(v); }
+
+				template<typename T>
+				nik_ce size_type max_bytes(const T & v) const
+					{ return glyph_cmethod().max_bytes(v); }
+
+				template<typename T>
+				nik_ce size_type max_universe(const T & v) const
+					{ return glyph_cmethod().max_universe(v); }
 
 			// image:
 
 				nik_ce auto image_cmethod() const
 					{ return base::model->template image_cequip<image_cmethod_type>(); }
 
-				nik_ce size_type image_ctext_at(sign_ctype_ref sign, size_ctype n)
-					{ return image_cmethod().text_cmethod(sign).cat(n); }
+				nik_ce auto image_ctext(sign_ctype_ref sign) const
+					{ return image_cmethod().text_csubmethod(sign); }
+
+				nik_ce size_type image_ctext(sign_ctype_ref sign, size_ctype n) const
+					{ return image_ctext(sign).cat(n); }
 	};
 
 /***********************************************************************************************************************/
@@ -327,12 +345,30 @@ namespace cctmp {
 				nik_ce auto glyph_method()
 					{ return base::model->template glyph_equip<glyph_method_type>(); }
 
+				nik_ce auto glyph_text(icon_ctype_ref icon)
+					{ return glyph_method().text_submethod(icon); }
+
+				nik_ce auto glyph_text(sign_ctype_ref sign)
+					{ return glyph_text(base::to_icon(sign)); }
+
+				nik_ce void set_glyph_text(icon_ctype_ref icon, size_type n, size_type v)
+					{ glyph_text(icon).copy(n, v); }
+
+				nik_ce void set_glyph_text(sign_ctype_ref sign, size_type n, size_type v)
+					{ glyph_text(sign).copy(n, v); }
+
 			// image:
 
 				nik_ce auto image_method()
 					{ return base::model->template image_equip<image_method_type>(); }
 
-				template<size_type Size, typename T>
+				nik_ce auto image_text(sign_ctype_ref sign)
+					{ return image_method().text_submethod(sign); }
+
+				nik_ce void set_image_text(sign_ctype_ref sign, size_type n, size_type v)
+					{ image_text(sign).copy(n, v); }
+
+				template<size_type Mark, size_type Size, typename T>
 				nik_ce auto declare_image(icon_ctype_ref icon, const T & field)
 				{
 					auto image_ival = image_method();
@@ -340,7 +376,7 @@ namespace cctmp {
 						// should this check be here now ?
 					if (base::glyph_cmethod().is_fail(icon)) { return image_ival.fail_sign(); }
 
-					return image_ival.template declare<Size>(field);
+					return image_ival.template declare<Mark, Size>(field);
 				}
 	};
 

@@ -38,71 +38,103 @@
 
 /***********************************************************************************************************************/
 
-// square:
+// test:
 
-	template<typename MI, typename MP, typename SizeType>
-	struct square_concord
+	template<typename SizeType>
+	struct concord_test
 	{
-		using size_type         = SizeType;
-		using glyph_pack        = cctmp::T_pack_Vs<100, 1, 0, 0, 1>;
-		using space_pack        = cctmp::T_pack_Vs<  0, 0, 0, 0, 0>;
-		using image_pack        = cctmp::T_pack_Vs< 10, 1, 0, 0, 1>;
-		using concord_type      = concord<size_type, size_type, glyph_pack, space_pack, image_pack, 100>;
-		using sign_type         = sign<size_type>;
+		using size_type          = SizeType;
+		using glyph_pack         = cctmp::T_pack_Vs<100, 10, 10, 10, 10, 10>;
+		using space_pack         = cctmp::T_pack_Vs<  0,  0,  0,  0,  0,  0>;
+		using image_pack         = cctmp::T_pack_Vs<100, 10, 10, 10, 10, 10>;
+		using concord_type       = concord<size_type, size_type, glyph_pack, space_pack, image_pack, 100>;
+		using icon_type          = icon<size_type>;
+		using sign_type          = sign<size_type>;
 
-		using ring_method_type  = resolve_method<concord_type, concord_ring_method>;
-		using func_method_type  = resolve_method<concord_type, concord_function_method>;
-		using eval_cmethod_type = resolve_eval_cmethod<concord_type, 10, 10, 10>;
-
-		constexpr static size_type contr[32] =
-		{
-			MI::program         , 6 ,            0 , 2 ,	// line 0: action,  lines, atomic,   next
-			MI::define_argument , 0 ,            0 , 1 ,	// line 1: action,  index,  start, finish
-			MI::function        , 6 , MP::to_stack , 1 ,	// line 2: action, inline, policy,   next
-			MI::argument        , 1 , MP::to_stack , 1 ,	// line 3: action, inline, policy,   next
-			MI::argument        , 1 , MP::to_stack , 1 ,	// line 4: action, inline, policy,   next
-			MI::apply           , 0 , MP::to_carry , 0 ,	// line 5: action, offset, policy,   next
-		// multiply:
-			MI::program         , 2 ,            1 , 1 ,	// line 6: action,  lines, atomic,   next
-			MI::multiply        , 0 , MP::to_carry , 0	// line 7: action, offset, policy,   next
-		};
+		using ring_cmethod_type  = resolve_cmethod < concord_type, concord_ring_cmethod  >;
+		using ring_method_type   = resolve_method  < concord_type, concord_ring_method   >;
+		using tuple_cmethod_type = resolve_cmethod < concord_type, concord_tuple_cmethod >;
+		using tuple_method_type  = resolve_method  < concord_type, concord_tuple_method  >;
 
 		concord_type value;
-		sign_type square;
 
-		constexpr square_concord()
+		icon_type ring1_icon;
+		icon_type ring4_icon;
+		icon_type ring8_icon;
+
+		sign_type ring1_sign1;
+		sign_type ring4_sign1;
+		sign_type ring8_sign1;
+
+		icon_type tuple1_icon;
+		sign_type tuple1_sign;
+
+		constexpr concord_test()
 		{
-			auto ring_method       = value.template equip<ring_method_type>();
-			auto func_method       = value.template equip<func_method_type>();
+			auto ring_method  = value.template equip<ring_method_type>();
+			auto tuple_method = value.template equip<tuple_method_type>();
 
-			auto ring8_t           = ring_method.declare_type(8);
-			auto ring8_to_ring8_f  = func_method.declare_type({ ring8_t, ring8_t });
+			ring1_icon        = ring_method.declare_type(1);
+			ring4_icon        = ring_method.declare_type(4);
+			ring8_icon        = ring_method.declare_type(8);
 
-			square                 = func_method.define_abstract(ring8_to_ring8_f, contr);
+			ring1_sign1       = ring_method.define_abstract(ring1_icon, 5);
+			ring4_sign1       = ring_method.define_abstract(ring4_icon, 6);
+			ring8_sign1       = ring_method.define_abstract(ring8_icon, 7);
+
+			tuple1_icon       = tuple_method.declare_type({ ring1_icon, ring4_icon, ring8_icon });
+			tuple1_sign       = tuple_method.define_abstract(
+						tuple1_icon, {ring1_sign1, ring4_sign1, ring8_sign1});
 		}
 
-		constexpr auto eval_cmethod() const { return value.template cequip<eval_cmethod_type>(); }
+		// glyph:
+
+			constexpr auto ring_cglyph(const icon_type & icon) const
+				{ return value.template cequip<ring_cmethod_type>().glyph_ctext(icon); }
+
+			constexpr auto tuple_cglyph(const icon_type & icon) const
+				{ return value.template cequip<tuple_cmethod_type>().glyph_ctext(icon); }
+
+		// image:
+
+			constexpr auto ring_cimage(const sign_type & sign) const
+				{ return value.template cequip<ring_cmethod_type>().image_ctext(sign); }
+
+			constexpr auto tuple_cimage(const sign_type & sign) const
+				{ return value.template cequip<tuple_cmethod_type>().image_ctext(sign); }
 	};
 
-	// test:
+	constexpr auto test0 = concord_test<unsigned long>{};
 
-		template<typename size_type>
-		constexpr auto square(size_type const v)
-		{
-			constexpr auto concord = square_concord<MachineInstr, MachinePolicy, size_type>{};
-			auto eval_cmethod      = concord.eval_cmethod();
-			eval_cmethod           . apply(concord.square, {v});
+	void print_test_types()
+	{
+		print_array(test0.ring_cglyph(test0.ring1_icon));
+		print_array(test0.ring_cglyph(test0.ring4_icon));
+		print_array(test0.ring_cglyph(test0.ring8_icon));
 
-			return eval_cmethod.rtn_cat(0);
-		}
+		print_array(test0.tuple_cglyph(test0.tuple1_icon));
+
+		printf("\n");
+	}
+
+	void print_test_images()
+	{
+		print_array(test0.ring_cimage(test0.ring1_sign1));
+		print_array(test0.ring_cimage(test0.ring4_sign1));
+		print_array(test0.ring_cimage(test0.ring8_sign1));
+
+		print_array(test0.tuple_cimage(test0.tuple1_sign));
+
+		printf("\n");
+	}
 
 /***********************************************************************************************************************/
 
 	int main(int argc, char *argv[])
 	{
-	//	static_assert(square<unsigned long>(5) == 25);
-
-	//	printf("%lu\n", square<unsigned long>(5));
+		print_test_types();
+		print_test_images();
+		print_array(*test0.value.crecord());
 
 		return 0;
 	}

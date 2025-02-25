@@ -402,35 +402,10 @@ namespace cctmp {
 					return text_csubmethod(npage->start(), npage->finish());
 				}
 
-				nik_ce auto text_csubmethod(icon_ctype_ref icon) const
-					{ return text_csubmethod(page_cmethod(icon.mark()), icon.index()); }
-
-				nik_ce auto text_csubmethod(sign_ctype_ref sign) const
-					{ return text_csubmethod(page_cmethod(sign.mark()), sign.index()); }
-
 			// find:
 
 				nik_ce bool found_from_previous(size_ctype n, size_ctype index) const
 					{ return (n < index); }
-
-					// assumes page and note_page match.
-				nik_ce size_type find_from_previous(icon_ctype_ref icon) const
-				{
-					auto page_cival = page_cmethod(icon.mark());
-					auto npage      = page_cival.citer(icon.index());
-					auto text_cival = text_csubmethod(npage->start(), npage->finish());
-
-					for (auto k = page_cival.cbegin(); k != npage; ++k)
-					{
-						auto b = base::ctext().citer(k->start ());
-						auto e = base::ctext().citer(k->finish());
-
-						if (text_cival.equal(0, b, e))
-							{ return page_cival.left_size(k); }
-					}
-
-					return icon.index();
-				}
 	};
 
 /***********************************************************************************************************************/
@@ -500,9 +475,6 @@ namespace cctmp {
 
 					return text_submethod(npage->start(), npage->finish());
 				}
-
-				nik_ce auto text_submethod(icon_ctype_ref icon)
-					{ return text_submethod(page_cmethod(icon.mark()), icon.index()); }
 
 		protected:
 

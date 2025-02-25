@@ -214,6 +214,8 @@ namespace cctmp {
 
 				nik_ce deref_type_ref operator [] (size_ctype n) { return at(n); }
 
+				nik_ce void copy(size_ctype n, ctype_ref v) { at(n) = v; }
+
 				template<typename In, typename End>
 				nik_ce void copy(size_ctype n, In in, End end)
 					{ for (iter_type out = iter(n); in != end; ++out, ++in) { *out = *in; } }
@@ -351,6 +353,9 @@ namespace cctmp {
 
 				template<typename In, typename End>
 				nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }
+
+				template<typename F, typename In, typename End>
+				nik_ce void pushmap(F f, In in, End end) { while (in != end) { push(f(*in++)); } }
 	};
 
 /***********************************************************************************************************************/
@@ -418,6 +423,9 @@ namespace cctmp {
 
 				template<typename In, typename End>
 				nik_ce void push(In in, End end) { while (in != end) { push(*in++); } }
+
+				template<typename F, typename In, typename End>
+				nik_ce void pushmap(F f, In in, End end) { while (in != end) { push(f(*in++)); } }
 	};
 
 /***********************************************************************************************************************/

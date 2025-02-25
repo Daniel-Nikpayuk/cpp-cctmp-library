@@ -52,11 +52,6 @@ namespace cctmp {
 
 			nik_ce symbol_builtin_cmethod_disjoint() : base{} { }
 			nik_ce symbol_builtin_cmethod_disjoint(const facade & f) : base{f} { }
-
-			// point:
-
-				nik_ce size_type image_ctext_point(sign_ctype_ref sign)
-					{ return base::image_ctext_at(sign, ImageBuiltin::point); }
 	};
 
 	// syntactic sugar:
@@ -99,7 +94,10 @@ namespace cctmp {
 
 				template<typename T>
 				nik_ce auto declare_image(icon_ctype_ref icon, T & field)
-					{ return base::template declare_image<ImageBuiltin::dimension>(icon, field); }
+				{
+					return base::template
+						declare_image<BookMark::builtin, ImageBuiltin::dimension>(icon, field);
+				}
 	};
 
 	// syntactic sugar:
@@ -110,6 +108,72 @@ namespace cctmp {
 			symbol_builtin_cmethod_disjoint <
 			corpus_method_disjoint          < glyph_builtin_method  , image_builtin_method  ,
 			corpus_cmethod_disjoint         < glyph_builtin_cmethod , image_builtin_cmethod , Facade >>>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// composite:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Base>
+	class symbol_composite_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce symbol_composite_cmethod_disjoint() : base{} { }
+			nik_ce symbol_composite_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class symbol_composite_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce symbol_composite_method_disjoint() : base{} { }
+			nik_ce symbol_composite_method_disjoint(const facade & f) : base{f} { }
+
+			// declare:
+
+				template<size_type Mark, typename T>
+				nik_ce auto declare_type(const T & v, size_ctype bytes, size_ctype universe)
+				{
+					return base::glyph_method().template
+						declare_type<Mark>(v, bytes, universe);
+				}
+	};
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -146,8 +210,9 @@ namespace cctmp {
 
 		template<typename Facade>
 		using symbol_tuple_cmethod =
-			symbol_tuple_cmethod_disjoint <
-			corpus_cmethod_disjoint       < glyph_tuple_cmethod , image_tuple_cmethod , Facade >>;
+			symbol_tuple_cmethod_disjoint     <
+			symbol_composite_cmethod_disjoint <
+			corpus_cmethod_disjoint           < glyph_tuple_cmethod , image_tuple_cmethod , Facade >>>;
 
 /***********************************************************************************************************************/
 
@@ -173,32 +238,18 @@ namespace cctmp {
 
 			nik_ce symbol_tuple_method_disjoint() : base{} { }
 			nik_ce symbol_tuple_method_disjoint(const facade & f) : base{f} { }
-
-			// declare:
-
-				template<typename T>
-				nik_ce auto declare_type(const T & v) { return base::glyph_method().declare(v); }
-
-				template<typename T>
-				nik_ce auto declare_image(icon_ctype_ref icon, T & field)
-					{ return base::template declare_image<ImageTuple::dimension>(icon, field); }
-
-			// set:
-
-			//	nik_ce void set_abstract(size_ctype n, sign_ctype_ref sign)
-			//	{
-			//		base::symbol_method().set_abstract(v);
-			//	}
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
 		using symbol_tuple_method =
-			symbol_tuple_method_disjoint  <
-			symbol_tuple_cmethod_disjoint <
-			corpus_method_disjoint        < glyph_tuple_method  , image_tuple_method  ,
-			corpus_cmethod_disjoint       < glyph_tuple_cmethod , image_tuple_cmethod , Facade >>>>;
+			symbol_tuple_method_disjoint      <
+			symbol_tuple_cmethod_disjoint     <
+			symbol_composite_method_disjoint  <
+			symbol_composite_cmethod_disjoint <
+			corpus_method_disjoint            < glyph_tuple_method  , image_tuple_method  ,
+			corpus_cmethod_disjoint           < glyph_tuple_cmethod , image_tuple_cmethod , Facade >>>>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -235,8 +286,9 @@ namespace cctmp {
 
 		template<typename Facade>
 		using symbol_cotuple_cmethod =
-			symbol_cotuple_cmethod_disjoint <
-			corpus_cmethod_disjoint         < glyph_cotuple_cmethod , image_cotuple_cmethod , Facade >>;
+			symbol_cotuple_cmethod_disjoint   <
+			symbol_composite_cmethod_disjoint <
+			corpus_cmethod_disjoint           < glyph_cotuple_cmethod , image_cotuple_cmethod , Facade >>>;
 
 /***********************************************************************************************************************/
 
@@ -262,25 +314,18 @@ namespace cctmp {
 
 			nik_ce symbol_cotuple_method_disjoint() : base{} { }
 			nik_ce symbol_cotuple_method_disjoint(const facade & f) : base{f} { }
-
-			// declare:
-
-				template<typename T>
-				nik_ce auto declare_type(const T & v) { return base::glyph_method().declare(v); }
-
-				template<typename T>
-				nik_ce auto declare_image(icon_ctype_ref icon, T & field)
-					{ return base::template declare_image<ImageCotuple::dimension>(icon, field); }
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
 		using symbol_cotuple_method =
-			symbol_cotuple_method_disjoint  <
-			symbol_cotuple_cmethod_disjoint <
-			corpus_method_disjoint          < glyph_cotuple_method  , image_cotuple_method  ,
-			corpus_cmethod_disjoint         < glyph_cotuple_cmethod , image_cotuple_cmethod , Facade >>>>;
+			symbol_cotuple_method_disjoint    <
+			symbol_cotuple_cmethod_disjoint   <
+			symbol_composite_method_disjoint  <
+			symbol_composite_cmethod_disjoint <
+			corpus_method_disjoint            < glyph_cotuple_method  , image_cotuple_method  ,
+			corpus_cmethod_disjoint           < glyph_cotuple_cmethod , image_cotuple_cmethod , Facade >>>>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -317,8 +362,9 @@ namespace cctmp {
 
 		template<typename Facade>
 		using symbol_function_cmethod =
-			symbol_function_cmethod_disjoint <
-			corpus_cmethod_disjoint          < glyph_function_cmethod , image_function_cmethod , Facade >>;
+			symbol_function_cmethod_disjoint  <
+			symbol_composite_cmethod_disjoint <
+			corpus_cmethod_disjoint           < glyph_function_cmethod , image_function_cmethod , Facade >>>;
 
 /***********************************************************************************************************************/
 
@@ -344,25 +390,18 @@ namespace cctmp {
 
 			nik_ce symbol_function_method_disjoint() : base{} { }
 			nik_ce symbol_function_method_disjoint(const facade & f) : base{f} { }
-
-			// declare:
-
-				template<typename T>
-				nik_ce auto declare_type(const T & v) { return base::glyph_method().declare(v); }
-
-				template<typename T>
-				nik_ce auto declare_image(icon_ctype_ref icon, T & field)
-					{ return base::template declare_image<ImageFunction::dimension>(icon, field); }
 	};
 
 	// syntactic sugar:
 
 		template<typename Facade>
 		using symbol_function_method =
-			symbol_function_method_disjoint  <
-			symbol_function_cmethod_disjoint <
-			corpus_method_disjoint           < glyph_function_method  , image_function_method  ,
-			corpus_cmethod_disjoint          < glyph_function_cmethod , image_function_cmethod , Facade >>>>;
+			symbol_function_method_disjoint   <
+			symbol_function_cmethod_disjoint  <
+			symbol_composite_method_disjoint  <
+			symbol_composite_cmethod_disjoint <
+			corpus_method_disjoint            < glyph_function_method  , image_function_method  ,
+			corpus_cmethod_disjoint           < glyph_function_cmethod , image_function_cmethod , Facade >>>>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
