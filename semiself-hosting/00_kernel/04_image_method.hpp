@@ -101,23 +101,23 @@ namespace cctmp {
 			// find:
 
 					// assumes page and note_page match.
-			//	nik_ce size_type find_from_previous(sign_ctype_ref icon) const
-			//	{
-			//		auto page_cival = base::page_cmethod(icon.mark());
-			//		auto npage      = page_cival.citer(icon.index());
-			//		auto text_cival = base::text_csubmethod(npage->start(), npage->finish());
+				nik_ce size_type find_from_previous(sign_ctype_ref sign) const
+				{
+					auto page_cival = base::page_cmethod(sign.mark());
+					auto npage      = page_cival.citer(sign.index());
+					auto text_cival = base::text_csubmethod(npage->start(), npage->finish());
 
-			//		for (auto k = page_cival.cbegin(); k != npage; ++k)
-			//		{
-			//			auto b = base::ctext().citer(k->start ());
-			//			auto e = base::ctext().citer(k->finish());
+					for (auto k = page_cival.cbegin(); k != npage; ++k)
+					{
+						auto b = base::ctext().citer(k->start ());
+						auto e = base::ctext().citer(k->finish());
 
-			//			if (text_cival.equal(0, b, e))
-			//				{ return page_cival.left_size(k); }
-			//		}
+						if (text_cival.equal(0, b, e))
+							{ return page_cival.left_size(k); }
+					}
 
-			//		return icon.index();
-			//	}
+					return sign.index();
+				}
 	};
 
 /***********************************************************************************************************************/
@@ -153,11 +153,18 @@ namespace cctmp {
 		protected:
 
 			template<typename T>
-			nik_ce void instantiate(const page_method_type & page_ival, const T & field)
+			nik_ce void instantiate(const page_method_type & page_ival, sign_type_ref sign, const T & field)
 			{
-				auto text_ival = base::text_submethod(page_ival, field[ImageBase::index]);
+				auto text_ival = base::text_submethod(page_ival, sign.index());
+				text_ival      . copy(0, field.cbegin(), field.cend());
+			//	size_ctype pos = base::find_from_previous(sign);
 
-				for (size_type k = 0; k != field.size(); ++k) { text_ival[k] = field[k]; }
+			//	if (base::found_from_previous(pos, sign.index())) // required ?
+			//	{
+			//		sign.set_index(pos);
+
+			//		base::deallocate_last(page_ival);
+			//	}
 			}
 
 		public:
@@ -187,7 +194,7 @@ namespace cctmp {
 					auto page_ival = base::page_method(Mark);
 					auto sign      = allocate(page_ival, Mark, Size);
 
-					if (base::not_fail(sign)) { instantiate(page_ival, field); }
+					if (base::not_fail(sign)) { instantiate(page_ival, sign, field); }
 
 					return sign;
 				}
@@ -543,9 +550,99 @@ namespace cctmp {
 
 // list:
 
+	struct ImageList { enum : genum_type { index = ImageBase::index, time, point, dimension }; };
+
 /***********************************************************************************************************************/
 
-// :
+// immutable:
+
+	template<typename Base>
+	class image_list_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		protected:
+
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
+
+		public:
+
+			nik_ce image_list_cmethod_disjoint() : base{} { }
+			nik_ce image_list_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using image_list_cmethod =
+			image_list_cmethod_disjoint <
+			image_cmethod_disjoint      < Facade >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class image_list_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		protected:
+
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using page_method_type		= typename base::page_method_type;
+
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
+			using text_submethod_type	= typename base::text_submethod_type;
+
+		public:
+
+			nik_ce image_list_method_disjoint() : base{} { }
+			nik_ce image_list_method_disjoint(const facade & f) : base{f} { }
+
+			// declare:
+
+			//	nik_ce auto declare(icon_ctype_ref icon)
+			//	{
+			//		return sign_type{0, 0};
+			//	}
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using image_list_method =
+			image_list_method_disjoint  <
+			image_list_cmethod_disjoint <
+			image_method_disjoint       <
+			image_cmethod_disjoint      < Facade >>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
