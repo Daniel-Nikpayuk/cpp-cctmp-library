@@ -925,6 +925,149 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// space:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Base>
+	class glyph_space_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+		protected:
+
+			nik_ces size_type row_length	= 4;
+			nik_ces size_type length	= row_length * base::col_length;
+
+		public:
+
+			nik_ce glyph_space_cmethod_disjoint() : base{} { }
+			nik_ce glyph_space_cmethod_disjoint(const facade & f) : base{f} { }
+
+			// sub(ordinate) icon:
+
+				nik_ce auto sub_icon(icon_ctype_ref icon) const
+				{
+					auto text_cival  = base::text_csubmethod(icon);
+					text_cival       . set_dimension(row_length, base::col_length);
+
+					size_ctype mark  = text_cival[3][GlyphNote::mark ];
+					size_ctype index = text_cival[3][GlyphNote::index];
+
+					return base::make_icon(mark, index);
+				}
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using glyph_space_cmethod =
+			glyph_space_cmethod_disjoint <
+			glyph_cmethod_disjoint       < Facade >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class glyph_space_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+		protected:
+
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using page_method_type		= typename base::page_method_type;
+
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
+			using text_submethod_type	= typename base::text_submethod_type;
+
+		public:
+
+			nik_ce glyph_space_method_disjoint() : base{} { }
+			nik_ce glyph_space_method_disjoint(const facade & f) : base{f} { }
+
+		protected:
+
+			nik_ce void copy_program(text_submethod_type & text_ival, icon_ctype_ref sub_icon)
+			{
+				size_ctype bytes = 17; // update using sub_icon.
+
+				base::make_line_program (text_ival, base::row_length);
+				base::make_line_routine (text_ival, GlyphInstr::custom);
+				base::make_line_meta    (text_ival, bytes, 0);
+			}
+
+			nik_ce void instantiate(
+				const page_method_type & page_ival, icon_type_ref icon, icon_ctype_ref sub_icon)
+			{
+				auto text_ival = base::text_submethod(page_ival, icon.index());
+				text_ival      . set_dimension(base::row_length, base::col_length);
+
+				copy_program(text_ival, sub_icon);
+				text_ival[3][GlyphNote::instr] = GlyphInstr::type;
+
+				base::pop_page_if(page_ival, icon);
+			}
+
+		public:
+
+			// declare:
+
+				nik_ce auto declare(icon_ctype_ref sub_icon)
+				{
+					auto page_ival = base::page_method(BookMark::recurse);
+					auto icon      = base::allocate(page_ival, BookMark::recurse, base::length);
+
+					if (base::not_fail(icon)) { instantiate(page_ival, icon, sub_icon); }
+
+					return icon;
+				}
+
+			// recurse:
+
+				nik_ce void recurse(icon_ctype_ref icon, icon_ctype_ref sub_icon)
+				{
+					auto text_ival = base::text_submethod(icon);
+					text_ival      . set_dimension(base::row_length, base::col_length);
+
+					text_ival[3][GlyphNote::mark ] = sub_icon.mark ();
+					text_ival[3][GlyphNote::index] = sub_icon.index();
+				}
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using glyph_space_method =
+			glyph_space_method_disjoint  <
+			glyph_space_cmethod_disjoint <
+			glyph_method_disjoint        <
+			glyph_cmethod_disjoint       < Facade >>>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 } // namespace cctmp

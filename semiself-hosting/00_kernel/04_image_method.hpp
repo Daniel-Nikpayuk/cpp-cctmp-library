@@ -626,13 +626,6 @@ namespace cctmp {
 
 			nik_ce image_list_method_disjoint() : base{} { }
 			nik_ce image_list_method_disjoint(const facade & f) : base{f} { }
-
-			// declare:
-
-			//	nik_ce auto declare(icon_ctype_ref icon)
-			//	{
-			//		return sign_type{0, 0};
-			//	}
 	};
 
 	// syntactic sugar:
@@ -670,6 +663,63 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // :
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// space:
+
+/***********************************************************************************************************************/
+
+// immutable (symbolic):
+
+	template<typename Base>
+	class image_space_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+		public:
+
+			nik_ce image_space_cmethod_disjoint() : base{} { }
+			nik_ce image_space_cmethod_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using image_space_cmethod =
+			image_space_cmethod_disjoint <
+			image_cmethod_disjoint       < Facade >>;
+
+/***********************************************************************************************************************/
+
+// mutable (symbolic):
+
+	template<typename Base>
+	class image_space_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+		public:
+
+			nik_ce image_space_method_disjoint() : base{} { }
+			nik_ce image_space_method_disjoint(const facade & f) : base{f} { }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using image_space_method =
+			image_space_method_disjoint  <
+			image_space_cmethod_disjoint <
+			image_method_disjoint        <
+			image_cmethod_disjoint       < Facade >>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

@@ -1238,6 +1238,18 @@ namespace cctmp {
 
 			// define:
 
+				nik_ce auto define_abstract(icon_ctype_ref icon, sign_ctype_ref e)
+				{
+					auto cotuple_icon = base::sub_icon(icon);
+
+					auto cotuple_sign = cotuple_method.define_abstract(cotuple_icon, 0, e);
+					auto sign         = declare_abstract(icon);
+
+					define_abstract(sign, cotuple_sign);
+
+					return sign;
+				}
+
 				nik_ce auto define_abstract(icon_ctype_ref icon, sign_ctype_ref a, sign_ctype_ref d)
 				{
 					auto cotuple_icon = base::sub_icon(icon);
@@ -1288,6 +1300,223 @@ namespace cctmp {
 /***********************************************************************************************************************/
 
 // :
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// space:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Base>
+	class concord_space_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype		= typename base::sign_ctype;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		protected:
+
+			using tuple_cmethod_type	= resolve_cmethod<model_type, concord_tuple_cmethod>;
+			using cotuple_cmethod_type	= resolve_cmethod<model_type, concord_cotuple_cmethod>;
+
+			tuple_cmethod_type   tuple_cmethod;
+			cotuple_cmethod_type cotuple_cmethod;
+
+		protected:
+
+			nik_ce auto tuple_sign(sign_ctype_ref sign) const
+				{ return cotuple_cmethod.sub_sign(sub_sign(sign)); }
+
+		public:
+
+			nik_ce concord_space_cmethod_disjoint() : base{} { }
+			nik_ce concord_space_cmethod_disjoint(const facade & f) :
+				base{f},
+				tuple_cmethod   { base::model->template cequip<tuple_cmethod_type  >() },
+				cotuple_cmethod { base::model->template cequip<cotuple_cmethod_type>() }
+				{ }
+
+			// sub(ordinate) icon:
+
+				nik_ce auto sub_icon(icon_ctype_ref icon) const
+					{ return base::symbol_cmethod().sub_icon(icon); }
+
+			// sub(ordinate) sign:
+
+				nik_ce auto sub_sign(sign_ctype_ref sign) const
+				{
+					auto text_cival   = base::image_ctext(sign);
+					size_ctype start  = text_cival[ImageList::point];
+					size_ctype finish = start + 2;
+					auto record_cival = base::record_csubmethod();
+					record_cival      . mid_set(start, finish);
+
+					return base::symbol_cmethod().
+						image_cmethod().make_sign(record_cival[0], record_cival[1]);
+				}
+
+				nik_ce auto car_sign(sign_ctype_ref sign) const
+					{ return tuple_cmethod.sub_sign(tuple_sign(sign), 0); }
+
+				nik_ce auto cdr_sign(sign_ctype_ref sign) const
+					{ return tuple_cmethod.sub_sign(tuple_sign(sign), 1); }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_space_cmethod =
+			concord_space_cmethod_disjoint <
+			concord_cmethod_disjoint       < symbol_space_cmethod , array_csubmethod , Facade >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class concord_space_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype		= typename base::sign_ctype;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		protected:
+
+			using empty_method_type		= resolve_method<model_type, concord_empty_method >;
+			using tuple_method_type		= resolve_method<model_type, concord_tuple_method >;
+			using cotuple_method_type	= resolve_method<model_type, concord_cotuple_method >;
+
+			empty_method_type   empty_method;
+			tuple_method_type   tuple_method;
+			cotuple_method_type cotuple_method;
+
+		protected:
+
+			nik_ce auto declare_image(icon_ctype_ref icon, size_ctype time, size_ctype point)
+			{
+				auto field = array<size_type, size_type, ImageList::dimension>{};
+				field.fullsize();
+
+				field[ImageList::index] = icon.index();
+				field[ImageList::time ] = time;
+				field[ImageList::point] = point;
+
+				return base::symbol_method().template declare_image
+					<BookMark::recurse, ImageList::dimension>(icon, field);
+			}
+
+			nik_ce auto declare_abstract(icon_ctype_ref icon)
+				{ return declare_image(icon, ImageTime::abstract, base::record().expand(2)); }
+
+			nik_ce auto define_abstract(sign_ctype_ref sign, sign_ctype_ref sub_sign)
+			{
+				auto text_cival   = base::image_ctext(sign);
+				auto record_ival  = base::record_submethod();
+				size_ctype start  = text_cival[ImageList::point];
+				size_ctype finish = start + 2;
+				record_ival       . mid_set(start, finish);
+
+				record_ival[0] = sub_sign.mark ();
+				record_ival[1] = sub_sign.index();
+
+				return sign;
+			}
+
+		public:
+
+			nik_ce concord_space_method_disjoint() : base{} { }
+			nik_ce concord_space_method_disjoint(const facade & f) :
+
+				base{f},
+				empty_method   { base::model->template equip<  empty_method_type>() },
+				tuple_method   { base::model->template equip<  tuple_method_type>() },
+				cotuple_method { base::model->template equip<cotuple_method_type>() }
+				{ }
+
+			// declare:
+
+				nik_ce auto declare_space()
+				{
+					return icon_type{0, 0};
+				}
+
+				nik_ce auto declare_type(icon_ctype_ref space_icon, icon_ctype_ref icon)
+				{
+					auto this_icon    = base::symbol_method().declare_type(icon);
+					auto empty_icon   = empty_method  .declare_type();
+					auto tuple_icon   = tuple_method  .declare_type({       icon ,  this_icon });
+					auto cotuple_icon = cotuple_method.declare_type({ empty_icon , tuple_icon });
+
+					base::symbol_method().recurse_type(this_icon, cotuple_icon);
+
+					return this_icon;
+				}
+
+				nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype addr)
+					{ return declare_image(icon, ImageTime::concrete, addr); }
+
+			// define:
+
+				nik_ce auto define_abstract(icon_ctype_ref icon, sign_ctype_ref e)
+				{
+					auto cotuple_icon = base::sub_icon(icon);
+
+					auto cotuple_sign = cotuple_method.define_abstract(cotuple_icon, 0, e);
+					auto sign         = declare_abstract(icon);
+
+					define_abstract(sign, cotuple_sign);
+
+					return sign;
+				}
+
+				nik_ce auto define_abstract(icon_ctype_ref icon, sign_ctype_ref a, sign_ctype_ref d)
+				{
+					auto cotuple_icon = base::sub_icon(icon);
+					auto tuple_icon   = cotuple_method.sub_icon(cotuple_icon, 1);
+
+					auto tuple_sign   = tuple_method.define_abstract(tuple_icon, { a, d });
+					auto cotuple_sign = cotuple_method.define_abstract(cotuple_icon, 1, tuple_sign);
+					auto sign         = declare_abstract(icon);
+
+					define_abstract(sign, cotuple_sign);
+
+					return sign;
+				}
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using concord_space_method =
+			concord_space_method_disjoint  <
+			concord_space_cmethod_disjoint <
+			concord_method_disjoint        < symbol_space_method  , array_submethod  ,
+			concord_cmethod_disjoint       < symbol_space_cmethod , array_csubmethod , Facade >>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

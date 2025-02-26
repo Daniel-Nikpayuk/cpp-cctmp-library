@@ -518,6 +518,94 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// space:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<typename Base>
+	class symbol_space_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce symbol_space_cmethod_disjoint() : base{} { }
+			nik_ce symbol_space_cmethod_disjoint(const facade & f) : base{f} { }
+
+			// sub(ordinate) icon:
+
+				nik_ce auto sub_icon(icon_ctype_ref icon) const
+					{ return base::glyph_cmethod().sub_icon(icon); }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using symbol_space_cmethod =
+			symbol_space_cmethod_disjoint <
+			corpus_cmethod_disjoint       < glyph_space_cmethod , image_space_cmethod , Facade >>;
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<typename Base>
+	class symbol_space_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		public:
+
+			nik_ce symbol_space_method_disjoint() : base{} { }
+			nik_ce symbol_space_method_disjoint(const facade & f) : base{f} { }
+
+			// declare:
+
+				nik_ce auto declare_type(icon_ctype_ref icon)
+					{ return base::glyph_method().declare(icon); }
+
+			// recurse:
+
+				nik_ce auto recurse_type(icon_ctype_ref icon, icon_ctype_ref sub_icon)
+					{ return base::glyph_method().recurse(icon, sub_icon); }
+	};
+
+	// syntactic sugar:
+
+		template<typename Facade>
+		using symbol_space_method =
+			symbol_space_method_disjoint  <
+			symbol_space_cmethod_disjoint <
+			corpus_method_disjoint        < glyph_space_method  , image_space_method  ,
+			corpus_cmethod_disjoint       < glyph_space_cmethod , image_space_cmethod , Facade >>>>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 } // namespace cctmp
