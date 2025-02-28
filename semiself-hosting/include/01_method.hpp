@@ -17,14 +17,11 @@
 **
 ************************************************************************************************************************/
 
-#include"../00_kernel/00_array_class.hpp"
-#include"../00_kernel/01_array_method.hpp"
-#include"../00_kernel/02_book_class.hpp"
-#include"../00_kernel/03_book_method.hpp"
-#include"../00_kernel/04_corpus_class.hpp"
-#include"../00_kernel/05_corpus_method.hpp"
-#include"../00_kernel/06_concord_class.hpp"
-#include"../00_kernel/07_concord_method.hpp"
-#include"../00_kernel/08_machine_class.hpp"
-#include"../00_kernel/09_machine_method.hpp"
+#include"../01_method/00_builtin.hpp"
+//#include"../01_method/01_composite.hpp"
+//#include"../01_method/02_function.hpp"
+//#include"../01_method/03_recurse.hpp"
+//#include"../01_method/04_compare.hpp"
+//#include"../01_method/05_dependent.hpp"
+//#include"../01_method/06_space.hpp"
 

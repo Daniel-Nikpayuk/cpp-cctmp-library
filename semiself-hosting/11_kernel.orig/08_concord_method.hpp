@@ -469,6 +469,30 @@ namespace cctmp {
 
 				nik_ce auto declare_type(size_ctype bytes)
 					{ return base::declare_type(GlyphInstr::utf8_char, bytes); }
+
+			// define:
+
+				nik_ce auto define_abstract(icon_ctype_ref icon, size_ctype char1)
+				{
+					return sign_type{0, 0};
+				}
+
+				nik_ce auto define_abstract(icon_ctype_ref icon, size_ctype char1, size_ctype char2)
+				{
+					return sign_type{0, 0};
+				}
+
+				nik_ce auto define_abstract(icon_ctype_ref icon,
+					size_ctype char1, size_ctype char2, size_ctype char3)
+				{
+					return sign_type{0, 0};
+				}
+
+				nik_ce auto define_abstract(icon_ctype_ref icon,
+					size_ctype char1, size_ctype char2, size_ctype char3, size_ctype char4)
+				{
+					return sign_type{0, 0};
+				}
 	};
 
 	// syntactic sugar:
@@ -1405,108 +1429,17 @@ namespace cctmp {
 			using sign_ctype		= typename base::sign_ctype;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
-		protected:
-
-			using empty_method_type		= resolve_method<model_type, concord_empty_method >;
-			using tuple_method_type		= resolve_method<model_type, concord_tuple_method >;
-			using cotuple_method_type	= resolve_method<model_type, concord_cotuple_method >;
-
-			empty_method_type   empty_method;
-			tuple_method_type   tuple_method;
-			cotuple_method_type cotuple_method;
-
-		protected:
-
-			nik_ce auto declare_image(icon_ctype_ref icon, size_ctype time, size_ctype point)
-			{
-				auto field = array<size_type, size_type, ImageList::dimension>{};
-				field.fullsize();
-
-				field[ImageList::index] = icon.index();
-				field[ImageList::time ] = time;
-				field[ImageList::point] = point;
-
-				return base::symbol_method().template declare_image
-					<BookMark::recurse, ImageList::dimension>(icon, field);
-			}
-
-			nik_ce auto declare_abstract(icon_ctype_ref icon)
-				{ return declare_image(icon, ImageTime::abstract, base::record().expand(2)); }
-
-			nik_ce auto define_abstract(sign_ctype_ref sign, sign_ctype_ref sub_sign)
-			{
-				auto text_cival   = base::image_ctext(sign);
-				auto record_ival  = base::record_submethod();
-				size_ctype start  = text_cival[ImageList::point];
-				size_ctype finish = start + 2;
-				record_ival       . mid_set(start, finish);
-
-				record_ival[0] = sub_sign.mark ();
-				record_ival[1] = sub_sign.index();
-
-				return sign;
-			}
-
 		public:
 
 			nik_ce concord_space_method_disjoint() : base{} { }
-			nik_ce concord_space_method_disjoint(const facade & f) :
-
-				base{f},
-				empty_method   { base::model->template equip<  empty_method_type>() },
-				tuple_method   { base::model->template equip<  tuple_method_type>() },
-				cotuple_method { base::model->template equip<cotuple_method_type>() }
-				{ }
+			nik_ce concord_space_method_disjoint(const facade & f) : base{f} { }
 
 			// declare:
 
-				nik_ce auto declare_space()
-				{
-					return icon_type{0, 0};
-				}
+				nik_ce auto declare_space() { return base::symbol_method().declare_space(); }
 
-				nik_ce auto declare_type(icon_ctype_ref space_icon, icon_ctype_ref icon)
-				{
-					auto this_icon    = base::symbol_method().declare_type(icon);
-					auto empty_icon   = empty_method  .declare_type();
-					auto tuple_icon   = tuple_method  .declare_type({       icon ,  this_icon });
-					auto cotuple_icon = cotuple_method.declare_type({ empty_icon , tuple_icon });
-
-					base::symbol_method().recurse_type(this_icon, cotuple_icon);
-
-					return this_icon;
-				}
-
-				nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype addr)
-					{ return declare_image(icon, ImageTime::concrete, addr); }
-
-			// define:
-
-				nik_ce auto define_abstract(icon_ctype_ref icon, sign_ctype_ref e)
-				{
-					auto cotuple_icon = base::sub_icon(icon);
-
-					auto cotuple_sign = cotuple_method.define_abstract(cotuple_icon, 0, e);
-					auto sign         = declare_abstract(icon);
-
-					define_abstract(sign, cotuple_sign);
-
-					return sign;
-				}
-
-				nik_ce auto define_abstract(icon_ctype_ref icon, sign_ctype_ref a, sign_ctype_ref d)
-				{
-					auto cotuple_icon = base::sub_icon(icon);
-					auto tuple_icon   = cotuple_method.sub_icon(cotuple_icon, 1);
-
-					auto tuple_sign   = tuple_method.define_abstract(tuple_icon, { a, d });
-					auto cotuple_sign = cotuple_method.define_abstract(cotuple_icon, 1, tuple_sign);
-					auto sign         = declare_abstract(icon);
-
-					define_abstract(sign, cotuple_sign);
-
-					return sign;
-				}
+				nik_ce auto declare_type(size_ctype space, icon_ctype_ref sub_icon)
+					{ return base::symbol_method().declare_type(space, sub_icon); }
 	};
 
 	// syntactic sugar:

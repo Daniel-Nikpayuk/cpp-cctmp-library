@@ -25,291 +25,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// plot:
-
-	// We encode scope restrictions into the class itself as a means of partitioning a contiguous structure.
-	// It allows us to simulate a plot: An array of dynamic length arrays, all the same type.
-
-	template<typename> class plot_cfacade;
-	template<typename> class plot_facade;
-
-/***********************************************************************************************************************/
-
-// (scope) policy:
-
-	template<typename Array>
-	class plot_policy
-	{
-		public:
-
-			using array_type		= Array;
-
-			nik_using_name_scope_type	( type, array_type)
-			nik_using_name_scope_ctype	(ctype, array_type)
-
-			nik_using_size_type_scope	(array_type)
-
-		protected:
-
-			array_type _start;
-			array_type _slot;
-
-		protected:
-
-			nik_ce void initialize_start(ctype_ptr in, ctype_cptr end)
-			{
-				_start.fullsize();
-				partial_sum_start(in, end);
-			}
-
-			nik_ce void partial_sum_start(ctype_ptr in, ctype_cptr end)
-			{
-				type sum = 0;
-
-				for (auto k = _start.begin(); in != end; ++k, ++in)
-				{
-					 *k  = sum;
-					sum +=  *in;
-				}
-			}
-
-			nik_ce void initialize_slot(ctype_ptr in, ctype_cptr end)
-			{
-				_slot.fullsize();
-				_slot.copy(0, in, end);
-			}
-
-		public:
-
-			nik_ce plot_policy() { }
-
-			template<typename T, auto N>
-			nik_ce plot_policy(const T (&a)[N])
-			{
-				initialize_start (a, a + N);
-				initialize_slot  (a, a + N);
-			}
-
-			// start:
-
-				nik_ce size_type start(size_ctype n) const { return _start[n]; }
-
-			// slot:
-
-				nik_ce size_type length(size_ctype n) const { return _slot[n]; }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Type, typename SizeType, SizeType... Sizes>
-	class plot
-	{
-		public:
-
-			using facade			= plot; // method compatible.
-			using cfacade_type		= plot_cfacade<plot>;
-			using facade_type		= plot_facade<plot>;
-
-			using initial_type		= array<Type, SizeType, (... + Sizes)>;
-			using terminal_type		= array<SizeType, SizeType, sizeof...(Sizes)>;
-			using policy_type		= plot_policy<terminal_type>;
-
-			nik_using_name_scope_type	( type, initial_type)
-			nik_using_name_scope_ctype	(ctype, initial_type)
-
-			nik_using_name_scope_member	( iter_type, initial_type,  iter_type)
-			nik_using_name_scope_member	(iter_ctype, initial_type, iter_ctype)
-
-			nik_using_name_scope_member	( citer_type, initial_type,  citer_type)
-			nik_using_name_scope_member	(citer_ctype, initial_type, citer_ctype)
-
-			nik_using_name_scope_member	( deref_type, initial_type,  deref_type)
-			nik_using_name_scope_member	(deref_ctype, initial_type, deref_ctype)
-
-			nik_using_name_scope_member	( cderef_type, initial_type,  cderef_type)
-			nik_using_name_scope_member	(cderef_ctype, initial_type, cderef_ctype)
-
-			nik_using_size_type_scope	(initial_type)
-
-		protected:
-
-			nik_ces auto policy		= policy_type{{ Sizes... }};
-
-		public:
-
-			nik_ces size_type length(size_ctype n) { return policy.length(n); }
-
-		protected:
-
-			initial_type initial;
-			terminal_type terminal;
-
-		public:
-
-			nik_ce plot() { }
-
-			// equip:
-
-					// submethods lack access to push.
-
-				template<typename CMethod>
-				nik_ce auto cequip(size_ctype n) const -> CMethod
-					{ return cfacade_type{static_cast<plot const*>(this), n}; }
-
-				template<typename Method>
-				nik_ce auto equip(size_ctype n) -> Method
-					{ return facade_type{static_cast<plot*>(this), n}; }
-
-			// initial:
-
-				nik_ce ctype_ptr cbegin(size_ctype n) const { return initial.citer(policy.start(n)); }
-				nik_ce  type_ptr  begin(size_ctype n)       { return initial. iter(policy.start(n)); }
-
-			// terminal:
-
-				nik_ce size_type size(size_ctype n) const { return terminal[n]; }
-
-				nik_ce void set_size(size_ctype n, size_ctype m)
-					{ if (m <= length(n)) terminal[n] = m; }
-
-				nik_ce void upslot(size_ctype n = 1)
-					{ if (terminal.has_capacity(n)) terminal.upsize(n); }
-
-				nik_ce size_type expand(size_ctype n = 1)
-				{
-					if (terminal.has_capacity(n)) { return terminal.expand(n); }
-					else // error:
-					{
-						return terminal.size();
-					}
-				}
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// facade:
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Model>
-	class plot_cfacade
-	{
-		public:
-
-			using facade			= plot_cfacade; // method compatible.
-
-			using model_type		= Model;
-			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
-			using model_ctype_cptr		= typename alias<model_type>::ctype_cptr;
-
-			nik_using_name_scope_type	( type, model_type)
-			nik_using_name_scope_ctype	(ctype, model_type)
-
-			nik_using_name_scope_member	( iter_type, model_type,  iter_type)
-			nik_using_name_scope_member	(iter_ctype, model_type, iter_ctype)
-
-			nik_using_name_scope_member	( citer_type, model_type,  citer_type)
-			nik_using_name_scope_member	(citer_ctype, model_type, citer_ctype)
-
-			nik_using_name_scope_member	( deref_type, model_type,  deref_type)
-			nik_using_name_scope_member	(deref_ctype, model_type, deref_ctype)
-
-			nik_using_name_scope_member	( cderef_type, model_type,  cderef_type)
-			nik_using_name_scope_member	(cderef_ctype, model_type, cderef_ctype)
-
-			nik_using_size_type_scope	(model_type)
-
-		protected:
-
-			model_ctype_ptr model;
-			size_type locus;
-
-		public:
-
-			nik_ce plot_cfacade() : model{}, locus{} { }
-			nik_ce plot_cfacade(model_ctype_cptr m, size_ctype l) : model{m}, locus{l} { }
-
-			nik_ce size_type slot() const { return locus; }
-			nik_ce void set_slot(size_ctype l) { locus = l; }
-
-			// initial:
-
-				nik_ce citer_type cbegin() const { return model->cbegin(locus); }
-
-			// terminal:
-
-				nik_ce size_type size() const { return model->size(locus); }
-	};
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Model>
-	class plot_facade
-	{
-		public:
-
-			using facade			= plot_facade; // method compatible.
-
-			using model_type		= Model;
-			using model_type_ptr		= typename alias<model_type>::type_ptr;
-			using model_type_cptr		= typename alias<model_type>::type_cptr;
-
-			nik_using_name_scope_type	( type, model_type)
-			nik_using_name_scope_ctype	(ctype, model_type)
-
-			nik_using_name_scope_member	( iter_type, model_type,  iter_type)
-			nik_using_name_scope_member	(iter_ctype, model_type, iter_ctype)
-
-			nik_using_name_scope_member	( citer_type, model_type,  citer_type)
-			nik_using_name_scope_member	(citer_ctype, model_type, citer_ctype)
-
-			nik_using_name_scope_member	( deref_type, model_type,  deref_type)
-			nik_using_name_scope_member	(deref_ctype, model_type, deref_ctype)
-
-			nik_using_name_scope_member	( cderef_type, model_type,  cderef_type)
-			nik_using_name_scope_member	(cderef_ctype, model_type, cderef_ctype)
-
-			nik_using_size_type_scope	(model_type)
-
-		protected:
-
-			model_type_ptr model;
-			size_type locus;
-
-		public:
-
-			nik_ce plot_facade() : model{}, locus{} { }
-			nik_ce plot_facade(model_type_cptr m, size_ctype l) : model{m}, locus{l} { }
-
-			nik_ce size_type slot() const { return locus; }
-			nik_ce void set_slot(size_ctype l) { locus = l; }
-
-			nik_ce size_type length() const { return model->length(locus); }
-
-			// initial:
-
-				nik_ce citer_type cbegin() const { return model->cbegin(locus); }
-				nik_ce  iter_type  begin()       { return model-> begin(locus); }
-
-			// terminal:
-
-				nik_ce size_type size() const { return model->size(locus); }
-				nik_ce void set_size(size_ctype n) { model->set_size(locus, n); }
-				nik_ce void upslot(size_ctype n = 1) { model->upslot(n); }
-				nik_ce size_type expand(size_ctype n = 1) { model->expand(n); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // book:
 
 /***********************************************************************************************************************/
@@ -346,7 +61,7 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// icon (glyph):
+// icon:
 
 	template<typename SizeType>
 	struct icon : public note<SizeType>
@@ -357,19 +72,11 @@ namespace cctmp {
 
 		nik_ce icon() : base{} { }
 		nik_ce icon(size_ctype t, size_ctype p) : base{t, p} { }
-
-		bool operator == (const icon & i) const
-		{
-			size_ctype mark  = base::mark ();
-			size_ctype index = base::index();
-
-			return ((mark == i.mark()) && (index == i.index()));
-		}
 	};
 
 /***********************************************************************************************************************/
 
-// sign (image):
+// sign:
 
 	template<typename SizeType>
 	struct sign : public note<SizeType>
@@ -380,37 +87,6 @@ namespace cctmp {
 
 		nik_ce sign() : base{} { }
 		nik_ce sign(size_ctype t, size_ctype p) : base{t, p} { }
-
-		bool operator == (const sign & s) const
-		{
-			size_ctype mark  = base::mark ();
-			size_ctype index = base::index();
-
-			return ((mark == s.mark()) && (index == s.index()));
-		}
-	};
-
-/***********************************************************************************************************************/
-
-// mode (custom):
-
-	template<typename SizeType>
-	struct mode : public note<SizeType>
-	{
-		using base			= note<SizeType>;
-
-		nik_using_size_type_scope	(base)
-
-		nik_ce mode() : base{} { }
-		nik_ce mode(size_ctype t, size_ctype p) : base{t, p} { }
-
-		bool operator == (const mode & s) const
-		{
-			size_ctype mark  = base::mark ();
-			size_ctype index = base::index();
-
-			return ((mark == s.mark()) && (index == s.index()));
-		}
 	};
 
 /***********************************************************************************************************************/
@@ -661,6 +337,171 @@ namespace cctmp {
 
 				nik_ce text_ctype_ref ctext() const { return *model->ctext(); }
 				nik_ce  text_type_ref  text()       { return *model-> text(); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// method:
+
+/***********************************************************************************************************************/
+
+// immutable:
+
+	template<template<typename> typename PageCMethod, template<typename> typename TextCMethod, typename Base>
+	class book_cmethod_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename facade::model_type;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= icon<size_type>;
+			using icon_type_ref		= typename alias<icon_type>::type_ref;
+			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
+
+			using sign_type			= sign<size_type>;
+			using sign_type_ref		= typename alias<sign_type>::type_ref;
+			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
+
+		protected:
+
+			using page_cmethod_type		= typename model_type::template
+								page_cmethod_type<PageCMethod>;
+
+			using text_csubmethod_type	= typename model_type::template
+								text_csubmethod_type<TextCMethod>;
+
+		public:
+
+			nik_ce book_cmethod_disjoint() : base{} { }
+			nik_ce book_cmethod_disjoint(const facade & f) : base{f} { }
+
+			// page:
+
+				nik_ce auto page_cmethod(size_ctype n) const
+					{ return base::model->template page_cequip<page_cmethod_type>(n); }
+
+			// text:
+
+				nik_ce auto text_csubmethod(size_ctype start, size_ctype finish) const
+				{
+					auto cival = base::model->template text_csubequip<text_csubmethod_type>();
+					cival.mid_set(start, finish);
+
+					return cival;
+				}
+
+				nik_ce auto text_csubmethod(const page_cmethod_type & page_cival, size_ctype index) const
+				{
+					auto npage = page_cival.citer(index);
+
+					return text_csubmethod(npage->start(), npage->finish());
+				}
+
+			// find:
+
+				nik_ce bool found_from_previous(size_ctype n, size_ctype index) const
+					{ return (n < index); }
+	};
+
+/***********************************************************************************************************************/
+
+// mutable:
+
+	template<template<typename> typename PageMethod, template<typename> typename TextMethod, typename Base>
+	class book_method_disjoint : public Base
+	{
+		public:
+
+			using base			= Base;
+			using facade			= typename base::facade;
+			using model_type		= typename base::model_type;
+			using ival_type			= typename model_type::ival_type;
+
+			nik_using_size_type_scope	(base)
+
+			using icon_type			= typename base::icon_type;
+			using icon_type_ref		= typename base::icon_type_ref;
+			using icon_ctype_ref		= typename base::icon_ctype_ref;
+
+			using sign_type			= typename base::sign_type;
+			using sign_type_ref		= typename base::sign_type_ref;
+			using sign_ctype_ref		= typename base::sign_ctype_ref;
+
+		protected:
+
+			using page_cmethod_type		= typename base::page_cmethod_type;
+			using page_method_type		= typename model_type::template
+								page_method_type<PageMethod>;
+
+			using text_csubmethod_type	= typename base::text_csubmethod_type;
+			using text_submethod_type	= typename model_type::template
+								text_submethod_type<TextMethod>;
+
+		public:
+
+			nik_ce book_method_disjoint() : base{} { }
+			nik_ce book_method_disjoint(const facade & f) : base{f} { }
+
+			// page:
+
+				nik_ce auto page_method(size_ctype n)
+					{ return base::model->template page_equip<page_method_type>(n); }
+
+			// text:
+
+				nik_ce auto text_submethod(size_ctype start, size_ctype finish)
+				{
+					auto ival = base::model->template text_subequip<text_submethod_type>();
+					ival.mid_set(start, finish);
+
+					return ival;
+				}
+
+				nik_ce auto text_submethod(const page_cmethod_type & page_cival, size_ctype index)
+				{
+					auto npage = page_cival.citer(index);
+
+					return text_submethod(npage->start(), npage->finish());
+				}
+
+				nik_ce auto text_submethod(const page_method_type & page_ival, size_ctype index)
+				{
+					auto npage = page_ival.citer(index);
+
+					return text_submethod(npage->start(), npage->finish());
+				}
+
+		protected:
+
+				nik_ce void deallocate_last(const page_cmethod_type & page_cival)
+					{ base::text().downsize(page_cival.clast()->size()); }
+
+				nik_ce void deallocate_last(const page_method_type & page_ival)
+					{ base::text().downsize(page_ival.clast()->size()); }
+
+				nik_ce void push_page(page_method_type & page_ival, size_ctype n)
+				{
+					size_ctype start  = base::text().expand(n);
+					size_ctype finish = start + n;
+
+					page_ival.push(ival_type{start, finish});
+				}
+
+		public:
+
+				nik_ce bool allocate(page_method_type & page_ival, size_ctype n)
+				{
+					if (page_ival.is_full() || base::ctext().lacks_capacity(n)) return false;
+
+					push_page(page_ival, n);
+
+					return true;
+				}
 	};
 
 /***********************************************************************************************************************/

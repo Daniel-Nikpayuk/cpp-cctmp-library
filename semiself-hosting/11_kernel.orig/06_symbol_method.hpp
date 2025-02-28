@@ -586,13 +586,10 @@ namespace cctmp {
 
 			// declare:
 
-				nik_ce auto declare_type(icon_ctype_ref icon)
-					{ return base::glyph_method().declare(icon); }
+				nik_ce auto declare_space() { return base::glyph_method().declare_space(); }
 
-			// recurse:
-
-				nik_ce auto recurse_type(icon_ctype_ref icon, icon_ctype_ref sub_icon)
-					{ return base::glyph_method().recurse(icon, sub_icon); }
+				nik_ce auto declare_type(size_ctype space, icon_ctype_ref sub_icon)
+					{ return base::glyph_method().declare(space, sub_icon); }
 	};
 
 	// syntactic sugar:

@@ -847,6 +847,8 @@ namespace cctmp {
 				base::make_line_program (text_ival, base::row_length);
 				base::make_line_routine (text_ival, GlyphInstr::list);
 				base::make_line_meta    (text_ival, bytes, 0);
+
+				text_ival[3][GlyphNote::instr] = GlyphInstr::type;
 			}
 
 			nik_ce void instantiate(
@@ -856,7 +858,6 @@ namespace cctmp {
 				text_ival      . set_dimension(base::row_length, base::col_length);
 
 				copy_program(text_ival, sub_icon);
-				text_ival[3][GlyphNote::instr] = GlyphInstr::type;
 
 				base::pop_page_if(page_ival, icon);
 			}
@@ -948,7 +949,7 @@ namespace cctmp {
 
 		protected:
 
-			nik_ces size_type row_length	= 4;
+			nik_ces size_type row_length	= 2;
 			nik_ces size_type length	= row_length * base::col_length;
 
 		public:
@@ -1012,11 +1013,11 @@ namespace cctmp {
 
 			nik_ce void copy_program(text_submethod_type & text_ival, icon_ctype_ref sub_icon)
 			{
-				size_ctype bytes = 17; // update using sub_icon.
+				base::make_line_program(text_ival, base::row_length);
 
-				base::make_line_program (text_ival, base::row_length);
-				base::make_line_routine (text_ival, GlyphInstr::custom);
-				base::make_line_meta    (text_ival, bytes, 0);
+				text_ival[1][GlyphNote::instr] = GlyphInstr::custom;
+				text_ival[1][GlyphNote::mark ] = sub_icon.mark ();
+				text_ival[1][GlyphNote::index] = sub_icon.index();
 			}
 
 			nik_ce void instantiate(
@@ -1026,34 +1027,22 @@ namespace cctmp {
 				text_ival      . set_dimension(base::row_length, base::col_length);
 
 				copy_program(text_ival, sub_icon);
-				text_ival[3][GlyphNote::instr] = GlyphInstr::type;
-
-				base::pop_page_if(page_ival, icon);
 			}
 
 		public:
 
 			// declare:
 
-				nik_ce auto declare(icon_ctype_ref sub_icon)
+				nik_ce size_type declare_space() { return base::page().expand(); }
+
+				nik_ce auto declare(size_ctype space, icon_ctype_ref sub_icon)
 				{
-					auto page_ival = base::page_method(BookMark::recurse);
-					auto icon      = base::allocate(page_ival, BookMark::recurse, base::length);
+					auto page_ival = base::page_method(space);
+					auto icon      = base::allocate(page_ival, space, base::length);
 
 					if (base::not_fail(icon)) { instantiate(page_ival, icon, sub_icon); }
 
 					return icon;
-				}
-
-			// recurse:
-
-				nik_ce void recurse(icon_ctype_ref icon, icon_ctype_ref sub_icon)
-				{
-					auto text_ival = base::text_submethod(icon);
-					text_ival      . set_dimension(base::row_length, base::col_length);
-
-					text_ival[3][GlyphNote::mark ] = sub_icon.mark ();
-					text_ival[3][GlyphNote::index] = sub_icon.index();
 				}
 	};
 

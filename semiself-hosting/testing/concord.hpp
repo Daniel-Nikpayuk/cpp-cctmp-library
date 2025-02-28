@@ -124,26 +124,26 @@
 		using icon_type            = cctmp::icon<size_type>;
 		using sign_type            = cctmp::sign<size_type>;
 
-		using empty_cmethod_type   = cctmp::resolve_cmethod < concord_type , cctmp::concord_empty_cmethod     >;
-		using empty_method_type    = cctmp::resolve_method  < concord_type , cctmp::concord_empty_method      >;
+		using empty_cmethod_type   = cctmp::resolve_cmethod < concord_type , cctmp::empty_cmethod     >;
+		using empty_method_type    = cctmp::resolve_method  < concord_type , cctmp::empty_method      >;
 
-		using ring_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::concord_ring_cmethod      >;
-		using ring_method_type     = cctmp::resolve_method  < concord_type , cctmp::concord_ring_method       >;
+		using ring_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::ring_cmethod      >;
+		using ring_method_type     = cctmp::resolve_method  < concord_type , cctmp::ring_method       >;
 
-		using char_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::concord_utf8_char_cmethod >;
-		using char_method_type     = cctmp::resolve_method  < concord_type , cctmp::concord_utf8_char_method  >;
+		using char_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::utf8_char_cmethod >;
+		using char_method_type     = cctmp::resolve_method  < concord_type , cctmp::utf8_char_method  >;
 
-		using tuple_cmethod_type   = cctmp::resolve_cmethod < concord_type , cctmp::concord_tuple_cmethod     >;
-		using tuple_method_type    = cctmp::resolve_method  < concord_type , cctmp::concord_tuple_method      >;
+	//	using tuple_cmethod_type   = cctmp::resolve_cmethod < concord_type , cctmp::tuple_cmethod     >;
+	//	using tuple_method_type    = cctmp::resolve_method  < concord_type , cctmp::tuple_method      >;
 
-		using cotuple_cmethod_type = cctmp::resolve_cmethod < concord_type , cctmp::concord_cotuple_cmethod   >;
-		using cotuple_method_type  = cctmp::resolve_method  < concord_type , cctmp::concord_cotuple_method    >;
+	//	using cotuple_cmethod_type = cctmp::resolve_cmethod < concord_type , cctmp::cotuple_cmethod   >;
+	//	using cotuple_method_type  = cctmp::resolve_method  < concord_type , cctmp::cotuple_method    >;
 
-		using list_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::concord_list_cmethod      >;
-		using list_method_type     = cctmp::resolve_method  < concord_type , cctmp::concord_list_method       >;
+	//	using list_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::list_cmethod      >;
+	//	using list_method_type     = cctmp::resolve_method  < concord_type , cctmp::list_method       >;
 
-		using space_cmethod_type   = cctmp::resolve_cmethod < concord_type , cctmp::concord_space_cmethod     >;
-		using space_method_type    = cctmp::resolve_method  < concord_type , cctmp::concord_space_method      >;
+	//	using space_cmethod_type   = cctmp::resolve_cmethod < concord_type , cctmp::space_cmethod     >;
+	//	using space_method_type    = cctmp::resolve_method  < concord_type , cctmp::space_method      >;
 
 		concord_type value;
 
@@ -186,47 +186,47 @@
 
 			// tuple:
 
-				constexpr auto tuple_cmethod() const
-					{ return value.template cequip<tuple_cmethod_type>(); }
+			//	constexpr auto tuple_cmethod() const
+			//		{ return value.template cequip<tuple_cmethod_type>(); }
 
-				constexpr auto tuple_method()
-					{ return value.template equip<tuple_method_type>(); }
+			//	constexpr auto tuple_method()
+			//		{ return value.template equip<tuple_method_type>(); }
 
-				constexpr auto tuple_cglyph(const icon_type & icon) const
-					{ return tuple_cmethod().glyph_ctext(icon); }
+			//	constexpr auto tuple_cglyph(const icon_type & icon) const
+			//		{ return tuple_cmethod().glyph_ctext(icon); }
 
 			// cotuple:
 
-				constexpr auto cotuple_cmethod() const
-					{ return value.template cequip<cotuple_cmethod_type>(); }
+			//	constexpr auto cotuple_cmethod() const
+			//		{ return value.template cequip<cotuple_cmethod_type>(); }
 
-				constexpr auto cotuple_method()
-					{ return value.template equip<cotuple_method_type>(); }
+			//	constexpr auto cotuple_method()
+			//		{ return value.template equip<cotuple_method_type>(); }
 
-				constexpr auto cotuple_cglyph(const icon_type & icon) const
-					{ return cotuple_cmethod().glyph_ctext(icon); }
+			//	constexpr auto cotuple_cglyph(const icon_type & icon) const
+			//		{ return cotuple_cmethod().glyph_ctext(icon); }
 
 			// list:
 
-				constexpr auto list_cmethod() const
-					{ return value.template cequip<list_cmethod_type>(); }
+			//	constexpr auto list_cmethod() const
+			//		{ return value.template cequip<list_cmethod_type>(); }
 
-				constexpr auto list_method()
-					{ return value.template equip<list_method_type>(); }
+			//	constexpr auto list_method()
+			//		{ return value.template equip<list_method_type>(); }
 
-				constexpr auto list_cglyph(const icon_type & icon) const
-					{ return list_cmethod().glyph_ctext(icon); }
+			//	constexpr auto list_cglyph(const icon_type & icon) const
+			//		{ return list_cmethod().glyph_ctext(icon); }
 
 			// space:
 
-				constexpr auto space_cmethod() const
-					{ return value.template cequip<space_cmethod_type>(); }
+			//	constexpr auto space_cmethod() const
+			//		{ return value.template cequip<space_cmethod_type>(); }
 
-				constexpr auto space_method()
-					{ return value.template equip<space_method_type>(); }
+			//	constexpr auto space_method()
+			//		{ return value.template equip<space_method_type>(); }
 
-				constexpr auto space_cglyph(const icon_type & icon) const
-					{ return space_cmethod().glyph_ctext(icon); }
+			//	constexpr auto space_cglyph(const icon_type & icon) const
+			//		{ return space_cmethod().glyph_ctext(icon); }
 
 		// image:
 
@@ -247,23 +247,23 @@
 
 			// tuple:
 
-				constexpr auto tuple_cimage(const sign_type & sign) const
-					{ return tuple_cmethod().image_ctext(sign); }
+			//	constexpr auto tuple_cimage(const sign_type & sign) const
+			//		{ return tuple_cmethod().image_ctext(sign); }
 
 			// cotuple:
 
-				constexpr auto cotuple_cimage(const sign_type & sign) const
-					{ return cotuple_cmethod().image_ctext(sign); }
+			//	constexpr auto cotuple_cimage(const sign_type & sign) const
+			//		{ return cotuple_cmethod().image_ctext(sign); }
 
 			// list:
 
-				constexpr auto list_cimage(const sign_type & sign) const
-					{ return list_cmethod().image_ctext(sign); }
+			//	constexpr auto list_cimage(const sign_type & sign) const
+			//		{ return list_cmethod().image_ctext(sign); }
 
 			// space:
 
-				constexpr auto space_cimage(const sign_type & sign) const
-					{ return space_cmethod().image_ctext(sign); }
+			//	constexpr auto space_cimage(const sign_type & sign) const
+			//		{ return space_cmethod().image_ctext(sign); }
 	};
 
 /***********************************************************************************************************************/
@@ -424,9 +424,9 @@
 			char4_icon       = char_method.declare_type(4);
 
 			char1_sign_1     = char_method.define_abstract(char1_icon,                   0x24);
-		//	char2_sign_1     = char_method.define_abstract(char2_icon,             0xc2, 0xa2);
-		//	char3_sign_1     = char_method.define_abstract(char3_icon,       0xe2, 0x82, 0xac);
-		//	char4_sign_1     = char_method.define_abstract(char4_icon, 0xf0, 0xa4, 0xad, 0xa2);
+			char2_sign_1     = char_method.define_abstract(char2_icon,             0xc2, 0xa2);
+			char3_sign_1     = char_method.define_abstract(char3_icon,       0xe2, 0x82, 0xac);
+			char4_sign_1     = char_method.define_abstract(char4_icon, 0xf0, 0xa4, 0xad, 0xa2);
 						// examples taken from:
 						// https://www.unicode.mayastudios.com/examples/utf8.html
 		}
@@ -468,6 +468,7 @@
 
 // tuple:
 
+/*
 	template<typename SizeType>
 	struct concord_test_tuple : public concord_test<SizeType>
 	{
@@ -541,11 +542,13 @@
 
 			printf("\n");
 	}
+*/
 
 /***********************************************************************************************************************/
 
 // cotuple:
 
+/*
 	template<typename SizeType>
 	struct concord_test_cotuple : public concord_test<SizeType>
 	{
@@ -622,11 +625,13 @@
 
 			printf("\n");
 	}
+*/
 
 /***********************************************************************************************************************/
 
 // list:
 
+/*
 	template<typename SizeType>
 	struct concord_test_list : public concord_test<SizeType>
 	{
@@ -696,11 +701,13 @@
 
 			printf("\n");
 	}
+*/
 
 /***********************************************************************************************************************/
 
 // space:
 
+/*
 	template<typename SizeType>
 	struct concord_test_space : public concord_test<SizeType>
 	{
@@ -709,13 +716,14 @@
 		using icon_type		= typename base::icon_type;
 		using sign_type		= typename base::sign_type;
 
+		size_type unicode_space;
+
 		icon_type empty_icon;
 		icon_type char1_icon;
 		icon_type char2_icon;
 		icon_type char3_icon;
 		icon_type char4_icon;
 		icon_type cotuple_icon;
-		icon_type unicode_icon;
 		icon_type char_icon;
 		icon_type list_icon;
 		icon_type string_icon;
@@ -724,7 +732,7 @@
 		sign_type char_sign;
 		sign_type string_sign;
 
-		constexpr concord_test_space()
+		constexpr concord_test_space() : unicode_space{}
 		{
 			auto empty_method   = base::empty_method   ();
 			auto char_method    = base::char_method    ();
@@ -738,15 +746,15 @@
 			char3_icon          = char_method .declare_type(3);
 			char4_icon          = char_method .declare_type(4);
 
-			unicode_icon        = space_method.declare_space();
+			unicode_space       = space_method.declare_space();
 			icon_type chars[4]  = { char1_icon, char2_icon, char3_icon, char4_icon };
 			cotuple_icon        = cotuple_method.declare_type(chars);
-			char_icon           = space_method  .declare_type(unicode_icon, cotuple_icon);
+			char_icon           = space_method  .declare_type(unicode_space, cotuple_icon);
 			list_icon           = list_method   .declare_type(char_icon);
-			string_icon         = space_method  .declare_type(unicode_icon, list_icon);
+			string_icon         = space_method  .declare_type(unicode_space, list_icon);
 
 			empty_sign          = empty_method.define_abstract(empty_icon);
-			string_sign         = space_method.define_abstract(string_icon, empty_sign);
+		//	string_sign         = space_method.define_abstract(string_icon, empty_sign);
 
 		//	for (size_type k = 0; k != 5; ++k)
 		//	{
@@ -762,15 +770,16 @@
 	{
 		// glyph:
 
+			print_array(space_test_0.ring_cglyph(space_test_0.char_icon));
 			print_array(space_test_0.ring_cglyph(space_test_0.string_icon));
 
 			printf("\n");
 
 		// image:
 
-			print_array(space_test_0.ring_cimage(space_test_0.string_sign));
+		//	print_array(space_test_0.ring_cimage(space_test_0.string_sign));
 
-			printf("\n");
+		//	printf("\n");
 
 		// value:
 
@@ -788,6 +797,7 @@
 
 		//	printf("\n");
 	}
+*/
 
 /***********************************************************************************************************************/
 
