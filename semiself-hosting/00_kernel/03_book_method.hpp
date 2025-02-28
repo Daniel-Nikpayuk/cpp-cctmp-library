@@ -550,7 +550,7 @@ namespace cctmp {
 	struct ImageTuple    : public IE { enum : genum_type { units = IE::units, length, point, dimension }; };
 	struct ImageCotuple  : public IE { enum : genum_type { units = IE::units, inject, point, dimension }; };
 	struct ImageFunction : public IE { enum : genum_type { units = IE::units, length, point, dimension }; };
-	struct ImageList     : public IE {                                                                    };
+	struct ImageList     : public IE { enum : genum_type { units = IE::units,         point, dimension }; };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

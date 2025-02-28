@@ -17,251 +17,11 @@
 **
 ************************************************************************************************************************/
 
-// composite:
+// function:
 
 namespace cctmp {
 
 /***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// glyph:
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Base>
-	class glyph_function_cmethod_disjoint : public Base
-	{
-		public:
-
-			using base			= Base;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-			using icon_type			= typename base::icon_type;
-			using icon_type_ref		= typename base::icon_type_ref;
-			using icon_ctype_ref		= typename base::icon_ctype_ref;
-
-		public:
-
-			nik_ce glyph_function_cmethod_disjoint() : base{} { }
-			nik_ce glyph_function_cmethod_disjoint(const facade & f) : base{f} { }
-	};
-
-	// syntactic sugar:
-
-		template<typename Facade>
-		using glyph_function_cmethod =
-			glyph_function_cmethod_disjoint  <
-			glyph_composite_cmethod_disjoint <
-			glyph_cmethod_disjoint           < Facade >>>;
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Base>
-	class glyph_function_method_disjoint : public Base
-	{
-		public:
-
-			using base			= Base;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-			using icon_type			= typename base::icon_type;
-			using icon_type_ref		= typename base::icon_type_ref;
-			using icon_ctype_ref		= typename base::icon_ctype_ref;
-
-		public:
-
-			nik_ce glyph_function_method_disjoint() : base{} { }
-			nik_ce glyph_function_method_disjoint(const facade & f) : base{f} { }
-	};
-
-	// syntactic sugar:
-
-		template<typename Facade>
-		using glyph_function_method =
-			glyph_function_method_disjoint   <
-			glyph_function_cmethod_disjoint  <
-			glyph_composite_method_disjoint  <
-			glyph_composite_cmethod_disjoint <
-			glyph_method_disjoint            <
-			glyph_cmethod_disjoint           < Facade >>>>>>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// image:
-
-	struct ImageFunction { enum : genum_type { index = ImageBase::index, time, length, point, dimension }; };
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Base>
-	class image_function_cmethod_disjoint : public Base
-	{
-		public:
-
-			using base			= Base;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-			using icon_type			= typename base::icon_type;
-			using icon_type_ref		= typename base::icon_type_ref;
-			using icon_ctype_ref		= typename base::icon_ctype_ref;
-
-			using sign_type			= typename base::sign_type;
-			using sign_type_ref		= typename base::sign_type_ref;
-			using sign_ctype_ref		= typename base::sign_ctype_ref;
-
-		protected:
-
-			using page_cmethod_type		= typename base::page_cmethod_type;
-			using text_csubmethod_type	= typename base::text_csubmethod_type;
-
-		public:
-
-			nik_ce image_function_cmethod_disjoint() : base{} { }
-			nik_ce image_function_cmethod_disjoint(const facade & f) : base{f} { }
-	};
-
-	// syntactic sugar:
-
-		template<typename Facade>
-		using image_function_cmethod =
-			image_function_cmethod_disjoint <
-			image_cmethod_disjoint          < Facade >>;
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Base>
-	class image_function_method_disjoint : public Base
-	{
-		public:
-
-			using base			= Base;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-			using icon_type			= typename base::icon_type;
-			using icon_type_ref		= typename base::icon_type_ref;
-			using icon_ctype_ref		= typename base::icon_ctype_ref;
-
-			using sign_type			= typename base::sign_type;
-			using sign_type_ref		= typename base::sign_type_ref;
-			using sign_ctype_ref		= typename base::sign_ctype_ref;
-
-		protected:
-
-			using page_cmethod_type		= typename base::page_cmethod_type;
-			using page_method_type		= typename base::page_method_type;
-
-			using text_csubmethod_type	= typename base::text_csubmethod_type;
-			using text_submethod_type	= typename base::text_submethod_type;
-
-		public:
-
-			nik_ce image_function_method_disjoint() : base{} { }
-			nik_ce image_function_method_disjoint(const facade & f) : base{f} { }
-	};
-
-	// syntactic sugar:
-
-		template<typename Facade>
-		using image_function_method =
-			image_function_method_disjoint  <
-			image_function_cmethod_disjoint <
-			image_method_disjoint           <
-			image_cmethod_disjoint          < Facade >>>>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// symbol:
-
-/***********************************************************************************************************************/
-
-// immutable:
-
-	template<typename Base>
-	class symbol_function_cmethod_disjoint : public Base
-	{
-		public:
-
-			using base			= Base;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-			using icon_type			= typename base::icon_type;
-			using icon_ctype_ref		= typename base::icon_ctype_ref;
-
-			using sign_type			= typename base::sign_type;
-			using sign_ctype_ref		= typename base::sign_ctype_ref;
-
-		public:
-
-			nik_ce symbol_function_cmethod_disjoint() : base{} { }
-			nik_ce symbol_function_cmethod_disjoint(const facade & f) : base{f} { }
-	};
-
-	// syntactic sugar:
-
-		template<typename Facade>
-		using symbol_function_cmethod =
-			symbol_function_cmethod_disjoint  <
-			symbol_composite_cmethod_disjoint <
-			corpus_cmethod_disjoint           < glyph_function_cmethod , image_function_cmethod , Facade >>>;
-
-/***********************************************************************************************************************/
-
-// mutable:
-
-	template<typename Base>
-	class symbol_function_method_disjoint : public Base
-	{
-		public:
-
-			using base			= Base;
-			using facade			= typename base::facade;
-
-			nik_using_size_type_scope	(base)
-
-			using icon_type			= typename base::icon_type;
-			using icon_ctype_ref		= typename base::icon_ctype_ref;
-
-			using sign_type			= typename base::sign_type;
-			using sign_ctype_ref		= typename base::sign_ctype_ref;
-
-		public:
-
-			nik_ce symbol_function_method_disjoint() : base{} { }
-			nik_ce symbol_function_method_disjoint(const facade & f) : base{f} { }
-	};
-
-	// syntactic sugar:
-
-		template<typename Facade>
-		using symbol_function_method =
-			symbol_function_method_disjoint   <
-			symbol_function_cmethod_disjoint  <
-			symbol_composite_method_disjoint  <
-			symbol_composite_cmethod_disjoint <
-			corpus_method_disjoint            < glyph_function_method  , image_function_method  ,
-			corpus_cmethod_disjoint           < glyph_function_cmethod , image_function_cmethod , Facade >>>>>>;
-
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
@@ -272,7 +32,7 @@ namespace cctmp {
 // immutable:
 
 	template<typename Base>
-	class concord_function_cmethod_disjoint : public Base
+	class function_cmethod_disjoint : public Base
 	{
 		public:
 
@@ -295,8 +55,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce concord_function_cmethod_disjoint() : base{} { }
-			nik_ce concord_function_cmethod_disjoint(const facade & f) : base{f} { }
+			nik_ce function_cmethod_disjoint() : base{} { }
+			nik_ce function_cmethod_disjoint(const facade & f) : base{f} { }
 
 		protected:
 
@@ -323,17 +83,17 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using concord_function_cmethod =
-			concord_function_cmethod_disjoint  <
-			concord_composite_cmethod_disjoint <
-			concord_cmethod_disjoint           < symbol_function_cmethod , array_csubmethod , Facade >>>;
+		using function_cmethod =
+			function_cmethod_disjoint  <
+			composite_cmethod_disjoint <
+			concord_cmethod_disjoint   < Facade >>>;
 
 /***********************************************************************************************************************/
 
 // mutable:
 
 	template<typename Base>
-	class concord_function_method_disjoint : public Base
+	class function_method_disjoint : public Base
 	{
 		public:
 
@@ -391,8 +151,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce concord_function_method_disjoint() : base{} { }
-			nik_ce concord_function_method_disjoint(const facade & f) : base{f} { }
+			nik_ce function_method_disjoint() : base{} { }
+			nik_ce function_method_disjoint(const facade & f) : base{f} { }
 
 			// declare:
 
@@ -430,13 +190,13 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using concord_function_method =
-			concord_function_method_disjoint   <
-			concord_function_cmethod_disjoint  <
-			concord_composite_method_disjoint  <
-			concord_composite_cmethod_disjoint <
-			concord_method_disjoint            < symbol_function_method  , array_submethod  ,
-			concord_cmethod_disjoint           < symbol_function_cmethod , array_csubmethod , Facade >>>>>>;
+		using function_method =
+			function_method_disjoint   <
+			function_cmethod_disjoint  <
+			composite_method_disjoint  <
+			composite_cmethod_disjoint <
+			concord_method_disjoint    <
+			concord_cmethod_disjoint   < Facade >>>>>>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -640,8 +400,8 @@ namespace cctmp {
 
 		template<typename Facade, auto CarrySize, auto VerseSize, auto StageSize>
 		using eval_cmethod =
-			eval_cmethod_disjoint   < CarrySize , VerseSize , StageSize , atomic_action , machine_action ,
-			concord_function_method < Facade    >>;
+			eval_cmethod_disjoint < CarrySize , VerseSize , StageSize , atomic_action , machine_action ,
+			function_method       < Facade    >>;
 
 		template<typename Container, auto CarrySize, auto VerseSize, auto StageSize>
 		using resolve_eval_cmethod = eval_cmethod

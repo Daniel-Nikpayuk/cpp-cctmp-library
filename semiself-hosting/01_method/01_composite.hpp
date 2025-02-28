@@ -53,6 +53,14 @@ namespace cctmp {
 
 			nik_ce composite_cmethod_disjoint() : base{} { }
 			nik_ce composite_cmethod_disjoint(const facade & f) : base{f} { }
+
+			// sub(ordinate) icon:
+
+				nik_ce auto sub_icon(icon_ctype_ref icon, size_ctype n) const
+					{ return base::glyph_sub_icon(icon, n); }
+
+				nik_ce auto sub_icon(sign_ctype_ref sign, size_ctype n) const
+					{ return base::glyph_sub_icon(sign, n); }
 	};
 
 /***********************************************************************************************************************/
@@ -299,6 +307,10 @@ namespace cctmp {
 			using sign_type			= typename base::sign_type;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
+		protected:
+
+			nik_ces size_type length	= 2;
+
 		public:
 
 			nik_ce cotuple_cmethod_disjoint() : base{} { }
@@ -308,7 +320,7 @@ namespace cctmp {
 
 				nik_ce auto sub_sign(sign_ctype_ref sign) const
 				{
-					auto record_cival = base::record_ctext(sign, ImageTuple::point, 2);
+					auto record_cival = base::record_ctext(sign, ImageTuple::point, length);
 
 					return sign_type{record_cival[0], record_cival[1]};
 				}
@@ -345,8 +357,6 @@ namespace cctmp {
 
 		protected:
 
-			nik_ces size_type length	= 2;
-
 			template<typename T>
 			nik_ce auto declare_meta(icon_ctype_ref icon,
 				size_ctype time, size_ctype inject, size_ctype point, const T & sign_array)
@@ -367,7 +377,7 @@ namespace cctmp {
 			nik_ce auto declare_abstract(icon_ctype_ref icon, const T & sign_array)
 			{
 				size_ctype inject = base::record().expand(1);
-				size_ctype point  = base::record().expand(length);
+				size_ctype point  = base::record().expand(base::length);
 							// only expand if not duplicate.
 
 				return declare_meta(icon, ImageTime::abstract, inject, point, sign_array);
@@ -397,12 +407,12 @@ namespace cctmp {
 
 				nik_ce auto define_abstract(icon_ctype_ref icon, size_ctype inject, sign_ctype_ref s)
 				{
-					auto sign_array  = typename base::template sign_array_type<length>{{s}};
+					auto sign_array  = typename base::template sign_array_type<base::length>{{s}};
 					auto sign        = declare_abstract(icon, sign_array);
 
 					auto text_cival  = base::image_ctext(sign);
 					base::record()   . copy(text_cival[ImageCotuple::inject], inject);
-					auto record_ival = base::record_text(text_cival, ImageCotuple::point, length);
+					auto record_ival = base::record_text(text_cival, ImageCotuple::point, base::length);
 
 					base::define_abstract(record_ival, sign_array);
 

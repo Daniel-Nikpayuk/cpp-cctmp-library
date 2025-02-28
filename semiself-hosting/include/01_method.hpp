@@ -20,7 +20,7 @@
 #include"../01_method/00_builtin.hpp"
 #include"../01_method/01_composite.hpp"
 //#include"../01_method/02_function.hpp"
-//#include"../01_method/03_recurse.hpp"
+#include"../01_method/03_recurse.hpp"
 //#include"../01_method/04_compare.hpp"
 //#include"../01_method/05_dependent.hpp"
 //#include"../01_method/06_space.hpp"

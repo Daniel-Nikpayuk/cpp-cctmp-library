@@ -139,8 +139,8 @@
 		using cotuple_cmethod_type = cctmp::resolve_cmethod < concord_type , cctmp::cotuple_cmethod   >;
 		using cotuple_method_type  = cctmp::resolve_method  < concord_type , cctmp::cotuple_method    >;
 
-	//	using list_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::list_cmethod      >;
-	//	using list_method_type     = cctmp::resolve_method  < concord_type , cctmp::list_method       >;
+		using list_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::list_cmethod      >;
+		using list_method_type     = cctmp::resolve_method  < concord_type , cctmp::list_method       >;
 
 	//	using space_cmethod_type   = cctmp::resolve_cmethod < concord_type , cctmp::space_cmethod     >;
 	//	using space_method_type    = cctmp::resolve_method  < concord_type , cctmp::space_method      >;
@@ -208,14 +208,14 @@
 
 			// list:
 
-			//	constexpr auto list_cmethod() const
-			//		{ return value.template cequip<list_cmethod_type>(); }
+				constexpr auto list_cmethod() const
+					{ return value.template cequip<list_cmethod_type>(); }
 
-			//	constexpr auto list_method()
-			//		{ return value.template equip<list_method_type>(); }
+				constexpr auto list_method()
+					{ return value.template equip<list_method_type>(); }
 
-			//	constexpr auto list_cglyph(const icon_type & icon) const
-			//		{ return list_cmethod().glyph_ctext(icon); }
+				constexpr auto list_cglyph(const icon_type & icon) const
+					{ return list_cmethod().glyph_ctext(icon); }
 
 			// space:
 
@@ -257,8 +257,8 @@
 
 			// list:
 
-			//	constexpr auto list_cimage(const sign_type & sign) const
-			//		{ return list_cmethod().image_ctext(sign); }
+				constexpr auto list_cimage(const sign_type & sign) const
+					{ return list_cmethod().image_ctext(sign); }
 
 			// space:
 
@@ -627,7 +627,6 @@
 
 // list:
 
-/*
 	template<typename SizeType>
 	struct concord_test_list : public concord_test<SizeType>
 	{
@@ -697,7 +696,6 @@
 
 			printf("\n");
 	}
-*/
 
 /***********************************************************************************************************************/
 
