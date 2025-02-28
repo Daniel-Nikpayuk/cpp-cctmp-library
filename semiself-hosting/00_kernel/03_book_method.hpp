@@ -58,6 +58,11 @@ namespace cctmp {
 			using text_csubmethod_type	= typename model_type::template
 								text_csubmethod_type<TextCMethod>;
 
+		protected:
+
+			nik_ces void total_act(size_type & n, size_ctype m) { n += m; }
+			nik_ces void   max_act(size_type & n, size_ctype m) { if (n < m) { n = m; } }
+
 		public:
 
 			nik_ce book_cmethod_disjoint() : base{} { }
@@ -254,25 +259,26 @@ namespace cctmp {
 			using page_cmethod_type		= typename base::page_cmethod_type;
 			using text_csubmethod_type	= typename base::text_csubmethod_type;
 
+		public:
+
 			nik_ces size_type row_program	= 0;
 			nik_ces size_type row_routine	= 1;
 			nik_ces size_type row_meta	= 2;
-			nik_ces size_type col_length	= 3;
+			nik_ces size_type row_body	= 3;
 
-			nik_ces void total_act(size_type & n, size_ctype m) { n += m; }
-			nik_ces void   max_act(size_type & n, size_ctype m) { if (n < m) { n = m; } }
+			nik_ces size_type col_length	= 3;
 
 		protected:
 
 			template<auto act, typename T> // this needs to check for recusive types!
-			nik_ce size_type fold(const T & v, size_ctype col)
+			nik_ce size_type fold(const T & v, size_ctype col) const
 			{
 				size_type n = 0;
 
 				for (auto k = v.cbegin(); k != v.cend(); ++k)
 				{
 					auto text_cival = text_csubmethod(*k);
-					size_ctype m    = text_cival[base::row_meta][col];
+					size_ctype m    = text_cival[row_meta][col];
 
 					act(n, m);
 				}
@@ -370,18 +376,18 @@ namespace cctmp {
 			// total:
 
 				template<typename T>
-				nik_ce size_type total_bytes(const T & v)
-					{ return fold<total_act>(v, GlyphMeta::bytes); }
+				nik_ce size_type total_bytes(const T & v) const
+					{ return fold<base::total_act>(v, GlyphMeta::bytes); }
 
 			// max:
 
 				template<typename T>
-				nik_ce size_type max_bytes(const T & v)
-					{ return fold<max_act>(v, GlyphMeta::bytes); }
+				nik_ce size_type max_bytes(const T & v) const
+					{ return fold<base::max_act>(v, GlyphMeta::bytes); }
 
 				template<typename T>
-				nik_ce size_type max_universe(const T & v)
-					{ return fold<max_act>(v, GlyphMeta::universe); }
+				nik_ce size_type max_universe(const T & v) const
+					{ return fold<base::max_act>(v, GlyphMeta::universe); }
 	};
 
 	// syntactic sugar:
@@ -530,20 +536,21 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// base:
+// empty (base):
 
-	struct ImageBase { enum : genum_type { index, dimension }; };
+	struct ImageEmpty { enum : genum_type { index, time, units, dimension }; };
+
+	using IE = ImageEmpty;
 
 /***********************************************************************************************************************/
 
 // mark:
 
-	struct ImageEmpty    { enum : genum_type { index = ImageBase::index, time,                dimension }; };
-	struct ImageBuiltin  { enum : genum_type { index = ImageBase::index, time,         point, dimension }; };
-	struct ImageTuple    { enum : genum_type { index = ImageBase::index, time, length, point, dimension }; };
-	struct ImageCotuple  { enum : genum_type { index = ImageBase::index, time, inject, point, dimension }; };
-	struct ImageFunction { enum : genum_type { index = ImageBase::index, time, length, point, dimension }; };
-	struct ImageList     { enum : genum_type { index = ImageBase::index, time,         point, dimension }; };
+	struct ImageBuiltin  : public IE { enum : genum_type { units = IE::units,         point, dimension }; };
+	struct ImageTuple    : public IE { enum : genum_type { units = IE::units, length, point, dimension }; };
+	struct ImageCotuple  : public IE { enum : genum_type { units = IE::units, inject, point, dimension }; };
+	struct ImageFunction : public IE { enum : genum_type { units = IE::units, length, point, dimension }; };
+	struct ImageList     : public IE {                                                                    };
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -576,6 +583,24 @@ namespace cctmp {
 
 			using page_cmethod_type		= typename base::page_cmethod_type;
 			using text_csubmethod_type	= typename base::text_csubmethod_type;
+
+		protected:
+
+			template<auto act, typename T> // this needs to check for recusive types!
+			nik_ce size_type fold(const T & v, size_ctype pos) const
+			{
+				size_type n = 0;
+
+				for (auto k = v.cbegin(); k != v.cend(); ++k)
+				{
+					auto text_cival = text_csubmethod(*k);
+					size_ctype m    = text_cival[pos];
+
+					act(n, m);
+				}
+
+				return n;
+			}
 
 		public:
 
@@ -622,6 +647,18 @@ namespace cctmp {
 
 					return text_cival1.equal(0, text_cival2.cbegin(), text_cival2.cend());
 				}
+
+			// total:
+
+				template<typename T>
+				nik_ce size_type total_units(const T & v) const
+					{ return fold<base::total_act>(v, ImageEmpty::units); }
+
+			// max:
+
+				template<typename T>
+				nik_ce size_type max_units(const T & v) const
+					{ return fold<base::max_act>(v, ImageEmpty::units); }
 	};
 
 	// syntactic sugar:

@@ -60,6 +60,15 @@ namespace cctmp {
 
 		public:
 
+			nik_ces size_type row_program		= glyph_cmethod_type::row_program;
+			nik_ces size_type row_routine		= glyph_cmethod_type::row_routine;
+			nik_ces size_type row_meta		= glyph_cmethod_type::row_meta;
+			nik_ces size_type row_body		= glyph_cmethod_type::row_body;
+
+			nik_ces size_type col_length		= glyph_cmethod_type::col_length;
+
+		public:
+
 			nik_ce corpus_cmethod_disjoint() : base{} { }
 			nik_ce corpus_cmethod_disjoint(const facade & f) :
 				base{f},
@@ -72,7 +81,7 @@ namespace cctmp {
 				nik_ce auto glyph_cmethod() const { return _glyph_cmethod; }
 
 				nik_ce auto to_icon(sign_ctype_ref sign) const
-					{ return icon_type{sign.mark(), image_ctext(sign).cat(ImageBase::index)}; }
+					{ return icon_type{sign.mark(), image_ctext(sign).cat(ImageEmpty::index)}; }
 
 			// (glyph) icon:
 
@@ -199,6 +208,18 @@ namespace cctmp {
 
 				nik_ce bool image_equal(sign_ctype_ref sign1, sign_ctype_ref sign2) const
 					{ return _image_cmethod.equal(sign1, sign2); }
+
+			// (image) total:
+
+				template<typename T>
+				nik_ce size_type image_total_units(const T & v) const
+					{ return _image_cmethod.total_units(v); }
+
+			// (image) max:
+
+				template<typename T>
+				nik_ce size_type image_max_units(const T & v) const
+					{ return _image_cmethod.max_units(v); }
 	};
 
 	// syntactic sugar:

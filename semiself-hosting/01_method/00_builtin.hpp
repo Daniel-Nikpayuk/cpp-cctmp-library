@@ -50,9 +50,8 @@ namespace cctmp {
 
 		protected:
 
-			nik_ces size_type row_length	= 3;
-			nik_ces size_type col_length	= 3;
-			nik_ces size_type glyph_length	= row_length * col_length;
+			nik_ces size_type row_length	= base::row_body;
+			nik_ces size_type glyph_length	= row_length * base::col_length;
 
 		public:
 
@@ -88,69 +87,63 @@ namespace cctmp {
 
 		protected:
 
-			using glyph_field_type		= array<size_type, size_type, base::glyph_length>;
-			using glyph_field_method_type	= resolve_submethod<glyph_field_type, table_submethod>;
+			nik_ces size_type bytes_to_units(size_ctype bytes)
+			{
+				size_ctype unit_size   = sizeof(size_type);
+				size_ctype is_multiple = static_cast<bool>(bytes % unit_size);
 
-			using image_field_type		= array<size_type, size_type, ImageBuiltin::dimension>;
+				return ((bytes / unit_size) + is_multiple);
+			}
+
+		protected:
+
+			using glyph_field_type		= array<size_type, size_type, base::glyph_length>;
 
 			// glyph:
 
 				nik_ce auto glyph_make_field()
-				{
-					auto field = glyph_field_type{};
-					field      . fullsize();
-
-					return field;
-				}
+					{ return base::template glyph_make_field<base::glyph_length>(); }
 
 				nik_ce auto glyph_make_table(glyph_field_type & field)
 				{
-					auto table = field.template subequip<glyph_field_method_type>();
-					table      . full_set();
-					table      . set_dimension(base::row_length, base::col_length);
-
-					return table;
+					return base::template
+						glyph_make_table<base::glyph_length>
+							(field, base::row_length, base::col_length);
 				}
 
 			// image:
 
-				nik_ce auto image_make_field()
-				{
-					auto field = image_field_type{};
-					field      . fullsize();
+				using base::image_make_field;
 
-					return field;
-				}
+				nik_ce auto image_make_field()
+					{ return base::template image_make_field<ImageBuiltin::dimension>(); }
 
 		protected:
 
 			// declare:
 
-				template<typename T>
-				nik_ce auto declare_type(size_ctype mark, const T & field)
-				{
-					size_ctype index = base::glyph_find(mark, field);
-
-					if (base::glyph_found(mark, index))
-						{ return base::glyph_make_icon(mark, index); }
-
-					return base::glyph_declare(BookMark::builtin, field);
-				}
-
-				nik_ce auto declare_meta(icon_ctype_ref icon, size_ctype time, size_ctype point)
+				nik_ce auto declare_meta(
+					icon_ctype_ref icon, size_ctype time, size_ctype units, size_ctype point)
 				{
 					auto field = image_make_field();
 					field      . fullsize();
 
 					field[ImageBuiltin::index] = icon.index();
 					field[ImageBuiltin::time ] = time;
+					field[ImageBuiltin::units] = units;
 					field[ImageBuiltin::point] = point;
 
 					return base::image_declare(BookMark::builtin, field);
 				}
 
 				nik_ce auto declare_abstract(icon_ctype_ref icon)
-					{ return declare_meta(icon, ImageTime::abstract, base::record().expand(1)); }
+				{
+					size_ctype bytes = base::glyph_cfield(icon, base::row_meta, GlyphMeta::bytes);
+					size_ctype units = bytes_to_units(bytes);
+					size_ctype point = base::record().expand(units);
+
+					return declare_meta(icon, ImageTime::abstract, units, point);
+				}
 
 			// define:
 
@@ -173,11 +166,16 @@ namespace cctmp {
 					base::glyph_set_routine (table, instr);
 					base::glyph_set_meta    (table, bytes);
 
-					return declare_type(BookMark::builtin, field);
+					return base::glyph_declare(BookMark::builtin, field);
 				}
 
 				nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype addr)
-					{ return declare_meta(icon, ImageTime::concrete, addr); }
+				{
+					size_ctype bytes = base::glyph_cfield(icon, base::row_meta, GlyphMeta::bytes);
+					size_ctype units = bytes_to_units(bytes);
+
+					return declare_meta(icon, ImageTime::concrete, units, addr);
+				}
 
 			// define:
 
@@ -262,8 +260,7 @@ namespace cctmp {
 
 				nik_ce auto declare_meta(icon_ctype_ref icon, size_ctype time)
 				{
-					auto field = typename base::image_field_type{};
-					field      . upsize(ImageEmpty::dimension);
+					auto field = base::template image_make_field<ImageEmpty::dimension>();
 
 					field[ImageEmpty::index] = icon.index();
 					field[ImageEmpty::time ] = time;
@@ -279,16 +276,7 @@ namespace cctmp {
 			// declare:
 
 				nik_ce auto declare_type()
-				{
-					auto field = base::glyph_make_field();
-					auto table = base::glyph_make_table(field);
-
-					base::glyph_set_program (table, base::row_length);
-					base::glyph_set_routine (table, GlyphInstr::empty);
-					base::glyph_set_meta    (table, base::byte_size);
-
-					return base::declare_type(BookMark::builtin, field);
-				}
+					{ return base::declare_type(GlyphInstr::empty, base::byte_size); }
 
 			// define:
 

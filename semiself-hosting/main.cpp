@@ -26,7 +26,6 @@
 
 #include"include/00_kernel.hpp"
 #include"include/01_method.hpp"
-//#include"include/01_automata.hpp"
 
 #include"undef_macros.hpp"
 

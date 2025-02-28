@@ -133,11 +133,11 @@
 		using char_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::utf8_char_cmethod >;
 		using char_method_type     = cctmp::resolve_method  < concord_type , cctmp::utf8_char_method  >;
 
-	//	using tuple_cmethod_type   = cctmp::resolve_cmethod < concord_type , cctmp::tuple_cmethod     >;
-	//	using tuple_method_type    = cctmp::resolve_method  < concord_type , cctmp::tuple_method      >;
+		using tuple_cmethod_type   = cctmp::resolve_cmethod < concord_type , cctmp::tuple_cmethod     >;
+		using tuple_method_type    = cctmp::resolve_method  < concord_type , cctmp::tuple_method      >;
 
-	//	using cotuple_cmethod_type = cctmp::resolve_cmethod < concord_type , cctmp::cotuple_cmethod   >;
-	//	using cotuple_method_type  = cctmp::resolve_method  < concord_type , cctmp::cotuple_method    >;
+		using cotuple_cmethod_type = cctmp::resolve_cmethod < concord_type , cctmp::cotuple_cmethod   >;
+		using cotuple_method_type  = cctmp::resolve_method  < concord_type , cctmp::cotuple_method    >;
 
 	//	using list_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::list_cmethod      >;
 	//	using list_method_type     = cctmp::resolve_method  < concord_type , cctmp::list_method       >;
@@ -186,25 +186,25 @@
 
 			// tuple:
 
-			//	constexpr auto tuple_cmethod() const
-			//		{ return value.template cequip<tuple_cmethod_type>(); }
+				constexpr auto tuple_cmethod() const
+					{ return value.template cequip<tuple_cmethod_type>(); }
 
-			//	constexpr auto tuple_method()
-			//		{ return value.template equip<tuple_method_type>(); }
+				constexpr auto tuple_method()
+					{ return value.template equip<tuple_method_type>(); }
 
-			//	constexpr auto tuple_cglyph(const icon_type & icon) const
-			//		{ return tuple_cmethod().glyph_ctext(icon); }
+				constexpr auto tuple_cglyph(const icon_type & icon) const
+					{ return tuple_cmethod().glyph_ctext(icon); }
 
 			// cotuple:
 
-			//	constexpr auto cotuple_cmethod() const
-			//		{ return value.template cequip<cotuple_cmethod_type>(); }
+				constexpr auto cotuple_cmethod() const
+					{ return value.template cequip<cotuple_cmethod_type>(); }
 
-			//	constexpr auto cotuple_method()
-			//		{ return value.template equip<cotuple_method_type>(); }
+				constexpr auto cotuple_method()
+					{ return value.template equip<cotuple_method_type>(); }
 
-			//	constexpr auto cotuple_cglyph(const icon_type & icon) const
-			//		{ return cotuple_cmethod().glyph_ctext(icon); }
+				constexpr auto cotuple_cglyph(const icon_type & icon) const
+					{ return cotuple_cmethod().glyph_ctext(icon); }
 
 			// list:
 
@@ -247,13 +247,13 @@
 
 			// tuple:
 
-			//	constexpr auto tuple_cimage(const sign_type & sign) const
-			//		{ return tuple_cmethod().image_ctext(sign); }
+				constexpr auto tuple_cimage(const sign_type & sign) const
+					{ return tuple_cmethod().image_ctext(sign); }
 
 			// cotuple:
 
-			//	constexpr auto cotuple_cimage(const sign_type & sign) const
-			//		{ return cotuple_cmethod().image_ctext(sign); }
+				constexpr auto cotuple_cimage(const sign_type & sign) const
+					{ return cotuple_cmethod().image_ctext(sign); }
 
 			// list:
 
@@ -468,7 +468,6 @@
 
 // tuple:
 
-/*
 	template<typename SizeType>
 	struct concord_test_tuple : public concord_test<SizeType>
 	{
@@ -542,13 +541,11 @@
 
 			printf("\n");
 	}
-*/
 
 /***********************************************************************************************************************/
 
 // cotuple:
 
-/*
 	template<typename SizeType>
 	struct concord_test_cotuple : public concord_test<SizeType>
 	{
@@ -574,14 +571,14 @@
 			auto ring_method    = base::ring_method();
 			auto cotuple_method = base::cotuple_method();
 
-			ring1_icon          = ring_method .declare_type(1);
-			ring4_icon          = ring_method .declare_type(4);
-			ring8_icon          = ring_method .declare_type(8);
+			ring1_icon          = ring_method   .declare_type(1);
+			ring4_icon          = ring_method   .declare_type(4);
+			ring8_icon          = ring_method   .declare_type(8);
 			cotuple_icon        = cotuple_method.declare_type({ ring1_icon, ring4_icon, ring8_icon });
 
-			ring1_sign_1        = ring_method .define_abstract(ring4_icon, 8);
-			ring4_sign_1        = ring_method .define_abstract(ring4_icon, 5);
-			ring8_sign_1        = ring_method .define_abstract(ring8_icon, 7);
+			ring1_sign_1        = ring_method   .define_abstract(ring4_icon, 8);
+			ring4_sign_1        = ring_method   .define_abstract(ring4_icon, 5);
+			ring8_sign_1        = ring_method   .define_abstract(ring8_icon, 7);
 
 			cotuple_sign_1      = cotuple_method.define_abstract(cotuple_icon, 0, ring1_sign_1);
 			cotuple_sign_2      = cotuple_method.define_abstract(cotuple_icon, 1, ring4_sign_1);
@@ -625,7 +622,6 @@
 
 			printf("\n");
 	}
-*/
 
 /***********************************************************************************************************************/
 
@@ -799,5 +795,6 @@
 	}
 */
 
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
