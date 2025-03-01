@@ -497,6 +497,8 @@ namespace cctmp {
 
 			// declare:
 
+				nik_ce size_type declare() { return base::page().expand(); } // space
+
 				template<typename T>
 				nik_ce auto declare(size_ctype mark, const T & field)
 				{

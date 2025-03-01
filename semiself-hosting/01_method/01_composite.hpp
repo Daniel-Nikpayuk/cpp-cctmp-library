@@ -96,10 +96,10 @@ namespace cctmp {
 				nik_ce auto declare_type(
 					size_ctype mark, size_ctype instr, size_ctype bytes, const T & icon_array)
 				{
-					nik_ce size_type row_length = base::row_body + T::length();
-					nik_ce size_type length     = row_length * base::col_length;
-					auto field                  = base::template glyph_make_field<length>();
-					auto table                  = base::template glyph_make_table<length>
+					nik_ce auto row_length = static_cast<size_type>(base::row_body + T::length());
+					nik_ce auto length     = static_cast<size_type>(row_length * base::col_length);
+					auto field             = base::template glyph_make_field<length>();
+					auto table             = base::template glyph_make_table<length>
 									(field, row_length, base::col_length);
 
 					base::glyph_set_program (table, row_length);

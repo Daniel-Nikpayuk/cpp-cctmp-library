@@ -64,11 +64,11 @@ namespace cctmp {
 
 				nik_ce auto get_contr(sign_ctype_ref sign) const
 				{
-					auto sit_cival = base::image_ctext(sign);
-					auto rec_cival = base::model->template record_csubequip<contr_type>();
+					auto sit_cival      = base::image_ctext(sign);
+					auto rec_cival      = base::model->template record_csubequip<contr_type>();
 
-					size_ctype length   = base::crecord().cat(sit_cival[ImageFunction::length]);
-					size_ctype start    = sit_cival[ImageFunction::point];
+					size_ctype length   = sit_cival[ImageFunction::length];
+					size_ctype start    = sit_cival[ImageFunction::point ];
 					size_ctype finish   = start + length;
 					size_ctype row_size = (length >> 2);
 					size_ctype col_size = 4;
@@ -111,42 +111,27 @@ namespace cctmp {
 
 		protected:
 
-			nik_ce auto declare_image(
+			nik_ce auto declare_meta(
 				icon_ctype_ref icon, size_ctype time, size_ctype length, size_ctype point)
 			{
-				auto field = array<size_type, size_type, ImageFunction::dimension>{};
-				field.fullsize();
+				auto field = base::template image_make_field<ImageFunction::dimension>();
+				field      . fullsize();
 
 				field[ImageFunction::index ] = icon.index();
 				field[ImageFunction::time  ] = time;
+				field[ImageFunction::units ] = length;
 				field[ImageFunction::length] = length;
 				field[ImageFunction::point ] = point;
 
-				return base::template
-					declare_image<BookMark::function, ImageFunction::dimension>(icon, field);
+				return base::image_declare(BookMark::function, field);
 			}
 
-			nik_ce auto declare_abstract(icon_ctype_ref icon)
+			nik_ce auto declare_abstract(icon_ctype_ref icon, size_ctype length) // needs to type check.
 			{
-				size_ctype length = base::record().expand(1);
-				size_ctype point  = base::record().expand(length);
+				size_ctype point = base::record().expand(length);
+							// only expand if not duplicate.
 
-				return declare_image(icon, ImageTime::abstract, length, point);
-			}
-
-			template<typename T>
-			nik_ce auto define_abstract(sign_ctype_ref sign, const T & v)
-			{
-				auto record_ival  = base::record_submethod();
-				auto text_cival   = base::image_ctext(sign);
-				size_ctype start  = text_cival[ImageFunction::point];
-				size_ctype finish = start + v.size();
-
-				record_ival       . mid_set(start, finish);
-				base::record()    . copy(text_cival[ImageFunction::length], v.size());
-				record_ival       . copy(0, v.cbegin(), v.cend());
-
-				return sign;
+				return declare_meta(icon, ImageTime::abstract, length, point);
 			}
 
 		public:
@@ -156,32 +141,31 @@ namespace cctmp {
 
 			// declare:
 
-				template<typename T>
-				nik_ce auto declare_type(const T & type)
-				{
-					size_ctype bytes    = 0; // incorrect.
-					size_ctype universe = base::max_universe(type);
-
-					return base::template declare_type
-						<BookMark::function, GlyphInstr::function>(type, bytes, universe);
-				}
-
 				template<auto N>
 				nik_ce auto declare_type(const icon_type (&t)[N])
-					{ return declare_type(typename base::template array_type<N>{t}); }
+				{
+					nik_ce auto length = static_cast<size_type>(N);
+					auto icon_array    = typename base::template icon_array_type<length>{t};
+					size_ctype bytes   = 0; // policy not yet determined.
 
-				nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype addr)
-					{ return declare_image(icon, ImageTime::concrete, addr); }
+					return base::declare_type(
+						BookMark::function, GlyphInstr::function, bytes, icon_array);
+				}
+
+			//	nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype addr)
+			//		{ return declare_image(icon, ImageTime::concrete, addr); }
 
 			// define:
 
 				template<auto N>
-				nik_ce auto define_abstract(icon_ctype_ref icon, size_ctype (&v)[N])
+				nik_ce auto define_abstract(icon_ctype_ref icon, size_ctype (&cc_asm)[N])
 				{
-					auto value = array<size_type, size_type, N>{v};
-					auto sign  = declare_abstract(icon, N); // needs to type check.
+					nik_ce auto length = static_cast<size_type>(N);
+					auto asm_array     = array<size_type, size_type, length>{cc_asm};
+					auto sign          = declare_abstract(icon, length);
+					auto record_ival   = base::record_text(sign, ImageFunction::point, length);
 
-					define_abstract(sign, value);
+					record_ival.copy(0, asm_array.cbegin(), asm_array.cend());
 
 					return sign;
 				}
@@ -401,7 +385,7 @@ namespace cctmp {
 		template<typename Facade, auto CarrySize, auto VerseSize, auto StageSize>
 		using eval_cmethod =
 			eval_cmethod_disjoint < CarrySize , VerseSize , StageSize , atomic_action , machine_action ,
-			function_method       < Facade    >>;
+			function_cmethod      < Facade    >>;
 
 		template<typename Container, auto CarrySize, auto VerseSize, auto StageSize>
 		using resolve_eval_cmethod = eval_cmethod

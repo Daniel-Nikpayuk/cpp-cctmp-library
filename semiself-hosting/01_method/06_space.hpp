@@ -51,50 +51,23 @@ namespace cctmp {
 
 		protected:
 
-			using tuple_cmethod_type	= resolve_cmethod<model_type, tuple_cmethod>;
-			using cotuple_cmethod_type	= resolve_cmethod<model_type, cotuple_cmethod>;
-
-			tuple_cmethod_type   tuple_cmethod;
-			cotuple_cmethod_type cotuple_cmethod;
-
-		protected:
-
-			nik_ce auto tuple_sign(sign_ctype_ref sign) const
-				{ return cotuple_cmethod.sub_sign(sub_sign(sign)); }
+			nik_ces size_type row_custom	= 1;
+			nik_ces size_type row_overt	= 2;
+			nik_ces size_type row_length	= 3;
+			nik_ces size_type length	= row_length * base::col_length;
 
 		public:
 
 			nik_ce space_cmethod_disjoint() : base{} { }
-			nik_ce space_cmethod_disjoint(const facade & f) :
-				base{f},
-				tuple_cmethod   { base::model->template cequip<tuple_cmethod_type  >() },
-				cotuple_cmethod { base::model->template cequip<cotuple_cmethod_type>() }
-				{ }
+			nik_ce space_cmethod_disjoint(const facade & f) : base{f} { }
 
 			// sub(ordinate) icon:
 
 				nik_ce auto sub_icon(icon_ctype_ref icon) const
-					{ return base::symbol_cmethod().sub_icon(icon); }
+					{ return base::glyph_sub_icon(icon, row_custom); }
 
-			// sub(ordinate) sign:
-
-				nik_ce auto sub_sign(sign_ctype_ref sign) const
-				{
-					auto text_cival   = base::image_ctext(sign);
-					size_ctype start  = text_cival[ImageList::point];
-					size_ctype finish = start + 2;
-					auto record_cival = base::record_csubmethod();
-					record_cival      . mid_set(start, finish);
-
-					return base::symbol_cmethod().
-						image_cmethod().make_sign(record_cival[0], record_cival[1]);
-				}
-
-				nik_ce auto car_sign(sign_ctype_ref sign) const
-					{ return tuple_cmethod.sub_sign(tuple_sign(sign), 0); }
-
-				nik_ce auto cdr_sign(sign_ctype_ref sign) const
-					{ return tuple_cmethod.sub_sign(tuple_sign(sign), 1); }
+				nik_ce auto overt_icon(icon_ctype_ref icon) const
+					{ return base::glyph_sub_icon(icon, row_overt); }
 	};
 
 	// syntactic sugar:
@@ -122,6 +95,9 @@ namespace cctmp {
 			using icon_type			= typename base::icon_type;
 			using icon_ctype_ref		= typename base::icon_ctype_ref;
 
+			using mode_type			= typename base::mode_type;
+			using mode_ctype_ref		= typename base::mode_ctype_ref;
+
 			using sign_type			= typename base::sign_type;
 			using sign_ctype		= typename base::sign_ctype;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
@@ -133,10 +109,28 @@ namespace cctmp {
 
 			// declare:
 
-				nik_ce auto declare_space() { return base::symbol_method().declare_space(); }
+				nik_ce auto declare_space() { return base::glyph_declare_space(); }
 
 				nik_ce auto declare_type(size_ctype space, icon_ctype_ref sub_icon)
-					{ return base::symbol_method().declare_type(space, sub_icon); }
+				{
+					auto field = base::template glyph_make_field<base::length>();
+					auto table = base::template glyph_make_table<base::length>
+							(field, base::row_length, base::col_length);
+
+					size_ctype custom_mark  = sub_icon.mark ();
+					size_ctype custom_index = sub_icon.index();
+
+					size_ctype overt_mark   = sub_icon.mark (); // update.
+					size_ctype overt_index  = sub_icon.index(); // update.
+
+					base::glyph_set_program (table, base::row_length);
+					base::glyph_set_note    (table, base::row_custom, custom_mark, custom_index);
+					base::glyph_set_note    (table, base::row_overt, overt_mark, overt_index);
+
+					auto icon = base::glyph_declare(space, field);
+
+					return mode_type{icon.mark(), icon.index()};
+				}
 	};
 
 	// syntactic sugar:

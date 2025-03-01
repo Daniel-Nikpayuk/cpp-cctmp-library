@@ -30,7 +30,8 @@
 #include"undef_macros.hpp"
 
 #include"testing/printer.hpp"
-#include"testing/concord.hpp"
+#include"testing/type_system.hpp"
+//#include"testing/virtual_machine.hpp"
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -46,6 +47,7 @@
 	//	concord_utf8_char_test ();
 	//	concord_tuple_test     ();
 	//	concord_cotuple_test   ();
+	//	concord_function_test  ();
 	//	concord_list_test      ();
 	//	concord_space_test     ();
 

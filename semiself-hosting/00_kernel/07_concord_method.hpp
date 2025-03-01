@@ -45,6 +45,9 @@ namespace cctmp {
 			using icon_type			= icon<size_type>;
 			using icon_ctype_ref		= typename alias<icon_type>::ctype_ref;
 
+			using mode_type			= mode<size_type>;
+			using mode_ctype_ref		= typename alias<mode_type>::ctype_ref;
+
 			using sign_type			= sign<size_type>;
 			using sign_ctype		= typename alias<sign_type>::ctype;
 			using sign_ctype_ref		= typename alias<sign_type>::ctype_ref;
@@ -78,6 +81,9 @@ namespace cctmp {
 			// symbol:
 
 				nik_ce auto symbol_cmethod() const { return _symbol_cmethod; }
+
+				nik_ce auto to_icon(mode_ctype_ref mode) const
+					{ return icon_type{mode.mark(), mode.index()}; }
 
 				nik_ce auto to_icon(sign_ctype_ref sign) const
 					{ return _symbol_cmethod.to_icon(sign); }
@@ -376,6 +382,8 @@ namespace cctmp {
 						{ _symbol_method.glyph_set_note(table, row, mark, index); }
 
 			// (glyph) declare:
+
+				nik_ce auto glyph_declare_space() { return _symbol_method.glyph_declare_space(); }
 
 				template<typename T>
 				nik_ce auto glyph_declare(size_ctype mark, const T & field)

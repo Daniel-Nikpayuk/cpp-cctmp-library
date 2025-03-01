@@ -314,6 +314,8 @@ namespace cctmp {
 
 			// (glyph) declare:
 
+				nik_ce auto glyph_declare_space() { return _glyph_method.declare(); }
+
 				template<typename T>
 				nik_ce auto glyph_declare(size_ctype mark, const T & field)
 					{ return _glyph_method.declare(mark, field); }
