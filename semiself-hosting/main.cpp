@@ -56,22 +56,51 @@
 
 /***********************************************************************************************************************/
 
-/*
-	template<typename T>
-	constexpr auto square(T v)
-	{
-		constexpr auto square_contr = cctmp::U_store_T<static_square_test<unsigned long>>;
+// continuation constructing:
 
-		return cctmp::T_metapile_apply<square_contr, U_null_Vs, U_null_Vs>::template result(0, v);
+	template<typename T>
+	constexpr auto cc_square(T v)
+	{
+		constexpr auto contr = cctmp::U_store_T<static_square_test<concord_test_cc_function, T>>;
+
+		return cctmp::T_metapile_apply<contr, U_null_Vs, U_null_Vs>::template result<T>(v);
 	}
-*/
+
+	template<typename T>
+	constexpr auto cc_sum_of_sq(T v1, T v2)
+	{
+		constexpr auto contr = cctmp::U_store_T<static_sum_of_sq_test<concord_test_cc_function, T>>;
+
+		return cctmp::T_metapile_apply<contr, U_null_Vs, U_null_Vs>::template result<T, T>(v1, v2);
+	}
+
+	template<typename T>
+	constexpr auto cc_factorial(T v)
+	{
+		constexpr auto contr = cctmp::U_store_T<static_factorial_test<concord_test_cc_function, T>>;
+		constexpr auto types = cctmp::U_pack_Ts<T>;
+
+		return cctmp::T_metapile_recurse<contr, U_null_Vs, types>::template result<T>(v);
+	}
+
+	template<typename T>
+	constexpr auto cc_fibonacci(T v)
+	{
+		constexpr auto contr = cctmp::U_store_T<static_fibonacci_test<concord_test_cc_function, T>>;
+		constexpr auto types = cctmp::U_pack_Ts<T>;
+
+		return cctmp::T_metapile_recurse<contr, U_null_Vs, types>::template result<T>(v);
+	}
+
+// virtual machine:
 
 	template<typename size_type>
-	constexpr auto square(size_type const v)
+	constexpr auto vm_square(size_type const v)
 	{
-		constexpr auto function_test_0 = concord_test_function<size_type>{};
-		auto eval_cmethod = function_test_0.eval_cmethod();
-		eval_cmethod      . apply(function_test_0.square_sign, {v});
+		constexpr auto function = concord_test_vm_function<size_type>{};
+
+		auto eval_cmethod = function.eval_cmethod();
+		eval_cmethod      . apply(function.square_sign, {v});
 
 		return eval_cmethod.rtn_cat(0);
 	}
@@ -92,7 +121,37 @@
 	//	continuant_machine_test ();
 	//	virtual_machine_test    ();
 
-		printf("%lu\n", square<unsigned long>(main_at(0, argc, argv)));
+		// continuation constructing:
+
+			// square:
+
+			//	static_assert(cc_square<unsigned long>(5) == 25);
+
+			//	printf("%lu\n", cc_square<unsigned long>(main_at(0, argc, argv)));
+
+			// sum of squares:
+
+			//	static_assert(cc_sum_of_sq<unsigned long>(3, 4) == 25);
+
+			//	printf("%lu\n", cc_sum_of_sq<unsigned long>(3, 4));
+
+			// factorial:
+
+			//	static_assert(cc_factorial<unsigned long>(5) == 120);
+
+			//	printf("%lu\n", cc_factorial<unsigned long>(5));
+
+			// fibonacci:
+
+			//	static_assert(cc_fibonacci<unsigned long>(8) == 34);
+
+			//	printf("%lu\n", cc_fibonacci<unsigned long>(8));
+
+		// virtual machine:
+
+		//	static_assert(vm_square<unsigned long>(5) == 25);
+
+		//	printf("%lu\n", vm_square<unsigned long>(main_at(0, argc, argv)));
 
 		return 0;
 	}

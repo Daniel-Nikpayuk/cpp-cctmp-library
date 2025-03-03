@@ -251,21 +251,48 @@ namespace cctmp {
 
 // apply:
 
-	template
-	<
-		auto static_contr,
-		auto static_values,
-		auto out_types
-	>
-	struct T_metapile_apply
-	{
-		template<typename... Ts>
-		nik_ces auto result(Ts... vs)
+	// untyped:
+
+		template
+		<
+			auto static_contr,
+			auto static_values,
+			auto out_types
+		>
+		struct T_metapile_apply
 		{
-			return T_continuant_compound<static_contr, 0>::template
-				result<static_values, out_types, 0, Ts...>(vs...);
-		}
-	};
+			template<typename... Ts>
+			nik_ces auto result(Ts... vs)
+			{
+				return T_continuant_compound<static_contr, 0>::template
+					result<static_values, out_types, 0, Ts...>(0, vs...);
+			}
+		};
+
+	// typed:
+
+		template
+		<
+			auto static_contr,
+			auto static_values,
+			auto out_types
+		>
+		struct T_metapile_recurse
+		{
+			nik_ces auto out_type = at_<out_types, 0>;
+
+			template<typename... Ts>
+			nik_ces auto result(Ts... vs)
+			{
+				return T_continuant_compound<out_type, static_contr, 0>::template
+					result<static_values, out_types, 0, Ts...>(0, vs...);
+			}
+		};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// space:
 
 /***********************************************************************************************************************/
 
@@ -279,57 +306,6 @@ namespace cctmp {
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
 			nik_ces auto result(T v, Ts... vs) -> T
 				{ return v; }
-		};
-
-/***********************************************************************************************************************/
-
-// function:
-
-	// line:
-
-		template<>
-		struct T_continuant<CI::function>
-		{
-			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
-			nik_ces auto result(Ts... vs)
-			{
-				nik_ce auto policy = CD<c>::value(i, 2);
-
-				return T_continuant<CI::function, genum_type{policy}>
-					::template result<c, i, l, t, r, Ts...>(vs...);
-			}
-		};
-
-	// to stack:
-
-		template<>
-		struct T_continuant<CI::function, genum_type{CP::to_stack}>
-		{
-			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
-			nik_ces auto result(Ts... vs)
-			{
-				nik_ce auto n = CD<c>::value(i, 1);
-				nik_ce auto f = U_continuant_compound<c, n>;
-
-				return NIK_MACHINE_TS(c, i, l, t, r, Ts..., decltype(f))
-					(vs..., f);
-			}
-		};
-
-	// to carry:
-
-		template<>
-		struct T_continuant<CI::function, genum_type{CP::to_carry}>
-		{
-			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
-			nik_ces auto result(T v, Ts... vs)
-			{
-				nik_ce auto n = CD<c>::value(i, 1);
-				nik_ce auto f = U_continuant_compound<c, n>;
-
-				return NIK_MACHINE_TS(c, i, l, t, r, decltype(f), Ts...)
-					(f, vs...);
-			}
 		};
 
 /***********************************************************************************************************************/
@@ -396,6 +372,40 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
+// jump:
+
+	// branch:
+
+		template<>
+		struct T_continuant<CI::branch>
+		{
+			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
+			nik_ces auto result(T v, Ts... vs)
+			{
+				nik_ce auto ni = CD<c>::value(i, 1);
+
+				if (v) { return NIK_MACHINE_TS(c, ni, l, t, r, T, Ts...)(v, vs...); }
+				else   { return NIK_MACHINE_TS(c,  i, l, t, r, T, Ts...)(v, vs...); }
+			}
+		};
+
+	// invert:
+
+		template<>
+		struct T_continuant<CI::invert>
+		{
+			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
+			nik_ces auto result(T v, Ts... vs)
+			{
+				nik_ce auto ni = CD<c>::value(i, 1);
+
+				if (v) { return NIK_MACHINE_TS(c,  i, l, t, r, T, Ts...)(v, vs...); }
+				else   { return NIK_MACHINE_TS(c, ni, l, t, r, T, Ts...)(v, vs...); }
+			}
+		};
+
+/***********************************************************************************************************************/
+
 // apply:
 
 	// line:
@@ -406,11 +416,10 @@ namespace cctmp {
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
 			nik_ces auto result(Ts... vs)
 			{
-				nik_ce auto n      = CD<c>::value (i, 1);
-				nik_ce auto arg    = CD<c>::value (n, 1);
-				nik_ce auto policy = CD<c>::value (i, 2);
-				nik_ce auto l_pack = left_  <arg, U_store_T<Ts>...>;
-				nik_ce auto r_pack = right_ <arg, U_store_T<Ts>...>;
+				nik_ce auto arg    = CD<c>::value(i, 1);
+				nik_ce auto policy = CD<c>::value(i, 2);
+				nik_ce auto l_pack = left_ <arg, U_store_T<Ts>...>;
+				nik_ce auto r_pack = right_<arg, U_store_T<Ts>...>;
 
 				return T_continuant<CI::apply, genum_type{policy}, l_pack, r_pack>
 					::template result<c, i, l, t, r, Ts...>(vs...);
@@ -431,7 +440,8 @@ namespace cctmp {
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
 			nik_ces auto result(T_store_U<LUs>... lvs, RT, T_store_U<RUs>... rvs)
 			{
-				const auto value = RT::template result<c, l, t, r, T_store_U<RUs>...>(rvs...);
+				auto value = T_restore_T<RT>::template
+						result<l, t, r, decltype(0), T_store_U<RUs>...>(0, rvs...);
 
 				return NIK_MACHINE_TS(c, i, l, t, r, T_store_U<LUs>..., decltype(value))
 					(lvs..., value);
@@ -453,8 +463,8 @@ namespace cctmp {
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
 			nik_ces auto result(LT lv, T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs)
 			{
-				const auto value = T_restore_T<RT>::template
-						result<l, t, r, LT, T_store_U<RUs>...>(lv, rvs...);
+				auto value = T_restore_T<RT>::template
+						result<l, t, r, decltype(0), T_store_U<RUs>...>(0, rvs...);
 
 				return NIK_MACHINE_TS(c, i, l, t, r, decltype(value), T_store_U<LUs>...)
 					(value, lvs...);
@@ -463,32 +473,32 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 
-// multiply:
+// atomic (generic):
 
 	// line:
 
-		template<>
-		struct T_continuant<CI::multiply>
+		template<auto F>
+		struct T_continuant<CI::atomic, F>
 		{
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
 			nik_ces auto result(Ts... vs)
 			{
 				nik_ce auto policy = CD<c>::value(i, 2);
 
-				return T_continuant<CI::multiply, genum_type{policy}>
-					::NIK_MACHINE_RESULT_TS(c, i, l, t, r, Ts...)(vs...);
+				return T_continuant<CI::atomic, genum_type{policy}, F>
+					::template result<c, i, l, t, r, Ts...>(vs...);
 			}
 		};
 
 	// to stack:
 
-		template<>
-		struct T_continuant<CI::multiply, genum_type{CP::to_stack}>
+		template<auto F>
+		struct T_continuant<CI::atomic, genum_type{CP::to_stack}, F>
 		{
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
 			nik_ces auto result(T v, Ts... vs)
 			{
-				auto value = (... * vs);
+				auto value = T_store_U<F>::template result<Ts...>(vs...);
 
 				return NIK_MACHINE_TS(c, i, l, t, r, T, Ts..., decltype(value))
 					(v, vs..., value);
@@ -497,16 +507,194 @@ namespace cctmp {
 
 	// to carry:
 
-		template<>
-		struct T_continuant<CI::multiply, genum_type{CP::to_carry}>
+		template<auto F>
+		struct T_continuant<CI::atomic, genum_type{CP::to_carry}, F>
 		{
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
 			nik_ces auto result(T v, Ts... vs)
 			{
-				auto value = (... * vs);
+				auto value = T_store_U<F>::template result<Ts...>(vs...);
 
 				return NIK_MACHINE_TS(c, i, l, t, r, decltype(value), Ts...)
 					(value, vs...);
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// comparison:
+
+	template<> struct T_continuant< CI::equal        > : public T_continuant< CI::atomic , U_equal        <> > { };
+	template<> struct T_continuant< CI::not_equal    > : public T_continuant< CI::atomic , U_not_equal    <> > { };
+	template<> struct T_continuant< CI::l_than       > : public T_continuant< CI::atomic , U_l_than       <> > { };
+	template<> struct T_continuant< CI::l_than_or_eq > : public T_continuant< CI::atomic , U_l_than_or_eq <> > { };
+	template<> struct T_continuant< CI::g_than       > : public T_continuant< CI::atomic , U_g_than       <> > { };
+	template<> struct T_continuant< CI::g_than_or_eq > : public T_continuant< CI::atomic , U_g_than_or_eq <> > { };
+
+/***********************************************************************************************************************/
+
+// arithmetic:
+
+	template<> struct T_continuant< CI::add      > : public T_continuant< CI::atomic , U_add      <> > { };
+	template<> struct T_continuant< CI::subtract > : public T_continuant< CI::atomic , U_subtract <> > { };
+	template<> struct T_continuant< CI::multiply > : public T_continuant< CI::atomic , U_multiply <> > { };
+	template<> struct T_continuant< CI::divide   > : public T_continuant< CI::atomic , U_divide   <> > { };
+	template<> struct T_continuant< CI::modulo   > : public T_continuant< CI::atomic , U_modulo   <> > { };
+
+/***********************************************************************************************************************/
+
+// constant:
+
+	// line:
+
+		template<>
+		struct T_continuant<CI::constant>
+		{
+			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
+			nik_ces auto result(Ts... vs)
+			{
+				nik_ce auto policy = CD<c>::value(i, 2);
+
+				return T_continuant<CI::constant, genum_type{policy}>
+					::template result<c, i, l, t, r, Ts...>(vs...);
+			}
+		};
+
+	// to stack:
+
+		template<>
+		struct T_continuant<CI::constant, genum_type{CP::to_stack}>
+		{
+			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
+			nik_ces auto result(Ts... vs)
+			{
+				nik_ce auto value = CD<c>::value(i, 1);
+
+				return NIK_MACHINE_TS(c, i, l, t, r, Ts..., decltype(value))
+					(vs..., value);
+			}
+		};
+
+	// to carry:
+
+		template<>
+		struct T_continuant<CI::constant, genum_type{CP::to_carry}>
+		{
+			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
+			nik_ces auto result(T v, Ts... vs)
+			{
+				nik_ce auto value = CD<c>::value(i, 1);
+
+				return NIK_MACHINE_TS(c, i, l, t, r, decltype(value), Ts...)
+					(value, vs...);
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// function:
+
+	// line:
+
+		template<>
+		struct T_continuant<CI::function>
+		{
+			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
+			nik_ces auto result(Ts... vs)
+			{
+				nik_ce auto policy = CD<c>::value(i, 2);
+
+				return T_continuant<CI::function, genum_type{policy}>
+					::template result<c, i, l, t, r, Ts...>(vs...);
+			}
+		};
+
+	// to stack:
+
+		template<>
+		struct T_continuant<CI::function, genum_type{CP::to_stack}>
+		{
+			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
+			nik_ces auto result(Ts... vs)
+			{
+				nik_ce auto n = CD<c>::value(i, 1);
+				nik_ce auto f = U_continuant_compound<c, n>;
+
+				return NIK_MACHINE_TS(c, i, l, t, r, Ts..., decltype(f))
+					(vs..., f);
+			}
+		};
+
+	// to carry:
+
+		template<>
+		struct T_continuant<CI::function, genum_type{CP::to_carry}>
+		{
+			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
+			nik_ces auto result(T v, Ts... vs)
+			{
+				nik_ce auto n = CD<c>::value(i, 1);
+				nik_ce auto f = U_continuant_compound<c, n>;
+
+				return NIK_MACHINE_TS(c, i, l, t, r, decltype(f), Ts...)
+					(f, vs...);
+			}
+		};
+
+/***********************************************************************************************************************/
+
+// recursive:
+
+	// line:
+
+		template<>
+		struct T_continuant<CI::recursive>
+		{
+			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
+			nik_ces auto result(Ts... vs)
+			{
+				nik_ce auto policy = CD<c>::value(i, 2);
+
+				return T_continuant<CI::recursive, genum_type{policy}>
+					::template result<c, i, l, t, r, Ts...>(vs...);
+			}
+		};
+
+	// to stack:
+
+		template<>
+		struct T_continuant<CI::recursive, genum_type{CP::to_stack}>
+		{
+			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
+			nik_ces auto result(Ts... vs)
+			{
+				nik_ce auto n    = CD<c>::value(i, 1);
+				nik_ce auto fpos = CD<c>::value(n, 1);
+				nik_ce auto tpos = CD<c>::value(n, 2);
+				nik_ce auto u    = at_<t, tpos>;
+				nik_ce auto f    = U_continuant_compound<u, c, fpos>;
+
+				return NIK_MACHINE_TS(c, i, l, t, r, Ts..., decltype(f))
+					(vs..., f);
+			}
+		};
+
+	// to carry:
+
+		template<>
+		struct T_continuant<CI::recursive, genum_type{CP::to_carry}>
+		{
+			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
+			nik_ces auto result(T v, Ts... vs)
+			{
+				nik_ce auto n    = CD<c>::value(i, 1);
+				nik_ce auto fpos = CD<c>::value(n, 1);
+				nik_ce auto tpos = CD<c>::value(n, 2);
+				nik_ce auto u    = at_<t, tpos>;
+				nik_ce auto f    = U_continuant_compound<u, c, fpos>;
+
+				return NIK_MACHINE_TS(c, i, l, t, r, decltype(f), Ts...)
+					(f, vs...);
 			}
 		};
 

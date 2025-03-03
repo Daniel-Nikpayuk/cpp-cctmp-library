@@ -29,6 +29,419 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// action:
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// atomic:
+
+/***********************************************************************************************************************/
+
+// instructions:
+
+	struct AtomicInstr
+	{
+		enum : genum_type
+		{
+			// comparison:
+
+				equal, not_equal, l_than, l_than_or_eq, g_than, g_than_or_eq,
+
+			// arithmetic:
+
+				add, subtract, multiply, divide, modulo,
+
+			// dimension
+
+				dimension
+		};
+	};
+
+	using AI = AtomicInstr;
+
+/***********************************************************************************************************************/
+
+// operator:
+
+	// comparison:
+
+		// equal:
+
+			template<typename...>
+			struct T_equal
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return (... == vs); }
+			};
+
+			template<typename T>
+			struct T_equal<T>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) -> T { return (... == vs); }
+			};
+
+		// not equal:
+
+			template<typename...>
+			struct T_not_equal
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return (... != vs); }
+			};
+
+			template<typename T>
+			struct T_not_equal<T>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) -> T { return (... != vs); }
+			};
+
+		// less than:
+
+			template<typename...>
+			struct T_l_than
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return (... < vs); }
+			};
+
+			template<typename T>
+			struct T_l_than<T>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) -> T { return (... < vs); }
+			};
+
+		// less than or equal:
+
+			template<typename...>
+			struct T_l_than_or_eq
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return (... <= vs); }
+			};
+
+			template<typename T>
+			struct T_l_than_or_eq<T>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) -> T { return (... <= vs); }
+			};
+
+		// greater than:
+
+			template<typename...>
+			struct T_g_than
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return (... > vs); }
+			};
+
+			template<typename T>
+			struct T_g_than<T>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) -> T { return (... > vs); }
+			};
+
+		// greater than or equal:
+
+			template<typename...>
+			struct T_g_than_or_eq
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return (... >= vs); }
+			};
+
+			template<typename T>
+			struct T_g_than_or_eq<T>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) -> T { return (... >= vs); }
+			};
+
+	// arithmetic:
+
+		// add:
+
+			template<typename...>
+			struct T_add
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return (... + vs); }
+			};
+
+			template<typename T>
+			struct T_add<T>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) -> T { return (... + vs); }
+			};
+
+		// subtract:
+
+			template<typename...>
+			struct T_subtract
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return (... - vs); }
+			};
+
+			template<typename T>
+			struct T_subtract<T>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) -> T { return (... - vs); }
+			};
+
+		// multiply:
+
+			template<typename...>
+			struct T_multiply
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return (... * vs); }
+			};
+
+			template<typename T>
+			struct T_multiply<T>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) -> T { return (... * vs); }
+			};
+
+		// divide:
+
+			template<typename...>
+			struct T_divide
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return (... / vs); }
+			};
+
+			template<typename T>
+			struct T_divide<T>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) -> T { return (... / vs); }
+			};
+
+		// modulo:
+
+			template<typename...>
+			struct T_modulo
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) { return (... % vs); }
+			};
+
+			template<typename T>
+			struct T_modulo<T>
+			{
+				template<typename... Ts>
+				nik_ces auto result(Ts... vs) -> T { return (... % vs); }
+			};
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename Type, typename SizeType>
+	struct atomic_action
+	{
+		nik_using_name_alias_scope_type		( type, Type)
+		nik_using_name_alias_scope_ctype	(ctype, Type)
+
+		nik_using_size_type_alias		(SizeType)
+
+		using method_type			= type(*)(ctype, ctype);
+		using action_type			= array<method_type, size_type, AI::dimension>;
+
+		// action:
+
+			nik_ces auto set_action() // call only once.
+			{
+				action_type action;
+				action.fullsize();
+
+			// comparison:
+
+				action[ AI::equal        ] = T_equal        <type>::template result<type, type>;
+				action[ AI::not_equal    ] = T_not_equal    <type>::template result<type, type>;
+				action[ AI::l_than       ] = T_l_than       <type>::template result<type, type>;
+				action[ AI::l_than_or_eq ] = T_l_than_or_eq <type>::template result<type, type>;
+				action[ AI::g_than       ] = T_g_than       <type>::template result<type, type>;
+				action[ AI::g_than_or_eq ] = T_g_than_or_eq <type>::template result<type, type>;
+
+			// arithmetic:
+
+				action[ AI::add          ] = T_add          <type>::template result<type, type>;
+				action[ AI::subtract     ] = T_subtract     <type>::template result<type, type>;
+				action[ AI::multiply     ] = T_multiply     <type>::template result<type, type>;
+				action[ AI::divide       ] = T_divide       <type>::template result<type, type>;
+				action[ AI::modulo       ] = T_modulo       <type>::template result<type, type>;
+
+				return action;
+			}
+
+			nik_ces auto action = set_action();
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+
+// compound:
+
+/***********************************************************************************************************************/
+
+// instructions:
+
+	struct CompoundInstr : public AtomicInstr
+	{
+		enum : genum_type
+		{
+			// core:
+
+				// dimension == 11
+				program = AI::dimension, halt,
+				function_specs, argument_specs,
+				argument, branch, invert, apply,
+				atomic, constant, function, recursive,
+				memory_to_stack, memory_to_stage = memory_to_stack, memory_to_carry,
+
+			// dimension
+
+				dimension
+		};
+	};
+
+	using CI = CompoundInstr;
+
+/***********************************************************************************************************************/
+
+// policies:
+
+	struct CompoundPolicy { enum : genum_type { to_stack, to_stage = to_stack, to_carry, dimension }; };
+
+	using CP = CompoundPolicy;
+
+/***********************************************************************************************************************/
+
+// fields:
+
+	struct CompoundProgram		{ enum : genum_type { action,  lines, atomic,   next, dimension }; };
+	struct CompoundArgument		{ enum : genum_type { action,  index,  start, finish, dimension }; };
+	struct CompoundBranch		{ enum : genum_type { action,   line,   none,   next, dimension }; };
+	struct CompoundApply		{ enum : genum_type { action, offset, policy,   next, dimension }; };
+	struct CompoundValue		{ enum : genum_type { action,   line, policy,   next, dimension }; };
+	struct CompoundMove		{ enum : genum_type { action,  start, finish,   next, dimension }; };
+
+	using CProg			= CompoundProgram;
+	using CArg			= CompoundArgument;
+	using CBran			= CompoundBranch;
+	using CAppl			= CompoundApply;
+	using CVal			= CompoundValue;
+	using CMove			= CompoundMove;
+
+/***********************************************************************************************************************/
+
+// interface:
+
+	template<typename EvalMethod, typename SizeType>
+	struct memory_action
+	{
+		using eval_method_type		= EvalMethod;
+		using eval_method_type_ptr	= typename alias<eval_method_type>::type_ptr;
+
+		nik_using_size_type_alias	(SizeType)
+
+		using method_type		= void(*)(eval_method_type_ptr);
+		using action_type		= array<method_type, size_type, CI::dimension>;
+
+	//	nik_ces void symbolic(eval_method_type_ptr) { } // do nothing.
+
+		// atomic:
+
+			template<size_type n>
+			nik_ces void atomic(eval_method_type_ptr eval_method) { eval_method->atomic(n); }
+
+		// core:
+
+			nik_ces void branch(eval_method_type_ptr eval_method)
+				{ eval_method->run_branch(); }
+
+			nik_ces void invert(eval_method_type_ptr eval_method)
+				{ eval_method->run_invert(); }
+
+			nik_ces void apply(eval_method_type_ptr eval_method)
+				{ eval_method->run_apply(); }
+
+			nik_ces void constant(eval_method_type_ptr eval_method)
+				{ eval_method->run_constant(); }
+
+			nik_ces void function(eval_method_type_ptr eval_method)
+				{ eval_method->run_function(); }
+
+			nik_ces void argument(eval_method_type_ptr eval_method)
+				{ eval_method->run_argument(); }
+
+			nik_ces void memory_to_stage(eval_method_type_ptr eval_method)
+				{ eval_method->run_memory_to_stage(); }
+
+			nik_ces void memory_to_carry(eval_method_type_ptr eval_method)
+				{ eval_method->run_memory_to_carry(); }
+
+		// action:
+
+			nik_ces auto set_action() // call only once.
+			{
+				action_type action;
+				action.fullsize();
+
+				// comparison:
+
+					action[ CI::equal        ] = atomic < AI::equal        >;
+					action[ CI::not_equal    ] = atomic < AI::not_equal    >;
+					action[ CI::l_than       ] = atomic < AI::l_than       >;
+					action[ CI::l_than_or_eq ] = atomic < AI::l_than_or_eq >;
+					action[ CI::g_than       ] = atomic < AI::g_than       >;
+					action[ CI::g_than_or_eq ] = atomic < AI::g_than_or_eq >;
+
+				// arithmetic:
+
+					action[ CI::add          ] = atomic < AI::add          >;
+					action[ CI::subtract     ] = atomic < AI::subtract     >;
+					action[ CI::multiply     ] = atomic < AI::multiply     >;
+					action[ CI::divide       ] = atomic < AI::divide       >;
+					action[ CI::modulo       ] = atomic < AI::modulo       >;
+
+				// core:
+
+					action[ CI::argument        ] = argument        ;
+					action[ CI::branch          ] = branch          ;
+					action[ CI::invert          ] = invert          ;
+					action[ CI::apply           ] = apply           ;
+					action[ CI::constant        ] = constant        ;
+					action[ CI::function        ] = function        ;
+					action[ CI::memory_to_stage ] = memory_to_stage ;
+					action[ CI::memory_to_carry ] = memory_to_carry ;
+
+				return action;
+			}
+
+			nik_ces auto action = set_action();
+
+			nik_ces void execute(size_ctype instr, eval_method_type_ptr eval_method)
+				{ action[instr](eval_method); }
+	};
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 
 // model:
 
@@ -258,250 +671,6 @@ namespace cctmp {
 				nik_ce size_type counter() const { return model->counter(); }
 				nik_ce void set_counter(size_ctype c) { model->set_counter(c); }
 				nik_ce void inc_counter(size_ctype n = 1) { model->inc_counter(n); }
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// action:
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// atomic:
-
-/***********************************************************************************************************************/
-
-// instructions:
-
-	struct AtomicInstr
-	{
-		enum : genum_type
-		{
-			// compare:
-
-				equal, not_equal, l_than, l_than_or_eq, g_than, g_than_or_eq,
-
-			// arithmetic:
-
-				add, subtract, multiply, divide, modulo,
-
-			// dimension
-
-				dimension
-		};
-	};
-
-	using AI = AtomicInstr;
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename Type, typename SizeType>
-	struct atomic_action
-	{
-		nik_using_name_alias_scope_type		( type, Type)
-		nik_using_name_alias_scope_ctype	(ctype, Type)
-
-		nik_using_size_type_alias		(SizeType)
-
-		using method_type			= type(*)(ctype, ctype);
-		using action_type			= array<method_type, size_type, AI::dimension>;
-
-		// compare:
-
-			nik_ces type equal        (ctype v1, ctype v2) { return (v1 == v2); }
-			nik_ces type not_equal    (ctype v1, ctype v2) { return (v1 != v2); }
-			nik_ces type l_than       (ctype v1, ctype v2) { return (v1 <  v2); }
-			nik_ces type l_than_or_eq (ctype v1, ctype v2) { return (v1 <= v2); }
-			nik_ces type g_than       (ctype v1, ctype v2) { return (v1 >  v2); }
-			nik_ces type g_than_or_eq (ctype v1, ctype v2) { return (v1 >= v2); }
-
-		// arithmetic:
-
-			nik_ces type add          (ctype v1, ctype v2) { return (v1  + v2); }
-			nik_ces type subtract     (ctype v1, ctype v2) { return (v1  - v2); }
-			nik_ces type multiply     (ctype v1, ctype v2) { return (v1  * v2); }
-			nik_ces type divide       (ctype v1, ctype v2) { return (v1  / v2); }
-			nik_ces type modulo       (ctype v1, ctype v2) { return (v1  % v2); }
-
-		// action:
-
-			nik_ces auto set_action() // call only once.
-			{
-				action_type action;
-				action.fullsize();
-
-				// compare:
-
-					action[ AI::equal        ] = equal        ;
-					action[ AI::not_equal    ] = not_equal    ;
-					action[ AI::l_than       ] = l_than       ;
-					action[ AI::l_than_or_eq ] = l_than_or_eq ;
-					action[ AI::g_than       ] = g_than       ;
-					action[ AI::g_than_or_eq ] = g_than_or_eq ;
-
-				// arithmetic:
-
-					action[ AI::add          ] = add          ;
-					action[ AI::subtract     ] = subtract     ;
-					action[ AI::multiply     ] = multiply     ;
-					action[ AI::divide       ] = divide       ;
-					action[ AI::modulo       ] = modulo       ;
-
-				return action;
-			}
-
-			nik_ces auto action = set_action();
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// compound:
-
-/***********************************************************************************************************************/
-
-// instructions:
-
-	struct CompoundInstr : public AtomicInstr
-	{
-		enum : genum_type
-		{
-			// core:
-
-				program = AI::dimension, split, halt,
-				define_argument, branch, invert, apply, constant, function, argument,
-				memory_to_stack, memory_to_stage = memory_to_stack, memory_to_carry,
-
-			// dimension
-
-				dimension
-		};
-	};
-
-	using CI = CompoundInstr;
-
-/***********************************************************************************************************************/
-
-// policies:
-
-	struct CompoundPolicy { enum : genum_type { to_stack, to_stage = to_stack, to_carry, dimension }; };
-
-	using CP = CompoundPolicy;
-
-/***********************************************************************************************************************/
-
-// fields:
-
-	struct CompoundProgram		{ enum : genum_type { action,  lines, atomic,   next, dimension }; };
-	struct CompoundArgument		{ enum : genum_type { action,  index,  start, finish, dimension }; };
-	struct CompoundBranch		{ enum : genum_type { action,   line,   none,   next, dimension }; };
-	struct CompoundApply		{ enum : genum_type { action, offset, policy,   next, dimension }; };
-	struct CompoundValue		{ enum : genum_type { action,   line, policy,   next, dimension }; };
-	struct CompoundMove		{ enum : genum_type { action,  start, finish,   next, dimension }; };
-
-	using CProg			= CompoundProgram;
-	using CArg			= CompoundArgument;
-	using CBran			= CompoundBranch;
-	using CAppl			= CompoundApply;
-	using CVal			= CompoundValue;
-	using CMove			= CompoundMove;
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename EvalMethod, typename SizeType>
-	struct memory_action
-	{
-		using eval_method_type		= EvalMethod;
-		using eval_method_type_ptr	= typename alias<eval_method_type>::type_ptr;
-
-		nik_using_size_type_alias	(SizeType)
-
-		using method_type		= void(*)(eval_method_type_ptr);
-		using action_type		= array<method_type, size_type, CI::dimension>;
-
-		nik_ces void symbolic(eval_method_type_ptr) { } // do nothing.
-
-		// atomic:
-
-			template<size_type n>
-			nik_ces void atomic(eval_method_type_ptr eval_method) { eval_method->atomic(n); }
-
-		// core:
-
-			nik_ces void branch(eval_method_type_ptr eval_method)
-				{ eval_method->run_branch(); }
-
-			nik_ces void invert(eval_method_type_ptr eval_method)
-				{ eval_method->run_invert(); }
-
-			nik_ces void apply(eval_method_type_ptr eval_method)
-				{ eval_method->run_apply(); }
-
-			nik_ces void constant(eval_method_type_ptr eval_method)
-				{ eval_method->run_constant(); }
-
-			nik_ces void function(eval_method_type_ptr eval_method)
-				{ eval_method->run_function(); }
-
-			nik_ces void argument(eval_method_type_ptr eval_method)
-				{ eval_method->run_argument(); }
-
-			nik_ces void memory_to_stage(eval_method_type_ptr eval_method)
-				{ eval_method->run_memory_to_stage(); }
-
-			nik_ces void memory_to_carry(eval_method_type_ptr eval_method)
-				{ eval_method->run_memory_to_carry(); }
-
-		// action:
-
-			nik_ces auto set_action() // call only once.
-			{
-				action_type action;
-				action.fullsize();
-
-				// compare:
-
-					action[ CI::equal        ] = atomic < AI::equal        >;
-					action[ CI::not_equal    ] = atomic < AI::not_equal    >;
-					action[ CI::l_than       ] = atomic < AI::l_than       >;
-					action[ CI::l_than_or_eq ] = atomic < AI::l_than_or_eq >;
-					action[ CI::g_than       ] = atomic < AI::g_than       >;
-					action[ CI::g_than_or_eq ] = atomic < AI::g_than_or_eq >;
-
-				// arithmetic:
-
-					action[ CI::add          ] = atomic < AI::add          >;
-					action[ CI::subtract     ] = atomic < AI::subtract     >;
-					action[ CI::multiply     ] = atomic < AI::multiply     >;
-					action[ CI::divide       ] = atomic < AI::divide       >;
-					action[ CI::modulo       ] = atomic < AI::modulo       >;
-
-				// core:
-
-					action[ CI::program         ] = symbolic        ;
-					action[ CI::define_argument ] = symbolic        ;
-					action[ CI::branch          ] = branch          ;
-					action[ CI::invert          ] = invert          ;
-					action[ CI::apply           ] = apply           ;
-					action[ CI::constant        ] = constant        ;
-					action[ CI::function        ] = function        ;
-					action[ CI::argument        ] = argument        ;
-					action[ CI::memory_to_stage ] = memory_to_stage ;
-					action[ CI::memory_to_carry ] = memory_to_carry ;
-
-				return action;
-			}
-
-			nik_ces auto action = set_action();
-
-			nik_ces void execute(size_ctype instr, eval_method_type_ptr eval_method)
-				{ action[instr](eval_method); }
 	};
 
 /***********************************************************************************************************************/

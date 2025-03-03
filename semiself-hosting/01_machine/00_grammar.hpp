@@ -71,26 +71,47 @@ namespace cctmp {
 
 	// unsigned:
 
-		nik_ce auto U_unsigned_char			= U_store_T < unsigned char      >;
-		nik_ce auto U_unsigned_short			= U_store_T < unsigned short     >;
-		nik_ce auto U_unsigned_int			= U_store_T < unsigned int       >;
-		nik_ce auto U_unsigned_long			= U_store_T < unsigned long      >;
-		nik_ce auto U_unsigned_long_long		= U_store_T < unsigned long long >;
+		nik_ce auto U_unsigned_char		= U_store_T < unsigned char      >;
+		nik_ce auto U_unsigned_short		= U_store_T < unsigned short     >;
+		nik_ce auto U_unsigned_int		= U_store_T < unsigned int       >;
+		nik_ce auto U_unsigned_long		= U_store_T < unsigned long      >;
+		nik_ce auto U_unsigned_long_long	= U_store_T < unsigned long long >;
 
 	// signed:
 
-		nik_ce auto U_signed_char			= U_store_T < signed char      >;
-		nik_ce auto U_signed_short			= U_store_T < signed short     >;
-		nik_ce auto U_signed_int			= U_store_T < signed int       >;
-		nik_ce auto U_signed_long			= U_store_T < signed long      >;
-		nik_ce auto U_signed_long_long			= U_store_T < signed long long >;
+		nik_ce auto U_signed_char		= U_store_T < signed char      >;
+		nik_ce auto U_signed_short		= U_store_T < signed short     >;
+		nik_ce auto U_signed_int		= U_store_T < signed int       >;
+		nik_ce auto U_signed_long		= U_store_T < signed long      >;
+		nik_ce auto U_signed_long_long		= U_store_T < signed long long >;
 
 	// auto:
 
-		nik_ce auto U_auto_bool				= U_store_T < decltype( false ) >;
-		nik_ce auto U_auto_char				= U_store_T < decltype(  '\0' ) >;
-		nik_ce auto U_auto_int				= U_store_T < decltype(    0  ) >;
-		nik_ce auto U_auto_float			= U_store_T < decltype(  0.0  ) >;
+		nik_ce auto U_auto_bool			= U_store_T < decltype( false ) >;
+		nik_ce auto U_auto_char			= U_store_T < decltype(  '\0' ) >;
+		nik_ce auto U_auto_int			= U_store_T < decltype(    0  ) >;
+		nik_ce auto U_auto_float		= U_store_T < decltype(  0.0  ) >;
+
+/***********************************************************************************************************************/
+
+// operator:
+
+	// comparison:
+
+		template<typename... Ts> nik_ce auto U_equal			= U_store_T < T_equal        <Ts...> >;
+		template<typename... Ts> nik_ce auto U_not_equal		= U_store_T < T_not_equal    <Ts...> >;
+		template<typename... Ts> nik_ce auto U_l_than			= U_store_T < T_l_than       <Ts...> >;
+		template<typename... Ts> nik_ce auto U_l_than_or_eq		= U_store_T < T_l_than_or_eq <Ts...> >;
+		template<typename... Ts> nik_ce auto U_g_than			= U_store_T < T_g_than       <Ts...> >;
+		template<typename... Ts> nik_ce auto U_g_than_or_eq		= U_store_T < T_g_than_or_eq <Ts...> >;
+
+	// arithmetic:
+
+		template<typename... Ts> nik_ce auto U_add			= U_store_T < T_add      <Ts...> >;
+		template<typename... Ts> nik_ce auto U_subtract			= U_store_T < T_subtract <Ts...> >;
+		template<typename... Ts> nik_ce auto U_multiply			= U_store_T < T_multiply <Ts...> >;
+		template<typename... Ts> nik_ce auto U_divide			= U_store_T < T_divide   <Ts...> >;
+		template<typename... Ts> nik_ce auto U_modulo			= U_store_T < T_modulo   <Ts...> >;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -101,8 +122,7 @@ namespace cctmp {
 
 // auto:
 
-	// T_pack_Vs was defined in 00/00.
-	using T_null_Vs = T_pack_Vs<>;
+	using T_null_Vs = T_pack_Vs<>; // T_pack_Vs was defined in 00/00.
 
 	template<auto... Vs>
 	nik_ce auto U_pack_Vs = store<T_pack_Vs<Vs...>*>;
@@ -248,105 +268,6 @@ namespace cctmp {
 	using gchar_ctype		= global_char_type const;
 	nik_ce auto U_gchar_type	= U_store_T<gchar_type>;
 	nik_ce auto U_gchar_ctype	= U_store_T<gchar_ctype>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// space:
-
-		// The design privileges modularizing names, not grammar.
-		// Given this, names are specified as enums within structs
-		// rather than enum structs.
-
-	template<gkey_type, gkey_type, gkey_type, auto...> struct T_grammar; // no default definition.
-
-	template<auto Syn, auto Key, auto... Vs>
-	nik_ce auto U_grammar = U_store_T<T_grammar<Syn, Key, Vs...>>;
-
-/***********************************************************************************************************************/
-
-// shapes:
-
-	struct Shape
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-			argument , parameter ,
-			dimension
-		};
-	};
-
-/***********************************************************************************************************************/
-
-// patterns:
-
-	struct Pattern
-	{
-		enum : gkey_type
-		{
-			id = 0, identity = id, // convenience for default params.
-			overload , number ,
-			abstract , access , boolean , pointer ,
-			dimension
-		};
-	};
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// argument:
-
-	// no default definition.
-
-	template<auto Key, auto... Vs>       using T_argument = T_grammar<Shape::argument, Key, Vs...>;
-	template<auto Key, auto... Vs> nik_ce auto U_argument = U_grammar<Shape::argument, Key, Vs...>;
-
-/***********************************************************************************************************************/
-
-// overload:
-
-	template<auto... Vs> using T_arg_overload		= T_argument<Pattern::overload, Vs...>;
-	template<auto... Vs> nik_ce auto U_arg_overload		= U_argument<Pattern::overload, Vs...>;
-
-// number:
-
-	template<auto... Vs> using T_arg_number			= T_argument<Pattern::number, Vs...>;
-	template<auto... Vs> nik_ce auto U_arg_number		= U_argument<Pattern::number, Vs...>;
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// parameter:
-
-	template<gkey_type Key, gkey_type Op, auto... Vs>
-	struct T_grammar<Shape::parameter, Key, Op, Vs...> { }; // empty default definition.
-
-	template<auto Key, auto... Vs>       using T_parameter = T_grammar<Shape::parameter, Key, Vs...>;
-	template<auto Key, auto... Vs> nik_ce auto U_parameter = U_grammar<Shape::parameter, Key, Vs...>;
-
-/***********************************************************************************************************************/
-
-// abstract:
-
-	template<auto... Vs> using T_par_abstract		= T_parameter<Pattern::abstract, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_abstract		= U_parameter<Pattern::abstract, Vs...>;
-
-// access:
-
-	template<auto... Vs> using T_par_access			= T_parameter<Pattern::access, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_access		= U_parameter<Pattern::access, Vs...>;
-
-// boolean:
-
-	template<auto... Vs> using T_par_boolean		= T_parameter<Pattern::boolean, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_boolean		= U_parameter<Pattern::boolean, Vs...>;
-
-// pointer:
-
-	template<auto... Vs> using T_par_pointer		= T_parameter<Pattern::pointer, Vs...>;
-	template<auto... Vs> nik_ce auto U_par_pointer		= U_parameter<Pattern::pointer, Vs...>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

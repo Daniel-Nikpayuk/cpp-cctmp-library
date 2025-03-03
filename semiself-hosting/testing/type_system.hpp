@@ -480,10 +480,182 @@
 
 /***********************************************************************************************************************/
 
-// function:
+// function (continuation constructing):
 
 	template<typename SizeType>
-	struct concord_test_function : public concord_test<SizeType>
+	struct concord_test_cc_function : public concord_test<SizeType>
+	{
+		using base		= concord_test<SizeType>;
+		using concord_type	= typename base::concord_type;
+
+		using size_type		= SizeType;
+		using icon_type		= typename base::icon_type;
+		using sign_type		= typename base::sign_type;
+		using CI		= cctmp::CompoundInstr;
+		using CP		= cctmp::CompoundPolicy;
+
+		// identity:
+
+			constexpr static size_type identity_contr[12] =
+			{
+				CI::program         , 3 ,            0 , 2 , // 00
+				CI::argument_specs  , 0 ,            0 , 1 , // 01
+				CI::argument        , 1 , CP::to_carry , 0   // 02
+			};
+
+		// square:
+
+			constexpr static size_type square_contr[32] =
+			{
+				CI::program         , 6 ,            0 , 2 , // 00: action,  lines, atomic,   next
+				CI::argument_specs  , 0 ,            0 , 1 , // 01: action,  index,  start, finish
+				CI::function        , 6 , CP::to_stack , 1 , // 02: action, inline, policy,   next
+				CI::argument        , 1 , CP::to_stack , 1 , // 03: action, inline, policy,   next
+				CI::argument        , 1 , CP::to_stack , 1 , // 04: action, inline, policy,   next
+				CI::apply           , 2 , CP::to_carry , 0 , // 05: action, offset, policy,   next
+			// multiply:
+				CI::program         , 2 ,            1 , 1 , // 06: action,  lines, atomic,   next
+				CI::multiply        , 0 , CP::to_carry , 0   // 07: action,   none, policy,   next
+			};
+
+		// sum of squares:
+
+			constexpr static size_type sum_of_sq_contr[84] =
+			{
+				CI::program         , 11 ,            0 , 3 ,	// 00
+				CI::argument_specs  ,  0 ,            0 , 1 ,	// 01 x
+				CI::argument_specs  ,  1 ,            1 , 2 ,	// 02 y
+				CI::function        , 19 , CP::to_stack , 1 ,	// 03 +      0
+				CI::function        , 11 , CP::to_stack , 1 ,	// 04 square 1
+				CI::argument        ,  1 , CP::to_stack , 1 ,	// 05 x      2
+				CI::apply           ,  4 , CP::to_stack , 1 ,	// 06
+				CI::function        , 11 , CP::to_stack , 1 ,	// 07 square 1
+				CI::argument        ,  2 , CP::to_stack , 1 ,	// 08 y      2
+				CI::apply           ,  5 , CP::to_stack , 1 ,	// 09
+				CI::apply           ,  3 , CP::to_carry , 0 ,	// 10
+			// square:
+				CI::program         ,  6 ,            0 , 2 ,	// 11
+				CI::argument_specs  ,  0 ,            0 , 1 ,	// 12 z
+				CI::function        , 17 , CP::to_stack , 1 ,	// 13 * 0
+				CI::argument        , 12 , CP::to_stack , 1 ,	// 14 z 1
+				CI::argument        , 12 , CP::to_stack , 1 ,	// 15 z 2
+				CI::apply           ,  2 , CP::to_carry , 0 ,	// 16
+			// multiply:
+				CI::program         ,  2 ,            1 , 1 ,	// 17
+				CI::multiply        ,  0 , CP::to_carry , 0 ,	// 18
+			// add:
+				CI::program         ,  2 ,            1 , 1 ,	// 19
+				CI::add             ,  0 , CP::to_carry , 0	// 20
+			};
+
+		// factorial:
+
+			constexpr static size_type factorial_contr[100] =
+			{
+				CI::program         , 17 ,            0 , 3 ,	// 00
+				CI::function_specs  ,  0 ,            0 , 0 ,	// 01 f
+				CI::argument_specs  ,  0 ,            0 , 1 ,	// 02 n
+				CI::function        , 21 , CP::to_stack , 1 ,	// 03 = 0
+				CI::argument        ,  2 , CP::to_stack , 1 ,	// 04 n 1
+				CI::constant        ,  0 , CP::to_stack , 1 ,	// 05 0 2
+				CI::apply           ,  2 , CP::to_carry , 1 ,	// 06
+				CI::branch          , 23 ,            0 , 1 ,	// 07 1
+				CI::function        , 17 , CP::to_stack , 1 ,	// 08 * 0
+				CI::argument        ,  2 , CP::to_stack , 1 ,	// 09 n 1
+				CI::recursive       ,  1 , CP::to_stack , 1 ,	// 10 f 2
+				CI::function        , 19 , CP::to_stack , 1 ,	// 11 - 3
+				CI::argument        ,  2 , CP::to_stack , 1 ,	// 12 n 4
+				CI::constant        ,  1 , CP::to_stack , 1 ,	// 13 1 5
+				CI::apply           ,  5 , CP::to_stack , 1 ,	// 14
+				CI::apply           ,  4 , CP::to_stack , 1 ,	// 15
+				CI::apply           ,  2 , CP::to_carry , 0 ,	// 16
+			// multiply:
+				CI::program         ,  2 ,            1 , 1 ,	// 17
+				CI::multiply        ,  0 , CP::to_carry , 0 ,	// 18
+			// subtract:
+				CI::program         ,  2 ,            1 , 1 ,	// 19
+				CI::subtract        ,  0 , CP::to_carry , 0 ,	// 20
+			// equal:
+				CI::program         ,  2 ,            1 , 1 ,	// 21
+				CI::equal           ,  0 , CP::to_carry , 0 ,	// 22
+			// one:
+				CI::program         ,  2 ,            1 , 1 ,	// 23
+				CI::constant        ,  1 , CP::to_carry , 0	// 24
+			};
+
+		// fibonacci:
+
+			constexpr static size_type fibonacci_contr[120] =
+			{
+				CI::program         , 22 ,            0 , 3 ,	// 00
+				CI::function_specs  ,  0 ,            0 , 0 ,	// 01 f
+				CI::argument_specs  ,  0 ,            0 , 1 ,	// 02 n
+				CI::function        , 26 , CP::to_stack , 1 ,	// 03 < 0
+				CI::argument        ,  2 , CP::to_stack , 1 ,	// 04 n 1
+				CI::constant        ,  2 , CP::to_stack , 1 ,	// 05 2 2
+				CI::apply           ,  2 , CP::to_carry , 1 ,	// 06
+				CI::branch          , 28 ,            0 , 1 ,	// 07 1
+				CI::function        , 22 , CP::to_stack , 1 ,	// 08 + 0
+				CI::recursive       ,  1 , CP::to_stack , 1 ,	// 09 f 1
+				CI::function        , 24 , CP::to_stack , 1 ,	// 10 - 2
+				CI::argument        ,  2 , CP::to_stack , 1 ,	// 11 n 3
+				CI::constant        ,  1 , CP::to_stack , 1 ,	// 12 1 4
+				CI::apply           ,  4 , CP::to_stack , 1 ,	// 13
+				CI::apply           ,  3 , CP::to_stack , 1 ,	// 14
+				CI::recursive       ,  1 , CP::to_stack , 1 ,	// 15 f 2
+				CI::function        , 24 , CP::to_stack , 1 ,	// 16 - 3
+				CI::argument        ,  2 , CP::to_stack , 1 ,	// 17 n 4
+				CI::constant        ,  2 , CP::to_stack , 1 ,	// 18 2 5
+				CI::apply           ,  5 , CP::to_stack , 1 ,	// 19
+				CI::apply           ,  4 , CP::to_stack , 1 ,	// 20
+				CI::apply           ,  2 , CP::to_carry , 0 ,	// 21
+			// add:
+				CI::program         ,  2 ,            1 , 1 ,	// 22
+				CI::add             ,  0 , CP::to_carry , 0 ,	// 23
+			// subtract:
+				CI::program         ,  2 ,            1 , 1 ,	// 24
+				CI::subtract        ,  0 , CP::to_carry , 0 ,	// 25
+			// less than:
+				CI::program         ,  2 ,            1 , 1 ,	// 26
+				CI::l_than          ,  0 , CP::to_carry , 0 ,	// 27
+			// one:
+				CI::program         ,  2 ,            1 , 1 ,	// 28
+				CI::constant        ,  1 , CP::to_carry , 0	// 29
+			};
+
+		icon_type ring8_icon;
+		icon_type unary_icon;
+		icon_type binary_icon;
+
+		sign_type identity_sign;
+		sign_type square_sign;
+		sign_type sum_of_sq_sign;
+		sign_type factorial_sign;
+		sign_type fibonacci_sign;
+
+		constexpr concord_test_cc_function()
+		{
+			auto ring_method     = base::ring_method();
+			auto function_method = base::function_method();
+
+			ring8_icon           = ring_method    .declare_type(8);
+			unary_icon           = function_method.declare_type({ ring8_icon, ring8_icon });
+			binary_icon          = function_method.declare_type({ ring8_icon, ring8_icon, ring8_icon });
+
+			identity_sign        = function_method.define_abstract( unary_icon,  identity_contr);
+			square_sign          = function_method.define_abstract( unary_icon,    square_contr);
+			sum_of_sq_sign       = function_method.define_abstract(binary_icon, sum_of_sq_contr);
+			factorial_sign       = function_method.define_abstract( unary_icon, factorial_contr);
+			fibonacci_sign       = function_method.define_abstract( unary_icon, fibonacci_contr);
+		}
+	};
+
+/***********************************************************************************************************************/
+
+// function (virtual machine):
+
+	template<typename SizeType>
+	struct concord_test_vm_function : public concord_test<SizeType>
 	{
 		using base		= concord_test<SizeType>;
 		using concord_type	= typename base::concord_type;
@@ -500,24 +672,23 @@
 			constexpr static size_type identity_contr[12] =
 			{
 				CI::program         , 3 ,            0 , 2 , // 00
-				CI::define_argument , 0 ,            0 , 1 , // 01
+				CI::argument_specs  , 0 ,            0 , 1 , // 01
 				CI::argument        , 1 , CP::to_carry , 0   // 02
 			};
 
 		// square:
 
-			constexpr static size_type square_contr[36] =
+			constexpr static size_type square_contr[32] =
 			{
-				CI::program         , 7 ,            0 , 3 , // 00: action,  lines, atomic,   next
-				CI::define_argument , 0 ,            0 , 1 , // 01: action,  index,  start, finish
-				CI::split           , 2 ,            0 , 3 , // 02: action, global,  start, finish
-				CI::function        , 7 , CP::to_stack , 1 , // 03: action, inline, policy,   next
+				CI::program         , 6 ,            0 , 2 , // 00: action,  lines, atomic,   next
+				CI::argument_specs  , 0 ,            0 , 1 , // 01: action,  index,  start, finish
+				CI::function        , 6 , CP::to_stack , 1 , // 02: action, inline, policy,   next
+				CI::argument        , 1 , CP::to_stack , 1 , // 03: action, inline, policy,   next
 				CI::argument        , 1 , CP::to_stack , 1 , // 04: action, inline, policy,   next
-				CI::argument        , 1 , CP::to_stack , 1 , // 05: action, inline, policy,   next
-				CI::apply           , 2 , CP::to_carry , 0 , // 06: action, inline, policy,   next
+				CI::apply           , 0 , CP::to_carry , 0 , // 05: action, offset, policy,   next
 			// multiply:
-				CI::program         , 2 ,            1 , 1 , // 07: action,  lines, atomic,   next
-				CI::multiply        , 0 , CP::to_carry , 0   // 08: action,   none, policy,   next
+				CI::program         , 2 ,            1 , 1 , // 06: action,  lines, atomic,   next
+				CI::multiply        , 0 , CP::to_carry , 0   // 07: action,   none, policy,   next
 			};
 
 		// sum of squares:
@@ -525,8 +696,8 @@
 			constexpr static size_type sum_of_sq_contr[84] =
 			{
 				CI::program         , 11 ,            0 , 3 ,	// 00
-				CI::define_argument ,  0 ,            0 , 1 ,	// 01 x
-				CI::define_argument ,  1 ,            1 , 2 ,	// 02 y
+				CI::argument_specs  ,  0 ,            0 , 1 ,	// 01 x
+				CI::argument_specs  ,  1 ,            1 , 2 ,	// 02 y
 				CI::function        , 19 , CP::to_stack , 1 ,	// 03 +      0
 				CI::function        , 11 , CP::to_stack , 1 ,	// 04 square 1
 				CI::argument        ,  1 , CP::to_stack , 1 ,	// 05 x      2
@@ -537,7 +708,7 @@
 				CI::apply           ,  0 , CP::to_carry , 0 ,	// 10
 			// square:
 				CI::program         ,  6 ,            0 , 2 ,	// 11
-				CI::define_argument ,  0 ,            0 , 1 ,	// 12 z
+				CI::argument_specs  ,  0 ,            0 , 1 ,	// 12 z
 				CI::function        , 17 , CP::to_stack , 1 ,	// 13 * 0
 				CI::argument        , 12 , CP::to_stack , 1 ,	// 14 z 1
 				CI::argument        , 12 , CP::to_stack , 1 ,	// 15 z 2
@@ -555,7 +726,7 @@
 			constexpr static size_type factorial_contr[96] =
 			{
 				CI::program         , 16 ,            0 , 2 ,	// 00
-				CI::define_argument ,  0 ,            0 , 1 ,	// 01 n
+				CI::argument_specs  ,  0 ,            0 , 1 ,	// 01 n
 				CI::function        , 20 , CP::to_stack , 1 ,	// 02 = 0
 				CI::argument        ,  1 , CP::to_stack , 1 ,	// 03 n 1
 				CI::constant        ,  0 , CP::to_stack , 1 ,	// 04 0 2
@@ -589,7 +760,7 @@
 			constexpr static size_type fibonacci_contr[116] =
 			{
 				CI::program         , 21 ,            0 , 2 ,	// 00
-				CI::define_argument ,  0 ,            0 , 1 ,	// 01 n
+				CI::argument_specs  ,  0 ,            0 , 1 ,	// 01 n
 				CI::function        , 25 , CP::to_stack , 1 ,	// 02 < 0
 				CI::argument        ,  1 , CP::to_stack , 1 ,	// 03 n 1
 				CI::constant        ,  2 , CP::to_stack , 1 ,	// 04 2 2
@@ -633,7 +804,7 @@
 		sign_type factorial_sign;
 		sign_type fibonacci_sign;
 
-		constexpr concord_test_function()
+		constexpr concord_test_vm_function()
 		{
 			auto ring_method     = base::ring_method();
 			auto function_method = base::function_method();
@@ -658,7 +829,7 @@
 
 	// identity:
 
-		template<typename SizeType>
+		template<template<typename> typename concord_test_function, typename SizeType>
 		struct static_identity_test
 		{
 			constexpr static auto value		= concord_test_function<SizeType>{};
@@ -673,7 +844,7 @@
 
 	// square:
 
-		template<typename SizeType>
+		template<template<typename> typename concord_test_function, typename SizeType>
 		struct static_square_test
 		{
 			constexpr static auto value		= concord_test_function<SizeType>{};
@@ -688,8 +859,8 @@
 
 	// sum of squares:
 
-		template<typename SizeType>
-		struct static_sum_of_sqs_test
+		template<template<typename> typename concord_test_function, typename SizeType>
+		struct static_sum_of_sq_test
 		{
 			constexpr static auto value		= concord_test_function<SizeType>{};
 			using type				= decltype(value);
@@ -698,12 +869,12 @@
 			using size_type				= typename concord_type::size_type;
 			using size_ctype			= typename concord_type::size_ctype;
 
-			constexpr static auto & function	= value.sum_of_sqs_sign;
+			constexpr static auto & function	= value.sum_of_sq_sign;
 		};
 
 	// factorial:
 
-		template<typename SizeType>
+		template<template<typename> typename concord_test_function, typename SizeType>
 		struct static_factorial_test
 		{
 			constexpr static auto value		= concord_test_function<SizeType>{};
@@ -718,7 +889,7 @@
 
 	// fibonacci:
 
-		template<typename SizeType>
+		template<template<typename> typename concord_test_function, typename SizeType>
 		struct static_fibonacci_test
 		{
 			constexpr static auto value		= concord_test_function<SizeType>{};
