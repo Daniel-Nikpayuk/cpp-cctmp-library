@@ -58,8 +58,6 @@ namespace cctmp {
 			nik_ce function_cmethod_disjoint() : base{} { }
 			nik_ce function_cmethod_disjoint(const facade & f) : base{f} { }
 
-		protected:
-
 			// contr:
 
 				nik_ce auto get_contr(sign_ctype_ref sign) const
@@ -219,9 +217,9 @@ namespace cctmp {
 			using sign_type			= typename base::sign_type;
 			using sign_ctype_ref		= typename base::sign_ctype_ref;
 
-			using machine_type		= machine<type, size_type, CarrySize, VerseSize, StageSize>;
-			using carry_type		= typename machine_type::carry_type;
-			using verse_type		= typename machine_type::verse_type;
+			using memory_type		= memory<type, size_type, CarrySize, VerseSize, StageSize>;
+			using carry_type		= typename memory_type::carry_type;
+			using verse_type		= typename memory_type::verse_type;
 
 		protected:
 
@@ -234,23 +232,23 @@ namespace cctmp {
 			using atomic_action_type	= Atomic<type, size_type>;
 			using action_type		= Action<eval_cmethod_disjoint, size_type>;
 
-			using machine_cmethod_type	= resolve_cmethod<machine_type, machine_cmethod>;
-			using  machine_method_type	=  resolve_method<machine_type,  machine_method>;
+			using memory_cmethod_type	= resolve_cmethod<memory_type, memory_cmethod>;
+			using  memory_method_type	=  resolve_method<memory_type,  memory_method>;
 
-			machine_cmethod_type mach_cmethod;
-			machine_method_type   mach_method;
+			memory_cmethod_type mach_cmethod;
+			memory_method_type   mach_method;
 
 		protected:
 
-			machine_type _machine;
+			memory_type _memory;
 
 		public:
 
 			nik_ce eval_cmethod_disjoint() : base{}, mach_cmethod{}, mach_method{} { }
 			nik_ce eval_cmethod_disjoint(const facade & f) : base{f}
 			{
-				mach_cmethod = _machine.template cequip<machine_cmethod_type>();
-				mach_method  = _machine.template  equip< machine_method_type>();
+				mach_cmethod = _memory.template cequip<memory_cmethod_type>();
+				mach_method  = _memory.template  equip< memory_method_type>();
 			}
 
 			// contr:
@@ -272,15 +270,15 @@ namespace cctmp {
 
 				template<typename F>
 				nik_ce void atomic_binary(F f)
-					{ mach_method.atomic_binary(f, instr_value(MAppl::policy)); }
+					{ mach_method.atomic_binary(f, instr_value(CAppl::policy)); }
 
 				template<typename F>
 				nik_ce void atomic_fold(F f, size_type m)
-					{ mach_method.atomic_fold(f, instr_value(MAppl::policy), m); }
+					{ mach_method.atomic_fold(f, instr_value(CAppl::policy), m); }
 
 			// execute:
 
-				nik_ce void execute() { action_type::execute(instr_value(MAppl::action), this); }
+				nik_ce void execute() { action_type::execute(instr_value(CAppl::action), this); }
 
 		public:
 
@@ -291,8 +289,8 @@ namespace cctmp {
 
 			// run:
 
-				nik_ce void run_branch() { mach_method.branch(instr_value(MBran::line)); }
-				nik_ce void run_invert() { mach_method.invert(instr_value(MBran::line)); }
+				nik_ce void run_branch() { mach_method.branch(instr_value(CBran::line)); }
+				nik_ce void run_invert() { mach_method.invert(instr_value(CBran::line)); }
 
 				nik_ce void reset()
 				{
@@ -303,8 +301,8 @@ namespace cctmp {
 
 				nik_ce void run_apply()
 				{
-					size_ctype offset    = instr_value(MAppl::offset);
-					size_ctype policy    = instr_value(MAppl::policy);
+					size_ctype offset    = instr_value(CAppl::offset);
+					size_ctype policy    = instr_value(CAppl::policy);
 
 					auto n_eval_cmethod  = eval_cmethod_disjoint{base::model};
 					n_eval_cmethod.contr = contr;
@@ -317,40 +315,40 @@ namespace cctmp {
 
 				nik_ce void run_constant()
 				{
-					size_ctype policy = instr_value(MAppl::policy);
-					size_ctype value  = instr_value(MAppl::offset);
+					size_ctype policy = instr_value(CAppl::policy);
+					size_ctype value  = instr_value(CAppl::offset);
 
 					mach_method.copy_value(policy, value);
 				}
 
 				nik_ce void run_function()
 				{
-					size_ctype policy = instr_value(MVal::policy);
-					size_ctype line   = instr_value(MVal::line);
+					size_ctype policy = instr_value(CVal::policy);
+					size_ctype line   = instr_value(CVal::line);
 
 					mach_method.copy_value(policy, line);
 				}
 
 				nik_ce void run_argument()
 				{
-					auto start  = contr_value(instr_value(MVal::line), MArg::start);
-					auto finish = contr_value(instr_value(MVal::line), MArg::finish);
+					auto start  = contr_value(instr_value(CVal::line), CArg::start);
+					auto finish = contr_value(instr_value(CVal::line), CArg::finish);
 
-					mach_method.copy_interval(instr_value(MVal::policy), start, finish);
+					mach_method.copy_interval(instr_value(CVal::policy), start, finish);
 				}
 
 				nik_ce void run_memory_to_stage()
 				{
-					size_ctype start  = instr_value(MMove::start);
-					size_ctype finish = instr_value(MMove::finish);
+					size_ctype start  = instr_value(CMove::start);
+					size_ctype finish = instr_value(CMove::finish);
 
 					mach_method.interval_to_stage(start, finish);
 				}
 
 				nik_ce void run_memory_to_carry()
 				{
-					size_ctype start  = instr_value(MMove::start);
-					size_ctype finish = instr_value(MMove::finish);
+					size_ctype start  = instr_value(CMove::start);
+					size_ctype finish = instr_value(CMove::finish);
 
 					mach_method.interval_to_carry(start, finish);
 				}
@@ -362,9 +360,9 @@ namespace cctmp {
 			{
 				mach_method.initialize(n, v);
 
-				while (instr_value(MProg::next))
+				while (instr_value(CProg::next))
 				{
-					mach_method.inc_counter(instr_value(MProg::next));
+					mach_method.inc_counter(instr_value(CProg::next));
 					execute();
 				}
 			}
@@ -384,7 +382,7 @@ namespace cctmp {
 
 		template<typename Facade, auto CarrySize, auto VerseSize, auto StageSize>
 		using eval_cmethod =
-			eval_cmethod_disjoint < CarrySize , VerseSize , StageSize , atomic_action , machine_action ,
+			eval_cmethod_disjoint < CarrySize , VerseSize , StageSize , atomic_action , memory_action ,
 			function_cmethod      < Facade    >>;
 
 		template<typename Container, auto CarrySize, auto VerseSize, auto StageSize>

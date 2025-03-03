@@ -19,269 +19,8 @@
 
 // type system (concord):
 
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
-// size pack:
-
-	template<typename SizeType>
-	struct concord_size_pack_0
-	{
-		using size_type            				= SizeType;
-
-		constexpr static size_type concord_size			= 1000;
-
-		constexpr static size_type glyph_size			= 1000;
-
-		constexpr static size_type space_size			=   50;
-		constexpr static size_type space_0			=   10;
-		constexpr static size_type space_1			=   10;
-		constexpr static size_type space_2			=   10;
-
-		constexpr static size_type image_size			=  500;
-
-		constexpr static size_type book_builtin			=  100;
-		constexpr static size_type book_tuple			=   10;
-		constexpr static size_type book_cotuple			=   10;
-		constexpr static size_type book_function		=   10;
-		constexpr static size_type book_recurse			=    5;
-		constexpr static size_type book_identity		=  100;
-		constexpr static size_type book_l_than			=   50;
-		constexpr static size_type book_l_than_or_eq		=   50;
-		constexpr static size_type book_r_than			=   50;
-		constexpr static size_type book_r_than_or_eq		=   50;
-		constexpr static size_type book_exists			=  100;
-		constexpr static size_type book_forall			=  100;
-		constexpr static size_type book_message			=  100;
-
-		using glyph_pack = cctmp::T_pack_Vs
-		<
-			glyph_size		,
-			book_builtin		,
-			book_tuple		,
-			book_cotuple		,
-			book_function		,
-			book_recurse		,
-			book_identity		,
-			book_l_than		,
-			book_l_than_or_eq	,
-			book_r_than		,
-			book_r_than_or_eq	,
-			book_exists		,
-			book_forall		,
-			book_message
-		>;
-
-		using space_pack = cctmp::T_pack_Vs
-		<
-			space_size		,
-			space_0			,
-			space_1			,
-			space_2
-		>;
-
-		using image_pack = cctmp::T_pack_Vs
-		<
-			image_size		,
-			book_builtin		,
-			book_tuple		,
-			book_cotuple		,
-			book_function		,
-			book_recurse		,
-			book_identity		,
-			book_l_than		,
-			book_l_than_or_eq	,
-			book_r_than		,
-			book_r_than_or_eq	,
-			book_exists		,
-			book_forall		,
-			book_message
-		>;
-	};
-
-	template<typename type, typename size_type, template<typename> typename concord_pack>
-	using resolve_concord_type = cctmp::concord
-	<
-		type, size_type,
-		typename concord_pack<size_type>::glyph_pack,
-		typename concord_pack<size_type>::space_pack,
-		typename concord_pack<size_type>::image_pack,
-		concord_pack<size_type>::concord_size
-	>;
-
-/***********************************************************************************************************************/
-
-// interface:
-
-	template<typename SizeType>
-	struct concord_test
-	{
-		using size_type             = SizeType;
-		using concord_type          = resolve_concord_type<size_type, size_type, concord_size_pack_0>;
-		using icon_type             = cctmp::icon<size_type>;
-		using mode_type             = cctmp::mode<size_type>;
-		using sign_type             = cctmp::sign<size_type>;
-
-		using empty_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::empty_cmethod     >;
-		using empty_method_type     = cctmp::resolve_method  < concord_type , cctmp::empty_method      >;
-
-		using ring_cmethod_type     = cctmp::resolve_cmethod < concord_type , cctmp::ring_cmethod      >;
-		using ring_method_type      = cctmp::resolve_method  < concord_type , cctmp::ring_method       >;
-
-		using char_cmethod_type     = cctmp::resolve_cmethod < concord_type , cctmp::utf8_char_cmethod >;
-		using char_method_type      = cctmp::resolve_method  < concord_type , cctmp::utf8_char_method  >;
-
-		using tuple_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::tuple_cmethod     >;
-		using tuple_method_type     = cctmp::resolve_method  < concord_type , cctmp::tuple_method      >;
-
-		using cotuple_cmethod_type  = cctmp::resolve_cmethod < concord_type , cctmp::cotuple_cmethod   >;
-		using cotuple_method_type   = cctmp::resolve_method  < concord_type , cctmp::cotuple_method    >;
-
-		using function_cmethod_type = cctmp::resolve_cmethod < concord_type , cctmp::function_cmethod  >;
-		using function_method_type  = cctmp::resolve_method  < concord_type , cctmp::function_method   >;
-
-		using list_cmethod_type     = cctmp::resolve_cmethod < concord_type , cctmp::list_cmethod      >;
-		using list_method_type      = cctmp::resolve_method  < concord_type , cctmp::list_method       >;
-
-		using space_cmethod_type    = cctmp::resolve_cmethod < concord_type , cctmp::space_cmethod     >;
-		using space_method_type     = cctmp::resolve_method  < concord_type , cctmp::space_method      >;
-
-		concord_type value;
-
-		constexpr concord_test() { }
-
-		// glyph:
-
-			// empty:
-
-				constexpr auto empty_cmethod() const
-					{ return value.template cequip<empty_cmethod_type>(); }
-
-				constexpr auto empty_method()
-					{ return value.template equip<empty_method_type>(); }
-
-				constexpr auto empty_cglyph(const icon_type & icon) const
-					{ return empty_cmethod().glyph_ctext(icon); }
-
-			// ring:
-
-				constexpr auto ring_cmethod() const
-					{ return value.template cequip<ring_cmethod_type>(); }
-
-				constexpr auto ring_method()
-					{ return value.template equip<ring_method_type>(); }
-
-				constexpr auto ring_cglyph(const icon_type & icon) const
-					{ return ring_cmethod().glyph_ctext(icon); }
-
-			// utf8 char:
-
-				constexpr auto char_cmethod() const
-					{ return value.template cequip<char_cmethod_type>(); }
-
-				constexpr auto char_method()
-					{ return value.template equip<char_method_type>(); }
-
-				constexpr auto char_cglyph(const icon_type & icon) const
-					{ return char_cmethod().glyph_ctext(icon); }
-
-			// tuple:
-
-				constexpr auto tuple_cmethod() const
-					{ return value.template cequip<tuple_cmethod_type>(); }
-
-				constexpr auto tuple_method()
-					{ return value.template equip<tuple_method_type>(); }
-
-				constexpr auto tuple_cglyph(const icon_type & icon) const
-					{ return tuple_cmethod().glyph_ctext(icon); }
-
-			// cotuple:
-
-				constexpr auto cotuple_cmethod() const
-					{ return value.template cequip<cotuple_cmethod_type>(); }
-
-				constexpr auto cotuple_method()
-					{ return value.template equip<cotuple_method_type>(); }
-
-				constexpr auto cotuple_cglyph(const icon_type & icon) const
-					{ return cotuple_cmethod().glyph_ctext(icon); }
-
-			// function:
-
-				constexpr auto function_cmethod() const
-					{ return value.template cequip<function_cmethod_type>(); }
-
-				constexpr auto function_method()
-					{ return value.template equip<function_method_type>(); }
-
-				constexpr auto function_cglyph(const icon_type & icon) const
-					{ return function_cmethod().glyph_ctext(icon); }
-
-			// list:
-
-				constexpr auto list_cmethod() const
-					{ return value.template cequip<list_cmethod_type>(); }
-
-				constexpr auto list_method()
-					{ return value.template equip<list_method_type>(); }
-
-				constexpr auto list_cglyph(const icon_type & icon) const
-					{ return list_cmethod().glyph_ctext(icon); }
-
-			// space:
-
-				constexpr auto space_cmethod() const
-					{ return value.template cequip<space_cmethod_type>(); }
-
-				constexpr auto space_method()
-					{ return value.template equip<space_method_type>(); }
-
-				constexpr auto space_cglyph(const icon_type & icon) const
-					{ return space_cmethod().glyph_ctext(icon); }
-
-		// image:
-
-			// empty:
-
-				constexpr auto empty_cimage(const sign_type & sign) const
-					{ return empty_cmethod().image_ctext(sign); }
-
-			// ring:
-
-				constexpr auto ring_cimage(const sign_type & sign) const
-					{ return ring_cmethod().image_ctext(sign); }
-
-			// utf8 char:
-
-				constexpr auto char_cimage(const sign_type & sign) const
-					{ return char_cmethod().image_ctext(sign); }
-
-			// tuple:
-
-				constexpr auto tuple_cimage(const sign_type & sign) const
-					{ return tuple_cmethod().image_ctext(sign); }
-
-			// cotuple:
-
-				constexpr auto cotuple_cimage(const sign_type & sign) const
-					{ return cotuple_cmethod().image_ctext(sign); }
-
-			// function:
-
-				constexpr auto function_cimage(const sign_type & sign) const
-					{ return function_cmethod().image_ctext(sign); }
-
-			// list:
-
-				constexpr auto list_cimage(const sign_type & sign) const
-					{ return list_cmethod().image_ctext(sign); }
-
-			// space:
-
-				constexpr auto space_cimage(const sign_type & sign) const
-					{ return space_cmethod().image_ctext(sign); }
-	};
+		//	print_array(*_test_0.value.csymbol()->cglyph()->ctext());
+		//	print_array(*_test_0.value.csymbol()->cimage()->ctext());
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -315,6 +54,33 @@
 			empty_sign_2      = empty_method.define_abstract(empty_icon);
 		}
 	};
+
+	constexpr auto empty_test_0 = concord_test_empty<unsigned long>{};
+
+	void concord_empty_test()
+	{
+		// glyph:
+
+			print_array(empty_test_0.empty_cglyph(empty_test_0.empty_icon));
+
+			printf("\n");
+
+		// image:
+
+			print_array(empty_test_0.empty_cimage(empty_test_0.empty_sign_1));
+			print_array(empty_test_0.empty_cimage(empty_test_0.empty_sign_2));
+
+			printf("\n");
+
+		// value:
+
+			auto crecord = empty_test_0.empty_cmethod().crecord();
+
+			if (crecord.not_empty()) { print_array(crecord); }
+			else                     { printf("empty");      }
+
+			printf("\n");
+	}
 
 /***********************************************************************************************************************/
 
@@ -352,6 +118,36 @@
 			ring8_sign_3     = ring_method.define_abstract(ring8_icon, 8);
 		}
 	};
+
+	constexpr auto ring_test_0 = concord_test_ring<unsigned long>{};
+
+	void concord_ring_test()
+	{
+		// glyph:
+
+			print_array(ring_test_0.ring_cglyph(ring_test_0.ring4_icon));
+			print_array(ring_test_0.ring_cglyph(ring_test_0.ring8_icon));
+
+			printf("\n");
+
+		// image:
+
+			print_array(ring_test_0.ring_cimage(ring_test_0.ring4_sign_1));
+			print_array(ring_test_0.ring_cimage(ring_test_0.ring8_sign_1));
+			print_array(ring_test_0.ring_cimage(ring_test_0.ring8_sign_2));
+			print_array(ring_test_0.ring_cimage(ring_test_0.ring8_sign_3));
+
+			printf("\n");
+
+		// value:
+
+			printf("%lu ", ring_test_0.ring_cmethod().cvalue(ring_test_0.ring4_sign_1));
+			printf("%lu ", ring_test_0.ring_cmethod().cvalue(ring_test_0.ring8_sign_1));
+			printf("%lu ", ring_test_0.ring_cmethod().cvalue(ring_test_0.ring8_sign_2));
+			printf("%lu ", ring_test_0.ring_cmethod().cvalue(ring_test_0.ring8_sign_3));
+
+			printf("\n");
+	}
 
 /***********************************************************************************************************************/
 
@@ -393,6 +189,38 @@
 		}
 	};
 
+	constexpr auto char_test_0 = concord_test_utf8_char<unsigned long>{};
+
+	void concord_utf8_char_test()
+	{
+		// glyph:
+
+			print_array(char_test_0.char_cglyph(char_test_0.char1_icon));
+			print_array(char_test_0.char_cglyph(char_test_0.char2_icon));
+			print_array(char_test_0.char_cglyph(char_test_0.char3_icon));
+			print_array(char_test_0.char_cglyph(char_test_0.char4_icon));
+
+			printf("\n");
+
+		// image:
+
+			print_array(char_test_0.char_cimage(char_test_0.char1_sign_1));
+			print_array(char_test_0.char_cimage(char_test_0.char2_sign_1));
+			print_array(char_test_0.char_cimage(char_test_0.char3_sign_1));
+			print_array(char_test_0.char_cimage(char_test_0.char4_sign_1));
+
+			printf("\n");
+
+		// value:
+
+			printf("%lu ", char_test_0.char_cmethod().cvalue(char_test_0.char1_sign_1));
+			printf("%lu ", char_test_0.char_cmethod().cvalue(char_test_0.char2_sign_1));
+			printf("%lu ", char_test_0.char_cmethod().cvalue(char_test_0.char3_sign_1));
+			printf("%lu ", char_test_0.char_cmethod().cvalue(char_test_0.char4_sign_1));
+
+			printf("\n");
+	}
+
 /***********************************************************************************************************************/
 
 // tuple:
@@ -433,6 +261,43 @@
 			tuple_sign_1      = tuple_method.define_abstract(tuple_icon, args);
 		}
 	};
+
+	constexpr auto tuple_test_0 = concord_test_tuple<unsigned long>{};
+
+	void concord_tuple_test()
+	{
+		// glyph:
+
+			print_array(tuple_test_0.ring_cglyph(tuple_test_0.ring1_icon));
+			print_array(tuple_test_0.ring_cglyph(tuple_test_0.ring4_icon));
+			print_array(tuple_test_0.ring_cglyph(tuple_test_0.ring8_icon));
+			print_array(tuple_test_0.ring_cglyph(tuple_test_0.tuple_icon));
+
+			printf("\n");
+
+		// image:
+
+			print_array(tuple_test_0.ring_cimage(tuple_test_0.ring1_sign_1));
+			print_array(tuple_test_0.ring_cimage(tuple_test_0.ring4_sign_1));
+			print_array(tuple_test_0.ring_cimage(tuple_test_0.ring8_sign_1));
+			print_array(tuple_test_0.ring_cimage(tuple_test_0.tuple_sign_1));
+
+			printf("\n");
+
+		// sign:
+
+			auto s0 = tuple_test_0.tuple_cmethod().sub_sign(tuple_test_0.tuple_sign_1, 0);
+			auto s1 = tuple_test_0.tuple_cmethod().sub_sign(tuple_test_0.tuple_sign_1, 1);
+			auto s2 = tuple_test_0.tuple_cmethod().sub_sign(tuple_test_0.tuple_sign_1, 2);
+
+		// value:
+
+			printf("%lu ", tuple_test_0.ring_cmethod().cvalue(s0));
+			printf("%lu ", tuple_test_0.ring_cmethod().cvalue(s1));
+			printf("%lu ", tuple_test_0.ring_cmethod().cvalue(s2));
+
+			printf("\n");
+	}
 
 /***********************************************************************************************************************/
 
@@ -477,6 +342,43 @@
 			cotuple_sign_3      = cotuple_method.define_abstract(cotuple_icon, 2, ring8_sign_1);
 		}
 	};
+
+	constexpr auto cotuple_test_0 = concord_test_cotuple<unsigned long>{};
+
+	void concord_cotuple_test()
+	{
+		// glyph:
+
+			print_array(cotuple_test_0.ring_cglyph(cotuple_test_0.ring1_icon));
+			print_array(cotuple_test_0.ring_cglyph(cotuple_test_0.ring4_icon));
+			print_array(cotuple_test_0.ring_cglyph(cotuple_test_0.ring8_icon));
+			print_array(cotuple_test_0.ring_cglyph(cotuple_test_0.cotuple_icon));
+
+			printf("\n");
+
+		// image:
+
+			print_array(cotuple_test_0.ring_cimage(cotuple_test_0.ring1_sign_1));
+			print_array(cotuple_test_0.ring_cimage(cotuple_test_0.ring4_sign_1));
+			print_array(cotuple_test_0.ring_cimage(cotuple_test_0.ring8_sign_1));
+			print_array(cotuple_test_0.ring_cimage(cotuple_test_0.cotuple_sign_1));
+
+			printf("\n");
+
+		// sign:
+
+			auto s1 = cotuple_test_0.cotuple_cmethod().sub_sign(cotuple_test_0.cotuple_sign_1);
+			auto s2 = cotuple_test_0.cotuple_cmethod().sub_sign(cotuple_test_0.cotuple_sign_2);
+			auto s3 = cotuple_test_0.cotuple_cmethod().sub_sign(cotuple_test_0.cotuple_sign_3);
+
+		// value:
+
+			printf("%lu ", cotuple_test_0.ring_cmethod().cvalue(s1));
+			printf("%lu ", cotuple_test_0.ring_cmethod().cvalue(s2));
+			printf("%lu ", cotuple_test_0.ring_cmethod().cvalue(s3));
+
+			printf("\n");
+	}
 
 /***********************************************************************************************************************/
 
@@ -652,84 +554,26 @@
 		constexpr auto eval_cmethod() const { return base::value.template cequip<eval_cmethod_type>(); }
 	};
 
-/***********************************************************************************************************************/
+	constexpr auto function_test_0 = concord_test_function<unsigned long>{};
 
-// static:
+	void concord_function_test()
+	{
+		// glyph:
 
-	// identity:
+			print_array(function_test_0.function_cglyph(function_test_0.unary_icon));
+			print_array(function_test_0.function_cglyph(function_test_0.binary_icon));
 
-		template<typename SizeType>
-		struct static_identity_test
-		{
-			constexpr static auto value		= concord_test_function<SizeType>{};
-			using type				= decltype(value);
+			printf("\n");
 
-			using concord_type			= typename type::concord_type;
-			using size_type				= typename concord_type::size_type;
-			using size_ctype			= typename concord_type::size_ctype;
+		// image:
 
-			constexpr static auto & function	= value.identity_sign;
-		};
+			print_array(function_test_0.function_cimage(function_test_0.square_sign));
+			print_array(function_test_0.function_cimage(function_test_0.sum_of_sq_sign));
+			print_array(function_test_0.function_cimage(function_test_0.factorial_sign));
+			print_array(function_test_0.function_cimage(function_test_0.fibonacci_sign));
 
-	// square:
-
-		template<typename SizeType>
-		struct static_square_test
-		{
-			constexpr static auto value		= concord_test_function<SizeType>{};
-			using type				= decltype(value);
-
-			using concord_type			= typename type::concord_type;
-			using size_type				= typename concord_type::size_type;
-			using size_ctype			= typename concord_type::size_ctype;
-
-			constexpr static auto & function	= value.square_sign;
-		};
-
-	// sum of squares:
-
-		template<typename SizeType>
-		struct static_sum_of_sqs_test
-		{
-			constexpr static auto value		= concord_test_function<SizeType>{};
-			using type				= decltype(value);
-
-			using concord_type			= typename type::concord_type;
-			using size_type				= typename concord_type::size_type;
-			using size_ctype			= typename concord_type::size_ctype;
-
-			constexpr static auto & function	= value.sum_of_sqs_sign;
-		};
-
-	// factorial:
-
-		template<typename SizeType>
-		struct static_factorial_test
-		{
-			constexpr static auto value		= concord_test_function<SizeType>{};
-			using type				= decltype(value);
-
-			using concord_type			= typename type::concord_type;
-			using size_type				= typename concord_type::size_type;
-			using size_ctype			= typename concord_type::size_ctype;
-
-			constexpr static auto & function	= value.factorial_sign;
-		};
-
-	// fibonacci:
-
-		template<typename SizeType>
-		struct static_fibonacci_test
-		{
-			constexpr static auto value		= concord_test_function<SizeType>{};
-			using type				= decltype(value);
-
-			using concord_type			= typename type::concord_type;
-			using size_type				= typename concord_type::size_type;
-			using size_ctype			= typename concord_type::size_ctype;
-
-			constexpr static auto & function	= value.fibonacci_sign;
-		};
+			printf("\n");
+	}
 
 /***********************************************************************************************************************/
 
@@ -771,6 +615,39 @@
 			}
 		}
 	};
+
+	constexpr auto list_test_0 = concord_test_list<unsigned long>{};
+
+	void concord_list_test()
+	{
+		// glyph:
+
+			print_array(list_test_0.ring_cglyph(list_test_0.list_icon));
+
+			printf("\n");
+
+		// image:
+
+			print_array(list_test_0.ring_cimage(list_test_0.list_sign));
+
+			printf("\n");
+
+		// value:
+
+			auto ring_cmethod = list_test_0.ring_cmethod();
+			auto list_cmethod = list_test_0.list_cmethod();
+			auto l_sign       = list_test_0.list_sign;
+
+			for (auto k = 0; k != 5; ++k)
+			{
+				auto r_sign = list_cmethod.car_sign(l_sign);
+				     l_sign = list_cmethod.cdr_sign(l_sign);
+
+				printf("%lu ", ring_cmethod.cvalue(r_sign));
+			}
+
+			printf("\n");
+	}
 
 /***********************************************************************************************************************/
 
@@ -836,6 +713,40 @@
 		constexpr auto to_icon(const mode_type & mode) const
 			{ return base::space_cmethod().to_icon(mode); }
 	};
+
+	constexpr auto space_test_0 = concord_test_space<unsigned long>{};
+
+	void concord_space_test()
+	{
+		// glyph:
+
+			print_array(space_test_0.ring_cglyph(space_test_0.to_icon(space_test_0.char_mode)));
+		//	print_array(space_test_0.ring_cglyph(space_test_0.string_mode));
+
+			printf("\n");
+
+		// image:
+
+		//	print_array(space_test_0.ring_cimage(space_test_0.string_sign));
+
+		//	printf("\n");
+
+		// value:
+
+		//	auto ring_cmethod  = space_test_0.ring_cmethod();
+		//	auto space_cmethod = space_test_0.space_cmethod();
+		//	auto l_sign        = space_test_0.space_sign;
+
+		//	for (auto k = 0; k != 5; ++k)
+		//	{
+		//		auto r_sign = space_cmethod.car_sign(l_sign);
+		//		     l_sign = space_cmethod.cdr_sign(l_sign);
+
+		//		printf("%lu ", ring_cmethod.cvalue(r_sign));
+		//	}
+
+		//	printf("\n");
+	}
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

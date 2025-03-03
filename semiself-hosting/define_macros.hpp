@@ -405,10 +405,9 @@
 
 	#define NIK_MACHINE_TEMPLATE_BEGIN(_c_, _i_)									\
 															\
-		T_machine												\
+		T_continuant												\
 		<													\
-			MD<_c_>::next_name(_i_),									\
-			MD<_c_>::next_note(_i_)
+			CD<_c_>::next_action(_i_)									\
 
 	#define NIK_MACHINE_TEMPLATE_BEGIN_WS(_c_, _i_, ...)								\
 															\
@@ -437,7 +436,7 @@
 		template result												\
 		<													\
 			_c_,												\
-			MD<_c_>::next_index(_i_),									\
+			CD<_c_>::next_counter(_i_),									\
 			_l_, _t_, _r_
 
 	#define NIK_MACHINE_RESULT_BEGIN_TS(_c_, _i_, _l_, _t_, _r_, ...)						\

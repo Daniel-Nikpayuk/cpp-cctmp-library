@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// machine class:
+// memory class:
 
 namespace cctmp {
 
@@ -25,28 +25,28 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// virtual machine:
+// (simulant) memory:
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 // model:
 
-	template<typename> class machine_cfacade;
-	template<typename> class machine_facade;
+	template<typename> class memory_cfacade;
+	template<typename> class memory_facade;
 
 /***********************************************************************************************************************/
 
 // mutable:
 
 	template<typename Type, typename SizeType, SizeType CarrySize, SizeType VerseSize, SizeType StageSize>
-	class machine
+	class memory
 	{
 		public:
 
-			using facade				= machine; // method compatible.
-			using cfacade_type			= machine_cfacade<machine>;
-			using facade_type			= machine_facade<machine>;
+			using facade				= memory; // method compatible.
+			using cfacade_type			= memory_cfacade<memory>;
+			using facade_type			= memory_facade<memory>;
 
 			using carry_type			= array<Type, SizeType, CarrySize>;
 			using carry_type_ptr			= typename alias<carry_type>::type_ptr;
@@ -85,17 +85,17 @@ namespace cctmp {
 
 		public:
 
-			nik_ce machine() : _counter{} { }
+			nik_ce memory() : _counter{} { }
 
 			// equip:
 
 				template<typename CMethod>
 				nik_ce auto cequip() const -> CMethod
-					{ return cfacade_type{static_cast<machine const*>(this)}; }
+					{ return cfacade_type{static_cast<memory const*>(this)}; }
 
 				template<typename Method>
 				nik_ce auto equip() -> Method
-					{ return facade_type{static_cast<machine*>(this)}; }
+					{ return facade_type{static_cast<memory*>(this)}; }
 
 			// carry:
 
@@ -147,11 +147,11 @@ namespace cctmp {
 // immutable:
 
 	template<typename Model>
-	class machine_cfacade
+	class memory_cfacade
 	{
 		public:
 
-			using facade			= machine_cfacade; // method compatible.
+			using facade			= memory_cfacade; // method compatible.
 
 			using model_type		= Model;
 			using model_ctype_ptr		= typename alias<model_type>::ctype_ptr;
@@ -177,8 +177,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce machine_cfacade() : model{} { }
-			nik_ce machine_cfacade(model_ctype_cptr m) : model{m} { }
+			nik_ce memory_cfacade() : model{} { }
+			nik_ce memory_cfacade(model_ctype_cptr m) : model{m} { }
 
 			// carry:
 
@@ -202,11 +202,11 @@ namespace cctmp {
 // mutable:
 
 	template<typename Model>
-	class machine_facade
+	class memory_facade
 	{
 		public:
 
-			using facade			= machine_facade; // method compatible.
+			using facade			= memory_facade; // method compatible.
 
 			using model_type		= Model;
 			using model_type_ptr		= typename alias<model_type>::type_ptr;
@@ -235,8 +235,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce machine_facade() : model{} { }
-			nik_ce machine_facade(model_type_cptr m) : model{m} { }
+			nik_ce memory_facade() : model{} { }
+			nik_ce memory_facade(model_type_cptr m) : model{m} { }
 
 			// carry:
 
@@ -360,19 +360,19 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// machine:
+// compound:
 
 /***********************************************************************************************************************/
 
 // instructions:
 
-	struct MachineInstr : public AtomicInstr
+	struct CompoundInstr : public AtomicInstr
 	{
 		enum : genum_type
 		{
 			// core:
 
-				program = AI::dimension,
+				program = AI::dimension, split, halt,
 				define_argument, branch, invert, apply, constant, function, argument,
 				memory_to_stack, memory_to_stage = memory_to_stack, memory_to_carry,
 
@@ -382,40 +382,40 @@ namespace cctmp {
 		};
 	};
 
-	using MI = MachineInstr;
+	using CI = CompoundInstr;
 
 /***********************************************************************************************************************/
 
 // policies:
 
-	struct MachinePolicy { enum : genum_type { to_stack, to_stage = to_stack, to_carry, dimension }; };
+	struct CompoundPolicy { enum : genum_type { to_stack, to_stage = to_stack, to_carry, dimension }; };
 
-	using MP = MachinePolicy;
+	using CP = CompoundPolicy;
 
 /***********************************************************************************************************************/
 
 // fields:
 
-	struct MachineProgram		{ enum : genum_type { action,  lines, atomic,   next, dimension }; };
-	struct MachineArgument		{ enum : genum_type { action,  index,  start, finish, dimension }; };
-	struct MachineBranch		{ enum : genum_type { action,   line,   none,   next, dimension }; };
-	struct MachineApply		{ enum : genum_type { action, offset, policy,   next, dimension }; };
-	struct MachineValue		{ enum : genum_type { action,   line, policy,   next, dimension }; };
-	struct MachineMove		{ enum : genum_type { action,  start, finish,   next, dimension }; };
+	struct CompoundProgram		{ enum : genum_type { action,  lines, atomic,   next, dimension }; };
+	struct CompoundArgument		{ enum : genum_type { action,  index,  start, finish, dimension }; };
+	struct CompoundBranch		{ enum : genum_type { action,   line,   none,   next, dimension }; };
+	struct CompoundApply		{ enum : genum_type { action, offset, policy,   next, dimension }; };
+	struct CompoundValue		{ enum : genum_type { action,   line, policy,   next, dimension }; };
+	struct CompoundMove		{ enum : genum_type { action,  start, finish,   next, dimension }; };
 
-	using MProg			= MachineProgram;
-	using MArg			= MachineArgument;
-	using MBran			= MachineBranch;
-	using MAppl			= MachineApply;
-	using MVal			= MachineValue;
-	using MMove			= MachineMove;
+	using CProg			= CompoundProgram;
+	using CArg			= CompoundArgument;
+	using CBran			= CompoundBranch;
+	using CAppl			= CompoundApply;
+	using CVal			= CompoundValue;
+	using CMove			= CompoundMove;
 
 /***********************************************************************************************************************/
 
 // interface:
 
 	template<typename EvalMethod, typename SizeType>
-	struct machine_action
+	struct memory_action
 	{
 		using eval_method_type		= EvalMethod;
 		using eval_method_type_ptr	= typename alias<eval_method_type>::type_ptr;
@@ -423,7 +423,7 @@ namespace cctmp {
 		nik_using_size_type_alias	(SizeType)
 
 		using method_type		= void(*)(eval_method_type_ptr);
-		using action_type		= array<method_type, size_type, MI::dimension>;
+		using action_type		= array<method_type, size_type, CI::dimension>;
 
 		nik_ces void symbolic(eval_method_type_ptr) { } // do nothing.
 
@@ -467,33 +467,33 @@ namespace cctmp {
 
 				// compare:
 
-					action[ MI::equal        ] = atomic < AI::equal        >;
-					action[ MI::not_equal    ] = atomic < AI::not_equal    >;
-					action[ MI::l_than       ] = atomic < AI::l_than       >;
-					action[ MI::l_than_or_eq ] = atomic < AI::l_than_or_eq >;
-					action[ MI::g_than       ] = atomic < AI::g_than       >;
-					action[ MI::g_than_or_eq ] = atomic < AI::g_than_or_eq >;
+					action[ CI::equal        ] = atomic < AI::equal        >;
+					action[ CI::not_equal    ] = atomic < AI::not_equal    >;
+					action[ CI::l_than       ] = atomic < AI::l_than       >;
+					action[ CI::l_than_or_eq ] = atomic < AI::l_than_or_eq >;
+					action[ CI::g_than       ] = atomic < AI::g_than       >;
+					action[ CI::g_than_or_eq ] = atomic < AI::g_than_or_eq >;
 
 				// arithmetic:
 
-					action[ MI::add          ] = atomic < AI::add          >;
-					action[ MI::subtract     ] = atomic < AI::subtract     >;
-					action[ MI::multiply     ] = atomic < AI::multiply     >;
-					action[ MI::divide       ] = atomic < AI::divide       >;
-					action[ MI::modulo       ] = atomic < AI::modulo       >;
+					action[ CI::add          ] = atomic < AI::add          >;
+					action[ CI::subtract     ] = atomic < AI::subtract     >;
+					action[ CI::multiply     ] = atomic < AI::multiply     >;
+					action[ CI::divide       ] = atomic < AI::divide       >;
+					action[ CI::modulo       ] = atomic < AI::modulo       >;
 
 				// core:
 
-					action[ MI::program         ] = symbolic        ;
-					action[ MI::define_argument ] = symbolic        ;
-					action[ MI::branch          ] = branch          ;
-					action[ MI::invert          ] = invert          ;
-					action[ MI::apply           ] = apply           ;
-					action[ MI::constant        ] = constant        ;
-					action[ MI::function        ] = function        ;
-					action[ MI::argument        ] = argument        ;
-					action[ MI::memory_to_stage ] = memory_to_stage ;
-					action[ MI::memory_to_carry ] = memory_to_carry ;
+					action[ CI::program         ] = symbolic        ;
+					action[ CI::define_argument ] = symbolic        ;
+					action[ CI::branch          ] = branch          ;
+					action[ CI::invert          ] = invert          ;
+					action[ CI::apply           ] = apply           ;
+					action[ CI::constant        ] = constant        ;
+					action[ CI::function        ] = function        ;
+					action[ CI::argument        ] = argument        ;
+					action[ CI::memory_to_stage ] = memory_to_stage ;
+					action[ CI::memory_to_carry ] = memory_to_carry ;
 
 				return action;
 			}

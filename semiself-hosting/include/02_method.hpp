@@ -17,12 +17,11 @@
 **
 ************************************************************************************************************************/
 
-#include"../10_assembly/00_grammar.hpp"
-#include"../10_assembly/01_argument.hpp"
-#include"../10_assembly/02_parameter.hpp"
-#include"../10_assembly/03_variadic.hpp"
-#include"../10_assembly/04_machine.hpp"
-#include"../10_assembly/05_constant.hpp"
-#include"../10_assembly/06_application.hpp"
-#include"../10_assembly/07_conditional.hpp"
+#include"../02_method/00_builtin.hpp"
+#include"../02_method/01_composite.hpp"
+#include"../02_method/02_function.hpp"
+#include"../02_method/03_recurse.hpp"
+#include"../02_method/04_compare.hpp"
+#include"../02_method/05_dependent.hpp"
+#include"../02_method/06_space.hpp"
 

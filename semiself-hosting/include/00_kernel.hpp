@@ -25,6 +25,6 @@
 #include"../00_kernel/05_corpus_method.hpp"
 #include"../00_kernel/06_concord_class.hpp"
 #include"../00_kernel/07_concord_method.hpp"
-#include"../00_kernel/08_machine_class.hpp"
-#include"../00_kernel/09_machine_method.hpp"
+#include"../00_kernel/08_memory_class.hpp"
+#include"../00_kernel/09_memory_method.hpp"
 

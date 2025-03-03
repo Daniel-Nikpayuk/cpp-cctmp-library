@@ -738,6 +738,8 @@ namespace cctmp {
 
 // mutable:
 
+		// needs a cleaner design (is currently only used for variadic contr).
+
 	template<typename Type, typename SizeType, SizeType RowSize, SizeType ColSize>
 	class table : public array<Type, SizeType, RowSize * ColSize, table_submethod>
 	{
@@ -757,7 +759,7 @@ namespace cctmp {
 			nik_ce void initialize()
 			{
 				base::template equip<array_method<facade_type>>().fullsize();
-				base::set_sizes(RowSize, ColSize);
+				base::set_dimension(RowSize, ColSize);
 			}
 
 		public:

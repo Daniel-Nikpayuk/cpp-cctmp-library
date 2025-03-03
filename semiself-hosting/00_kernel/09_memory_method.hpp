@@ -17,7 +17,7 @@
 **
 ************************************************************************************************************************/
 
-// machine method:
+// memory method:
 
 namespace cctmp {
 
@@ -32,7 +32,7 @@ namespace cctmp {
 // immutable:
 
 	template<typename Base>
-	class machine_cmethod_disjoint : public Base
+	class memory_cmethod_disjoint : public Base
 	{
 		public:
 
@@ -57,8 +57,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce machine_cmethod_disjoint() : base{} { }
-			nik_ce machine_cmethod_disjoint(const facade & f) :
+			nik_ce memory_cmethod_disjoint() : base{} { }
+			nik_ce memory_cmethod_disjoint(const facade & f) :
 
 				base{f},
 				carry_csubmethod {base::model->carry_csubequip()},
@@ -96,15 +96,15 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using machine_cmethod =
-			machine_cmethod_disjoint < Facade >;
+		using memory_cmethod =
+			memory_cmethod_disjoint < Facade >;
 
 /***********************************************************************************************************************/
 
 // mutable:
 
 	template<typename Base>
-	class machine_method_disjoint : public Base
+	class memory_method_disjoint : public Base
 	{
 		public:
 
@@ -129,8 +129,8 @@ namespace cctmp {
 
 		public:
 
-			nik_ce machine_method_disjoint() : base{} { }
-			nik_ce machine_method_disjoint(const facade & f) :
+			nik_ce memory_method_disjoint() : base{} { }
+			nik_ce memory_method_disjoint(const facade & f) :
 
 				base{f},
 				carry_submethod{base::model->carry_subequip()},
@@ -182,15 +182,15 @@ namespace cctmp {
 
 				nik_ce void copy_value(size_ctype policy, size_ctype value)
 				{
-					if      (policy == MP::to_stage) { value_to_stage(value); }
-					else if (policy == MP::to_carry) { value_to_carry(value); }
+					if      (policy == CP::to_stage) { value_to_stage(value); }
+					else if (policy == CP::to_carry) { value_to_carry(value); }
 				}
 
 				template<typename T>
 				nik_ce void copy_interval(size_ctype policy, const T & v)
 				{
-					if      (policy == MP::to_stage) { interval_to_stage(v); }
-					else if (policy == MP::to_carry) { interval_to_carry(v); }
+					if      (policy == CP::to_stage) { interval_to_stage(v); }
+					else if (policy == CP::to_carry) { interval_to_carry(v); }
 				}
 
 				nik_ce void copy_interval(size_ctype policy, size_ctype start, size_ctype finish)
@@ -226,9 +226,9 @@ namespace cctmp {
 	// syntactic sugar:
 
 		template<typename Facade>
-		using machine_method =
-			machine_method_disjoint  <
-			machine_cmethod_disjoint < Facade >>;
+		using memory_method =
+			memory_method_disjoint  <
+			memory_cmethod_disjoint < Facade >>;
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/

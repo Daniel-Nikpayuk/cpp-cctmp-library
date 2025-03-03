@@ -17,11 +17,12 @@
 **
 ************************************************************************************************************************/
 
-#include"../01_method/00_builtin.hpp"
-#include"../01_method/01_composite.hpp"
-#include"../01_method/02_function.hpp"
-#include"../01_method/03_recurse.hpp"
-#include"../01_method/04_compare.hpp"
-#include"../01_method/05_dependent.hpp"
-#include"../01_method/06_space.hpp"
+#include"../01_machine/00_grammar.hpp"
+#include"../01_machine/01_variadic.hpp"
+#include"../01_machine/02_continuant.hpp"
+//#include"../01_machine/03_constant.hpp"
+//#include"../01_machine/04_application.hpp"
+//#include"../01_machine/05_conditional.hpp"
+//#include"../01_machine/06_argument.hpp"
+//#include"../01_machine/07_parameter.hpp"
 
