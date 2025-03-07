@@ -116,7 +116,7 @@ namespace cctmp {
 			// define:
 
 				template<typename Record, typename T>
-				nik_ce void define_abstract(Record & ival, const T & sign_array)
+				nik_ce void define_value(Record & ival, const T & sign_array)
 				{
 					for (size_type k = 0; k != sign_array.size(); ++k)
 					{
@@ -209,14 +209,13 @@ namespace cctmp {
 		protected:
 
 			template<typename T>
-			nik_ce auto declare_meta(icon_ctype_ref icon,
-				size_ctype time, size_ctype length, size_ctype point, const T & sign_array)
+			nik_ce auto declare_meta(
+				icon_ctype_ref icon, size_ctype length, size_ctype point, const T & sign_array)
 			{
 				auto field = base::template image_make_field<ImageTuple::dimension>();
 				field      . fullsize();
 
 				field[ImageTuple::index ] = icon.index();
-				field[ImageTuple::time  ] = time;
 				field[ImageTuple::units ] = base::image_total_units(sign_array);
 				field[ImageTuple::length] = length;
 				field[ImageTuple::point ] = point;
@@ -225,12 +224,12 @@ namespace cctmp {
 			}
 
 			template<typename T> // needs to type check.
-			nik_ce auto declare_abstract(icon_ctype_ref icon, size_ctype length, const T & sign_array)
+			nik_ce auto declare_value(icon_ctype_ref icon, size_ctype length, const T & sign_array)
 			{
 				size_ctype point = base::record().expand(length);
 							// only expand if not duplicate.
 
-				return declare_meta(icon, ImageTime::abstract, length, point, sign_array);
+				return declare_meta(icon, length, point, sign_array);
 			}
 
 		public:
@@ -250,21 +249,18 @@ namespace cctmp {
 						BookMark::tuple, GlyphInstr::tuple, bytes, icon_array);
 				}
 
-			//	nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype l_adder, size_ctype addr)
-			//		{ return declare_image(icon, ImageTime::concrete, l_adder, addr); }
-
 			// define:
 
 				template<auto N>
-				nik_ce auto define_abstract(icon_ctype_ref icon, sign_ctype (&v)[N])
+				nik_ce auto define_value(icon_ctype_ref icon, sign_ctype (&v)[N])
 				{
 					auto sign_array   = typename base::template sign_array_type<N>{v};
 
 					size_ctype length = (N << 1);
-					auto sign         = declare_abstract(icon, length, sign_array);
+					auto sign         = declare_value(icon, length, sign_array);
 					auto record_ival  = base::record_text(sign, ImageTuple::point, length);
 
-					base::define_abstract(record_ival, sign_array);
+					base::define_value(record_ival, sign_array);
 
 					return sign;
 				}
@@ -358,14 +354,13 @@ namespace cctmp {
 		protected:
 
 			template<typename T>
-			nik_ce auto declare_meta(icon_ctype_ref icon,
-				size_ctype time, size_ctype inject, size_ctype point, const T & sign_array)
+			nik_ce auto declare_meta(
+				icon_ctype_ref icon, size_ctype inject, size_ctype point, const T & sign_array)
 			{
 				auto field = base::template image_make_field<ImageCotuple::dimension>();
 				field      . fullsize();
 
 				field[ImageCotuple::index ] = icon.index();
-				field[ImageCotuple::time  ] = time;
 				field[ImageCotuple::units ] = base::image_max_units(sign_array);
 				field[ImageCotuple::inject] = inject;
 				field[ImageCotuple::point ] = point;
@@ -374,13 +369,13 @@ namespace cctmp {
 			}
 
 			template<typename T>
-			nik_ce auto declare_abstract(icon_ctype_ref icon, const T & sign_array)
+			nik_ce auto declare_value(icon_ctype_ref icon, const T & sign_array)
 			{
 				size_ctype inject = base::record().expand(1);
 				size_ctype point  = base::record().expand(base::length);
 							// only expand if not duplicate.
 
-				return declare_meta(icon, ImageTime::abstract, inject, point, sign_array);
+				return declare_meta(icon, inject, point, sign_array);
 			}
 
 		public:
@@ -400,21 +395,18 @@ namespace cctmp {
 						BookMark::cotuple, GlyphInstr::cotuple, bytes, icon_array);
 				}
 
-			//	nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype inject, size_ctype addr)
-			//		{ return declare_image(icon, ImageTime::concrete, inject, addr); }
-
 			// define:
 
-				nik_ce auto define_abstract(icon_ctype_ref icon, size_ctype inject, sign_ctype_ref s)
+				nik_ce auto define_value(icon_ctype_ref icon, size_ctype inject, sign_ctype_ref s)
 				{
 					auto sign_array  = typename base::template sign_array_type<base::length>{{s}};
-					auto sign        = declare_abstract(icon, sign_array);
+					auto sign        = declare_value(icon, sign_array);
 
 					auto text_cival  = base::image_ctext(sign);
 					base::record()   . copy(text_cival[ImageCotuple::inject], inject);
 					auto record_ival = base::record_text(text_cival, ImageCotuple::point, base::length);
 
-					base::define_abstract(record_ival, sign_array);
+					base::define_value(record_ival, sign_array);
 
 					return sign;
 				}

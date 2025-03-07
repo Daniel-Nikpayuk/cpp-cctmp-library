@@ -173,6 +173,16 @@ namespace cctmp {
 
 				nik_ce auto cdr_sign(sign_ctype_ref sign) const
 					{ return base::tuple_cmethod.sub_sign(tuple_sign(sign), 1); }
+
+				nik_ce auto cdr_sign(sign_type sign, size_type n) const
+				{
+					for (; n; --n) { sign = cdr_sign(sign); }
+
+					return sign;
+				}
+
+				nik_ce auto car_sign(sign_type sign, size_type n) const
+					{ return car_sign(cdr_sign(sign, n)); }
 	};
 
 	// syntactic sugar:
@@ -231,29 +241,28 @@ namespace cctmp {
 				base::glyph_set_note(text_ival, base::row_body, mark, index);
 			}
 
-			nik_ce auto declare_meta(icon_ctype_ref icon, size_ctype time, size_ctype point)
+			nik_ce auto declare_meta(icon_ctype_ref icon, size_ctype point)
 			{
 				auto field = base::template image_make_field<ImageList::dimension>();
 				field      . fullsize();
 
 				field[ImageList::index] = icon.index();
-				field[ImageList::time ] = time;
 				field[ImageList::units] = 0;// update. base::image_max_units(sign_array);
 				field[ImageList::point] = point;
 
 				return base::image_declare(BookMark::recurse, field);
 			}
 
-			nik_ce auto declare_abstract(icon_ctype_ref icon)
+			nik_ce auto declare_value(icon_ctype_ref icon)
 			{
 				size_ctype length = base::point_length;
 				size_ctype point  = base::record().expand(base::point_length);
 							// only expand if not duplicate.
 
-				return declare_meta(icon, ImageTime::abstract, point);
+				return declare_meta(icon, point);
 			}
 
-			nik_ce auto define_abstract(sign_ctype_ref sign, sign_ctype_ref sub_sign)
+			nik_ce auto define_value(sign_ctype_ref sign, sign_ctype_ref sub_sign)
 			{
 				auto record_ival = base::record_text(sign, ImageList::point, base::point_length);
 				record_ival[0]   = sub_sign.mark ();
@@ -281,34 +290,31 @@ namespace cctmp {
 					return this_icon;
 				}
 
-			//	nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype addr)
-			//		{ return declare_image(icon, ImageTime::concrete, addr); }
-
 			// define:
 
-				nik_ce auto define_abstract(icon_ctype_ref icon, sign_ctype_ref e)
+				nik_ce auto define_value(icon_ctype_ref icon, sign_ctype_ref e)
 				{
 					auto cotuple_icon = base::sub_icon(icon);
 
-					auto cotuple_sign = base::cotuple_method.define_abstract(cotuple_icon, 0, e);
-					auto sign         = declare_abstract(icon);
+					auto cotuple_sign = base::cotuple_method.define_value(cotuple_icon, 0, e);
+					auto sign         = declare_value(icon);
 
-					define_abstract(sign, cotuple_sign);
+					define_value(sign, cotuple_sign);
 
 					return sign;
 				}
 
-				nik_ce auto define_abstract(icon_ctype_ref icon, sign_ctype_ref a, sign_ctype_ref d)
+				nik_ce auto define_value(icon_ctype_ref icon, sign_ctype_ref a, sign_ctype_ref d)
 				{
 					auto cotuple_icon = base::sub_icon(icon);
 					auto tuple_icon   = base::cotuple_method.sub_icon(cotuple_icon, 1);
 
-					auto tuple_sign   = base::tuple_method.define_abstract(tuple_icon, { a, d });
+					auto tuple_sign   = base::tuple_method.define_value(tuple_icon, { a, d });
 					auto cotuple_sign = base::cotuple_method.
-								define_abstract(cotuple_icon, 1, tuple_sign);
-					auto sign         = declare_abstract(icon);
+								define_value(cotuple_icon, 1, tuple_sign);
+					auto sign         = declare_value(icon);
 
-					define_abstract(sign, cotuple_sign);
+					define_value(sign, cotuple_sign);
 
 					return sign;
 				}

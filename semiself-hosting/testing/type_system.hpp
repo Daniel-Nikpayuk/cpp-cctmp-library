@@ -311,8 +311,8 @@
 
 			empty_icon        = empty_method.declare_type();
 
-			empty_sign_1      = empty_method.define_abstract(empty_icon);
-			empty_sign_2      = empty_method.define_abstract(empty_icon);
+			empty_sign_1      = empty_method.define_value(empty_icon);
+			empty_sign_2      = empty_method.define_value(empty_icon);
 		}
 	};
 
@@ -345,11 +345,11 @@
 			ring8_icon       = ring_method.declare_type(8);
 			ring8_icon       = ring_method.declare_type(8); // duplicate.
 
-			ring4_sign_1     = ring_method.define_abstract(ring4_icon, 5);
+			ring4_sign_1     = ring_method.define_value(ring4_icon, 5);
 
-			ring8_sign_1     = ring_method.define_abstract(ring8_icon, 7);
-			ring8_sign_2     = ring_method.define_abstract(ring8_icon, 7);
-			ring8_sign_3     = ring_method.define_abstract(ring8_icon, 8);
+			ring8_sign_1     = ring_method.define_value(ring8_icon, 7);
+			ring8_sign_2     = ring_method.define_value(ring8_icon, 7);
+			ring8_sign_3     = ring_method.define_value(ring8_icon, 8);
 		}
 	};
 
@@ -384,10 +384,10 @@
 			char3_icon       = char_method.declare_type(3);
 			char4_icon       = char_method.declare_type(4);
 
-			char1_sign_1     = char_method.define_abstract(char1_icon,                   0x24);
-			char2_sign_1     = char_method.define_abstract(char2_icon,             0xc2, 0xa2);
-			char3_sign_1     = char_method.define_abstract(char3_icon,       0xe2, 0x82, 0xac);
-			char4_sign_1     = char_method.define_abstract(char4_icon, 0xf0, 0xa4, 0xad, 0xa2);
+			char1_sign_1     = char_method.define_value(char1_icon,                   0x24);
+			char2_sign_1     = char_method.define_value(char2_icon,             0xc2, 0xa2);
+			char3_sign_1     = char_method.define_value(char3_icon,       0xe2, 0x82, 0xac);
+			char4_sign_1     = char_method.define_value(char4_icon, 0xf0, 0xa4, 0xad, 0xa2);
 						// examples taken from:
 						// https://www.unicode.mayastudios.com/examples/utf8.html
 		}
@@ -425,12 +425,12 @@
 			ring8_icon        = ring_method .declare_type(8);
 			tuple_icon        = tuple_method.declare_type({ ring1_icon, ring4_icon, ring8_icon });
 
-			ring1_sign_1      = ring_method .define_abstract(ring1_icon, 8);
-			ring4_sign_1      = ring_method .define_abstract(ring4_icon, 5);
-			ring8_sign_1      = ring_method .define_abstract(ring8_icon, 7);
+			ring1_sign_1      = ring_method .define_value(ring1_icon, 8);
+			ring4_sign_1      = ring_method .define_value(ring4_icon, 5);
+			ring8_sign_1      = ring_method .define_value(ring8_icon, 7);
 
 			sign_type args[3] = { ring1_sign_1 , ring4_sign_1 , ring8_sign_1 };
-			tuple_sign_1      = tuple_method.define_abstract(tuple_icon, args);
+			tuple_sign_1      = tuple_method.define_value(tuple_icon, args);
 		}
 	};
 
@@ -468,13 +468,13 @@
 			ring8_icon          = ring_method   .declare_type(8);
 			cotuple_icon        = cotuple_method.declare_type({ ring1_icon, ring4_icon, ring8_icon });
 
-			ring1_sign_1        = ring_method   .define_abstract(ring4_icon, 8);
-			ring4_sign_1        = ring_method   .define_abstract(ring4_icon, 5);
-			ring8_sign_1        = ring_method   .define_abstract(ring8_icon, 7);
+			ring1_sign_1        = ring_method   .define_value(ring4_icon, 8);
+			ring4_sign_1        = ring_method   .define_value(ring4_icon, 5);
+			ring8_sign_1        = ring_method   .define_value(ring8_icon, 7);
 
-			cotuple_sign_1      = cotuple_method.define_abstract(cotuple_icon, 0, ring1_sign_1);
-			cotuple_sign_2      = cotuple_method.define_abstract(cotuple_icon, 1, ring4_sign_1);
-			cotuple_sign_3      = cotuple_method.define_abstract(cotuple_icon, 2, ring8_sign_1);
+			cotuple_sign_1      = cotuple_method.define_value(cotuple_icon, 0, ring1_sign_1);
+			cotuple_sign_2      = cotuple_method.define_value(cotuple_icon, 1, ring4_sign_1);
+			cotuple_sign_3      = cotuple_method.define_value(cotuple_icon, 2, ring8_sign_1);
 		}
 	};
 
@@ -642,11 +642,11 @@
 			unary_icon           = function_method.declare_type({ ring8_icon, ring8_icon });
 			binary_icon          = function_method.declare_type({ ring8_icon, ring8_icon, ring8_icon });
 
-			identity_sign        = function_method.define_abstract( unary_icon,  identity_contr);
-			square_sign          = function_method.define_abstract( unary_icon,    square_contr);
-			sum_of_sq_sign       = function_method.define_abstract(binary_icon, sum_of_sq_contr);
-			factorial_sign       = function_method.define_abstract( unary_icon, factorial_contr);
-			fibonacci_sign       = function_method.define_abstract( unary_icon, fibonacci_contr);
+			identity_sign        = function_method.define_value( unary_icon,  identity_contr);
+			square_sign          = function_method.define_value( unary_icon,    square_contr);
+			sum_of_sq_sign       = function_method.define_value(binary_icon, sum_of_sq_contr);
+			factorial_sign       = function_method.define_value( unary_icon, factorial_contr);
+			fibonacci_sign       = function_method.define_value( unary_icon, fibonacci_contr);
 		}
 	};
 
@@ -813,11 +813,11 @@
 			unary_icon           = function_method.declare_type({ ring8_icon, ring8_icon });
 			binary_icon          = function_method.declare_type({ ring8_icon, ring8_icon, ring8_icon });
 
-			identity_sign        = function_method.define_abstract( unary_icon,  identity_contr);
-			square_sign          = function_method.define_abstract( unary_icon,    square_contr);
-			sum_of_sq_sign       = function_method.define_abstract(binary_icon, sum_of_sq_contr);
-			factorial_sign       = function_method.define_abstract( unary_icon, factorial_contr);
-			fibonacci_sign       = function_method.define_abstract( unary_icon, fibonacci_contr);
+			identity_sign        = function_method.define_value( unary_icon,  identity_contr);
+			square_sign          = function_method.define_value( unary_icon,    square_contr);
+			sum_of_sq_sign       = function_method.define_value(binary_icon, sum_of_sq_contr);
+			factorial_sign       = function_method.define_value( unary_icon, factorial_contr);
+			fibonacci_sign       = function_method.define_value( unary_icon, fibonacci_contr);
 		}
 
 		constexpr auto eval_cmethod() const { return base::value.template cequip<eval_cmethod_type>(); }
@@ -932,13 +932,13 @@
 			ring8_icon        = ring_method .declare_type(8);
 			list_icon         = list_method .declare_type(ring8_icon);
 
-			empty_sign        = empty_method.define_abstract(empty_icon);
-			list_sign         = list_method .define_abstract(list_icon, empty_sign);
+			empty_sign        = empty_method.define_value(empty_icon);
+			list_sign         = list_method .define_value(list_icon, empty_sign);
 
 			for (size_type k = 0; k != 5; ++k)
 			{
-				ring8_sign = ring_method.define_abstract(ring8_icon, k);
-				list_sign  = list_method.define_abstract(list_icon, ring8_sign, list_sign);
+				ring8_sign = ring_method.define_value(ring8_icon, k);
+				list_sign  = list_method.define_value(list_icon, ring8_sign, list_sign);
 			}
 		}
 	};
@@ -994,13 +994,13 @@
 		//	list_icon           = list_method   .declare_type(char_icon);
 		//	string_mode         = space_method  .declare_type(unicode_space, list_icon);
 
-		//	empty_sign          = empty_method.define_abstract(empty_icon);
-		//	string_sign         = space_method.define_abstract(string_icon, empty_sign);
+		//	empty_sign          = empty_method.define_value(empty_icon);
+		//	string_sign         = space_method.define_value(string_icon, empty_sign);
 
 		//	for (size_type k = 0; k != 5; ++k)
 		//	{
-		//		ring8_sign = ring_method.define_abstract(ring8_icon, k);
-		//		space_sign  = space_method.define_abstract(space_icon, ring8_sign, space_sign);
+		//		ring8_sign = ring_method.define_value(ring8_icon, k);
+		//		space_sign  = space_method.define_value(space_icon, ring8_sign, space_sign);
 		//	}
 		}
 

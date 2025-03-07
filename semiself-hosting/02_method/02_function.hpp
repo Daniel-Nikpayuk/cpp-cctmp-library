@@ -110,13 +110,12 @@ namespace cctmp {
 		protected:
 
 			nik_ce auto declare_meta(
-				icon_ctype_ref icon, size_ctype time, size_ctype length, size_ctype point)
+				icon_ctype_ref icon, size_ctype length, size_ctype point)
 			{
 				auto field = base::template image_make_field<ImageFunction::dimension>();
 				field      . fullsize();
 
 				field[ImageFunction::index ] = icon.index();
-				field[ImageFunction::time  ] = time;
 				field[ImageFunction::units ] = length;
 				field[ImageFunction::length] = length;
 				field[ImageFunction::point ] = point;
@@ -124,12 +123,12 @@ namespace cctmp {
 				return base::image_declare(BookMark::function, field);
 			}
 
-			nik_ce auto declare_abstract(icon_ctype_ref icon, size_ctype length) // needs to type check.
+			nik_ce auto declare_value(icon_ctype_ref icon, size_ctype length) // needs to type check.
 			{
 				size_ctype point = base::record().expand(length);
 							// only expand if not duplicate.
 
-				return declare_meta(icon, ImageTime::abstract, length, point);
+				return declare_meta(icon, length, point);
 			}
 
 		public:
@@ -150,17 +149,14 @@ namespace cctmp {
 						BookMark::function, GlyphInstr::function, bytes, icon_array);
 				}
 
-			//	nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype addr)
-			//		{ return declare_image(icon, ImageTime::concrete, addr); }
-
 			// define:
 
 				template<auto N>
-				nik_ce auto define_abstract(icon_ctype_ref icon, size_ctype (&cc_asm)[N])
+				nik_ce auto define_value(icon_ctype_ref icon, size_ctype (&cc_asm)[N])
 				{
 					nik_ce auto length = static_cast<size_type>(N);
 					auto asm_array     = array<size_type, size_type, length>{cc_asm};
-					auto sign          = declare_abstract(icon, length);
+					auto sign          = declare_value(icon, length);
 					auto record_ival   = base::record_text(sign, ImageFunction::point, length);
 
 					record_ival.copy(0, asm_array.cbegin(), asm_array.cend());

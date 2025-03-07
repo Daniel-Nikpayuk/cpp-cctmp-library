@@ -532,15 +532,9 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// times:
-
-	struct ImageTime { enum : genum_type { abstract, concrete, dimension }; };
-
-/***********************************************************************************************************************/
-
 // empty (base):
 
-	struct ImageEmpty { enum : genum_type { index, time, units, dimension }; };
+	struct ImageEmpty { enum : genum_type { index, units, dimension }; };
 
 	using IE = ImageEmpty;
 

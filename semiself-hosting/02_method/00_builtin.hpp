@@ -122,32 +122,30 @@ namespace cctmp {
 
 			// declare:
 
-				nik_ce auto declare_meta(
-					icon_ctype_ref icon, size_ctype time, size_ctype units, size_ctype point)
+				nik_ce auto declare_meta(icon_ctype_ref icon, size_ctype units, size_ctype point)
 				{
 					auto field = image_make_field();
 					field      . fullsize();
 
 					field[ImageBuiltin::index] = icon.index();
-					field[ImageBuiltin::time ] = time;
 					field[ImageBuiltin::units] = units;
 					field[ImageBuiltin::point] = point;
 
 					return base::image_declare(BookMark::builtin, field);
 				}
 
-				nik_ce auto declare_abstract(icon_ctype_ref icon)
+				nik_ce auto declare_value(icon_ctype_ref icon)
 				{
 					size_ctype bytes = base::glyph_cfield(icon, base::row_meta, GlyphMeta::bytes);
 					size_ctype units = bytes_to_units(bytes);
 					size_ctype point = base::record().expand(units);
 
-					return declare_meta(icon, ImageTime::abstract, units, point);
+					return declare_meta(icon, units, point);
 				}
 
 			// define:
 
-				nik_ce void define_abstract(sign_ctype_ref sign, size_ctype value)
+				nik_ce void define_value(sign_ctype_ref sign, size_ctype value)
 					{ base::record_copy(sign, ImageBuiltin::point, value); }
 
 		public:
@@ -169,21 +167,13 @@ namespace cctmp {
 					return base::glyph_declare(BookMark::builtin, field);
 				}
 
-				nik_ce auto declare_concrete(icon_ctype_ref icon, size_ctype addr)
-				{
-					size_ctype bytes = base::glyph_cfield(icon, base::row_meta, GlyphMeta::bytes);
-					size_ctype units = bytes_to_units(bytes);
-
-					return declare_meta(icon, ImageTime::concrete, units, addr);
-				}
-
 			// define:
 
-				nik_ce auto define_abstract(icon_ctype_ref icon, size_ctype value)
+				nik_ce auto define_value(icon_ctype_ref icon, size_ctype value)
 				{
-					auto sign = declare_abstract(icon);
+					auto sign = declare_value(icon);
 
-					define_abstract(sign, value);
+					define_value(sign, value);
 
 					return sign;
 				}
@@ -258,12 +248,11 @@ namespace cctmp {
 
 			// declare:
 
-				nik_ce auto declare_meta(icon_ctype_ref icon, size_ctype time)
+				nik_ce auto declare_meta(icon_ctype_ref icon)
 				{
 					auto field = base::template image_make_field<ImageEmpty::dimension>();
 
 					field[ImageEmpty::index] = icon.index();
-					field[ImageEmpty::time ] = time;
 
 					return base::image_declare(BookMark::builtin, field);
 				}
@@ -280,8 +269,7 @@ namespace cctmp {
 
 			// define:
 
-				nik_ce auto define_abstract(icon_ctype_ref icon)
-					{ return declare_meta(icon, ImageTime::abstract); }
+				nik_ce auto define_value(icon_ctype_ref icon) { return declare_meta(icon); }
 	};
 
 	// syntactic sugar:
@@ -534,32 +522,32 @@ namespace cctmp {
 
 			// define:
 
-				nik_ce auto define_abstract(icon_ctype_ref icon, size_ctype char1)
+				nik_ce auto define_value(icon_ctype_ref icon, size_ctype char1)
 				{
-					auto sign = base::declare_abstract(icon);
+					auto sign = base::declare_value(icon);
 
 					return sign;
 				}
 
-				nik_ce auto define_abstract(icon_ctype_ref icon, size_ctype char1, size_ctype char2)
+				nik_ce auto define_value(icon_ctype_ref icon, size_ctype char1, size_ctype char2)
 				{
-					auto sign = base::declare_abstract(icon);
+					auto sign = base::declare_value(icon);
 
 					return sign;
 				}
 
-				nik_ce auto define_abstract(icon_ctype_ref icon,
+				nik_ce auto define_value(icon_ctype_ref icon,
 					size_ctype char1, size_ctype char2, size_ctype char3)
 				{
-					auto sign = base::declare_abstract(icon);
+					auto sign = base::declare_value(icon);
 
 					return sign;
 				}
 
-				nik_ce auto define_abstract(icon_ctype_ref icon,
+				nik_ce auto define_value(icon_ctype_ref icon,
 					size_ctype char1, size_ctype char2, size_ctype char3, size_ctype char4)
 				{
-					auto sign = base::declare_abstract(icon);
+					auto sign = base::declare_value(icon);
 
 					return sign;
 				}

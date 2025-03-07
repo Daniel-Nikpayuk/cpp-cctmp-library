@@ -1,4 +1,4 @@
-# cpp-cctmp-library
+cpp-cctmp-library
 -------------------
 
 C++17 Continuation Constructing Template Meta Programming Library.
@@ -66,11 +66,6 @@ j) add in unit tests.
 At such a point the project's version 1.0 will be done. I intend to leave backend optimizers to others.
 As this project grows and stabilizes, I hope you find it to be of interest, and even maybe some use.
 
-
-[comment]: GCC -fconstexpr-depth=2048
-
-
-[comment:] Clang -fconstexpr-steps=2097152 (2^21)
 
 Thank you.
 
