@@ -175,16 +175,8 @@
 
 			constexpr static auto & function	= value.square_sign;
 
-			constexpr static auto make_offset()
-			{
-				using array_type = array<size_type, size_type, sizeof...(Ts)>;
-
-				array_type array;
-				for (size_type k = 0; k != array.length(); ++k)
-					{ array.push(value.cat(k)); }
-
-				return array;
-			}
+			template<size_type n>
+			constexpr static size_type offset	= value.cat(n);
 		};
 
 /***********************************************************************************************************************/
@@ -198,7 +190,6 @@
 				using meta_info = static_concord_tuple<size_type, Ts...>;
 
 				constexpr static auto length = size_type{(... + sizeof(Ts))};
-				constexpr static auto offset = meta_info::make_offset();
 
 			protected:
 
@@ -206,7 +197,7 @@
 
 				template<auto... Is>
 				void assign_memory(void(*)(T_pack_Vs<Is...>*), Ts const &... vs)
-					{ (..., new (memory + offset[Is]) Ts(vs)); }
+					{ (..., new (memory + meta_info::template offset<Is>) Ts(vs)); }
 
 			public:
 
@@ -215,7 +206,7 @@
 				tuple(Ts const &... vs) { assign_memory(segment_<sizeof...(Ts)>, vs...); }
 
 				template<size_type n>
-				auto at() { return *(new (memory + offset[n]) type_at<n, Ts...>); }
+				auto at() { return *(new (memory + meta_info::template offset<n>) type_at<n, Ts...>); }
 
 				template<size_type n>
 				auto at_squared()
