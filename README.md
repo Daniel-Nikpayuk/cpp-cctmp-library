@@ -36,14 +36,14 @@ such as Boost or even the C++ standard (std::).
 The first paradigm of this library is a specialized version of C++ object
 oriented programming designed to be compatible with compile time use:
 
-![A graphic showing the relationships between objects of the method equip paradigm.](readme/method_equip_paradigm.png)
+![A graphic showing the relationships between objects of the method equip paradigm.](semiself-hosting/readme/method_equip_paradigm.png)
 
 Models are classes intended to hold simple data structures (such as C style arrays) and as few member functions
 as possible. They have no pointer members which means they can be assigned as general constexpr values. As these
 models are intended for compile time use, the their memory sizes are expected to be known in advance. Models also
 have a special collection of *equip* member functions:
 
-![A screenshot of C++ code showing how method equip member functions are defined.](readme/equip_member_function.png)
+![A screenshot of C++ code showing how method equip member functions are defined.](semiself-hosting/readme/equip_member_function.png)
 
 This paradigm can be considered a variation of *dependency injection*, but the overall idea is to modularize
 member functions out of data structure classes: Instead of hardcoding the member functions into a single model
@@ -139,7 +139,7 @@ At this point you might be asking: What about functions within these type system
 Function values are represented internally using an in-house bytecode that resembles assembly language.
 Below is an example of bytecode defining the *square* function:
 
-![A screenshot of C++ code showing bytecode for a generic square function](readme/continuation_constructing_assembly.png)
+![A screenshot of C++ code showing bytecode for a generic square function](semiself-hosting/readme/continuation_constructing_assembly.png)
 
 This library supports running this style of bytecode at compile time in two distinct ways:
 
@@ -188,9 +188,9 @@ type system to a C++ class defined with a flat memory container such as std::arr
 The assumption is the type system will contain the desired functions (and even constant values),
 as well as the structural information needed to complete the OOP class definition:
 
-![A screenshot of C++ code showing the definition of a proof oriented class](readme/proof_oriented_class_1.png)
+![A screenshot of C++ code showing the definition of a proof oriented class](semiself-hosting/readme/proof_oriented_class_1.png)
 
-![A screenshot of C++ code showing the definition of a proof oriented class](readme/proof_oriented_class_2.png)
+![A screenshot of C++ code showing the definition of a proof oriented class](semiself-hosting/readme/proof_oriented_class_2.png)
 
 In this code example, *meta_info* is our type system (defined elsewhere).
 We use it and *placement new* to read from and write to the class memory.
@@ -261,9 +261,9 @@ a Scheme-like (LISP) language.
 
 Here are example programs in each language:
 
-![A screenshot of chord code showing the definition of the factorial function](readme/chord_factorial.png)
+![A screenshot of chord code showing the definition of the factorial function](semiself-hosting/readme/chord_factorial.png)
 
-![A screenshot of hustle code showing the definition of the factorial function](readme/hustle_factorial.png)
+![A screenshot of hustle code showing the definition of the factorial function](semiself-hosting/readme/hustle_factorial.png)
 
 It should be noted that these type systems have a second purpose in this library: Direct support in creating
 new DSLs.
