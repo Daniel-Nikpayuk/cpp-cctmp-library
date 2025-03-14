@@ -452,7 +452,7 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// utf8_char:
+// utf8 char:
 
 /***********************************************************************************************************************/
 
@@ -463,22 +463,112 @@ namespace cctmp {
 	{
 		public:
 
-			using base			= Base;
-			using facade			= typename base::facade;
-			using model_type		= typename base::model_type;
+			using base				= Base;
+			using facade				= typename base::facade;
+			using model_type			= typename base::model_type;
 
-			nik_using_size_type_scope	(base)
+			nik_using_size_type_scope		(base)
 
-			using icon_type			= typename base::icon_type;
-			using icon_ctype_ref		= typename base::icon_ctype_ref;
+			using icon_type				= typename base::icon_type;
+			using icon_ctype_ref			= typename base::icon_ctype_ref;
 
-			using sign_type			= typename base::sign_type;
-			using sign_ctype_ref		= typename base::sign_ctype_ref;
+			using sign_type				= typename base::sign_type;
+			using sign_ctype_ref			= typename base::sign_ctype_ref;
+
+		protected:
+
+			// byte range:
+
+				nik_ces size_type max_byte	= 4;
+
+				struct Range
+				{
+					enum : size_type
+					{
+						x00_x7f, xc2_xdf, xe0_xe0, xe1_xec, xed_xed,
+						xee_xef, xf0_xf0, xf1_xf3, xf4_xf4,
+
+						dimension
+					};
+				};
+
+				struct Byte        { enum : size_type { b1, e1, b2, e2, b3, e3, b4, e4, dimension }; };
+				using range_type   = table<size_type, size_type, Range::dimension, Byte::dimension>;
+				nik_ces auto range = range_type
+				{{
+				//	  b1   e1     b2   e2     b3   e3     b4   e4
+					0x00,0x7f , 0x00,0x7f , 0x00,0x7f , 0x00,0x7f , // 0 - char1
+					0xc2,0xdf , 0x80,0xbf , 0x00,0x7f , 0x00,0x7f , // 1 - char2
+					0xe0,0xe0 , 0xa0,0xbf , 0x80,0xbf , 0x00,0x7f , // 2 - char3
+					0xe1,0xec , 0x80,0xbf , 0x80,0xbf , 0x00,0x7f , // 3 - char3
+					0xed,0xed , 0x80,0x9f , 0x80,0xbf , 0x00,0x7f , // 4 - char3
+					0xee,0xef , 0x80,0xbf , 0x80,0xbf , 0x00,0x7f , // 5 - char3
+					0xf0,0xf0 , 0x90,0xbf , 0x80,0xbf , 0x80,0xbf , // 6 - char4
+					0xf1,0xf3 , 0x80,0xbf , 0x80,0xbf , 0x80,0xbf , // 7 - char4
+					0xf4,0xf4 , 0x80,0x8f , 0x80,0xbf , 0x80,0xbf   // 8 - char4
+				}};
+
+			// code point:
+
+				struct Point
+				{
+					enum : size_type
+					{
+						x000000_x00007f, // 0 - char1
+						x000080_x0007ff, // 1 - char2
+						x000800_x000fff, // 2 - char3
+						x001000_x00cfff, // 3 - char3
+						x00d000_x00d7ff, // 4 - char3
+						x00e000_x00ffff, // 5 - char3
+						x010000_x03ffff, // 6 - char4
+						x040000_x0fffff, // 7 - char4
+						x100000_x10ffff, // 8 - char4
+
+						dimension
+					};
+				};
+
+				struct Code        { enum : size_type { b, e, dimension }; };
+				using point_type   = table<size_type, size_type, Point::dimension, Code::dimension>;
+				nik_ces auto point = point_type
+				{{
+					0x000000 , 0x00007f , // 0 - char1
+					0x000080 , 0x0007ff , // 1 - char2
+					0x000800 , 0x000fff , // 2 - char3
+					0x001000 , 0x00cfff , // 3 - char3
+					0x00d000 , 0x00d7ff , // 4 - char3
+					0x00e000 , 0x00ffff , // 5 - char3
+					0x010000 , 0x03ffff , // 6 - char4
+					0x040000 , 0x0fffff , // 7 - char4
+					0x100000 , 0x10ffff   // 8 - char4
+				}};
 
 		public:
 
 			nik_ce utf8_char_cmethod_disjoint() : base{} { }
 			nik_ce utf8_char_cmethod_disjoint(const facade & f) : base{f} { }
+
+			// byte range:
+
+				nik_ces bool in_range(size_ctype v, size_ctype n, size_ctype s, size_ctype f)
+					{ return (range[n][s] <= v && v <= range[n][f]); }
+
+				nik_ces bool is_byte1_valid(size_ctype v, size_ctype n)
+					{ return base::in_range(v, n, Byte::b1, Byte::e1); }
+
+				nik_ces bool is_byte2_valid(size_ctype v, size_ctype n)
+					{ return base::in_range(v, n, Byte::b2, Byte::e2); }
+
+				nik_ces bool is_byte3_valid(size_ctype v, size_ctype n)
+					{ return base::in_range(v, n, Byte::b3, Byte::e3); }
+
+				nik_ces bool is_byte4_valid(size_ctype v, size_ctype n)
+					{ return base::in_range(v, n, Byte::b4, Byte::e4); }
+
+			// code point:
+
+				nik_ces bool on_point(size_ctype v, size_ctype n)
+					{ return (point[n][Code::b] <= v && v <= point[n][Code::e]); }
 	};
 
 	// syntactic sugar:
@@ -522,35 +612,21 @@ namespace cctmp {
 
 			// define:
 
-				nik_ce auto define_value(icon_ctype_ref icon, size_ctype char1)
+				template<typename In, typename End>
+				nik_ce auto define_value(icon_ctype_ref icon, In in, End end)
 				{
 					auto sign = base::declare_value(icon);
+
+					size_ctype length = end - in;
+					auto text_ival    = base::record_text(sign, ImageBuiltin::point, length);
+					text_ival         . copy(0, in, end);
 
 					return sign;
 				}
 
-				nik_ce auto define_value(icon_ctype_ref icon, size_ctype char1, size_ctype char2)
-				{
-					auto sign = base::declare_value(icon);
-
-					return sign;
-				}
-
-				nik_ce auto define_value(icon_ctype_ref icon,
-					size_ctype char1, size_ctype char2, size_ctype char3)
-				{
-					auto sign = base::declare_value(icon);
-
-					return sign;
-				}
-
-				nik_ce auto define_value(icon_ctype_ref icon,
-					size_ctype char1, size_ctype char2, size_ctype char3, size_ctype char4)
-				{
-					auto sign = base::declare_value(icon);
-
-					return sign;
-				}
+				template<auto N>
+				nik_ce auto define_value(icon_ctype_ref icon, size_ctype (&v)[N])
+					{ return define_value(icon, v, v + N); }
 	};
 
 	// syntactic sugar:

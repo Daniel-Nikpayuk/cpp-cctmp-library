@@ -478,7 +478,7 @@ namespace cctmp {
 			nik_ce table_presubmethod(const Facade & f) : base{f}, rows{}, cols{} { }
 
 			template<typename T, auto N>
-			nik_ce table_presubmethod(const T (&a)[N]) : base{a} { }
+			nik_ce table_presubmethod(const T (&a)[N]) : base{a}, rows{}, cols{} { }
 
 			using base::cat;
 

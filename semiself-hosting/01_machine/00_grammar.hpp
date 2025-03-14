@@ -271,6 +271,61 @@ namespace cctmp {
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
+
+// cover:
+
+	// this "friend" technique takes inspiration from Kris Jusiak's
+	// CppCon 2024 talk "Template-less Metaprogramming in C++".
+
+/***********************************************************************************************************************/
+
+// V -> Y:
+
+	template<auto V>
+	struct T_normed
+	{
+		template<typename... Ts>
+		nik_ce auto friend V_recover_Y(T_normed, Ts...);
+	};
+
+	template<auto V>
+	struct T_cover_V
+	{
+		static void result();
+
+		template<typename... Ts>
+		nik_ce auto friend V_recover_Y(T_normed<result>, Ts...) { return V; }
+	};
+
+	template<auto     V> nik_ce auto  Y_cover_V = T_cover_V<V>::result;
+	template<typename T> nik_ce auto  Y_cover_T = Y_cover_V<U_store_T<T>>;
+
+	template<auto... Vs>
+	nik_ce void(*Ys_cover_Vs[sizeof...(Vs)])()  = { Y_cover_V<Vs>... };
+
+	template<typename... Ts>
+	nik_ce void(*Ys_cover_Ts[sizeof...(Ts)])()  = { Y_cover_T<Ts>... };
+
+// Y -> V:
+
+	template<auto     Y> nik_ce auto  V_cover_Y = V_recover_Y(T_normed<Y>{});
+	template<auto     Y>           using T_cover_Y = T_store_U<V_cover_Y<Y>>;
+
+/***********************************************************************************************************************/
+
+// at:
+
+	template<auto n, auto... Vs>
+	nik_ce auto at_ = V_cover_Y<Ys_cover_Vs<Vs...>[n]>;
+
+	template<auto... Vs, nik_vp(p)(T_pack_Vs<Vs...>*), auto n>
+	nik_ce auto at_<p, n> = at_<n, Vs...>;
+
+	template<auto n, typename... Ts>
+	using type_at = T_cover_Y<Ys_cover_Ts<Ts...>[n]>;
+
+/***********************************************************************************************************************/
+/***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
 } // namespace cctmp

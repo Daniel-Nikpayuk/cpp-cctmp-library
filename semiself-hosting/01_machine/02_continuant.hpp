@@ -25,61 +25,6 @@ namespace cctmp {
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
 
-// operators:
-
-/***********************************************************************************************************************/
-
-// select:
-
-	template<auto, auto> struct T_select;
-
-	template
-	<
-		         auto... LUs, nik_vp(p0)(T_pack_Vs<    LUs...>*),
-		auto RU, auto... RUs, nik_vp(p1)(T_pack_Vs<RU, RUs...>*)
-	>
-	struct T_select<p0, p1>
-	{
-		nik_ces auto result(T_store_U<LUs>... lvs, T_store_U<RU> rv, T_store_U<RUs>... rvs)
-			{ return rv; }
-
-	}; template<auto p0, auto p1>
-		nik_ce auto _select_ = U_store_T<T_select<p0, p1>>;
-
-/***********************************************************************************************************************/
-
-// at:
-
-	template<auto n>
-	struct T_at
-	{
-		template<typename... Ts>
-		nik_ces auto result(Ts... vs)
-		{
-			nik_ce auto p0 = left_    <n, U_store_T<Ts>...>;
-			nik_ce auto p1 = right_   <n, U_store_T<Ts>...>;
-			nik_ce auto U  = _select_ <p0, p1>;
-
-			return T_store_U<U>::result(vs...);
-		}
-
-	}; template<auto n>
-		nik_ce auto _at_ = U_store_T<T_at<n>>;
-
-	// syntactic sugar:
-
-		template<auto n, auto... Vs>
-		nik_ce auto at_ = T_store_U<_at_<n>>::template result<decltype(Vs)...>(Vs...);
-
-		template<auto n, typename... Ts>
-		using type_at = T_store_U<at_<n, U_store_T<Ts>...>>;
-
-		template<auto... Vs, nik_vp(p)(T_pack_Vs<Vs...>*), auto n>
-		nik_ce auto at_<p, n> = T_store_U<_at_<n>>::template result<decltype(Vs)...>(Vs...);
-
-/***********************************************************************************************************************/
-/***********************************************************************************************************************/
-
 // read:
 
 /***********************************************************************************************************************/

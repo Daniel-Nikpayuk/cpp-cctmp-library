@@ -113,9 +113,9 @@
 
 		// sum of squares:
 
-			static_assert(cc_sum_of_sq<unsigned long>(3, 4) == 25);
+			static_assert(cc_sum_of_sq<unsigned long>(3, 7) == 58);
 
-			printf("%lu\n", cc_sum_of_sq<unsigned long>(3, 4));
+			printf("%lu\n", cc_sum_of_sq<unsigned long>(3, 7));
 
 		// factorial:
 

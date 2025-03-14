@@ -18,8 +18,8 @@
 ************************************************************************************************************************/
 
 #include<cstdio>
-#include<cstdlib>
-#include<new>
+//#include<cstdlib>
+//#include<new>
 
 /***********************************************************************************************************************/
 
@@ -28,15 +28,17 @@
 #include"include/00_kernel.hpp"
 #include"include/01_machine.hpp"
 #include"include/02_method.hpp"
+//#include"include/05_encoding.hpp"
 
 #include"undef_macros.hpp"
 
-#include"testing/printer.hpp"
-#include"testing/type_system.hpp"
-#include"testing/proof_oriented_programming.hpp"
+//#include"testing/printer.hpp"
+//#include"testing/type_system.hpp"
+//#include"testing/proof_oriented.hpp"
 //#include"testing/unit_test_type_system.hpp"
 //#include"testing/unit_test_continuant_machine.hpp"
 //#include"testing/unit_test_virtual_machine.hpp"
+//#include"testing/unit_test_proof_oriented.hpp"
 
 /***********************************************************************************************************************/
 /***********************************************************************************************************************/
@@ -45,35 +47,8 @@
 
 /***********************************************************************************************************************/
 
-// main at:
-
-	template<typename T>
-	auto main_at(T n, int argc, char *argv[], T def = 0) -> T
-	{
-		auto pos = n + 1;
-
-		if (pos < argc) return atoi(argv[pos]);
-		else            return def;
-	}
-
-/***********************************************************************************************************************/
-
 	int main(int argc, char *argv[])
 	{
-		using tuple_type = tuple<int, float, char>;
-
-		tuple_type tuple{main_at(0, argc, argv), 2.718, 'e'};
-
-		printf("%d\n", tuple.at<0>());
-		printf("%f\n", tuple.at<1>());
-		printf("%c\n", tuple.at<2>());
-
-		printf("\n");
-
-		printf("%d\n", tuple.at_squared<0>());
-		printf("%f\n", tuple.at_squared<1>());
-		printf("%c\n", tuple.at_squared<2>());
-
 	//	concord_empty_test      ();
 	//	concord_ring_test       ();
 	//	concord_utf8_char_test  ();
@@ -85,6 +60,7 @@
 
 	//	continuant_machine_test ();
 	//	virtual_machine_test    ();
+	//	proof_oriented_test     (argc, argv);
 
 		return 0;
 	}

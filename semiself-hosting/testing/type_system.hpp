@@ -384,10 +384,10 @@
 			char3_icon       = char_method.declare_type(3);
 			char4_icon       = char_method.declare_type(4);
 
-			char1_sign_1     = char_method.define_value(char1_icon,                   0x24);
-			char2_sign_1     = char_method.define_value(char2_icon,             0xc2, 0xa2);
-			char3_sign_1     = char_method.define_value(char3_icon,       0xe2, 0x82, 0xac);
-			char4_sign_1     = char_method.define_value(char4_icon, 0xf0, 0xa4, 0xad, 0xa2);
+		//	char1_sign_1     = char_method.define_value(char1_icon,                   0x24);
+		//	char2_sign_1     = char_method.define_value(char2_icon,             0xc2, 0xa2);
+		//	char3_sign_1     = char_method.define_value(char3_icon,       0xe2, 0x82, 0xac);
+		//	char4_sign_1     = char_method.define_value(char4_icon, 0xf0, 0xa4, 0xad, 0xa2);
 						// examples taken from:
 						// https://www.unicode.mayastudios.com/examples/utf8.html
 		}
