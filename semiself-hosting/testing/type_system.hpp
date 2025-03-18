@@ -978,7 +978,7 @@
 			auto empty_method   = base::empty_method   ();
 			auto char_method    = base::char_method    ();
 			auto cotuple_method = base::cotuple_method ();
-			auto list_method    = base::list_method    ();
+		//	auto list_method    = base::list_method    ();
 			auto space_method   = base::space_method   ();
 
 			empty_icon          = empty_method.declare_type();

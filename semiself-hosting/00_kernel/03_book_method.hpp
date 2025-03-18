@@ -297,7 +297,8 @@ namespace cctmp {
 
 			// fail:
 
-				nik_ce bool is_fail(icon_ctype_ref icon) const
+			//	nik_ce bool is_fail(icon_ctype_ref icon) const
+				nik_ce bool is_fail(icon_ctype_ref) const
 				{
 					return false;
 				}
@@ -331,7 +332,8 @@ namespace cctmp {
 
 			// compare:
 
-				nik_ce bool is_instr(icon_ctype_ref icon, size_ctype instr) const
+			//	nik_ce bool is_instr(icon_ctype_ref icon, size_ctype instr) const
+				nik_ce bool is_instr(icon_ctype_ref, size_ctype instr) const
 					{ return (text_cfield(row_routine, GlyphRout::instr) == instr); }
 
 				nik_ce bool is_custom(icon_ctype_ref icon) const
@@ -609,7 +611,8 @@ namespace cctmp {
 
 			// fail:
 
-				nik_ce bool is_fail(sign_ctype_ref sign) const
+			//	nik_ce bool is_fail(sign_ctype_ref sign) const
+				nik_ce bool is_fail(sign_ctype_ref) const
 				{
 					return false;
 				}

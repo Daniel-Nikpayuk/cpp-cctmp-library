@@ -249,7 +249,7 @@ namespace cctmp {
 		struct T_continuant<CI::halt>
 		{
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
-			nik_ces auto result(T v, Ts... vs) -> T
+			nik_ces auto result(T v, Ts...) -> T
 				{ return v; }
 		};
 
@@ -308,7 +308,7 @@ namespace cctmp {
 			using RT = T_store_U<RU>;
 
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
-			nik_ces auto result(LT lv, T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs)
+			nik_ces auto result(LT, T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs)
 			{
 				return NIK_MACHINE_TS(c, i, l, t, r, RT, T_store_U<LUs>..., RT, T_store_U<RUs>...)
 					(rv, lvs..., rv, rvs...);
@@ -406,7 +406,7 @@ namespace cctmp {
 			using RT = T_store_U<RU>;
 
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename... Ts>
-			nik_ces auto result(LT lv, T_store_U<LUs>... lvs, RT rv, T_store_U<RUs>... rvs)
+			nik_ces auto result(LT, T_store_U<LUs>... lvs, RT, T_store_U<RUs>... rvs)
 			{
 				auto value = T_restore_T<RT>::template
 						result<l, t, r, decltype(0), T_store_U<RUs>...>(0, rvs...);
@@ -456,7 +456,7 @@ namespace cctmp {
 		struct T_continuant<CI::atomic, genum_type{CP::to_carry}, F>
 		{
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
-			nik_ces auto result(T v, Ts... vs)
+			nik_ces auto result(T, Ts... vs)
 			{
 				auto value = T_store_U<F>::template result<Ts...>(vs...);
 
@@ -526,7 +526,7 @@ namespace cctmp {
 		struct T_continuant<CI::constant, genum_type{CP::to_carry}>
 		{
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
-			nik_ces auto result(T v, Ts... vs)
+			nik_ces auto result(T, Ts... vs)
 			{
 				nik_ce auto value = CD<c>::value(i, 1);
 
@@ -576,7 +576,7 @@ namespace cctmp {
 		struct T_continuant<CI::function, genum_type{CP::to_carry}>
 		{
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
-			nik_ces auto result(T v, Ts... vs)
+			nik_ces auto result(T, Ts... vs)
 			{
 				nik_ce auto n = CD<c>::value(i, 1);
 				nik_ce auto f = U_continuant_compound<c, n>;
@@ -630,7 +630,7 @@ namespace cctmp {
 		struct T_continuant<CI::recursive, genum_type{CP::to_carry}>
 		{
 			template<NIK_MACHINE_PARAMS(c, i, l, t, r), typename T, typename... Ts>
-			nik_ces auto result(T v, Ts... vs)
+			nik_ces auto result(T, Ts... vs)
 			{
 				nik_ce auto n    = CD<c>::value(i, 1);
 				nik_ce auto fpos = CD<c>::value(n, 1);

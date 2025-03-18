@@ -297,19 +297,19 @@ namespace cctmp {
 		nik_ce auto friend V_recover_Y(T_normed<result>, Ts...) { return V; }
 	};
 
-	template<auto     V> nik_ce auto  Y_cover_V = T_cover_V<V>::result;
-	template<typename T> nik_ce auto  Y_cover_T = Y_cover_V<U_store_T<T>>;
+	template<auto     V> nik_ce auto Y_cover_V = T_cover_V<V>::result;
+	template<typename T> nik_ce auto Y_cover_T = Y_cover_V<U_store_T<T>>;
 
 	template<auto... Vs>
-	nik_ce void(*Ys_cover_Vs[sizeof...(Vs)])()  = { Y_cover_V<Vs>... };
+	nik_ce void(*Ys_cover_Vs[sizeof...(Vs)])() = { Y_cover_V<Vs>... };
 
 	template<typename... Ts>
-	nik_ce void(*Ys_cover_Ts[sizeof...(Ts)])()  = { Y_cover_T<Ts>... };
+	nik_ce void(*Ys_cover_Ts[sizeof...(Ts)])() = { Y_cover_T<Ts>... };
 
 // Y -> V:
 
-	template<auto     Y> nik_ce auto  V_cover_Y = V_recover_Y(T_normed<Y>{});
-	template<auto     Y>           using T_cover_Y = T_store_U<V_cover_Y<Y>>;
+	template<auto Y> nik_ce auto  V_cover_Y    = V_recover_Y(T_normed<Y>{});
+	template<auto Y>        using T_cover_Y    = T_store_U<V_cover_Y<Y>>;
 
 /***********************************************************************************************************************/
 

@@ -418,7 +418,7 @@ namespace cctmp {
 	struct T_variadic<VN::halt, VT::pause, filler...>
 	{
 		template<NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs, typename... Heaps>
-		nik_ces auto result(Heaps... Hs)
+		nik_ces auto result(Heaps...)
 		{
 			nik_ce auto param = U_pack_Vs<c, i, j, Vs...>;
 			nik_ce auto heap  = U_pack_Vs<U_restore_T<Heaps>...>;
@@ -435,7 +435,7 @@ namespace cctmp {
 	struct T_variadic<VN::halt, VT::heap, filler...>
 	{
 		template<NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs, typename Heap0, typename... Heaps>
-		nik_ces auto result(Heap0 H0, Heaps... Hs)
+		nik_ces auto result(Heap0 H0, Heaps...)
 			{ return H0; }
 	};
 
@@ -453,7 +453,7 @@ namespace cctmp {
 			template<auto...> typename B1, auto... Ws1,
 			typename... Heaps
 		>
-		nik_ces auto result(nik_vp(H0)(B0<Ws0...>*), nik_vp(H1)(B1<Ws1...>*), Heaps... Hs)
+		nik_ces auto result(nik_avp(B0<Ws0...>*), nik_avp(B1<Ws1...>*), Heaps...)
 			{ return U_store_T<B0<Ws0..., Ws1...>>; }
 	};
 
@@ -469,7 +469,7 @@ namespace cctmp {
 			NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs,
 			template<auto...> typename B0, auto... Ws, typename... Heaps
 		>
-		nik_ces auto result(nik_vp(H0)(B0<Ws...>*), Heaps... Hs)
+		nik_ces auto result(nik_avp(B0<Ws...>*), Heaps...)
 			{ return U_store_T<B0<Ws..., Vs...>>; }
 	};
 
@@ -486,7 +486,7 @@ namespace cctmp {
 	struct T_variadic<VN::mach, VT::id, filler...>
 	{
 		template<NIK_VARIADIC_PARAMS(d, c, i, j, Vs), typename... Heaps>
-		nik_ces auto result(Heaps... Hs)
+		nik_ces auto result(Heaps...)
 		{
 			nik_ce auto v = NIK_VARIADIC(d, c, i, j, Vs)(U_restore_T<Heaps>...);
 
@@ -560,7 +560,7 @@ namespace cctmp {
 				template<auto...> typename B1, auto... Ws1,
 				typename... Heaps
 			>
-			nik_ces auto result(nik_vp(H0)(B0<Ws0...>*), nik_vp(H1)(B1<Ws1...>*), Heaps... Hs)
+			nik_ces auto result(nik_avp(B0<Ws0...>*), nik_vp(H1)(B1<Ws1...>*), Heaps... Hs)
 			{
 				nik_ce auto n   = VD<c>::pos(i);
 				nik_ce auto nH0 = U_store_T<B0<Ws0..., j + Ws1...>>;
@@ -579,7 +579,7 @@ namespace cctmp {
 				NIK_VARIADIC_CONTROLS(d, c, i, j), auto... Vs,
 				typename Heap0, template<auto...> typename B1, auto... Ws, typename... Heaps
 			>
-			nik_ces auto result(Heap0 H0, nik_vp(H1)(B1<Ws...>*), Heaps... Hs)
+			nik_ces auto result(Heap0 H0, nik_avp(B1<Ws...>*), Heaps... Hs)
 			{
 				nik_ce auto n   = VD<c>::pos(i);
 				nik_ce auto nH1 = U_store_T<foldl_type<T_left, n, j + Ws...>>;

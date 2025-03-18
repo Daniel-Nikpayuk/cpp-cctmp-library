@@ -256,7 +256,7 @@ namespace cctmp {
 			nik_ce auto declare_value(icon_ctype_ref icon)
 			{
 				size_ctype length = base::point_length;
-				size_ctype point  = base::record().expand(base::point_length);
+				size_ctype point  = base::record().expand(length);
 							// only expand if not duplicate.
 
 				return declare_meta(icon, point);
